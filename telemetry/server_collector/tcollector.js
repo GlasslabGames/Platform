@@ -7,12 +7,18 @@
  */
 
 var _      = require('underscore');
+var redis  = require('redis');
 var tConst = require('../telemetry_const.js');
 
-
 function tCollector(settings){
-    var redis  = require('redis');
-    this.queue = redis.createClient();
+    this.settings = {
+        q: {
+            port: null, host: null
+        },
+        ds: {} };
+    if(settings && settings.queue)     this.settings.q  = settings.queue;
+
+    this.queue = redis.createClient(this.settings.q.port, this.settings.q.host, this.settings.q);
 }
 
 tCollector.prototype.start = function(id) {
