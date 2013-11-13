@@ -1,0 +1,14 @@
+{
+    "name": "Telemetry-Disbatcher",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "underscore": "1.4.4",
+        "redis":      "*",
+        "hiredis":    "*",
+        "mysql":      "2.0.0-alpha9"
+    }
+}
