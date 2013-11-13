@@ -10,7 +10,9 @@ var env     = "dev";
 var express    = require('express');
 var http       = require('http');
 var request    = require('request');
+var multiparty = require('multiparty')
 var tCollector = require('./tcollector.js');
+
 
 var col = new tCollector();
 var app = express();
@@ -32,7 +34,8 @@ if (env = 'dev') {
 // ---------------------------------------
 //
 app.post('/api/:type/startsession', function(req, res){
-    //console.log("req.params:", req.params);
+    //console.log("req.params:", req.params, ", req.body:", req.body);
+
     // forward to webapp server
     request.post(webAppServer+"/api/"+req.params.type+"/startsession", function (err, postRes, body) {
         if(err) {
@@ -40,10 +43,12 @@ app.post('/api/:type/startsession', function(req, res){
             return;
         }
 
-        // send resonse back
+        // send response back
         res.send( body );
 
         body = JSON.parse(body);
+        //console.log("body:", body);
+
         // add start session to Q
         col.start(body.gameSessionId);
     })
@@ -52,14 +57,27 @@ app.post('/api/:type/startsession', function(req, res){
 
 app.post('/api/:type/sendtelemetrybatch', function(req, res){
 
-    // data
-    //console.log("req.params:", req.params, ", req.body:", req.body);
-    col.batch(req.body.gameSessionId, req.body);
+    if(req.params.type == "game") {
+        var form = new multiparty.Form();
+        form.parse(req, function(err, fields) {
+            fields.events        = fields.events[0];
+            fields.gameSessionId = fields.gameSessionId[0];
+            fields.gameVersion   = fields.gameVersion[0];
+
+            //console.log("fields:", fields);
+            col.batch(fields.gameSessionId, fields);
+        });
+    } else {
+        // Queue Data
+        col.batch(req.body.gameSessionId, req.body);
+    }
 
     res.send();
 });
 
 app.post('/api/:type/endsession', function(req, res){
+    //console.log("req.params:", req.params, ", req.body:", req.body);
+
     // forward to webapp server
     request.post(webAppServer+"/api/"+req.params.type+"/endsession", function (err, postRes, body) {
         if(err) {
