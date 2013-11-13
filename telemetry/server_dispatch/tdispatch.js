@@ -6,13 +6,22 @@
  *   mysql -
  *
  */
-var _      = require('underscore');
-var tConst = require('../telemetry_const.js');
-var mysql  = require('mysql');
-var redis  = require('redis');
+var _       = require('underscore');
+var mysql   = require('mysql');
+var redis   = require('redis');
+var request = require('request');
+var tConst  = require('../telemetry_const.js');
 
 function tDispatch(settings){
-    this.queue = redis.createClient(settings);
+    this.settings = {
+        q: {
+            port: null, host: null
+        },
+        ds: {} };
+    if(settings && settings.queue)     this.settings.q  = settings.queue;
+    if(settings && settings.datastore) this.settings.ds = settings.datastore;
+
+    this.queue = redis.createClient(this.settings.q.port, this.settings.q.host, this.settings.q);
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
@@ -199,13 +208,15 @@ tDispatch.prototype.endBatchIn = function(sessionId){
 
                 //console.log("Dispatch endBatchIn", batchActiveKey, "list:", list);
                 if(list.length == 0) {
-                    console.log(sessionId, "- Done");
+                    //console.log(sessionId, "- Done");
 
                     // cleanup session
                     this.cleanupSession(sessionId, function executeAssessment(){
 
                         // execute assessment
-                        console.log(sessionId, "- Execute Assessment!!");
+                        console.log(sessionId, "- Run Assessment!!");
+
+                        // TODO add the request
 
                     }.bind(this));
 
@@ -313,12 +324,8 @@ tDispatch.prototype.sendItemToDataStore = function(batchActiveKey, data){
     jdata = JSON.parse(data);
     jdata.events = JSON.parse(jdata.events);
 
-    this.ds    = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'glasslab',
-        password : 'glasslab',
-        database : 'glasslab_dev'
-    });
+    // Connect to data store and save
+    this.ds = mysql.createConnection(this.settings.ds);
     this.ds.connect();
     for(var i in jdata.events){
         var q = [
