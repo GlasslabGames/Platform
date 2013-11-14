@@ -25,7 +25,7 @@ app.use(express.urlencoded());
 app.use(express.json());
 app.use(express.methodOverride());
 
-var webAppUrl = settings.protocal+"://"+settings.host+":"+settings.port;
+var webAppUrl = settings.webapp.protocal+"://"+settings.webapp.host+":"+settings.webapp.port;
 
 // development only
 if (env = 'dev') {
@@ -38,8 +38,10 @@ app.post('/api/:type/startsession', function(req, res){
     //console.log("req.params:", req.params, ", req.body:", req.body);
 
     // forward to webapp server
-    request.post(webAppUrl+"/api/"+req.params.type+"/startsession", function (err, postRes, body) {
+    var url = webAppUrl+"/api/"+req.params.type+"/startsession";
+    request.post(url, function (err, postRes, body) {
         if(err) {
+            console.log("url:", url, ", Error:", err);
             res.status(500).send('Error:'+err);
             return;
         }
@@ -80,8 +82,10 @@ app.post('/api/:type/endsession', function(req, res){
     //console.log("req.params:", req.params, ", req.body:", req.body);
 
     // forward to webapp server
-    request.post(webAppUrl+"/api/"+req.params.type+"/endsession", function (err, postRes, body) {
+    var url = webAppUrl+"/api/"+req.params.type+"/endsession";
+    request.post(url, function (err, postRes, body) {
         if(err) {
+            console.log("url:", url, ", Error:", err);
             res.status(500).send('Error:'+err);
             return;
         }
