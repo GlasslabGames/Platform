@@ -14,14 +14,17 @@ var tConst  = require('../telemetry_const.js');
 
 function tDispatch(settings){
     this.settings = {
-        q: {
-            port: null, host: null
-        },
-        ds: {} };
+        q: { port: null, host: null },
+        ds: {},
+        wa: { protocal:"http", host:"localhost", port: "8080"}
+    };
     if(settings && settings.queue)     this.settings.q  = settings.queue;
     if(settings && settings.datastore) this.settings.ds = settings.datastore;
+    if(settings && settings.webapp)    this.settings.wa = settings.webapp;
 
-    this.queue = redis.createClient(this.settings.q.port, this.settings.q.host, this.settings.q);
+    this.queue         = redis.createClient(this.settings.q.port, this.settings.q.host, this.settings.q);
+    this.webAppUrl     = this.settings.wa.protocal+"://"+this.settings.wa.host+":"+this.settings.wa.port;
+    this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
@@ -214,10 +217,17 @@ tDispatch.prototype.endBatchIn = function(sessionId){
                     this.cleanupSession(sessionId, function executeAssessment(){
 
                         // execute assessment
-                        console.log(sessionId, "- Run Assessment!!");
+                        console.log("Run Assessment - SessionId:", sessionId);
+                        var url = this.assessmentUrl + sessionId;
+                        request.post(url, function (err, postRes, body) {
+                            if(err) {
+                                console.log("url:", url, ", Error:", err);
+                                res.status(500).send('Error:'+err);
+                                return;
+                            }
 
-                        // TODO add the request
-
+                            console.log("Started Assessment - SessionId:", sessionId);
+                        }.bind(this));
                     }.bind(this));
 
                 } else {
