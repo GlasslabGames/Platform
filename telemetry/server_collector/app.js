@@ -100,6 +100,11 @@ app.post('/api/:type/endsession', function(req, res){
 });
 // ---------------------------------------
 
+process.on('uncaughtException', function(err) {
+    console.log("Collector Uncaught Error:", err);
+});
+
+
 http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
 });

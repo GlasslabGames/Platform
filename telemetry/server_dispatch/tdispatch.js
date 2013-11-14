@@ -331,8 +331,13 @@ tDispatch.prototype.sendItemToDataStore = function(batchActiveKey, data){
     //console.log("Dispatch sendItemToDataStore data:", data);
 
     // send to datastore server
-    jdata = JSON.parse(data);
-    jdata.events = JSON.parse(jdata.events);
+    try {
+        jdata = JSON.parse(data);
+        jdata.events = JSON.parse(jdata.events);
+    } catch(err) {
+        console.error("Dispatch Error:", err, ", JSON data:", data);
+    }
+
 
     // Connect to data store and save
     this.ds = mysql.createConnection(this.settings.ds);
