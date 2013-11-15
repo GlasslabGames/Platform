@@ -11,11 +11,11 @@ module.exports = {
   activeKey:    "a",
 
   dispatch: {
-      telemetryGetMax: 1,
-      batchGetMax: 10,
-      telemetryPollDelay: 1000,
-      batchInPollDelay:   1000,
-      cleanupPollDelay:   5*60*1000, // 5 min
-      sessionExpire:      5*60*1000  // 5 min
+      telemetryGetMax: 10,
+      batchGetMax: 100,
+      telemetryPollDelay: 500,
+      batchInPollDelay:   500,
+      cleanupPollDelay:   1*60*60*1000, // 1 hour
+      sessionExpire:      4*60*60*1000  // 4 hours
   }
 };
