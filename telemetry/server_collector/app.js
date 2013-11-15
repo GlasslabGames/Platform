@@ -19,7 +19,7 @@ var col = new tCollector(settings);
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 8081);
 app.use(express.logger( env ));
 app.use(express.urlencoded());
 app.use(express.json());
