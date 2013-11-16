@@ -81,22 +81,40 @@ app.post('/api/:type/sendtelemetrybatch', function(req, res){
 app.post('/api/:type/endsession', function(req, res){
     //console.log("req.params:", req.params, ", req.body:", req.body);
 
-    // forward to webapp server
-    var url = webAppUrl+"/api/"+req.params.type+"/endsession";
-    request.post(url, function (err, postRes, body) {
-        if(err) {
-            console.log("url:", url, ", Error:", err);
-            res.status(500).send('Error:'+err);
-            return;
-        }
+    function endSession(req, res, data){
+        // forward to webapp server
+        var url = webAppUrl+"/api/"+req.params.type+"/endsession";
+        request.post(url, function (err, postRes, body) {
+            if(err) {
+                console.log("url:", url, ", Error:", err);
+                res.status(500).send('Error:'+err);
+                return;
+            }
 
-        // send resonse back
-        res.send( body );
+            // send resonse back
+            res.send( body );
 
-        // add end session to Q
-        col.end(req.body.gameSessionId);
-    })
-    .form(req.body);
+            // add end session to Q
+            col.end(data.gameSessionId);
+        })
+        .form(data);
+    }
+
+    if(req.params.type == "game") {
+        var form = new multiparty.Form();
+        form.parse(req, function(err, fields) {
+            fields.events        = fields.events[0];
+            fields.gameSessionId = fields.gameSessionId[0];
+            fields.gameVersion   = fields.gameVersion[0];
+
+            //console.log("fields:", fields);
+            endSession(req, res, fields);
+        });
+    } else {
+        endSession(req, res, req.body);
+    }
+
+
 });
 // ---------------------------------------
 
