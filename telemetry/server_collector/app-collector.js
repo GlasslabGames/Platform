@@ -41,7 +41,7 @@ app.post('/api/:type/startsession', function(req, res){
     var url = webAppUrl+"/api/"+req.params.type+"/startsession";
     request.post(url, function (err, postRes, body) {
         if(err) {
-            console.log("url:", url, ", Error:", err);
+            console.error("url:", url, ", Error:", err);
             res.status(500).send('Error:'+err);
             return;
         }
@@ -63,9 +63,9 @@ app.post('/api/:type/sendtelemetrybatch', function(req, res){
     if(req.params.type == "game") {
         var form = new multiparty.Form();
         form.parse(req, function(err, fields) {
-            fields.events        = fields.events[0];
-            fields.gameSessionId = fields.gameSessionId[0];
-            fields.gameVersion   = fields.gameVersion[0];
+            if(fields.events)        fields.events        = fields.events[0];
+            if(fields.gameSessionId) fields.gameSessionId = fields.gameSessionId[0];
+            if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
 
             //console.log("fields:", fields);
             col.batch(fields.gameSessionId, fields);
@@ -86,7 +86,7 @@ app.post('/api/:type/endsession', function(req, res){
         var url = webAppUrl+"/api/"+req.params.type+"/endsession";
         request.post(url, function (err, postRes, body) {
             if(err) {
-                console.log("url:", url, ", Error:", err);
+                console.error("url:", url, ", Error:", err);
                 res.status(500).send('Error:'+err);
                 return;
             }
@@ -103,9 +103,9 @@ app.post('/api/:type/endsession', function(req, res){
     if(req.params.type == "game") {
         var form = new multiparty.Form();
         form.parse(req, function(err, fields) {
-            fields.events        = fields.events[0];
-            fields.gameSessionId = fields.gameSessionId[0];
-            fields.gameVersion   = fields.gameVersion[0];
+            if(fields.events)        fields.events        = fields.events[0];
+            if(fields.gameSessionId) fields.gameSessionId = fields.gameSessionId[0];
+            if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
 
             //console.log("fields:", fields);
             endSession(req, res, fields);
@@ -119,7 +119,7 @@ app.post('/api/:type/endsession', function(req, res){
 // ---------------------------------------
 
 process.on('uncaughtException', function(err) {
-    console.log("Collector Uncaught Error:", err);
+    console.error("Collector Uncaught Error:", err);
 });
 
 
