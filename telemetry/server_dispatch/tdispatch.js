@@ -209,7 +209,7 @@ tDispatch.prototype.endBatchIn = function(sessionId){
                     return;
                 }
 
-                //console.log("Dispatch endBatchIn", batchActiveKey, "list:", list);
+                console.log("Dispatch endBatchIn", batchActiveKey, "list:", list);
                 if(list.length == 0) {
                     //console.log(sessionId, "- Done");
 
@@ -217,17 +217,23 @@ tDispatch.prototype.endBatchIn = function(sessionId){
                     this.cleanupSession(sessionId, function executeAssessment(){
 
                         // execute assessment
-                        console.log("Run Assessment - SessionId:", sessionId);
-                        var url = this.assessmentUrl + sessionId;
-                        request.post(url, function (err, postRes, body) {
-                            if(err) {
-                                console.log("url:", url, ", Error:", err);
-                                res.status(500).send('Error:'+err);
-                                return;
-                            }
+                        console.log("Assessment Delay - SessionId:", sessionId);
+                        // wait 10 seconds
+                        setTimeout(function(){
 
-                            console.log("Started Assessment - SessionId:", sessionId);
-                        }.bind(this));
+                            var url = this.assessmentUrl + sessionId;
+                            request.post(url, function (err, postRes, body) {
+                                if(err) {
+                                    console.error("url:", url, ", Error:", err);
+                                    res.status(500).send('Error:'+err);
+                                    return;
+                                }
+
+                                console.log("Started Assessment - SessionId:", sessionId);
+                            }.bind(this));
+
+                        }.bind(this), tConst.dispatch.assessmentDelay);
+
                     }.bind(this));
 
                 } else {
@@ -304,8 +310,9 @@ tDispatch.prototype.processItem = function(sessionId){
 
 tDispatch.prototype.processDone = function(err, batchActiveKey, data){
     if(err) {
+        jdata = JSON.parse(data);
+        this.cleanupSession(jdata.gameSessionId);
         console.error("Dispatch processDone saved Error:", err);
-        return;
     }
 
     //console.log("processDone batchActiveKey:", batchActiveKey, ", data:", data);
@@ -327,6 +334,7 @@ tDispatch.prototype.sendItemToDataStore = function(batchActiveKey, data){
             this.processDone(err, key, data);
         }.bind(this)
     }.bind(this);
+    var doneCB = done(batchActiveKey, data);
 
     //console.log("Dispatch sendItemToDataStore data:", data);
 
@@ -338,33 +346,63 @@ tDispatch.prototype.sendItemToDataStore = function(batchActiveKey, data){
         console.error("Dispatch Error:", err, ", JSON data:", data);
     }
 
-
-    // Connect to data store and save
-    this.ds = mysql.createConnection(this.settings.ds);
-    this.ds.connect();
-    for(var i in jdata.events){
-        var q = [
-            "NULL",
-            0,
-            mysql.escape(JSON.stringify(jdata.events[i].eventData)),
-            "NOW()",
-            mysql.escape(jdata.gameVersion),
-            mysql.escape(jdata.gameSessionId),
-            "NOW()",
-            mysql.escape(jdata.events[i].name),
-            "UNIX_TIMESTAMP(NOW())"
-        ];
-        q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) " +
-            "SELECT "+q.join(',')+", user_id FROM GL_SESSION WHERE SESSION_ID="+mysql.escape(jdata.gameSessionId);
-        //console.log('q:', q);
-
-        var cb = done(batchActiveKey, data);
-        this.ds.query(q, function(err) {
-            //console.log('rows:', rows, ", fields:", fields);
-            cb(err);
-        }.bind(this));
+    // if no events
+    if(!jdata.events.length) {
+        doneCB(null);
+        return;
     }
-    this.ds.end();
+
+    if(jdata.gameSessionId) {
+        // Connect to data store and save
+        this.ds = mysql.createConnection(this.settings.ds);
+        this.ds.connect();
+
+        var q = "SELECT user_id FROM GL_SESSION WHERE SESSION_ID="+mysql.escape(jdata.gameSessionId);
+        this.ds.query(q, function(err, rows, fields) {
+            if(err) {
+                this.ds.end();
+                this.cleanupSession(jdata.gameSessionId);
+                console.error("Dispatch sendItemToDataStore Q session Error:", err);
+                return;
+            }
+
+            //console.log('rows:', rows, ", fields:", fields);
+            // verify has user_id
+            if(rows.length > 0 && rows[0].hasOwnProperty("user_id")) {
+
+                if(jdata.events)
+
+                var qInsertData = [];
+                for(var i in jdata.events){
+                    var row = [
+                        "NULL",
+                        0,
+                        mysql.escape(JSON.stringify(jdata.events[i].eventData)),
+                        "NOW()",
+                        mysql.escape(jdata.gameVersion),
+                        mysql.escape(jdata.gameSessionId),
+                        "NOW()",
+                        mysql.escape(jdata.events[i].name),
+                        "UNIX_TIMESTAMP(NOW())",
+                        rows[0].user_id
+                    ];
+                    qInsertData.push( "("+row.join(",")+")" );
+                }
+
+                q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) VALUES ";
+                q += qInsertData.join(",");
+                //console.log('q:', q);
+
+                this.ds.query(q, function(err) {
+                    this.ds.end();
+
+                    doneCB(err);
+                }.bind(this));
+            }
+        }.bind(this));
+    } else {
+        console.error("Dispatch sendItemToDataStore missing gameSessionId");
+    }
 }
 
 module.exports = tDispatch;

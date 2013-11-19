@@ -47,6 +47,11 @@ app.post('/api/:type/startsession', function(req, res){
         }
 
         // send response back
+        res.writeHead(200,
+            {
+                'Content-Type': 'application/json',
+                'Content-Length': body.length
+            });
         res.send( body );
 
         body = JSON.parse(body);
@@ -71,6 +76,7 @@ app.post('/api/:type/sendtelemetrybatch', function(req, res){
             col.batch(fields.gameSessionId, fields);
         });
     } else {
+        //console.log("send telemetry batch body:", req.body);
         // Queue Data
         col.batch(req.body.gameSessionId, req.body);
     }
@@ -91,7 +97,12 @@ app.post('/api/:type/endsession', function(req, res){
                 return;
             }
 
-            // send resonse back
+            // send response back
+            res.writeHead(200,
+                {
+                    'Content-Type': 'application/json',
+                    'Content-Length': body.length
+                });
             res.send( body );
 
             // add end session to Q
@@ -111,6 +122,7 @@ app.post('/api/:type/endsession', function(req, res){
             endSession(req, res, fields);
         });
     } else {
+        //console.log("end session body:", req.body);
         endSession(req, res, req.body);
     }
 
