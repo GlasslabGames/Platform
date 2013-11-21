@@ -1,4 +1,5 @@
 {
+    "env": "dev",
     "webapp": {
         "protocal": "http",
         "host":     "localhost",

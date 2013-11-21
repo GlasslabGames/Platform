@@ -1,15 +1,9 @@
 /**
- * Telemetry Config
+ * Telemetry Settings
  *
  */
 
 module.exports = {
-  telemetryKey: "t",
-  metaKey:      "m",
-  batchKey:     "b",
-  inKey:        "i",
-  activeKey:    "a",
-
   dispatch: {
       telemetryGetMax: 20,
       batchGetMax: 100,
