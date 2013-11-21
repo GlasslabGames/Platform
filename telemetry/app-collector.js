@@ -37,81 +37,92 @@ if (settings.env = 'dev') {
 // ---------------------------------------
 //
 app.post('/api/:type/startsession', function(req, outRes){
-    //console.log("req.params:", req.params, ", req.body:", req.body);
+    try {
+        //console.log("req.params:", req.params, ", req.body:", req.body);
 
-    // forward to webapp server
-    var url = webAppUrl+"/api/"+req.params.type+"/startsession";
+        // forward to webapp server
+        var url = webAppUrl+"/api/"+req.params.type+"/startsession";
 
-    postData(url, req.body, outRes, function(body){
-        body = JSON.parse(body);
-        // add start session to Q
-        col.start(body.gameSessionId);
-    });
+        postData(url, req.body, outRes, function(body){
+            body = JSON.parse(body);
+            // add start session to Q
+            col.start(body.gameSessionId);
+        });
+    } catch(err) {
+        console.trace("Collector Start Session Error:", err);
+    }
 });
 
 app.post('/api/:type/sendtelemetrybatch', function(req, outRes){
+    try {
+        if(req.params.type == "game") {
+            var form = new multiparty.Form();
+            form.parse(req, function(err, fields) {
+                if(err){
+                    console.error("Error:", err);
+                    outRes.status(500).send('Error:'+err);
+                    return;
+                }
 
-    if(req.params.type == "game") {
-        var form = new multiparty.Form();
-        form.parse(req, function(err, fields) {
-            if(err){
-                console.error("Error:", err);
-                outRes.status(500).send('Error:'+err);
-                return;
-            }
+                if(fields){
+                    if(fields.events)        fields.events        = fields.events[0];
+                    if(fields.gameSessionId) fields.gameSessionId = fields.gameSessionId[0];
+                    if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
 
-            if(fields){
-                if(fields.events)        fields.events        = fields.events[0];
-                if(fields.gameSessionId) fields.gameSessionId = fields.gameSessionId[0];
-                if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
+                    //console.log("fields:", fields);
+                    col.batch(fields.gameSessionId, fields);
+                }
+            });
+        } else {
+            //console.log("send telemetry batch body:", req.body);
+            // Queue Data
+            col.batch(req.body.gameSessionId, req.body);
+        }
 
-                //console.log("fields:", fields);
-                col.batch(fields.gameSessionId, fields);
-            }
-        });
-    } else {
-        //console.log("send telemetry batch body:", req.body);
-        // Queue Data
-        col.batch(req.body.gameSessionId, req.body);
+        outRes.send();
+    } catch(err) {
+        console.trace("Collector Send Telemetry Batch Error:", err);
     }
-
-    outRes.send();
 });
 
 app.post('/api/:type/endsession', function(req, outRes){
-    //console.log("req.params:", req.params, ", req.body:", req.body);
+    try {
+        //console.log("req.params:", req.params, ", req.body:", req.body);
 
-    function endSession(req, outRes, jdata){
-        // forward to webapp server
-        var url = webAppUrl+"/api/"+req.params.type+"/endsession";
+        function endSession(req, outRes, jdata){
+            // forward to webapp server
+            var url = webAppUrl+"/api/"+req.params.type+"/endsession";
 
-        postData(url, jdata, outRes, function(){
-            // add end session to Q
-            col.end(jdata.gameSessionId);
-        });
-    }
+            postData(url, jdata, outRes, function(){
+                // add end session to Q
+                col.end(jdata.gameSessionId);
+            });
+        }
 
-    if(req.params.type == "game") {
-        var form = new multiparty.Form();
-        form.parse(req, function(err, fields) {
-            if(err){
-                console.error("Error:", err);
-                outRes.status(500).send('Error:'+err);
-                return;
-            }
+        if(req.params.type == "game") {
+            var form = new multiparty.Form();
+            form.parse(req, function(err, fields) {
+                if(err){
+                    console.error("Error:", err);
+                    outRes.status(500).send('Error:'+err);
+                    return;
+                }
 
-            if(fields){
-                if(fields.events)        fields.events        = fields.events[0];
-                if(fields.gameSessionId) fields.gameSessionId = fields.gameSessionId[0];
-                if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
+                if(fields){
+                    if(fields.events)        fields.events        = fields.events[0];
+                    if(fields.gameSessionId) fields.gameSessionId = fields.gameSessionId[0];
+                    if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
 
-                //console.log("fields:", fields);
-                endSession(req, outRes, fields);
-            }
-        });
-    } else {
-        //console.log("end session body:", req.body);
-        endSession(req, outRes, req.body);
+                    //console.log("fields:", fields);
+                    endSession(req, outRes, fields);
+                }
+            });
+        } else {
+            //console.log("end session body:", req.body);
+            endSession(req, outRes, req.body);
+        }
+    } catch(err) {
+        console.trace("Collector End Session Error:", err);
     }
 });
 // ---------------------------------------

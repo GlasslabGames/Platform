@@ -11,7 +11,11 @@ var settings  = _.extend(
     require('./telemetry.settings.js')
 );
 
-dispatcher = new telemetry.Dispatcher(settings);
+try {
+    dispatcher = new telemetry.Dispatcher(settings);
+} catch(err){
+    console.log("Dispatcher Error:", err);
+}
 
 process.on('uncaughtException', function(err) {
     console.log("Dispatch Uncaught Error:", err);

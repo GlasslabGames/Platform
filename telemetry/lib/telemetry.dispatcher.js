@@ -376,7 +376,7 @@ Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
 
         q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) VALUES ";
         q += qInsertData.join(",");
-        console.log('q:', q);
+        //console.log('q:', q);
 
         this.ds.addQuery(q, function(err) {
             doneCB(err);
