@@ -9,6 +9,7 @@ var env     = "dev";
 
 var express    = require('express');
 var http       = require('http');
+var urlParser  = require('url');
 var request    = require('request');
 var multiparty = require('multiparty');
 
@@ -39,28 +40,12 @@ app.post('/api/:type/startsession', function(req, res){
 
     // forward to webapp server
     var url = webAppUrl+"/api/"+req.params.type+"/startsession";
-    request.post(url, function (err, postRes, body) {
-        if(err) {
-            console.error("url:", url, ", Error:", err);
-            res.status(500).send('Error:'+err);
-            return;
-        }
 
-        // send response back
-        res.writeHead(200,
-            {
-                'Content-Type': 'application/json',
-                'Content-Length': body.length
-            });
-        res.send( body );
-
+    postData(url, req.body, res, function(body){
         body = JSON.parse(body);
-        //console.log("body:", body);
-
         // add start session to Q
         col.start(body.gameSessionId);
-    })
-    .form(req.body);
+    });
 });
 
 app.post('/api/:type/sendtelemetrybatch', function(req, res){
@@ -87,28 +72,15 @@ app.post('/api/:type/sendtelemetrybatch', function(req, res){
 app.post('/api/:type/endsession', function(req, res){
     //console.log("req.params:", req.params, ", req.body:", req.body);
 
-    function endSession(req, res, data){
+    function endSession(req, res, jdata){
         // forward to webapp server
         var url = webAppUrl+"/api/"+req.params.type+"/endsession";
-        request.post(url, function (err, postRes, body) {
-            if(err) {
-                console.error("url:", url, ", Error:", err);
-                res.status(500).send('Error:'+err);
-                return;
-            }
 
-            // send response back
-            res.writeHead(200,
-                {
-                    'Content-Type': 'application/json',
-                    'Content-Length': body.length
-                });
-            res.send( body );
-
+        postData(url, jdata, res, function(body){
+            body = JSON.parse(body);
             // add end session to Q
-            col.end(data.gameSessionId);
-        })
-        .form(data);
+            col.end(body.gameSessionId);
+        });
     }
 
     if(req.params.type == "game") {
@@ -125,14 +97,55 @@ app.post('/api/:type/endsession', function(req, res){
         //console.log("end session body:", req.body);
         endSession(req, res, req.body);
     }
-
-
 });
 // ---------------------------------------
 
 process.on('uncaughtException', function(err) {
-    console.error("Collector Uncaught Error:", err);
+    console.trace("Collector Uncaught Error:", err);
 });
+
+function postData(url, jdata, outRes, cb){
+    var purl = urlParser.parse(url);
+    var data = JSON.stringify(jdata);
+
+    var options = {
+        host: purl.hostname,
+        port: purl.port,
+        path: purl.pathname,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(data)
+        }
+    };
+
+    var req = http.request(options, function(res) {
+        res.setEncoding('utf8');
+
+        var body = "";
+        res.on('data', function (chunk) {
+            body += chunk;
+        });
+
+        res.on('end', function () {
+            cb(body);
+
+            outRes.writeHead(200, {
+                'Content-Type':   'application/json',
+                'Content-Length': Buffer.byteLength(body)
+            });
+            outRes.end(body);
+        });
+    });
+
+    req.on("error", function(err){
+        console.error("url:", url, ", Error:", err);
+        outRes.status(500).send('Error:'+err);
+    });
+
+    req.write(data);
+    req.end();
+}
 
 
 http.createServer(app).listen(app.get('port'), function(){
