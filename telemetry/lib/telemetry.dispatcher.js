@@ -1,5 +1,5 @@
 /**
- * Telemetry Dispatch Module
+ * Telemetry Dispatcher Module
  *
  * Module dependencies:
  *   redis - https://github.com/mranney/node_redis
@@ -7,38 +7,42 @@
  *
  */
 var _       = require('underscore');
-var mysql   = require('mysql');
 var redis   = require('redis');
 var request = require('request');
-var tConst  = require('../telemetry_const.js');
+var MySQL   = require('./datastore.mysql.js');
+var tConst  = require('./telemetry.const.js');
 
-function tDispatch(settings){
-    this.settings = {
-        q: { port: null, host: null },
-        ds: {},
-        wa: { protocal:"http", host:"localhost", port: "8080"}
-    };
-    if(settings && settings.queue)     this.settings.q  = settings.queue;
-    if(settings && settings.datastore) this.settings.ds = settings.datastore;
-    if(settings && settings.webapp)    this.settings.wa = settings.webapp;
+function Dispatcher(settings){
+    this.settings = _.extend(settings,
+        {
+            q: { port: null, host: null },
+            ds: {},
+            wa: { protocal:"http", host:"localhost", port: "8080"}
+        });
+    if(this.settings && this.settings.queue)     this.settings.q  = this.settings.queue;
+    if(this.settings && this.settings.webapp)    this.settings.wa = this.settings.webapp;
 
     this.queue         = redis.createClient(this.settings.q.port, this.settings.q.host, this.settings.q);
     this.webAppUrl     = this.settings.wa.protocal+"://"+this.settings.wa.host+":"+this.settings.wa.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
+
+    this.ds = new MySQL(this.settings.datastore);
+    // Connect to data store
+    this.ds.connect();
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
 }
 
 
-tDispatch.prototype.startTelemetryPoll = function(){
+Dispatcher.prototype.startTelemetryPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.telemetryCheck();
-    }.bind(this), tConst.dispatch.telemetryPollDelay);
+    }.bind(this), this.settings.dispatch.telemetryPollDelay);
 }
 
-tDispatch.prototype.telemetryCheck = function(){
+Dispatcher.prototype.telemetryCheck = function(){
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
 
     this.queue.llen(telemetryInKey, function(err, count){
@@ -48,7 +52,7 @@ tDispatch.prototype.telemetryCheck = function(){
         }
 
         if(count > 0) {
-            for(var i = 0; i < Math.min(count, tConst.dispatch.telemetryGetMax); i++){
+            for(var i = 0; i < Math.min(count, this.settings.dispatch.telemetryGetMax); i++){
                 this.getTelemetryBatch();
             }
         }
@@ -56,14 +60,14 @@ tDispatch.prototype.telemetryCheck = function(){
 }
 
 
-tDispatch.prototype.startCleanOldSessionPoll = function(){
+Dispatcher.prototype.startCleanOldSessionPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.cleanOldSessionCheck();
-    }.bind(this), tConst.dispatch.cleanupPollDelay);
+    }.bind(this), this.settings.dispatch.cleanupPollDelay);
 }
 
-tDispatch.prototype.cleanOldSessionCheck = function(){
+Dispatcher.prototype.cleanOldSessionCheck = function(){
     var telemetryMetaKey = tConst.telemetryKey+":"+tConst.metaKey;
 
     this.queue.hgetall(telemetryMetaKey, function(err, data){
@@ -81,7 +85,7 @@ tDispatch.prototype.cleanOldSessionCheck = function(){
 
                 var startTime = new Date(meta.date).getTime();
                 var now       = new Date().getTime();
-                if(now - startTime > tConst.dispatch.sessionExpire){
+                if(now - startTime > this.settings.dispatch.sessionExpire){
                     // clean up session
                     console.log("!!! Expired Cleaning Up - id", sessionId, ", metaData:", meta);
 
@@ -92,7 +96,7 @@ tDispatch.prototype.cleanOldSessionCheck = function(){
     }.bind(this));
 }
 
-tDispatch.prototype.cleanupSession = function(sessionId, execFinalCB){
+Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
     var telemetryActiveKey = tConst.telemetryKey+":"+tConst.activeKey;
     var telemetryMetaKey   = tConst.telemetryKey+":"+tConst.metaKey;
     var batchInKey         = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
@@ -135,7 +139,7 @@ tDispatch.prototype.cleanupSession = function(sessionId, execFinalCB){
     }.bind(this));
 }
 
-tDispatch.prototype.updateSessionMetaData = function(sessionId){
+Dispatcher.prototype.updateSessionMetaData = function(sessionId){
     var telemetryMetaKey = tConst.telemetryKey+":"+tConst.metaKey;
 
     this.queue.hset(telemetryMetaKey, sessionId,
@@ -151,7 +155,7 @@ tDispatch.prototype.updateSessionMetaData = function(sessionId){
     );
 }
 
-tDispatch.prototype.getTelemetryBatch = function(){
+Dispatcher.prototype.getTelemetryBatch = function(){
     var telemetryInKey     = tConst.telemetryKey+":"+tConst.inKey;
     var telemetryActiveKey = tConst.telemetryKey+":"+tConst.activeKey;
 
@@ -187,8 +191,8 @@ tDispatch.prototype.getTelemetryBatch = function(){
     }.bind(this));
 }
 
-tDispatch.prototype.endBatchIn = function(sessionId){
-    //console.log("Dispatch endBatchIn sessionId:", sessionId);
+Dispatcher.prototype.endBatchIn = function(sessionId){
+    console.log("Dispatch endBatchIn sessionId:", sessionId);
     var batchInKey         = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
     var batchActiveKey     = tConst.batchKey+":"+sessionId+":"+tConst.activeKey;
 
@@ -232,7 +236,7 @@ tDispatch.prototype.endBatchIn = function(sessionId){
                                 console.log("Started Assessment - SessionId:", sessionId);
                             }.bind(this));
 
-                        }.bind(this), tConst.dispatch.assessmentDelay);
+                        }.bind(this), this.settings.dispatch.assessmentDelay);
 
                     }.bind(this));
 
@@ -242,7 +246,7 @@ tDispatch.prototype.endBatchIn = function(sessionId){
                     // try again until empty
                     setTimeout(function(){
                         this.endBatchIn(sessionId);
-                    }.bind(this), tConst.dispatch.batchInPollDelay);
+                    }.bind(this), this.settings.dispatch.batchInPollDelay);
                 }
             }.bind(this));
         } else {
@@ -253,22 +257,22 @@ tDispatch.prototype.endBatchIn = function(sessionId){
                 function(){
                     this.endBatchIn(sessionId);
                 }.bind(this),
-                tConst.dispatch.batchInPollDelay
+                this.settings.dispatch.batchInPollDelay
             );
         }
     }.bind(this));
 }
 
-tDispatch.prototype.startBatchInPoll = function(sessionId){
+Dispatcher.prototype.startBatchInPoll = function(sessionId){
     setInterval(
         function(){
             this.batchInCheck(sessionId);
         }.bind(this),
-        tConst.dispatch.batchInPollDelay
+        this.settings.dispatch.batchInPollDelay
     );
 }
 
-tDispatch.prototype.batchInCheck = function(sessionId){
+Dispatcher.prototype.batchInCheck = function(sessionId){
     var batchInKey = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
 
     // check items in batch list
@@ -280,7 +284,7 @@ tDispatch.prototype.batchInCheck = function(sessionId){
 
         //console.log("batchInCheck batchInKey:", batchInKey, ", count:", count);
         if(count > 0) {
-            for(var i = 0; i < Math.min(tConst.dispatch.batchGetMax, count); i++){
+            for(var i = 0; i < Math.min(this.settings.dispatch.batchGetMax, count); i++){
                 // adding to batch
                 this.processItem(sessionId);
             }
@@ -288,7 +292,7 @@ tDispatch.prototype.batchInCheck = function(sessionId){
     }.bind(this));
 }
 
-tDispatch.prototype.processItem = function(sessionId){
+Dispatcher.prototype.processItem = function(sessionId){
     var batchInKey     = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
     var batchActiveKey = tConst.batchKey+":"+sessionId+":"+tConst.activeKey;
 
@@ -308,14 +312,14 @@ tDispatch.prototype.processItem = function(sessionId){
     }.bind(this));
 }
 
-tDispatch.prototype.processDone = function(err, batchActiveKey, data){
+Dispatcher.prototype.processDone = function(err, batchActiveKey, data){
     if(err) {
         jdata = JSON.parse(data);
         this.cleanupSession(jdata.gameSessionId);
         console.error("Dispatch processDone saved Error:", err);
     }
 
-    //console.log("processDone batchActiveKey:", batchActiveKey, ", data:", data);
+    console.log("processDone batchActiveKey:", batchActiveKey, ", data:", data);
     // move item from active to done
     this.queue.lrem(batchActiveKey, 0, data, function(err){
         if(err) {
@@ -327,7 +331,7 @@ tDispatch.prototype.processDone = function(err, batchActiveKey, data){
     }.bind(this));
 }
 
-tDispatch.prototype.sendItemToDataStore = function(batchActiveKey, data){
+Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
     // curry (aka, use closure to save batchActiveKey and data)
     var done = function(key, data){
         return function(err){
@@ -353,57 +357,34 @@ tDispatch.prototype.sendItemToDataStore = function(batchActiveKey, data){
     }
 
     if(jdata.gameSessionId) {
-        // Connect to data store and save
-        this.ds = mysql.createConnection(this.settings.ds);
-        this.ds.connect();
+        var qInsertData = [];
+        for(var i in jdata.events){
+            var row = [
+                "NULL",
+                0,
+                this.ds.escape(JSON.stringify(jdata.events[i].eventData)),
+                "NOW()",
+                this.ds.escape(jdata.gameVersion),
+                this.ds.escape(jdata.gameSessionId),
+                "NOW()",
+                this.ds.escape(jdata.events[i].name),
+                "UNIX_TIMESTAMP(NOW())",
+                "(SELECT user_id FROM GL_SESSION WHERE SESSION_ID="+this.ds.escape(jdata.gameSessionId)+")"
+            ];
+            qInsertData.push( "("+row.join(",")+")" );
+        }
 
-        var q = "SELECT user_id FROM GL_SESSION WHERE SESSION_ID="+mysql.escape(jdata.gameSessionId);
-        this.ds.query(q, function(err, rows, fields) {
-            if(err) {
-                this.ds.end();
-                this.cleanupSession(jdata.gameSessionId);
-                console.error("Dispatch sendItemToDataStore Q session Error:", err);
-                return;
-            }
+        q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) VALUES ";
+        q += qInsertData.join(",");
+        console.log('q:', q);
 
-            //console.log('rows:', rows, ", fields:", fields);
-            // verify has user_id
-            if(rows.length > 0 && rows[0].hasOwnProperty("user_id")) {
-
-                if(jdata.events)
-
-                var qInsertData = [];
-                for(var i in jdata.events){
-                    var row = [
-                        "NULL",
-                        0,
-                        mysql.escape(JSON.stringify(jdata.events[i].eventData)),
-                        "NOW()",
-                        mysql.escape(jdata.gameVersion),
-                        mysql.escape(jdata.gameSessionId),
-                        "NOW()",
-                        mysql.escape(jdata.events[i].name),
-                        "UNIX_TIMESTAMP(NOW())",
-                        rows[0].user_id
-                    ];
-                    qInsertData.push( "("+row.join(",")+")" );
-                }
-
-                q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) VALUES ";
-                q += qInsertData.join(",");
-                //console.log('q:', q);
-
-                this.ds.query(q, function(err) {
-                    this.ds.end();
-
-                    doneCB(err);
-                }.bind(this));
-            }
+        this.ds.addQuery(q, function(err) {
+            doneCB(err);
         }.bind(this));
     } else {
         console.error("Dispatch sendItemToDataStore missing gameSessionId");
     }
 }
 
-module.exports = tDispatch;
+module.exports = Dispatcher;
 

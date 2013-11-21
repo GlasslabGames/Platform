@@ -1,24 +1,26 @@
 #!/bin/bash
 
-mkdir -p logs
-DIR=`pwd`
-
-cd server_collector
 # if node_modules missing then install
 if [ ! -d "node_modules" ]; then
 	npm install
 fi
+
 # stop then start
 forever stop app-collector.js
-forever start -o ${DIR}/logs/server_collector.log -e ${DIR}/logs/server_collector_error.log app-collector.js
-cd ..
+forever start \
+-a \
+-l >(logger -p local0.notice -t telemetry.collector) \
+app-collector.js
+#-o >(logger -p local0.info -t telemetry.collector)
+#-e >(logger -p local0.error -t telemetry.collector)
+# 2>&1 | cat > /dev/null &
 
-cd server_dispatch
-# if node_modules missing then install
-if [ ! -d "node_modules" ]; then
-	npm install
-fi
 # stop then start
-forever stop app-dispatch.js
-forever start -o ${DIR}/logs/server_dispatch.log -e ${DIR}/logs/server_dispatch_error.log app-dispatch.js
-cd ..
+forever stop app-dispatcher.js
+forever start \
+-a \
+-l >(logger -p local1.notice -t telemetry.dispatcher) \
+app-dispatcher.js
+#-o >(logger -p local1.info -t telemetry.dispatcher)
+#-e >(logger -p local1.error -t telemetry.dispatcher)
+# 2>&1 | cat > /dev/null &

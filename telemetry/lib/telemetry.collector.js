@@ -8,9 +8,9 @@
 
 var _      = require('underscore');
 var redis  = require('redis');
-var tConst = require('../telemetry_const.js');
+var tConst  = require('./telemetry.const.js');
 
-function tCollector(settings){
+function Collector(settings){
     this.settings = {
         q: {
             port: null, host: null
@@ -21,7 +21,7 @@ function tCollector(settings){
     this.queue = redis.createClient(this.settings.q.port, this.settings.q.host, this.settings.q);
 }
 
-tCollector.prototype.start = function(id) {
+Collector.prototype.start = function(id) {
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
 
     this.queue.lpush(telemetryInKey,
@@ -37,7 +37,7 @@ tCollector.prototype.start = function(id) {
     );
 }
 
-tCollector.prototype.batch = function(id, data) {
+Collector.prototype.batch = function(id, data) {
     var batchInKey = tConst.batchKey+":"+id+":"+tConst.inKey;
 
     // if object convert data to string
@@ -52,7 +52,7 @@ tCollector.prototype.batch = function(id, data) {
     });
 }
 
-tCollector.prototype.end = function(id) {
+Collector.prototype.end = function(id) {
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
 
     this.queue.lpush(telemetryInKey,
@@ -68,4 +68,4 @@ tCollector.prototype.end = function(id) {
     );
 }
 
-module.exports = tCollector;
+module.exports = Collector;

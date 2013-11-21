@@ -4,10 +4,14 @@
  * redis - https://github.com/mranney/node_redis
  *
  */
-var tDispatch = require('./tdispatch.js');
-var settings  = require('../server_config.json');
+var _         = require('underscore');
+var telemetry = require('./lib/telemetry.js');
+var settings  = _.extend(
+    require('./config.json'),
+    require('./telemetry.settings.js')
+);
 
-dispatch = new tDispatch(settings);
+dispatcher = new telemetry.Dispatcher(settings);
 
 process.on('uncaughtException', function(err) {
     console.log("Dispatch Uncaught Error:", err);
