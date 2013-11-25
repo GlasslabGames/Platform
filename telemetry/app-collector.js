@@ -10,6 +10,7 @@ var http       = require('http');
 var urlParser  = require('url');
 var request    = require('request');
 var multiparty = require('multiparty');
+// https://github.com/felixge/node-formidable
 
 var telemetry  = require('./lib/telemetry.js');
 var settings   = _.extend(
@@ -166,8 +167,7 @@ function postData(url, jdata, outRes, cb){
     });
 
     req.on("error", function(err){
-        console.error("Error:", err);
-        outRes.status(500).send('Error:'+err);
+        console.trace("Collector postData Error:", err);
     });
 
     req.write(data);
