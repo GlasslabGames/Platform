@@ -32,6 +32,8 @@ function Dispatcher(settings){
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
+
+    console.log('Dispatcher: Waiting for messages...');
 }
 
 
@@ -39,7 +41,7 @@ Dispatcher.prototype.startTelemetryPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.telemetryCheck();
-    }.bind(this), this.settings.dispatch.telemetryPollDelay);
+    }.bind(this), this.settings.dispatcher.telemetryPollDelay);
 }
 
 Dispatcher.prototype.telemetryCheck = function(){
@@ -47,12 +49,12 @@ Dispatcher.prototype.telemetryCheck = function(){
 
     this.queue.llen(telemetryInKey, function(err, count){
         if(err) {
-            console.error("Dispatch Error:", err);
+            console.error("Dispatcher: Error:", err);
             return;
         }
 
         if(count > 0) {
-            for(var i = 0; i < Math.min(count, this.settings.dispatch.telemetryGetMax); i++){
+            for(var i = 0; i < Math.min(count, this.settings.dispatcher.telemetryGetMax); i++){
                 this.getTelemetryBatch();
             }
         }
@@ -64,7 +66,7 @@ Dispatcher.prototype.startCleanOldSessionPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.cleanOldSessionCheck();
-    }.bind(this), this.settings.dispatch.cleanupPollDelay);
+    }.bind(this), this.settings.dispatcher.cleanupPollDelay);
 }
 
 Dispatcher.prototype.cleanOldSessionCheck = function(){
@@ -72,7 +74,7 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
 
     this.queue.hgetall(telemetryMetaKey, function(err, data){
         if(err) {
-            console.error("Dispatch Error:", err);
+            console.error("Dispatcher: Error:", err);
             return;
         }
 
@@ -85,7 +87,7 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
 
                 var startTime = new Date(meta.date).getTime();
                 var now       = new Date().getTime();
-                if(now - startTime > this.settings.dispatch.sessionExpire){
+                if(now - startTime > this.settings.dispatcher.sessionExpire){
                     // clean up session
                     console.log("!!! Expired Cleaning Up - id", sessionId, ", metaData:", meta);
 
@@ -105,7 +107,7 @@ Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
     // remove telemetryData with sessionId
     this.queue.srem(telemetryActiveKey, sessionId, function(err){
         if(err) {
-            console.error("Dispatch endBatchIn telemetryActiveKey srem Error:", err);
+            console.error("Dispatcher: endBatchIn telemetryActiveKey srem Error:", err);
             return;
         }
 
@@ -117,7 +119,7 @@ Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
     // remove batch in list
     this.queue.del(batchInKey, function(err){
         if(err) {
-            console.error("Dispatch endBatchIn batchInKey del Error:", err);
+            console.error("Dispatcher: endBatchIn batchInKey del Error:", err);
             return;
         }
     }.bind(this));
@@ -125,7 +127,7 @@ Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
     // remove batch active list
     this.queue.del(batchActiveKey, function(err){
         if(err) {
-            console.error("Dispatch endBatchIn batchActiveKey del Error:", err);
+            console.error("Dispatcher: endBatchIn batchActiveKey del Error:", err);
             return;
         }
     }.bind(this));
@@ -133,7 +135,7 @@ Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
     // remove meta info
     this.queue.hdel(telemetryMetaKey, sessionId, function(err){
         if(err) {
-            console.error("Dispatch endBatchIn telemetryMetaKey del Error:", err);
+            console.error("Dispatcher: endBatchIn telemetryMetaKey del Error:", err);
             return;
         }
     }.bind(this));
@@ -148,7 +150,7 @@ Dispatcher.prototype.updateSessionMetaData = function(sessionId){
         }),
         function(err){
             if(err) {
-                console.error("Dispatch getTelemetryBatch hset Error:", err);
+                console.error("Dispatcher: getTelemetryBatch hset Error:", err);
                 return;
             }
         }.bind(this)
@@ -162,7 +164,7 @@ Dispatcher.prototype.getTelemetryBatch = function(){
     // move telemetry item from in to active
     this.queue.rpop(telemetryInKey, function(err, telemData){
         if(err) {
-            console.error("Dispatch getTelemetryBatch Error:", err);
+            console.error("Dispatcher: getTelemetryBatch Error:", err);
             return;
         }
 
@@ -170,7 +172,7 @@ Dispatcher.prototype.getTelemetryBatch = function(){
         if(telemData) {
             // convert string to object
             telemData = JSON.parse(telemData);
-            console.log("Dispatch getTelemetryBatch data:", telemData);
+            //console.log("Dispatcher: getTelemetryBatch data:", telemData);
 
             // update date in meta data
             this.updateSessionMetaData(telemData.id);
@@ -178,7 +180,7 @@ Dispatcher.prototype.getTelemetryBatch = function(){
             if(telemData.type == "start"){
                 this.queue.sadd(telemetryActiveKey, telemData.id, function(err){
                     if(err) {
-                        console.error("Dispatch getTelemetryBatch sadd Error:", err);
+                        console.error("Dispatcher: getTelemetryBatch sadd Error:", err);
                         return;
                     }
 
@@ -192,7 +194,10 @@ Dispatcher.prototype.getTelemetryBatch = function(){
 }
 
 Dispatcher.prototype.endBatchIn = function(sessionId){
-    console.log("Dispatch endBatchIn sessionId:", sessionId);
+    if(this.settings.env == "dev") {
+        console.log("Dispatcher: endBatchIn sessionId:", sessionId);
+    }
+
     var batchInKey         = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
     var batchActiveKey     = tConst.batchKey+":"+sessionId+":"+tConst.activeKey;
 
@@ -203,17 +208,17 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
             return;
         }
 
-        //console.log("Dispatch endBatchIn", batchInKey, "list:", list);
+        //console.log("Dispatcher: endBatchIn", batchInKey, "list:", list);
         if(list.length == 0) {
 
             // check active done
             this.queue.lrange(batchActiveKey, 0, -1, function(err, list){
                 if(err) {
-                    console.error("Dispatch endBatchIn",  batchActiveKey, "Error:", err);
+                    console.error("Dispatcher: endBatchIn",  batchActiveKey, "Error:", err);
                     return;
                 }
 
-                console.log("Dispatch endBatchIn", batchActiveKey, "list:", list);
+                //console.log("Dispatcher: endBatchIn", batchActiveKey, "list:", list);
                 if(list.length == 0) {
                     //console.log(sessionId, "- Done");
 
@@ -221,7 +226,9 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                     this.cleanupSession(sessionId, function executeAssessment(){
 
                         // execute assessment
-                        console.log("Assessment Delay - SessionId:", sessionId);
+                        if(this.settings.env == "dev") {
+                            console.log("Dispatcher: Assessment Delay - SessionId:", sessionId);
+                        }
                         // wait 10 seconds
                         setTimeout(function(){
 
@@ -233,10 +240,12 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                                     return;
                                 }
 
-                                console.log("Started Assessment - SessionId:", sessionId);
+                                if(this.settings.env == "dev") {
+                                    console.log("Dispatcher: Started Assessment - SessionId:", sessionId);
+                                }
                             }.bind(this));
 
-                        }.bind(this), this.settings.dispatch.assessmentDelay);
+                        }.bind(this), this.settings.dispatcher.assessmentDelay);
 
                     }.bind(this));
 
@@ -246,7 +255,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                     // try again until empty
                     setTimeout(function(){
                         this.endBatchIn(sessionId);
-                    }.bind(this), this.settings.dispatch.batchInPollDelay);
+                    }.bind(this), this.settings.dispatcher.batchInPollDelay);
                 }
             }.bind(this));
         } else {
@@ -257,7 +266,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                 function(){
                     this.endBatchIn(sessionId);
                 }.bind(this),
-                this.settings.dispatch.batchInPollDelay
+                this.settings.dispatcher.batchInPollDelay
             );
         }
     }.bind(this));
@@ -268,7 +277,7 @@ Dispatcher.prototype.startBatchInPoll = function(sessionId){
         function(){
             this.batchInCheck(sessionId);
         }.bind(this),
-        this.settings.dispatch.batchInPollDelay
+        this.settings.dispatcher.batchInPollDelay
     );
 }
 
@@ -278,13 +287,13 @@ Dispatcher.prototype.batchInCheck = function(sessionId){
     // check items in batch list
     this.queue.llen(batchInKey, function(err, count){
         if(err) {
-            console.error("Dispatch startBatchIn Error:", err);
+            console.error("Dispatcher: startBatchIn Error:", err);
             return;
         }
 
         //console.log("batchInCheck batchInKey:", batchInKey, ", count:", count);
         if(count > 0) {
-            for(var i = 0; i < Math.min(this.settings.dispatch.batchGetMax, count); i++){
+            for(var i = 0; i < Math.min(this.settings.dispatcher.batchGetMax, count); i++){
                 // adding to batch
                 this.processItem(sessionId);
             }
@@ -299,7 +308,7 @@ Dispatcher.prototype.processItem = function(sessionId){
     // move item from In to Active
     this.queue.rpoplpush(batchInKey, batchActiveKey, function(err, data){
         if(err) {
-            console.error("Dispatch processItem Error:", err);
+            console.error("Dispatcher: processItem Error:", err);
             return;
         }
 
@@ -316,14 +325,14 @@ Dispatcher.prototype.processDone = function(err, batchActiveKey, data){
     if(err) {
         jdata = JSON.parse(data);
         this.cleanupSession(jdata.gameSessionId);
-        console.error("Dispatch processDone saved Error:", err);
+        console.error("Dispatcher: processDone saved Error:", err);
     }
 
-    console.log("processDone batchActiveKey:", batchActiveKey, ", data:", data);
+    //console.log("processDone batchActiveKey:", batchActiveKey, ", data:", data);
     // move item from active to done
     this.queue.lrem(batchActiveKey, 0, data, function(err){
         if(err) {
-            console.error("Dispatch processDone final Error:", err);
+            console.error("Dispatcher: processDone final Error:", err);
             return;
         }
 
@@ -340,14 +349,14 @@ Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
     }.bind(this);
     var doneCB = done(batchActiveKey, data);
 
-    //console.log("Dispatch sendItemToDataStore data:", data);
+    //console.log("Dispatcher: sendItemToDataStore data:", data);
 
     // send to datastore server
     try {
         jdata = JSON.parse(data);
         jdata.events = JSON.parse(jdata.events);
     } catch(err) {
-        console.error("Dispatch Error:", err, ", JSON data:", data);
+        console.error("Dispatcher: Error:", err, ", JSON data:", data);
     }
 
     // if no events
@@ -382,7 +391,7 @@ Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
             doneCB(err);
         }.bind(this));
     } else {
-        console.error("Dispatch sendItemToDataStore missing gameSessionId");
+        console.error("Dispatcher: sendItemToDataStore missing gameSessionId");
     }
 }
 
