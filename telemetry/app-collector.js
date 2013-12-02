@@ -12,17 +12,21 @@ var request    = require('request');
 var multiparty = require('multiparty');
 // https://github.com/felixge/node-formidable
 
-var telemetry  = require('./lib/telemetry.js');
-var settings   = _.extend(
-    require('./config.json'),
-    require('./telemetry.settings.js')
-);
+var telemetry     = require('./lib/telemetry.js');
+var ConfigManager = require('./lib/config.manager.js');
+
+var config = new ConfigManager();
+// load config files from first to last until successful
+var settings = config.loadSync([
+    "./config.json",
+    "~/config.telemetry.json",
+]);
 
 var col = new telemetry.Collector(settings);
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 8081);
+app.set('port', settings.collector.port || 8081);
 app.use(express.logger( settings.env ));
 app.use(express.urlencoded());
 app.use(express.json());

@@ -10,9 +10,21 @@
         "port": 6379
     },
     "datastore": {
-        "host"     : "localhost",
-        "user"     : "glasslab",
-        "password" : "glasslab",
-        "database" : "glasslab_dev"
+        "host"    : "localhost",
+        "user"    : "glasslab",
+        "password": "glasslab",
+        "database": "glasslab_dev"
+    },
+    "collector": {
+        "port": 8081
+    },
+    "dispatcher": {
+        "telemetryGetMax": 20,
+        "batchGetMax"    : 100,
+        "telemetryPollDelay": 1000,
+        "batchInPollDelay"  : 5000,
+        "assessmentDelay"   : 30000,
+        "cleanupPollDelay"  : 3600000,
+        "sessionExpire"     : 14400000
     }
 }
