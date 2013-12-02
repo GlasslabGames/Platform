@@ -27,17 +27,13 @@ var app = express();
 
 // all environments
 app.set('port', settings.collector.port || 8081);
-app.use(express.logger( settings.env ));
+app.use(express.logger());
 app.use(express.urlencoded());
 app.use(express.json());
 app.use(express.methodOverride());
+app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
 
 var webAppUrl = settings.webapp.protocal+"://"+settings.webapp.host+":"+settings.webapp.port;
-
-// development only
-if (settings.env = 'dev') {
-    app.use(express.errorHandler());
-}
 
 // ---------------------------------------
 //
