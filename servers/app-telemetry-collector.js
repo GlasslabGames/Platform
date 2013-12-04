@@ -1,10 +1,6 @@
 /**
- * App Service for Telemetry Disbatch
- *
- * redis - https://github.com/mranney/node_redis
- *
+ * Telemetry Collector - App Server
  */
-var _             = require('underscore');
 var telemetry     = require('./lib/telemetry.js');
 var ConfigManager = require('./lib/config.manager.js');
 
@@ -16,11 +12,11 @@ var settings = config.loadSync([
 ]);
 
 try {
-    dispatcher = new telemetry.Dispatcher(settings);
+    collector = new telemetry.Collector(settings);
 } catch(err){
-    console.log("Dispatcher: Error -", err);
+    console.trace("Collector: Error -", err);
 }
 
 process.on('uncaughtException', function(err) {
-    console.log("Dispatcher: Uncaught Error -", err);
+    console.error("Collector: Uncaught Error -", err);
 });

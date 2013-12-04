@@ -9,6 +9,10 @@
         "multiparty": "3.1.0",
         "request":    "2.27.0",
         "redis":      "0.9.0",
-        "hiredis":    "0.1.15"
+        "hiredis":    "0.1.15",
+        "couchbase":  "*",
+        "passport":   "*",
+        "passport-local": "*",
+        "ejs-locals": "*"
     }
 }

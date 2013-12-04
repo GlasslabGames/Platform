@@ -26,5 +26,9 @@
         "assessmentDelay"   : 30000,
         "cleanupPollDelay"  : 3600000,
         "sessionExpire"     : 14400000
+    },
+    "auth": {
+        "port": 8082,
+        "secret": "keyboard kitty"
     }
 }
