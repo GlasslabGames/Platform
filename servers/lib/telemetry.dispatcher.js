@@ -2,28 +2,33 @@
  * Telemetry Dispatcher Module
  *
  * Module dependencies:
- *   redis - https://github.com/mranney/node_redis
- *   mysql -
+ *  underscore - https://github.com/jashkenas/underscore
+ *  request    - https://github.com/mikeal/request
+ *  redis      - https://github.com/mranney/node_redis
+ *  couchnode  - https://github.com/couchbase/couchnode
  *
  */
-var _       = require('underscore');
-var redis   = require('redis');
-var request = require('request');
-var MySQL   = require('./datastore.mysql.js');
-var tConst  = require('./telemetry.const.js');
+// Third-party libs
+var _         = require('underscore');
+var request   = require('request');
+var redis     = require('redis');
+var couchbase = require('couchbase');
+// Glasslab libs
+var MySQL     = require('./datastore.mysql.js');
+var tConst    = require('./telemetry.const.js');
 
 function Dispatcher(settings){
-    this.settings = _.extend(settings,
+    this.settings = _.extend(
         {
-            q: { port: null, host: null },
-            ds: {},
-            wa: { protocal:"http", host:"localhost", port: "8080"}
-        });
-    if(this.settings && this.settings.queue)     this.settings.q  = this.settings.queue;
-    if(this.settings && this.settings.webapp)    this.settings.wa = this.settings.webapp;
+            queue: { port: null, host: null },
+            webapp: { protocal: "http", host: "localhost", port: 8080},
+            datastore: {}
+        },
+        settings
+    );
 
-    this.queue         = redis.createClient(this.settings.q.port, this.settings.q.host, this.settings.q);
-    this.webAppUrl     = this.settings.wa.protocal+"://"+this.settings.wa.host+":"+this.settings.wa.port;
+    this.queue         = redis.createClient(this.settings.queue.port, this.settings.queue.host, this.settings.queue);
+    this.webAppUrl     = this.settings.webapp.protocal+"://"+this.settings.webapp.host+":"+this.settings.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
 
     this.ds = new MySQL(this.settings.datastore);
