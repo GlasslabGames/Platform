@@ -64,7 +64,7 @@ app.post('/api/:type/sendtelemetrybatch', function(req, outRes){
             var form = new multiparty.Form();
             form.parse(req, function(err, fields) {
                 if(err){
-                    console.error("Error:", err);
+                    console.error("Collector SendTelemetryBatch Error:", err);
                     outRes.status(500).send('Error:'+err);
                     return;
                 }
@@ -77,14 +77,16 @@ app.post('/api/:type/sendtelemetrybatch', function(req, outRes){
                     //console.log("fields:", fields);
                     col.batch(fields.gameSessionId, fields);
                 }
-            });
+
+                outRes.send();
+            }.bind(this));
         } else {
             //console.log("send telemetry batch body:", req.body);
             // Queue Data
             col.batch(req.body.gameSessionId, req.body);
-        }
 
-        outRes.send();
+            outRes.send();
+        }
     } catch(err) {
         console.trace("Collector Send Telemetry Batch Error:", err);
     }
