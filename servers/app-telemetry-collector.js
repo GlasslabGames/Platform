@@ -11,6 +11,10 @@ var settings = config.loadSync([
     "~/config.telemetry.json",
 ]);
 
+console.log("---------------------------------------------");
+console.log("-- Telemetry Collector App Server - Start");
+console.log("---------------------------------------------");
+
 try {
     collector = new telemetry.Collector(settings);
 } catch(err){

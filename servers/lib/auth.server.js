@@ -10,67 +10,19 @@
  *
  *
  */
-var urlParser  = require('url');
+//var urlParser  = require('url');
 var http       = require('http');
+var path       = require('path');
 // Third-party libs
 var _          = require('underscore');
 var express    = require('express');
 var passport   = require('passport');
+var crypto     = require('crypto');
 var PassLocal  = require('passport-local').Strategy;
+var RedisStore = require('connect-redis')(express);
 // Glasslab libs
-var MySQL     = require('./datastore.mysql.js');
-
-var users = [
-    { id: 1, username: 'bob', password: '1234', email: 'bob@example.com' },
-    { id: 2, username: 'joe', password: '1234', email: 'joe@example.com' }
-];
-
-
-function findById(id, fn) {
-    var idx = id - 1;
-    if (users[idx]) {
-        fn(null, users[idx]);
-    } else {
-        fn(new Error('User ' + id + ' does not exist'));
-    }
-}
-
-function findByUsername(username, fn) {
-    for (var i = 0, len = users.length; i < len; i++) {
-        var user = users[i];
-        if (user.username === username) {
-            return fn(null, user);
-        }
-    }
-    return fn(null, null);
-}
-
-// Simple route middleware to ensure user is authenticated.
-//   Use this route middleware on any resource that needs to be protected.  If
-//   the request is authenticated (typically via a persistent login session),
-//   the request will proceed.  Otherwise, the user will be redirected to the
-//   login page.
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) { return next(); }
-    res.redirect('/login')
-}
-
-
-// Passport session setup.
-//   To support persistent login sessions, Passport needs to be able to
-//   serialize users into and deserialize users out of the session.  Typically,
-//   this will be as simple as storing the user ID when serializing, and finding
-//   the user by ID when deserializing.
-passport.serializeUser(function(user, done) {
-    done(null, user.id);
-});
-
-passport.deserializeUser(function(id, done) {
-    findById(id, function (err, user) {
-        done(err, user);
-    });
-});
-
+var MySQL      = require('./datastore.mysql.js');
+var apiConts   = require('./api.routes.const.js');
 
 function AuthServer(settings){
     this.settings = _.extend(
@@ -82,6 +34,11 @@ function AuthServer(settings){
         },
         settings
     );
+
+
+    this.ds = new MySQL(this.settings.datastore);
+    // Connect to data store
+    this.ds.testConnection();
 
     this.app = express();
 
@@ -99,7 +56,10 @@ function AuthServer(settings){
         this.app.use(express.urlencoded());
         this.app.use(express.json());
         this.app.use(express.methodOverride());
-        this.app.use(express.session({ secret: this.settings.auth.secret }));
+        this.app.use(express.session({
+            secret: this.settings.auth.secret,
+            store: new RedisStore(settings.sessionstore)
+        }));
 
         // Use the LocalStrategy within Passport.
         //   Strategies in passport require a `verify` function, which accept
@@ -108,54 +68,97 @@ function AuthServer(settings){
         //   however, in this example we are using a baked-in set of users.
         passport.use(new PassLocal(
             function(username, password, done) {
-                // asynchronous verification, for effect...
-                process.nextTick(function () {
-                    // Find the user by username.  If there is no user with the given
-                    // username, or the password is not correct, set the user to `false` to
-                    // indicate failure and set a flash message.  Otherwise, return the
-                    // authenticated `user`.
-                    findByUsername(username, function(err, user) {
-                        if (err) { return done(err); }
-                        if (!user) { return done(null, false, { message: 'Unknown user ' + username }); }
-                        if (user.password != password) { return done(null, false, { message: 'Invalid password' }); }
+
+                // TODO clean up DB requests
+                var q = "SELECT * FROM GL_USER WHERE username="+this.ds.escape(username);
+                this.ds.query(q,
+                    function(err, data) {
+                        if(err) {
+                            return done(err);
+                        }
+
+                        if(!_.isArray(data) || data.length == 0) {
+                            return done(null, false, { message: 'Unknown user ' + username });
+                        }
+
+                        var user = data[0];
+                        var sha256 = crypto.createHash('sha256');
+                        sha256.update(password, 'utf8');
+                        hpass = sha256.digest('base64');
+
+                        if(hpass != user.PASSWORD) {
+                            return done(null, false, { message: 'Invalid password' });
+                        }
+
                         return done(null, user);
-                    })
-                });
-            }
+                }.bind(this));
+
+
+            }.bind(this)
         ));
+
+        // Passport session setup.
+        //   To support persistent login sessions, Passport needs to be able to
+        //   serialize users into and deserialize users out of the session.  Typically,
+        //   this will be as simple as storing the user ID when serializing, and finding
+        //   the user by ID when deserializing.
+        passport.serializeUser(function(user, done) {
+            done(null, user.id);
+        });
+
+        passport.deserializeUser(function(id, done) {
+            this.findById(id, function (err, user) {
+                done(err, user);
+            }.bind(this));
+        }.bind(this));
 
         this.app.use(passport.initialize());
         this.app.use(passport.session());
     }.bind(this));
 
-    this.app.get('/', function(req, res){
+    // GET
+    this.app.get(apiConts.root, function(req, res){
         res.render('index', { user: req.user });
     });
 
-    this.app.get('/account', ensureAuthenticated, function(req, res){
-        res.render('account', { user: req.user });
+    this.app.get(apiConts.crossDomain, function(req, res){
+        // need to resolve relative path to absolute, to prevent "Error: Forbidden"
+        res.sendfile( path.resolve(__dirname + '/../static' + apiConts.crossDomain) );
     });
 
-    this.app.get('/login', function(req, res){
-        res.render('login', { user: req.user, message: req.session.messages });
+    this.app.get(apiConts.account,
+        this.ensureAuthenticated.bind(this),
+        function(req, res){
+            res.render('account', { user: req.user });
     });
 
-    this.app.get('/logout', function(req, res){
+    this.app.get(apiConts.login, function(req, res){
+        res.render('login', {
+            user:    req.user,
+            message: req.session.messages
+        });
+    });
+
+    this.app.get(apiConts.logout, function(req, res){
         req.logout();
-        res.redirect('/');
+        res.redirect(apiConts.root);
     });
 
-
-    this.app.post('/login', function(req, res, next) {
+    // POST
+    this.app.post(apiConts.login, function(req, res, next) {
         passport.authenticate('local', function(err, user, info) {
-            if (err) { return next(err) }
+            if(err) {
+                return next(err);
+            }
+
             if (!user) {
                 req.session.messages =  [info.message];
-                return res.redirect('/login')
+                return res.redirect(apiConts.logout)
             }
+
             req.logIn(user, function(err) {
                 if (err) { return next(err); }
-                return res.redirect('/missions');
+                return res.redirect(apiConts.root);
             });
         })(req, res, next);
     });
@@ -164,6 +167,59 @@ function AuthServer(settings){
     http.createServer(this.app).listen(this.app.get('port'), function(){
         console.log('Auth: Server listening on port ' + this.app.get('port'));
     }.bind(this));
+}
+
+AuthServer.prototype.findById = function(id, done) {
+    console.log("findById");
+
+    // TODO clean up DB requests
+    var q = "SELECT * FROM GL_USER WHERE id="+this.ds.escape(id);
+    this.ds.query(q,
+        function(err, data) {
+            if(err) {
+                return done(new Error( err.toString() ));
+            }
+
+            if(!_.isArray(data) || data.length == 0) {
+                return done(new Error('User ' + id + ' does not exist'));
+            }
+
+            return done(null, data[0]);
+        }.bind(this));
+}
+
+AuthServer.prototype.findByUsername = function(username, done) {
+    console.log("findByUsername");
+
+    // TODO clean up DB requests
+    var q = "SELECT * FROM GL_USER WHERE username="+this.ds.escape(username);
+    this.ds.query(q,
+        function(err, data) {
+            if(err) {
+                return done(new Error( err.toString() ));
+            }
+
+            if(!_.isArray(data) || data.length == 0) {
+                return done(new Error('User ' + username + ' does not exist'));
+            }
+
+            return done(null, data[0]);
+        }.bind(this));
+
+}
+
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed.  Otherwise, the user will be redirected to the
+//   login page.
+AuthServer.prototype.ensureAuthenticated = function(req, res, next) {
+    if (req.isAuthenticated()) {
+        // all ok, move on
+        return next();
+    }
+
+    res.redirect(apiConts.login);
 }
 
 module.exports = AuthServer;

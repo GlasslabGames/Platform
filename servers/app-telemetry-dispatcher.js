@@ -11,6 +11,10 @@ var settings = config.loadSync([
     "~/config.telemetry.json",
 ]);
 
+console.log("---------------------------------------------");
+console.log("-- Telemetry Dispatcher App Server - Start");
+console.log("---------------------------------------------");
+
 try {
     dispatcher = new telemetry.Dispatcher(settings);
 } catch(err){

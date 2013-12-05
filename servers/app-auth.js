@@ -11,6 +11,10 @@ var settings = config.loadSync([
     "~/config.telemetry.json",
 ]);
 
+console.log("---------------------------------------------");
+console.log("-- Authentication App Server - Start");
+console.log("---------------------------------------------");
+
 try {
     auth = new Auth.Server(settings);
 } catch(err){
