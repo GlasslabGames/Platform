@@ -22,6 +22,10 @@ var settings = config.loadSync([
     "~/config.telemetry.json",
 ]);
 
+console.log("---------------------------------------------");
+console.log("-- Telemetry Collector App Server - Start");
+console.log("---------------------------------------------");
+
 var col = new telemetry.Collector(settings);
 var app = express();
 
@@ -133,45 +137,49 @@ process.on('uncaughtException', function(err) {
 });
 
 function postData(url, jdata, outRes, cb){
-    var purl = urlParser.parse(url);
-    var data = JSON.stringify(jdata);
+    try {
+        var purl = urlParser.parse(url);
+        var data = JSON.stringify(jdata);
 
-    var options = {
-        host: purl.hostname,
-        port: purl.port,
-        path: purl.pathname,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(data)
-        }
-    };
+        var options = {
+            host: purl.hostname,
+            port: purl.port,
+            path: purl.pathname,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data)
+            }
+        };
 
-    var req = http.request(options, function(res) {
-        res.setEncoding('utf8');
+        var req = http.request(options, function(res) {
+            res.setEncoding('utf8');
 
-        var body = "";
-        res.on('data', function (chunk) {
-            body += chunk;
-        });
-
-        res.on('end', function () {
-            cb(body);
-
-            outRes.writeHead(200, {
-                'Content-Type':   'application/json',
-                'Content-Length': Buffer.byteLength(body)
+            var body = "";
+            res.on('data', function (chunk) {
+                body += chunk;
             });
-            outRes.end(body);
+
+            res.on('end', function () {
+                cb(body);
+
+                outRes.writeHead(200, {
+                    'Content-Type':   'application/json',
+                    'Content-Length': Buffer.byteLength(body)
+                });
+                outRes.end(body);
+            });
         });
-    });
 
-    req.on("error", function(err){
-        console.trace("Collector postData Error:", err);
-    });
+        req.on("error", function(err){
+            console.trace("Collector postData Error:", err);
+        });
 
-    req.write(data);
-    req.end();
+        req.write(data);
+        req.end();
+    } catch(err) {
+        console.trace("Collector PostData Error:", err);
+    }
 }
 
 

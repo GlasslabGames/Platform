@@ -28,7 +28,7 @@ function Dispatcher(settings){
 
     this.ds = new MySQL(this.settings.datastore);
     // Connect to data store
-    this.ds.connect();
+    this.ds.testConnect();
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
@@ -354,9 +354,15 @@ Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
     // send to datastore server
     try {
         jdata = JSON.parse(data);
+    } catch(err) {
+        console.error("Dispatcher: Error -", err, ", JSON data:", data);
+        return;
+    }
+    try {
         jdata.events = JSON.parse(jdata.events);
     } catch(err) {
-        console.error("Dispatcher: Error:", err, ", JSON data:", data);
+        console.error("Dispatcher: Error -", err, ", JSON events:", data);
+        return;
     }
 
     // if no events
