@@ -28,7 +28,7 @@ function Dispatcher(settings){
 
     this.ds = new MySQL(this.settings.datastore);
     // Connect to data store
-    this.ds.testConnect();
+    this.ds.testConnection();
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
