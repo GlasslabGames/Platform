@@ -1,6 +1,6 @@
 /*
  MySQL Module
-*/
+ */
 var mysql = require('mysql');
 
 function MySQL(settings){
@@ -52,10 +52,20 @@ MySQL.prototype.clearTimers = function() {
     }
 };
 
-MySQL.prototype.connect = function()
+MySQL.prototype.testConnection = function(){
+    // test connection
+    this.connect(function(){
+        if(this.connection) {
+            this.connection.end();
+            this.connection = null;
+        }
+    }.bind(this));
+}
+
+MySQL.prototype.connect = function(callback)
 {
     if(this.connection) {
-        this.connection.close();
+        this.connection.end();
         this.connection = null;
     }
 
@@ -77,10 +87,10 @@ MySQL.prototype.connect = function()
                     this.reconnectCount = 0;
                     this.reconnectTime = this.reconnectTimeDefault;
 
-                    // start timer
-                    this.quarySentTimer = setInterval(function(){
-                        this.sendQueries();
-                    }.bind(this), this.quarySentTime);
+                    // all connected run callback
+                    if(callback) {
+                        callback();
+                    }
                 }
             }.bind(this));
 
@@ -99,9 +109,25 @@ MySQL.prototype.connect = function()
     }
 };
 
+MySQL.prototype.query = function(query, callback) {
+    this.connect(function(){
+        // send query
+        this.connection.query( query, function(){
+            callback.apply(callback, arguments);
+
+            if(this.settings.autoCloseConnection) {
+                if(this.connection) {
+                    this.connection.end();
+                    this.connection = null;
+                }
+            }
+        }.bind(this));
+    }.bind(this));
+}
+
 /*
  don't use with multi selects
-*/
+ */
 MySQL.prototype.addQuery = function(query, callback) {
     this.batch.queries.push(query);
     this.batch.callbacks.push(callback);
@@ -114,20 +140,27 @@ MySQL.prototype.sendQueries = function() {
             this.connection.query( this.batch.queries.join(';'), function(err){
                 this.batch.queries = [];
 
+                if(this.settings.autoCloseConnection) {
+                    if(this.connection) {
+                        this.connection.end();
+                        this.connection = null;
+                    }
+                }
+
                 for(var c in this.batch.callbacks) {
                     this.batch.callbacks[c].apply(this.batch.callbacks[c], arguments);
                 }
                 this.batch.callbacks = [];
-
-                if(this.settings.autoCloseConnection) {
-                    this.connection.end();
-                    this.connection = null;
-                }
             }.bind(this));
         }
         else {
             if(this.settings.autoCloseConnection) {
-                this.connect();
+                this.connect(function() {
+                    // start timer
+                    this.quarySentTimer = setInterval(function(){
+                        this.sendQueries();
+                    }.bind(this), this.quarySentTime);
+                }.bind(this));
             }
         }
     }
@@ -135,7 +168,7 @@ MySQL.prototype.sendQueries = function() {
 
 MySQL.prototype.reconnect = function() {
     if(this.connection) {
-        this.connection.close();
+        this.connection.end();
         this.connection = null;
     }
 

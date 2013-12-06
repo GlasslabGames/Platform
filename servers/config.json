@@ -7,6 +7,7 @@
     },
     "queue": {
         "host": "127.0.0.1",
+        "db": 0,
         "port": 6379
     },
     "datastore": {
@@ -15,17 +16,23 @@
         "password": "glasslab",
         "database": "glasslab_dev"
     },
+    "sessionstore": {
+        "host": "127.0.0.1",
+        "db": 1,
+        "port": 6379,
+        "ttl": 14400, "//":"in seconds"
+    },
     "collector": {
         "port": 8081
     },
     "dispatcher": {
         "telemetryGetMax": 20,
         "batchGetMax"    : 100,
-        "telemetryPollDelay": 1000,
-        "batchInPollDelay"  : 5000,
-        "assessmentDelay"   : 30000,
-        "cleanupPollDelay"  : 3600000,
-        "sessionExpire"     : 14400000
+        "telemetryPollDelay": 1000, "//":"in microseconds",
+        "batchInPollDelay"  : 5000, "//":"in microseconds",
+        "assessmentDelay"   : 30000, "//":"in microseconds",
+        "cleanupPollDelay"  : 3600000, "//":"in microseconds",
+        "sessionExpire"     : 14400000, "//":"in microseconds"
     },
     "auth": {
         "port": 8082,

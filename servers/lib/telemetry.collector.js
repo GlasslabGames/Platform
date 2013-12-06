@@ -24,7 +24,7 @@ var tConst  = require('./telemetry.const.js');
 function Collector(settings){
     this.settings = _.extend(
         {
-            queue: { port: null, host: null },
+            queue: { port: null, host: null, db:0 },
             webapp: { protocal: "http", host: "localhost", port: 8080},
             collector: { port: 8081 }
         },
@@ -33,6 +33,10 @@ function Collector(settings){
 
     this.app   = express();
     this.queue = redis.createClient(this.settings.queue.port, this.settings.queue.host, this.settings.queue);
+    if(this.settings.queue.db) {
+        this.queue.select(this.settings.queue.db);
+    }
+
     this.webAppUrl = this.settings.webapp.protocal+"://"+this.settings.webapp.host+":"+this.settings.webapp.port;
 
     this.app.set('port', this.settings.collector.port);
@@ -95,14 +99,16 @@ Collector.prototype.sendBatchTelemetry = function(req, outRes){
                     //console.log("fields:", fields);
                     this.qSendBatch(fields.gameSessionId, fields);
                 }
+
+                outRes.send();
             }.bind(this));
         } else {
             //console.log("send telemetry batch body:", req.body);
             // Queue Data
             this.qSendBatch(req.body.gameSessionId, req.body);
-        }
 
-        outRes.send();
+            outRes.send();
+        }
     } catch(err) {
         console.trace("Collector: Send Telemetry Batch Error -", err);
     }
