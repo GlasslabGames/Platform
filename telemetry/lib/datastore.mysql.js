@@ -11,7 +11,7 @@ function MySQL(settings){
         database : settings.database,
         multipleStatements : true,
         autoCloseConnection: true,
-        quarySentTime      : 1000
+        querySentTime      : 1000
     };
 
     this.connection = null;
@@ -24,8 +24,8 @@ function MySQL(settings){
     this.reconnectTimeDefault += Math.round(this.reconnectTimeDefault*Math.random());
     this.reconnectTime = this.reconnectTimeDefault;
 
-    this.quarySentTimer = null;
-    this.quarySentTime = 1000;
+    this.querySentTimer = null;
+    this.querySentTime = 1000;
 
     if(settings.reconnectTimeout) {
         this.reconnectTimeDefault = settings.reconnectTimeout;
@@ -37,8 +37,8 @@ function MySQL(settings){
         this.reconnectMax = settings.reconnectMaxTries;
     }
 
-    if(settings.quarySentTime) {
-        this.quarySentTime = settings.quarySentTime;
+    if(settings.querySentTime) {
+        this.querySentTime = settings.querySentTime;
     }
 }
 
@@ -51,9 +51,9 @@ MySQL.prototype.clearTimers = function() {
     }
 
     // stop trying to sending queries
-    if(this.quarySentTimer) {
-        clearInterval(this.quarySentTimer);
-        this.quarySentTimer = null;
+    if(this.querySentTimer) {
+        clearInterval(this.querySentTimer);
+        this.querySentTimer = null;
     }
 };
 
@@ -162,9 +162,9 @@ MySQL.prototype.sendQueries = function() {
             if(this.settings.autoCloseConnection) {
                 this.connect(function() {
                     // start timer
-                    this.quarySentTimer = setInterval(function(){
+                    this.querySentTimer = setInterval(function(){
                         this.sendQueries();
-                    }.bind(this), this.quarySentTime);
+                    }.bind(this), this.querySentTime);
                 }.bind(this));
             }
         }
