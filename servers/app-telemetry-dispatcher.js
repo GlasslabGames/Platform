@@ -15,11 +15,7 @@ console.log("---------------------------------------------");
 console.log("-- Telemetry Dispatcher App Server - Start");
 console.log("---------------------------------------------");
 
-try {
-    dispatcher = new telemetry.Dispatcher(settings);
-} catch(err){
-    console.trace("Dispatcher: Error -", err);
-}
+var dispatcher = new telemetry.Dispatcher(settings);
 
 process.on('uncaughtException', function(err) {
     console.error("Dispatcher: Uncaught Error -", err);

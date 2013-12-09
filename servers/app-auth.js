@@ -15,11 +15,7 @@ console.log("---------------------------------------------");
 console.log("-- Authentication App Server - Start");
 console.log("---------------------------------------------");
 
-try {
-    auth = new Auth.Server(settings);
-} catch(err){
-    console.trace("Auth: Error -", err);
-}
+var auth = new Auth.Server(settings);
 
 process.on('uncaughtException', function(err) {
     console.error("Auth: Uncaught Error -", err);

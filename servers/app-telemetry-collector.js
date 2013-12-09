@@ -15,11 +15,7 @@ console.log("---------------------------------------------");
 console.log("-- Telemetry Collector App Server - Start");
 console.log("---------------------------------------------");
 
-try {
-    collector = new telemetry.Collector(settings);
-} catch(err){
-    console.trace("Collector: Error -", err);
-}
+var collector = new telemetry.Collector(settings);
 
 process.on('uncaughtException', function(err) {
     console.error("Collector: Uncaught Error -", err);
