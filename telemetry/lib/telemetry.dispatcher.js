@@ -250,7 +250,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                     }.bind(this));
 
                 } else {
-                    //console.log(batchActiveKey, "not done, count:", list.length);
+                    //console.log(batchActiveKey, "batchActive not done, count:", list.length);
 
                     // try again until empty
                     setTimeout(function(){
@@ -259,7 +259,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                 }
             }.bind(this));
         } else {
-            //console.log(batchInKey, "not done, count:", list.length);
+            //console.log(batchInKey, "BatchIn not done, count:", list.length);
 
             // try again until empty
             setTimeout(
@@ -396,6 +396,8 @@ Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
         this.ds.addQuery(q, function(err) {
             doneCB(err);
         }.bind(this));
+
+        this.ds.sendQueries();
     } else {
         console.error("Dispatcher: sendItemToDataStore missing gameSessionId");
     }
