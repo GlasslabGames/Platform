@@ -9,8 +9,9 @@ function MySQL(settings){
         user     : settings.user,
         password : settings.password,
         database : settings.database,
-        multipleStatements  : true,
-        autoCloseConnection : true
+        multipleStatements : true,
+        autoCloseConnection: true,
+        quarySentTime      : 1000
     };
 
     this.connection = null;
@@ -34,6 +35,10 @@ function MySQL(settings){
 
     if(settings.reconnectMaxTries) {
         this.reconnectMax = settings.reconnectMaxTries;
+    }
+
+    if(settings.quarySentTime) {
+        this.quarySentTime = settings.quarySentTime;
     }
 }
 
