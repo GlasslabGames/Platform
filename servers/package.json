@@ -5,7 +5,7 @@
     "dependencies": {
         "underscore": "~1.4.4",
         "express":    "~3.4.4",
-        "mysql":      "~2.0.0-alpha9",
+        "mysql":      "~2.0.0-rc1",
         "multiparty": "~3.1.0",
         "request":    "~2.27.0",
         "redis":      "~0.9.0",

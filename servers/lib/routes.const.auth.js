@@ -6,7 +6,7 @@
 var api = '/api';
 
 module.exports = {
-    exlude: [
+    exclude: [
         "/api/config"
     ],
     include: [

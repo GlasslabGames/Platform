@@ -17,13 +17,17 @@ var path       = require('path');
 var _          = require('underscore');
 var express    = require('express');
 var passport   = require('passport');
-var crypto     = require('crypto');
 var request    = require('request');
-var PassLocal  = require('passport-local').Strategy;
+
+//var PassLocal  = require('passport-local').Strategy;
+var Strategy   = require('./auth.strategy.js');
 var RedisStore = require('connect-redis')(express);
+
 // Glasslab libs
-var MySQL      = require('./datastore.mysql.js');
 var rConst     = require('./routes.const.js');
+var WebStore   = require('./datastore.web.js');
+
+module.exports = AuthServer;
 
 function AuthServer(settings){
     try {
@@ -34,12 +38,9 @@ function AuthServer(settings){
             settings
         );
 
-
-        this.ds = new MySQL(this.settings.datastore);
-        // Connect to data store
-        this.ds.testConnection();
-
         this.app = express();
+
+        this.webstore = new WebStore(this.settings);
 
         this.app.configure(function() {
             this.app.set('port', this.settings.auth.port);
@@ -55,63 +56,21 @@ function AuthServer(settings){
             this.app.use(express.urlencoded());
             this.app.use(express.json());
             this.app.use(express.methodOverride());
+
             this.app.use(express.session({
                 secret: this.settings.auth.secret,
                 store: new RedisStore(settings.sessionstore)
             }));
 
-            // Use the LocalStrategy within Passport.
-            //   Strategies in passport require a `verify` function, which accept
-            //   credentials (in this case, a username and password), and invoke a callback
-            //   with a user object.  In the real world, this would query a database;
-            //   however, in this example we are using a baked-in set of users.
-            passport.use(new PassLocal(
-                function(username, password, done) {
-                    console.log("Auth: check user/pass");
+            passport.use(new Strategy.Glasslab(this.settings));
 
-                    // TODO clean up DB requests
-                    var q = "SELECT * FROM GL_USER WHERE username="+this.ds.escape(username);
-                    this.ds.query(q,
-                        function(err, data) {
-                            if(err) {
-                                return done(err);
-                            }
-
-                            if(!_.isArray(data) || data.length == 0) {
-                                return done(null, false, { message: 'Unknown user ' + username });
-                            }
-
-                            var user = data[0];
-                            var sha256 = crypto.createHash('sha256');
-                            sha256.update(password, 'utf8');
-                            hpass = sha256.digest('base64');
-
-                            if(hpass != user.PASSWORD) {
-                                return done(null, false, { message: 'Invalid password' });
-                            }
-
-                            console.log("Login OK");
-
-                            return done(null, user);
-                    }.bind(this));
-
-                }.bind(this)
-            ));
-
-            // Passport session setup.
-            //   To support persistent login sessions, Passport needs to be able to
-            //   serialize users into and deserialize users out of the session.  Typically,
-            //   this will be as simple as storing the user ID when serializing, and finding
-            //   the user by ID when deserializing.
+            // session de/serialize
             passport.serializeUser(function serializeUser(user, done) {
-                done(null, user.id);
+                done(null, user);
             });
-
-            passport.deserializeUser(function deserializeUser(id, done) {
-                this.findById(id, function (err, user) {
-                    done(err, user);
-                }.bind(this));
-            }.bind(this));
+            passport.deserializeUser(function deserializeUser(user, done) {
+                done(null, user);
+            });
 
             this.app.use(passport.initialize());
             this.app.use(passport.session());
@@ -158,6 +117,9 @@ AuthServer.prototype.setupRoutes = function() {
                 console.log("Include to Auth:", req.path);
 
                 if( req.isAuthenticated()) {
+
+                    console.log("Auth passport user:", req.session.passport.user);
+
                     this.forwardRequest(req, res);
                 } else {
                     // error in auth, redirect back to login
@@ -187,7 +149,8 @@ AuthServer.prototype.setupRoutes = function() {
 
         // POST
         this.app.post(rConst.api.login, function loginRoute(req, res, next) {
-            passport.authenticate('local', function(err, user, info) {
+
+            var auth = passport.authenticate('glasslab', function(err, user, info) {
                 if(err) {
                     return next(err);
                 }
@@ -197,19 +160,30 @@ AuthServer.prototype.setupRoutes = function() {
                     return res.redirect(rConst.api.login)
                 }
 
-                this.forwardRequest(req, res, function logInforwardRequest(err){
+                req.logIn(user, function(err) {
                     if(err) {
                         return next(err);
                     }
 
-                    req.logIn(user, function(err) {
-                        if(err) {
-                            return next(err);
-                        }
-                    }.bind(this));
+                    // get courses
+                    this.webstore.getCourses(user.id,
+                        function(err, courses){
+                            // add courses
+                            var tuser = _.clone(user);
+                            tuser.courses = courses;
 
+                            console.log("login user:", tuser);
+
+                            res.writeHead(200);
+                            res.end( JSON.stringify(tuser) );
+                        }.bind(this)
+                    );
                 }.bind(this));
-            }.bind(this))(req, res, next);
+
+            }.bind(this));
+
+            auth(req, res, next);
+
         }.bind(this));
 
     } catch(err){
@@ -218,6 +192,7 @@ AuthServer.prototype.setupRoutes = function() {
 };
 
 AuthServer.prototype.forwardRequest = function(req, res, done){
+
     var options = {
         protocal: this.settings.webapp.protocal,
         host:     this.settings.webapp.host,
@@ -226,6 +201,8 @@ AuthServer.prototype.forwardRequest = function(req, res, done){
         method:   req.method,
         headers:  req.headers
     };
+    //console.log("forwardRequest path:", options.path);
+    //console.log("forwardRequest headers:", req.headers);
 
     var data = "";
     if(req.body) {
@@ -235,12 +212,17 @@ AuthServer.prototype.forwardRequest = function(req, res, done){
     var sreq = http.request(options, function(sres) {
         sres.setEncoding('utf8');
         res.writeHead(sres.statusCode);
+        //console.log("forwardRequest sres headers:", sres.headers);
 
+        var data = "";
         sres.on('data', function(chunk){
+            data += chunk;
             res.write(chunk);
         });
 
         sres.on('end', function(){
+            //console.log("forwardRequest data:", data);
+
             res.end();
             // call done function if exist
             if(done) {
@@ -262,44 +244,3 @@ AuthServer.prototype.forwardRequest = function(req, res, done){
 
     sreq.end();
 };
-
-AuthServer.prototype.findById = function(id, done) {
-    console.log("Auth: findById");
-
-    // TODO clean up DB requests
-    var q = "SELECT * FROM GL_USER WHERE id="+this.ds.escape(id);
-    this.ds.query(q,
-        function findById(err, data) {
-            if(err) {
-                return done(new Error( err.toString() ));
-            }
-
-            if(!_.isArray(data) || data.length == 0) {
-                return done(new Error('User ' + id + ' does not exist'));
-            }
-
-            return done(null, data[0]);
-        }.bind(this));
-}
-
-AuthServer.prototype.findByUsername = function(username, done) {
-    console.log("findByUsername");
-
-    // TODO clean up DB requests
-    var q = "SELECT * FROM GL_USER WHERE username="+this.ds.escape(username);
-    this.ds.query(q,
-        function findByUsername(err, data) {
-            if(err) {
-                return done(new Error( err.toString() ));
-            }
-
-            if(!_.isArray(data) || data.length == 0) {
-                return done(new Error('User ' + username + ' does not exist'));
-            }
-
-            return done(null, data[0]);
-        }.bind(this));
-
-}
-
-module.exports = AuthServer;

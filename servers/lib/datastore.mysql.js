@@ -92,6 +92,11 @@ MySQL.prototype.connect = function(callback)
                     this.reconnectCount = 0;
                     this.reconnectTime = this.reconnectTimeDefault;
 
+                    if(!this.connection){
+                        this.reconnect();
+                        return;
+                    }
+
                     // all connected run callback
                     if(callback) {
                         callback();
@@ -116,17 +121,21 @@ MySQL.prototype.connect = function(callback)
 
 MySQL.prototype.query = function(query, callback) {
     this.connect(function(){
-        // send query
-        this.connection.query( query, function(){
-            callback.apply(callback, arguments);
-
-            if(this.settings.autoCloseConnection) {
-                if(this.connection) {
-                    this.connection.end();
-                    this.connection = null;
+        if(this.connection) {
+            // send query
+            this.connection.query( query, function(){
+                if(this.settings.autoCloseConnection) {
+                    if(this.connection) {
+                        this.connection.end();
+                        this.connection = null;
+                    }
                 }
-            }
-        }.bind(this));
+
+                callback.apply(callback, arguments);
+            }.bind(this));
+        } else {
+            console.trace("MySQL: query - no connection");
+        }
     }.bind(this));
 }
 
