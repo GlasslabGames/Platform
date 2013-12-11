@@ -17,10 +17,10 @@
         "database": "glasslab_dev"
     },
     "sessionstore": {
-        "host": "127.0.0.1",
-        "db": 1,
-        "port": 6379,
-        "ttl": 14400, "//":"in seconds"
+        "host":     "localhost:8091",
+        "bucket":   "glasslab_webapp",
+        "password": "glasslab",
+        "ttl": 14400, "//":" 4 mins in seconds"
     },
     "collector": {
         "port": 8081

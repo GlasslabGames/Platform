@@ -10,7 +10,6 @@
  *
  *
  */
-//var urlParser  = require('url');
 var http       = require('http');
 var path       = require('path');
 // Third-party libs
@@ -21,7 +20,8 @@ var request    = require('request');
 
 //var PassLocal  = require('passport-local').Strategy;
 var Strategy   = require('./auth.strategy.js');
-var RedisStore = require('connect-redis')(express);
+//var RedisStore = require('connect-redis')(express);
+var CouchBaseStore = require('./sessionstore.couchbase.js')(express);
 
 // Glasslab libs
 var rConst     = require('./routes.const.js');
@@ -59,7 +59,8 @@ function AuthServer(settings){
 
             this.app.use(express.session({
                 secret: this.settings.auth.secret,
-                store: new RedisStore(settings.sessionstore)
+                //store: new RedisStore(this.settings.sessionstore)
+                store: new CouchBaseStore(this.settings.sessionstore)
             }));
 
             passport.use(new Strategy.Glasslab(this.settings));
@@ -105,8 +106,7 @@ AuthServer.prototype.setupRoutes = function() {
                 })
             ){
                 console.log("Exclude From Auth:", req.path);
-
-                this.forwardRequest(req, res);
+                this.forwardRequest(req.session.passport.user, req, res);
                 return;
             }
 
@@ -115,12 +115,10 @@ AuthServer.prototype.setupRoutes = function() {
                 })
             ){
                 console.log("Include to Auth:", req.path);
-
                 if( req.isAuthenticated()) {
+                    this.forwardRequest(req.session.passport.user, req, res);
 
                     console.log("Auth passport user:", req.session.passport.user);
-
-                    this.forwardRequest(req, res);
                 } else {
                     // error in auth, redirect back to login
                     console.error("Auth: path -", req.path);
@@ -130,7 +128,7 @@ AuthServer.prototype.setupRoutes = function() {
                 return;
             }
 
-            this.forwardRequest(req, res);
+            this.forwardRequest(req.session.passport.user, req, res);
 
         }.bind(this));
 
@@ -160,24 +158,35 @@ AuthServer.prototype.setupRoutes = function() {
                     return res.redirect(rConst.api.login)
                 }
 
-                req.logIn(user, function(err) {
+                this.getWebSession(req, function(err, session){
                     if(err) {
                         return next(err);
                     }
 
-                    // get courses
-                    this.webstore.getCourses(user.id,
-                        function(err, courses){
-                            // add courses
-                            var tuser = _.clone(user);
-                            tuser.courses = courses;
+                    // save web session
+                    user.webSession = session;
 
-                            console.log("login user:", tuser);
+                    req.logIn(user, function(err) {
+                        if(err) {
+                            return next(err);
+                        }
 
-                            res.writeHead(200);
-                            res.end( JSON.stringify(tuser) );
-                        }.bind(this)
-                    );
+                        // get courses
+                        this.webstore.getCourses(user.id,
+                            function(err, courses){
+                                // add courses
+                                var tuser = _.clone(user);
+                                tuser.courses = courses;
+                                // no need to send web session
+                                delete tuser.webSession;
+
+                                //console.log("login user:", tuser);
+
+                                res.writeHead(200);
+                                res.end( JSON.stringify(tuser) );
+                            }.bind(this)
+                        );
+                    }.bind(this));
                 }.bind(this));
 
             }.bind(this));
@@ -191,7 +200,43 @@ AuthServer.prototype.setupRoutes = function() {
     }
 };
 
-AuthServer.prototype.forwardRequest = function(req, res, done){
+AuthServer.prototype.getWebSession = function(req, done){
+    var cookieSessionId = "JSESSIONID";
+    var options = {
+        protocal: this.settings.webapp.protocal,
+        host:     this.settings.webapp.host,
+        port:     this.settings.webapp.port,
+        path:     req.url,
+        method:   req.method,
+        headers:  req.headers
+    };
+    delete options.headers.cookie;
+
+    var url = this.settings.webapp.protocal+"://"+this.settings.webapp.host+":"+this.settings.webapp.port+"/api/config"
+    request.get(url, function(err, res, body){
+        if(err) {
+            done(err, null);
+        }
+
+        // parse cookie, to get web session
+        var mCookieParts = {};
+        var aCookieParts = res.headers['set-cookie'][0].split(';');
+        for(var p in aCookieParts) {
+            var cp = aCookieParts[p].split('=');
+            mCookieParts[cp[0]] = cp[1] || "";
+        }
+
+        if(mCookieParts.hasOwnProperty(cookieSessionId)) {
+            //console.log("cookieParts:", mCookieParts);
+            done(null, mCookieParts[cookieSessionId])
+        } else {
+            done(new Error("could not get "+cookieSessionId), null);
+        }
+
+    });
+};
+
+AuthServer.prototype.forwardRequest = function(user, req, res, done){
 
     var options = {
         protocal: this.settings.webapp.protocal,
@@ -203,6 +248,13 @@ AuthServer.prototype.forwardRequest = function(req, res, done){
     };
     //console.log("forwardRequest path:", options.path);
     //console.log("forwardRequest headers:", req.headers);
+
+    // if user, override cookie otherwise no cookie
+    if(user) {
+        options.headers.cookie = "JSESSIONID="+user.webSession;
+    } else {
+        delete options.headers.cookie;
+    }
 
     var data = "";
     if(req.body) {
