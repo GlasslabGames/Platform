@@ -10,7 +10,7 @@
         "request":    "~2.27.0",
         "redis":      "~0.9.0",
         "hiredis":    "~0.1.15",
-        "connect-redis": "*",
+        "deepcopy":   "*",
         "couchbase":  "*",
         "passport":   "*",
         "passport-local": "*",

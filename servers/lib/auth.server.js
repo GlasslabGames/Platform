@@ -17,6 +17,7 @@ var _          = require('underscore');
 var express    = require('express');
 var passport   = require('passport');
 var request    = require('request');
+var couchbase  = require('couchbase');
 
 //var PassLocal  = require('passport-local').Strategy;
 var Strategy   = require('./auth.strategy.js');
@@ -29,21 +30,33 @@ var WebStore   = require('./datastore.web.js');
 
 module.exports = AuthServer;
 
-function AuthServer(settings){
+function AuthServer(options){
     try {
-        this.settings = _.extend(
+        this.options = _.extend(
             {
                 auth: { port: 8082, secret: "keyboard kitty"}
             },
-            settings
+            options
         );
 
         this.app = express();
 
-        this.webstore = new WebStore(this.settings);
+        this.webstore = new WebStore(this.options);
+
+        this.sessionStore = new couchbase.Connection({
+            host:     this.options.sessionstore.host,
+            bucket:   this.options.sessionstore.bucket,
+            password: this.options.sessionstore.password
+        }, function(err) {
+            console.error("CouchBase SessionStore: Error -", err);
+            if(err) throw err;
+        }.bind(this));
+
+        // pass session store to express session store strategy, via options
+        this.options.sessionstore.client = this.sessionStore;
 
         this.app.configure(function() {
-            this.app.set('port', this.settings.auth.port);
+            this.app.set('port', this.options.auth.port);
 
             this.app.set('views', __dirname + '/../views');
             this.app.set('view engine', 'ejs');
@@ -58,12 +71,11 @@ function AuthServer(settings){
             this.app.use(express.methodOverride());
 
             this.app.use(express.session({
-                secret: this.settings.auth.secret,
-                //store: new RedisStore(this.settings.sessionstore)
-                store: new CouchBaseStore(this.settings.sessionstore)
+                secret: this.options.auth.secret,
+                store:  new CouchBaseStore(this.options.sessionstore)
             }));
 
-            passport.use(new Strategy.Glasslab(this.settings));
+            passport.use(new Strategy.Glasslab(this.options));
 
             // session de/serialize
             passport.serializeUser(function serializeUser(user, done) {
@@ -96,7 +108,9 @@ AuthServer.prototype.setupRoutes = function() {
 
             // if logout or login then use next handler
             if( (req.method == 'GET'  && req.path == rConst.api.logout) ||
-                (req.method == 'POST' && req.path == rConst.api.login) ) {
+                (req.method == 'POST' && req.path == rConst.api.login) ||
+                (req.method == 'GET'  && req.path == rConst.api.session.validate)
+              ) {
                 next();
                 return;
             }
@@ -118,10 +132,10 @@ AuthServer.prototype.setupRoutes = function() {
                 if( req.isAuthenticated()) {
                     this.forwardRequest(req.session.passport.user, req, res);
 
-                    console.log("Auth passport user:", req.session.passport.user);
+                    //console.log("Auth passport user:", req.session.passport.user);
                 } else {
                     // error in auth, redirect back to login
-                    console.error("Auth: path -", req.path);
+                    //console.error("Auth: path -", req.path);
 
                     res.redirect(rConst.api.login)
                 }
@@ -145,74 +159,103 @@ AuthServer.prototype.setupRoutes = function() {
             res.redirect(rConst.root);
         });
 
+        this.app.get(rConst.api.session.validate, function validateSession(req, res){
+
+            // get
+            /*
+            this.sessionStore.set("psession:"+user.psession, req.sessionID, function(err, result) {
+                console.error("CouchBase SessionStore: Error -", err);
+                if(err) throw err;
+            });
+            */
+        });
+
         // POST
-        this.app.post(rConst.api.login, function loginRoute(req, res, next) {
-
-            var auth = passport.authenticate('glasslab', function(err, user, info) {
-                if(err) {
-                    return next(err);
-                }
-
-                if (!user) {
-                    req.session.messages =  [info.message];
-                    return res.redirect(rConst.api.login)
-                }
-
-                this.getWebSession(req, function(err, session){
-                    if(err) {
-                        return next(err);
-                    }
-
-                    // save web session
-                    user.webSession = session;
-
-                    req.logIn(user, function(err) {
-                        if(err) {
-                            return next(err);
-                        }
-
-                        // get courses
-                        this.webstore.getCourses(user.id,
-                            function(err, courses){
-                                // add courses
-                                var tuser = _.clone(user);
-                                tuser.courses = courses;
-                                // no need to send web session
-                                delete tuser.webSession;
-
-                                //console.log("login user:", tuser);
-
-                                res.writeHead(200);
-                                res.end( JSON.stringify(tuser) );
-                            }.bind(this)
-                        );
-                    }.bind(this));
-                }.bind(this));
-
-            }.bind(this));
-
-            auth(req, res, next);
-
-        }.bind(this));
+        this.app.post(rConst.api.login, this.loginRoute.bind(this));
 
     } catch(err){
         console.trace("Auth: setupRoutes Error -", err);
     }
 };
 
+AuthServer.prototype.loginRoute = function(req, res, next) {
+
+    console.log("Auth loginRoute");
+
+    var auth = passport.authenticate('glasslab', function(err, user, info) {
+        if(err) {
+            return next(err);
+        }
+
+        if (!user) {
+            req.session.messages =  [info.message];
+            return res.redirect(rConst.api.login)
+        }
+
+        this.getWebSession(req, function(err, session){
+            if(err) {
+                return next(err);
+            }
+
+            // save web session
+            user.psession = session;
+            var key = "psession:"+user.psession;
+            var data = { session: req.sessionID.toString() };
+
+            console.log("logIn:", user);
+            req.logIn(user, function(err) {
+                if(err) {
+                    return next(err);
+                }
+
+                // get courses
+                this.webstore.getCourses(user.id,
+                    function(err, courses){
+                        // add courses
+                        var tuser = _.clone(user);
+                        tuser.courses = courses;
+                        // no need to send web session
+                        delete tuser.webSession;
+
+                        //console.log("login user:", tuser);
+
+                        console.log("Auth sessionStore set key:", key, ", data:", data);
+                        // write proxy psession
+                        this.sessionStore.set( key, data,
+                            function(err, result) {
+                                if(err) {
+                                    console.error("Auth: sessionStore psession Error -", err);
+                                    return next(err);
+                                }
+                            }.bind(this)
+                        );
+
+                        res.writeHead(200);
+                        res.end( JSON.stringify(tuser) );
+                    }.bind(this)
+                );
+            }.bind(this));
+
+        }.bind(this));
+
+    }.bind(this));
+
+    auth(req, res, next);
+};
+
 AuthServer.prototype.getWebSession = function(req, done){
     var cookieSessionId = "JSESSIONID";
     var options = {
-        protocal: this.settings.webapp.protocal,
-        host:     this.settings.webapp.host,
-        port:     this.settings.webapp.port,
+        protocal: this.options.webapp.protocal,
+        host:     this.options.webapp.host,
+        port:     this.options.webapp.port,
         path:     req.url,
         method:   req.method,
         headers:  req.headers
     };
     delete options.headers.cookie;
 
-    var url = this.settings.webapp.protocal+"://"+this.settings.webapp.host+":"+this.settings.webapp.port+"/api/config"
+    var url = this.options.webapp.protocal+"://"+this.options.webapp.host+":"+this.options.webapp.port+"/api/config"
     request.get(url, function(err, res, body){
         if(err) {
             done(err, null);
@@ -239,9 +282,9 @@ AuthServer.prototype.getWebSession = function(req, done){
 AuthServer.prototype.forwardRequest = function(user, req, res, done){
 
     var options = {
-        protocal: this.settings.webapp.protocal,
-        host:     this.settings.webapp.host,
-        port:     this.settings.webapp.port,
+        protocal: this.options.webapp.protocal,
+        host:     this.options.webapp.host,
+        port:     this.options.webapp.port,
         path:     req.url,
         method:   req.method,
         headers:  req.headers
