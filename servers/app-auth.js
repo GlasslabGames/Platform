@@ -18,5 +18,5 @@ console.log("---------------------------------------------");
 var auth = new Auth.Server(settings);
 
 process.on('uncaughtException', function(err) {
-    console.error("Auth: Uncaught Error -", err);
+    console.trace("Auth: Uncaught Error -", err);
 });

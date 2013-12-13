@@ -7,10 +7,10 @@ var api = '/api';
 
 module.exports = {
     exclude: [
-        "/api/config"
+        api+"/config"
     ],
     include: [
-        "/api",
+        api,
         "/classes",
         "/roster",
         "/class",

@@ -21,14 +21,33 @@ var couchbase  = require('couchbase');
 
 //var PassLocal  = require('passport-local').Strategy;
 var Strategy   = require('./auth.strategy.js');
-//var RedisStore = require('connect-redis')(express);
-var CouchBaseStore = require('./sessionstore.couchbase.js')(express);
+//var RediexsStore = require('connect-redis')(express);
+var CouchBaseexsStore = require('./sessionstore.couchbase.js')(express);
 
 // Glasslab libs
+var aConst     = require('./auth.const.js');
 var rConst     = require('./routes.const.js');
 var WebStore   = require('./datastore.web.js');
 
 module.exports = AuthServer;
+
+function errorResponce(res, errorStr){
+    var error = JSON.stringify({ error: errorStr });
+    res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Content-Length": error.length
+    });
+    res.end( error );
+}
+
+function jsonResponce(res, obj){
+    var json = JSON.stringify(obj);
+    res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Content-Length": json.length
+    });
+    res.end( json );
+}
 
 function AuthServer(options){
     try {
@@ -54,6 +73,8 @@ function AuthServer(options){
 
         // pass session store to express session store strategy, via options
         this.options.sessionstore.client = this.sessionStore;
+        // express session store
+        this.exsStore = new CouchBaseexsStore(this.options.sessionstore);
 
         this.app.configure(function() {
             this.app.set('port', this.options.auth.port);
@@ -72,7 +93,7 @@ function AuthServer(options){
 
             this.app.use(express.session({
                 secret: this.options.auth.secret,
-                store:  new CouchBaseStore(this.options.sessionstore)
+                store:  this.exsStore
             }));
 
             passport.use(new Strategy.Glasslab(this.options));
@@ -104,48 +125,6 @@ function AuthServer(options){
 
 AuthServer.prototype.setupRoutes = function() {
     try {
-        this.app.use(function defaultRoute(req, res, next) {
-
-            // if logout or login then use next handler
-            if( (req.method == 'GET'  && req.path == rConst.api.logout) ||
-                (req.method == 'POST' && req.path == rConst.api.login) ||
-                (req.method == 'GET'  && req.path == rConst.api.session.validate)
-              ) {
-                next();
-                return;
-            }
-
-            if( _.find(rConst.auth.exclude, function(item){
-                    if(req.path.substring(0, item.length) == item) return 1;
-                })
-            ){
-                console.log("Exclude From Auth:", req.path);
-                this.forwardRequest(req.session.passport.user, req, res);
-                return;
-            }
-
-            if( _.find(rConst.auth.include, function(item){
-                    if(req.path.substring(0, item.length) == item) return 1;
-                })
-            ){
-                console.log("Include to Auth:", req.path);
-                if( req.isAuthenticated()) {
-                    this.forwardRequest(req.session.passport.user, req, res);
-
-                    //console.log("Auth passport user:", req.session.passport.user);
-                } else {
-                    // error in auth, redirect back to login
-                    //console.error("Auth: path -", req.path);
-
-                    res.redirect(rConst.api.login)
-                }
-                return;
-            }
-
-            this.forwardRequest(req.session.passport.user, req, res);
-
-        }.bind(this));
-
         // GET
         /*
         this.app.get(rConst.crossDomain, function(req, res){
@@ -153,25 +132,85 @@ AuthServer.prototype.setupRoutes = function() {
             res.sendfile( path.resolve(__dirname + '/../static' + rConst.crossDomain) );
         });
         */
-
         this.app.get(rConst.api.logout, function logoutRoute(req, res){
             req.logout();
             res.redirect(rConst.root);
-        });
+        }.bind(this));
 
-        this.app.get(rConst.api.session.validate, function validateSession(req, res){
+        this.app.get(rConst.api.session.validate, function validateSession(req, res, next){
+            if(req.connection.remoteAddress == "127.0.0.1")
+            {
+                if( req.params.id ) {
+                    // using proxy session get real session
+                    this.sessionStore.get(aConst.proxySessionPrefix+":"+req.params.id, function(err, result) {
+                        if(err) {
+                            console.error("CouchBase validateSession: Error -", err);
+                            errorResponce(res, err.toString());
+                        }
 
-            // get
-            /*
-            this.sessionStore.set("psession:"+user.psession, req.sessionID, function(err, result) {
-                console.error("CouchBase SessionStore: Error -", err);
-                if(err) throw err;
-            });
-            */
-        });
+                        console.log("CouchBase SessionStore: value:", result.value);
+                        if(result.value.session) {
+                            this.sessionStore.get(this.exsStore.getSessionPrefix()+":"+result.value.session, function(err, result) {
+                                if(err) {
+                                    console.error("CouchBase validateSession: Error -", err);
+                                    errorResponce(res, err.toString());
+                                }
 
-        // POST
+                                if(result.value.passport.user) {
+                                    jsonResponce(res, result.value.passport);
+                                } else {
+                                    errorResponce(res, "No user data");
+                                }
+                            }.bind(this));
+                        }
+
+                    }.bind(this));
+                } else {
+                    errorResponce(res, "Missing ID");
+                }
+            } else {
+                console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
+                next();
+            }
+        }.bind(this));
+
+        // POST - login
         this.app.post(rConst.api.login, this.loginRoute.bind(this));
+
+        // Add exclude routes
+        var excludeRoute = function(req, res) {
+            console.log("Exclude From Auth:", req.path);
+            this.forwardRequest(req.session.passport.user, req, res);
+            return;
+        }.bind(this);
+        for(var e in rConst.auth.exclude){
+            this.app.use(rConst.auth.exclude[e], excludeRoute);
+        }
+
+        // Add include routes
+        var includeRoute = function(req, res, next) {
+            console.log("Include to Auth:", req.path);
+            if( req.isAuthenticated()) {
+                console.log("Auth passport user:", req.session.passport.user);
+                this.forwardRequest(req.session.passport.user, req, res, null, true);
+                //console.log("Auth passport user:", req.session.passport.user);
+            } else {
+                // error in auth, redirect back to login
+                console.error("Auth: Not Authenticated");
+                res.redirect(rConst.api.login)
+            }
+            return;
+        }.bind(this);
+        for(var i in rConst.auth.include){
+            this.app.use(rConst.auth.include[i], includeRoute);
+        }
+
+        // DEFAULT
+        this.app.use(function defaultRoute(req, res, next) {
+
+            this.forwardRequest(req.session.passport.user, req, res);
+
+        }.bind(this));
 
     } catch(err){
         console.trace("Auth: setupRoutes Error -", err);
@@ -179,6 +218,8 @@ AuthServer.prototype.setupRoutes = function() {
 };
 
 AuthServer.prototype.loginRoute = function(req, res, next) {
+    // only allow for POST on login
+    if(req.method != 'POST') { next(); return;}
 
     console.log("Auth loginRoute");
 
@@ -192,15 +233,13 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
             return res.redirect(rConst.api.login)
         }
 
-        this.getWebSession(req, function(err, session){
+        this.getWebSession(req, res, function(err, session){
             if(err) {
                 return next(err);
             }
 
-            // save web session
-            user.psession = session;
-            var key = "psession:"+user.psession;
-            var data = { session: req.sessionID.toString() };
+            // save proxy session
+            user[aConst.proxySessionPrefix] = session;
 
             console.log("logIn:", user);
             req.logIn(user, function(err) {
@@ -217,14 +256,17 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
                         // no need to send web session
                         delete tuser.webSession;
 
-                        //console.log("login user:", tuser);
-
+                        var key  = aConst.proxySessionPrefix+":"+user[aConst.proxySessionPrefix];
+                        var data = { session: req.sessionID.toString() };
                         console.log("Auth sessionStore set key:", key, ", data:", data);
-                        // write proxy psession
-                        this.sessionStore.set( key, data,
+
+                        // write proxy session, set expire the same as the session
+                        this.sessionStore.set( key, data, {
+                                expiry: this.exsStore.getSessionTTL()
+                            },
                             function(err, result) {
                                 if(err) {
-                                    console.error("Auth: sessionStore psession Error -", err);
+                                    console.error("Auth: sessionStore "+aConst.proxySessionPrefix+" Error -", err);
                                     return next(err);
                                 }
                             }.bind(this)
@@ -243,71 +285,70 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
     auth(req, res, next);
 };
 
-AuthServer.prototype.getWebSession = function(req, done){
-    var cookieSessionId = "JSESSIONID";
-    var options = {
-        protocal: this.options.webapp.protocal,
-        host:     this.options.webapp.host,
-        port:     this.options.webapp.port,
-        path:     req.url,
-        method:   req.method,
-        headers:  req.headers
-    };
-    delete options.headers.cookie;
-
+AuthServer.prototype.getWebSession = function(req, res, done){
     var url = this.options.webapp.protocal+"://"+this.options.webapp.host+":"+this.options.webapp.port+"/api/config"
-    request.get(url, function(err, res, body){
+    request.get(url, function(err, pres){
         if(err) {
             done(err, null);
         }
 
         // parse cookie, to get web session
         var mCookieParts = {};
-        var aCookieParts = res.headers['set-cookie'][0].split(';');
-        for(var p in aCookieParts) {
-            var cp = aCookieParts[p].split('=');
-            mCookieParts[cp[0]] = cp[1] || "";
-        }
+        if(_.isArray(pres.headers['set-cookie'])) {
+            var aCookieParts = pres.headers['set-cookie'][0].split(';');
+            for(var p in aCookieParts) {
+                var cp = aCookieParts[p].split('=');
+                mCookieParts[cp[0]] = cp[1] || "";
+            }
 
-        if(mCookieParts.hasOwnProperty(cookieSessionId)) {
-            //console.log("cookieParts:", mCookieParts);
-            done(null, mCookieParts[cookieSessionId])
+            if(mCookieParts.hasOwnProperty(aConst.sessionCookieName)) {
+                //console.log("cookieParts:", mCookieParts);
+                done(null, mCookieParts[aConst.sessionCookieName])
+            } else {
+                done(new Error("could not get "+aConst.sessionCookieName), null);
+            }
         } else {
-            done(new Error("could not get "+cookieSessionId), null);
+            console.error("Auth: Error - No cookie set in proxy!");
+            errorResponce(res, "Could not get cookie");
         }
-
-    });
+    }.bind(this));
 };
 
-AuthServer.prototype.forwardRequest = function(user, req, res, done){
+AuthServer.prototype.forwardRequest = function(user, req, res, done, auth){
 
     var options = {
         protocal: this.options.webapp.protocal,
         host:     this.options.webapp.host,
         port:     this.options.webapp.port,
-        path:     req.url,
+        path:     req.originalUrl,
         method:   req.method,
         headers:  req.headers
     };
-    //console.log("forwardRequest path:", options.path);
-    //console.log("forwardRequest headers:", req.headers);
 
     // if user, override cookie otherwise no cookie
     if(user) {
-        options.headers.cookie = "JSESSIONID="+user.webSession;
+        options.headers.cookie = aConst.sessionCookieName+"="+user[aConst.proxySessionPrefix];
     } else {
         delete options.headers.cookie;
     }
 
     var data = "";
-    if(req.body) {
+    if(req.body && req.method == "POST") {
         data = JSON.stringify(req.body);
+    }
+
+    if(auth){
+        console.log("forwardRequest url:", options.path);
+        console.log("forwardRequest headers:", options.headers.cookies);
+        console.log("forwardRequest data:", data);
     }
 
     var sreq = http.request(options, function(sres) {
         sres.setEncoding('utf8');
         res.writeHead(sres.statusCode);
-        //console.log("forwardRequest sres headers:", sres.headers);
+        if(auth){
+            console.log("forwardRequest sres headers:", sres.headers);
+        }
 
         var data = "";
         sres.on('data', function(chunk){
@@ -316,7 +357,9 @@ AuthServer.prototype.forwardRequest = function(user, req, res, done){
         });
 
         sres.on('end', function(){
-            //console.log("forwardRequest data:", data);
+            if(auth){
+                console.log("forwardRequest data:", data);
+            }
 
             res.end();
             // call done function if exist

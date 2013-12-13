@@ -20,7 +20,7 @@ module.exports = function(connect){
                 host:     "localhost:8091",
                 bucket:   "default",
                 password: "",
-                prefix:   "session:",
+                prefix:   "session",
                 ttl:      sessionMaxAge,
                 client:   null
             },
@@ -57,9 +57,17 @@ module.exports = function(connect){
     // Inherit from Connect Session Store
     CouchBaseStore.prototype.__proto__ = Store.prototype;
 
+    CouchBaseStore.prototype.getSessionPrefix = function(){
+        return this.options.prefix;
+    };
+
+    CouchBaseStore.prototype.getSessionTTL = function(){
+        return this.options.ttl;
+    };
+
     CouchBaseStore.prototype.get = function(sessionId, done){
         try {
-            var key = this.options.prefix + sessionId;
+            var key = this.options.prefix+":"+sessionId;
 
             console.log("CouchBaseStore get key:", key);
             this.client.get(key, function(err, result) {
@@ -83,7 +91,7 @@ module.exports = function(connect){
 
     CouchBaseStore.prototype.set = function(sessionId, session, done){
         try {
-            var key     = this.options.prefix + sessionId;
+            var key     = this.options.prefix+":"+sessionId;
 
             // get before set
             this.client.get(key, function(err, result){
@@ -94,8 +102,12 @@ module.exports = function(connect){
                         if(err) { return done(err); }
                     }
                 } else {
-                    if( session.passport.hasOwnProperty('user') ) {
-                        if( result.value.passport.hasOwnProperty('user') ) {
+                    if( session.passport.user ) {
+                        // if result has user data AND user data same then touch
+                        // otherwise set a new
+                        if( result.value.passport.user &&
+                            _.isEqual(session.passport.user, result.value.passport.user)
+                          ) {
                             // already has user data
                             console.log("CouchBaseStore: touching session key:", key);
                             this.client.touch(key, function(err){
@@ -120,6 +132,7 @@ module.exports = function(connect){
         var ttl     = this.options.ttl;
         var maxAge  = session.cookie.maxAge;
 
+        // maxAge set by cookie, override ttl
         if(_.isNumber(maxAge)) {
             // convert maxAge from milli seconds to seconds
             ttl = Math.floor(maxAge / 1000);
@@ -142,7 +155,7 @@ module.exports = function(connect){
 
     CouchBaseStore.prototype.destroy = function(sessionId, done){
         try {
-            var key = this.options.prefix + sessionId;
+            var key = this.options.prefix+":"+sessionId;
 
             console.log("CouchBaseStore remove key:", key);
             this.client.remove(key, done);
