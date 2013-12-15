@@ -2,48 +2,45 @@
  * Telemetry Collector Module
  *
  * Module dependencies:
- *  underscore - https://github.com/jashkenas/underscore
+ *  lodash     - https://github.com/lodash/lodash
  *  express    - https://github.com/visionmedia/express
  *  multiparty - https://github.com/superjoe30/node-multiparty
  *  redis      - https://github.com/mranney/node_redis
- *  couchnode  - https://github.com/couchbase/couchnode
  *
  */
 
 var urlParser  = require('url');
 var http       = require('http');
 // Third-party libs
-var _          = require('underscore');
+var _          = require('lodash');
 var express    = require('express');
 var multiparty = require('multiparty');
 var redis      = require('redis');
-var couchbase  = require('couchbase');
 // Glasslab libs
 var tConst     = require('./telemetry.const.js');
 var rConst     = require('./routes.const.js');
 
-function Collector(settings){
+function Collector(options){
     try{
 
-        this.settings = _.extend(
+        this.options = _.merge(
             {
-                env: 'dev',
-                queue: { port: null, host: null, db:0 },
-                webapp: { protocal: 'http', host: 'localhost', port: 8080},
+                queue:     { port: null, host: null, db:0 },
+                settings:  { protocal: 'http', host: 'localhost', port: 8082},
                 collector: { port: 8081 }
             },
-            settings
+            options
         );
 
         this.app   = express();
-        this.queue = redis.createClient(this.settings.queue.port, this.settings.queue.host, this.settings.queue);
-        if(this.settings.queue.db) {
-            this.queue.select(this.settings.queue.db);
+        this.queue = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
+        if(this.options.queue.db) {
+            this.queue.select(this.options.queue.db);
         }
 
-        this.webAppUrl = this.settings.webapp.protocal+"://"+this.settings.webapp.host+":"+this.settings.webapp.port;
+        this.webAppUrl = this.options.auth.protocal+"://"+this.options.auth.host+":"+this.options.auth.port;
 
-        this.app.set('port', this.settings.collector.port);
+        this.app.set('port', this.options.collector.port);
         this.app.use(express.logger());
         this.app.use(express.urlencoded());
         this.app.use(express.json());

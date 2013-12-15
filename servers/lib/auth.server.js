@@ -2,7 +2,7 @@
  * Authentication Server Module
  *
  * Module dependencies:
- *  underscore - https://github.com/jashkenas/underscore
+ *  lodash     - https://github.com/lodash/lodash
  *  express    - https://github.com/visionmedia/express
  *  passport   - https://github.com/jaredhanson/passport
  *
@@ -13,7 +13,7 @@
 var http       = require('http');
 var path       = require('path');
 // Third-party libs
-var _          = require('underscore');
+var _          = require('lodash');
 var express    = require('express');
 var passport   = require('passport');
 var request    = require('request');
@@ -21,8 +21,8 @@ var couchbase  = require('couchbase');
 
 //var PassLocal  = require('passport-local').Strategy;
 var Strategy   = require('./auth.strategy.js');
-//var RediexsStore = require('connect-redis')(express);
-var CouchBaseexsStore = require('./sessionstore.couchbase.js')(express);
+//var RedisStore = require('connect-redis')(express);
+var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
 
 // Glasslab libs
 var aConst     = require('./auth.const.js');
@@ -51,9 +51,20 @@ function jsonResponce(res, obj){
 
 function AuthServer(options){
     try {
-        this.options = _.extend(
+        this.options = _.merge(
             {
-                auth: { port: 8082, secret: "keyboard kitty"}
+                webapp: {
+                    protocal: "http",
+                    host:     "localhost",
+                    port:     8080,
+                    staticContentPath: "/../../../Root/web-app"
+                },
+                auth: { host: "localhost", port: 8082, secret: "keyboard kitty"},
+                sessionstore: {
+                    "host":     "localhost:8091",
+                    "bucket":   "glasslab_webapp",
+                    "password": "glasslab"
+                }
             },
             options
         );
@@ -74,16 +85,13 @@ function AuthServer(options){
         // pass session store to express session store strategy, via options
         this.options.sessionstore.client = this.sessionStore;
         // express session store
-        this.exsStore = new CouchBaseexsStore(this.options.sessionstore);
+        this.exsStore = new CouchbaseStore(this.options.sessionstore);
 
         this.app.configure(function() {
             this.app.set('port', this.options.auth.port);
 
-            this.app.set('views', __dirname + '/../views');
-            this.app.set('view engine', 'ejs');
-            this.app.engine('ejs', require('ejs-locals'));
-
             this.app.use(express.logger());
+            this.app.use(express.compress());
             this.app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
 
             this.app.use(express.cookieParser());
@@ -93,6 +101,10 @@ function AuthServer(options){
 
             this.app.use(express.session({
                 secret: this.options.auth.secret,
+                cookie: {
+                    path: '/'
+                    //, domain: this.options.auth.host+":"+this.options.frontend.port
+                },
                 store:  this.exsStore
             }));
 
@@ -108,10 +120,10 @@ function AuthServer(options){
 
             this.app.use(passport.initialize());
             this.app.use(passport.session());
-        }.bind(this));
 
-        // setup app routes
-        this.setupRoutes();
+            // setup app routes
+            this.setupRoutes();
+        }.bind(this));
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function createServer(){
@@ -132,46 +144,11 @@ AuthServer.prototype.setupRoutes = function() {
             res.sendfile( path.resolve(__dirname + '/../static' + rConst.crossDomain) );
         });
         */
+
         this.app.get(rConst.api.logout, function logoutRoute(req, res){
+            console.log("logout:", req.path);
             req.logout();
             res.redirect(rConst.root);
-        }.bind(this));
-
-        this.app.get(rConst.api.session.validate, function validateSession(req, res, next){
-            if(req.connection.remoteAddress == "127.0.0.1")
-            {
-                if( req.params.id ) {
-                    // using proxy session get real session
-                    this.sessionStore.get(aConst.proxySessionPrefix+":"+req.params.id, function(err, result) {
-                        if(err) {
-                            console.error("CouchBase validateSession: Error -", err);
-                            errorResponce(res, err.toString());
-                        }
-
-                        console.log("CouchBase SessionStore: value:", result.value);
-                        if(result.value.session) {
-                            this.sessionStore.get(this.exsStore.getSessionPrefix()+":"+result.value.session, function(err, result) {
-                                if(err) {
-                                    console.error("CouchBase validateSession: Error -", err);
-                                    errorResponce(res, err.toString());
-                                }
-
-                                if(result.value.passport.user) {
-                                    jsonResponce(res, result.value.passport);
-                                } else {
-                                    errorResponce(res, "No user data");
-                                }
-                            }.bind(this));
-                        }
-
-                    }.bind(this));
-                } else {
-                    errorResponce(res, "Missing ID");
-                }
-            } else {
-                console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
-                next();
-            }
         }.bind(this));
 
         // POST - login
@@ -205,11 +182,23 @@ AuthServer.prototype.setupRoutes = function() {
             this.app.use(rConst.auth.include[i], includeRoute);
         }
 
+        // static content
+        for(var i in rConst.static.include){
+            var fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.include[i]);
+            //console.log("static content fullPath:", fullPath);
+            this.app.use(rConst.static.include[i], express.static(fullPath) );
+        }
+
+        this.app.get("/", function(req, res){
+            console.log("static root:", req.path);
+            var fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.root);
+            res.sendfile( fullPath );
+        }.bind(this));
+
         // DEFAULT
-        this.app.use(function defaultRoute(req, res, next) {
-
-            this.forwardRequest(req.session.passport.user, req, res);
-
+        this.app.use(function defaultRoute(req, res) {
+            console.log("defaultRoute:", req.path);
+            res.redirect(rConst.root);
         }.bind(this));
 
     } catch(err){
@@ -344,23 +333,15 @@ AuthServer.prototype.forwardRequest = function(user, req, res, done, auth){
     }
 
     var sreq = http.request(options, function(sres) {
-        sres.setEncoding('utf8');
-        res.writeHead(sres.statusCode);
-        if(auth){
-            console.log("forwardRequest sres headers:", sres.headers);
-        }
+        // remove set cookie, but send test
+        delete sres.headers['set-cookie'];
+        res.writeHead(sres.statusCode, sres.headers);
 
-        var data = "";
         sres.on('data', function(chunk){
-            data += chunk;
             res.write(chunk);
         });
 
         sres.on('end', function(){
-            if(auth){
-                console.log("forwardRequest data:", data);
-            }
-
             res.end();
             // call done function if exist
             if(done) {

@@ -2,14 +2,14 @@
  * Telemetry Dispatcher Module
  *
  * Module dependencies:
- *  underscore - https://github.com/jashkenas/underscore
+ *  lodash     - https://github.com/lodash/lodash
  *  request    - https://github.com/mikeal/request
  *  redis      - https://github.com/mranney/node_redis
  *  couchnode  - https://github.com/couchbase/couchnode
  *
  */
 // Third-party libs
-var _         = require('underscore');
+var _         = require('lodash');
 var request   = require('request');
 var redis     = require('redis');
 var couchbase = require('couchbase');
@@ -18,7 +18,7 @@ var MySQL     = require('./datastore.mysql.js');
 var tConst    = require('./telemetry.const.js');
 
 function Dispatcher(settings){
-    this.settings = _.extend(
+    this.settings = _.merge(
         {
             queue: { port: null, host: null },
             webapp: { protocal: "http", host: "localhost", port: 8080},

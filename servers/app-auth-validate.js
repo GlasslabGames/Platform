@@ -1,5 +1,5 @@
 /**
- * Authentication - App Server
+ * Authentication Validate - App Server
  */
 var Auth          = require('./lib/auth.js');
 var ConfigManager = require('./lib/config.manager.js');
@@ -13,11 +13,11 @@ var options = config.loadSync([
 ]);
 
 console.log("---------------------------------------------");
-console.log("-- Authentication App Server - Start");
+console.log("-- Authentication Validate App Server - Start");
 console.log("---------------------------------------------");
 
-var a = new Auth.Server(options);
+var av = new Auth.Validate(options);
 
 process.on('uncaughtException', function(err) {
-    console.trace("Auth: Uncaught Error -", err);
+    console.trace("AuthValidate: Uncaught Error -", err);
 });

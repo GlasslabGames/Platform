@@ -2,9 +2,8 @@
  * Couchbase Session Store Module
  */
 // Third-party libs
-var _         = require('underscore');
+var _         = require('lodash');
 var couchbase = require('couchbase');
-var deepcopy  = require('deepcopy');
 
 //
 var sessionMaxAge = 24*60*60; // one day in seconds
@@ -15,7 +14,7 @@ module.exports = function(connect){
     var Store = connect.session.Store;
 
     function CouchBaseStore(options) {
-        this.options = _.extend(
+        this.options = _.merge(
             {
                 host:     "localhost:8091",
                 bucket:   "default",
@@ -102,22 +101,19 @@ module.exports = function(connect){
                         if(err) { return done(err); }
                     }
                 } else {
-                    if( session.passport.user ) {
-                        // if result has user data AND user data same then touch
-                        // otherwise set a new
-                        if( result.value.passport.user &&
-                            _.isEqual(session.passport.user, result.value.passport.user)
-                          ) {
-                            // already has user data
-                            console.log("CouchBaseStore: touching session key:", key);
-                            this.client.touch(key, function(err){
-                                done(err);
-                            });
-                        } else {
-                            this._setSession(key, session, done);
-                        }
+                    // if result has user data AND user data same then touch
+                    // otherwise set a new
+                    if( result.value &&
+                        result.value.passport &&
+                        _.isEqual(session.passport, result.value.passport)
+                    ){
+                        // already has user data
+                        console.log("CouchBaseStore: touching session key:", key);
+                        this.client.touch(key, function(err){
+                            done(err);
+                        });
                     } else {
-                        done(err);
+                        this._setSession(key, session, done);
                     }
                 }
 
@@ -138,7 +134,7 @@ module.exports = function(connect){
             ttl = Math.floor(maxAge / 1000);
         }
 
-        var data = deepcopy(session);
+        var data = _.cloneDeep(session);
         console.log("CouchBaseStore set key:", key, ", data:", data);
         this.client.set(key, data, {
                 expiry: ttl // in seconds

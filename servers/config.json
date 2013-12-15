@@ -1,9 +1,13 @@
 {
     "env": "dev",
+    "frontend": {
+        "port":     8000
+    },
     "webapp": {
         "protocal": "http",
         "host":     "localhost",
-        "port":     8080
+        "port":     8080,
+        "staticContentPath": "/../../../Root/web-app"
     },
     "queue": {
         "host": "127.0.0.1",
@@ -35,7 +39,12 @@
         "sessionExpire"     : 14400000, "//":"in microseconds"
     },
     "auth": {
-        "port": 8082,
-        "secret": "keyboard kitty"
+        "protocal": "http",
+        "host":     "localhost",
+        "port":     8082,
+        "secret":   "keyboard kitty"
+    },
+    "validate": {
+        "port":     8083
     }
 }

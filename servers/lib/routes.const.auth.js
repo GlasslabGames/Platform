@@ -8,6 +8,15 @@ var api = '/api';
 module.exports = {
     exclude: [
         api+"/config"
+        /*,
+        "/challenges",
+        "/css",
+        "/font",
+        "/images",
+        "/js",
+        "/maintenance",
+        "/template",
+        "/updates"*/
     ],
     include: [
         api,
@@ -18,7 +27,6 @@ module.exports = {
         "/create",
         "/code",
         "/missions",
-        "/challenge",
         "/license"
     ]
 };

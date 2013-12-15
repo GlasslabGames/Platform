@@ -5,5 +5,6 @@
  */
 
 module.exports = {
-    Server:  require('./auth.server.js')
+    Server:   require('./auth.server.js'),
+    Validate: require('./auth.validate.server.js')
 };

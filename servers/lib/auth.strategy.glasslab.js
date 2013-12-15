@@ -1,13 +1,13 @@
 /**
  * Authentication Server Module
  * Module dependencies:
- *  underscore - https://github.com/jashkenas/underscore
+ *  lodash     - https://github.com/lodash/lodash
  *  passport   - https://github.com/jaredhanson/passport
  */
 var crypto   = require('crypto');
 var util     = require('util');
 // Third-party libs
-var _        = require('underscore');
+var _        = require('lodash');
 var passport = require('passport')
 // Glasslab libs
 var MySQL    = require('./datastore.mysql.js');
