@@ -27,7 +27,9 @@ function Collector(options){
             {
                 queue:     { port: null, host: null, db:0 },
                 settings:  { protocal: 'http', host: 'localhost', port: 8082},
-                collector: { port: 8081 }
+                collector: { port: 8081,
+                    httpTimeout: 5000 // 5 seconds
+                }
             },
             options
         );
@@ -123,7 +125,7 @@ Collector.prototype.endSession = function(req, outRes){
     try {
         //console.log("req.params:", req.params, ", req.body:", req.body);
 
-        var done = function(req, outRes, jdata){
+        var done = function(req, outRes, jdata) {
             // forward to webapp server
             var url = this.webAppUrl + tConst.webapp.api +"/"+req.params.type + tConst.webapp.endsession;
 
@@ -160,7 +162,7 @@ Collector.prototype.endSession = function(req, outRes){
     }
 };
 
-Collector.prototype.postData = function(url, jdata, outRes, cb){
+Collector.prototype.postData = function(url, jdata, outRes, cb) {
     var purl = urlParser.parse(url);
     var data = JSON.stringify(jdata);
 
@@ -174,10 +176,6 @@ Collector.prototype.postData = function(url, jdata, outRes, cb){
             'Content-Length': Buffer.byteLength(data)
         }
     };
-
-    // TODO: PLAT-2 (Add http request timeout on start/end session)
-    // http://stackoverflow.com/questions/6214902/how-to-set-a-timeout-on-a-http-request-in-node
-    // http://nodejs.org/api/net.html#net_socket_settimeout_timeout_callback
 
     var req = http.request(options, function(res) {
         res.setEncoding('utf8');
@@ -198,7 +196,15 @@ Collector.prototype.postData = function(url, jdata, outRes, cb){
         });
     });
 
-    req.on("error", function(err){
+    // http request timeout on start/end session
+    req.on('socket', function(socket) {
+        socket.setTimeout(this.options.collector.httpTimeout);
+        socket.on('timeout', function() {
+            req.abort();
+        });
+    }.bind(this));
+
+    req.on("error", function(err) {
         console.trace("Collector: postData Error -", err);
     });
 

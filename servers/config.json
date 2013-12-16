@@ -27,16 +27,17 @@
         "ttl": 14400, "//":" 4 mins in seconds"
     },
     "collector": {
-        "port": 8081
+        "port": 8081,
+        "httpTimeout": 5000, "//":"in milliseconds"
     },
     "dispatcher": {
         "telemetryGetMax": 20,
         "batchGetMax"    : 100,
-        "telemetryPollDelay": 1000, "//":"in microseconds",
-        "batchInPollDelay"  : 5000, "//":"in microseconds",
-        "assessmentDelay"   : 30000, "//":"in microseconds",
-        "cleanupPollDelay"  : 3600000, "//":"in microseconds",
-        "sessionExpire"     : 14400000, "//":"in microseconds"
+        "telemetryPollDelay": 1000, "//":"in milliseconds",
+        "batchInPollDelay"  : 5000, "//":"in milliseconds",
+        "assessmentDelay"   : 30000, "//":"in milliseconds",
+        "cleanupPollDelay"  : 3600000, "//":"in milliseconds",
+        "sessionExpire"     : 14400000, "//":"in milliseconds"
     },
     "auth": {
         "protocal": "http",
