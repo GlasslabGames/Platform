@@ -1,10 +1,13 @@
 {
     "env": "dev",
+    "request": {
+        "httpTimeout": 5000, "//":"in milliseconds"
+    },
     "frontend": {
         "port":     8000
     },
     "webapp": {
-        "protocal": "http",
+        "protocol": "http:",
         "host":     "localhost",
         "port":     8080,
         "staticContentPath": "/../../../Root/web-app"
@@ -27,8 +30,7 @@
         "ttl": 14400, "//":" 4 mins in seconds"
     },
     "collector": {
-        "port": 8081,
-        "httpTimeout": 5000, "//":"in milliseconds"
+        "port": 8081
     },
     "dispatcher": {
         "telemetryGetMax": 20,
@@ -40,7 +42,7 @@
         "sessionExpire"     : 14400000, "//":"in milliseconds"
     },
     "auth": {
-        "protocal": "http",
+        "protocol": "http:",
         "host":     "localhost",
         "port":     8082,
         "secret":   "keyboard kitty"

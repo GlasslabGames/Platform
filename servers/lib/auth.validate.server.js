@@ -14,15 +14,13 @@ var express    = require('express');
 var passport   = require('passport');
 var request    = require('request');
 var couchbase  = require('couchbase');
-var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
 
-// Glasslab libs
-var aConst     = require('./auth.const.js');
-var rConst     = require('./routes.const.js');
+// load at runtime
+var aConst, rConst, SessionServer;
 
 module.exports = AuthValidateServer;
 
-function errorResponce(res, errorStr){
+function errorResponse(res, errorStr){
     var error = JSON.stringify({ error: errorStr });
     res.writeHead(200, {
         "Content-Type": "application/json",
@@ -31,7 +29,7 @@ function errorResponce(res, errorStr){
     res.end( error );
 }
 
-function jsonResponce(res, obj){
+function jsonResponse(res, obj){
     var json = JSON.stringify(obj);
     res.writeHead(200, {
         "Content-Type": "application/json",
@@ -42,47 +40,21 @@ function jsonResponce(res, obj){
 
 function AuthValidateServer(options){
     try {
+        aConst     = require('./auth.js').Const;
+        rConst     = require('./routes.js').Const;
+        SessionServer = require('./auth.js').SessionServer;
+
         this.options = _.merge(
             {
-                validate: { port: 8083},
-                sessionstore: {
-                    "host":     "localhost:8091",
-                    "bucket":   "glasslab_webapp",
-                    "password": "glasslab"
-                }
+                validate: { port: 8083 },
+                sessionstore: { readonly: true }
             },
             options
         );
 
         this.app = express();
-
-        this.sessionStore = new couchbase.Connection({
-            host:     this.options.sessionstore.host,
-            bucket:   this.options.sessionstore.bucket,
-            password: this.options.sessionstore.password
-        }, function(err) {
-            console.error("CouchBase SessionStore: Error -", err);
-            if(err) throw err;
-        }.bind(this));
-
-        // pass session store to express session store strategy, via options
-        this.options.sessionstore.client = this.sessionStore;
-        // express session store
-        this.exsStore = new CouchbaseStore(this.options.sessionstore);
-
-        this.app.configure(function() {
-            this.app.set('port', this.options.validate.port);
-
-            this.app.use(express.logger());
-            this.app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
-
-            this.app.use(express.urlencoded());
-            this.app.use(express.json());
-            this.app.use(express.methodOverride());
-
-            // setup app routes
-            this.setupRoutes();
-        }.bind(this));
+        this.app.set('port', this.options.validate.port);
+        this.sessionServer = new SessionServer(this.options, this.app, this.setupRoutes.bind(this));
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function createServer(){
@@ -97,54 +69,8 @@ function AuthValidateServer(options){
 AuthValidateServer.prototype.setupRoutes = function() {
     try {
         // GET
-        this.app.get(rConst.api.session.validate, function validateSession(req, res, next){
-            console.log("validateSession:", req.path);
-            if(req.connection.remoteAddress == "127.0.0.1")
-            {
-                if( req.params.id ) {
-                    // using proxy session get real session
-                    this.sessionStore.get(aConst.proxySessionPrefix+":"+req.params.id, function(err, result) {
-                        if(err) {
-                            console.error("CouchBase validateSession: Error -", err);
-                            errorResponce(res, err.toString());
-                        }
-
-                        if(result.value) {
-                            console.log("CouchBase SessionStore: value:", result.value);
-
-                            if(result.value.session) {
-                                this.sessionStore.get(this.exsStore.getSessionPrefix()+":"+result.value.session, function(err, result) {
-                                    if(err) {
-                                        console.error("CouchBase validateSession: Error -", err);
-                                        errorResponce(res, err.toString());
-                                    }
-
-                                    if(result.value.passport.user) {
-                                        jsonResponce(res, result.value.passport);
-                                    } else {
-                                        errorResponce(res, "No user data");
-                                    }
-                                }.bind(this));
-
-                            } else {
-                                // request for missing session
-                                res.end();
-                            }
-
-                        } else {
-                            // request for missing session
-                            res.end();
-                        }
-
-                    }.bind(this));
-                } else {
-                    errorResponce(res, "Missing ID");
-                }
-            } else {
-                console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
-                next();
-            }
-        }.bind(this));
+        this.app.get(rConst.api.wa_session.validate, this.validateWASession.bind(this));
+        this.app.get(rConst.api.session.validate,    this.validateSession.bind(this));
 
         // DEFAULT
         this.app.use(function defaultRoute(req, res) {
@@ -157,3 +83,72 @@ AuthValidateServer.prototype.setupRoutes = function() {
     }
 };
 
+AuthValidateServer.prototype.validateSession = function(req, res, next) {
+    console.log("validate Session:", req.path);
+    // only allow local connections
+    if(req.connection.remoteAddress == "127.0.0.1")
+    {
+        //console.log("session:", req.session);
+        this.sessionServer.getCookieWASession(req, function(err, data){
+            if(err) {
+                return errorResponse(res, err);
+            }
+
+            jsonResponse(res, data);
+        }.bind(this));
+
+    } else {
+        console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
+        next();
+    }
+};
+
+AuthValidateServer.prototype.validateWASession = function(req, res, next) {
+    console.log("validate WA-Session:", req.path);
+    // only allow local connections
+    if(req.connection.remoteAddress == "127.0.0.1")
+    {
+        if( req.params.id ) {
+            // using proxy session get real session
+            this.sessionServer.getWASession(req.params.id, function(err, result) {
+                if(err) {
+                    console.error("CouchBase validateSession: Error -", err);
+                    errorResponse(res, err.toString());
+                }
+
+                if(result.value) {
+                    console.log("CouchBase SessionStore: value:", result.value);
+
+                    if(result.value.session) {
+                        this.sessionServer.getSession(result.value.session, function(err, result) {
+                            if(err) {
+                                console.error("CouchBase validateSession: Error -", err);
+                                errorResponse(res, err.toString());
+                            }
+
+                            if(result.value.passport.user) {
+                                jsonResponse(res, result.value.passport);
+                            } else {
+                                errorResponse(res, "No user data");
+                            }
+                        }.bind(this));
+
+                    } else {
+                        // request for missing session
+                        res.end();
+                    }
+
+                } else {
+                    // request for missing session
+                    res.end();
+                }
+
+            }.bind(this));
+        } else {
+            errorResponse(res, "Missing ID");
+        }
+    } else {
+        console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
+        next();
+    }
+};

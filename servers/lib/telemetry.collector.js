@@ -16,23 +16,29 @@ var _          = require('lodash');
 var express    = require('express');
 var multiparty = require('multiparty');
 var redis      = require('redis');
-// Glasslab libs
-var tConst     = require('./telemetry.const.js');
-var rConst     = require('./routes.const.js');
+// load at runtime
+var RequestUtil, tConst, rConst;
+
+module.exports = Collector;
 
 function Collector(options){
     try{
+        // Glasslab libs
+        RequestUtil = require('./util.js').Request;
+        aConst      = require('./auth.js').Const;
+        tConst      = require('./telemetry.js').Const;
+        rConst      = require('./routes.js').Const;
 
         this.options = _.merge(
             {
                 queue:     { port: null, host: null, db:0 },
-                settings:  { protocal: 'http', host: 'localhost', port: 8082},
-                collector: { port: 8081,
-                    httpTimeout: 5000 // 5 seconds
-                }
+                settings:  { protocol: 'http', host: 'localhost', port: 8082},
+                collector: { port: 8081 }
             },
             options
         );
+
+        this.requestUtil = new RequestUtil(this.options);
 
         this.app   = express();
         this.queue = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
@@ -40,7 +46,7 @@ function Collector(options){
             this.queue.select(this.options.queue.db);
         }
 
-        this.webAppUrl = this.options.auth.protocal+"://"+this.options.auth.host+":"+this.options.auth.port;
+        this.webAppUrl = this.options.auth.protocol+"//"+this.options.auth.host+":"+this.options.auth.port;
 
         this.app.set('port', this.options.collector.port);
         this.app.use(express.logger());
@@ -73,15 +79,54 @@ Collector.prototype.setupRoutes = function() {
 Collector.prototype.startSession = function(req, outRes){
     try {
         //console.log("req.params:", req.params, ", req.body:", req.body);
+        var url = "http://localhost:" +this.options.validate.port + rConst.api.session.validate;
+        //console.log("getSession url:", url);
 
-        // forward to webapp server
-        var url = this.webAppUrl + tConst.webapp.api +"/"+req.params.type + tConst.webapp.startsession;
+        var headers = {
+            cookie: req.headers.cookie
+        };
+        this.requestUtil.getRequest(url, headers, req, function(err, res, data){
+                if(err) {
+                    console.log("Collector startSession Error:", err);
+                    return;
+                }
 
-        this.postData(url, req.body, outRes, function(body){
-            body = JSON.parse(body);
-            // add start session to Q
-            this.qStartSession(body.gameSessionId);
-        }.bind(this));
+                //console.log("statusCode:", res.statusCode, ", headers:",  res.headers);
+                //console.log("data:", data);
+
+                try {
+                    data = JSON.parse(data);
+                } catch(err) {
+                    console.log("Collector startSession JSON parse Error:", err);
+                    return;
+                }
+
+                // forward to webapp server
+                this.requestUtil.forwardRequestToWebApp({
+                        path: tConst.webapp.api + "/" + req.params.type + tConst.webapp.startsession,
+                        cookie: aConst.sessionCookieName + "=" + data[aConst.webappSessionPrefix]
+                    },
+                    req,
+                    outRes,
+                    function(err, body){
+                        if(err){
+                            console.error("Collector: Error -", err);
+                            return;
+                        }
+
+                        try{
+                            body = JSON.parse(body);
+                        } catch(err) {
+                            console.error("Collector: JSON parse Error -", err);
+                            //console.error("Collector: JSON data-", body);
+                            return;
+                        }
+
+                        // add start session to Q
+                        this.qStartSession(body.gameSessionId);
+                    }.bind(this)
+                );
+        }.bind(this) );
     } catch(err) {
         console.trace("Collector: Start Session Error -", err);
     }
@@ -129,10 +174,20 @@ Collector.prototype.endSession = function(req, outRes){
             // forward to webapp server
             var url = this.webAppUrl + tConst.webapp.api +"/"+req.params.type + tConst.webapp.endsession;
 
-            this.postData(url, jdata, outRes, function(){
-                // add end session to Q
-                this.qEndSession(jdata.gameSessionId);
-            }.bind(this));
+            if(jdata.gameSessionId) {
+                // save events
+                this.qSendBatch(jdata.gameSessionId, jdata, function sendBatchdone(){
+                    this.requestUtil.forwardPostRequest(url, jdata, outRes, function forwardRequestDone(){
+                        // add end session to Q
+                        this.qEndSession(jdata.gameSessionId);
+                    }.bind(this));
+                }.bind(this));
+            } else {
+                var err = "gameSessionId missing!";
+                console.error("Error:", err);
+                outRes.status(500).send('Error:'+err);
+            }
+
         }.bind(this);
 
         if(req.params.type == "game") {
@@ -162,7 +217,8 @@ Collector.prototype.endSession = function(req, outRes){
     }
 };
 
-Collector.prototype.postData = function(url, jdata, outRes, cb) {
+/*
+Collector.prototype.postData = function(url, jdata, outRes, done) {
     var purl = urlParser.parse(url);
     var data = JSON.stringify(jdata);
 
@@ -186,7 +242,7 @@ Collector.prototype.postData = function(url, jdata, outRes, cb) {
         });
 
         res.on('end', function () {
-            cb(body);
+            if(done) done(body);
 
             outRes.writeHead(200, {
                 'Content-Type':   'application/json',
@@ -205,18 +261,21 @@ Collector.prototype.postData = function(url, jdata, outRes, cb) {
     }.bind(this));
 
     req.on("error", function(err) {
-        console.trace("Collector: postData Error -", err);
+        console.trace("Collector: forwardRequest Error -", err);
     });
 
     req.write(data);
     req.end();
 }
+*/
+
+
 // ---------------------------------------
 
 
 // ---------------------------------------
 // Queue function
-Collector.prototype.qStartSession = function(id) {
+Collector.prototype.qStartSession = function(id, done) {
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
 
     this.queue.lpush(telemetryInKey,
@@ -228,11 +287,14 @@ Collector.prototype.qStartSession = function(id) {
             if(err) {
                 console.error("Collector: Start Error-", err);
             }
+
+            // done callback
+            if(done) done();
         }
     );
 }
 
-Collector.prototype.qSendBatch = function(id, data) {
+Collector.prototype.qSendBatch = function(id, data, done) {
     var batchInKey = tConst.batchKey+":"+id+":"+tConst.inKey;
 
     // if object convert data to string
@@ -244,10 +306,13 @@ Collector.prototype.qSendBatch = function(id, data) {
         if(err) {
             console.error("Collector: Batch Error -", err);
         }
+
+        // done callback
+        if(done) done();
     });
 }
 
-Collector.prototype.qEndSession = function(id) {
+Collector.prototype.qEndSession = function(id, done) {
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
 
     this.queue.lpush(telemetryInKey,
@@ -259,9 +324,10 @@ Collector.prototype.qEndSession = function(id) {
             if(err) {
                 console.error("Collector: End Error -", err);
             }
+
+            // done callback
+            if(done) done();
         }
     );
 }
 // ---------------------------------------
-
-module.exports = Collector;

@@ -5,6 +5,6 @@
  */
 
 module.exports = {
-    proxySessionPrefix: "psession",
+    webappSessionPrefix: "wa_session",
     sessionCookieName:  "JSESSIONID"
 };

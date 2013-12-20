@@ -12,28 +12,26 @@
 var _         = require('lodash');
 var request   = require('request');
 var redis     = require('redis');
-var couchbase = require('couchbase');
 // Glasslab libs
-var MySQL     = require('./datastore.mysql.js');
-var tConst    = require('./telemetry.const.js');
+var tConst, DS;
 
-function Dispatcher(settings){
-    this.settings = _.merge(
+function Dispatcher(options){
+    tConst    = require('./telemetry.js').Const;
+    DS        = require('./telemetry.js').Datastore.MySQL;
+
+    this.options = _.merge(
         {
             queue: { port: null, host: null },
-            webapp: { protocal: "http", host: "localhost", port: 8080},
-            datastore: {}
+            webapp: { protocol: "http", host: "localhost", port: 8080}
         },
-        settings
+        options
     );
 
-    this.queue         = redis.createClient(this.settings.queue.port, this.settings.queue.host, this.settings.queue);
-    this.webAppUrl     = this.settings.webapp.protocal+"://"+this.settings.webapp.host+":"+this.settings.webapp.port;
+    this.queue         = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
+    this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
 
-    this.ds = new MySQL(this.settings.datastore);
-    // Connect to data store
-    this.ds.testConnection();
+    this.ds = new DS(this.options.datastore);
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
@@ -46,7 +44,7 @@ Dispatcher.prototype.startTelemetryPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.telemetryCheck();
-    }.bind(this), this.settings.dispatcher.telemetryPollDelay);
+    }.bind(this), this.options.dispatcher.telemetryPollDelay);
 }
 
 Dispatcher.prototype.telemetryCheck = function(){
@@ -59,7 +57,7 @@ Dispatcher.prototype.telemetryCheck = function(){
         }
 
         if(count > 0) {
-            for(var i = 0; i < Math.min(count, this.settings.dispatcher.telemetryGetMax); i++){
+            for(var i = 0; i < Math.min(count, this.options.dispatcher.telemetryGetMax); i++){
                 this.getTelemetryBatch();
             }
         }
@@ -71,7 +69,7 @@ Dispatcher.prototype.startCleanOldSessionPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.cleanOldSessionCheck();
-    }.bind(this), this.settings.dispatcher.cleanupPollDelay);
+    }.bind(this), this.options.dispatcher.cleanupPollDelay);
 }
 
 Dispatcher.prototype.cleanOldSessionCheck = function(){
@@ -92,7 +90,7 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
 
                 var startTime = new Date(meta.date).getTime();
                 var now       = new Date().getTime();
-                if(now - startTime > this.settings.dispatcher.sessionExpire){
+                if(now - startTime > this.options.dispatcher.sessionExpire){
                     // clean up session
                     console.log("!!! Expired Cleaning Up - id", sessionId, ", metaData:", meta);
 
@@ -199,7 +197,7 @@ Dispatcher.prototype.getTelemetryBatch = function(){
 }
 
 Dispatcher.prototype.endBatchIn = function(sessionId){
-    if(this.settings.env == "dev") {
+    if(this.options.env == "dev") {
         console.log("Dispatcher: endBatchIn sessionId:", sessionId);
     }
 
@@ -231,7 +229,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                     this.cleanupSession(sessionId, function executeAssessment(){
 
                         // execute assessment
-                        if(this.settings.env == "dev") {
+                        if(this.options.env == "dev") {
                             console.log("Dispatcher: Assessment Delay - SessionId:", sessionId);
                         }
                         // wait 10 seconds
@@ -245,12 +243,12 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                                     return;
                                 }
 
-                                if(this.settings.env == "dev") {
+                                if(this.options.env == "dev") {
                                     console.log("Dispatcher: Started Assessment - SessionId:", sessionId);
                                 }
                             }.bind(this));
 
-                        }.bind(this), this.settings.dispatcher.assessmentDelay);
+                        }.bind(this), this.options.dispatcher.assessmentDelay);
 
                     }.bind(this));
 
@@ -260,7 +258,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                     // try again until empty
                     setTimeout(function(){
                         this.endBatchIn(sessionId);
-                    }.bind(this), this.settings.dispatcher.batchInPollDelay);
+                    }.bind(this), this.options.dispatcher.batchInPollDelay);
                 }
             }.bind(this));
         } else {
@@ -271,7 +269,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                 function(){
                     this.endBatchIn(sessionId);
                 }.bind(this),
-                this.settings.dispatcher.batchInPollDelay
+                this.options.dispatcher.batchInPollDelay
             );
         }
     }.bind(this));
@@ -282,7 +280,7 @@ Dispatcher.prototype.startBatchInPoll = function(sessionId){
         function(){
             this.batchInCheck(sessionId);
         }.bind(this),
-        this.settings.dispatcher.batchInPollDelay
+        this.options.dispatcher.batchInPollDelay
     );
 }
 
@@ -298,7 +296,7 @@ Dispatcher.prototype.batchInCheck = function(sessionId){
 
         //console.log("batchInCheck batchInKey:", batchInKey, ", count:", count);
         if(count > 0) {
-            for(var i = 0; i < Math.min(this.settings.dispatcher.batchGetMax, count); i++){
+            for(var i = 0; i < Math.min(this.options.dispatcher.batchGetMax, count); i++){
                 // adding to batch
                 this.processItem(sessionId);
             }
@@ -377,36 +375,10 @@ Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
     }
 
     if(jdata.gameSessionId) {
-        var qInsertData = [];
-        for(var i in jdata.events){
-            var row = [
-                "NULL",
-                0,
-                this.ds.escape(JSON.stringify(jdata.events[i].eventData)),
-                "NOW()",
-                this.ds.escape(jdata.gameVersion),
-                this.ds.escape(jdata.gameSessionId),
-                "NOW()",
-                this.ds.escape(jdata.events[i].name),
-                "UNIX_TIMESTAMP(NOW())",
-                "(SELECT user_id FROM GL_SESSION WHERE SESSION_ID="+this.ds.escape(jdata.gameSessionId)+")"
-            ];
-            qInsertData.push( "("+row.join(",")+")" );
-        }
-
-        q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) VALUES ";
-        q += qInsertData.join(",");
-        //console.log('q:', q);
-
-        this.ds.addQuery(q, function(err) {
-            doneCB(err);
-        }.bind(this));
-
-        this.ds.sendQueries();
+        this.ds.saveEvents(jdata, doneCB);
     } else {
         console.error("Dispatcher: sendItemToDataStore missing gameSessionId");
     }
 }
 
 module.exports = Dispatcher;
-

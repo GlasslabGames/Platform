@@ -21,7 +21,8 @@ module.exports = function(connect){
                 password: "",
                 prefix:   "session",
                 ttl:      sessionMaxAge,
-                client:   null
+                client:   null,
+                readonly: false
             },
             options
         );
@@ -90,6 +91,12 @@ module.exports = function(connect){
 
     CouchBaseStore.prototype.set = function(sessionId, session, done){
         try {
+            // exit function if readonly
+            if(this.options.readonly) {
+                done(null);
+                return;
+            }
+
             var key     = this.options.prefix+":"+sessionId;
 
             // get before set
