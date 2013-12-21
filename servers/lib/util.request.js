@@ -73,6 +73,7 @@ RequestUtil.prototype.postRequest = function(url, headers, jdata, req, done){
     this.sendRequest(options, data, null, done);
 };
 
+/*
 RequestUtil.prototype.forwardPostRequest = function(url, jdata, resOut, done){
     var purl = urlParser.parse(url);
     var data = JSON.stringify(jdata);
@@ -91,8 +92,9 @@ RequestUtil.prototype.forwardPostRequest = function(url, jdata, resOut, done){
 
     this.sendRequest(options, data, resOut, done);
 };
+*/
 
-RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done, auth){
+RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done){
     var options = _.merge(
         {
             protocol: this.options.webapp.protocol || "http:",
@@ -100,7 +102,7 @@ RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done,
             port:     this.options.webapp.port,
             path:     req.originalUrl,
             method:   req.method,
-            headers: _.cloneDeep(req.headers)
+            headers:  _.cloneDeep(req.headers)
         },
         opts
     );
@@ -122,7 +124,16 @@ RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done,
 
     var data = "";
     if(req.body && req.method == "POST") {
-        data = JSON.stringify(req.body);
+        if(options.headers['content-type'] == 'application/x-www-form-urlencoded')
+        {
+            var querystring = require('querystring');
+            data = querystring.stringify(req.body);
+        } else {
+            // default to json
+            data = JSON.stringify(req.body);
+            options.headers['content-type'] = 'application/json';
+        }
+        options.headers['content-length'] = data.length;
     }
 
     //console.log("forwardRequest options:", options);
@@ -134,35 +145,24 @@ RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done,
 RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
 
     var sreq = http.request(options, function(sres) {
+        //console.log("sendRequest statusCode:", sres.statusCode, ", headers:",  sres.headers);
         if(resOut) {
             // remove set cookie, but send rest
             delete sres.headers['set-cookie'];
-
             resOut.writeHead(sres.statusCode, sres.headers);
-
-            var data = "";
-            sres.on('data', function(chunk){
-                data += chunk;
-                resOut.write(chunk);
-            });
-
-            sres.on('end', function(){
-                resOut.end();
-                // call done function if exist
-                if(done) done(null, data);
-            });
-        } else {
-            //console.log("sendRequest statusCode:", sres.statusCode, ", headers:",  sres.headers);
-
-            var data = "";
-            sres.on('data', function(chunk){
-                data += chunk;
-            });
-
-            sres.on('end', function(){
-                if(done) done(null, sres, data);
-            });
         }
+
+        var data = "";
+        sres.on('data', function(chunk){
+            data += chunk;
+            if(resOut) resOut.write(chunk);
+        });
+
+        sres.on('end', function(){
+            if(resOut) resOut.end();
+            // call done function if exist
+            if(done) done(null, sres, data);
+        });
     });
 
     sreq.on("error", function(err) {
@@ -180,10 +180,16 @@ RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
         socket.setTimeout(this.options.request.httpTimeout);
         socket.on('timeout', function() {
             sreq.abort();
+            if(resOut) {
+                resOut.writeHead(500);
+                resOut.end();
+            }
         });
     }.bind(this));
 
     if(data) {
+        sreq.write( data );
+
         if(_.isObject(data)) {
             // convert data to string
             data = JSON.stringify(data);

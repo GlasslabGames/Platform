@@ -119,13 +119,17 @@ function AuthSessionServer(options, app, routes){
 
 AuthSessionServer.prototype.getCookieWASession = function(req, done){
     if(req.session.passport && req.session.passport.user){
-        var data = {};
-        data[aConst.webappSessionPrefix] = req.session.passport.user[aConst.webappSessionPrefix];
-
+        var data = this.buildWASession( req.session.passport.user[aConst.webappSessionPrefix] );
         done(null, data);
     } else {
         done("User info missing");
     }
+};
+
+AuthSessionServer.prototype.buildWASession = function(sessionId){
+    var data = {};
+    data[aConst.webappSessionPrefix] = sessionId;
+    return data;
 };
 
 AuthSessionServer.prototype.getWASession = function(id, done){

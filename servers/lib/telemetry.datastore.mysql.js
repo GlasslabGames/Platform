@@ -36,7 +36,7 @@ TelemDS_Mysql.prototype.saveEvents = function(jdata, done){
             0,
             this.ds.escape(JSON.stringify(jdata.events[i].eventData)),
             "NOW()",
-            this.ds.escape(jdata.gameVersion),
+            this.ds.escape(jdata.gameVersion || ""),
             this.ds.escape(jdata.gameSessionId),
             "NOW()",
             this.ds.escape(jdata.events[i].name),
@@ -50,11 +50,9 @@ TelemDS_Mysql.prototype.saveEvents = function(jdata, done){
     q += qInsertData.join(",");
     //console.log('q:', q);
 
-    this.ds.addQuery(q, function(err) {
+    this.ds.query(q, function(err) {
         done(err);
     }.bind(this));
-
-    this.ds.sendQueries();
 }
 
 module.exports = TelemDS_Mysql;

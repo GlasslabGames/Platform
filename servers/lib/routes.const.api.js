@@ -12,7 +12,7 @@ module.exports = {
         validate:       api+'/wa-session/validate/:id'
     },
     session: {
-        validate:       api+'/session/validate'
+        validate:       api+'/session/validate/:id'
     },
     startsession:       api+'/:type/startsession',
     sendtelemetrybatch: api+'/:type/sendtelemetrybatch',

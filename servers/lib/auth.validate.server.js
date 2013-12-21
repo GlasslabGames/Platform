@@ -88,14 +88,36 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
     // only allow local connections
     if(req.connection.remoteAddress == "127.0.0.1")
     {
-        //console.log("session:", req.session);
-        this.sessionServer.getCookieWASession(req, function(err, data){
-            if(err) {
-                return errorResponse(res, err);
-            }
+        if( req.params.id &&
+            req.params.id != "-" ) {
+            // using real session get webapp session
+            this.sessionServer.getSession(req.params.id, function(err, result) {
+                if(err) {
+                    console.error("CouchBase validateSession: Error -", err);
+                    errorResponse(res, err.toString());
+                }
 
-            jsonResponse(res, data);
-        }.bind(this));
+                //console.log("result:", result.value);
+                if( result &&
+                    result.value &&
+                    result.value.passport &&
+                    result.value.passport.user) {
+                    var data = this.sessionServer.buildWASession(result.value.passport.user.wa_session);
+                    jsonResponse(res, data);
+                } else {
+                    errorResponse(res, "missing session");
+                }
+            }.bind(this));
+        } else {
+            //console.log("session:", session);
+            this.sessionServer.getCookieWASession(req, function(err, data){
+                if(err) {
+                    return errorResponse(res, err);
+                }
+
+                jsonResponse(res, data);
+            }.bind(this));
+        }
 
     } else {
         console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
@@ -109,7 +131,7 @@ AuthValidateServer.prototype.validateWASession = function(req, res, next) {
     if(req.connection.remoteAddress == "127.0.0.1")
     {
         if( req.params.id ) {
-            // using proxy session get real session
+            // using webapp session get real session
             this.sessionServer.getWASession(req.params.id, function(err, result) {
                 if(err) {
                     console.error("CouchBase validateSession: Error -", err);

@@ -88,9 +88,9 @@ AuthServer.prototype.setupRoutes = function() {
                     cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
                 }
 
-                console.log("Auth passport user:", user);
+                //console.log("Auth passport user:", user);
 
-                this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, res, null, true);
+                this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, res);
                 //console.log("Auth passport user:", req.session.passport.user);
             } else {
                 // error in auth, redirect back to login
@@ -179,6 +179,7 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
 
             // save proxy session
             user[aConst.webappSessionPrefix] = session;
+            user.sessionId = req.session.id;
 
             console.log("logIn:", user);
             req.logIn(user, function(err) {
@@ -192,8 +193,6 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
                         // add courses
                         var tuser = _.clone(user);
                         tuser.courses = courses;
-                        // no need to send web session
-                        delete tuser.webSession;
 
                         done(user, req, function(){
                             res.writeHead(200);

@@ -78,55 +78,67 @@ Collector.prototype.setupRoutes = function() {
 
 Collector.prototype.startSession = function(req, outRes){
     try {
+        var headers = { cookie: "" };
+        var url = "http://localhost:" +this.options.validate.port + tConst.validate.api.session;
         //console.log("req.params:", req.params, ", req.body:", req.body);
-        var url = "http://localhost:" +this.options.validate.port + rConst.api.session.validate;
+
+        if(req.params.type == tConst.type.game) {
+            url += "/"+req.body.userSessionId;
+            delete req.body.userSessionId;
+        } else {
+            url += "/-";
+            headers.cookie = req.headers.cookie;
+        }
+
+        //console.log("req:", req);
+        //console.log("headers:", headers);
         //console.log("getSession url:", url);
-
-        var headers = {
-            cookie: req.headers.cookie
-        };
         this.requestUtil.getRequest(url, headers, req, function(err, res, data){
-                if(err) {
-                    console.log("Collector startSession Error:", err);
-                    return;
-                }
+            if(err) {
+                console.log("Collector startSession Error:", err);
+                return;
+            }
 
-                //console.log("statusCode:", res.statusCode, ", headers:",  res.headers);
-                //console.log("data:", data);
+            //console.log("statusCode:", res.statusCode, ", headers:",  res.headers);
+            //console.log("data:", data);
 
-                try {
-                    data = JSON.parse(data);
-                } catch(err) {
-                    console.log("Collector startSession JSON parse Error:", err);
-                    return;
-                }
+            try {
+                data = JSON.parse(data);
+            } catch(err) {
+                console.log("Collector startSession JSON parse Error:", err);
+                return;
+            }
 
-                // forward to webapp server
-                this.requestUtil.forwardRequestToWebApp({
-                        path: tConst.webapp.api + "/" + req.params.type + tConst.webapp.startsession,
-                        cookie: aConst.sessionCookieName + "=" + data[aConst.webappSessionPrefix]
-                    },
-                    req,
-                    outRes,
-                    function(err, body){
-                        if(err){
-                            console.error("Collector: Error -", err);
-                            return;
-                        }
+            //console.log("req.params:", req.params, ", req.body:", req.body);
 
-                        try{
-                            body = JSON.parse(body);
-                        } catch(err) {
-                            console.error("Collector: JSON parse Error -", err);
-                            //console.error("Collector: JSON data-", body);
-                            return;
-                        }
+            // forward to webapp server
+            this.requestUtil.forwardRequestToWebApp({
+                    cookie: aConst.sessionCookieName+"="+data[aConst.webappSessionPrefix]
+                },
+                req,
+                outRes,
+                function(err, res, body){
+                    if(err){
+                        console.error("Collector: Error -", err);
+                        return;
+                    }
 
-                        // add start session to Q
-                        this.qStartSession(body.gameSessionId);
-                    }.bind(this)
-                );
+                    try{
+                        body = JSON.parse(body);
+                    } catch(err) {
+                        console.error("Collector: JSON parse Error -", err);
+                        //console.error("Collector: JSON data -", body);
+                        return;
+                    }
+
+                    //console.log("Collector: JSON data:", body);
+
+                    // add start session to Q
+                    this.qStartSession(body.gameSessionId);
+                }.bind(this)
+            );
         }.bind(this) );
+
     } catch(err) {
         console.trace("Collector: Start Session Error -", err);
     }
@@ -134,7 +146,7 @@ Collector.prototype.startSession = function(req, outRes){
 
 Collector.prototype.sendBatchTelemetry = function(req, outRes){
     try {
-        if(req.params.type == "game") {
+        if(req.params.type == tConst.type.game) {
             var form = new multiparty.Form();
             form.parse(req, function(err, fields) {
                 if(err){
@@ -172,12 +184,11 @@ Collector.prototype.endSession = function(req, outRes){
 
         var done = function(req, outRes, jdata) {
             // forward to webapp server
-            var url = this.webAppUrl + tConst.webapp.api +"/"+req.params.type + tConst.webapp.endsession;
-
             if(jdata.gameSessionId) {
                 // save events
                 this.qSendBatch(jdata.gameSessionId, jdata, function sendBatchdone(){
-                    this.requestUtil.forwardPostRequest(url, jdata, outRes, function forwardRequestDone(){
+                    req.body = jdata;
+                    this.requestUtil.forwardRequestToWebApp({}, req, outRes, function forwardRequestDone(){
                         // add end session to Q
                         this.qEndSession(jdata.gameSessionId);
                     }.bind(this));
@@ -187,10 +198,9 @@ Collector.prototype.endSession = function(req, outRes){
                 console.error("Error:", err);
                 outRes.status(500).send('Error:'+err);
             }
-
         }.bind(this);
 
-        if(req.params.type == "game") {
+        if(req.params.type == tConst.type.game) {
             var form = new multiparty.Form();
             form.parse(req, function(err, fields) {
                 if(err){
@@ -216,59 +226,6 @@ Collector.prototype.endSession = function(req, outRes){
         console.trace("Collector: End Session Error -", err);
     }
 };
-
-/*
-Collector.prototype.postData = function(url, jdata, outRes, done) {
-    var purl = urlParser.parse(url);
-    var data = JSON.stringify(jdata);
-
-    var options = {
-        host: purl.hostname,
-        port: purl.port,
-        path: purl.pathname,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(data)
-        }
-    };
-
-    var req = http.request(options, function(res) {
-        res.setEncoding('utf8');
-
-        var body = "";
-        res.on('data', function (chunk) {
-            body += chunk;
-        });
-
-        res.on('end', function () {
-            if(done) done(body);
-
-            outRes.writeHead(200, {
-                'Content-Type':   'application/json',
-                'Content-Length': Buffer.byteLength(body)
-            });
-            outRes.end(body);
-        });
-    });
-
-    // http request timeout on start/end session
-    req.on('socket', function(socket) {
-        socket.setTimeout(this.options.collector.httpTimeout);
-        socket.on('timeout', function() {
-            req.abort();
-        });
-    }.bind(this));
-
-    req.on("error", function(err) {
-        console.trace("Collector: forwardRequest Error -", err);
-    });
-
-    req.write(data);
-    req.end();
-}
-*/
-
 
 // ---------------------------------------
 
