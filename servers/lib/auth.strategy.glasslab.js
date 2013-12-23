@@ -16,8 +16,8 @@ var MySQL    = require('./datastore.mysql.js');
 module.exports = Glasslab_Strategy;
 
 
-function Glasslab_Strategy(settings) {
-    this.settings = settings;
+function Glasslab_Strategy(options) {
+    this.options = options;
 
     this._usernameField = 'username';
     this._passwordField = 'password';
@@ -25,7 +25,7 @@ function Glasslab_Strategy(settings) {
     passport.Strategy.call(this);
     this.name = 'glasslab';
 
-    this.ds = new MySQL(this.settings.datastore);
+    this.ds = new MySQL(this.options.datastore.mysql);
     // Connect to data store
     this.ds.testConnection();
 }

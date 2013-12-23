@@ -2,21 +2,28 @@
  * Telemetry Dispatcher Module
  *
  * Module dependencies:
- *  lodash     - https://github.com/lodash/lodash
+ *  lodash - https://github.com/lodash/lodash
+ *  when   - https://github.com/cujojs/when
  *
  */
 // Third-party libs
-var _         = require('lodash');
+var _    = require('lodash');
+var when = require('when');
+var uuid = require('node-uuid');
 // load at runtime
 var MySQL;
 
 function TelemDS_Mysql(options){
     // Glasslab libs
-    MySQL = require('./datastore.mysql.js');
+    MySQL  = require('./datastore.mysql.js');
+    tConst = require('./telemetry.const.js');
 
     this.options = _.merge(
         {
-            datastore: {}
+            "host"    : "localhost",
+            "user"    : "root",
+            "password": "",
+            "database": ""
         },
         options
     );
@@ -26,8 +33,11 @@ function TelemDS_Mysql(options){
     this.ds.testConnection();
 }
 
-TelemDS_Mysql.prototype.saveEvents = function(jdata, done){
-    var q = "";
+TelemDS_Mysql.prototype.saveEvents = function(jdata){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q = "";
     var qInsertData = [];
 
     for(var i in jdata.events){
@@ -40,20 +50,138 @@ TelemDS_Mysql.prototype.saveEvents = function(jdata, done){
             this.ds.escape(jdata.gameSessionId),
             "NOW()",
             this.ds.escape(jdata.events[i].name),
-            "UNIX_TIMESTAMP(NOW())",
-            "(SELECT user_id FROM GL_SESSION WHERE SESSION_ID="+this.ds.escape(jdata.gameSessionId)+")"
+            "UNIX_TIMESTAMP()",
+            "(SELECT user_id FROM GL_SESSION WHERE session_id="+this.ds.escape(jdata.gameSessionId)+")"
         ];
         qInsertData.push( "("+row.join(",")+")" );
     }
 
-    q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) VALUES ";
-    q += qInsertData.join(",");
-    //console.log('q:', q);
+    Q = "INSERT INTO GL_ACTIVITY_EVENTS (" +
+        "id," +
+        "version," +
+        "data," +
+        "date_created," +
+        "game," +
+        "game_session_id," +
+        "last_updated," +
+        "name," +
+        "timestamp," +
+        "user_id" +
+        ") VALUES ";
+    Q += qInsertData.join(",");
+    //console.log('Q:', Q);
 
-    this.ds.query(q, function(err) {
-        done(err);
+    this.ds.query(Q, function(err) {
+        if(err) {
+            reject(err);
+            return;
+        }
+        resolve();
     }.bind(this));
-}
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Mysql.prototype.startGameSession = function(userId, courseId, activityId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    // create session ID
+    var gameSessionId = uuid.v1();
+    var values = [
+        "NULL",
+        0,
+        this.ds.escape(activityId),
+        this.ds.escape(courseId),
+        "NOW()",
+        "NULL",
+        "NOW()",
+        "NULL",
+        this.ds.escape(gameSessionId),
+        "UNIX_TIMESTAMP()",
+        this.ds.escape(userId)
+    ];
+    values = values.join(',');
+
+    var Q = "INSERT INTO GL_SESSION (" +
+        "id," +
+        "version," +
+        "activity_id," +
+        "course_id," +
+        "date_created," +
+        "end_time," +
+        "last_updated," +
+        "reason_ended," +
+        "session_id," +
+        "start_time," +
+        "user_id" +
+        ") VALUES("+values+")";
+
+    this.ds.query(Q, function(err) {
+        if(err) {
+            reject(err);
+            return;
+        }
+        resolve(gameSessionId);
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Mysql.prototype.cleanUpOldGameSessions = function(userId, activityId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "UPDATE GL_SESSION" +
+        " SET" +
+        "  end_time=UNIX_TIMESTAMP()," +
+        "  reason_ended="+this.ds.escape(tConst.game.session.cleanup) +
+        " WHERE" +
+        "  user_id="+this.ds.escape(userId)+" AND" +
+        "  activity_id="+this.ds.escape(activityId)+" AND" +
+        "  end_time IS NULL";
+    this.ds.query(Q, function(err) {
+        if(err) {
+            reject(err);
+            return;
+        }
+        resolve();
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Mysql.prototype.endGameSession = function(gameSessionId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "UPDATE GL_SESSION" +
+        " SET" +
+        "  end_time=UNIX_TIMESTAMP()," +
+        "  reason_ended="+this.ds.escape(tConst.game.session.ended) +
+        " WHERE" +
+        "  session_id="+this.ds.escape(gameSessionId);
+    this.ds.query(Q, function(err) {
+        if(err) {
+            reject(err);
+            return;
+        }
+        resolve();
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
 
 module.exports = TelemDS_Mysql;
 

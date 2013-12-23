@@ -3,21 +3,24 @@
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
+ *  when       - https://github.com/cujojs/when
  *  express    - https://github.com/visionmedia/express
  *  multiparty - https://github.com/superjoe30/node-multiparty
  *  redis      - https://github.com/mranney/node_redis
  *
  */
 
-var urlParser  = require('url');
 var http       = require('http');
 // Third-party libs
 var _          = require('lodash');
+var when       = require('when');
+var parallel   = require('when/parallel');
 var express    = require('express');
 var multiparty = require('multiparty');
 var redis      = require('redis');
 // load at runtime
-var RequestUtil, tConst, rConst;
+var RequestUtil, aConst, tConst, rConst;
+var myDS, cbDS;
 
 module.exports = Collector;
 
@@ -28,6 +31,9 @@ function Collector(options){
         aConst      = require('./auth.js').Const;
         tConst      = require('./telemetry.js').Const;
         rConst      = require('./routes.js').Const;
+        myDS        = require('./telemetry.js').Datastore.MySQL;
+        cbDS        = require('./telemetry.js').Datastore.Couchbase;
+        WebStore    = require('./webapp.js').Datastore.MySQL;
 
         this.options = _.merge(
             {
@@ -39,14 +45,15 @@ function Collector(options){
         );
 
         this.requestUtil = new RequestUtil(this.options);
+        this.webstore    = new WebStore(this.options);
+        this.myds        = new myDS(this.options.datastore.mysql);
+        this.cbds        = new cbDS(this.options.datastore.couchbase);
 
         this.app   = express();
         this.queue = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
         if(this.options.queue.db) {
             this.queue.select(this.options.queue.db);
         }
-
-        this.webAppUrl = this.options.auth.protocol+"//"+this.options.auth.host+":"+this.options.auth.port;
 
         this.app.set('port', this.options.collector.port);
         this.app.use(express.logger());
@@ -80,13 +87,11 @@ Collector.prototype.startSession = function(req, outRes){
     try {
         var headers = { cookie: "" };
         var url = "http://localhost:" +this.options.validate.port + tConst.validate.api.session;
-        //console.log("req.params:", req.params, ", req.body:", req.body);
 
         if(req.params.type == tConst.type.game) {
             url += "/"+req.body.userSessionId;
             delete req.body.userSessionId;
         } else {
-            url += "/-";
             headers.cookie = req.headers.cookie;
         }
 
@@ -101,7 +106,6 @@ Collector.prototype.startSession = function(req, outRes){
 
             //console.log("statusCode:", res.statusCode, ", headers:",  res.headers);
             //console.log("data:", data);
-
             try {
                 data = JSON.parse(data);
             } catch(err) {
@@ -110,33 +114,60 @@ Collector.prototype.startSession = function(req, outRes){
             }
 
             //console.log("req.params:", req.params, ", req.body:", req.body);
+            var gameType = req.body.gameType;
+            var userId   = data.userId;
+            var courseId = parseInt(req.body.courseId);
+            var collectTelemetry = data.collectTelemetry;
+            var gSessionId = "";
+            var isVersionValid = false;
 
-            // forward to webapp server
-            this.requestUtil.forwardRequestToWebApp({
-                    cookie: aConst.sessionCookieName+"="+data[aConst.webappSessionPrefix]
-                },
-                req,
-                outRes,
-                function(err, res, body){
-                    if(err){
-                        console.error("Collector: Error -", err);
-                        return;
-                    }
+            // only if game
+            if(req.params.type == tConst.type.game) {
+                // validate game version if version is passed exists
+                var isVersionValid = this.validateGameVersion(gameType, req.body.gameVersion);
+            }
 
-                    try{
-                        body = JSON.parse(body);
-                    } catch(err) {
-                        console.error("Collector: JSON parse Error -", err);
-                        //console.error("Collector: JSON data -", body);
-                        return;
-                    }
+            // clean up old game session
+            this.myds.cleanUpOldGameSessions(userId, gameType)
+            // start session
+            .then(function(){
+                return this.myds.startGameSession(userId, courseId, gameType);
+            }.bind(this) )
+            // start activity session
+            .then(function(gameSessionId){
+                // save for later
+                gSessionId = gameSessionId;
+                return this.webstore.createActivityResults(gameSessionId, userId, courseId, gameType);
+            }.bind(this) )
+            // get config settings
+            .then(function(){
+                return this.webstore.getConfigs();
+            }.bind(this) )
+            // all ok, done
+            .then(function(configs){
+                // override details if user collectTelemetry is set
+                if(collectTelemetry) {
+                    configs.eventsDetailLevel = 10;
+                }
 
-                    //console.log("Collector: JSON data:", body);
+                var outData = {
+                    versionValid:      isVersionValid,
+                    gameSessionId:     gSessionId,
+                    eventsMaxSize:     configs.eventsMaxSize,
+                    eventsMinSize:     configs.eventsMinSize,
+                    eventsPeriodSecs:  configs.eventsPeriodSecs,
+                    eventsDetailLevel: configs.eventsDetailLevel
+                };
 
-                    // add start session to Q
-                    this.qStartSession(body.gameSessionId);
-                }.bind(this)
-            );
+                //console.log("configs:", configs);
+                this.requestUtil.jsonResponse(outRes, outData);
+            }.bind(this) )
+            // catch all errors
+            .then(null, function(err) {
+                console.error("Collector end Session Error:", err);
+                outRes.status(500).send('Error:'+err);
+            }.bind(this) );
+
         }.bind(this) );
 
     } catch(err) {
@@ -182,17 +213,48 @@ Collector.prototype.endSession = function(req, outRes){
     try {
         //console.log("req.params:", req.params, ", req.body:", req.body);
 
-        var done = function(req, outRes, jdata) {
+        var done = function(jdata) {
+            //console.log("endSession jdata:", jdata);
             // forward to webapp server
             if(jdata.gameSessionId) {
+
                 // save events
-                this.qSendBatch(jdata.gameSessionId, jdata, function sendBatchdone(){
-                    req.body = jdata;
-                    this.requestUtil.forwardRequestToWebApp({}, req, outRes, function forwardRequestDone(){
-                        // add end session to Q
-                        this.qEndSession(jdata.gameSessionId);
-                    }.bind(this));
-                }.bind(this));
+                this.qSendBatch(jdata.gameSessionId, jdata)
+                .then(function sendBatchDone(score){
+                    // all done in parallel
+                    var p = parallel([
+                        // create challenge submission if challenge exists
+                        function() {
+                            this.webstore.createChallengeSubmission(jdata)
+                        }.bind(this),
+                        // end game session
+                        function() {
+                            return this.myds.endGameSession(jdata.gameSessionId);
+                        }.bind(this),
+                        // end activity session
+                        function() {
+                            return this.webstore.updateActivityResults(jdata.gameSessionId, score, jdata.cancelled);
+                        }.bind(this)
+                    ])
+                    // when all done
+                    // add end session to Q
+                    .then( function() {
+                        return this.qEndSession(jdata.gameSessionId);
+                    }.bind(this) );
+
+                    return p;
+                }.bind(this))
+                // all done
+                .then( function() {
+                    outRes.status(200).send('{}');
+                    return;
+                }.bind(this) )
+                // catch all errors
+                .then(null, function(err) {
+                    console.error("Collector end Session Error:", err);
+                    outRes.status(500).send('Error:'+err);
+                }.bind(this) );
+
             } else {
                 var err = "gameSessionId missing!";
                 console.error("Error:", err);
@@ -215,26 +277,79 @@ Collector.prototype.endSession = function(req, outRes){
                     if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
 
                     //console.log("fields:", fields);
-                    done(req, outRes, fields);
+                    done(fields);
                 }
             });
         } else {
             //console.log("end session body:", req.body);
-            done(req, outRes, req.body);
+            done(req.body);
         }
     } catch(err) {
         console.trace("Collector: End Session Error -", err);
     }
 };
-
 // ---------------------------------------
 
+
+Collector.prototype.validateGameVersion = function(gameType, gameVersion){
+    // Grab indices of specific delimeters
+    var gameMajorDelimeter     = gameVersion.indexOf( "_" );
+    var majorMinorDelimeter    = gameVersion.indexOf( "." );
+    var minorRevisionDelimeter = gameVersion.lastIndexOf( "." );
+
+    // If any of these indices are invalid, the version is invalid
+    if( gameMajorDelimeter < 0 ||
+        majorMinorDelimeter < 0 ||
+        minorRevisionDelimeter < 0 ) {
+        console.warn( "Game version format was invalid:", gameVersion );
+        return false;
+    }
+
+    // Parse the gameVersion string and grab game, major, minor, and revision
+    var game           = gameVersion.substring( 0, gameMajorDelimeter );
+    var major          = parseInt(gameVersion.substring( gameMajorDelimeter + 1, majorMinorDelimeter ) );
+    var minor          = parseInt(gameVersion.substring( majorMinorDelimeter + 1, minorRevisionDelimeter ) );
+    var revisionString = gameVersion.substring( minorRevisionDelimeter + 1 );
+    var revision = 0;
+
+    // Check the revision for an appended character (used internally to indicate server)
+    // /^[a-z]/i == check if between a to z when lowercase
+    if( /^[a-z]/i.test(revisionString.charAt(revisionString.length - 1)) ) {
+        console.warn( "Found character in revision:", revisionString );
+        revisionString = revisionString.substring( 0, revisionStringlength - 1 );
+    }
+    revision = parseInt(revisionString);
+
+    console.log( "Game version:", gameVersion,
+                ", game:", game,
+                ", major:", major,
+                ", minor:", minor,
+                ", revision:", revision);
+
+    var validGameVersions = tConst.game.versions;
+    // Check existence of the game key
+    if( !validGameVersions.hasOwnProperty(game) ) {
+        console.warn( "Game type " + game + " did not exist as a valid version." );
+        return false;
+    }
+
+    // Check against the expected major, minor, and revision
+    var versionInfo = validGameVersions[game];
+    if( major < versionInfo.major ||
+        minor < versionInfo.minor ||
+        revision < versionInfo.revision ) {
+        console.warn( "Game version is invalid and needs to be updated:", gameVersion );
+        return false;
+    }
+
+    // The version is valid, allow play
+    return true;
+};
 
 // ---------------------------------------
 // Queue function
-Collector.prototype.qStartSession = function(id, done) {
+Collector.prototype.qStartSession = function(id) {
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
-
     this.queue.lpush(telemetryInKey,
         JSON.stringify({
             id: id,
@@ -242,36 +357,81 @@ Collector.prototype.qStartSession = function(id, done) {
         }),
         function(err){
             if(err) {
-                console.error("Collector: Start Error-", err);
+                console.error("Collector: qStart Error-", err);
             }
-
-            // done callback
-            if(done) done();
         }
     );
 }
 
-Collector.prototype.qSendBatch = function(id, data, done) {
+Collector.prototype.qSendBatch = function(id, data) {
+// add promise wrapper
+return when.promise(function(resolve, reject, notify) {
+// ------------------------------------------------
+
     var batchInKey = tConst.batchKey+":"+id+":"+tConst.inKey;
+
+    var score = 0;
+    if(data.stars) {
+        score = data.stars;
+    }
 
     // if object convert data to string
     if(_.isObject(data)) {
+        if(data.events) {
+
+            // parse events
+            try {
+                data.events = JSON.parse(data.events);
+            } catch(err) {
+                console.error("Collector: Error -", err, ", JSON events:", data.events);
+                reject(err);
+                return;
+            }
+
+            if(!data.events.length) {
+                resolve(score);
+                return;
+            }
+
+            // find score if it exists
+            for(var i in data.events) {
+                if( data.events[i].name &&
+                    data.events[i].name == tConst.game.scoreKey) {
+                    if( data.events[i].eventData &&
+                        data.events[i].eventData.stars) {
+                        score = data.events[i].eventData.stars;
+                    }
+                }
+            }
+
+        } else {
+            // no events
+            resolve(score);
+            return;
+        }
+
         data = JSON.stringify(data);
     }
 
     this.queue.lpush(batchInKey, data, function(err){
         if(err) {
             console.error("Collector: Batch Error -", err);
+            reject(err);
+            return;
         }
-
-        // done callback
-        if(done) done();
+        resolve(score);
     });
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 }
 
-Collector.prototype.qEndSession = function(id, done) {
+Collector.prototype.qEndSession = function(id) {
+// add promise wrapper
+return when.promise(function(resolve, reject, notify) {
+// ------------------------------------------------
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
-
     this.queue.lpush(telemetryInKey,
         JSON.stringify({
             id: id,
@@ -280,11 +440,14 @@ Collector.prototype.qEndSession = function(id, done) {
         function(err){
             if(err) {
                 console.error("Collector: End Error -", err);
+                reject(err);
+                return;
             }
-
-            // done callback
-            if(done) done();
+            resolve();
         }
     );
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 }
 // ---------------------------------------

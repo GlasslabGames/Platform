@@ -18,10 +18,17 @@
         "port": 6379
     },
     "datastore": {
-        "host"    : "localhost",
-        "user"    : "glasslab",
-        "password": "glasslab",
-        "database": "glasslab_dev"
+        "mysql": {
+            "host"    : "localhost",
+            "user"    : "glasslab",
+            "password": "glasslab",
+            "database": "glasslab_dev"
+        },
+        "couchbase": {
+            "host":     "localhost:8091",
+            "bucket":   "glasslab_webapp",
+            "password": "glasslab"
+        }
     },
     "sessionstore": {
         "host":     "localhost:8091",

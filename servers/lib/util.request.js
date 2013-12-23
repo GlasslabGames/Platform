@@ -32,7 +32,7 @@ RequestUtil.prototype.errorResponse = function(res, errorStr){
 };
 
 RequestUtil.prototype.jsonResponse = function(res, obj){
-    var json = JSON.stringify(obj);
+    var json = _.isObject(obj) ? JSON.stringify(obj) : obj;
     res.writeHead(200, {
         "Content-Type": "application/json",
         "Content-Length": json.length

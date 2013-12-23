@@ -137,7 +137,13 @@ AuthSessionServer.prototype.getWASession = function(id, done){
 
     this.sessionStore.get(key, function(err, result) {
         if(err) {
-            return done(err);
+            if(err.code == 13) { // No such key
+                console.warn("AuthSessionServer webapp session key missing:", key);
+                done();
+            } else {
+                done(err);
+            }
+            return;
         }
 
         if(done) done(null, result);
@@ -149,7 +155,13 @@ AuthSessionServer.prototype.getSession = function(id, done){
 
     this.sessionStore.get(key, function(err, result) {
         if(err) {
-            return done(err);
+            if(err.code == 13) { // No such key
+                console.warn("AuthSessionServer session key missing:", key);
+                done();
+            } else {
+                done(err);
+            }
+            return;
         }
 
         if(done) done(null, result);

@@ -69,8 +69,9 @@ function AuthValidateServer(options){
 AuthValidateServer.prototype.setupRoutes = function() {
     try {
         // GET
-        this.app.get(rConst.api.wa_session.validate, this.validateWASession.bind(this));
-        this.app.get(rConst.api.session.validate,    this.validateSession.bind(this));
+        this.app.get(rConst.api.wa_session.validate,    this.validateWASession.bind(this));
+        this.app.get(rConst.api.session.validateWithId, this.validateSession.bind(this));
+        this.app.get(rConst.api.session.validateNoId,   this.validateSession.bind(this));
 
         // DEFAULT
         this.app.use(function defaultRoute(req, res) {
@@ -88,8 +89,7 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
     // only allow local connections
     if(req.connection.remoteAddress == "127.0.0.1")
     {
-        if( req.params.id &&
-            req.params.id != "-" ) {
+        if( req.params.id ) {
             // using real session get webapp session
             this.sessionServer.getSession(req.params.id, function(err, result) {
                 if(err) {
@@ -103,18 +103,27 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
                     result.value.passport &&
                     result.value.passport.user) {
                     var data = this.sessionServer.buildWASession(result.value.passport.user.wa_session);
+
+                    data.userId = result.value.passport.user.id;
+                    data.collectTelemetry = result.value.passport.user.collectTelemetry;
                     jsonResponse(res, data);
                 } else {
                     errorResponse(res, "missing session");
                 }
             }.bind(this));
         } else {
-            //console.log("session:", session);
+            //console.log("session:", req.session);
             this.sessionServer.getCookieWASession(req, function(err, data){
                 if(err) {
                     return errorResponse(res, err);
                 }
 
+                if( req.session &&
+                    req.session.passport &&
+                    req.session.passport.user ){
+                    data.userId = req.session.passport.user.id;
+                    data.collectTelemetry = req.session.passport.user.collectTelemetry;
+                }
                 jsonResponse(res, data);
             }.bind(this));
         }

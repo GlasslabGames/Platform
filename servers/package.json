@@ -3,15 +3,17 @@
     "version": "0.0.5",
     "private": true,
     "dependencies": {
+        "when":       "*",
+        "lodash":     "*",
         "express":    "~3.4.4",
-        "mysql":      "~2.0.0-rc1",
         "multiparty": "~3.1.0",
         "request":    "~2.27.0",
+        "mysql":      "~2.0.0-rc1",
         "redis":      "~0.9.0",
         "hiredis":    "~0.1.15",
-        "lodash":     "*",
         "couchbase":  "*",
         "passport":   "*",
-        "passport-local": "*"
+        "passport-local": "*",
+        "node-uuid":  "*"
     }
 }

@@ -8,6 +8,7 @@ module.exports = {
     Collector:  require('./telemetry.collector.js'),
     Dispatcher: require('./telemetry.dispatcher.js'),
     Datastore: {
-        MySQL:  require('./telemetry.datastore.mysql.js')
+        MySQL:     require('./telemetry.datastore.mysql.js'),
+        Couchbase: require('./telemetry.datastore.couchbase.js')
     }
 }

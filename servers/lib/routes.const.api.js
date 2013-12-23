@@ -12,7 +12,8 @@ module.exports = {
         validate:       api+'/wa-session/validate/:id'
     },
     session: {
-        validate:       api+'/session/validate/:id'
+        validateWithId: api+'/session/validate/:id',
+        validateNoId:   api+'/session/validate'
     },
     startsession:       api+'/:type/startsession',
     sendtelemetrybatch: api+'/:type/sendtelemetrybatch',

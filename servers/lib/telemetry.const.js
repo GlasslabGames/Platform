@@ -12,13 +12,21 @@ module.exports = {
   start:        'start',
   end:          'end',
   type: {
-      game: 'game',
+      game:      'game',
       challenge: 'challenge'
   },
   validate: {
       api: {
           session: '/api/session/validate'
       }
+  },
+  game: {
+      session: {
+          ended:   "ended",
+          cleanup: "cleanup"
+      },
+      scoreKey: "GL_Scenario_Score",
+      versions: require('./telemetry.const.game_versions')
   },
   webapp: {
       api: '/api',

@@ -31,7 +31,7 @@ function AuthServer(options){
         aConst        = require('./auth.js').Const;
         rConst        = require('./routes.js').Const;
         SessionServer = require('./auth.js').SessionServer;
-        WebStore      = require('./datastore.web.js');
+        WebStore      = require('./webapp.js').Datastore.MySQL;
 
         this.options = _.merge(
             {
@@ -41,8 +41,7 @@ function AuthServer(options){
         );
 
         this.requestUtil = new RequestUtil(this.options);
-
-        this.webstore = new WebStore(this.options);
+        this.webstore    = new WebStore(this.options);
 
         this.app = express();
         this.app.set('port', this.options.auth.port);
@@ -208,68 +207,3 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
 
     auth(req, res, next);
 };
-
-/*
-AuthServer.prototype.forwardRequest = function(user, req, res, done, auth){
-
-    var options = {
-        protocol: this.options.webapp.protocol,
-        host:     this.options.webapp.host,
-        port:     this.options.webapp.port,
-        path:     req.originalUrl,
-        method:   req.method,
-        headers:  req.headers
-    };
-
-    // if user, override cookie otherwise no cookie
-    if(user) {
-        options.headers.cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
-    } else {
-        delete options.headers.cookie;
-    }
-
-    var data = "";
-    if(req.body && req.method == "POST") {
-        data = JSON.stringify(req.body);
-    }
-
-    if(auth){
-        console.log("forwardRequest url:",     options.path);
-        console.log("forwardRequest method:",  options.method);
-        console.log("forwardRequest cookie:",  options.headers.cookie);
-        console.log("forwardRequest data:",    data);
-        //console.log("forwardRequest user:",    user);
-    }
-
-    var sreq = http.request(options, function(sres) {
-        // remove set cookie, but send test
-        delete sres.headers['set-cookie'];
-        res.writeHead(sres.statusCode, sres.headers);
-
-        sres.on('data', function(chunk){
-            res.write(chunk);
-        });
-
-        sres.on('end', function(){
-            res.end();
-            // call done function if exist
-            if(done) {
-                done(null);
-            }
-        });
-
-    }).on('error', function(e) {
-            console.error("Auth: forwardRequest Error -", e.message);
-            res.writeHead(500);
-            res.end();
-
-            done(e);
-        });
-
-    if(data.length > 0) {
-        sreq.write( data );
-    }
-
-    sreq.end();
-};
-*/

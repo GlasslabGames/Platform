@@ -9,15 +9,16 @@
  *
  */
 // Third-party libs
-var _         = require('lodash');
-var request   = require('request');
-var redis     = require('redis');
+var _       = require('lodash');
+var when    = require('when');
+var request = require('request');
+var redis   = require('redis');
 // Glasslab libs
 var tConst, DS;
 
 function Dispatcher(options){
-    tConst    = require('./telemetry.js').Const;
-    DS        = require('./telemetry.js').Datastore.MySQL;
+    tConst  = require('./telemetry.js').Const;
+    DS      = require('./telemetry.js').Datastore.MySQL;
 
     this.options = _.merge(
         {
@@ -31,7 +32,7 @@ function Dispatcher(options){
     this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
 
-    this.ds = new DS(this.options.datastore);
+    this.ds = new DS(this.options.datastore.mysql);
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
@@ -85,7 +86,13 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
             //console.log(telemetryMetaKey, " data:", data);
             // check date
             _.forEach(data, function(value, sessionId){
-                var meta = JSON.parse(value);
+                var meta = value;
+                try {
+                    meta = JSON.parse(meta);
+                } catch(err) {
+                    console.error("Dispatcher: meta Error -", err, ", JSON data:", meta);
+                    return;
+                }
                 //console.log("id", sessionId, ", metaData:", meta);
 
                 var startTime = new Date(meta.date).getTime();
@@ -152,7 +159,12 @@ Dispatcher.prototype.getTelemetryBatch = function(){
         // if telemetry has data
         if(telemData) {
             // convert string to object
-            telemData = JSON.parse(telemData);
+            try {
+                telemData = JSON.parse(telemData);
+            } catch(err) {
+                console.error("Dispatcher: getTelemetryBatch Error -", err, ", JSON data:", telemData);
+                return;
+            }
             //console.log("Dispatcher: getTelemetryBatch data:", telemData);
 
             // update date in meta data
@@ -194,6 +206,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
             // wait some time before start assessment
             setTimeout(function(){
 
+                console.error("TODO: ENABLE ASSESSMENT!!!");
                 /*
                 var url = this.assessmentUrl + sessionId;
                 request.post(url, function (err, postRes, body) {
@@ -250,11 +263,14 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
                 //console.log("Dispatcher: JSON data:", jrow);
 
                 if(jrow.events) {
-                    try {
-                        jrow.events = JSON.parse(jrow.events);
-                    } catch(err) {
-                        console.error("Dispatcher: Error -", err, ", JSON events:", jrow.events);
-                        break;
+
+                    if(_.isString(jrow.events)) {
+                        try {
+                            jrow.events = JSON.parse(jrow.events);
+                        } catch(err) {
+                            console.error("Dispatcher: Error -", err, ", JSON events:", jrow.events);
+                            break;
+                        }
                     }
 
                     if(!jrow.events.length) {
@@ -277,7 +293,11 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
                 //console.log("Dispatcher: events:", jdata.events);
                 console.log("Dispatcher: gameSessionID:", jdata.gameSessionId, ", event count:", jdata.events.length);
 
-                this.ds.saveEvents(jdata, done);
+                this.ds.saveEvents(jdata)
+                    .then(
+                        function(){ done(); },
+                        function(err){ done(err); }
+                    );
             } else {
                 console.error("Dispatcher: sendItemToDataStore missing gameSessionId");
             }
