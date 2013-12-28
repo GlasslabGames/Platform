@@ -41,7 +41,7 @@ function AuthServer(options){
         );
 
         this.requestUtil = new RequestUtil(this.options);
-        this.webstore    = new WebStore(this.options);
+        this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
 
         this.app = express();
         this.app.set('port', this.options.auth.port);
@@ -94,7 +94,7 @@ AuthServer.prototype.setupRoutes = function() {
             } else {
                 // error in auth, redirect back to login
                 console.error("Auth: Not Authenticated");
-                res.redirect(rConst.api.login)
+                res.redirect(rConst.root)
             }
             return;
         }.bind(this);

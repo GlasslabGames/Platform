@@ -1,23 +1,22 @@
 /**
- * Telemetry Collector - App Server
+ * Assessment - App Server
  */
-var telemetry     = require('./lib/telemetry.js');
+var Assessment    = require('./lib/assessment.js');
 var ConfigManager = require('./lib/config.manager.js');
 
 var config = new ConfigManager();
 // load config files from first to last until successful
 var options = config.loadSync([
     "./config.json",
-    "~/config.telemetry.json",
     "~/hydra.config.json"
 ]);
 
 console.log("---------------------------------------------");
-console.log("-- Telemetry Collector App Server - Start");
+console.log("-- Assessment App Server - Start");
 console.log("---------------------------------------------");
 
-var c = new telemetry.Collector(options);
+var a = new Assessment.Server(options);
 
 process.on('uncaughtException', function(err) {
-    console.error("Collector: Uncaught Error -", err);
+    console.trace("Assessment: Uncaught Error -", err);
 });

@@ -25,6 +25,8 @@ module.exports = {
           ended:   "ended",
           cleanup: "cleanup"
       },
+      sessionKey: "gs",
+      eventsKey: "events",
       scoreKey: "GL_Scenario_Score",
       versions: require('./telemetry.const.game_versions')
   },

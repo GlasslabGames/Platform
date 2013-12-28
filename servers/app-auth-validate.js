@@ -8,8 +8,7 @@ var config = new ConfigManager();
 // load config files from first to last until successful
 var options = config.loadSync([
     "./config.json",
-    "~/config.telemetry.json",
-    "~/config.glasslab.json"
+    "~/hydra.config.json"
 ]);
 
 console.log("---------------------------------------------");

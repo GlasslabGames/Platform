@@ -20,19 +20,15 @@ function WebStore_MySQL(options){
 
     this.options = _.merge(
         {
-            datastore: {
-                mysql: {
-                    host    : "localhost",
-                    user    : "glasslab",
-                    password: "glasslab",
-                    database: "glasslab_dev"
-                }
-            }
+            host    : "localhost",
+            user    : "glasslab",
+            password: "glasslab",
+            database: "glasslab_dev"
         },
         options
     );
 
-    this.ds = new MySQL(this.options.datastore.mysql);
+    this.ds = new MySQL(this.options);
     // Connect to data store
     this.ds.testConnection();
 }

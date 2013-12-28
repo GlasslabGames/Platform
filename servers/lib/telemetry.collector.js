@@ -32,22 +32,21 @@ function Collector(options){
         tConst      = require('./telemetry.js').Const;
         rConst      = require('./routes.js').Const;
         myDS        = require('./telemetry.js').Datastore.MySQL;
-        cbDS        = require('./telemetry.js').Datastore.Couchbase;
+        //cbDS        = require('./telemetry.js').Datastore.Couchbase;
         WebStore    = require('./webapp.js').Datastore.MySQL;
 
         this.options = _.merge(
             {
                 queue:     { port: null, host: null, db:0 },
-                settings:  { protocol: 'http', host: 'localhost', port: 8082},
                 collector: { port: 8081 }
             },
             options
         );
 
         this.requestUtil = new RequestUtil(this.options);
-        this.webstore    = new WebStore(this.options);
-        this.myds        = new myDS(this.options.datastore.mysql);
-        this.cbds        = new cbDS(this.options.datastore.couchbase);
+        this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
+        this.myds        = new myDS(this.options.telemetry.datastore.mysql);
+        //this.cbds        = new cbDS(this.options.telemetry.datastore.couchbase);
 
         this.app   = express();
         this.queue = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
@@ -98,6 +97,7 @@ Collector.prototype.startSession = function(req, outRes){
         //console.log("req:", req);
         //console.log("headers:", headers);
         //console.log("getSession url:", url);
+        // validate session
         this.requestUtil.getRequest(url, headers, req, function(err, res, data){
             if(err) {
                 console.log("Collector startSession Error:", err);
@@ -118,7 +118,7 @@ Collector.prototype.startSession = function(req, outRes){
             var userId   = data.userId;
             var courseId = parseInt(req.body.courseId);
             var collectTelemetry = data.collectTelemetry;
-            var gSessionId = "";
+            var gSessionId = null;
             var isVersionValid = false;
 
             // only if game
@@ -133,11 +133,15 @@ Collector.prototype.startSession = function(req, outRes){
             .then(function(){
                 return this.myds.startGameSession(userId, courseId, gameType);
             }.bind(this) )
-            // start activity session
+            // start queue session
             .then(function(gameSessionId){
                 // save for later
                 gSessionId = gameSessionId;
-                return this.webstore.createActivityResults(gameSessionId, userId, courseId, gameType);
+                this.qStartSession(gameSessionId, userId)
+            }.bind(this) )
+            // start activity session
+            .then(function(){
+                return this.webstore.createActivityResults(gSessionId, userId, courseId, gameType);
             }.bind(this) )
             // get config settings
             .then(function(){
@@ -218,10 +222,14 @@ Collector.prototype.endSession = function(req, outRes){
             // forward to webapp server
             if(jdata.gameSessionId) {
 
+                // validate session
+                this.qValidate(jdata.gameSessionId)
                 // save events
-                this.qSendBatch(jdata.gameSessionId, jdata)
-                .then(function sendBatchDone(score){
-                    // all done in parallel
+                .then(function(){
+                    return this.qSendBatch(jdata.gameSessionId, jdata)
+                }.bind(this))
+                // all done in parallel
+                .then(function (score){
                     var p = parallel([
                         // create challenge submission if challenge exists
                         function() {
@@ -239,6 +247,8 @@ Collector.prototype.endSession = function(req, outRes){
                     // when all done
                     // add end session to Q
                     .then( function() {
+                        console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
+
                         return this.qEndSession(jdata.gameSessionId);
                     }.bind(this) );
 
@@ -348,12 +358,17 @@ Collector.prototype.validateGameVersion = function(gameType, gameVersion){
 
 // ---------------------------------------
 // Queue function
-Collector.prototype.qStartSession = function(id) {
-    var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
-    this.queue.lpush(telemetryInKey,
+Collector.prototype.qStartSession = function(gameSessionId, userId) {
+// add promise wrapper
+return when.promise(function(resolve, reject, notify) {
+// ------------------------------------------------
+    var batchInKey = tConst.batchKey+":"+gameSessionId+":"+tConst.inKey;
+
+    // create list and add userId
+    this.queue.lpush(batchInKey,
         JSON.stringify({
-            id: id,
-            type: tConst.start
+            gameSessionId: gameSessionId,
+            userId:        userId
         }),
         function(err){
             if(err) {
@@ -361,7 +376,37 @@ Collector.prototype.qStartSession = function(id) {
             }
         }
     );
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 }
+
+Collector.prototype.qValidate = function(id) {
+// add promise wrapper
+return when.promise(function(resolve, reject, notify) {
+// ------------------------------------------------
+
+    var batchInKey = tConst.batchKey+":"+id+":"+tConst.inKey;
+
+    this.queue.llen(batchInKey, function(err, count){
+        if(err) {
+            console.error("Collector: Batch Error -", err);
+            reject(err);
+            return;
+        }
+
+        if(count > 1) {
+            resolve();
+        } else {
+            reject(new Error("session never created"));
+        }
+    });
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
+
 
 Collector.prototype.qSendBatch = function(id, data) {
 // add promise wrapper
@@ -410,15 +455,18 @@ return when.promise(function(resolve, reject, notify) {
             return;
         }
 
+        //console.log("Collector: gameVersion", data.gameVersion);
         data = JSON.stringify(data);
     }
 
-    this.queue.lpush(batchInKey, data, function(err){
+    // X prevents from creating a list if does not exist
+    this.queue.lpushx(batchInKey, data, function(err){
         if(err) {
             console.error("Collector: Batch Error -", err);
             reject(err);
             return;
         }
+
         resolve(score);
     });
 
@@ -432,6 +480,7 @@ Collector.prototype.qEndSession = function(id) {
 return when.promise(function(resolve, reject, notify) {
 // ------------------------------------------------
     var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
+
     this.queue.lpush(telemetryInKey,
         JSON.stringify({
             id: id,

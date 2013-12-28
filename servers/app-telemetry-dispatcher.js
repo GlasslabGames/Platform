@@ -9,7 +9,7 @@ var config = new ConfigManager();
 var options = config.loadSync([
     "./config.json",
     "~/config.telemetry.json",
-    "~/config.glasslab.json"
+    "~/hydra.config.json"
 ]);
 
 console.log("---------------------------------------------");

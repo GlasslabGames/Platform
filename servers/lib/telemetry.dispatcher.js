@@ -14,16 +14,24 @@ var when    = require('when');
 var request = require('request');
 var redis   = require('redis');
 // Glasslab libs
-var tConst, DS;
+var tConst, myDS, cbDS;
 
 function Dispatcher(options){
-    tConst  = require('./telemetry.js').Const;
-    DS      = require('./telemetry.js').Datastore.MySQL;
+    tConst = require('./telemetry.js').Const;
+    myDS   = require('./telemetry.js').Datastore.MySQL;
+    cbDS   = require('./telemetry.js').Datastore.Couchbase;
 
     this.options = _.merge(
         {
             queue: { port: null, host: null },
-            webapp: { protocol: "http", host: "localhost", port: 8080}
+            webapp: { protocol: "http", host: "localhost", port: 8080},
+            dispatcher: {
+                telemetryGetMax: 20,
+                telemetryPollDelay: 1000,     // (1 second) in milliseconds
+                assessmentDelay:    1000,     // (1 second) in milliseconds
+                cleanupPollDelay:   3600000,  // (1 hour)   in milliseconds
+                sessionExpire:      14400000  // (4 hours)  in milliseconds
+            }
         },
         options
     );
@@ -32,7 +40,8 @@ function Dispatcher(options){
     this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
 
-    this.ds = new DS(this.options.datastore.mysql);
+    //this.ds            = new myDS(this.options.telemetry.datastore.mysql);
+    this.ds            = new cbDS(this.options.telemetry.datastore.couchbase);
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
@@ -58,6 +67,8 @@ Dispatcher.prototype.telemetryCheck = function(){
         }
 
         if(count > 0) {
+            console.log("telemetryInKey:", telemetryInKey, ", count:", count);
+
             for(var i = 0; i < Math.min(count, this.options.dispatcher.telemetryGetMax); i++){
                 this.getTelemetryBatch();
             }
@@ -127,6 +138,8 @@ Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
             return;
         }
     }.bind(this));
+
+    execFinalCB();
 }
 
 Dispatcher.prototype.updateSessionMetaData = function(sessionId){
@@ -147,7 +160,6 @@ Dispatcher.prototype.updateSessionMetaData = function(sessionId){
 
 Dispatcher.prototype.getTelemetryBatch = function(){
     var telemetryInKey     = tConst.telemetryKey+":"+tConst.inKey;
-    var telemetryActiveKey = tConst.telemetryKey+":"+tConst.activeKey;
 
     // pop in item off telemetry queue
     this.queue.rpop(telemetryInKey, function(err, telemData){
@@ -165,25 +177,11 @@ Dispatcher.prototype.getTelemetryBatch = function(){
                 console.error("Dispatcher: getTelemetryBatch Error -", err, ", JSON data:", telemData);
                 return;
             }
-            //console.log("Dispatcher: getTelemetryBatch data:", telemData);
+            console.log("Dispatcher: getTelemetryBatch data:", telemData);
 
             // update date in meta data
             this.updateSessionMetaData(telemData.id);
-
-            if(telemData.type == tConst.start){
-                // add id to active list
-                this.queue.sadd(telemetryActiveKey, telemData.id, function(err){
-                    if(err) {
-                        console.error("Dispatcher: getTelemetryBatch sadd Error:", err);
-                        return;
-                    }
-                }.bind(this));
-            }
-            else if(telemData.type == tConst.end){
-                this.endBatchIn(telemData.id);
-            } else {
-                console.error("Dispatcher: invalid type in data:", telemData);
-            }
+            this.endBatchIn(telemData.id);
         }
     }.bind(this));
 }
@@ -206,8 +204,6 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
             // wait some time before start assessment
             setTimeout(function(){
 
-                console.error("TODO: ENABLE ASSESSMENT!!!");
-                /*
                 var url = this.assessmentUrl + sessionId;
                 request.post(url, function (err, postRes, body) {
                     if(err) {
@@ -220,7 +216,6 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
                         console.log("Dispatcher: Started Assessment - SessionId:", sessionId);
                     }
                 }.bind(this));
-                */
 
             }.bind(this), this.options.dispatcher.assessmentDelay);
 
@@ -247,8 +242,10 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
 
             var row, jrow;
             var jdata = {
+                userId:        null,
                 gameSessionId: "",
-                events: []
+                gameVersion:   "",
+                events:        []
             };
             for(var i in data) {
                 row = data[i];
@@ -261,6 +258,16 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
                     break;
                 }
                 //console.log("Dispatcher: JSON data:", jrow);
+
+                if(jrow.userId) {
+                    jdata.userId = jrow.userId;
+                }
+                if(jrow.gameSessionId) {
+                    jdata.gameSessionId = jrow.gameSessionId;
+                }
+                if(jrow.gameVersion) {
+                    jdata.gameVersion = jrow.gameVersion;
+                }
 
                 if(jrow.events) {
 
@@ -279,12 +286,19 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
 
                     if(jrow.gameSessionId) {
                         jdata.gameSessionId = jrow.gameSessionId;
-                        for(var e in jrow.events) {
-                            jdata.events.push( jrow.events[e] );
-                        }
                     } else {
                         console.error("Dispatcher: sendItemToDataStore row missing gameSessionId");
                         break;
+                    }
+
+                    // copy evernts
+                    for(var e in jrow.events) {
+                        jdata.events.push( jrow.events[e] );
+                    }
+
+                    // set version (in case it's set in an events
+                    if(jrow.gameVersion) {
+                        jdata.gameVersion   = jrow.gameVersion;
                     }
                 }
             }

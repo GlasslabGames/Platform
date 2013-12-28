@@ -25,7 +25,7 @@ function Glasslab_Strategy(options) {
     passport.Strategy.call(this);
     this.name = 'glasslab';
 
-    this.ds = new MySQL(this.options.datastore.mysql);
+    this.ds = new MySQL(this.options.webapp.datastore.mysql);
     // Connect to data store
     this.ds.testConnection();
 }

@@ -11,7 +11,7 @@ var _    = require('lodash');
 var when = require('when');
 var uuid = require('node-uuid');
 // load at runtime
-var MySQL;
+var MySQL, tConst;
 
 function TelemDS_Mysql(options){
     // Glasslab libs
@@ -51,7 +51,7 @@ return when.promise(function(resolve, reject) {
             "NOW()",
             this.ds.escape(jdata.events[i].name),
             "UNIX_TIMESTAMP()",
-            "(SELECT user_id FROM GL_SESSION WHERE session_id="+this.ds.escape(jdata.gameSessionId)+")"
+            this.ds.escape(jdata.userId)
         ];
         qInsertData.push( "("+row.join(",")+")" );
     }
@@ -82,6 +82,51 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+TelemDS_Mysql.prototype.getEvents = function(gameSessionId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q = "";
+
+    Q = "SELECT * FROM GL_ACTIVITY_EVENTS WHERE game_session_id="+this.ds.escape(gameSessionId);
+    //console.log('Q:', Q);
+
+    this.ds.query(Q, function(err, result) {
+        if(err) {
+            reject(err);
+            return;
+        }
+
+        if(result.length > 0) {
+            var data = {
+                gameSessionId: gameSessionId,
+                userId:        result[0].USER_ID,
+                gameVersion:   result[0].GAME,
+                events:        []
+            };
+
+            for(var i in result){
+                data.events.push({
+                    name:      result[i].NAME,
+                    data:      result[i].DATA,
+                    timestamp: result[i].timestamp
+                });
+            }
+
+            //console.log("data.events.length:", data.events.length);
+            resolve(data);
+        } else {
+            reject(new Error("no events found"));
+            return;
+        }
+
+    }.bind(this));
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
 
 TelemDS_Mysql.prototype.startGameSession = function(userId, courseId, activityId){
 // add promise wrapper
