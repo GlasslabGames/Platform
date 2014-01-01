@@ -3,6 +3,7 @@
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
+ *  when       - https://github.com/cujojs/when
  *  express    - https://github.com/visionmedia/express
  *  passport   - https://github.com/jaredhanson/passport
  *
@@ -14,13 +15,14 @@ var http       = require('http');
 var path       = require('path');
 // Third-party libs
 var _          = require('lodash');
+var when       = require('when');
 var express    = require('express');
 var passport   = require('passport');
 var request    = require('request');
 var couchbase  = require('couchbase');
 
 // load at runtime
-var Strategy, CouchbaseStore, aConst, rConst, WebStore;
+var Strategy, CouchbaseStore, aConst, rConst;
 
 module.exports = AuthSessionServer;
 
@@ -95,7 +97,8 @@ function AuthSessionServer(options, app, routes){
                 store:  this.exsStore
             }));
 
-            passport.use(new Strategy.Glasslab(this.options));
+            this.glassLabStrategy = new Strategy.Glasslab(this.options);
+            passport.use(this.glassLabStrategy);
 
             // session de/serialize
             passport.serializeUser(function serializeUser(user, done) {
@@ -219,3 +222,24 @@ AuthSessionServer.prototype.getWebSession = function(req, res, done){
     }.bind(this));
 };
 
+AuthSessionServer.prototype.registerUser = function(userData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    if( (userData.loginType == aConst.login.type.glassLabV1) ||
+        (userData.loginType == aConst.login.type.glassLabV2) ){
+        this.glassLabStrategy.registerUser(userData)
+            .then(function(userId){
+                resolve(userId);
+            }.bind(this))
+            // catch all errors
+            .then(null, function(err, code){
+                reject(err), code;
+            }.bind(this))
+    } else {
+        reject(new Error("invalid login type"));
+    }
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};

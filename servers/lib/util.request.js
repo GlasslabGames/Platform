@@ -22,20 +22,22 @@ function RequestUtil(options){
     );
 }
 
-RequestUtil.prototype.errorResponse = function(res, errorStr){
-    var error = JSON.stringify({ error: errorStr });
-    res.writeHead(200, {
-        "Content-Type": "application/json",
-        "Content-Length": error.length
+RequestUtil.prototype.errorResponse = function(res, errorStr, errorCode){
+    var json = JSON.stringify({ error: errorStr });
+    if(!errorCode) { errorCode = 200; }
+
+    res.writeHead(errorCode, {
+        "Content-Type": "application/json"
     });
-    res.end( error );
+    res.end( json );
 };
 
-RequestUtil.prototype.jsonResponse = function(res, obj){
+RequestUtil.prototype.jsonResponse = function(res, obj, code){
     var json = _.isObject(obj) ? JSON.stringify(obj) : obj;
-    res.writeHead(200, {
-        "Content-Type": "application/json",
-        "Content-Length": json.length
+    if(!code) { code = 200; }
+
+    res.writeHead(code, {
+        "Content-Type": "application/json"
     });
     res.end( json );
 };

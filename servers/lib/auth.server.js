@@ -3,24 +3,28 @@
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
+ *  when       - https://github.com/cujojs/when
  *  express    - https://github.com/visionmedia/express
  *  passport   - https://github.com/jaredhanson/passport
  *
  *  node-edmodo-api - https://github.com/gabceb/node-edmodo-api
  *
+ *  validator       - https://github.com/chriso/node-validator
  *
  */
 var http       = require('http');
 var path       = require('path');
 // Third-party libs
 var _          = require('lodash');
+var when       = require('when');
 var express    = require('express');
 var passport   = require('passport');
 var request    = require('request');
 var couchbase  = require('couchbase');
+var check      = require('validator').check;
 
 // load at runtime
-var RequestUtil, aConst, rConst, SessionServer;
+var RequestUtil, aConst, rConst, SessionServer, WebStore;
 
 module.exports = AuthServer;
 
@@ -62,20 +66,25 @@ AuthServer.prototype.setupRoutes = function() {
     try {
         // GET
         /*
-       this.app.get(rConst.crossDomain, function(req, res){
+        this.app.get(rConst.crossDomain, function(req, res){
             // need to resolve relative path to absolute, to prevent "Error: Forbidden"
             res.sendfile( path.resolve(__dirname + '/../static' + rConst.crossDomain) );
         });
         */
 
-       this.app.get(rConst.api.logout, function logoutRoute(req, res){
+        this.app.get(rConst.api.user.logout, function logoutRoute(req, res){
             console.log("logout:", req.path);
             req.logout();
             res.redirect(rConst.root);
         }.bind(this));
 
         // POST - login
-       this.app.post(rConst.api.login, this.loginRoute.bind(this));
+        this.app.post(rConst.api.user.login, this.loginRoute.bind(this));
+
+        // POST - register user
+        this.app.post(rConst.api.user.regUser, this.registerUserRoute.bind(this));
+        // POST - register manager
+        this.app.post(rConst.api.user.regManager, this.registerManagerRoute.bind(this));
 
         // Add include routes
         var includeRoute = function(req, res) {
@@ -155,12 +164,137 @@ AuthServer.prototype.setupRoutes = function() {
     }
 };
 
+AuthServer.prototype.registerUserRoute = function(req, res, next) {
+    // only allow for POST on login
+    if(req.method != 'POST') { next(); return;}
+
+    //console.log("Auth registerUserRoute - body:", req.body);
+    if( req.body.username  &&
+        req.body.firstName && req.body.lastName &&
+        req.body.type &&
+        _.isNumber(req.body.associatedId) &&
+        req.body.password  && !_.isEmpty(req.body.password) )
+    {
+        this.registerUser(req, res, next);
+    } else {
+        this.requestUtil.errorResponse(res, "missing some fields", 400);
+    }
+};
+
+/**
+ * Registers a user with role of instructor or student
+ * 1. get institution
+ * 2. create the new user
+ * 3. if student, enroll them in the course
+ * @param registrationData the data to register a user
+ * @return user object on success, otherwise null (error output handled here)
+ */
+AuthServer.prototype.registerUser = function(req, res, next) {
+    var systemRole = aConst.role.student;
+    var courseId, institutionId;
+
+    var registerErr = function(err, code){
+        if(!code) code = 500;
+
+        console.error("AuthServer registerUser Error:", err);
+        this.requestUtil.jsonResponse(res, err, code);
+    }.bind(this);
+
+    var register = function(institutionId){
+        var userData = {
+            username:         req.body.username,
+            firstName:        req.body.firstName,
+            lastName:         req.body.lastName,
+            email:            req.body.email,
+            password:         req.body.password,
+            systemRole:       systemRole,
+            institutionId:    institutionId,
+            loginType:        aConst.login.type.glassLabV2
+        };
+
+        this.sessionServer.registerUser(userData)
+            .then(function(userId){
+                // if student, enroll in course
+                if(systemRole == aConst.role.student) {
+                    // courseId
+                   return this.webstore.addUserToCourse(courseId, userId, systemRole)
+                        .then(function(){
+                            this.glassLabLogin(req, res, next);
+                        }.bind(this));
+                }
+            }.bind(this))
+            // catch all errors
+            .then(null, registerErr);
+    }.bind(this);
+
+    // is institution -> instructor
+    if(req.body.type.toLowerCase() == aConst.code.type.institution) {
+        systemRole = aConst.role.instructor;
+        // validate institution Id (associatedId == institutionId)
+        institutionId = req.body.associatedId;
+        this.webstore.getInstitution(institutionId)
+            // register, passing in institutionId
+            .then(function(data){
+                register(data.id);
+            }.bind(this))
+            // catch all errors
+            .then(null, registerErr);
+    } else {
+        // else student
+        // get institution Id from course
+        courseId = req.body.associatedId;
+        this.webstore.getInstitutionIdFromCourse(courseId)
+            // register, passing in institutionId
+            .then(function(data){
+                institutionId = data[0].institutionId;
+                register(institutionId);
+            }.bind(this))
+            // catch all errors
+            .then(null, registerErr);
+    }
+}
+
+
+AuthServer.prototype.registerManagerRoute = function(req, res, next) {
+    // only allow for POST on login
+    if(req.method != 'POST') { next(); return;}
+
+    console.log("Auth registerManagerRoute - body:", req.body);
+    if( req.body.username  && req.body.key && req.body.institution &&
+        req.body.firstName && req.body.lastName &&
+        req.body.password  && _.isEmpty(req.body.password) )
+    {
+        this.registerManager(req, res, next);
+    } else {
+        this.requestUtil.errorResponse(res, "missing some fields", 400);
+    }
+};
+
+/**
+ * Registers a user with role of manager
+ * 1. get / create institution
+ * 2. create code for new institution
+ * 3. create the new user
+ * 4. update license data
+ * @param registrationData the data to register a user
+ * @return user object on success, otherwise null (error output handled here)
+ */
+AuthServer.prototype.registerManager = function(req, res, next) {
+
+    // TODO
+
+}
+
+
 AuthServer.prototype.loginRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
-    console.log("Auth loginRoute");
+    this.glassLabLogin(req, res, next);
+};
 
+AuthServer.prototype.glassLabLogin = function(req, res, next) {
+    //console.log("Auth loginRoute");
     var auth = passport.authenticate('glasslab', function(err, user, info) {
         if(err) {
             return next(err);
@@ -168,7 +302,7 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
 
         if (!user) {
             req.session.messages =  [info.message];
-            return res.redirect(rConst.api.login)
+            return res.redirect(rConst.api.user.login)
         }
 
         this.sessionServer.getWebSession(req, res, function(err, session, done){
@@ -180,7 +314,8 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
             user[aConst.webappSessionPrefix] = session;
             user.sessionId = req.session.id;
 
-            console.log("logIn:", user);
+            // login
+            //console.log("login:", user);
             req.logIn(user, function(err) {
                 if(err) {
                     return next(err);
@@ -193,14 +328,18 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
                         var tuser = _.clone(user);
                         tuser.courses = courses;
 
-                        done(user, req, function(){
+                        if(done) {
+                            done(user, req, function(){
+                                res.writeHead(200);
+                                res.end( JSON.stringify(tuser) );
+                            }.bind(this));
+                        } else {
                             res.writeHead(200);
                             res.end( JSON.stringify(tuser) );
-                        }.bind(this));
+                        }
                     }.bind(this)
                 );
             }.bind(this));
-
         }.bind(this));
 
     }.bind(this));

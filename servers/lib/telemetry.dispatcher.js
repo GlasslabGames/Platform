@@ -119,7 +119,7 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
     }.bind(this));
 }
 
-Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
+Dispatcher.prototype.cleanupSession = function(sessionId, cb){
     var telemetryMetaKey   = tConst.telemetryKey+":"+tConst.metaKey;
     var batchInKey         = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
 
@@ -139,7 +139,7 @@ Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
         }
     }.bind(this));
 
-    execFinalCB();
+    if(cb) cb();
 }
 
 Dispatcher.prototype.updateSessionMetaData = function(sessionId){
@@ -177,7 +177,7 @@ Dispatcher.prototype.getTelemetryBatch = function(){
                 console.error("Dispatcher: getTelemetryBatch Error -", err, ", JSON data:", telemData);
                 return;
             }
-            console.log("Dispatcher: getTelemetryBatch data:", telemData);
+            //console.log("Dispatcher: getTelemetryBatch data:", telemData);
 
             // update date in meta data
             this.updateSessionMetaData(telemData.id);
@@ -233,8 +233,7 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
             console.error("Dispatcher: startBatchIn Error:", err);
             return;
         }
-
-        console.log("batchInCheck batchInKey:", batchInKey, ", count:", count);
+        //console.log("batchInCheck batchInKey:", batchInKey, ", count:", count);
 
         // get all items
         this.queue.lrange(batchInKey, 0, count, function(err, data){
@@ -305,7 +304,7 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
 
             if(jdata.gameSessionId && jdata.events.length > 0) {
                 //console.log("Dispatcher: events:", jdata.events);
-                console.log("Dispatcher: gameSessionID:", jdata.gameSessionId, ", event count:", jdata.events.length);
+                console.log("Dispatcher: ended session gameSessionID:", jdata.gameSessionId, ", event count:", jdata.events.length);
 
                 this.ds.saveEvents(jdata)
                     .then(

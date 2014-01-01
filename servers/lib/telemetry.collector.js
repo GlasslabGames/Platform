@@ -129,48 +129,48 @@ Collector.prototype.startSession = function(req, outRes){
 
             // clean up old game session
             this.myds.cleanUpOldGameSessions(userId, gameType)
-            // start session
-            .then(function(){
-                return this.myds.startGameSession(userId, courseId, gameType);
-            }.bind(this) )
-            // start queue session
-            .then(function(gameSessionId){
-                // save for later
-                gSessionId = gameSessionId;
-                this.qStartSession(gameSessionId, userId)
-            }.bind(this) )
-            // start activity session
-            .then(function(){
-                return this.webstore.createActivityResults(gSessionId, userId, courseId, gameType);
-            }.bind(this) )
-            // get config settings
-            .then(function(){
-                return this.webstore.getConfigs();
-            }.bind(this) )
-            // all ok, done
-            .then(function(configs){
-                // override details if user collectTelemetry is set
-                if(collectTelemetry) {
-                    configs.eventsDetailLevel = 10;
-                }
+                // start session
+                .then(function () {
+                    return this.myds.startGameSession(userId, courseId, gameType);
+                }.bind(this))
+                // start queue session
+                .then(function (gameSessionId) {
+                    // save for later
+                    gSessionId = gameSessionId;
+                    this.qStartSession(gameSessionId, userId)
+                }.bind(this))
+                // start activity session
+                .then(function () {
+                    return this.webstore.createActivityResults(gSessionId, userId, courseId, gameType);
+                }.bind(this))
+                // get config settings
+                .then(function () {
+                    return this.webstore.getConfigs();
+                }.bind(this))
+                // all ok, done
+                .then(function (configs) {
+                    // override details if user collectTelemetry is set
+                    if (collectTelemetry) {
+                        configs.eventsDetailLevel = 10;
+                    }
 
-                var outData = {
-                    versionValid:      isVersionValid,
-                    gameSessionId:     gSessionId,
-                    eventsMaxSize:     configs.eventsMaxSize,
-                    eventsMinSize:     configs.eventsMinSize,
-                    eventsPeriodSecs:  configs.eventsPeriodSecs,
-                    eventsDetailLevel: configs.eventsDetailLevel
-                };
+                    var outData = {
+                        versionValid:      isVersionValid,
+                        gameSession:       gSessionId,
+                        eventsMaxSize:     configs.eventsMaxSize,
+                        eventsMinSize:     configs.eventsMinSize,
+                        eventsPeriodSes:   configs.eventsPeriodSecs,
+                        eventsDetailLevel: configs.eventsDetailLevel
+                    };
 
-                //console.log("configs:", configs);
-                this.requestUtil.jsonResponse(outRes, outData);
-            }.bind(this) )
-            // catch all errors
-            .then(null, function(err) {
-                console.error("Collector end Session Error:", err);
-                outRes.status(500).send('Error:'+err);
-            }.bind(this) );
+                    //console.log("configs:", configs);
+                    this.requestUtil.jsonResponse(outRes, outData);
+                }.bind(this) )
+                // catch all errors
+                .then(null,  function(err) {
+                    console.error("Collector end Session Error:", err);
+                    outRes.status(500).send( ' Error:'+err);
+                }.bind(this) );
 
         }.bind(this) );
 

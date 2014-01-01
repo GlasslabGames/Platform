@@ -9,7 +9,7 @@
 var _     = require('lodash');
 var when  = require('when');
 // load at runtime
-var MySQL, waConst;
+var MySQL, waConst, aConst;
 
 module.exports = WebStore_MySQL;
 
@@ -17,6 +17,7 @@ function WebStore_MySQL(options){
     // Glasslab libs
     MySQL   = require('./datastore.mysql.js');
     waConst = require('./webapp.const.js');
+    aConst  = require('./auth.const.js');
 
     this.options = _.merge(
         {
@@ -46,7 +47,7 @@ WebStore_MySQL.prototype.getCourses = function(id, cb) {
             GL_MEMBERSHIP m \
             INNER JOIN GL_COURSE as c ON m.course_id=c.id \
         WHERE \
-            user_id=" + id;
+            user_id=" + this.ds.escape(id);
 
     this.ds.query(getCourses_Q, function(err, data){
         var courses = data;
@@ -54,6 +55,90 @@ WebStore_MySQL.prototype.getCourses = function(id, cb) {
         cb(err, courses);
     });
 };
+
+WebStore_MySQL.prototype.getInstitutionIdFromCourse = function(courseId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q = "SELECT id, institution_id as institutionId FROM GL_COURSE WHERE id=" + this.ds.escape(courseId);
+        this.ds.query(Q, function(err, data){
+            if(err) {
+                reject({"error": "failure", "exception": err}, 500);
+                return;
+            }
+            resolve(data);
+        });
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+WebStore_MySQL.prototype.getInstitution = function(institutionId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT * FROM GL_INSTITUTION WHERE id=" + this.ds.escape(institutionId);
+    this.ds.query(Q, function(err, data){
+        if(err) {
+            reject({"error": "failure", "exception": err}, 500);
+            return;
+        }
+        resolve(data);
+    });
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+WebStore_MySQL.prototype.addUserToCourse = function(courseId, userId, role) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    // if manager, make role in memebers instructor
+    if(role == aConst.role.manager) {
+        role = aConst.role.instructor;
+    }
+
+    var values = [
+        "NULL",  // id
+        0,       // version
+        this.ds.escape(courseId),
+        "NOW()", // date created
+        "NOW()", // last updated
+        this.ds.escape(role),
+        this.ds.escape(userId)
+    ];
+    values = values.join(',');
+
+    var Q = "INSERT INTO GL_MEMBERSHIP (" +
+        "id," +
+        "version," +
+        "course_id," +
+        "date_created," +
+        "last_updated," +
+        "role," +
+        "user_id" +
+        ") VALUES("+values+")";
+
+    this.ds.query(Q, function(err, data){
+        if(err) {
+            reject({"error": "failure", "exception": err}, 500);
+            return;
+        }
+        resolve(data.insertId);
+    });
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
 
 WebStore_MySQL.prototype.createChallengeSubmission = function(data) {
 // add promise wrapper
