@@ -156,10 +156,10 @@ Collector.prototype.startSession = function(req, outRes){
 
                     var outData = {
                         versionValid:      isVersionValid,
-                        gameSession:       gSessionId,
+                        gameSessionId:     gSessionId,
                         eventsMaxSize:     configs.eventsMaxSize,
                         eventsMinSize:     configs.eventsMinSize,
-                        eventsPeriodSes:   configs.eventsPeriodSecs,
+                        eventsPeriodSecs:  configs.eventsPeriodSecs,
                         eventsDetailLevel: configs.eventsDetailLevel
                     };
 
