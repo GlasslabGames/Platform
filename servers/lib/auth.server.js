@@ -31,9 +31,9 @@ module.exports = AuthServer;
 function AuthServer(options){
     try {
         // Glasslab libs
-        RequestUtil   = require('./util.js').Request;
         aConst        = require('./auth.js').Const;
         rConst        = require('./routes.js').Const;
+        RequestUtil   = require('./util.js').Request;
         SessionServer = require('./auth.js').SessionServer;
         WebStore      = require('./webapp.js').Datastore.MySQL;
 
@@ -53,7 +53,9 @@ function AuthServer(options){
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function createServer(){
+            console.log('---------------------------------------------');
             console.log('Auth: Server listening on port ' + this.app.get('port'));
+            console.log('---------------------------------------------');
         }.bind(this));
 
 
@@ -73,7 +75,14 @@ AuthServer.prototype.setupRoutes = function() {
         */
 
         this.app.get(rConst.api.user.logout, function logoutRoute(req, res){
-            console.log("logout:", req.path);
+            //console.log("logout:", req.originalUrl);
+            if( req.session &&
+                req.session.passport &&
+                req.session.passport.user) {
+                // delete webapp session
+                this.sessionServer.deleteWASession(req.session.passport.user[aConst.webappSessionPrefix]);
+            }
+
             req.logout();
             res.redirect(rConst.root);
         }.bind(this));
@@ -88,29 +97,31 @@ AuthServer.prototype.setupRoutes = function() {
 
         // Add include routes
         var includeRoute = function(req, res) {
-            console.log("Include to Auth:", req.path);
+            console.log("Include to Auth:", req.originalUrl);
             if( req.isAuthenticated()) {
-                var user = req.session.passport.user;
-                var cookie = "";
-                if(user){
-                    cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
-                }
 
                 //console.log("Auth passport user:", user);
+                var user = req.session.passport.user;
+                this.forwardAuthenticatedRequestToWebApp(user, req, res);
 
-                this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, res);
                 //console.log("Auth passport user:", req.session.passport.user);
             } else {
                 // error in auth, redirect back to login
                 console.error("Auth: Not Authenticated");
-                res.redirect(rConst.root)
+
+                if(req.originalUrl.indexOf("/api") != -1) {
+                    res.status(400).end();
+                } else {
+                    res.clearCookie('connect.sid', { path: '/' });
+                    res.redirect(rConst.login);
+                }
             }
             return;
         }.bind(this);
 
         // Add exclude routes
         var excludeRoute = function(req, res) {
-            console.log("Exclude From Auth:", req.path);
+            console.log("Exclude From Auth:", req.originalUrl);
             var user = req.session.passport.user;
             var cookie = "";
             if(user){
@@ -142,20 +153,29 @@ AuthServer.prototype.setupRoutes = function() {
 
         // static content
         for(var i in rConst.static.include){
-            var fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.include[i]);
-            console.log("Static Content fullPath:", fullPath);
-           this.app.use(rConst.static.include[i], express.static(fullPath) );
+
+            var fullPath, route;
+            if(_.isObject(rConst.static.include[i])) {
+                route = rConst.static.include[i].route;
+                fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.include[i].path);
+            } else {
+                route = rConst.static.include[i];
+                fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.include[i]);
+            }
+
+            console.log("Static Content:", route, "->", fullPath);
+            this.app.use(route, express.static(fullPath) );
         }
 
-       this.app.get("/", function(req, res){
-            console.log("static root:", req.path);
+        this.app.get(rConst.root, function(req, res){
+            //console.log("static root:", req.originalUrl);
             var fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.root);
             res.sendfile( fullPath );
         }.bind(this));
 
         // DEFAULT
-       this.app.use(function defaultRoute(req, res) {
-            console.log("defaultRoute:", req.path);
+        this.app.use(function defaultRoute(req, res) {
+            //console.log("defaultRoute:", req.originalUrl);
             res.redirect(rConst.root);
         }.bind(this));
 
@@ -163,6 +183,65 @@ AuthServer.prototype.setupRoutes = function() {
         console.trace("Auth: setupRoutes Error -", err);
     }
 };
+
+AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, res, alreadyTried) {
+    var cookie = "";
+    if(user){
+        cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
+    }
+
+    this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null, function(err, sres, data){
+        var statusCode = Math.floor(sres.statusCode/100)*100;
+
+        if( statusCode == 200 ||
+            statusCode == 300) {
+            res.writeHead(sres.statusCode, sres.headers);
+            res.end(data);
+        }
+        else if(statusCode == 400){
+            //console.log("includeRoute forwardRequestToWebApp - err:", err, ", data:", data);
+            if(alreadyTried) {
+                this.requestUtil.errorResponse(res, data, 500);
+                return;
+            }
+
+            // update session
+            this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
+                if(err) {
+                    res.writeHead(sres.statusCode, sres.headers);
+                    res.end(data);
+                    return;
+                }
+
+                if(saveWebSession) {
+
+                    // save web session
+                    saveWebSession(waSession, req.session.id, function(err){
+                        if(err) {
+                            this.requestUtil.errorResponse(res, err, 500);
+                            return;
+                        }
+
+                        // update web session in session store
+                        req.session.passport.user[aConst.webappSessionPrefix] = waSession;
+                        this.sessionServer.updateWebSessionInSession(req.session.id, req.session, function(err, user){
+                            if(err) {
+                                this.requestUtil.errorResponse(res, err, 500);
+                                return;
+                            }
+
+                            // try again
+                            this.forwardAuthenticatedRequestToWebApp(user, req, res, true);
+                        }.bind(this));
+                    }.bind(this));
+                }
+            }.bind(this));
+        } else {
+            // all else errors
+            this.requestUtil.errorResponse(res, data, sres.statusCode);
+        }
+    }.bind(this));
+}
 
 AuthServer.prototype.registerUserRoute = function(req, res, next) {
     // only allow for POST on login
@@ -186,8 +265,6 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
  * 1. get institution
  * 2. create the new user
  * 3. if student, enroll them in the course
- * @param registrationData the data to register a user
- * @return user object on success, otherwise null (error output handled here)
  */
 AuthServer.prototype.registerUser = function(req, res, next) {
     var systemRole = aConst.role.student;
@@ -202,14 +279,14 @@ AuthServer.prototype.registerUser = function(req, res, next) {
 
     var register = function(institutionId){
         var userData = {
-            username:         req.body.username,
-            firstName:        req.body.firstName,
-            lastName:         req.body.lastName,
-            email:            req.body.email,
-            password:         req.body.password,
-            systemRole:       systemRole,
-            institutionId:    institutionId,
-            loginType:        aConst.login.type.glassLabV2
+            username:      req.body.username,
+            firstName:     req.body.firstName,
+            lastName:      req.body.lastName,
+            email:         req.body.email,
+            password:      req.body.password,
+            systemRole:    systemRole,
+            institutionId: institutionId,
+            loginType:     aConst.login.type.glassLabV2
         };
 
         this.sessionServer.registerUser(userData)
@@ -217,10 +294,14 @@ AuthServer.prototype.registerUser = function(req, res, next) {
                 // if student, enroll in course
                 if(systemRole == aConst.role.student) {
                     // courseId
-                   return this.webstore.addUserToCourse(courseId, userId, systemRole)
-                        .then(function(){
+                   this.webstore.addUserToCourse(courseId, userId, systemRole)
+                       .then(function(){
                             this.glassLabLogin(req, res, next);
-                        }.bind(this));
+                       }.bind(this))
+                       // catch all errors
+                       .then(null, registerErr);
+                } else {
+                    this.glassLabLogin(req, res, next);
                 }
             }.bind(this))
             // catch all errors
@@ -235,7 +316,13 @@ AuthServer.prototype.registerUser = function(req, res, next) {
         this.webstore.getInstitution(institutionId)
             // register, passing in institutionId
             .then(function(data){
-                register(data.id);
+                if( data &&
+                    data.length &&
+                    institutionId == data[0].ID) {
+                    register(institutionId);
+                } else {
+                    registerErr({"error": "institution not found"});
+                }
             }.bind(this))
             // catch all errors
             .then(null, registerErr);
@@ -246,8 +333,12 @@ AuthServer.prototype.registerUser = function(req, res, next) {
         this.webstore.getInstitutionIdFromCourse(courseId)
             // register, passing in institutionId
             .then(function(data){
-                institutionId = data[0].institutionId;
-                register(institutionId);
+                if(data && data.length) {
+                    institutionId = data[0].institutionId;
+                    register(institutionId);
+                } else {
+                    registerErr({"error": "institution not found"});
+                }
             }.bind(this))
             // catch all errors
             .then(null, registerErr);
@@ -259,11 +350,15 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
-    console.log("Auth registerManagerRoute - body:", req.body);
-    if( req.body.username  && req.body.key && req.body.institution &&
+    //console.log("Auth registerManagerRoute - body:", req.body);
+    if( req.body.email  &&
         req.body.firstName && req.body.lastName &&
-        req.body.password  && _.isEmpty(req.body.password) )
+        req.body.key &&
+        req.body.institution &&
+        req.body.password  && !_.isEmpty(req.body.password) )
     {
+        // copy email to username for login
+        req.body.username = req.body.email;
         this.registerManager(req, res, next);
     } else {
         this.requestUtil.errorResponse(res, "missing some fields", 400);
@@ -272,17 +367,57 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
 
 /**
  * Registers a user with role of manager
- * 1. get / create institution
- * 2. create code for new institution
+ * 1. validate institution not already taken
+ * 2. validate license key
  * 3. create the new user
- * 4. update license data
- * @param registrationData the data to register a user
- * @return user object on success, otherwise null (error output handled here)
+ *    1. validate email and unique
+ *    2. validate username unique
+ * 4. create institution
+ * 5. create code with institutionId
+ * 6. update license institutionId, redeemed(true), expiration(date -> now + LICENSE_VALID_PERIOD)
+ * 7. update user with institutionId
  */
 AuthServer.prototype.registerManager = function(req, res, next) {
 
-    // TODO
+    var user = req.session.passport.user;
+    var cookie = "";
+    if(user){
+        cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
+    }
+    this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
+        function(err, sres, data){
+            if(err) {
+                this.requestUtil.errorResponse(res, err, 500);
+            }
 
+            if(sres.statusCode == 200) {
+                this.glassLabLogin(req, res, next);
+            } else {
+                res.writeHead(sres.statusCode, sres.headers);
+                res.end(data);
+            }
+        }.bind(this));
+
+    // TODO: refactor this and create license system
+    /*
+    // validate email
+    this.sessionServer.validateEmail(req.body.email)
+
+        // validate license key
+        .then(function(){
+            return this.license.checkLicense(req.body.key)
+        }.bind(this))
+
+        // validate institution not already taken
+        .then(function(){
+            return this.license.checkInstitution(req.body.institution)
+        }.bind(this))
+
+        // catch all errors
+        .then(null, function(err, code){
+
+        }.bind(this));
+    */
 }
 
 
@@ -305,13 +440,13 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
             return res.redirect(rConst.api.user.login)
         }
 
-        this.sessionServer.getWebSession(req, res, function(err, session, done){
+        this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
             if(err) {
                 return next(err);
             }
 
             // save proxy session
-            user[aConst.webappSessionPrefix] = session;
+            user[aConst.webappSessionPrefix] = waSession;
             user.sessionId = req.session.id;
 
             // login
@@ -322,23 +457,33 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
                 }
 
                 // get courses
-                this.webstore.getCourses(user.id,
-                    function(err, courses){
-                        // add courses
-                        var tuser = _.clone(user);
-                        tuser.courses = courses;
+                if( (user.role == aConst.role.student) ||
+                    (user.role == aConst.role.instructor) ||
+                    (user.role == aConst.role.manager) ||
+                    (user.role == aConst.role.admin) ) {
+                    this.webstore.getUserCourses(user.id)
+                        .then(function(courses){
+                            // add courses
+                            var tuser = _.clone(user);
+                            tuser.courses = courses;
 
-                        if(done) {
-                            done(user, req, function(){
+                            if(saveWebSession) {
+                                saveWebSession(waSession, tuser.sessionId, function(){
+                                    res.writeHead(200);
+                                    res.end( JSON.stringify(tuser) );
+                                }.bind(this));
+                            } else {
                                 res.writeHead(200);
                                 res.end( JSON.stringify(tuser) );
-                            }.bind(this));
-                        } else {
-                            res.writeHead(200);
-                            res.end( JSON.stringify(tuser) );
-                        }
-                    }.bind(this)
-                );
+                            }
+                        }.bind(this))
+                        .then(null, function(err){
+                            next(err);
+                        }.bind(this));
+                } else {
+                    next(new Error("invalid role"));
+                }
+
             }.bind(this));
         }.bind(this));
 

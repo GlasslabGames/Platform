@@ -7,3 +7,4 @@ fi
 
 ./server_start_telemetry.sh
 ./server_start_auth.sh
+./server_start_assessment.sh

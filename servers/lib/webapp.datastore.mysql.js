@@ -34,8 +34,16 @@ function WebStore_MySQL(options){
     this.ds.testConnection();
 }
 
-WebStore_MySQL.prototype.getCourses = function(id, cb) {
-    var getCourses_Q =
+WebStore_MySQL.prototype.getUserCourses = function(id) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    if(!id) {
+        reject({"error": "failure", "exception": "invalid userId"}, 500);
+        return;
+    }
+
+    var Q =
         "SELECT \
             c.id,\
             m.role,\
@@ -49,16 +57,22 @@ WebStore_MySQL.prototype.getCourses = function(id, cb) {
         WHERE \
             user_id=" + this.ds.escape(id);
 
-    this.ds.query(getCourses_Q, function(err, data){
-        var courses = data;
-        //console.log("getCourses courses:", courses);
-        cb(err, courses);
+    this.ds.query(Q, function(err, data){
+        if(err) {
+            reject({"error": "failure", "exception": err}, 500);
+            return;
+        }
+        console.log("getUserCourses:", data);
+        resolve(data);
     });
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 };
 
 WebStore_MySQL.prototype.getInstitutionIdFromCourse = function(courseId) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         var Q = "SELECT id, institution_id as institutionId FROM GL_COURSE WHERE id=" + this.ds.escape(courseId);
@@ -71,7 +85,7 @@ WebStore_MySQL.prototype.getInstitutionIdFromCourse = function(courseId) {
         });
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
@@ -100,7 +114,7 @@ WebStore_MySQL.prototype.addUserToCourse = function(courseId, userId, role) {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // if manager, make role in memebers instructor
+    // if manager, make role in members instructor
     if(role == aConst.role.manager) {
         role = aConst.role.instructor;
     }

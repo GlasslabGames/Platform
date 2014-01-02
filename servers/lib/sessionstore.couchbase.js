@@ -69,11 +69,11 @@ module.exports = function(connect){
         try {
             var key = this.options.prefix+":"+sessionId;
 
-            console.log("CouchBaseStore get key:", key);
+            //console.log("CouchBaseStore get key:", key);
             this.client.get(key, function(err, result) {
                 if(err){
                     if(err.code == 13) { // No such key
-                        console.log("CouchBaseStore: No such key");
+                        //console.log("CouchBaseStore: No such key");
                         return done();
                     } else {
                         console.error("CouchBase SessionStore: Get Error -", err);
@@ -115,7 +115,7 @@ module.exports = function(connect){
                         _.isEqual(session.passport, result.value.passport)
                     ){
                         // already has user data
-                        console.log("CouchBaseStore: touching session key:", key);
+                        //console.log("CouchBaseStore: touching session key:", key);
                         this.client.touch(key, function(err){
                             done(err);
                         });
@@ -142,7 +142,7 @@ module.exports = function(connect){
         }
 
         var data = _.cloneDeep(session);
-        console.log("CouchBaseStore set key:", key, ", data:", data);
+        //console.log("CouchBaseStore set key:", key, ", data:", data);
         this.client.set(key, data, {
                 expiry: ttl // in seconds
             },
@@ -159,8 +159,7 @@ module.exports = function(connect){
     CouchBaseStore.prototype.destroy = function(sessionId, done){
         try {
             var key = this.options.prefix+":"+sessionId;
-
-            console.log("CouchBaseStore remove key:", key);
+            //console.log("CouchBaseStore remove key:", key);
             this.client.remove(key, done);
         } catch (err) {
             console.error("CouchBase SessionStore: Destroy Error -", err);

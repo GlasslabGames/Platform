@@ -66,7 +66,9 @@ function Collector(options){
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function(){
+            console.log('---------------------------------------------');
             console.log('Collector: Server listening on port ' + this.app.get('port'));
+            console.log('---------------------------------------------');
         }.bind(this));
 
     } catch(err){
@@ -169,7 +171,7 @@ Collector.prototype.startSession = function(req, outRes){
                 // catch all errors
                 .then(null,  function(err) {
                     console.error("Collector end Session Error:", err);
-                    outRes.status(500).send( ' Error:'+err);
+                    outRes.status(500).send(err);
                 }.bind(this) );
 
         }.bind(this) );

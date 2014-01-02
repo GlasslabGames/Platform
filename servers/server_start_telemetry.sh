@@ -5,7 +5,7 @@ if [ ! -d "node_modules" ]; then
 	npm install
 fi
 
-LOG_DIR="/var/log/glasslab/telemetry"
+LOG_DIR="/var/log/hydra"
 
 mkdir -p $LOG_DIR
 

@@ -52,12 +52,17 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
         //return this.fail(new BadRequestError(options.badRequestMessage || 'Missing credentials'));
     }
 
-    this._verify(username, password,
-        function verified(err, user, info) {
-            if (err) { return this.error(err); }
-            if (!user) { return this.fail(info); }
-            this.success(user, info);
-        }.bind(this)
+    this._verify(username, password)
+        .then(
+            function (user, info) {
+                if (!user) {
+                    return this.fail(info);
+                }
+                this.success(user, info);
+            }.bind(this),
+            function (err) {
+                this.error(err);
+            }.bind(this)
     );
 
     function lookup(obj, field) {
@@ -77,15 +82,21 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
 };
 
 Glasslab_Strategy.prototype._verify = function(username, password, done){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
     console.log("Auth: check user/pass");
 
-    this._findUser("username", username, function(err, user) {
-            if(err) {
-                return done(err);
-            }
-
+    // try username
+    this._findUser("username", username)
+        // error, try email
+        .then(null, function(user){
+            return this._findUser("email", username);
+        }.bind(this))
+        // valid user
+        .then(function(user){
             if(!_.isObject(user)) {
-                return done(null, false, { message: 'Unknown user ' + username });
+                return resolve(false, { message: 'Unknown user ' + username });
             }
 
             this.verifyPassword(password, user)
@@ -93,22 +104,27 @@ Glasslab_Strategy.prototype._verify = function(username, password, done){
                     //console.log("Login OK");
                     // clear password so it's not saved in the session
                     delete user.password;
-
-                    done(err, user);
+                    resolve(user);
                 }.bind(this))
                 // errors
                 .then(null, function(err){
-                    done(null, false, { message: err.message });
+                    resolve(false, { message: err.message });
                 }.bind(this));
-
-        }.bind(this)
-    );
+        }.bind(this))
+        // catch all errors
+        .then(null, reject);
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 };
 
 Glasslab_Strategy.prototype._findUser = function(type, value, cb) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
     //console.log("_findUser type:", type, ", value:", value);
 
-    var findBy_Q =
+    var Q =
         "SELECT \
             id, \
             USERNAME as username,    \
@@ -119,7 +135,7 @@ Glasslab_Strategy.prototype._findUser = function(type, value, cb) {
             SYSTEM_ROLE as role,     \
             USER_TYPE as type,       \
             LOGIN_TYPE as loginType, \
-            institution_id as institutionId,        \
+            institution_id as institution, \
             COLLECT_TELEMETRY as collectTelemetry \
         FROM \
             GL_USER \
@@ -127,15 +143,25 @@ Glasslab_Strategy.prototype._findUser = function(type, value, cb) {
             ENABLED=1 AND \
             "+type+"="+this.ds.escape(value);
 
-    this.ds.query(findBy_Q, function(err, data){
+    this.ds.query(Q, function(err, data){
+        if(err) {
+            reject(err);
+        }
 
         // convert to usable userdata
-        var user = data[0];
-        user.collectTelemetry = user.collectTelemetry[0] ? true : false;
-        user.enabled = true;
+        if(data.length > 0) {
+            var user = data[0];
+            user.collectTelemetry = user.collectTelemetry[0] ? true : false;
+            user.enabled = true;
 
-        cb(err, user);
+            resolve(user);
+        } else {
+            reject(null);
+        }
     });
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 };
 
 Glasslab_Strategy.prototype._updateUserPassword = function(id, password, loginType) {
@@ -212,97 +238,99 @@ Glasslab_Strategy.prototype.registerUser = function(userData){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        // if instructor or manager check email
-        if( userData.systemRole == aConst.role.instructor ||
-            userData.systemRole == aConst.role.manager ) {
-            console.log("Auth registerUserRoute - institution isEmail:", check(req.body.email).isEmail());
-            // if no email -> error
-            if( !userData.email ||
-                !userData.email.length ) {
-                reject({"error": "missing email for "+userData.systemRole});
-                return;
-            }
+    // if instructor or manager check email
+    if( userData.systemRole == aConst.role.instructor ||
+        userData.systemRole == aConst.role.manager ) {
+        //console.log("Auth registerUserRoute - institution isEmail:", check(userData.email).isEmail());
+        // if no email -> error
+        if( !userData.email ||
+            !userData.email.length ) {
+            reject({"error": "missing email for "+userData.systemRole});
+            return;
         }
+    }
 
-        // if email exists then check it's validity
-        if( userData.email && userData.email.length ) {
-            if( !check(userData.email).isEmail()) {
-                reject({"error": "invalid email"});
-                return;
-            }
+    // if email exists then check it's validity
+    if( userData.email && userData.email.length ) {
+        try{
+            check(userData.email).isEmail();
+        } catch (err) {
+            reject({"error": "invalid email"});
+            return;
         }
+    }
 
-        this.checkUserEmailUnique(userData.email)
-            // check UserName
-            .then(function(){
-                return this.checkUserNameUnique(userData.username)
-            }.bind(this))
-            // encrypt password
-            .then(function(){
-                return this.encryptPassword(userData.password)
-            }.bind(this))
-            //
-            .then(function(password){
-                userData.password  = password;
-                userData.loginType = aConst.login.type.glassLabV2;
+    this.checkUserEmailUnique(userData.email)
+        // check UserName
+        .then(function(){
+            return this.checkUserNameUnique(userData.username)
+        }.bind(this))
+        // encrypt password
+        .then(function(){
+            return this.encryptPassword(userData.password)
+        }.bind(this))
+        //
+        .then(function(password){
+            userData.password  = password;
+            userData.loginType = aConst.login.type.glassLabV2;
 
-                var values = [
-                    "NULL",  // id
-                    0,       // version
-                    "NOW()", // date created
-                    1,       // enabled
-                    this.ds.escape(userData.email),
-                    this.ds.escape(userData.firstName),
-                    this.ds.escape(userData.lastName),
-                    this.ds.escape(userData.institutionId),
-                    "NOW()", // last updated
-                    this.ds.escape(userData.password),
-                    "NULL",  // reset code
-                    "NULL",  // reset code expiration
-                    "NULL",  // reset code status
-                    this.ds.escape(userData.systemRole),
-                    "NULL",  // user type
-                    this.ds.escape(userData.username),
-                    0,       // collect telemetry
-                    this.ds.escape(userData.loginType)
-                ];
-                values = values.join(',');
+            var values = [
+                "NULL",  // id
+                0,       // version
+                "NOW()", // date created
+                1,       // enabled
+                this.ds.escape(userData.email),
+                this.ds.escape(userData.firstName),
+                this.ds.escape(userData.lastName),
+                this.ds.escape(userData.institutionId),
+                "NOW()", // last updated
+                this.ds.escape(userData.password),
+                "NULL",  // reset code
+                "NULL",  // reset code expiration
+                "NULL",  // reset code status
+                this.ds.escape(userData.systemRole),
+                "NULL",  // user type
+                this.ds.escape(userData.username),
+                0,       // collect telemetry
+                this.ds.escape(userData.loginType)
+            ];
+            values = values.join(',');
 
-                var Q = "INSERT INTO GL_USER (" +
-                    "id," +
-                    "version," +
-                    "date_created," +
-                    "enabled," +
-                    "email," +
-                    "first_name," +
-                    "last_name," +
-                    "institution_id," +
-                    "last_updated," +
-                    "password," +
-                    "reset_code," +
-                    "reset_code_expiration," +
-                    "reset_code_status," +
-                    "system_role," +
-                    "user_type," +
-                    "username," +
-                    "collect_telemetry," +
-                    "login_type" +
-                    ") VALUES("+values+")";
+            var Q = "INSERT INTO GL_USER (" +
+                "id," +
+                "version," +
+                "date_created," +
+                "enabled," +
+                "email," +
+                "first_name," +
+                "last_name," +
+                "institution_id," +
+                "last_updated," +
+                "password," +
+                "reset_code," +
+                "reset_code_expiration," +
+                "reset_code_status," +
+                "system_role," +
+                "user_type," +
+                "username," +
+                "collect_telemetry," +
+                "login_type" +
+                ") VALUES("+values+")";
 
-                this.ds.query(Q, function(err, data){
-                    if(err) {
-                        reject({"error": "failure", "exception": err}, 500);
-                        return;
-                    }
-                    resolve(data.insertId);
-                });
-            }.bind(this))
-            // catch all errors
-            .then(null, function(err, code){
-                return reject(err, code);
-            }.bind(this));
+            this.ds.query(Q, function(err, data){
+                if(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                    return;
+                }
+                resolve(data.insertId);
+            });
+        }.bind(this))
+        // catch all errors
+        .then(null, function(err, code){
+            return reject(err, code);
+        }.bind(this));
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 

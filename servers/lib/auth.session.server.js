@@ -22,26 +22,17 @@ var request    = require('request');
 var couchbase  = require('couchbase');
 
 // load at runtime
-var Strategy, CouchbaseStore, aConst, rConst;
+var aConst, rConst, Strategy, CouchbaseStore, RequestUtil;
 
 module.exports = AuthSessionServer;
 
-function errorResponce(res, errorStr){
-    var error = JSON.stringify({ error: errorStr });
-    res.writeHead(200, {
-        "Content-Type": "application/json",
-        "Content-Length": error.length
-    });
-    res.end( error );
-}
-
-
 function AuthSessionServer(options, app, routes){
     try {
-        Strategy       = require('./auth.js').Strategy;
-        CouchbaseStore = require('./sessionstore.couchbase.js')(express);
         aConst         = require('./auth.js').Const;
         rConst         = require('./routes.js').Const;
+        Strategy       = require('./auth.js').Strategy;
+        CouchbaseStore = require('./sessionstore.couchbase.js')(express);
+        RequestUtil    = require('./util.js').Request;
 
         this.options = _.merge(
             {
@@ -62,6 +53,8 @@ function AuthSessionServer(options, app, routes){
 
         this.app = app;
 
+        this.requestUtil = new RequestUtil(this.options);
+
         this.sessionStore = new couchbase.Connection({
             host:     this.options.sessionstore.host,
             bucket:   this.options.sessionstore.bucket,
@@ -76,6 +69,7 @@ function AuthSessionServer(options, app, routes){
         this.options.sessionstore.client = this.sessionStore;
         // express session store
         this.exsStore = new CouchbaseStore(this.options.sessionstore);
+
 
         this.app.configure(function() {
 
@@ -141,7 +135,7 @@ AuthSessionServer.prototype.getWASession = function(id, done){
     this.sessionStore.get(key, function(err, result) {
         if(err) {
             if(err.code == 13) { // No such key
-                console.warn("AuthSessionServer webapp session key missing:", key);
+                //console.warn("AuthSessionServer webapp session key missing:", key);
                 done();
             } else {
                 done(err);
@@ -150,6 +144,13 @@ AuthSessionServer.prototype.getWASession = function(id, done){
         }
 
         if(done) done(null, result);
+    }.bind(this));
+};
+
+AuthSessionServer.prototype.deleteWASession = function(id){
+    var key = aConst.webappSessionPrefix+":"+id;
+
+    this.sessionStore.remove(key, function(err, result) {
     }.bind(this));
 };
 
@@ -171,13 +172,26 @@ AuthSessionServer.prototype.getSession = function(id, done){
     }.bind(this));
 };
 
+AuthSessionServer.prototype.updateWebSessionInSession = function(sessionId, session, done){
+    var data = _.cloneDeep(session);
+    delete data.id;
+    delete data.req;
 
-AuthSessionServer.prototype.getWebSession = function(req, res, done){
-    var url = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port+"/api/config"
+    this.exsStore.set(sessionId, data, function(err) {
+        if(err) {
+            done(err);
+        }
 
-    var saveWebSession = function(user, req, next){
-        var key  = aConst.webappSessionPrefix+":"+user[aConst.webappSessionPrefix];
-        var data = { session: req.sessionID.toString() };
+        done(null, data.passport.user);
+    }.bind(this));
+};
+
+AuthSessionServer.prototype.getWebSession = function(done){
+    var url = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port+"/api/session";
+
+    var saveWebSession = function(waSession, sessionId, next){
+        var key  = aConst.webappSessionPrefix+":"+waSession;
+        var data = { session: sessionId };
         console.log("Auth sessionStore set key:", key, ", data:", data);
 
         // write proxy session, set expire the same as the session
@@ -187,7 +201,7 @@ AuthSessionServer.prototype.getWebSession = function(req, res, done){
             function(err) {
                 if(err) {
                     console.error("Auth: sessionStore "+aConst.webappSessionPrefix+" Error -", err);
-                    next(err);
+                    if(next) next(err);
                 }
 
                 if(next) next();
@@ -217,7 +231,7 @@ AuthSessionServer.prototype.getWebSession = function(req, res, done){
             }
         } else {
             console.error("Auth: Error - No cookie set in proxy!");
-            errorResponce(res, "Could not get cookie");
+            if(done) done(new Error("could not get cookie"));
         }
     }.bind(this));
 };
@@ -229,17 +243,13 @@ return when.promise(function(resolve, reject) {
     if( (userData.loginType == aConst.login.type.glassLabV1) ||
         (userData.loginType == aConst.login.type.glassLabV2) ){
         this.glassLabStrategy.registerUser(userData)
-            .then(function(userId){
-                resolve(userId);
-            }.bind(this))
-            // catch all errors
-            .then(null, function(err, code){
-                reject(err), code;
-            }.bind(this))
+            .then(resolve, reject);
     } else {
-        reject(new Error("invalid login type"));
+        reject({error: "invalid login type"});
     }
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
+
+

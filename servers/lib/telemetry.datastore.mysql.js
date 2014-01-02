@@ -181,6 +181,14 @@ TelemDS_Mysql.prototype.cleanUpOldGameSessions = function(userId, activityId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+    if(!userId) {
+        reject({"error": "failure", "exception": "invalid userId"}, 500);
+        return;
+    }
+    if(!activityId) {
+        reject({"error": "failure", "exception": "invalid activityId"}, 500);
+        return;
+    }
 
     var Q = "UPDATE GL_SESSION" +
         " SET" +

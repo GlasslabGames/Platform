@@ -16,32 +16,16 @@ var request    = require('request');
 var couchbase  = require('couchbase');
 
 // load at runtime
-var aConst, rConst, SessionServer;
+var aConst, rConst, RequestUtil, SessionServer;
 
 module.exports = AuthValidateServer;
 
-function errorResponse(res, errorStr){
-    var error = JSON.stringify({ error: errorStr });
-    res.writeHead(200, {
-        "Content-Type": "application/json",
-        "Content-Length": error.length
-    });
-    res.end( error );
-}
-
-function jsonResponse(res, obj){
-    var json = JSON.stringify(obj);
-    res.writeHead(200, {
-        "Content-Type": "application/json",
-        "Content-Length": json.length
-    });
-    res.end( json );
-}
-
 function AuthValidateServer(options){
     try {
-        aConst     = require('./auth.js').Const;
-        rConst     = require('./routes.js').Const;
+        // Glasslab libs
+        aConst        = require('./auth.js').Const;
+        rConst        = require('./routes.js').Const;
+        RequestUtil   = require('./util.js').Request;
         SessionServer = require('./auth.js').SessionServer;
 
         this.options = _.merge(
@@ -55,10 +39,13 @@ function AuthValidateServer(options){
         this.app = express();
         this.app.set('port', this.options.validate.port);
         this.sessionServer = new SessionServer(this.options, this.app, this.setupRoutes.bind(this));
+        this.requestUtil   = new RequestUtil(this.options);
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function createServer(){
+            console.log('---------------------------------------------');
             console.log('AuthValidate: Server listening on port ' + this.app.get('port'));
+            console.log('---------------------------------------------');
         }.bind(this));
 
     } catch(err){
@@ -94,7 +81,7 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
             this.sessionServer.getSession(req.params.id, function(err, result) {
                 if(err) {
                     console.error("CouchBase validateSession: Error -", err);
-                    errorResponse(res, err.toString());
+                    this.requestUtil.errorResponse(res, err.toString());
                 }
 
                 //console.log("result:", result.value);
@@ -106,16 +93,16 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
 
                     data.userId = result.value.passport.user.id;
                     data.collectTelemetry = result.value.passport.user.collectTelemetry;
-                    jsonResponse(res, data);
+                    this.requestUtil.jsonResponse(res, data);
                 } else {
-                    errorResponse(res, "missing session");
+                    this.requestUtil.errorResponse(res, "missing session");
                 }
             }.bind(this));
         } else {
             //console.log("session:", req.session);
             this.sessionServer.getCookieWASession(req, function(err, data){
                 if(err) {
-                    return errorResponse(res, err);
+                    return this.requestUtil.errorResponse(res, err);
                 }
 
                 if( req.session &&
@@ -124,7 +111,7 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
                     data.userId = req.session.passport.user.id;
                     data.collectTelemetry = req.session.passport.user.collectTelemetry;
                 }
-                jsonResponse(res, data);
+                this.requestUtil.jsonResponse(res, data);
             }.bind(this));
         }
 
@@ -144,23 +131,24 @@ AuthValidateServer.prototype.validateWASession = function(req, res, next) {
             this.sessionServer.getWASession(req.params.id, function(err, result) {
                 if(err) {
                     console.error("CouchBase validateSession: Error -", err);
-                    errorResponse(res, err.toString());
+                    this.requestUtil.errorResponse(res, err.toString());
                 }
 
-                if(result.value) {
+                if( result &&
+                    result.value) {
                     console.log("CouchBase SessionStore: value:", result.value);
 
                     if(result.value.session) {
                         this.sessionServer.getSession(result.value.session, function(err, result) {
                             if(err) {
                                 console.error("CouchBase validateSession: Error -", err);
-                                errorResponse(res, err.toString());
+                                this.requestUtil.errorResponse(res, err.toString());
                             }
 
                             if(result.value.passport.user) {
-                                jsonResponse(res, result.value.passport);
+                                this.requestUtil.jsonResponse(res, result.value.passport);
                             } else {
-                                errorResponse(res, "No user data");
+                                this.requestUtil.errorResponse(res, "No user data");
                             }
                         }.bind(this));
 
@@ -171,12 +159,14 @@ AuthValidateServer.prototype.validateWASession = function(req, res, next) {
 
                 } else {
                     // request for missing session
-                    res.end();
+                    //res.end();
+                    console.error("CouchBase validateSession: could not find session");
+                    this.requestUtil.errorResponse(res, "could not find session");
                 }
 
             }.bind(this));
         } else {
-            errorResponse(res, "Missing ID");
+            this.requestUtil.errorResponse(res, "Missing ID");
         }
     } else {
         console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);

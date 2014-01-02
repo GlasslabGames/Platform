@@ -46,7 +46,9 @@ function Dispatcher(options){
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
 
+    console.log('---------------------------------------------');
     console.log('Dispatcher: Waiting for messages...');
+    console.log('---------------------------------------------');
 }
 
 

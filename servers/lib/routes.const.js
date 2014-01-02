@@ -6,8 +6,9 @@
 var root = '/';
 
 module.exports = {
-    root: root,
-    all:  root+'*',
+    root:  root,
+    login: root+"login",
+    all:   root+'*',
 
     api:  require('./routes.const.api.js'),
     auth: require('./routes.const.auth.js'),
@@ -15,6 +16,7 @@ module.exports = {
     static: {
         root: "/index.html",
         include: [
+            {route:"/login", path:"/index.html"},
             "/challenges",
             "/css",
             "/font",

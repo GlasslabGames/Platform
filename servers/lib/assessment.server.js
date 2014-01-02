@@ -52,7 +52,9 @@ function AssessmentServer(options){
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function(){
+            console.log('---------------------------------------------');
             console.log('Assessment: Server listening on port ' + this.app.get('port'));
+            console.log('---------------------------------------------');
         }.bind(this));
 
     } catch(err){

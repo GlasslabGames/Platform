@@ -20,8 +20,8 @@ module.exports = {
         api+"/user/register",
         api+"/user/resetpassword",
         api+"/code/valid",
-        api+"/game",
-        api+"/challenge"
+        api+"/game"
+        //,api+"/challenge"
     ],
     include: [
         api,
