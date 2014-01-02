@@ -1,41 +1,76 @@
 {
     "env": "dev",
+    "request": {
+        "httpTimeout": 5000, "//":"in milliseconds"
+    },
+    "frontend": {
+        "port":     8000
+    },
     "webapp": {
-        "protocal": "http",
+        "protocol": "http:",
         "host":     "localhost",
-        "port":     8080
+        "port":     8080,
+        "staticContentPath": "/../../../Root/web-app",
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab"
+            }
+        }
     },
     "queue": {
         "host": "127.0.0.1",
         "db": 0,
         "port": 6379
     },
-    "datastore": {
-        "host"    : "localhost",
-        "user"    : "glasslab",
-        "password": "glasslab",
-        "database": "glasslab_dev"
-    },
     "sessionstore": {
-        "host": "127.0.0.1",
-        "db": 1,
-        "port": 6379,
-        "ttl": 14400, "//":"in seconds"
+        "host":     "localhost:8091",
+        "bucket":   "glasslab_webapp",
+        "password": "glasslab",
+        "ttl": 14400, "//":" 4 mins in seconds"
     },
     "collector": {
         "port": 8081
     },
+    "telemetry": {
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_gamedata",
+                "password": "glasslab"
+            }
+        }
+    },
     "dispatcher": {
         "telemetryGetMax": 20,
-        "batchGetMax"    : 100,
-        "telemetryPollDelay": 1000, "//":"in microseconds",
-        "batchInPollDelay"  : 5000, "//":"in microseconds",
-        "assessmentDelay"   : 30000, "//":"in microseconds",
-        "cleanupPollDelay"  : 3600000, "//":"in microseconds",
-        "sessionExpire"     : 14400000, "//":"in microseconds"
+        "telemetryPollDelay": 1000, "//":"in milliseconds",
+        "assessmentDelay"   : 1000, "//":"in milliseconds, default 5000",
+        "cleanupPollDelay"  : 3600000, "//":"in milliseconds",
+        "sessionExpire"     : 14400000, "//":"in milliseconds"
     },
     "auth": {
-        "port": 8082,
-        "secret": "keyboard kitty"
+        "protocol": "http:",
+        "host":     "localhost",
+        "port":     8082,
+        "secret":   "keyboard kitty"
+    },
+    "validate": {
+        "port":     8083
+    },
+    "assessment": {
+        "port":     8084
     }
 }

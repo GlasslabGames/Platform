@@ -2,43 +2,53 @@
  * Telemetry Dispatcher Module
  *
  * Module dependencies:
- *  underscore - https://github.com/jashkenas/underscore
+ *  lodash     - https://github.com/lodash/lodash
  *  request    - https://github.com/mikeal/request
  *  redis      - https://github.com/mranney/node_redis
  *  couchnode  - https://github.com/couchbase/couchnode
  *
  */
 // Third-party libs
-var _         = require('underscore');
-var request   = require('request');
-var redis     = require('redis');
-var couchbase = require('couchbase');
+var _       = require('lodash');
+var when    = require('when');
+var request = require('request');
+var redis   = require('redis');
 // Glasslab libs
-var MySQL     = require('./datastore.mysql.js');
-var tConst    = require('./telemetry.const.js');
+var tConst, myDS, cbDS;
 
-function Dispatcher(settings){
-    this.settings = _.extend(
+function Dispatcher(options){
+    tConst = require('./telemetry.js').Const;
+    myDS   = require('./telemetry.js').Datastore.MySQL;
+    cbDS   = require('./telemetry.js').Datastore.Couchbase;
+
+    this.options = _.merge(
         {
             queue: { port: null, host: null },
-            webapp: { protocal: "http", host: "localhost", port: 8080},
-            datastore: {}
+            webapp: { protocol: "http", host: "localhost", port: 8080},
+            dispatcher: {
+                telemetryGetMax: 20,
+                telemetryPollDelay: 1000,     // (1 second) in milliseconds
+                assessmentDelay:    1000,     // (1 second) in milliseconds
+                cleanupPollDelay:   3600000,  // (1 hour)   in milliseconds
+                sessionExpire:      14400000  // (4 hours)  in milliseconds
+            }
         },
-        settings
+        options
     );
 
-    this.queue         = redis.createClient(this.settings.queue.port, this.settings.queue.host, this.settings.queue);
-    this.webAppUrl     = this.settings.webapp.protocal+"://"+this.settings.webapp.host+":"+this.settings.webapp.port;
+    this.queue         = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
+    this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
 
-    this.ds = new MySQL(this.settings.datastore);
-    // Connect to data store
-    this.ds.testConnection();
+    //this.ds            = new myDS(this.options.telemetry.datastore.mysql);
+    this.ds            = new cbDS(this.options.telemetry.datastore.couchbase);
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
 
+    console.log('---------------------------------------------');
     console.log('Dispatcher: Waiting for messages...');
+    console.log('---------------------------------------------');
 }
 
 
@@ -46,7 +56,7 @@ Dispatcher.prototype.startTelemetryPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.telemetryCheck();
-    }.bind(this), this.settings.dispatcher.telemetryPollDelay);
+    }.bind(this), this.options.dispatcher.telemetryPollDelay);
 }
 
 Dispatcher.prototype.telemetryCheck = function(){
@@ -59,7 +69,9 @@ Dispatcher.prototype.telemetryCheck = function(){
         }
 
         if(count > 0) {
-            for(var i = 0; i < Math.min(count, this.settings.dispatcher.telemetryGetMax); i++){
+            console.log("telemetryInKey:", telemetryInKey, ", count:", count);
+
+            for(var i = 0; i < Math.min(count, this.options.dispatcher.telemetryGetMax); i++){
                 this.getTelemetryBatch();
             }
         }
@@ -71,7 +83,7 @@ Dispatcher.prototype.startCleanOldSessionPoll = function(){
     // fetch telemetry loop
     setInterval(function() {
         this.cleanOldSessionCheck();
-    }.bind(this), this.settings.dispatcher.cleanupPollDelay);
+    }.bind(this), this.options.dispatcher.cleanupPollDelay);
 }
 
 Dispatcher.prototype.cleanOldSessionCheck = function(){
@@ -87,12 +99,18 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
             //console.log(telemetryMetaKey, " data:", data);
             // check date
             _.forEach(data, function(value, sessionId){
-                var meta = JSON.parse(value);
+                var meta = value;
+                try {
+                    meta = JSON.parse(meta);
+                } catch(err) {
+                    console.error("Dispatcher: meta Error -", err, ", JSON data:", meta);
+                    return;
+                }
                 //console.log("id", sessionId, ", metaData:", meta);
 
                 var startTime = new Date(meta.date).getTime();
                 var now       = new Date().getTime();
-                if(now - startTime > this.settings.dispatcher.sessionExpire){
+                if(now - startTime > this.options.dispatcher.sessionExpire){
                     // clean up session
                     console.log("!!! Expired Cleaning Up - id", sessionId, ", metaData:", meta);
 
@@ -103,36 +121,14 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
     }.bind(this));
 }
 
-Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
-    var telemetryActiveKey = tConst.telemetryKey+":"+tConst.activeKey;
+Dispatcher.prototype.cleanupSession = function(sessionId, cb){
     var telemetryMetaKey   = tConst.telemetryKey+":"+tConst.metaKey;
     var batchInKey         = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
-    var batchActiveKey     = tConst.batchKey+":"+sessionId+":"+tConst.activeKey;
-
-    // remove telemetryData with sessionId
-    this.queue.srem(telemetryActiveKey, sessionId, function(err){
-        if(err) {
-            console.error("Dispatcher: endBatchIn telemetryActiveKey srem Error:", err);
-            return;
-        }
-
-        // execute final callback
-        if(execFinalCB) execFinalCB();
-
-    }.bind(this));
 
     // remove batch in list
     this.queue.del(batchInKey, function(err){
         if(err) {
             console.error("Dispatcher: endBatchIn batchInKey del Error:", err);
-            return;
-        }
-    }.bind(this));
-
-    // remove batch active list
-    this.queue.del(batchActiveKey, function(err){
-        if(err) {
-            console.error("Dispatcher: endBatchIn batchActiveKey del Error:", err);
             return;
         }
     }.bind(this));
@@ -144,6 +140,8 @@ Dispatcher.prototype.cleanupSession = function(sessionId, execFinalCB){
             return;
         }
     }.bind(this));
+
+    if(cb) cb();
 }
 
 Dispatcher.prototype.updateSessionMetaData = function(sessionId){
@@ -164,9 +162,8 @@ Dispatcher.prototype.updateSessionMetaData = function(sessionId){
 
 Dispatcher.prototype.getTelemetryBatch = function(){
     var telemetryInKey     = tConst.telemetryKey+":"+tConst.inKey;
-    var telemetryActiveKey = tConst.telemetryKey+":"+tConst.activeKey;
 
-    // move telemetry item from in to active
+    // pop in item off telemetry queue
     this.queue.rpop(telemetryInKey, function(err, telemData){
         if(err) {
             console.error("Dispatcher: getTelemetryBatch Error:", err);
@@ -176,117 +173,60 @@ Dispatcher.prototype.getTelemetryBatch = function(){
         // if telemetry has data
         if(telemData) {
             // convert string to object
-            telemData = JSON.parse(telemData);
+            try {
+                telemData = JSON.parse(telemData);
+            } catch(err) {
+                console.error("Dispatcher: getTelemetryBatch Error -", err, ", JSON data:", telemData);
+                return;
+            }
             //console.log("Dispatcher: getTelemetryBatch data:", telemData);
 
             // update date in meta data
             this.updateSessionMetaData(telemData.id);
-
-            if(telemData.type == "start"){
-                this.queue.sadd(telemetryActiveKey, telemData.id, function(err){
-                    if(err) {
-                        console.error("Dispatcher: getTelemetryBatch sadd Error:", err);
-                        return;
-                    }
-
-                    this.startBatchInPoll(telemData.id);
-                }.bind(this));
-            } else {
-                this.endBatchIn(telemData.id);
-            }
+            this.endBatchIn(telemData.id);
         }
     }.bind(this));
 }
 
 Dispatcher.prototype.endBatchIn = function(sessionId){
-    if(this.settings.env == "dev") {
+    if(this.options.env == "dev") {
         console.log("Dispatcher: endBatchIn sessionId:", sessionId);
     }
 
-    var batchInKey         = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
-    var batchActiveKey     = tConst.batchKey+":"+sessionId+":"+tConst.activeKey;
+    // remove all events from
+    this.processBatch(sessionId, function(){
 
-    // check in done
-    this.queue.lrange(batchInKey, 0, -1, function(err, list){
-        if(err) {
-            console.error("Dispatch", batchInKey, "Error:", err);
-            return;
-        }
+        // cleanup session
+        this.cleanupSession(sessionId, function executeAssessment(){
 
-        //console.log("Dispatcher: endBatchIn", batchInKey, "list:", list);
-        if(list.length == 0) {
+            // execute assessment
+            if(this.options.env == "dev") {
+                console.log("Dispatcher: Assessment Delay - SessionId:", sessionId);
+            }
+            // wait some time before start assessment
+            setTimeout(function(){
 
-            // check active done
-            this.queue.lrange(batchActiveKey, 0, -1, function(err, list){
-                if(err) {
-                    console.error("Dispatcher: endBatchIn",  batchActiveKey, "Error:", err);
-                    return;
-                }
+                var url = this.assessmentUrl + sessionId;
+                request.post(url, function (err, postRes, body) {
+                    if(err) {
+                        console.error("url:", url, ", Error:", err);
+                        res.status(500).send('Error:'+err);
+                        return;
+                    }
 
-                //console.log("Dispatcher: endBatchIn", batchActiveKey, "list:", list);
-                if(list.length == 0) {
-                    //console.log(sessionId, "- Done");
+                    if(this.options.env == "dev") {
+                        console.log("Dispatcher: Started Assessment - SessionId:", sessionId);
+                    }
+                }.bind(this));
 
-                    // cleanup session
-                    this.cleanupSession(sessionId, function executeAssessment(){
+            }.bind(this), this.options.dispatcher.assessmentDelay);
 
-                        // execute assessment
-                        if(this.settings.env == "dev") {
-                            console.log("Dispatcher: Assessment Delay - SessionId:", sessionId);
-                        }
-                        // wait 10 seconds
-                        setTimeout(function(){
+        }.bind(this));
 
-                            var url = this.assessmentUrl + sessionId;
-                            request.post(url, function (err, postRes, body) {
-                                if(err) {
-                                    console.error("url:", url, ", Error:", err);
-                                    res.status(500).send('Error:'+err);
-                                    return;
-                                }
-
-                                if(this.settings.env == "dev") {
-                                    console.log("Dispatcher: Started Assessment - SessionId:", sessionId);
-                                }
-                            }.bind(this));
-
-                        }.bind(this), this.settings.dispatcher.assessmentDelay);
-
-                    }.bind(this));
-
-                } else {
-                    //console.log(batchActiveKey, "not done, count:", list.length);
-
-                    // try again until empty
-                    setTimeout(function(){
-                        this.endBatchIn(sessionId);
-                    }.bind(this), this.settings.dispatcher.batchInPollDelay);
-                }
-            }.bind(this));
-        } else {
-            //console.log(batchInKey, "not done, count:", list.length);
-
-            // try again until empty
-            setTimeout(
-                function(){
-                    this.endBatchIn(sessionId);
-                }.bind(this),
-                this.settings.dispatcher.batchInPollDelay
-            );
-        }
     }.bind(this));
 }
 
-Dispatcher.prototype.startBatchInPoll = function(sessionId){
-    setInterval(
-        function(){
-            this.batchInCheck(sessionId);
-        }.bind(this),
-        this.settings.dispatcher.batchInPollDelay
-    );
-}
-
-Dispatcher.prototype.batchInCheck = function(sessionId){
+Dispatcher.prototype.processBatch = function(sessionId, done){
     var batchInKey = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
 
     // check items in batch list
@@ -295,116 +235,92 @@ Dispatcher.prototype.batchInCheck = function(sessionId){
             console.error("Dispatcher: startBatchIn Error:", err);
             return;
         }
-
         //console.log("batchInCheck batchInKey:", batchInKey, ", count:", count);
-        if(count > 0) {
-            for(var i = 0; i < Math.min(this.settings.dispatcher.batchGetMax, count); i++){
-                // adding to batch
-                this.processItem(sessionId);
+
+        // get all items
+        this.queue.lrange(batchInKey, 0, count, function(err, data){
+            //console.log("batchInCheck batchInKey:", batchInKey, ", data:", data);
+
+            var row, jrow;
+            var jdata = {
+                userId:        null,
+                gameSessionId: "",
+                gameVersion:   "",
+                events:        []
+            };
+            for(var i in data) {
+                row = data[i];
+
+                // send to datastore server
+                try {
+                    jrow = JSON.parse(row);
+                } catch(err) {
+                    console.error("Dispatcher: Error -", err, ", JSON data:", row);
+                    break;
+                }
+                //console.log("Dispatcher: JSON data:", jrow);
+
+                if(jrow.userId) {
+                    jdata.userId = jrow.userId;
+                }
+                if(jrow.gameSessionId) {
+                    jdata.gameSessionId = jrow.gameSessionId;
+                }
+                if(jrow.gameVersion) {
+                    jdata.gameVersion = jrow.gameVersion;
+                }
+
+                if(jrow.events) {
+
+                    if(_.isString(jrow.events)) {
+                        try {
+                            jrow.events = JSON.parse(jrow.events);
+                        } catch(err) {
+                            console.error("Dispatcher: Error -", err, ", JSON events:", jrow.events);
+                            break;
+                        }
+                    }
+
+                    if(!jrow.events.length) {
+                        break;
+                    }
+
+                    if(jrow.gameSessionId) {
+                        jdata.gameSessionId = jrow.gameSessionId;
+                    } else {
+                        console.error("Dispatcher: sendItemToDataStore row missing gameSessionId");
+                        break;
+                    }
+
+                    // copy evernts
+                    for(var e in jrow.events) {
+                        jdata.events.push( jrow.events[e] );
+                    }
+
+                    // set version (in case it's set in an events
+                    if(jrow.gameVersion) {
+                        jdata.gameVersion   = jrow.gameVersion;
+                    }
+                }
             }
-        }
-    }.bind(this));
-}
 
-Dispatcher.prototype.processItem = function(sessionId){
-    var batchInKey     = tConst.batchKey+":"+sessionId+":"+tConst.inKey;
-    var batchActiveKey = tConst.batchKey+":"+sessionId+":"+tConst.activeKey;
+            if(jdata.gameSessionId && jdata.events.length > 0) {
+                //console.log("Dispatcher: events:", jdata.events);
+                console.log("Dispatcher: ended session gameSessionID:", jdata.gameSessionId, ", event count:", jdata.events.length);
 
-    // move item from In to Active
-    this.queue.rpoplpush(batchInKey, batchActiveKey, function(err, data){
-        if(err) {
-            console.error("Dispatcher: processItem Error:", err);
-            return;
-        }
+                this.ds.saveEvents(jdata)
+                    .then(
+                        function(){ done(); },
+                        function(err){ done(err); }
+                    );
+            } else {
+                console.error("Dispatcher: sendItemToDataStore missing gameSessionId");
+            }
 
-        // update date in meta data
-        this.updateSessionMetaData(sessionId);
-
-        //console.log("sendItemToDataStore batchActiveKey:", batchActiveKey, ", data:", data);
-        this.sendItemToDataStore(batchActiveKey, data);
-
-    }.bind(this));
-}
-
-Dispatcher.prototype.processDone = function(err, batchActiveKey, data){
-    if(err) {
-        jdata = JSON.parse(data);
-        this.cleanupSession(jdata.gameSessionId);
-        console.error("Dispatcher: processDone saved Error:", err);
-    }
-
-    //console.log("processDone batchActiveKey:", batchActiveKey, ", data:", data);
-    // move item from active to done
-    this.queue.lrem(batchActiveKey, 0, data, function(err){
-        if(err) {
-            console.error("Dispatcher: processDone final Error:", err);
-            return;
-        }
-
-        //console.log("done with:", data);
-    }.bind(this));
-}
-
-Dispatcher.prototype.sendItemToDataStore = function(batchActiveKey, data){
-    // curry (aka, use closure to save batchActiveKey and data)
-    var done = function(key, data){
-        return function(err){
-            this.processDone(err, key, data);
-        }.bind(this)
-    }.bind(this);
-    var doneCB = done(batchActiveKey, data);
-
-    //console.log("Dispatcher: sendItemToDataStore data:", data);
-
-    // send to datastore server
-    try {
-        jdata = JSON.parse(data);
-    } catch(err) {
-        console.error("Dispatcher: Error -", err, ", JSON data:", data);
-        return;
-    }
-    try {
-        jdata.events = JSON.parse(jdata.events);
-    } catch(err) {
-        console.error("Dispatcher: Error -", err, ", JSON events:", data);
-        return;
-    }
-
-    // if no events
-    if(!jdata.events.length) {
-        doneCB(null);
-        return;
-    }
-
-    if(jdata.gameSessionId) {
-        var qInsertData = [];
-        for(var i in jdata.events){
-            var row = [
-                "NULL",
-                0,
-                this.ds.escape(JSON.stringify(jdata.events[i].eventData)),
-                "NOW()",
-                this.ds.escape(jdata.gameVersion),
-                this.ds.escape(jdata.gameSessionId),
-                "NOW()",
-                this.ds.escape(jdata.events[i].name),
-                "UNIX_TIMESTAMP(NOW())",
-                "(SELECT user_id FROM GL_SESSION WHERE SESSION_ID="+this.ds.escape(jdata.gameSessionId)+")"
-            ];
-            qInsertData.push( "("+row.join(",")+")" );
-        }
-
-        q = "INSERT INTO GL_ACTIVITY_EVENTS (id, version, data, date_created, game, game_session_id, last_updated, name, timestamp, user_id) VALUES ";
-        q += qInsertData.join(",");
-        //console.log('q:', q);
-
-        this.ds.addQuery(q, function(err) {
-            doneCB(err);
         }.bind(this));
-    } else {
-        console.error("Dispatcher: sendItemToDataStore missing gameSessionId");
-    }
+
+    }.bind(this));
 }
+
 
 module.exports = Dispatcher;
-

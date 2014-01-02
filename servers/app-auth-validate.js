@@ -1,23 +1,22 @@
 /**
- * Telemetry Collector - App Server
+ * Authentication Validate - App Server
  */
-var telemetry     = require('./lib/telemetry.js');
+var Auth          = require('./lib/auth.js');
 var ConfigManager = require('./lib/config.manager.js');
 
 var config = new ConfigManager();
 // load config files from first to last until successful
 var options = config.loadSync([
     "./config.json",
-    "~/config.telemetry.json",
     "~/hydra.config.json"
 ]);
 
 console.log("---------------------------------------------");
-console.log("-- Telemetry Collector App Server - Start");
+console.log("-- Authentication Validate App Server - Start");
 console.log("---------------------------------------------");
 
-var c = new telemetry.Collector(options);
+var av = new Auth.Validate(options);
 
 process.on('uncaughtException', function(err) {
-    console.error("Collector: Uncaught Error -", err);
+    console.trace("AuthValidate: Uncaught Error -", err);
 });

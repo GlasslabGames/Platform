@@ -9,8 +9,9 @@ function MySQL(settings){
         user     : settings.user,
         password : settings.password,
         database : settings.database,
-        multipleStatements  : true,
-        autoCloseConnection : true
+        multipleStatements : true,
+        autoCloseConnection: true,
+        querySentTime      : 1000
     };
 
     this.connection = null;
@@ -23,8 +24,8 @@ function MySQL(settings){
     this.reconnectTimeDefault += Math.round(this.reconnectTimeDefault*Math.random());
     this.reconnectTime = this.reconnectTimeDefault;
 
-    this.quarySentTimer = null;
-    this.quarySentTime = 1000;
+    this.querySentTimer = null;
+    this.querySentTime = 1000;
 
     if(settings.reconnectTimeout) {
         this.reconnectTimeDefault = settings.reconnectTimeout;
@@ -34,6 +35,10 @@ function MySQL(settings){
 
     if(settings.reconnectMaxTries) {
         this.reconnectMax = settings.reconnectMaxTries;
+    }
+
+    if(settings.querySentTime) {
+        this.querySentTime = settings.querySentTime;
     }
 }
 
@@ -46,9 +51,9 @@ MySQL.prototype.clearTimers = function() {
     }
 
     // stop trying to sending queries
-    if(this.quarySentTimer) {
-        clearInterval(this.quarySentTimer);
-        this.quarySentTimer = null;
+    if(this.querySentTimer) {
+        clearInterval(this.querySentTimer);
+        this.querySentTimer = null;
     }
 };
 
@@ -87,6 +92,11 @@ MySQL.prototype.connect = function(callback)
                     this.reconnectCount = 0;
                     this.reconnectTime = this.reconnectTimeDefault;
 
+                    if(!this.connection){
+                        this.reconnect();
+                        return;
+                    }
+
                     // all connected run callback
                     if(callback) {
                         callback();
@@ -111,17 +121,21 @@ MySQL.prototype.connect = function(callback)
 
 MySQL.prototype.query = function(query, callback) {
     this.connect(function(){
-        // send query
-        this.connection.query( query, function(){
-            callback.apply(callback, arguments);
-
-            if(this.settings.autoCloseConnection) {
-                if(this.connection) {
-                    this.connection.end();
-                    this.connection = null;
+        if(this.connection) {
+            // send query
+            this.connection.query( query, function(){
+                if(this.settings.autoCloseConnection) {
+                    if(this.connection) {
+                        this.connection.end();
+                        this.connection = null;
+                    }
                 }
-            }
-        }.bind(this));
+
+                callback.apply(callback, arguments);
+            }.bind(this));
+        } else {
+            console.trace("MySQL: query - no connection");
+        }
     }.bind(this));
 }
 
@@ -157,9 +171,9 @@ MySQL.prototype.sendQueries = function() {
             if(this.settings.autoCloseConnection) {
                 this.connect(function() {
                     // start timer
-                    this.quarySentTimer = setInterval(function(){
+                    this.querySentTimer = setInterval(function(){
                         this.sendQueries();
-                    }.bind(this), this.quarySentTime);
+                    }.bind(this), this.querySentTime);
                 }.bind(this));
             }
         }

@@ -6,21 +6,17 @@ var ConfigManager = require('./lib/config.manager.js');
 
 var config = new ConfigManager();
 // load config files from first to last until successful
-var settings = config.loadSync([
+var options = config.loadSync([
     "./config.json",
-    "~/config.telemetry.json",
+    "~/hydra.config.json"
 ]);
 
 console.log("---------------------------------------------");
 console.log("-- Authentication App Server - Start");
 console.log("---------------------------------------------");
 
-try {
-    auth = new Auth.Server(settings);
-} catch(err){
-    console.trace("Auth: Error -", err);
-}
+var a = new Auth.Server(options);
 
 process.on('uncaughtException', function(err) {
-    console.error("Auth: Uncaught Error -", err);
+    console.trace("Auth: Uncaught Error -", err);
 });
