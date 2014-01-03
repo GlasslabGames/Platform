@@ -10,7 +10,7 @@ LOG_DIR="/var/log/hydra"
 mkdir -p $LOG_DIR
 
 # stop then start
-forever stop app-auth
+forever stop app-auth.js
 forever start \
 -a \
 -l ${LOG_DIR}/auth.log \
