@@ -192,7 +192,7 @@ AuthSessionServer.prototype.getWebSession = function(done){
     var saveWebSession = function(waSession, sessionId, next){
         var key  = aConst.webappSessionPrefix+":"+waSession;
         var data = { session: sessionId };
-        console.log("Auth sessionStore set key:", key, ", data:", data);
+        //console.log("Auth sessionStore set key:", key, ", data:", data);
 
         // write proxy session, set expire the same as the session
         this.sessionStore.set( key, data, {

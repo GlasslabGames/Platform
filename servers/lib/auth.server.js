@@ -63,7 +63,6 @@ function AuthServer(options){
             console.log('---------------------------------------------');
         }.bind(this));
 
-
     } catch(err){
         console.trace("Auth: Error -", err);
     }
@@ -102,7 +101,7 @@ AuthServer.prototype.setupRoutes = function() {
 
         // Add include routes
         var includeRoute = function(req, res) {
-            console.log("Include to Auth:", req.originalUrl);
+            //console.log("Include to Auth:", req.originalUrl);
             if( req.isAuthenticated()) {
 
                 //console.log("Auth passport user:", user);
@@ -126,7 +125,7 @@ AuthServer.prototype.setupRoutes = function() {
 
         // Add exclude routes
         var excludeRoute = function(req, res) {
-            console.log("Exclude From Auth:", req.originalUrl);
+            //console.log("Exclude From Auth:", req.originalUrl);
             var user = req.session.passport.user;
             var cookie = "";
             if(user){
@@ -441,8 +440,10 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
         }
 
         if (!user) {
-            req.session.messages =  [info.message];
-            return res.redirect(rConst.api.user.login)
+            //req.session.messages =  [info];
+            //res.redirect(rConst.api.user.login);
+            this.requestUtil.jsonResponse(res, info, 401);
+            return;
         }
 
         this.sessionServer.getWebSession(function(err, waSession, saveWebSession){

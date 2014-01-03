@@ -62,7 +62,7 @@ return when.promise(function(resolve, reject) {
             reject({"error": "failure", "exception": err}, 500);
             return;
         }
-        console.log("getUserCourses:", data);
+        //console.log("getUserCourses:", data);
         resolve(data);
     });
 // ------------------------------------------------

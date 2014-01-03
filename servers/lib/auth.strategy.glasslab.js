@@ -54,11 +54,11 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
 
     this._verify(username, password)
         .then(
-            function (user, info) {
-                if (!user) {
-                    return this.fail(info);
+            function (data) {
+                if (!data.user) {
+                    return this.fail(data.info);
                 }
-                this.success(user, info);
+                this.success(data.user, data.info);
             }.bind(this),
             function (err) {
                 this.error(err);
@@ -85,7 +85,7 @@ Glasslab_Strategy.prototype._verify = function(username, password, done){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    console.log("Auth: check user/pass");
+    //console.log("Auth: check user/pass");
 
     // try username
     this._findUser("username", username)
@@ -96,19 +96,20 @@ return when.promise(function(resolve, reject) {
         // valid user
         .then(function(user){
             if(!_.isObject(user)) {
-                return resolve(false, { message: 'Unknown user ' + username });
+                return resolve({user: null, info: {error: 'Unknown user ' + username} });
             }
 
             this.verifyPassword(password, user)
-                .then(function(){
-                    //console.log("Login OK");
-                    // clear password so it's not saved in the session
-                    delete user.password;
-                    resolve(user);
-                }.bind(this))
-                // errors
-                .then(null, function(err){
-                    resolve(false, { message: err.message });
+                .then(
+                    function(){
+                        //console.log("Login OK");
+                        // clear password so it's not saved in the session
+                        delete user.password;
+                        resolve({user: user, info: null});
+                    }.bind(this),
+                    // errors
+                    function(err){
+                        resolve({user: null, info: err});
                 }.bind(this));
         }.bind(this))
         // catch all errors
@@ -364,7 +365,7 @@ return when.promise(function(resolve, reject) {
 
 Glasslab_Strategy.prototype.verifyPassword = function(givenPassword, user){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
         if(user.loginType == aConst.login.type.glassLabV1) {
             // fallback to old password type
@@ -376,7 +377,7 @@ Glasslab_Strategy.prototype.verifyPassword = function(givenPassword, user){
                 // update password to use new password strength
                 this.migratePasswordToPDKDF2(givenPassword, user, resolve, reject);
             } else {
-                reject({"error": "invalid password"});
+                reject({"error": "invalid username/password"});
             }
         }
         else if(user.loginType == aConst.login.type.glassLabV2) {
@@ -404,20 +405,23 @@ Glasslab_Strategy.prototype.verifyPassword = function(givenPassword, user){
                         if(derivedKey.toString('base64') == p.key) {
                             resolve();
                         } else {
-                            reject({"error": "invalid password"});
+                            reject({"error": "invalid username/password"});
                         }
                     });
                 } else {
-                    reject({"error": "invalid password type or algorithum"});
+                    // invalid password type or algorithum
+                    reject({"error": "invalid username/password", code: 101});
                 }
             } else {
-                reject({"error": "invalid password type"});
+                // invalid password type
+                reject({"error": "invalid password type", code: 102});
             }
         } else {
-            reject({"error": "invalid login type"});
+            // invalid login type
+            reject({"error": "invalid login type", code: 103});
         }
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
