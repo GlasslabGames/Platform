@@ -40,7 +40,7 @@ function AuthSessionServer(options, app, routes){
                     protocol: "http",
                     host:     "localhost",
                     port:     8080,
-                    staticContentPath: "/../../../Root/web-app"
+                    staticContentPath: "../../../Root/web-app"
                 },
                 sessionstore: {
                     "host":     "localhost:8091",

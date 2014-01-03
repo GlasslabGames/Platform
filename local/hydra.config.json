@@ -1,76 +1,43 @@
 {
     "env": "dev",
-    "request": {
-        "httpTimeout": 5000, "//":"in milliseconds"
-    },
     "frontend": {
         "port":     8000
     },
     "webapp": {
-        "protocol": "http:",
         "host":     "localhost",
         "port":     8080,
         "staticContentPath": "../../../Root/web-app",
         "datastore": {
             "mysql": {
-                "host"    : "localhost",
                 "user"    : "glasslab",
                 "password": "glasslab",
                 "database": "glasslab_dev"
             },
             "couchbase": {
-                "host":     "localhost:8091",
                 "bucket":   "glasslab_webapp",
                 "password": "glasslab"
             }
         }
     },
-    "queue": {
-        "host": "127.0.0.1",
-        "db": 0,
-        "port": 6379
-    },
     "sessionstore": {
-        "host":     "localhost:8091",
         "bucket":   "glasslab_webapp",
         "password": "glasslab",
         "ttl": 14400, "//":" 4 mins in seconds"
     },
-    "collector": {
-        "port": 8081
-    },
     "telemetry": {
         "datastore": {
             "mysql": {
-                "host"    : "localhost",
                 "user"    : "glasslab",
                 "password": "glasslab",
                 "database": "glasslab_dev"
             },
             "couchbase": {
-                "host":     "localhost:8091",
                 "bucket":   "glasslab_gamedata",
                 "password": "glasslab"
             }
         }
     },
-    "dispatcher": {
-        "telemetryGetMax": 20,
-        "telemetryPollDelay": 1000, "//":"in milliseconds",
-        "assessmentDelay"   : 1000, "//":"in milliseconds, default 5000",
-        "cleanupPollDelay"  : 3600000, "//":"in milliseconds",
-        "sessionExpire"     : 14400000, "//":"in milliseconds"
-    },
     "auth": {
-        "protocol": "http:",
-        "host":     "localhost",
-        "port":     8082,
         "secret":   "keyboard kitty"
-    },
-    "validate": {
-        "port":     8083
-    },
-    "assessment": {
-        "port":     8084
     }
 }

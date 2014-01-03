@@ -47,6 +47,11 @@ function AuthServer(options){
         this.requestUtil = new RequestUtil(this.options);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
 
+        // if starts with DOT then add current dir to start
+        if(this.options.webapp.staticContentPath.charAt(0) == '.') {
+            this.options.webapp.staticContentPath = __dirname + "/" + this.options.webapp.staticContentPath;
+        }
+
         this.app = express();
         this.app.set('port', this.options.auth.port);
         this.sessionServer = new SessionServer(this.options, this.app, this.setupRoutes.bind(this));
@@ -157,10 +162,10 @@ AuthServer.prototype.setupRoutes = function() {
             var fullPath, route;
             if(_.isObject(rConst.static.include[i])) {
                 route = rConst.static.include[i].route;
-                fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.include[i].path);
+                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.include[i].path);
             } else {
                 route = rConst.static.include[i];
-                fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.include[i]);
+                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.include[i]);
             }
 
             console.log("Static Content:", route, "->", fullPath);
@@ -169,7 +174,7 @@ AuthServer.prototype.setupRoutes = function() {
 
         this.app.get(rConst.root, function(req, res){
             //console.log("static root:", req.originalUrl);
-            var fullPath = path.resolve(__dirname + this.options.webapp.staticContentPath + rConst.static.root);
+            var fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.root);
             res.sendfile( fullPath );
         }.bind(this));
 
