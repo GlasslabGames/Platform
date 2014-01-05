@@ -3,7 +3,6 @@
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
- *  request    - https://github.com/mikeal/request
  *  redis      - https://github.com/mranney/node_redis
  *  couchnode  - https://github.com/couchbase/couchnode
  *
@@ -11,15 +10,15 @@
 // Third-party libs
 var _       = require('lodash');
 var when    = require('when');
-var request = require('request');
 var redis   = require('redis');
 // Glasslab libs
-var tConst, myDS, cbDS;
+var tConst, myDS, cbDS, RequestUtil;
 
 function Dispatcher(options){
-    tConst = require('./telemetry.js').Const;
-    myDS   = require('./telemetry.js').Datastore.MySQL;
-    cbDS   = require('./telemetry.js').Datastore.Couchbase;
+    tConst      = require('./telemetry.js').Const;
+    myDS        = require('./telemetry.js').Datastore.MySQL;
+    cbDS        = require('./telemetry.js').Datastore.Couchbase;
+    RequestUtil = require('./util.js').Request;
 
     this.options = _.merge(
         {
@@ -36,6 +35,7 @@ function Dispatcher(options){
         options
     );
 
+    this.requestUtil   = new RequestUtil(this.options);
     this.queue         = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
     this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
@@ -207,7 +207,7 @@ Dispatcher.prototype.endBatchIn = function(sessionId){
             setTimeout(function(){
 
                 var url = this.assessmentUrl + sessionId;
-                request.post(url, function (err, postRes, body) {
+                this.requestUtil.getRequest(url, null, function (err, postRes, body) {
                     if(err) {
                         console.error("url:", url, ", Error:", err);
                         res.status(500).send('Error:'+err);

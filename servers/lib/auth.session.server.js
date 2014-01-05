@@ -18,7 +18,6 @@ var _          = require('lodash');
 var when       = require('when');
 var express    = require('express');
 var passport   = require('passport');
-var request    = require('request');
 var couchbase  = require('couchbase');
 
 // load at runtime
@@ -209,7 +208,7 @@ AuthSessionServer.prototype.getWebSession = function(done){
         );
     }.bind(this);
 
-    request.get(url, function(err, pres){
+    this.requestUtil.getRequest(url, null, function(err, pres){
         if(err) {
             if(done) done(err);
         }

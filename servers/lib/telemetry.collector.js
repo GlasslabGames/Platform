@@ -19,7 +19,7 @@ var express    = require('express');
 var multiparty = require('multiparty');
 var redis      = require('redis');
 // load at runtime
-var RequestUtil, aConst, tConst, rConst;
+var RequestUtil, aConst, tConst, rConst, WebStore;
 var myDS, cbDS;
 
 module.exports = Collector;
@@ -27,13 +27,13 @@ module.exports = Collector;
 function Collector(options){
     try{
         // Glasslab libs
-        RequestUtil = require('./util.js').Request;
         aConst      = require('./auth.js').Const;
         tConst      = require('./telemetry.js').Const;
         rConst      = require('./routes.js').Const;
         myDS        = require('./telemetry.js').Datastore.MySQL;
         //cbDS        = require('./telemetry.js').Datastore.Couchbase;
         WebStore    = require('./webapp.js').Datastore.MySQL;
+        RequestUtil = require('./util.js').Request;
 
         this.options = _.merge(
             {
@@ -100,7 +100,7 @@ Collector.prototype.startSession = function(req, outRes){
         //console.log("headers:", headers);
         //console.log("getSession url:", url);
         // validate session
-        this.requestUtil.getRequest(url, headers, req, function(err, res, data){
+        this.requestUtil.getRequest(url, headers, function(err, res, data){
             if(err) {
                 console.log("Collector startSession Error:", err);
                 return;

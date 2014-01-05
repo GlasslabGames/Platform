@@ -42,7 +42,7 @@ RequestUtil.prototype.jsonResponse = function(res, obj, code){
     res.end( json );
 };
 
-RequestUtil.prototype.getRequest = function(url, headers, req, done){
+RequestUtil.prototype.getRequest = function(url, headers, done){
     var purl = urlParser.parse(url);
 
     var options = {
@@ -58,7 +58,7 @@ RequestUtil.prototype.getRequest = function(url, headers, req, done){
     this.sendRequest(options, null, null, done);
 }
 
-RequestUtil.prototype.postRequest = function(url, headers, jdata, req, done){
+RequestUtil.prototype.postRequest = function(url, headers, jdata, done){
     var purl = urlParser.parse(url);
     var data = JSON.stringify(jdata);
 

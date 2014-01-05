@@ -19,7 +19,6 @@ var _          = require('lodash');
 var when       = require('when');
 var express    = require('express');
 var passport   = require('passport');
-var request    = require('request');
 var couchbase  = require('couchbase');
 var check      = require('validator').check;
 

@@ -12,7 +12,6 @@ var path       = require('path');
 var _          = require('lodash');
 var express    = require('express');
 var passport   = require('passport');
-var request    = require('request');
 var couchbase  = require('couchbase');
 
 // load at runtime
