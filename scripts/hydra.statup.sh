@@ -3,35 +3,18 @@
 ## Fill in name of program here.
 PROG="server_start.sh"
 PROG_PATH="/home/dev/github/Platform/servers" ## Not need, but sometimes helpful (if $PROG resides in /opt for example).
-PROG_ARGS=""
 PID_PATH="/var/run/"
 
 start() {
-    if [ -e "$PID_PATH/$PROG.pid" ]; then
-        ## Program is running, exit with error.
-        echo "Error! $PROG is currently running!" 1>&2
-        exit 1
-    else
-        ## Change from /dev/null to something like /var/log/$PROG if you want to save output.
-            $PROG_PATH/$PROG $PROG_ARGS 2>&1 >/dev/null &
-        echo "$PROG started"
-        touch "$PID_PATH/$PROG.pid"
-    fi
+    ## Change from /dev/null to something like /var/log/$PROG if you want to save output.
+    $PROG_PATH/$PROG
+    echo "$PROG started"
 }
 
 stop() {
-    if [ -e "$PID_PATH/$PROG.pid" ]; then
-        ## Program is running, so stop it
-        killall $PROG
-
-        rm "$PID_PATH/$PROG.pid"
-        
-        echo "$PROG stopped"
-    else
-        ## Program is not running, exit with error.
-        echo "Error! $PROG not started!" 1>&2
-        exit 1
-    fi
+    ## Program is running, so stop it
+    forever stopall
+    echo "$PROG stopped"
 }
 
 ## Check to see if we are running as root first.
@@ -50,7 +33,7 @@ case "$1" in
         exit 0
     ;;
     reload|restart|force-reload)
-        stop
+        # start will kill old processes
         start
         exit 0
     ;;
