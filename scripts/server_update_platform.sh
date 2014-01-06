@@ -21,7 +21,7 @@ cd ${PLATFORM_DIR}
 git checkout .
 git pull origin $BRANCH
 # if fail exit
-if [ $? -eq 0 ]; then
+if [ $? -ne 0 ]; then
     exit 1
 fi
 

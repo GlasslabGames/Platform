@@ -13,11 +13,11 @@ else
 fi
 
 ./server_update_platform.sh $BRANCH
-if [ $? -eq 0 ]; then
+if [ $? -ne 0 ]; then
     exit 1
 fi
 
 ./server_update_root.sh $BRANCH
-if [ $? -eq 0 ]; then
+if [ $? -ne 0 ]; then
     exit 1
 fi
