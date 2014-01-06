@@ -7,14 +7,15 @@ PID_PATH="/var/run/"
 
 start() {
     ## Change from /dev/null to something like /var/log/$PROG if you want to save output.
-    $PROG_PATH/$PROG
-    echo "$PROG started"
+    cd $PROG_PATH
+    ./$PROG
+    echo "Hydra started"
 }
 
 stop() {
     ## Program is running, so stop it
     forever stopall
-    echo "$PROG stopped"
+    echo "Hydra stopped"
 }
 
 ## Check to see if we are running as root first.
