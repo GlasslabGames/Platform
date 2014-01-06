@@ -251,4 +251,40 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+AuthSessionServer.prototype.updateUserData = function(userData, userSessionData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    if( (userData.loginType == aConst.login.type.glassLabV1) ||
+        (userData.loginType == aConst.login.type.glassLabV2) ){
+        this.glassLabStrategy.updateUserData(userData, userSessionData)
+            .then(resolve, reject);
+    } else {
+        reject({error: "invalid login type"});
+    }
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
 
+
+AuthSessionServer.prototype.updateUserDataInSession = function(session){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var data = _.cloneDeep(session);
+    delete data.id;
+    delete data.req;
+
+    var key = this.exsStore.getSessionPrefix()+":"+data.passport.user.sessionId;
+    this.exsStore.set(key, data, function(err) {
+        if(err) {
+            reject({"error": "failure", "exception": err}, 500);
+            return;
+        }
+        resolve();
+    }.bind(this));
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};

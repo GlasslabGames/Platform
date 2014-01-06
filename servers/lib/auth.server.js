@@ -23,7 +23,7 @@ var couchbase  = require('couchbase');
 var check      = require('validator').check;
 
 // load at runtime
-var RequestUtil, aConst, rConst, SessionServer, WebStore;
+var Util, RequestUtil, aConst, rConst, SessionServer, WebStore;
 
 module.exports = AuthServer;
 
@@ -32,7 +32,8 @@ function AuthServer(options){
         // Glasslab libs
         aConst        = require('./auth.js').Const;
         rConst        = require('./routes.js').Const;
-        RequestUtil   = require('./util.js').Request;
+        Util          = require('./util.js');
+        RequestUtil   = Util.Request;
         SessionServer = require('./auth.js').SessionServer;
         WebStore      = require('./webapp.js').Datastore.MySQL;
 
@@ -98,10 +99,26 @@ AuthServer.prototype.setupRoutes = function() {
         // POST - register manager
         this.app.post(rConst.api.user.regManager, this.registerManagerRoute.bind(this));
 
+        // POST - update user data
+        //this.app.post(rConst.api.user.updateUser, this.updateUserRoute.bind(this));
+
         // Add include routes
         var includeRoute = function(req, res) {
             //console.log("Include to Auth:", req.originalUrl);
             if( req.isAuthenticated()) {
+
+                if( req.method == 'POST') {
+                    var results = req.path.match(/\/user\/([0-9]*)/);
+                    // match finds results, an array with more then one element and the group is a number
+                    if( results &&
+                        results.length > 1 &&
+                        !isNaN(parseInt(results[1]) ) ) {
+
+                        //console.log("Include to Auth - POST path:", req.path, ", results:", results);
+                        this.updateUserRoute(req, res);
+                        return;
+                    }
+                }
 
                 //console.log("Auth passport user:", user);
                 var user = req.session.passport.user;
@@ -246,30 +263,29 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
     }.bind(this));
 }
 
-AuthServer.prototype.registerUserRoute = function(req, res, next) {
-    // only allow for POST on login
-    if(req.method != 'POST') { next(); return;}
-
-    //console.log("Auth registerUserRoute - body:", req.body);
-    if( req.body.username  &&
-        req.body.firstName && req.body.lastName &&
-        req.body.type &&
-        _.isNumber(req.body.associatedId) &&
-        req.body.password  && !_.isEmpty(req.body.password) )
-    {
-        this.registerUser(req, res, next);
-    } else {
-        this.requestUtil.errorResponse(res, "missing some fields", 400);
-    }
-};
-
 /**
  * Registers a user with role of instructor or student
  * 1. get institution
  * 2. create the new user
  * 3. if student, enroll them in the course
  */
-AuthServer.prototype.registerUser = function(req, res, next) {
+AuthServer.prototype.registerUserRoute = function(req, res, next) {
+    // only allow for POST on login
+    if(req.method != 'POST') { next(); return;}
+
+    //console.log("Auth registerUserRoute - body:", req.body);
+    if( !(
+            req.body.username  &&
+            req.body.firstName && req.body.lastName &&
+            req.body.type &&
+            _.isNumber(req.body.associatedId) &&
+            req.body.password  && !_.isEmpty(req.body.password)
+        ) )
+    {
+        this.requestUtil.errorResponse(res, "missing some fields", 400);
+        return;
+    }
+
     var systemRole = aConst.role.student;
     var courseId, institutionId;
 
@@ -297,12 +313,12 @@ AuthServer.prototype.registerUser = function(req, res, next) {
                 // if student, enroll in course
                 if(systemRole == aConst.role.student) {
                     // courseId
-                   this.webstore.addUserToCourse(courseId, userId, systemRole)
-                       .then(function(){
+                    this.webstore.addUserToCourse(courseId, userId, systemRole)
+                        .then(function(){
                             this.glassLabLogin(req, res, next);
-                       }.bind(this))
-                       // catch all errors
-                       .then(null, registerErr);
+                        }.bind(this))
+                        // catch all errors
+                        .then(null, registerErr);
                 } else {
                     this.glassLabLogin(req, res, next);
                 }
@@ -346,26 +362,6 @@ AuthServer.prototype.registerUser = function(req, res, next) {
             // catch all errors
             .then(null, registerErr);
     }
-}
-
-
-AuthServer.prototype.registerManagerRoute = function(req, res, next) {
-    // only allow for POST on login
-    if(req.method != 'POST') { next(); return;}
-
-    //console.log("Auth registerManagerRoute - body:", req.body);
-    if( req.body.email  &&
-        req.body.firstName && req.body.lastName &&
-        req.body.key &&
-        req.body.institution &&
-        req.body.password  && !_.isEmpty(req.body.password) )
-    {
-        // copy email to username for login
-        req.body.username = req.body.email;
-        this.registerManager(req, res, next);
-    } else {
-        this.requestUtil.errorResponse(res, "missing some fields", 400);
-    }
 };
 
 /**
@@ -380,8 +376,24 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
  * 6. update license institutionId, redeemed(true), expiration(date -> now + LICENSE_VALID_PERIOD)
  * 7. update user with institutionId
  */
-AuthServer.prototype.registerManager = function(req, res, next) {
+AuthServer.prototype.registerManagerRoute = function(req, res, next) {
+    // only allow for POST on login
+    if(req.method != 'POST') { next(); return;}
 
+    //console.log("Auth registerManagerRoute - body:", req.body);
+    if( !(
+            req.body.email  &&
+            req.body.firstName && req.body.lastName &&
+            req.body.key &&
+            req.body.institution &&
+            req.body.password  && !_.isEmpty(req.body.password)
+        ) )
+    {
+        this.requestUtil.errorResponse(res, "missing some fields", 400);
+    }
+
+    // copy email to username for login
+    req.body.username = req.body.email;
     var user = req.session.passport.user;
     var cookie = "";
     if(user){
@@ -403,24 +415,84 @@ AuthServer.prototype.registerManager = function(req, res, next) {
 
     // TODO: refactor this and create license system
     /*
-    // validate email
-    this.sessionServer.validateEmail(req.body.email)
+     // validate email
+     this.sessionServer.validateEmail(req.body.email)
 
-        // validate license key
-        .then(function(){
-            return this.license.checkLicense(req.body.key)
+     // validate license key
+     .then(function(){
+     return this.license.checkLicense(req.body.key)
+     }.bind(this))
+
+     // validate institution not already taken
+     .then(function(){
+     return this.license.checkInstitution(req.body.institution)
+     }.bind(this))
+
+     // catch all errors
+     .then(null, function(err, code){
+
+     }.bind(this));
+     */
+};
+
+AuthServer.prototype.updateUserRoute = function(req, res, next) {
+    // only allow for POST on login
+    if(req.method != 'POST') { next(); return;}
+
+    //console.log("Auth updateUserRoute - body:", req.body);
+    if( !(req.body.id) )
+    {
+        this.requestUtil.errorResponse(res, "missing the id", 400);
+        return;
+    }
+
+    if( !(
+            req.body.username &&
+            req.body.firstName &&
+            req.body.lastName
+        ) )
+    {
+        this.requestUtil.errorResponse(res, "missing data fields", 400);
+        return;
+    }
+
+    var userData = {
+        id:            req.body.id,
+        username:      req.body.username,
+        firstName:     req.body.firstName,
+        lastName:      req.body.lastName,
+        email:         req.body.email,
+        name:          req.body.name,
+        password:      req.body.password,
+        systemRole:    req.body.role,
+        institutionId: req.body.institution,
+        loginType:     aConst.login.type.glassLabV2  // TODO add login type to user data on client
+    };
+
+    var userSessionData = req.session.passport.user;
+
+    this.sessionServer.updateUserData(userData, userSessionData)
+        // save changed data
+        .then(
+            function(dataChanged){
+                if(dataChanged) {
+                    return this.sessionServer.updateUserDataInSession(req.session);
+                } else {
+                    return Util.PromiseContinue();
+                }
         }.bind(this))
-
-        // validate institution not already taken
-        .then(function(){
-            return this.license.checkInstitution(req.body.institution)
+        // all ok
+        .then(
+            function(){
+                this.requestUtil.jsonResponse(res, userData);
         }.bind(this))
-
-        // catch all errors
-        .then(null, function(err, code){
-
-        }.bind(this));
-    */
+        .then(null,
+            // error
+            function(err){
+                console.error("Auth - updateUserRoute error:", err);
+                this.requestUtil.errorResponse(res, err, 400);
+            }.bind(this)
+        );
 }
 
 

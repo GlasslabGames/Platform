@@ -22,11 +22,11 @@ function RequestUtil(options){
     );
 }
 
-RequestUtil.prototype.errorResponse = function(res, errorStr, errorCode){
-    var json = JSON.stringify({ error: errorStr });
-    if(!errorCode) { errorCode = 200; }
+RequestUtil.prototype.errorResponse = function(res, obj, code){
+    var json = _.isObject(obj) ? JSON.stringify(obj) : JSON.stringify({ error: obj });
+    if(!code) { code = 200; }
 
-    res.writeHead(errorCode, {
+    res.writeHead(code, {
         "Content-Type": "application/json"
     });
     res.end( json );
