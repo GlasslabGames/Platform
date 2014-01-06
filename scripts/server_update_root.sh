@@ -24,6 +24,10 @@ echo "Updating WebApp(Root)..."
 cd $ROOT_DIR
 git checkout .
 git pull origin $BRANCH
+# if fail exit
+if [ $? -eq 0 ]; then
+    exit 1
+fi
 
 echo "--------------------------------------"
 echo "Building web-app (Frontend) min/uglify files..."

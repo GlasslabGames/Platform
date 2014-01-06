@@ -6,12 +6,18 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-./server_update_platform.sh
+if [ -n "$1" ]; then
+    BRANCH=$1
+else
+    BRANCH="master"
+fi
+
+./server_update_platform.sh $BRANCH
 if [ $? -eq 0 ]; then
     exit 1
 fi
 
-./server_update_root.sh
+./server_update_root.sh $BRANCH
 if [ $? -eq 0 ]; then
     exit 1
 fi
