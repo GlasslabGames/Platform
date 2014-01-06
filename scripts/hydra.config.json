@@ -4,18 +4,12 @@
         "port":     80
     },
     "webapp": {
-        "host":     "localhost",
-        "port":     8080,
         "staticContentPath": "/home/dev/github/Root/web-app",
         "datastore": {
             "mysql": {
                 "user"    : "glasslab",
                 "password": "glasslab",
                 "database": "glasslab_dev"
-            },
-            "couchbase": {
-                "bucket":   "glasslab_webapp",
-                "password": "glasslab"
             }
         }
     },
