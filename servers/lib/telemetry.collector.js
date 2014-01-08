@@ -452,6 +452,11 @@ return when.promise(function(resolve, reject, notify) {
 
             // find score if it exists
             for(var i in data.events) {
+                // if string, convert timestamp to int
+                if( _.isString(data.events[i].timestamp) ) {
+                    data.events[i].timestamp = parseInt(data.events[i].timestamp);
+                }
+
                 if( data.events[i].name &&
                     data.events[i].name == tConst.game.scoreKey) {
                     if( data.events[i].eventData &&

@@ -77,7 +77,7 @@ Dispatcher.prototype.telemetryCheck = function(){
         }
 
         if(count > 0) {
-            console.log("telemetryInKey:", telemetryInKey, ", count:", count);
+            console.log("Dispatcher: telemetryInKey:", telemetryInKey, ", count:", count);
 
             for(var i = 0; i < Math.min(count, this.options.dispatcher.telemetryGetMax); i++){
                 this.getTelemetryBatch();

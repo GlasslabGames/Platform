@@ -108,7 +108,7 @@ TelemDS_Mysql.prototype.getAllEvents = function(){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        var Q = "SELECT * FROM GL_ACTIVITY_EVENTS_ARCHIVE ORDER BY game_session_id";
+        var Q = "SELECT * FROM GL_ACTIVITY_EVENTS_ARCHIVE WHERE version >= 0 ORDER BY game_session_id";
         //console.log('Q:', Q);
 
         this.ds.query(Q, function(err, result) {
@@ -161,11 +161,11 @@ TelemDS_Mysql.prototype.getAllEvents = function(){
 // end promise wrapper
 };
 
-TelemDS_Mysql.prototype.removeArchiveEvents = function(gameSessionId){
+TelemDS_Mysql.prototype.disableArchiveEvents = function(gameSessionId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var Q = "DELETE FROM GL_ACTIVITY_EVENTS_ARCHIVE WHERE game_session_id="+this.ds.escape(gameSessionId);
+    var Q = "UPDATE GL_ACTIVITY_EVENTS_ARCHIVE SET version=-1 WHERE game_session_id="+this.ds.escape(gameSessionId);
     //console.log('Q:', Q);
 
     this.ds.query(Q, function(err, result) {

@@ -132,24 +132,24 @@ AssessmentServer.prototype.migrateOldDBEvents = function() {
                             // saveEvents, ok
                             .then(function(){
                                 this.stats.increment('info', 'Couchbase.SaveEvents.Done');
-                                return this.myds.removeArchiveEvents(gSession.gameSessionId);
+                                return this.myds.disableArchiveEvents(gSession.gameSessionId);
                             }.bind(this),
-                                // saveEvents error
-                                function(err){
-                                    this.stats.increment('error', 'MigrateEvents.Couchbase.SaveEvents');
-                                    console.error("Assessment: Couchbase Error: could not save events, err:", err);
-                                }.bind(this))
+                            // saveEvents error
+                            function(err){
+                                this.stats.increment('error', 'MigrateEvents.Couchbase.SaveEvents');
+                                console.error("Assessment: Couchbase Error: could not save events, err:", err);
+                            }.bind(this))
 
-                            // removeArchiveEvents, ok
+                            // disableArchiveEvents, ok
                             .then(function(){
                                 console.log("Events migrated, events count:", gSession.events.length);
                                 this.stats.increment('info', 'MigrateEvents.MySQL.RemoveEvents.Done');
                             }.bind(this),
-                                // removeArchiveEvents, error
-                                function(){
-                                    this.stats.increment('error', 'MigrateEvents.MySQL.RemoveEvents');
-                                    console.error("Assessment: MySQL Error: could not remove events");
-                                }.bind(this));
+                            // disableArchiveEvents, error
+                            function(){
+                                this.stats.increment('error', 'MigrateEvents.MySQL.RemoveEvents');
+                                console.error("Assessment: MySQL Error: could not remove events");
+                            }.bind(this));
                     }.bind(this));
                 }.bind(this), 100);
             }
