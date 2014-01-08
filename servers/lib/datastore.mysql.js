@@ -57,12 +57,14 @@ MySQL.prototype.clearTimers = function() {
     }
 };
 
-MySQL.prototype.testConnection = function(){
+MySQL.prototype.testConnection = function(done){
     // test connection
     this.connect(function(){
         if(this.connection) {
             this.connection.end();
             this.connection = null;
+
+            if(done) done();
         }
     }.bind(this));
 }

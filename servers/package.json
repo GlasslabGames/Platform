@@ -15,6 +15,7 @@
         "couchbase":  "*",
         "passport":   "*",
         "passport-local": "*",
-        "node-uuid":  "*"
+        "node-uuid":  "*",
+        "node-statsd": "*"
     }
 }

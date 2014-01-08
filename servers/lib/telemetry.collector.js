@@ -19,7 +19,7 @@ var express    = require('express');
 var multiparty = require('multiparty');
 var redis      = require('redis');
 // load at runtime
-var RequestUtil, aConst, tConst, rConst, WebStore;
+var Util, aConst, tConst, rConst, WebStore;
 var myDS, cbDS;
 
 module.exports = Collector;
@@ -33,7 +33,7 @@ function Collector(options){
         myDS        = require('./telemetry.js').Datastore.MySQL;
         //cbDS        = require('./telemetry.js').Datastore.Couchbase;
         WebStore    = require('./webapp.js').Datastore.MySQL;
-        RequestUtil = require('./util.js').Request;
+        Util        = require('./util.js');
 
         this.options = _.merge(
             {
@@ -43,10 +43,19 @@ function Collector(options){
             options
         );
 
-        this.requestUtil = new RequestUtil(this.options);
+        this.requestUtil = new Util.Request(this.options);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
         this.myds        = new myDS(this.options.telemetry.datastore.mysql);
         //this.cbds        = new cbDS(this.options.telemetry.datastore.couchbase);
+        this.stats       = new Util.Stats(this.options, "Telemetry.Collector");
+
+        this.myds.connect()
+            .then(function(){
+                console.log("Collector: DS Connected");
+            }.bind(this),
+            function(err){
+                console.trace("Collector: DS Error -", err);
+            }.bind(this));
 
         this.app   = express();
         this.queue = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
@@ -55,7 +64,8 @@ function Collector(options){
         }
 
         this.app.set('port', this.options.collector.port);
-        this.app.use(express.logger());
+
+        this.app.use(Util.GetExpressLogger(this.options, express, this.stats));
         this.app.use(express.urlencoded());
         this.app.use(express.json());
         // If you want to use app.delete and app.put instead of using app.post
@@ -457,6 +467,7 @@ return when.promise(function(resolve, reject, notify) {
             return;
         }
 
+        //console.log("Collector: data", data);
         //console.log("Collector: gameVersion", data.gameVersion);
         data = JSON.stringify(data);
     }

@@ -21,7 +21,7 @@ var passport   = require('passport');
 var couchbase  = require('couchbase');
 
 // load at runtime
-var aConst, rConst, Strategy, CouchbaseStore, RequestUtil;
+var aConst, rConst, Strategy, CouchbaseStore, Util;
 
 module.exports = AuthSessionServer;
 
@@ -31,7 +31,7 @@ function AuthSessionServer(options, app, routes){
         rConst         = require('./routes.js').Const;
         Strategy       = require('./auth.js').Strategy;
         CouchbaseStore = require('./sessionstore.couchbase.js')(express);
-        RequestUtil    = require('./util.js').Request;
+        Util           = require('./util.js');
 
         this.options = _.merge(
             {
@@ -51,14 +51,15 @@ function AuthSessionServer(options, app, routes){
         );
 
         this.app = app;
-
-        this.requestUtil = new RequestUtil(this.options);
+        this.stats       = new Util.Stats(this.options, "Auth.Session");
+        this.requestUtil = new Util.Request(this.options);
 
         this.sessionStore = new couchbase.Connection({
             host:     this.options.sessionstore.host,
             bucket:   this.options.sessionstore.bucket,
             password: this.options.sessionstore.password
         }, function(err) {
+            this.sessionStore.stats.increment("error", "Connection");
             console.error("CouchBase SessionStore: Error -", err);
             if(err) throw err;
         }.bind(this));
@@ -69,10 +70,9 @@ function AuthSessionServer(options, app, routes){
         // express session store
         this.exsStore = new CouchbaseStore(this.options.sessionstore);
 
-
         this.app.configure(function() {
 
-            this.app.use(express.logger());
+            this.app.use(Util.GetExpressLogger(this.options, express, this.stats));
             this.app.use(express.compress());
             this.app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
 
@@ -109,6 +109,7 @@ function AuthSessionServer(options, app, routes){
         }.bind(this));
 
     } catch(err){
+        this.stats.increment("error", "Generic");
         console.trace("Auth: Error -", err);
     }
 }
@@ -118,6 +119,7 @@ AuthSessionServer.prototype.getCookieWASession = function(req, done){
         var data = this.buildWASession( req.session.passport.user[aConst.webappSessionPrefix] );
         done(null, data);
     } else {
+        this.stats.increment("error", "WASession");
         done("User info missing");
     }
 };
@@ -135,13 +137,16 @@ AuthSessionServer.prototype.getWASession = function(id, done){
         if(err) {
             if(err.code == 13) { // No such key
                 //console.warn("AuthSessionServer webapp session key missing:", key);
+                this.stats.increment("warn", "WASession.Missing");
                 done();
             } else {
+                this.stats.increment("error", "WASession");
                 done(err);
             }
             return;
         }
 
+        this.stats.increment("info", "WASession.Get");
         if(done) done(null, result);
     }.bind(this));
 };
@@ -150,6 +155,7 @@ AuthSessionServer.prototype.deleteWASession = function(id){
     var key = aConst.webappSessionPrefix+":"+id;
 
     this.sessionStore.remove(key, function(err, result) {
+        this.stats.increment("info", "WASession.Delete");
     }.bind(this));
 };
 
@@ -159,14 +165,17 @@ AuthSessionServer.prototype.getSession = function(id, done){
     this.sessionStore.get(key, function(err, result) {
         if(err) {
             if(err.code == 13) { // No such key
+                this.stats.increment("warn", "Session.KeyMissing");
                 console.warn("AuthSessionServer session key missing:", key);
                 done();
             } else {
+                this.stats.increment("error", "Session");
                 done(err);
             }
             return;
         }
 
+        this.stats.increment("info", "Session.Get");
         if(done) done(null, result);
     }.bind(this));
 };
@@ -181,6 +190,7 @@ AuthSessionServer.prototype.updateWebSessionInSession = function(sessionId, sess
             done(err);
         }
 
+        this.stats.increment("info", "Session.Update.WASession");
         done(null, data.passport.user);
     }.bind(this));
 };
@@ -199,10 +209,12 @@ AuthSessionServer.prototype.getWebSession = function(done){
             },
             function(err) {
                 if(err) {
+                    this.stats.increment("error", "GetWebSession");
                     console.error("Auth: sessionStore "+aConst.webappSessionPrefix+" Error -", err);
                     if(next) next(err);
                 }
 
+                this.stats.increment("info", "WASession.Set");
                 if(next) next();
             }.bind(this)
         );
@@ -210,9 +222,11 @@ AuthSessionServer.prototype.getWebSession = function(done){
 
     this.requestUtil.getRequest(url, null, function(err, pres){
         if(err) {
+            this.stats.increment("error", "GetWebSession.GetRequest");
             if(done) done(err);
         }
 
+        this.stats.increment("info", "GetWebSession");
         // parse cookie, to get web session
         var mCookieParts = {};
         if(_.isArray(pres.headers['set-cookie'])) {
@@ -226,9 +240,11 @@ AuthSessionServer.prototype.getWebSession = function(done){
                 //console.log("cookieParts:", mCookieParts);
                 if(done) done(null, mCookieParts[aConst.sessionCookieName], saveWebSession)
             } else {
+                this.stats.increment("error", "GetWebSession.GetRequest.MissingCookieName");
                 if(done) done(new Error("could not get "+aConst.sessionCookieName));
             }
         } else {
+            this.stats.increment("error", "GetWebSession.GetRequest.NoSetCookie");
             console.error("Auth: Error - No cookie set in proxy!");
             if(done) done(new Error("could not get cookie"));
         }
@@ -244,6 +260,7 @@ return when.promise(function(resolve, reject) {
         this.glassLabStrategy.registerUser(userData)
             .then(resolve, reject);
     } else {
+        this.stats.increment("error", "RegisterUser.InvalidLoginType");
         reject({error: "invalid login type"});
     }
 // ------------------------------------------------
@@ -260,6 +277,7 @@ return when.promise(function(resolve, reject) {
         this.glassLabStrategy.updateUserData(userData, userSessionData)
             .then(resolve, reject);
     } else {
+        this.stats.increment("error", "RegisterUser.InvalidLoginType");
         reject({error: "invalid login type"});
     }
 // ------------------------------------------------
@@ -279,6 +297,7 @@ return when.promise(function(resolve, reject) {
     var key = this.exsStore.getSessionPrefix()+":"+data.passport.user.sessionId;
     this.exsStore.set(key, data, function(err) {
         if(err) {
+            this.stats.increment("error", "UpdateUserDataInSession");
             reject({"error": "failure", "exception": err}, 500);
             return;
         }

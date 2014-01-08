@@ -23,7 +23,7 @@ var couchbase  = require('couchbase');
 var check      = require('validator').check;
 
 // load at runtime
-var Util, RequestUtil, aConst, rConst, SessionServer, WebStore;
+var Util, aConst, rConst, SessionServer, WebStore;
 
 module.exports = AuthServer;
 
@@ -33,7 +33,6 @@ function AuthServer(options){
         aConst        = require('./auth.js').Const;
         rConst        = require('./routes.js').Const;
         Util          = require('./util.js');
-        RequestUtil   = Util.Request;
         SessionServer = require('./auth.js').SessionServer;
         WebStore      = require('./webapp.js').Datastore.MySQL;
 
@@ -44,7 +43,8 @@ function AuthServer(options){
             options
         );
 
-        this.requestUtil = new RequestUtil(this.options);
+        this.stats       = new Util.Stats(this.options, "Auth");
+        this.requestUtil = new Util.Request(this.options);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
 
         // if starts with DOT then add current dir to start
@@ -61,9 +61,11 @@ function AuthServer(options){
             console.log('---------------------------------------------');
             console.log('Auth: Server listening on port ' + this.app.get('port'));
             console.log('---------------------------------------------');
+            this.stats.increment("info", "ServerStarted");
         }.bind(this));
 
     } catch(err){
+        this.stats.increment("error", "Generic");
         console.trace("Auth: Error -", err);
     }
 }
@@ -87,6 +89,7 @@ AuthServer.prototype.setupRoutes = function() {
                 this.sessionServer.deleteWASession(req.session.passport.user[aConst.webappSessionPrefix]);
             }
 
+            this.stats.increment("info", "Logout");
             req.logout();
             res.redirect(rConst.root);
         }.bind(this));
@@ -105,7 +108,10 @@ AuthServer.prototype.setupRoutes = function() {
         // Add include routes
         var includeRoute = function(req, res) {
             //console.log("Include to Auth:", req.originalUrl);
+            this.stats.increment("info", "Route.Auth");
+
             if( req.isAuthenticated()) {
+                this.stats.increment("info", "Route.Auth.Ok");
 
                 if( req.method == 'POST') {
                     var results = req.path.match(/\/user\/([0-9]*)/);
@@ -114,6 +120,7 @@ AuthServer.prototype.setupRoutes = function() {
                         results.length > 1 &&
                         !isNaN(parseInt(results[1]) ) ) {
 
+                        this.stats.increment("info", "Route.UpdateUserData");
                         //console.log("Include to Auth - POST path:", req.path, ", results:", results);
                         this.updateUserRoute(req, res);
                         return;
@@ -126,6 +133,7 @@ AuthServer.prototype.setupRoutes = function() {
 
                 //console.log("Auth passport user:", req.session.passport.user);
             } else {
+                this.stats.increment("error", "Route.Auth.Fail");
                 // error in auth, redirect back to login
                 console.error("Auth: Not Authenticated");
 
@@ -141,6 +149,8 @@ AuthServer.prototype.setupRoutes = function() {
 
         // Add exclude routes
         var excludeRoute = function(req, res) {
+            this.stats.increment("info", "Route.NoAuth");
+
             //console.log("Exclude From Auth:", req.originalUrl);
             var user = req.session.passport.user;
             var cookie = "";
@@ -155,13 +165,13 @@ AuthServer.prototype.setupRoutes = function() {
         // add excludeRoutes
         for(var e in rConst.auth.exclude){
             console.log("Exclude:", rConst.auth.exclude[e]);
-           this.app.use(rConst.auth.exclude[e], excludeRoute);
+            this.app.use(rConst.auth.exclude[e], excludeRoute);
         }
 
         // add includeRoutes
         for(var e in rConst.auth.include){
             console.log("Include:", rConst.auth.include[e]);
-           this.app.use(rConst.auth.include[e], includeRoute);
+            this.app.use(rConst.auth.include[e], includeRoute);
         }
 
         // add specialRoutes
@@ -189,17 +199,22 @@ AuthServer.prototype.setupRoutes = function() {
 
         this.app.get(rConst.root, function(req, res){
             //console.log("static root:", req.originalUrl);
+            this.stats.increment("info", "Route.Static.Root");
+
             var fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.root);
             res.sendfile( fullPath );
         }.bind(this));
 
         // DEFAULT
         this.app.use(function defaultRoute(req, res) {
+            this.stats.increment("info", "Route.Default");
+
             //console.log("defaultRoute:", req.originalUrl);
             res.redirect(rConst.root);
         }.bind(this));
 
     } catch(err){
+        this.stats.increment("error", "Route.Generic");
         console.trace("Auth: setupRoutes Error -", err);
     }
 };
@@ -257,6 +272,8 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
                 }
             }.bind(this));
         } else {
+            this.stats.increment("error", "ForwardToWebApp");
+
             // all else errors
             this.requestUtil.errorResponse(res, data, sres.statusCode);
         }
@@ -273,6 +290,7 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
+    this.stats.increment("info", "Route.Register.User");
     //console.log("Auth registerUserRoute - body:", req.body);
     if( !(
             req.body.username  &&
@@ -282,6 +300,7 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
             req.body.password  && !_.isEmpty(req.body.password)
         ) )
     {
+        this.stats.increment("error", "Route.Register.User.MissingFields");
         this.requestUtil.errorResponse(res, "missing some fields", 400);
         return;
     }
@@ -292,6 +311,7 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
     var registerErr = function(err, code){
         if(!code) code = 500;
 
+        this.stats.increment("error", "Route.Register.User");
         console.error("AuthServer registerUser Error:", err);
         this.requestUtil.jsonResponse(res, err, code);
     }.bind(this);
@@ -315,11 +335,13 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
                     // courseId
                     this.webstore.addUserToCourse(courseId, userId, systemRole)
                         .then(function(){
+                            this.stats.increment("info", "Route.Register.User."+systemRole+".Created");
                             this.glassLabLogin(req, res, next);
                         }.bind(this))
                         // catch all errors
                         .then(null, registerErr);
                 } else {
+                    this.stats.increment("info", "Route.Register.User."+systemRole+".Created");
                     this.glassLabLogin(req, res, next);
                 }
             }.bind(this))
@@ -340,6 +362,7 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
                     institutionId == data[0].ID) {
                     register(institutionId);
                 } else {
+                    this.stats.increment("error", "Route.Register.User.InvalidInstitution");
                     registerErr({"error": "institution not found"});
                 }
             }.bind(this))
@@ -356,12 +379,15 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
                     institutionId = data[0].institutionId;
                     register(institutionId);
                 } else {
+                    this.stats.increment("error", "Route.Register.User.InvalidInstitution");
                     registerErr({"error": "institution not found"});
                 }
             }.bind(this))
             // catch all errors
             .then(null, registerErr);
     }
+
+    this.stats.increment("info", "Route.Register.User."+systemRole);
 };
 
 /**
@@ -380,6 +406,7 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
+    this.stats.increment("info", "Route.Register.Manager");
     //console.log("Auth registerManagerRoute - body:", req.body);
     if( !(
             req.body.email  &&
@@ -389,6 +416,7 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
             req.body.password  && !_.isEmpty(req.body.password)
         ) )
     {
+        this.stats.increment("error", "Route.Register.Manager.MissingFields");
         this.requestUtil.errorResponse(res, "missing some fields", 400);
     }
 
@@ -406,8 +434,11 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
             }
 
             if(sres.statusCode == 200) {
+                this.stats.increment("info", "Route.Register.Manager.Created");
                 this.glassLabLogin(req, res, next);
             } else {
+                this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
+
                 res.writeHead(sres.statusCode, sres.headers);
                 res.end(data);
             }
@@ -439,9 +470,11 @@ AuthServer.prototype.updateUserRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
+    this.stats.increment("info", "Route.Update.User");
     //console.log("Auth updateUserRoute - body:", req.body);
     if( !(req.body.id) )
     {
+        this.stats.increment("error", "Route.Update.User.MissingId");
         this.requestUtil.errorResponse(res, "missing the id", 400);
         return;
     }
@@ -452,6 +485,7 @@ AuthServer.prototype.updateUserRoute = function(req, res, next) {
             req.body.lastName
         ) )
     {
+        this.stats.increment("error", "Route.Update.User.MissingFields");
         this.requestUtil.errorResponse(res, "missing data fields", 400);
         return;
     }
@@ -476,6 +510,7 @@ AuthServer.prototype.updateUserRoute = function(req, res, next) {
         .then(
             function(dataChanged){
                 if(dataChanged) {
+                    this.stats.increment("info", "Route.Update.User.Changed");
                     return this.sessionServer.updateUserDataInSession(req.session);
                 } else {
                     return Util.PromiseContinue();
@@ -484,11 +519,13 @@ AuthServer.prototype.updateUserRoute = function(req, res, next) {
         // all ok
         .then(
             function(){
+                this.stats.increment("info", "Route.Update.User.Done");
                 this.requestUtil.jsonResponse(res, userData);
         }.bind(this))
         .then(null,
             // error
             function(err){
+                this.stats.increment("error", "Route.Update.User");
                 console.error("Auth - updateUserRoute error:", err);
                 this.requestUtil.errorResponse(res, err, 400);
             }.bind(this)
@@ -500,6 +537,7 @@ AuthServer.prototype.loginRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
+    this.stats.increment("info", "Route.Login");
     this.glassLabLogin(req, res, next);
 };
 
@@ -507,18 +545,21 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
     //console.log("Auth loginRoute");
     var auth = passport.authenticate('glasslab', function(err, user, info) {
         if(err) {
+            this.stats.increment("error", "Route.Login.Auth");
             return next(err);
         }
 
         if (!user) {
             //req.session.messages =  [info];
             //res.redirect(rConst.api.user.login);
+            this.stats.increment("error", "Route.Login.NoUser");
             this.requestUtil.jsonResponse(res, info, 401);
             return;
         }
 
         this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
             if(err) {
+                this.stats.increment("error", "Route.Login.Auth.Session");
                 return next(err);
             }
 
@@ -530,6 +571,7 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
             //console.log("login:", user);
             req.logIn(user, function(err) {
                 if(err) {
+                    this.stats.increment("error", "Route.Login.Auth.LogIn");
                     return next(err);
                 }
 
@@ -546,18 +588,22 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
 
                             if(saveWebSession) {
                                 saveWebSession(waSession, tuser.sessionId, function(){
+                                    this.stats.increment("info", "Route.Login.Auth.LogIn.Done");
                                     res.writeHead(200);
                                     res.end( JSON.stringify(tuser) );
                                 }.bind(this));
                             } else {
+                                this.stats.increment("info", "Route.Login.Auth.LogIn.Done");
                                 res.writeHead(200);
                                 res.end( JSON.stringify(tuser) );
                             }
                         }.bind(this))
                         .then(null, function(err){
+                            this.stats.increment("error", "Route.Login.Auth.LogIn.GetCourse");
                             next(err);
                         }.bind(this));
                 } else {
+                    this.stats.increment("error", "Route.Login.Auth.LogIn.InvalidRole");
                     next(new Error("invalid role"));
                 }
 

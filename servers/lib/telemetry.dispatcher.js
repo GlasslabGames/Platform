@@ -40,8 +40,16 @@ function Dispatcher(options){
     this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
 
-    //this.ds            = new myDS(this.options.telemetry.datastore.mysql);
-    this.ds            = new cbDS(this.options.telemetry.datastore.couchbase);
+    //this.myds            = new myDS(this.options.telemetry.datastore.mysql);
+    this.cbds            = new cbDS(this.options.telemetry.datastore.couchbase);
+
+    this.cbds.connect()
+        .then(function(){
+            console.log("Dispatcher: DS Connected");
+        }.bind(this),
+        function(err){
+            console.trace("Dispatcher: DS Error -", err);
+        }.bind(this));
 
     this.startTelemetryPoll();
     this.startCleanOldSessionPoll();
@@ -299,7 +307,7 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
 
                     // set version (in case it's set in an events
                     if(jrow.gameVersion) {
-                        jdata.gameVersion   = jrow.gameVersion;
+                        jdata.gameVersion  = jrow.gameVersion;
                     }
                 }
             }
@@ -308,7 +316,7 @@ Dispatcher.prototype.processBatch = function(sessionId, done){
                 //console.log("Dispatcher: events:", jdata.events);
                 console.log("Dispatcher: ended session gameSessionID:", jdata.gameSessionId, ", event count:", jdata.events.length);
 
-                this.ds.saveEvents(jdata)
+                this.cbds.saveEvents(jdata)
                     .then(
                         function(){ done(); },
                         function(err){ done(err); }

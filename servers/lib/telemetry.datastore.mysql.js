@@ -29,9 +29,30 @@ function TelemDS_Mysql(options){
     );
 
     this.ds = new MySQL(this.options);
-    // Connect to data store
-    this.ds.testConnection();
 }
+
+TelemDS_Mysql.prototype.connect = function(){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var dsOk = false;
+
+    // Connect to data store
+    this.ds.testConnection(function(){
+        dsOk = true;
+        resolve();
+    }.bind(this));
+
+    // wait 10 seconds if can't connect then reject mysql telem
+    setTimeout(function(){
+        if(!dsOk) {
+            reject(new Error("Telemetry DataStore: Could not connect to mysql"));
+        }
+    }.bind(this), 10*1000);
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
 
 TelemDS_Mysql.prototype.saveEvents = function(jdata){
 // add promise wrapper
@@ -83,13 +104,90 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+TelemDS_Mysql.prototype.getAllEvents = function(){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var Q = "SELECT * FROM GL_ACTIVITY_EVENTS_ARCHIVE ORDER BY game_session_id";
+        //console.log('Q:', Q);
+
+        this.ds.query(Q, function(err, result) {
+            if(err) {
+                reject(err);
+                return;
+            }
+
+            if(result.length > 0) {
+                var eventList = {};
+
+                for(var i in result){
+                    var key = result[i].GAME_SESSION_ID;
+
+                    // if prop not set then set it
+                    if(!eventList.hasOwnProperty(key)) {
+                        eventList[key] = {
+                            gameSessionId: result[i].GAME_SESSION_ID,
+                            userId:        parseInt(result[i].USER_ID),
+                            gameVersion:   result[i].GAME,
+                            events:        []
+                        };
+                    }
+
+                    var edata;
+                    try{
+                        edata = JSON.parse(result[i].DATA);
+                    } catch(err) {
+                        // could not parse data
+                        edata = result[i].DATA;
+                    }
+
+                    eventList[key].events.push({
+                        name:      result[i].NAME,
+                        eventData: edata,
+                        timestamp: result[i].timestamp
+                    });
+                }
+
+                eventList = _.values(eventList);
+                //console.log("eventList length:", eventList.length);
+                resolve( eventList );
+            } else {
+                resolve();
+            }
+
+        }.bind(this));
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Mysql.prototype.removeArchiveEvents = function(gameSessionId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q = "DELETE FROM GL_ACTIVITY_EVENTS_ARCHIVE WHERE game_session_id="+this.ds.escape(gameSessionId);
+    //console.log('Q:', Q);
+
+    this.ds.query(Q, function(err, result) {
+        if(err) {
+            reject(err);
+            return;
+        }
+
+        resolve(result);
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
 TelemDS_Mysql.prototype.getEvents = function(gameSessionId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var Q = "";
-
-    Q = "SELECT * FROM GL_ACTIVITY_EVENTS WHERE game_session_id="+this.ds.escape(gameSessionId);
+    var Q = "SELECT * FROM GL_ACTIVITY_EVENTS WHERE game_session_id="+this.ds.escape(gameSessionId);
     //console.log('Q:', Q);
 
     this.ds.query(Q, function(err, result) {
@@ -101,15 +199,23 @@ return when.promise(function(resolve, reject) {
         if(result.length > 0) {
             var data = {
                 gameSessionId: gameSessionId,
-                userId:        result[0].USER_ID,
+                userId:        parseInt(result[0].USER_ID),
                 gameVersion:   result[0].GAME,
                 events:        []
             };
 
+            var edata;
+            try{
+                edata = JSON.parse(result[i].DATA);
+            } catch(err) {
+                // could not parse data
+                edata = result[i].DATA;
+            }
+
             for(var i in result){
                 data.events.push({
                     name:      result[i].NAME,
-                    data:      result[i].DATA,
+                    eventData: edata,
                     timestamp: result[i].timestamp
                 });
             }

@@ -26,7 +26,12 @@ function TelemDS_Couchbase(options){
         },
         options
     );
+}
 
+TelemDS_Couchbase.prototype.connect = function(){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
     this.client = new couchbase.Connection({
         host:     this.options.host,
         bucket:   this.options.bucket,
@@ -39,12 +44,18 @@ function TelemDS_Couchbase(options){
 
     this.client.on('error', function (err) {
         console.error("CouchBase SessionStore: Error -", err);
+        reject(err);
     }.bind(this));
 
     this.client.on('connect', function () {
-        console.log("CouchBase connected!");
+        //console.log("CouchBase connected!");
+        resolve();
     }.bind(this));
-}
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
 
 TelemDS_Couchbase.prototype.saveEvents = function(jdata){
 // add promise wrapper

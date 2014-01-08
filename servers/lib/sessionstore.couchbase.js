@@ -12,8 +12,11 @@ module.exports = function(connect){
 
     // Connect Session Store
     var Store = connect.session.Store;
+    var Util;
 
     function CouchBaseStore(options) {
+        Util = require('./util.js');
+
         this.options = _.merge(
             {
                 host:     "localhost:8091",
@@ -43,12 +46,16 @@ module.exports = function(connect){
             }.bind(this));
         }
 
-        this.client.on('error', function (err) {
-            console.error("CouchBase SessionStore: Error -", err);
+        this.stats = new Util.Stats(this.options, "CouchBase.SessionStore");
 
+        this.client.on('error', function (err) {
+            this.stats.increment("error", "Generic");
+
+            console.error("CouchBase SessionStore: Error -", err);
             this.emit('disconnect');
         }.bind(this));
         this.client.on('connect', function () {
+            this.stats.increment("info", "Connect");
             this.emit('connect');
         }.bind(this));
 
@@ -68,23 +75,30 @@ module.exports = function(connect){
     CouchBaseStore.prototype.get = function(sessionId, done){
         try {
             var key = this.options.prefix+":"+sessionId;
+            this.stats.increment("info", "Get.Session");
 
             //console.log("CouchBaseStore get key:", key);
             this.client.get(key, function(err, result) {
                 if(err){
                     if(err.code == 13) { // No such key
+                        this.stats.increment("info", "Get.NoKey");
                         //console.log("CouchBaseStore: No such key");
                         return done();
                     } else {
+                        this.stats.increment("error", "Get");
                         console.error("CouchBase SessionStore: Get Error -", err);
                         return done(err);
                     }
                 }
 
+                this.stats.increment("info", "Get.Done");
                 return done(null, result.value);
-            });
+
+            }.bind(this));
+
         } catch (err) {
-            console.error("CouchBase SessionStore: Set Error -", err);
+            this.stats.increment("error", "Get.Catch");
+            console.error("CouchBase SessionStore: Get Error -", err);
             done(err);
         }
     };
@@ -103,8 +117,10 @@ module.exports = function(connect){
             this.client.get(key, function(err, result){
                 if(err){
                     if(err.code == 13) { // No such key
+                        this.stats.increment("info", "Set.New");
                         this._setSession(key, session, done);
                     } else {
+                        this.stats.increment("error", "Set");
                         if(err) { return done(err); }
                     }
                 } else {
@@ -117,15 +133,19 @@ module.exports = function(connect){
                         // already has user data
                         //console.log("CouchBaseStore: touching session key:", key);
                         this.client.touch(key, function(err){
+                            this.stats.increment("info", "Set.Touch");
                             done(err);
-                        });
+                        }.bind(this));
                     } else {
+                        this.stats.increment("info", "Set.Update");
                         this._setSession(key, session, done);
                     }
                 }
 
             }.bind(this));
+
         } catch (err) {
+            this.stats.increment("error", "Set.Catch");
             console.error("CouchBase SessionStore: Set Error -", err);
             done(err);
         }
@@ -148,11 +168,14 @@ module.exports = function(connect){
             },
             function(err, result){
                 if(err){
-                    console.error("CouchBase SessionStore: Set Error -", err);
+                    this.stats.increment("error", "SetSession");
+                    console.error("CouchBase SessionStore: setSession Error -", err);
                     return done(err);
                 }
-                done(err);
-            }
+
+                this.stats.increment("info", "SetSession.Done");
+                done(err, result);
+            }.bind(this)
         );
     };
 
@@ -161,7 +184,9 @@ module.exports = function(connect){
             var key = this.options.prefix+":"+sessionId;
             //console.log("CouchBaseStore remove key:", key);
             this.client.remove(key, done);
+            this.stats.increment("info", "Destroy");
         } catch (err) {
+            this.stats.increment("error", "Destroy");
             console.error("CouchBase SessionStore: Destroy Error -", err);
             done(err);
         }
