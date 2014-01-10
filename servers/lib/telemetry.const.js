@@ -25,10 +25,12 @@ module.exports = {
           ended:   "ended",
           cleanup: "cleanup"
       },
-      sessionKey: "gs",
-      eventsKey: "events",
-      scoreKey: "GL_Scenario_Score",
-      versions: require('./telemetry.const.game_versions')
+      dataKey:    "gd",
+      countKey:   "count",
+      eventKey:   "e",
+      eventsKey:  "events",
+      scoreKey:   "GL_Scenario_Score",
+      versions:   require('./telemetry.const.game_versions')
   },
   webapp: {
       api: '/api',

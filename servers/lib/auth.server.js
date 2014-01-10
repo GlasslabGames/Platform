@@ -225,58 +225,59 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
         cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
     }
 
-    this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null, function(err, sres, data){
-        var statusCode = Math.floor(sres.statusCode/100)*100;
+    this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
+        function(err, sres, data){
+            var statusCode = Math.floor(sres.statusCode/100)*100;
 
-        if( statusCode == 200 ||
-            statusCode == 300) {
-            res.writeHead(sres.statusCode, sres.headers);
-            res.end(data);
-        }
-        else if(statusCode == 400){
-            //console.log("includeRoute forwardRequestToWebApp - err:", err, ", data:", data);
-            if(alreadyTried) {
-                this.requestUtil.errorResponse(res, data, 500);
-                return;
+            if( statusCode == 200 ||
+                statusCode == 300) {
+                res.writeHead(sres.statusCode, sres.headers);
+                res.end(data);
             }
-
-            // update session
-            this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
-                if(err) {
-                    res.writeHead(sres.statusCode, sres.headers);
-                    res.end(data);
+            else if(statusCode == 400){
+                //console.log("includeRoute forwardRequestToWebApp - err:", err, ", data:", data);
+                if(alreadyTried) {
+                    this.requestUtil.errorResponse(res, data, 500);
                     return;
                 }
 
-                if(saveWebSession) {
+                // update session
+                this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
+                    if(err) {
+                        res.writeHead(sres.statusCode, sres.headers);
+                        res.end(data);
+                        return;
+                    }
 
-                    // save web session
-                    saveWebSession(waSession, req.session.id, function(err){
-                        if(err) {
-                            this.requestUtil.errorResponse(res, err, 500);
-                            return;
-                        }
+                    if(saveWebSession) {
 
-                        // update web session in session store
-                        req.session.passport.user[aConst.webappSessionPrefix] = waSession;
-                        this.sessionServer.updateWebSessionInSession(req.session.id, req.session, function(err, user){
+                        // save web session
+                        saveWebSession(waSession, req.session.id, function(err){
                             if(err) {
                                 this.requestUtil.errorResponse(res, err, 500);
                                 return;
                             }
 
-                            // try again
-                            this.forwardAuthenticatedRequestToWebApp(user, req, res, true);
-                        }.bind(this));
-                    }.bind(this));
-                }
-            }.bind(this));
-        } else {
-            this.stats.increment("error", "ForwardToWebApp");
+                            // update web session in session store
+                            req.session.passport.user[aConst.webappSessionPrefix] = waSession;
+                            this.sessionServer.updateWebSessionInSession(req.session.id, req.session, function(err, user){
+                                if(err) {
+                                    this.requestUtil.errorResponse(res, err, 500);
+                                    return;
+                                }
 
-            // all else errors
-            this.requestUtil.errorResponse(res, data, sres.statusCode);
-        }
+                                // try again
+                                this.forwardAuthenticatedRequestToWebApp(user, req, res, true);
+                            }.bind(this));
+                        }.bind(this));
+                    }
+                }.bind(this));
+            } else {
+                this.stats.increment("error", "ForwardToWebApp");
+
+                // all else errors
+                this.requestUtil.errorResponse(res, data, sres.statusCode);
+            }
     }.bind(this));
 }
 

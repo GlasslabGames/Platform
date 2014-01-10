@@ -37,44 +37,119 @@ return when.promise(function(resolve, reject) {
         bucket:   this.options.bucket,
         password: this.options.password
     }, function(err) {
-        console.error("CouchBase SessionStore: Error -", err);
+        console.error("CouchBase TelemetryStore: Error -", err);
 
         if(err) throw err;
     }.bind(this));
 
     this.client.on('error', function (err) {
-        console.error("CouchBase SessionStore: Error -", err);
+        console.error("CouchBase TelemetryStore: Error -", err);
         reject(err);
     }.bind(this));
 
     this.client.on('connect', function () {
         //console.log("CouchBase connected!");
-        resolve();
+        this.setupDocsAndViews()
+            .then( resolve, reject );
     }.bind(this));
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
 
-
-TelemDS_Couchbase.prototype.saveEvents = function(jdata){
+TelemDS_Couchbase.prototype.setupDocsAndViews = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var key = tConst.game.sessionKey+":"+jdata.gameSessionId+":"+tConst.game.eventsKey;
 
-    //console.log("saveEvents jdata:", jdata);
-    this.client.set(key, jdata,
-        function(err){
+    this.client.getDesignDoc("telemetry", function(err, result){
+        if(err) {
+            // missing need to create the doc and views
+            if( err.reason == "missing" ||
+                err.reason == "deleted") {
+
+                // TODO: move this to it's own module
+                // TODO: add variable search and replace after convert to string
+                var telemDDoc = {
+                    views: {
+                        gameData : {
+                            map: function (doc, meta) {
+                                values = meta.id.split(':');
+                                if( (values[0] == 'gd') &&
+                                    (values[1] == 'e') &&
+                                    (meta.type == "json") )
+                                {
+                                    for(var i in doc.tags){
+                                        epoc = parseInt(doc.timestamp);
+                                        td = new Date(epoc * 1000);
+                                        key  = [i.toLowerCase(), doc.tags[i]];
+                                        key  = key.concat( dateToArray( td ) );
+                                        emit(key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                // convert function to string
+                telemDDoc.views.gameData.map = telemDDoc.views.gameData.map.toString();
+                //console.log("telemDDoc:", telemDDoc);
+
+                this.client.setDesignDoc("telemetry", telemDDoc, function(err, result){
+                    if(err) {
+                        console.error("err", err);
+                        reject(err);
+                        return;
+                    }
+
+                    resolve();
+                }.bind(this));
+
+            } else {
+                console.error("err", err);
+                reject(err);
+            }
+
+            return;
+        }
+
+        resolve();
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.saveEvent = function(event){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var key = tConst.game.dataKey+"::"+tConst.game.countKey;
+    this.client.incr(key, {initial: 0},
+        function(err, data){
             if(err){
-                console.error("CouchBase SessionStore: Set Events Error -", err);
+                console.error("CouchBase TelemetryStore: Incr Event Count Error -", err);
                 reject(err);
                 return;
             }
 
-            resolve();
-        }
-    );
+            var key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+data.value;
+            this.client.add(key, event, function(err, data){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Set Event Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                resolve();
+            }.bind(this));
+
+    }.bind(this));
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -85,21 +160,68 @@ TelemDS_Couchbase.prototype.getEvents = function(gameSessionId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var key = tConst.game.sessionKey+":"+gameSessionId+":"+tConst.game.eventsKey;
 
-    console.log("getEvents key:", key);
-    this.client.get(key,
-        function(err, result){
+    this.client.view("telemetry", "gameData").query({
+            stale: false,
+            startkey: ["gameSessionId".toLowerCase(), gameSessionId, null],
+            endkey:   ["gameSessionId".toLowerCase(), gameSessionId, "\u0fff"]
+        },
+        function(err, results){
             if(err){
-                console.error("CouchBase SessionStore: Get Events Error -", err);
+                console.error("CouchBase TelemetryStore: Get Events Error -", err);
                 reject(err);
                 return;
             }
 
-            //console.log("getEvents data:", result.value);
-            resolve(result.value);
-        }
-    );
+            var keys = [];
+            for (var i = 0; i < results.length; ++i) {
+                keys.push(results[i].id);
+            }
+
+            this.client.getMulti(keys, {},
+                function(err, results){
+                    if(err){
+                        console.error("CouchBase TelemetryStore: Get Events Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    var eventsData = {
+                        userId: 0,
+                        gameSessionId: '',
+                        events: []
+                    };
+                    var event, revent;
+                    for(var i in results) {
+                        revent = results[i].value;
+                        event = {
+                            name:      revent.name,
+                            timestamp: revent.timestamp,
+                            eventData: revent.data
+                        };
+
+                        if( revent.tags &&
+                            revent.tags.userId) {
+                            eventsData.userId = revent.tags.userId;
+                        }
+                        if( revent.tags &&
+                            revent.tags.gameSessionId) {
+                            eventsData.gameSessionId = revent.tags.gameSessionId;
+                        }
+                        if( revent.tags &&
+                            revent.tags.gameVersion) {
+                            eventsData.gameVersion = revent.tags.gameVersion;
+                        }
+
+                        eventsData.events.push(event);
+                    }
+
+                    //console.log("getEvents eventsData:", eventsData);
+                    resolve(eventsData);
+            }.bind(this));
+
+        }.bind(this));
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper

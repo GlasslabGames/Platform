@@ -18,9 +18,8 @@ function getExpressLogger(options, express, stats){
     express.logger.token('remote-addy', function(req, res){
         if( req.headers.hasOwnProperty('x-forwarded-for') ){
             return req.headers['x-forwarded-for'];
-        }
-        else if( req.headers.hasOwnProperty('remote-addr') ){
-            return req.headers['remote-addr'];
+        } else {
+            return req.connection.remoteAddress;
         }
     });
 

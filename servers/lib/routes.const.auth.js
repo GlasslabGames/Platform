@@ -15,6 +15,7 @@ module.exports = {
     ],
     exclude: [
         "/static", // needs to be served by the webapp because it's from admin
+        "/passwordreset",
         api+"/user/login",
         api+"/user/create",
         api+"/user/register",

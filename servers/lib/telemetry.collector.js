@@ -6,7 +6,6 @@
  *  when       - https://github.com/cujojs/when
  *  express    - https://github.com/visionmedia/express
  *  multiparty - https://github.com/superjoe30/node-multiparty
- *  redis      - https://github.com/mranney/node_redis
  *
  */
 
@@ -17,27 +16,25 @@ var when       = require('when');
 var parallel   = require('when/parallel');
 var express    = require('express');
 var multiparty = require('multiparty');
-var redis      = require('redis');
 // load at runtime
-var Util, aConst, tConst, rConst, WebStore;
-var myDS, cbDS;
+var aConst, tConst, rConst;
 
 module.exports = Collector;
 
 function Collector(options){
     try{
+        var Util, WebStore;
+        var Telem = require('./telemetry.js');
+
         // Glasslab libs
         aConst      = require('./auth.js').Const;
-        tConst      = require('./telemetry.js').Const;
         rConst      = require('./routes.js').Const;
-        myDS        = require('./telemetry.js').Datastore.MySQL;
-        //cbDS        = require('./telemetry.js').Datastore.Couchbase;
         WebStore    = require('./webapp.js').Datastore.MySQL;
         Util        = require('./util.js');
+        tConst      = Telem.Const;
 
         this.options = _.merge(
             {
-                queue:     { port: null, host: null, db:0 },
                 collector: { port: 8081 }
             },
             options
@@ -45,24 +42,28 @@ function Collector(options){
 
         this.requestUtil = new Util.Request(this.options);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
-        this.myds        = new myDS(this.options.telemetry.datastore.mysql);
-        //this.cbds        = new cbDS(this.options.telemetry.datastore.couchbase);
+        this.myds        = new Telem.Datastore.MySQL(this.options.telemetry.datastore.mysql);
+        this.cbds        = new Telem.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
+        this.queue       = new Telem.Queue.Redis(this.options);
         this.stats       = new Util.Stats(this.options, "Telemetry.Collector");
 
         this.myds.connect()
             .then(function(){
-                console.log("Collector: DS Connected");
+                console.log("Collector: MyDS Connected");
             }.bind(this),
             function(err){
-                console.trace("Collector: DS Error -", err);
+                console.trace("Collector: MyDS Error -", err);
             }.bind(this));
 
-        this.app   = express();
-        this.queue = redis.createClient(this.options.queue.port, this.options.queue.host, this.options.queue);
-        if(this.options.queue.db) {
-            this.queue.select(this.options.queue.db);
-        }
+        this.cbds.connect()
+            .then(function(){
+                console.log("Collector: CbDS Connected");
+            }.bind(this),
+            function(err){
+                console.trace("Collector: CbDS Error -", err);
+            }.bind(this));
 
+        this.app = express();
         this.app.set('port', this.options.collector.port);
 
         this.app.use(Util.GetExpressLogger(this.options, express, this.stats));
@@ -98,6 +99,8 @@ Collector.prototype.startSession = function(req, outRes){
     try {
         var headers = { cookie: "" };
         var url = "http://localhost:" +this.options.validate.port + tConst.validate.api.session;
+
+        // TODO: validate all inputs
 
         if(req.params.type == tConst.type.game) {
             url += "/"+req.body.userSessionId;
@@ -136,29 +139,34 @@ Collector.prototype.startSession = function(req, outRes){
             // only if game
             if(req.params.type == tConst.type.game) {
                 // validate game version if version is passed exists
-                var isVersionValid = this.validateGameVersion(gameType, req.body.gameVersion);
+                isVersionValid = this._validateGameVersion(gameType, req.body.gameVersion);
             }
 
             // clean up old game session
             this.myds.cleanUpOldGameSessions(userId, gameType)
-                // start session
+
+                // start session in MySQL (GL_SESSION)
                 .then(function () {
                     return this.myds.startGameSession(userId, courseId, gameType);
                 }.bind(this))
+
                 // start queue session
                 .then(function (gameSessionId) {
                     // save for later
                     gSessionId = gameSessionId;
-                    this.qStartSession(gameSessionId, userId)
+                    return this.queue.startSession(gameSessionId, userId);
                 }.bind(this))
+
                 // start activity session
                 .then(function () {
                     return this.webstore.createActivityResults(gSessionId, userId, courseId, gameType);
                 }.bind(this))
+
                 // get config settings
                 .then(function () {
                     return this.webstore.getConfigs();
                 }.bind(this))
+
                 // all ok, done
                 .then(function (configs) {
                     // override details if user collectTelemetry is set
@@ -178,6 +186,7 @@ Collector.prototype.startSession = function(req, outRes){
                     //console.log("configs:", configs);
                     this.requestUtil.jsonResponse(outRes, outData);
                 }.bind(this) )
+
                 // catch all errors
                 .then(null,  function(err) {
                     console.error("Collector end Session Error:", err);
@@ -193,6 +202,8 @@ Collector.prototype.startSession = function(req, outRes){
 
 Collector.prototype.sendBatchTelemetry = function(req, outRes){
     try {
+        // TODO: validate all inputs
+
         if(req.params.type == tConst.type.game) {
             var form = new multiparty.Form();
             form.parse(req, function(err, fields) {
@@ -208,25 +219,25 @@ Collector.prototype.sendBatchTelemetry = function(req, outRes){
                     if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
 
                     //console.log("fields:", fields);
-                    this.qSendBatch(fields.gameSessionId, fields);
+                    this._validateSendBatch(outRes, fields.gameSessionId, fields);
+                } else {
+                    outRes.send();
                 }
-
-                outRes.send();
             }.bind(this));
         } else {
             //console.log("send telemetry batch body:", req.body);
             // Queue Data
-            this.qSendBatch(req.body.gameSessionId, req.body);
-
-            outRes.send();
+            this._validateSendBatch(outRes, req.body.gameSessionId, req.body);
         }
     } catch(err) {
         console.trace("Collector: Send Telemetry Batch Error -", err);
     }
 };
 
+
 Collector.prototype.endSession = function(req, outRes){
     try {
+        // TODO: validate all inputs
         //console.log("req.params:", req.params, ", req.body:", req.body);
 
         var done = function(jdata) {
@@ -235,47 +246,51 @@ Collector.prototype.endSession = function(req, outRes){
             if(jdata.gameSessionId) {
 
                 // validate session
-                this.qValidate(jdata.gameSessionId)
-                // save events
-                .then(function(){
-                    return this.qSendBatch(jdata.gameSessionId, jdata)
-                }.bind(this))
-                // all done in parallel
-                .then(function (score){
-                    var p = parallel([
-                        // create challenge submission if challenge exists
-                        function() {
-                            this.webstore.createChallengeSubmission(jdata)
-                        }.bind(this),
-                        // end game session
-                        function() {
-                            return this.myds.endGameSession(jdata.gameSessionId);
-                        }.bind(this),
-                        // end activity session
-                        function() {
-                            return this.webstore.updateActivityResults(jdata.gameSessionId, score, jdata.cancelled);
-                        }.bind(this)
-                    ])
-                    // when all done
-                    // add end session to Q
+                this.queue.validateSession(jdata.gameSessionId)
+
+                    // save events
+                    .then(function(sdata){
+                        return this._saveBatch(jdata.gameSessionId, sdata.userId, jdata)
+                    }.bind(this))
+
+                    // all done in parallel
+                    .then(function (score){
+                        var p = parallel([
+                            // create challenge submission if challenge exists
+                            function() {
+                                this.webstore.createChallengeSubmission(jdata)
+                            }.bind(this),
+                            // end game session
+                            function() {
+                                return this.myds.endGameSession(jdata.gameSessionId);
+                            }.bind(this),
+                            // end activity session
+                            function() {
+                                return this.webstore.updateActivityResults(jdata.gameSessionId, score, jdata.cancelled);
+                            }.bind(this)
+                        ])
+                        // when all done
+                        // add end session to Q
+                        .then( function() {
+                            console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
+
+                            return this.queue.endSession(jdata.gameSessionId);
+                        }.bind(this) );
+
+                        return p;
+                    }.bind(this))
+
+                    // all done
                     .then( function() {
-                        console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
+                        outRes.status(200).send('{}');
+                        return;
+                    }.bind(this) )
 
-                        return this.qEndSession(jdata.gameSessionId);
+                    // catch all errors
+                    .then(null, function(err) {
+                        console.error("Collector end Session Error:", err);
+                        outRes.status(500).send('Error:'+err);
                     }.bind(this) );
-
-                    return p;
-                }.bind(this))
-                // all done
-                .then( function() {
-                    outRes.status(200).send('{}');
-                    return;
-                }.bind(this) )
-                // catch all errors
-                .then(null, function(err) {
-                    console.error("Collector end Session Error:", err);
-                    outRes.status(500).send('Error:'+err);
-                }.bind(this) );
 
             } else {
                 var err = "gameSessionId missing!";
@@ -313,7 +328,7 @@ Collector.prototype.endSession = function(req, outRes){
 // ---------------------------------------
 
 
-Collector.prototype.validateGameVersion = function(gameType, gameVersion){
+Collector.prototype._validateGameVersion = function(gameType, gameVersion){
     // Grab indices of specific delimeters
     var gameMajorDelimeter     = gameVersion.indexOf( "_" );
     var majorMinorDelimeter    = gameVersion.indexOf( "." );
@@ -369,71 +384,38 @@ Collector.prototype.validateGameVersion = function(gameType, gameVersion){
 };
 
 // ---------------------------------------
-// Queue function
-Collector.prototype.qStartSession = function(gameSessionId, userId) {
+Collector.prototype._validateSendBatch = function(res, gameSessionId, data){
+    // validate session and get data
+    this.queue.validateSession(gameSessionId)
+        // save batch
+        .then(function(sdata){
+            return this._saveBatch(gameSessionId, sdata.userId, data);
+        }.bind(this))
+
+        // all ok
+        .then(function(){
+            res.send();
+        }.bind(this))
+
+        // catch all errors
+        .then(null, function(err){
+            console.error("Collector: Error -", err);
+            res.status(500).send('Error:'+err);
+        }.bind(this));
+};
+
+Collector.prototype._saveBatch = function(gameSessionId, userId, data) {
 // add promise wrapper
-return when.promise(function(resolve, reject, notify) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var batchInKey = tConst.batchKey+":"+gameSessionId+":"+tConst.inKey;
-
-    // create list and add userId
-    this.queue.lpush(batchInKey,
-        JSON.stringify({
-            gameSessionId: gameSessionId,
-            userId:        userId
-        }),
-        function(err){
-            if(err) {
-                console.error("Collector: qStart Error-", err);
-            }
-        }
-    );
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}
-
-Collector.prototype.qValidate = function(id) {
-// add promise wrapper
-return when.promise(function(resolve, reject, notify) {
-// ------------------------------------------------
-
-    var batchInKey = tConst.batchKey+":"+id+":"+tConst.inKey;
-
-    this.queue.llen(batchInKey, function(err, count){
-        if(err) {
-            console.error("Collector: Batch Error -", err);
-            reject(err);
-            return;
-        }
-
-        if(count > 1) {
-            resolve();
-        } else {
-            reject(new Error("session never created"));
-        }
-    });
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}
-
-
-Collector.prototype.qSendBatch = function(id, data) {
-// add promise wrapper
-return when.promise(function(resolve, reject, notify) {
-// ------------------------------------------------
-
-    var batchInKey = tConst.batchKey+":"+id+":"+tConst.inKey;
-
     var score = 0;
-    if(data.stars) {
-        score = data.stars;
-    }
 
-    // if object convert data to string
+    // data needs to be an object
     if(_.isObject(data)) {
+        if(data.stars) {
+            score = data.stars;
+        }
+
         if(data.events) {
 
             // parse events
@@ -450,13 +432,53 @@ return when.promise(function(resolve, reject, notify) {
                 return;
             }
 
+            //console.log("Collector: data", data);
+            //console.log("Collector: gameVersion", data.gameVersion);
+
             // find score if it exists
+            var event;
+            var promiseList = [];
             for(var i in data.events) {
-                // if string, convert timestamp to int
-                if( _.isString(data.events[i].timestamp) ) {
-                    data.events[i].timestamp = parseInt(data.events[i].timestamp);
+                event = {
+                    name: "",
+                    timestamp: 0,
+                    tags: {},
+                    data: {}
+                };
+
+                // get name
+                if(data.events[i].name) {
+                    event.name = data.events[i].name;
+                } else {
+                    // skip to next event
+                    continue;
                 }
 
+                // get timestamp if provided
+                if(data.events[i].timestamp) {
+                    // if string, convert timestamp to int
+                    if( _.isString(data.events[i].timestamp) ) {
+                        event.timestamp = parseInt(data.events[i].timestamp);
+                    }
+                    if( _.isNumber(data.events[i].timestamp) ) {
+                        event.timestamp = data.events[i].timestamp;
+                    }
+                } else {
+                    event.timestamp = Math.round(new Date().getTime()/1000.0);
+                }
+
+                // add data
+                if(data.events[i].eventData) {
+                    event.data = data.events[i].eventData;
+                }
+
+                event.tags.gameSessionId = data.gameSessionId;
+                event.tags.gameVersion   = data.gameVersion;
+                if(userId) {
+                    event.tags.userId    = userId;
+                }
+
+                // get score
                 if( data.events[i].name &&
                     data.events[i].name == tConst.game.scoreKey) {
                     if( data.events[i].eventData &&
@@ -464,19 +486,35 @@ return when.promise(function(resolve, reject, notify) {
                         score = data.events[i].eventData.stars;
                     }
                 }
+
+                // adds the promise to the list
+                promiseList.push( this.cbds.saveEvent(event) );
             }
+
+            // when all the promises complete then it fires resolve
+            when.all(promiseList)
+                .then(
+                    function(){
+                        resolve(score);
+                    }.bind(this),
+                    function(err){
+                        reject(err);
+                    }.bind(this)
+                );
 
         } else {
             // no events
             resolve(score);
             return;
         }
-
-        //console.log("Collector: data", data);
-        //console.log("Collector: gameVersion", data.gameVersion);
-        data = JSON.stringify(data);
+    } else {
+        console.error("Collector: Error - invalid data type");
+        reject(new Error("invalid data type"));
+        return;
     }
 
+    /*
+    data = JSON.stringify(data);
     // X prevents from creating a list if does not exist
     this.queue.lpushx(batchInKey, data, function(err){
         if(err) {
@@ -487,34 +525,9 @@ return when.promise(function(resolve, reject, notify) {
 
         resolve(score);
     });
+    */
 
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 }
-
-Collector.prototype.qEndSession = function(id) {
-// add promise wrapper
-return when.promise(function(resolve, reject, notify) {
-// ------------------------------------------------
-    var telemetryInKey = tConst.telemetryKey+":"+tConst.inKey;
-
-    this.queue.lpush(telemetryInKey,
-        JSON.stringify({
-            id: id,
-            type: tConst.end
-        }),
-        function(err){
-            if(err) {
-                console.error("Collector: End Error -", err);
-                reject(err);
-                return;
-            }
-            resolve();
-        }
-    );
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}
-// ---------------------------------------

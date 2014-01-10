@@ -578,6 +578,13 @@ return when.promise(function(resolve, reject) {
 
         // check UserName, if changed
         .then(function(){
+            // If Instructors OR managers, then username is the same as there email
+            if( (userSessionData.role == aConst.role.instructor) ||
+                (userSessionData.role == aConst.role.manager)
+              ) {
+                userData.username = userData.email;
+            }
+
             if(userData.username.toLowerCase() != userSessionData.username.toLowerCase()) {
                 // update session data
                 userSessionData.username = userData.username;
