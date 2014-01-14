@@ -23,18 +23,21 @@ var couchbase  = require('couchbase');
 var check      = require('validator').check;
 
 // load at runtime
-var Util, aConst, rConst, SessionServer, WebStore;
+var aConst, rConst;
 
 module.exports = AuthServer;
 
 function AuthServer(options){
     try {
+        var Util, SessionServer, Strategy, WebStore;
+
         // Glasslab libs
         aConst        = require('./auth.js').Const;
         rConst        = require('./routes.js').Const;
         Util          = require('./util.js');
         SessionServer = require('./auth.js').SessionServer;
         WebStore      = require('./webapp.js').Datastore.MySQL;
+        Strategy      = require('./auth.js').Strategy;
 
         this.options = _.merge(
             {
@@ -43,9 +46,10 @@ function AuthServer(options){
             options
         );
 
-        this.stats       = new Util.Stats(this.options, "Auth");
-        this.requestUtil = new Util.Request(this.options);
-        this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
+        this.stats            = new Util.Stats(this.options, "Auth");
+        this.requestUtil      = new Util.Request(this.options);
+        this.webstore         = new WebStore(this.options.webapp.datastore.mysql);
+        this.glassLabStrategy = new Strategy.Glasslab(this.options);
 
         // if starts with DOT then add current dir to start
         if(this.options.webapp.staticContentPath.charAt(0) == '.') {
@@ -54,7 +58,14 @@ function AuthServer(options){
 
         this.app = express();
         this.app.set('port', this.options.auth.port);
-        this.sessionServer = new SessionServer(this.options, this.app, this.setupRoutes.bind(this));
+        this.sessionServer = new SessionServer(
+            this.options,
+            this.app,
+            this.setupRoutes.bind(this),
+            function(passport){
+                passport.use(this.glassLabStrategy);
+            }.bind(this)
+        );
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function createServer(){
@@ -65,8 +76,8 @@ function AuthServer(options){
         }.bind(this));
 
     } catch(err){
-        this.stats.increment("error", "Generic");
         console.trace("Auth: Error -", err);
+        if(this.stats) this.stats.increment("error", "Generic");
     }
 }
 
@@ -329,7 +340,7 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
             loginType:     aConst.login.type.glassLabV2
         };
 
-        this.sessionServer.registerUser(userData)
+        this._registerUser(userData)
             .then(function(userId){
                 // if student, enroll in course
                 if(systemRole == aConst.role.student) {
@@ -467,6 +478,40 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
      */
 };
 
+AuthServer.prototype._registerUser = function(userData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        if( (userData.loginType == aConst.login.type.glassLabV1) ||
+            (userData.loginType == aConst.login.type.glassLabV2) ){
+            this.glassLabStrategy.registerUser(userData)
+                .then(resolve, reject);
+        } else {
+            this.stats.increment("error", "RegisterUser.InvalidLoginType");
+            reject({error: "invalid login type"});
+        }
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+AuthServer.prototype._updateUserData = function(userData, userSessionData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        if( (userData.loginType == aConst.login.type.glassLabV1) ||
+            (userData.loginType == aConst.login.type.glassLabV2) ){
+            this.glassLabStrategy.updateUserData(userData, userSessionData)
+                .then(resolve, reject);
+        } else {
+            this.stats.increment("error", "RegisterUser.InvalidLoginType");
+            reject({error: "invalid login type"});
+        }
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
 AuthServer.prototype.updateUserRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
@@ -506,7 +551,7 @@ AuthServer.prototype.updateUserRoute = function(req, res, next) {
 
     var userSessionData = req.session.passport.user;
 
-    this.sessionServer.updateUserData(userData, userSessionData)
+    this._updateUserData(userData, userSessionData)
         // save changed data
         .then(
             function(dataChanged){

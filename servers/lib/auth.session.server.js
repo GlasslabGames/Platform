@@ -21,15 +21,16 @@ var passport   = require('passport');
 var couchbase  = require('couchbase');
 
 // load at runtime
-var aConst, rConst, Strategy, CouchbaseStore, Util;
+var aConst, rConst;
 
 module.exports = AuthSessionServer;
 
-function AuthSessionServer(options, app, routes){
+function AuthSessionServer(options, app, routes, loadStrategies){
     try {
+        var CouchbaseStore, Util;
+
         aConst         = require('./auth.js').Const;
         rConst         = require('./routes.js').Const;
-        Strategy       = require('./auth.js').Strategy;
         CouchbaseStore = require('./sessionstore.couchbase.js')(express);
         Util           = require('./util.js');
 
@@ -90,8 +91,8 @@ function AuthSessionServer(options, app, routes){
                 store:  this.exsStore
             }));
 
-            this.glassLabStrategy = new Strategy.Glasslab(this.options);
-            passport.use(this.glassLabStrategy);
+            // load strategies
+            if(loadStrategies) loadStrategies(passport);
 
             // session de/serialize
             passport.serializeUser(function serializeUser(user, done) {
@@ -250,41 +251,6 @@ AuthSessionServer.prototype.getWebSession = function(done){
         }
     }.bind(this));
 };
-
-AuthSessionServer.prototype.registerUser = function(userData){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    if( (userData.loginType == aConst.login.type.glassLabV1) ||
-        (userData.loginType == aConst.login.type.glassLabV2) ){
-        this.glassLabStrategy.registerUser(userData)
-            .then(resolve, reject);
-    } else {
-        this.stats.increment("error", "RegisterUser.InvalidLoginType");
-        reject({error: "invalid login type"});
-    }
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-AuthSessionServer.prototype.updateUserData = function(userData, userSessionData){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    if( (userData.loginType == aConst.login.type.glassLabV1) ||
-        (userData.loginType == aConst.login.type.glassLabV2) ){
-        this.glassLabStrategy.updateUserData(userData, userSessionData)
-            .then(resolve, reject);
-    } else {
-        this.stats.increment("error", "RegisterUser.InvalidLoginType");
-        reject({error: "invalid login type"});
-    }
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
 
 AuthSessionServer.prototype.updateUserDataInSession = function(session){
 // add promise wrapper
