@@ -10,6 +10,7 @@ var options = config.loadSync([
     "./config.json",
     "~/hydra.config.json"
 ]);
+global.ENV = options.env || 'dev';
 
 console.log("---------------------------------------------");
 console.log("-- Authentication App Server - Start");
@@ -18,5 +19,5 @@ console.log("---------------------------------------------");
 var a = new Auth.Server(options);
 
 process.on('uncaughtException', function(err) {
-    console.trace("Auth: Uncaught Error -", err);
+    console.error("Auth: Uncaught Error -", err, ", stack:", err.stack);
 });

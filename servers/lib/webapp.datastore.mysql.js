@@ -30,8 +30,6 @@ function WebStore_MySQL(options){
     );
 
     this.ds = new MySQL(this.options);
-    // Connect to data store
-    this.ds.testConnection();
 }
 
 WebStore_MySQL.prototype.getUserCourses = function(id) {
@@ -57,14 +55,13 @@ return when.promise(function(resolve, reject) {
         WHERE \
             user_id=" + this.ds.escape(id);
 
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-        //console.log("getUserCourses:", data);
-        resolve(data);
-    });
+    this.ds.query(Q)
+        .then(resolve,
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -76,13 +73,12 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         var Q = "SELECT id, institution_id as institutionId FROM GL_COURSE WHERE id=" + this.ds.escape(courseId);
-        this.ds.query(Q, function(err, data){
-            if(err) {
-                reject({"error": "failure", "exception": err}, 500);
-                return;
-            }
-            resolve(data);
-        });
+        this.ds.query(Q)
+            .then(resolve,
+                function(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
 
 // ------------------------------------------------
 }.bind(this));
@@ -95,13 +91,12 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var Q = "SELECT * FROM GL_INSTITUTION WHERE id=" + this.ds.escape(institutionId);
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-        resolve(data);
-    });
+    this.ds.query(Q)
+        .then(resolve,
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 
 // ------------------------------------------------
 }.bind(this));
@@ -140,13 +135,15 @@ return when.promise(function(resolve, reject) {
         "user_id" +
         ") VALUES("+values+")";
 
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-        resolve(data.insertId);
-    });
+    this.ds.query(Q)
+        .then(
+            function(data){
+                resolve(data.insertId);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 
 // ------------------------------------------------
 }.bind(this));
@@ -200,13 +197,7 @@ return when.promise(function(resolve, reject) {
         "type" +
         ") VALUES("+values+")";
 
-    this.ds.query(Q, function(err){
-        if(err) {
-            reject(err);
-            return;
-        }
-        resolve();
-    });
+    this.ds.query(Q).then(resolve, reject);
 
 // ------------------------------------------------
 }.bind(this));
@@ -257,13 +248,7 @@ return when.promise(function(resolve, reject) {
         user_id\
         ) VALUES("+values+")";
 
-    this.ds.query(Q, function(err){
-        if(err) {
-            reject(err);
-            return;
-        }
-        resolve();
-    });
+    this.ds.query(Q).then(resolve, reject);
 
 // ------------------------------------------------
 }.bind(this));
@@ -286,13 +271,8 @@ return when.promise(function(resolve, reject) {
         "  ,score="+this.ds.escape(stars) +
         " WHERE" +
         "  game_session_id="+this.ds.escape(gameSessionId);
-    this.ds.query(Q, function(err) {
-        if(err) {
-            reject(err);
-            return;
-        }
-        resolve();
-    }.bind(this));
+
+    this.ds.query(Q).then(resolve, reject);
 
 // ------------------------------------------------
 }.bind(this));
@@ -305,31 +285,30 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var Q = "SELECT * FROM GL_CONFIG";
-    this.ds.query(Q, function(err, data) {
-        if(err) {
-            reject(err);
-            return;
-        }
+    this.ds.query(Q)
+        .then(
+            function(data){
+                //console.log("data:", data);
+                var config = {};
+                var n, v, nv;
+                // build config from list
+                for(var i in data){
+                    n = data[i].NAME;
+                    v = data[i].VALUE;
 
-        //console.log("data:", data);
-        var config = {};
-        var n, v, nv;
-        // build config from list
-        for(var i in data){
-            n = data[i].NAME;
-            v = data[i].VALUE;
+                    // convert string to number
+                    nv = parseFloat(v);
+                    // if string was a number then set value to converted
+                    if( !isNaN(nv) ) { v = nv; }
 
-            // convert string to number
-            nv = parseFloat(v);
-            // if string was a number then set value to converted
-            if( !isNaN(nv) ) { v = nv; }
+                    config[n] = v;
+                }
+                //console.log("config:", config);
 
-            config[n] = v;
-        }
-        //console.log("config:", config);
-
-        resolve(config);
-    }.bind(this));
+                resolve(config);
+            }.bind(this),
+            reject
+        );
 
 // ------------------------------------------------
 }.bind(this));

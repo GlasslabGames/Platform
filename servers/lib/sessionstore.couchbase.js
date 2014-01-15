@@ -50,7 +50,6 @@ module.exports = function(connect){
 
         this.client.on('error', function (err) {
             this.stats.increment("error", "Generic");
-
             console.error("CouchBase SessionStore: Error -", err);
             this.emit('disconnect');
         }.bind(this));
@@ -97,8 +96,8 @@ module.exports = function(connect){
             }.bind(this));
 
         } catch (err) {
-            this.stats.increment("error", "Get.Catch");
             console.error("CouchBase SessionStore: Get Error -", err);
+            this.stats.increment("info", "Route.ValidateSession");
             done(err);
         }
     };
@@ -145,8 +144,8 @@ module.exports = function(connect){
             }.bind(this));
 
         } catch (err) {
-            this.stats.increment("error", "Set.Catch");
             console.error("CouchBase SessionStore: Set Error -", err);
+            this.stats.increment("error", "Set.Catch");
             done(err);
         }
     };
@@ -168,8 +167,8 @@ module.exports = function(connect){
             },
             function(err, result){
                 if(err){
-                    this.stats.increment("error", "SetSession");
                     console.error("CouchBase SessionStore: setSession Error -", err);
+                    this.stats.increment("error", "SetSession");
                     return done(err);
                 }
 
@@ -186,8 +185,8 @@ module.exports = function(connect){
             this.client.remove(key, done);
             this.stats.increment("info", "Destroy");
         } catch (err) {
-            this.stats.increment("error", "Destroy");
             console.error("CouchBase SessionStore: Destroy Error -", err);
+            this.stats.increment("error", "Destroy");
             done(err);
         }
     };

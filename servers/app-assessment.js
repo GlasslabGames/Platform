@@ -10,6 +10,7 @@ var options = config.loadSync([
     "./config.json",
     "~/hydra.config.json"
 ]);
+global.ENV = options.env || 'dev';
 
 console.log("---------------------------------------------");
 console.log("-- Assessment App Server - Start");
@@ -18,5 +19,5 @@ console.log("---------------------------------------------");
 var a = new Assessment.Server(options);
 
 process.on('uncaughtException', function(err) {
-    console.trace("Assessment: Uncaught Error -", err);
+    console.error("Assessment: Uncaught Error -", err, ", stack:", err.stack);
 });

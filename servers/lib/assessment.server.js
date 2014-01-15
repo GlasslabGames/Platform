@@ -57,6 +57,7 @@ function AssessmentServer(options){
             console.log('---------------------------------------------');
             console.log('Assessment: Server listening on port ' + this.app.get('port'));
             console.log('---------------------------------------------');
+            this.stats.increment("info", "ServerStarted");
         }.bind(this));
 
         this.myds.connect()
@@ -68,19 +69,18 @@ function AssessmentServer(options){
             // couchbase ok
             .then(function(){
                 console.log("Assessment: DS Connected");
-
                 this.migrateOldDBEvents();
             }.bind(this))
 
             // catch all errors
             .then(null, function(err){
-                this.stats.increment('error', 'DS.Init');
                 console.trace("Assessment: Error -", err);
+                this.stats.increment('error', 'DS.Init');
             }.bind(this));
 
     } catch(err){
-        this.stats.increment('error', 'Generic');
         console.trace("Assessment: Error -", err);
+        this.stats.increment('error', 'Generic');
     }
 }
 
@@ -136,8 +136,8 @@ AssessmentServer.prototype.migrateOldDBEvents = function() {
                             }.bind(this),
                             // saveEvents error
                             function(err){
-                                this.stats.increment('error', 'MigrateEvents.Couchbase.SaveEvents');
                                 console.error("Assessment: Couchbase Error: could not save events, err:", err);
+                                this.stats.increment('error', 'MigrateEvents.Couchbase.SaveEvents');
                             }.bind(this))
 
                             // disableArchiveEvents, ok
@@ -147,8 +147,8 @@ AssessmentServer.prototype.migrateOldDBEvents = function() {
                             }.bind(this),
                             // disableArchiveEvents, error
                             function(){
-                                this.stats.increment('error', 'MigrateEvents.MySQL.RemoveEvents');
                                 console.error("Assessment: MySQL Error: could not remove events");
+                                this.stats.increment('error', 'MigrateEvents.MySQL.RemoveEvents');
                             }.bind(this));
                     }.bind(this));
                 }.bind(this), 100);
@@ -157,8 +157,8 @@ AssessmentServer.prototype.migrateOldDBEvents = function() {
         }.bind(this))
         // catch all errors
         .then(null, function(err){
-            this.stats.increment('error', 'MySQL.ArchivedActivityEvents');
             console.error("Assessment: Error getting archived activity events, err:", err);
+            this.stats.increment('error', 'MySQL.ArchivedActivityEvents');
         }.bind(this));
 
 };

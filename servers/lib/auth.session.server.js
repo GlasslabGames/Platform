@@ -60,8 +60,8 @@ function AuthSessionServer(options, app, routes, loadStrategies){
             bucket:   this.options.sessionstore.bucket,
             password: this.options.sessionstore.password
         }, function(err) {
-            this.sessionStore.stats.increment("error", "Connection");
-            console.error("CouchBase SessionStore: Error -", err);
+            console.error("Couchbase SessionStore: Error -", err);
+            this.sessionStore.stats.increment("error", "Couchbase.Connect");
             if(err) throw err;
         }.bind(this));
 
@@ -110,8 +110,8 @@ function AuthSessionServer(options, app, routes, loadStrategies){
         }.bind(this));
 
     } catch(err){
-        this.stats.increment("error", "Generic");
         console.trace("Auth: Error -", err);
+        this.stats.increment("error", "Generic");
     }
 }
 
@@ -166,8 +166,8 @@ AuthSessionServer.prototype.getSession = function(id, done){
     this.sessionStore.get(key, function(err, result) {
         if(err) {
             if(err.code == 13) { // No such key
-                this.stats.increment("warn", "Session.KeyMissing");
                 console.warn("AuthSessionServer session key missing:", key);
+                this.stats.increment("warn", "Session.KeyMissing");
                 done();
             } else {
                 this.stats.increment("error", "Session");
@@ -210,8 +210,8 @@ AuthSessionServer.prototype.getWebSession = function(done){
             },
             function(err) {
                 if(err) {
-                    this.stats.increment("error", "GetWebSession");
                     console.error("Auth: sessionStore "+aConst.webappSessionPrefix+" Error -", err);
+                    this.stats.increment("error", "GetWebSession");
                     if(next) next(err);
                 }
 
@@ -223,7 +223,6 @@ AuthSessionServer.prototype.getWebSession = function(done){
 
     this.requestUtil.getRequest(url, null, function(err, pres){
         if(err) {
-            this.stats.increment("error", "GetWebSession.GetRequest");
             if(done) done(err);
         }
 
@@ -245,8 +244,8 @@ AuthSessionServer.prototype.getWebSession = function(done){
                 if(done) done(new Error("could not get "+aConst.sessionCookieName));
             }
         } else {
-            this.stats.increment("error", "GetWebSession.GetRequest.NoSetCookie");
             console.error("Auth: Error - No cookie set in proxy!");
+            this.stats.increment("error", "GetWebSession.GetRequest.NoSetCookie");
             if(done) done(new Error("could not get cookie"));
         }
     }.bind(this));

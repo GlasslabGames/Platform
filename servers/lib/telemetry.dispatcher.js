@@ -17,12 +17,11 @@ var tConst;
 module.exports = Dispatcher;
 
 function Dispatcher(options){
-    var RequestUtil, cbDS;
-    var Telem = require('./telemetry.js');
+    var Util, Telem;
 
-    tConst      = Telem.Const;
-    cbDS        = Telem.Datastore.Couchbase;
-    RequestUtil = require('./util.js').Request;
+    Telem  = require('./telemetry.js');
+    Util   = require('./util.js');
+    tConst = Telem.Const;
 
     this.options = _.merge(
         {
@@ -38,9 +37,9 @@ function Dispatcher(options){
         options
     );
 
-    this.requestUtil   = new RequestUtil(this.options);
+    this.requestUtil   = new Util.Request(this.options);
     this.queue         = new Telem.Queue.Redis(this.options);
-    this.cbds          = new cbDS(this.options.telemetry.datastore.couchbase);
+    this.cbds          = new Telem.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
 
     this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
     this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
@@ -48,9 +47,11 @@ function Dispatcher(options){
     this.cbds.connect()
         .then(function(){
             console.log("Dispatcher: DS Connected");
+            this.stats.increment("info", "Couchbase.Connect");
         }.bind(this),
         function(err){
             console.trace("Dispatcher: DS Error -", err);
+            this.stats.increment("error", "Couchbase.Connect");
         }.bind(this));
 
     this.startTelemetryPoll();
@@ -59,6 +60,7 @@ function Dispatcher(options){
     console.log('---------------------------------------------');
     console.log('Dispatcher: Waiting for messages...');
     console.log('---------------------------------------------');
+    this.stats.increment("info", "ServerStarted");
 }
 
 
@@ -75,6 +77,7 @@ Dispatcher.prototype.telemetryCheck = function(){
             function(count){
                 if(count > 0) {
                     console.log("Dispatcher: telemetryCheck count:", count);
+                    this.stats.increment("info", "GetIn.Count", count);
 
                     for(var i = 0; i < Math.min(count, this.options.dispatcher.telemetryGetMax); i++){
                         this.getTelemetryBatch();
@@ -83,8 +86,8 @@ Dispatcher.prototype.telemetryCheck = function(){
             }.bind(this),
             function(err){
                 console.log("Dispatcher: telemetryCheck Error:", err);
+                this.stats.increment("error", "TelemetryCheck.GetInCount");
             }.bind(this)
-
         );
 }
 
@@ -100,10 +103,12 @@ Dispatcher.prototype.cleanOldSessionCheck = function(){
     this.queue.cleanOldSessionCheck()
         .then(
             function(){
-                console.error("Dispatcher: cleanOldSessionCheck done");
+                console.log("Dispatcher: cleanOldSessionCheck done");
+                this.stats.increment("info", "CleanOldSessionCheck.Done");
             }.bind(this),
             function(err){
                 console.error("Dispatcher: cleanOldSessionCheck Error:", err);
+                this.stats.increment("error", "CleanOldSessionCheck");
             }.bind(this)
         );
 }
@@ -131,6 +136,7 @@ Dispatcher.prototype.getTelemetryBatch = function(){
         // catch all errors
         .then(null, function(err){
             console.error("Dispatcher: endBatchIn - Error:", err);
+            this.stats.increment("error", "GetTelemetryBatch");
         }.bind(this));
 }
 
@@ -141,6 +147,7 @@ return when.promise(function(resolve, reject) {
     if(this.options.env == "dev") {
         console.log("Dispatcher: Execute Assessment Delay - gameSessionId:", gameSessionId);
     }
+    this.stats.increment("info", "ExecuteAssessment.StartDelay");
 
     // wait some time before start assessment
     setTimeout(function(){
@@ -148,6 +155,7 @@ return when.promise(function(resolve, reject) {
         this.requestUtil.getRequest(url, null, function(err, res) {
             if(err) {
                 console.error("url:", url, ", Error:", err);
+                this.stats.increment("error", "ExecuteAssessment");
                 res.status(500).send('Error:'+err);
                 reject(err);
                 return;
@@ -156,6 +164,7 @@ return when.promise(function(resolve, reject) {
             if(this.options.env == "dev") {
                 console.log("Dispatcher: Started Assessment - gameSessionId:", gameSessionId);
             }
+            this.stats.increment("info", "ExecuteAssessment.Triggered");
             resolve();
         }.bind(this));
 

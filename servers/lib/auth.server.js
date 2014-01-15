@@ -30,6 +30,12 @@ module.exports = AuthServer;
 function AuthServer(options){
     try {
         var Util, SessionServer, Strategy, WebStore;
+        this.options = _.merge(
+            {
+                auth: { port: 8082 }
+            },
+            options
+        );
 
         // Glasslab libs
         aConst        = require('./auth.js').Const;
@@ -38,13 +44,6 @@ function AuthServer(options){
         SessionServer = require('./auth.js').SessionServer;
         WebStore      = require('./webapp.js').Datastore.MySQL;
         Strategy      = require('./auth.js').Strategy;
-
-        this.options = _.merge(
-            {
-                auth: { port: 8082 }
-            },
-            options
-        );
 
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options);
@@ -77,7 +76,7 @@ function AuthServer(options){
 
     } catch(err){
         console.trace("Auth: Error -", err);
-        if(this.stats) this.stats.increment("error", "Generic");
+        this.stats.increment("error", "Generic");
     }
 }
 
@@ -225,8 +224,8 @@ AuthServer.prototype.setupRoutes = function() {
         }.bind(this));
 
     } catch(err){
-        this.stats.increment("error", "Route.Generic");
         console.trace("Auth: setupRoutes Error -", err);
+        this.stats.increment("error", "Route.Generic");
     }
 };
 
@@ -345,15 +344,16 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
                 // if student, enroll in course
                 if(systemRole == aConst.role.student) {
                     // courseId
+                    this.stats.increment("info", "AddUserToCourse");
                     this.webstore.addUserToCourse(courseId, userId, systemRole)
                         .then(function(){
-                            this.stats.increment("info", "Route.Register.User."+systemRole+".Created");
+                            this.stats.increment("info", "Route.Register.User."+_.capitalize(systemRole)+".Created");
                             this.glassLabLogin(req, res, next);
                         }.bind(this))
                         // catch all errors
                         .then(null, registerErr);
                 } else {
-                    this.stats.increment("info", "Route.Register.User."+systemRole+".Created");
+                    this.stats.increment("info", "Route.Register.User."+_.capitalize(systemRole)+".Created");
                     this.glassLabLogin(req, res, next);
                 }
             }.bind(this))
@@ -399,7 +399,7 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
             .then(null, registerErr);
     }
 
-    this.stats.increment("info", "Route.Register.User."+systemRole);
+    this.stats.increment("info", "Route.Register.User."+_.capitalize(systemRole));
 };
 
 /**
@@ -634,12 +634,12 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
 
                             if(saveWebSession) {
                                 saveWebSession(waSession, tuser.sessionId, function(){
-                                    this.stats.increment("info", "Route.Login.Auth.LogIn.Done");
+                                    this.stats.increment("info", "Route.Login.Auth.GetUserCourses.SaveWebSession");
                                     res.writeHead(200);
                                     res.end( JSON.stringify(tuser) );
                                 }.bind(this));
                             } else {
-                                this.stats.increment("info", "Route.Login.Auth.LogIn.Done");
+                                this.stats.increment("info", "Route.Login.Auth.GetUserCourses.Done");
                                 res.writeHead(200);
                                 res.end( JSON.stringify(tuser) );
                             }

@@ -8,9 +8,9 @@ var config = new ConfigManager();
 // load config files from first to last until successful
 var options = config.loadSync([
     "./config.json",
-    "~/config.telemetry.json",
     "~/hydra.config.json"
 ]);
+global.ENV = options.env || 'dev';
 
 console.log("---------------------------------------------");
 console.log("-- Telemetry Collector App Server - Start");
@@ -19,5 +19,5 @@ console.log("---------------------------------------------");
 var c = new telemetry.Collector(options);
 
 process.on('uncaughtException', function(err) {
-    console.error("Collector: Uncaught Error -", err);
+    console.error("Collector: Uncaught Error -", err, ", stack:", err.stack);
 });

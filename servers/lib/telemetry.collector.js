@@ -23,15 +23,15 @@ module.exports = Collector;
 
 function Collector(options){
     try{
-        var Util, WebStore;
-        var Telem = require('./telemetry.js');
+        var Telem, Util, WebStore;
 
         // Glasslab libs
-        aConst      = require('./auth.js').Const;
-        rConst      = require('./routes.js').Const;
-        WebStore    = require('./webapp.js').Datastore.MySQL;
-        Util        = require('./util.js');
-        tConst      = Telem.Const;
+        Telem    = require('./telemetry.js');
+        aConst   = require('./auth.js').Const;
+        rConst   = require('./routes.js').Const;
+        WebStore = require('./webapp.js').Datastore.MySQL;
+        Util     = require('./util.js');
+        tConst   = Telem.Const;
 
         this.options = _.merge(
             {
@@ -50,17 +50,21 @@ function Collector(options){
         this.myds.connect()
             .then(function(){
                 console.log("Collector: MyDS Connected");
+                this.stats.increment("info", "MySQL.Connect");
             }.bind(this),
             function(err){
                 console.trace("Collector: MyDS Error -", err);
+                this.stats.increment("error", "MySQL.Connect");
             }.bind(this));
 
         this.cbds.connect()
             .then(function(){
                 console.log("Collector: CbDS Connected");
+                this.stats.increment("info", "Couchbase.Connect");
             }.bind(this),
             function(err){
                 console.trace("Collector: CbDS Error -", err);
+                this.stats.increment("error", "Couchbase.Connect");
             }.bind(this));
 
         this.app = express();
@@ -80,10 +84,12 @@ function Collector(options){
             console.log('---------------------------------------------');
             console.log('Collector: Server listening on port ' + this.app.get('port'));
             console.log('---------------------------------------------');
+            this.stats.increment("info", "ServerStarted");
         }.bind(this));
 
     } catch(err){
         console.trace("Collector: Error -", err);
+        this.stats.increment("error", "Generic");
     }
 }
 
@@ -109,6 +115,8 @@ Collector.prototype.startSession = function(req, outRes){
             headers.cookie = req.headers.cookie;
         }
 
+        this.stats.increment("info", "Route.StartSession");
+
         //console.log("req:", req);
         //console.log("headers:", headers);
         //console.log("getSession url:", url);
@@ -116,6 +124,7 @@ Collector.prototype.startSession = function(req, outRes){
         this.requestUtil.getRequest(url, headers, function(err, res, data){
             if(err) {
                 console.log("Collector startSession Error:", err);
+                this.stats.increment("error", "StartSession.GetRequest");
                 return;
             }
 
@@ -125,6 +134,7 @@ Collector.prototype.startSession = function(req, outRes){
                 data = JSON.parse(data);
             } catch(err) {
                 console.log("Collector startSession JSON parse Error:", err);
+                this.stats.increment("error", "StartSession.JSONParse");
                 return;
             }
 
@@ -185,11 +195,13 @@ Collector.prototype.startSession = function(req, outRes){
 
                     //console.log("configs:", configs);
                     this.requestUtil.jsonResponse(outRes, outData);
+                    this.stats.increment("info", "StartSession.Done");
                 }.bind(this) )
 
                 // catch all errors
                 .then(null,  function(err) {
                     console.error("Collector end Session Error:", err);
+                    this.stats.increment("error", "StartSession.General");
                     outRes.status(500).send(err);
                 }.bind(this) );
 
@@ -197,6 +209,7 @@ Collector.prototype.startSession = function(req, outRes){
 
     } catch(err) {
         console.trace("Collector: Start Session Error -", err);
+        this.stats.increment("error", "StartSession.Catch");
     }
 };
 
@@ -204,11 +217,14 @@ Collector.prototype.sendBatchTelemetry = function(req, outRes){
     try {
         // TODO: validate all inputs
 
+        this.stats.increment("info", "Route.SendBatchTelemetry");
+
         if(req.params.type == tConst.type.game) {
             var form = new multiparty.Form();
             form.parse(req, function(err, fields) {
                 if(err){
                     console.error("Collector: Error -", err);
+                    this.stats.increment("error", "SendBatchTelemetry.General");
                     outRes.status(500).send('Error:'+err);
                     return;
                 }
@@ -231,6 +247,7 @@ Collector.prototype.sendBatchTelemetry = function(req, outRes){
         }
     } catch(err) {
         console.trace("Collector: Send Telemetry Batch Error -", err);
+        this.stats.increment("error", "SendBatchTelemetry.Catch");
     }
 };
 
@@ -239,6 +256,8 @@ Collector.prototype.endSession = function(req, outRes){
     try {
         // TODO: validate all inputs
         //console.log("req.params:", req.params, ", req.body:", req.body);
+
+        this.stats.increment("info", "Route.EndSession");
 
         var done = function(jdata) {
             //console.log("endSession jdata:", jdata);
@@ -283,18 +302,21 @@ Collector.prototype.endSession = function(req, outRes){
                     // all done
                     .then( function() {
                         outRes.status(200).send('{}');
+                        this.stats.increment("info", "Route.EndSession.Done");
                         return;
                     }.bind(this) )
 
                     // catch all errors
                     .then(null, function(err) {
                         console.error("Collector end Session Error:", err);
+                        this.stats.increment("error", "Route.EndSession.CatchAll");
                         outRes.status(500).send('Error:'+err);
                     }.bind(this) );
 
             } else {
                 var err = "gameSessionId missing!";
                 console.error("Error:", err);
+                this.stats.increment("error", "Route.EndSession.GameSessionIdMissing");
                 outRes.status(500).send('Error:'+err);
             }
         }.bind(this);
@@ -304,6 +326,7 @@ Collector.prototype.endSession = function(req, outRes){
             form.parse(req, function(err, fields) {
                 if(err){
                     console.error("Error:", err);
+                    this.stats.increment("error", "Route.EndSession.General");
                     outRes.status(500).send('Error:'+err);
                     return;
                 }
@@ -323,6 +346,7 @@ Collector.prototype.endSession = function(req, outRes){
         }
     } catch(err) {
         console.trace("Collector: End Session Error -", err);
+        this.stats.increment("error", "Route.EndSession.Catch");
     }
 };
 // ---------------------------------------
@@ -339,6 +363,7 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
         majorMinorDelimeter < 0 ||
         minorRevisionDelimeter < 0 ) {
         console.warn( "Game version format was invalid:", gameVersion );
+        this.stats.increment("warn", "ValidateGameVersion.Invalid.GameVersion");
         return false;
     }
 
@@ -352,7 +377,7 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
     // Check the revision for an appended character (used internally to indicate server)
     // /^[a-z]/i == check if between a to z when lowercase
     if( /^[a-z]/i.test(revisionString.charAt(revisionString.length - 1)) ) {
-        console.warn( "Found character in revision:", revisionString );
+        //console.info( "Found character in revision:", revisionString );
         revisionString = revisionString.substring( 0, revisionStringlength - 1 );
     }
     revision = parseInt(revisionString);
@@ -367,6 +392,7 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
     // Check existence of the game key
     if( !validGameVersions.hasOwnProperty(game) ) {
         console.warn( "Game type " + game + " did not exist as a valid version." );
+        this.stats.increment("warn", "ValidateGameVersion.Invalid.GameType");
         return false;
     }
 
@@ -376,6 +402,7 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
         minor < versionInfo.minor ||
         revision < versionInfo.revision ) {
         console.warn( "Game version is invalid and needs to be updated:", gameVersion );
+        this.stats.increment("warn", "ValidateGameVersion.Invalid.GameVersion");
         return false;
     }
 
@@ -400,6 +427,7 @@ Collector.prototype._validateSendBatch = function(res, gameSessionId, data){
         // catch all errors
         .then(null, function(err){
             console.error("Collector: Error -", err);
+            this.stats.increment("error", "ValidateSendBatch");
             res.status(500).send('Error:'+err);
         }.bind(this));
 };
@@ -423,6 +451,7 @@ return when.promise(function(resolve, reject) {
                 data.events = JSON.parse(data.events);
             } catch(err) {
                 console.error("Collector: Error -", err, ", JSON events:", data.events);
+                this.stats.increment("error", "SaveBatch.JSONParse");
                 reject(err);
                 return;
             }
@@ -495,6 +524,7 @@ return when.promise(function(resolve, reject) {
             when.all(promiseList)
                 .then(
                     function(){
+                        this.stats.increment("info", "SaveBatch.Done");
                         resolve(score);
                     }.bind(this),
                     function(err){
@@ -504,11 +534,13 @@ return when.promise(function(resolve, reject) {
 
         } else {
             // no events
+            this.stats.increment("info", "SaveBatch.Done");
             resolve(score);
             return;
         }
     } else {
         console.error("Collector: Error - invalid data type");
+        this.stats.increment("error", "SaveBatch.Invalid.DataType");
         reject(new Error("invalid data type"));
         return;
     }

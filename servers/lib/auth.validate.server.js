@@ -15,16 +15,17 @@ var passport   = require('passport');
 var couchbase  = require('couchbase');
 
 // load at runtime
-var aConst, rConst, RequestUtil, SessionServer;
+var aConst, rConst;
 
 module.exports = AuthValidateServer;
 
 function AuthValidateServer(options){
     try {
+        var Util, SessionServer;
         // Glasslab libs
         aConst        = require('./auth.js').Const;
         rConst        = require('./routes.js').Const;
-        RequestUtil   = require('./util.js').Request;
+        Util          = require('./util.js');
         SessionServer = require('./auth.js').SessionServer;
 
         this.options = _.merge(
@@ -38,17 +39,20 @@ function AuthValidateServer(options){
         this.app = express();
         this.app.set('port', this.options.validate.port);
         this.sessionServer = new SessionServer(this.options, this.app, this.setupRoutes.bind(this));
-        this.requestUtil   = new RequestUtil(this.options);
+        this.requestUtil   = new Util.Request(this.options);
+        this.stats         = new Util.Stats(this.options, "AuthValidate");
 
         // start server
         http.createServer(this.app).listen(this.app.get('port'), function createServer(){
             console.log('---------------------------------------------');
             console.log('AuthValidate: Server listening on port ' + this.app.get('port'));
             console.log('---------------------------------------------');
+            this.stats.increment("info", "ServerStarted");
         }.bind(this));
 
     } catch(err){
         console.trace("AuthValidate: Error -", err);
+        this.stats.increment("error", "Generic");
     }
 }
 
@@ -61,25 +65,32 @@ AuthValidateServer.prototype.setupRoutes = function() {
 
         // DEFAULT
         this.app.use(function defaultRoute(req, res) {
-            console.log("defaultRoute:", req.path);
+            //console.log("defaultRoute:", req.path);
+            this.stats.increment("info", "Route.Default");
+
             res.redirect(rConst.root);
         }.bind(this));
 
     } catch(err){
         console.trace("AuthValidate: setupRoutes Error -", err);
+        this.stats.increment("error", "Route.Generic");
     }
 };
 
 AuthValidateServer.prototype.validateSession = function(req, res, next) {
-    console.log("validate Session:", req.path);
+    //console.log("validate Session:", req.path);
+
     // only allow local connections
     if(req.connection.remoteAddress == "127.0.0.1")
     {
+        this.stats.increment("info", "Route.ValidateSession");
+
         if( req.params.id ) {
             // using real session get webapp session
             this.sessionServer.getSession(req.params.id, function(err, result) {
                 if(err) {
                     console.error("CouchBase validateSession: Error -", err);
+                    this.stats.increment("error", "Route.ValidateSession.DS");
                     this.requestUtil.errorResponse(res, err.toString());
                 }
 
@@ -93,8 +104,10 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
                     data.userId = result.value.passport.user.id;
                     data.collectTelemetry = result.value.passport.user.collectTelemetry;
                     this.requestUtil.jsonResponse(res, data);
+                    this.stats.increment("info", "Route.ValidateSession.Done");
                 } else {
                     this.requestUtil.errorResponse(res, "missing session");
+                    this.stats.increment("error", "Route.ValidateSession.MissingSession");
                 }
             }.bind(this));
         } else {
@@ -111,17 +124,20 @@ AuthValidateServer.prototype.validateSession = function(req, res, next) {
                     data.collectTelemetry = req.session.passport.user.collectTelemetry;
                 }
                 this.requestUtil.jsonResponse(res, data);
+                this.stats.increment("info", "Route.ValidateSession.GetCookieWASession.Done");
             }.bind(this));
         }
 
     } else {
-        console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
+        console.error("AuthValidate: invalid remoteAddress ", req.connection.remoteAddress);
+        this.stats.increment("error", "Route.ValidateSession.InvalidRemoteAddress");
         next();
     }
 };
 
 AuthValidateServer.prototype.validateWASession = function(req, res, next) {
-    console.log("validate WA-Session:", req.path);
+    //console.log("validate WA-Session:", req.path);
+
     // only allow local connections
     if(req.connection.remoteAddress == "127.0.0.1")
     {
@@ -129,24 +145,28 @@ AuthValidateServer.prototype.validateWASession = function(req, res, next) {
             // using webapp session get real session
             this.sessionServer.getWASession(req.params.id, function(err, result) {
                 if(err) {
-                    console.error("CouchBase validateSession: Error -", err);
+                    console.error("CouchBase validateWASession: Error -", err);
+                    this.stats.increment("error", "Route.ValidateWASession.GetWASession");
                     this.requestUtil.errorResponse(res, err.toString());
                 }
 
                 if( result &&
                     result.value) {
-                    console.log("CouchBase SessionStore: value:", result.value);
+                    //console.log("CouchBase SessionStore: value:", result.value);
 
                     if(result.value.session) {
                         this.sessionServer.getSession(result.value.session, function(err, result) {
                             if(err) {
                                 console.error("CouchBase validateSession: Error -", err);
+                                this.stats.increment("error", "Route.ValidateWASession.GetSession");
                                 this.requestUtil.errorResponse(res, err.toString());
                             }
 
                             if(result.value.passport.user) {
+                                this.stats.increment("info", "Route.ValidateWASession.Done");
                                 this.requestUtil.jsonResponse(res, result.value.passport);
                             } else {
+                                this.stats.increment("error", "Route.ValidateWASession.NoUserData");
                                 this.requestUtil.errorResponse(res, "No user data");
                             }
                         }.bind(this));
@@ -160,15 +180,18 @@ AuthValidateServer.prototype.validateWASession = function(req, res, next) {
                     // request for missing session
                     //res.end();
                     console.error("CouchBase validateSession: could not find session");
+                    this.stats.increment("error", "Route.ValidateWASession.CouldNotFindSesion");
                     this.requestUtil.errorResponse(res, "could not find session");
                 }
 
             }.bind(this));
         } else {
             this.requestUtil.errorResponse(res, "Missing ID");
+            this.stats.increment("error", "Route.ValidateWASession.MissingID");
         }
     } else {
-        console.error("CouchBase validateSession invalid remoteAddress ", req.connection.remoteAddress);
+        console.error("CouchBase validateWASession invalid remoteAddress ", req.connection.remoteAddress);
+        this.stats.increment("info", "Route.ValidateWASession.InvalidRemoveAddress");
         next();
     }
 };

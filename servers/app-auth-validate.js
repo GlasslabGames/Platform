@@ -10,6 +10,7 @@ var options = config.loadSync([
     "./config.json",
     "~/hydra.config.json"
 ]);
+global.ENV = options.env || 'dev';
 
 console.log("---------------------------------------------");
 console.log("-- Authentication Validate App Server - Start");
@@ -18,5 +19,5 @@ console.log("---------------------------------------------");
 var av = new Auth.Validate(options);
 
 process.on('uncaughtException', function(err) {
-    console.trace("AuthValidate: Uncaught Error -", err);
+    console.error("AuthValidate: Uncaught Error -", err, ", stack:", err.stack);
 });

@@ -35,8 +35,6 @@ function Glasslab_Strategy(options) {
     this.name = 'glasslab';
 
     this.ds = new MySQL(this.options.webapp.datastore.mysql);
-    // Connect to data store
-    this.ds.testConnection();
 }
 
 /**
@@ -145,22 +143,19 @@ return when.promise(function(resolve, reject) {
             ENABLED=1 AND \
             "+type+"="+this.ds.escape(value);
 
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject(err);
-        }
+    this.ds.query(Q)
+        .then( function(data){
+            // convert to usable userdata
+            if(data.length > 0) {
+                var user = data[0];
+                user.collectTelemetry = user.collectTelemetry[0] ? true : false;
+                user.enabled = true;
 
-        // convert to usable userdata
-        if(data.length > 0) {
-            var user = data[0];
-            user.collectTelemetry = user.collectTelemetry[0] ? true : false;
-            user.enabled = true;
-
-            resolve(user);
-        } else {
-            reject(null);
-        }
-    });
+                resolve(user);
+            } else {
+                reject(null);
+            }
+        }.bind(this), reject);
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -175,13 +170,8 @@ return when.promise(function(resolve, reject) {
              "password="+this.ds.escape(password)+", " +
              "login_type="+this.ds.escape(loginType)+" " +
         "WHERE id="+this.ds.escape(id);
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-        resolve();
-    });
+
+    this.ds.query(Q).then( resolve, reject );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -195,19 +185,19 @@ return when.promise(function(resolve, reject) {
     if(!email || !email.length ) resolve();
 
     var Q = "SELECT id FROM GL_USER WHERE LOWER(email)=LOWER("+this.ds.escape(email)+")";
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-
-        if(data.length != 0) {
-            reject({"error": "data validation", "key": "email.not.unique"});
-        } else {
-            resolve();
-        }
-
-    });
+    this.ds.query(Q)
+        .then(
+            function(data){
+                if(data.length != 0) {
+                    reject({"error": "data validation", "key": "email.not.unique"});
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -218,18 +208,19 @@ Glasslab_Strategy.prototype._checkUserNameUnique = function(username){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var Q = "SELECT id FROM GL_USER WHERE LOWER(username)=LOWER("+this.ds.escape(username)+")";
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-
-        if(data.length != 0) {
-            reject({"error": "data validation", "key": "username.not.unique"});
-        } else {
-            resolve();
-        }
-    });
+    this.ds.query(Q)
+        .then(
+            function(data){
+                if(data.length != 0) {
+                    reject({"error": "data validation", "key": "username.not.unique"});
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -240,20 +231,22 @@ Glasslab_Strategy.prototype.getUserById = function(id){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var Q = "SELECT * FROM GL_USER WHERE id="+this.ds.escape(id);
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-        if( !data ||
-            !_.isArray(data) ||
-            data.length < 1) {
-            reject({"error": "user not found"}, 404);
-            return;
-        }
+    this.ds.query(Q)
+        .then(
+            function(data){
+                if( !data ||
+                    !_.isArray(data) ||
+                    data.length < 1) {
+                    reject({"error": "user not found"}, 404);
+                    return;
+                }
 
-        resolve(data);
-    });
+                resolve(data);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -291,14 +284,15 @@ return when.promise(function(resolve, reject) {
     values     = values.join(',');
     var Q      = "INSERT INTO GL_USER ("+keys+") VALUES("+values+")";
 
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-        resolve(data.insertId);
-    });
-
+    this.ds.query(Q)
+        .then(
+            function(data){
+                resolve(data.insertId);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -336,14 +330,15 @@ Glasslab_Strategy.prototype._updateUserDataInDB = function(userData){
         values     = values.join(',');
         var Q      = "UPDATE GL_USER SET "+values+" WHERE id="+this.ds.escape(userData.id);
 
-        this.ds.query(Q, function(err, data){
-            if(err) {
-                reject({"error": "failure", "exception": err}, 500);
-                return;
-            }
-            resolve(data.insertId);
-        });
-
+        this.ds.query(Q)
+            .then(
+                function(data){
+                    resolve(data.insertId);
+                }.bind(this),
+                function(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
 // ------------------------------------------------
     }.bind(this));
 // end promise wrapper
@@ -699,21 +694,22 @@ return when.promise(function(resolve, reject) {
             "m1.role='student' AND " +
             "m1.user_id="+this.ds.escape(studentId);
 
-    this.ds.query(Q, function(err, data){
-        if(err) {
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
+    this.ds.query(Q)
+        .then(
+            function(data){
+                if( !data ||
+                    !_.isArray(data) ||
+                    data.length < 1) {
+                    reject({"error": "user not found"}, 404);
+                    return;
+                }
 
-        if( !data ||
-            !_.isArray(data) ||
-            data.length < 1) {
-            reject({"error": "user not found"}, 404);
-            return;
-        }
-
-        resolve(data);
-    });
+                resolve(data);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper

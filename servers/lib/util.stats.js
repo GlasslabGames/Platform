@@ -27,24 +27,43 @@ function Stats(options, root){
         return console.error("StatsD: Error connecting to server. ", err);
     });
 
+    this.sRoot = root;
+    this.root =  root;
+}
+
+Stats.prototype.saveRoot = function() {
+    this.sRoot = this.root;
+}
+
+Stats.prototype.setRoot = function(root) {
     this.root = root;
 }
 
+Stats.prototype.restoreRoot = function() {
+    this.root = this.sRoot;
+}
+
+
 Stats.prototype.increment = function(level, key, count) {
-    /*
-    if(level == 'info') {
-        console.log("Stats: ", this.root+"."+key);
+    if(!count) {
+        count = 1;
     }
-    else if(level == 'error') {
-        console.error("Stats: ", this.root+"."+key);
+
+    /*
+    if(ENV == "dev") {
+        if(level == 'info') {
+            console.log("Stats:", this.root+"."+key, ", count:", count);
+        }
+        else if(level == 'warn') {
+            console.warn("Stats:", this.root+"."+key, ", count:", count);
+        }
+        else if(level == 'error') {
+            console.error("Stats:", this.root+"."+key, ", count:", count);
+        }
     }
     */
 
     if(this.statsd) {
-        if(!count) {
-            count = 1;
-        }
-
         level = level.toLowerCase();
         // Info.App.Loaded
         this.statsd.increment(level+"."+this.root+"."+key, count);
@@ -58,6 +77,20 @@ Stats.prototype.increment = function(level, key, count) {
 };
 
 Stats.prototype.gauge = function(level, key, value) {
+    /*
+    if(ENV == "dev") {
+        if(level == 'info') {
+            console.log("Stats:", this.root+"."+key, ", value:", value);
+        }
+        else if(level == 'warn') {
+            console.warn("Stats:", this.root+"."+key, ", value:", value);
+        }
+        else if(level == 'error') {
+            console.error("Stats:", this.root+"."+key, ", value:", value);
+        }
+    }
+    */
+
     if(this.statsd) {
         level = level.toLowerCase();
         this.statsd.gauge(level+"."+this.root+"."+key, value);
