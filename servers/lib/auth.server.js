@@ -23,13 +23,13 @@ var couchbase  = require('couchbase');
 var check      = require('validator').check;
 
 // load at runtime
-var aConst, rConst;
+var Util, aConst, rConst;
 
 module.exports = AuthServer;
 
 function AuthServer(options){
     try {
-        var Util, SessionServer, Strategy, WebStore;
+        var SessionServer, Strategy, WebStore;
         this.options = _.merge(
             {
                 auth: { port: 8082 }
@@ -347,13 +347,13 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
                     this.stats.increment("info", "AddUserToCourse");
                     this.webstore.addUserToCourse(courseId, userId, systemRole)
                         .then(function(){
-                            this.stats.increment("info", "Route.Register.User."+_.capitalize(systemRole)+".Created");
+                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(systemRole)+".Created");
                             this.glassLabLogin(req, res, next);
                         }.bind(this))
                         // catch all errors
                         .then(null, registerErr);
                 } else {
-                    this.stats.increment("info", "Route.Register.User."+_.capitalize(systemRole)+".Created");
+                    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(systemRole)+".Created");
                     this.glassLabLogin(req, res, next);
                 }
             }.bind(this))
@@ -399,7 +399,7 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
             .then(null, registerErr);
     }
 
-    this.stats.increment("info", "Route.Register.User."+_.capitalize(systemRole));
+    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(systemRole));
 };
 
 /**

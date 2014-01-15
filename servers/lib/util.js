@@ -97,5 +97,8 @@ module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
     PromiseContinue:  promiseContinue,
-    GetExpressLogger: getExpressLogger
+    GetExpressLogger: getExpressLogger,
+    String: {
+        capitalize: capitalize
+    }
 };
