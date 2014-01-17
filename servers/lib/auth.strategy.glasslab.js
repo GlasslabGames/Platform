@@ -48,7 +48,6 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
 
     if (!username || !password) {
         return this.fail('Missing credentials');
-        //return this.fail(new BadRequestError(options.badRequestMessage || 'Missing credentials'));
     }
 
     this._verify(username, password)
