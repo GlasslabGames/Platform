@@ -5,7 +5,7 @@
  *   - Config
  */
 var fs = require('fs');
-var _  = require('underscore');
+var _  = require('lodash');
 
 function ConfigManager(){
 	this.config = {};
@@ -32,7 +32,7 @@ ConfigManager.prototype.loadSync = function(files, fileType) {
 
 					if(fileType == "json") {
 						// merge in next
-						this.config = _.extend(
+						this.config = _.merge(
 							this.config,
 							JSON.parse(data)
 						);

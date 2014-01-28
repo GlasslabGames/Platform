@@ -5,13 +5,15 @@ if [ ! -d "node_modules" ]; then
 	npm install
 fi
 
-mkdir -p /var/log/telemetry
+LOG_DIR="/var/log/hydra"
+
+mkdir -p $LOG_DIR
 
 # stop then start
 forever stop app-telemetry-collector.js
 forever start \
 -a \
--l /var/log/telemetry/collector.log \
+-l ${LOG_DIR}/collector.log \
 app-telemetry-collector.js
 #-o >(logger -p local0.info -t telemetry.collector)
 #-e >(logger -p local0.error -t telemetry.collector)
@@ -21,7 +23,7 @@ app-telemetry-collector.js
 forever stop app-telemetry-dispatcher.js
 forever start \
 -a \
--l /var/log/telemetry/dispatcher.log \
+-l ${LOG_DIR}/dispatcher.log \
 app-telemetry-dispatcher.js
 #-o >(logger -p local1.info -t telemetry.dispatcher)
 #-e >(logger -p local1.error -t telemetry.dispatcher)

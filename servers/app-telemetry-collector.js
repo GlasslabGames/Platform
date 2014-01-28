@@ -6,21 +6,18 @@ var ConfigManager = require('./lib/config.manager.js');
 
 var config = new ConfigManager();
 // load config files from first to last until successful
-var settings = config.loadSync([
+var options = config.loadSync([
     "./config.json",
-    "~/config.telemetry.json",
+    "~/hydra.config.json"
 ]);
+global.ENV = options.env || 'dev';
 
 console.log("---------------------------------------------");
 console.log("-- Telemetry Collector App Server - Start");
 console.log("---------------------------------------------");
 
-try {
-    collector = new telemetry.Collector(settings);
-} catch(err){
-    console.trace("Collector: Error -", err);
-}
+var c = new telemetry.Collector(options);
 
 process.on('uncaughtException', function(err) {
-    console.error("Collector: Uncaught Error -", err);
+    console.error("Collector: Uncaught Error -", err, ", stack:", err.stack);
 });
