@@ -107,6 +107,7 @@ Collector.prototype.startSession = function(req, outRes){
         var url = "http://localhost:" +this.options.validate.port + tConst.validate.api.session;
 
         // TODO: validate all inputs
+        //console.log("headers cookie:", req.headers.cookie);
 
         if(req.params.type == tConst.type.game) {
             url += "/"+req.body.userSessionId;
@@ -438,6 +439,8 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var score = 0;
 
+    //console.log("saveBatch data: ", data);
+
     // data needs to be an object
     if(_.isObject(data)) {
         if(data.stars) {
@@ -447,12 +450,27 @@ return when.promise(function(resolve, reject) {
         if(data.events) {
 
             // parse events
-            try {
-                data.events = JSON.parse(data.events);
-            } catch(err) {
-                console.error("Collector: Error -", err, ", JSON events:", data.events);
-                this.stats.increment("error", "SaveBatch.JSONParse");
-                reject(err);
+            if( _.isString(data.events) ) {
+                try {
+                    data.events = JSON.parse(data.events);
+                } catch(err) {
+                    console.error("Collector: Error -", err, ", JSON events:", data.events);
+                    this.stats.increment("error", "SaveBatch.JSONParse");
+                    reject(err);
+                    return;
+                }
+            }
+
+            // object but not array, it should be an array
+            if(  _.isObject(data.events) &&
+                !_.isArray(data.events) ) {
+                data.events = [data.events];
+            }
+
+            // still not array, we have a problem
+            if(!_.isArray(data.events))
+            {
+                reject(new Error("invalid event type"));
                 return;
             }
 

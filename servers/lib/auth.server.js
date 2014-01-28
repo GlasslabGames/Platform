@@ -145,6 +145,7 @@ AuthServer.prototype.setupRoutes = function() {
             } else {
                 this.stats.increment("error", "Route.Auth.Fail");
                 // error in auth, redirect back to login
+                //console.log("headers:", req.headers);
                 console.error("Auth: Not Authenticated");
 
                 if(req.originalUrl.indexOf("/api") != -1) {
