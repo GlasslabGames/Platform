@@ -155,6 +155,51 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype.saveEvents = function(events){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var key = tConst.game.dataKey+"::"+tConst.game.countKey;
+        this.client.incr(key, {
+                initial: 0,
+                offset: events.length
+            },
+            function(err, data){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Incr Event Count Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var kv = {}, key;
+                var kIndex = data.value - events.length + 1;
+                for(var i in events){
+                    key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+kIndex;
+                    kv[key] = { value: _.cloneDeep(events[i]) };
+
+                    kIndex++;
+                }
+
+                // see setMulti for keyValue format
+                // https://github.com/couchbase/couchnode/blob/master/lib/connection.js
+                this.client.addMulti(kv, {}, function(err, data){
+                    if(err){
+                        console.error("CouchBase TelemetryStore: Set Event Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    resolve();
+                }.bind(this));
+
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
 
 TelemDS_Couchbase.prototype.getEvents = function(gameSessionId){
 // add promise wrapper
