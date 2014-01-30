@@ -1,4 +1,5 @@
 dataSource {
+   driverClassName = "com.mysql.jdbc.Driver"
    username = "glasslab"
    password = "glasslab"
    dbCreate = "update"

@@ -1,7 +1,7 @@
 /**
- * Telemetry Dispatcher - App Server
+ * Assessment - App Server
  */
-var telemetry     = require('./lib/telemetry.js');
+var Assessment    = require('./lib/assessment.js');
 var ConfigManager = require('./lib/config.manager.js');
 
 var config = new ConfigManager();
@@ -13,11 +13,11 @@ var options = config.loadSync([
 global.ENV = options.env || 'dev';
 
 console.log("---------------------------------------------");
-console.log("-- Telemetry Dispatcher App Server - Start");
+console.log("-- Assessment App Server - Start");
 console.log("---------------------------------------------");
 
-var d = new telemetry.Dispatcher(options);
+var a = new Assessment.Server(options);
 
 process.on('uncaughtException', function(err) {
-    console.error("Dispatcher: Uncaught Error -", err, ", stack:", err.stack);
+    console.error("Assessment: Uncaught Error -", err, ", stack:", err.stack);
 });

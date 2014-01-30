@@ -1,7 +1,7 @@
 /**
- * Telemetry Dispatcher - App Server
+ * Authentication Validate - App Server
  */
-var telemetry     = require('./lib/telemetry.js');
+var Auth          = require('./lib/auth.js');
 var ConfigManager = require('./lib/config.manager.js');
 
 var config = new ConfigManager();
@@ -13,11 +13,11 @@ var options = config.loadSync([
 global.ENV = options.env || 'dev';
 
 console.log("---------------------------------------------");
-console.log("-- Telemetry Dispatcher App Server - Start");
+console.log("-- Authentication Validate App Server - Start");
 console.log("---------------------------------------------");
 
-var d = new telemetry.Dispatcher(options);
+var av = new Auth.Validate(options);
 
 process.on('uncaughtException', function(err) {
-    console.error("Dispatcher: Uncaught Error -", err, ", stack:", err.stack);
+    console.error("AuthValidate: Uncaught Error -", err, ", stack:", err.stack);
 });
