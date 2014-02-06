@@ -1,2 +1,3 @@
-Start node app-collector.js
-Start node app-dispatcher.js
+start /wait npm install
+start node app-collector.js
+start node app-dispatcher.js
