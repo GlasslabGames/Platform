@@ -21,7 +21,16 @@ module.exports = {
         validateWithId:  api+'/session/validate/:id',
         validateNoId:    api+'/session/validate'
     },
-    startsession:        api+'/:type/startsession',
-    sendtelemetrybatch:  api+'/:type/sendtelemetrybatch',
-    endsession:          api+'/:type/endsession'
+
+    v1: {
+        startsession:        api+'/:type/startsession',
+        sendtelemetrybatch:  api+'/:type/sendtelemetrybatch',
+        endsession:          api+'/:type/endsession'
+    },
+    v2: {
+        sessionStart:  api+'/2/telem/session/start',
+        sendEvents:    api+'/2/telem/sendEvents',
+        sessionEnd:    api+'/2/telem/session/end'
+    }
+
 };

@@ -96,9 +96,10 @@ function Collector(options){
 // ---------------------------------------
 // HTTP Server request functions
 Collector.prototype.setupRoutes = function() {
-    this.app.post(rConst.api.startsession,       this.startSession.bind(this));
-    this.app.post(rConst.api.sendtelemetrybatch, this.sendBatchTelemetry.bind(this));
-    this.app.post(rConst.api.endsession,         this.endSession.bind(this));
+    this.app.post(rConst.api.v1.startsession,       this.startSession.bind(this));
+    this.app.post(rConst.api.v1.sendtelemetrybatch, this.sendBatchTelemetryV1.bind(this));
+    this.app.post(rConst.api.v2.sendEvents,         this.sendBatchTelemetryV2.bind(this));
+    this.app.post(rConst.api.v1.endsession,         this.endSession.bind(this));
 }
 
 Collector.prototype.startSession = function(req, outRes){
@@ -214,7 +215,7 @@ Collector.prototype.startSession = function(req, outRes){
     }
 };
 
-Collector.prototype.sendBatchTelemetry = function(req, outRes){
+Collector.prototype.sendBatchTelemetryV1 = function(req, outRes){
     try {
         // TODO: validate all inputs
 
@@ -236,7 +237,7 @@ Collector.prototype.sendBatchTelemetry = function(req, outRes){
                     if(fields.gameVersion)   fields.gameVersion   = fields.gameVersion[0];
 
                     //console.log("fields:", fields);
-                    this._validateSendBatch(outRes, fields.gameSessionId, fields);
+                    this._validateSendBatch(1, outRes, fields, fields.gameSessionId);
                 } else {
                     outRes.send();
                 }
@@ -244,8 +245,23 @@ Collector.prototype.sendBatchTelemetry = function(req, outRes){
         } else {
             //console.log("send telemetry batch body:", req.body);
             // Queue Data
-            this._validateSendBatch(outRes, req.body.gameSessionId, req.body);
+            this._validateSendBatch(1, outRes, req.body, req.body.gameSessionId);
         }
+    } catch(err) {
+        console.trace("Collector: Send Telemetry Batch Error -", err);
+        this.stats.increment("error", "SendBatchTelemetry.Catch");
+    }
+};
+
+Collector.prototype.sendBatchTelemetryV2 = function(req, outRes){
+    try {
+        // TODO: validate all inputs
+
+        this.stats.increment("info", "Route.SendBatchTelemetry2");
+
+        //console.log("send telemetry batch body:", req.body);
+        // Queue Data
+        this._validateSendBatch(2, outRes, req.body);
     } catch(err) {
         console.trace("Collector: Send Telemetry Batch Error -", err);
         this.stats.increment("error", "SendBatchTelemetry.Catch");
@@ -270,7 +286,7 @@ Collector.prototype.endSession = function(req, outRes){
 
                     // save events
                     .then(function(sdata){
-                        return this._saveBatch(jdata.gameSessionId, sdata.userId, jdata)
+                        return this._saveBatchV1(jdata.gameSessionId, sdata.userId, jdata)
                     }.bind(this))
 
                     // all done in parallel
@@ -412,28 +428,45 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
 };
 
 // ---------------------------------------
-Collector.prototype._validateSendBatch = function(res, gameSessionId, data){
-    // validate session and get data
-    this.queue.validateSession(gameSessionId)
-        // save batch
-        .then(function(sdata){
-            return this._saveBatch(gameSessionId, sdata.userId, data);
-        }.bind(this))
+Collector.prototype._validateSendBatch = function(version, res, data, gameSessionId){
 
-        // all ok
-        .then(function(){
-            res.send();
-        }.bind(this))
+    var promise;
 
-        // catch all errors
-        .then(null, function(err){
-            console.error("Collector: Error -", err);
-            this.stats.increment("error", "ValidateSendBatch");
-            res.status(500).send('Error:'+err);
-        }.bind(this));
+    if(gameSessionId) {
+        // validate session and get data
+        promise = this.queue.validateSession(gameSessionId)
+            .then(function(sdata){
+                if(version == 1) {
+                    return this._saveBatchV1(gameSessionId, data, sdata.userId);
+                } else {
+                    return this._saveBatchV2(gameSessionId, data);
+                }
+            }.bind(this));
+    } else {
+        if(version == 1) {
+            promise = this._saveBatchV1(gameSessionId, data);
+        } else {
+            promise = this._saveBatchV2(gameSessionId, data);
+        }
+    }
+
+    if(promise) {
+        promise
+            // all ok
+            .then(function(){
+                res.send();
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err){
+                console.error("Collector: Error -", err);
+                this.stats.increment("error", "ValidateSendBatch");
+                res.status(500).send('Error:'+err);
+            }.bind(this));
+    }
 };
 
-Collector.prototype._saveBatch = function(gameSessionId, userId, data) {
+Collector.prototype._saveBatchV1 = function(gameSessionId, data, userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -484,11 +517,12 @@ return when.promise(function(resolve, reject) {
 
             // find score if it exists
             var event;
-            var promiseList = [];
+            var events = [];
             for(var i in data.events) {
                 event = {
-                    name: "",
                     timestamp: 0,
+                    name: "",
+                    clientId: "",
                     tags: {},
                     data: {}
                 };
@@ -514,13 +548,16 @@ return when.promise(function(resolve, reject) {
                     event.timestamp = Math.round(new Date().getTime()/1000.0);
                 }
 
+                var vParts = data.gameVersion.split("_");
+                event.clientId      = vParts[0];
+                event.clientVersion = vParts[1];
+
                 // add data
                 if(data.events[i].eventData) {
                     event.data = data.events[i].eventData;
                 }
 
                 event.tags.gameSessionId = data.gameSessionId;
-                event.tags.gameVersion   = data.gameVersion;
                 if(userId) {
                     event.tags.userId    = userId;
                 }
@@ -535,11 +572,10 @@ return when.promise(function(resolve, reject) {
                 }
 
                 // adds the promise to the list
-                promiseList.push( this.cbds.saveEvent(event) );
+                events.push(event);
             }
 
-            // when all the promises complete then it fires resolve
-            when.all(promiseList)
+            this.cbds.saveEvents(events)
                 .then(
                     function(){
                         this.stats.increment("info", "SaveBatch.Done");
@@ -579,5 +615,42 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
+// end promise wrapper
+}
+
+Collector.prototype._saveBatchV2 = function(gameSessionId, data) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        // TODO: move score to separate API
+        //console.log("saveBatch data: ", data);
+
+        // data needs to be an object
+        if(_.isObject(data)) {
+            if(!data.length) {
+                resolve();
+                return;
+            }
+
+            // adds the promise to the list
+            this.cbds.saveEvents(data)
+                .then(
+                    function(){
+                        this.stats.increment("info", "SaveBatch.Done");
+                        resolve();
+                    }.bind(this),
+                    function(err){
+                        reject(err);
+                    }.bind(this)
+                );
+        } else {
+            console.error("Collector: Error - invalid data type");
+            this.stats.increment("error", "SaveBatch.Invalid.DataType");
+            reject(new Error("invalid data type"));
+            return;
+        }
+
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 }
