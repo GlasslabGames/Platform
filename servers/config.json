@@ -25,11 +25,6 @@
             }
         }
     },
-    "queue": {
-        "host": "127.0.0.1",
-        "db": 0,
-        "port": 6379
-    },
     "sessionstore": {
         "host":     "localhost:8091",
         "bucket":   "glasslab_webapp",
@@ -54,10 +49,25 @@
             }
         }
     },
-    "dispatcher": {
-        "telemetryGetMax": 20,
-        "telemetryPollDelay": 1000, "//":"in milliseconds",
-        "assessmentDelay"   : 1000, "//":"in milliseconds, default 5000",
+    "assessment": {
+        "port":     8084,
+        "datastore": {
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_assessment",
+                "password": "glasslab"
+            }
+        },
+        "queue": {
+            "host": "127.0.0.1",
+            "db": 0,
+            "port": 6379,
+            "sessionExpire" : 14400000, "//":"in milliseconds"
+        }
+    },
+    "distiller": {
+        "getMax":    20,
+        "pollDelay": 1000, "//":"in milliseconds",
         "cleanupPollDelay"  : 3600000, "//":"in milliseconds",
         "sessionExpire"     : 14400000, "//":"in milliseconds"
     },
@@ -69,8 +79,5 @@
     },
     "validate": {
         "port":     8083
-    },
-    "assessment": {
-        "port":     8084
     }
 }

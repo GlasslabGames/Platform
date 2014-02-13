@@ -4,13 +4,6 @@
  */
 
 module.exports = {
-  telemetryKey: 't',
-  metaKey:      'm',
-  batchKey:     'b',
-  inKey:        'i',
-  activeKey:    'a',
-  start:        'start',
-  end:          'end',
   type: {
       game:      'game',
       challenge: 'challenge'
