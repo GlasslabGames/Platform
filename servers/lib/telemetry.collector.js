@@ -23,15 +23,16 @@ module.exports = Collector;
 
 function Collector(options){
     try{
-        var Telem, Util, WebStore;
+        var Assessment, Telemetry, Util, WebStore;
 
         // Glasslab libs
-        Telem    = require('./telemetry.js');
-        aConst   = require('./auth.js').Const;
-        rConst   = require('./routes.js').Const;
-        WebStore = require('./webapp.js').Datastore.MySQL;
-        Util     = require('./util.js');
-        tConst   = Telem.Const;
+        Telemetry  = require('./telemetry.js');
+        Assessment = require('./assessment.js');
+        aConst     = require('./auth.js').Const;
+        rConst     = require('./routes.js').Const;
+        WebStore   = require('./webapp.js').Datastore.MySQL;
+        Util       = require('./util.js');
+        tConst     = Telemetry.Const;
 
         this.options = _.merge(
             {
@@ -42,28 +43,28 @@ function Collector(options){
 
         this.requestUtil = new Util.Request(this.options);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
-        this.myds        = new Telem.Datastore.MySQL(this.options.telemetry.datastore.mysql);
-        this.cbds        = new Telem.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
-        this.queue       = new Telem.Queue.Redis(this.options);
+        this.myds        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
+        this.cbds        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
+        this.queue       = new Assessment.Queue.Redis(this.options.assessment.queue);
         this.stats       = new Util.Stats(this.options, "Telemetry.Collector");
 
         this.myds.connect()
             .then(function(){
-                console.log("Collector: MyDS Connected");
+                console.log("Collector: MySQL DS Connected");
                 this.stats.increment("info", "MySQL.Connect");
             }.bind(this),
             function(err){
-                console.trace("Collector: MyDS Error -", err);
+                console.trace("Collector: MySQL Error -", err);
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this));
 
         this.cbds.connect()
             .then(function(){
-                console.log("Collector: CbDS Connected");
+                console.log("Collector: Couchbase DS Connected");
                 this.stats.increment("info", "Couchbase.Connect");
             }.bind(this),
             function(err){
-                console.trace("Collector: CbDS Error -", err);
+                console.trace("Collector: Couchbase DS Error -", err);
                 this.stats.increment("error", "Couchbase.Connect");
             }.bind(this));
 
@@ -598,20 +599,6 @@ return when.promise(function(resolve, reject) {
         reject(new Error("invalid data type"));
         return;
     }
-
-    /*
-    data = JSON.stringify(data);
-    // X prevents from creating a list if does not exist
-    this.queue.lpushx(batchInKey, data, function(err){
-        if(err) {
-            console.error("Collector: Batch Error -", err);
-            reject(err);
-            return;
-        }
-
-        resolve(score);
-    });
-    */
 
 // ------------------------------------------------
 }.bind(this));

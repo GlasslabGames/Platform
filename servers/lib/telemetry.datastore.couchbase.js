@@ -1,6 +1,6 @@
 
 /**
- * Telemetry Dispatcher Module
+ * Telemetry Couchbase Datastore Module
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
@@ -271,7 +271,6 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
-
 
 /*
 TelemDS_Couchbase.prototype.startGameSession = function(userId, courseId, activityId){
