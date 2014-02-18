@@ -287,7 +287,7 @@ Collector.prototype.endSession = function(req, outRes){
 
                     // save events
                     .then(function(sdata){
-                        return this._saveBatchV1(jdata.gameSessionId, sdata.userId, jdata)
+                        return this._saveBatchV1(jdata.gameSessionId, jdata, sdata.userId)
                     }.bind(this))
 
                     // all done in parallel
