@@ -12,7 +12,7 @@ var _       = require('lodash');
 var when    = require('when');
 var redis   = require('redis');
 // Glasslab libs
-var tConst;
+var aeConst;
 
 module.exports = Distiller;
 
@@ -23,7 +23,7 @@ function Distiller(options){
     Telemetry  = require('./telemetry.js');
     Assessment = require('./assessment.js');
     Util       = require('./util.js');
-    tConst     = Assessment.Const;
+    aeConst    = Assessment.Const;
 
     this.options = _.merge(
         {
@@ -46,7 +46,7 @@ function Distiller(options){
     this.stats         = new Util.Stats(this.options, "Assessment.Distiller");
 
     this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
-    this.assessmentUrl = this.webAppUrl+"/api/game/assessment/";
+    this.assessmentUrl = this.webAppUrl+"/WekaServlet";//api/game/assessment/";
 
     this.dataDS.connect()
         .then(function(){
@@ -132,7 +132,7 @@ Distiller.prototype.getTelemetryBatch = function(){
     this.queue.getTelemetryBatch()
         // cleanup session
         .then(function(telemData){
-            if(telemData.type == tConst.end) {
+            if(telemData.type == aeConst.queue.end) {
                 return this.runAssessment(telemData.id)
                             .then( function(){
                                 return this.queue.cleanupSession(telemData.id)
@@ -166,7 +166,7 @@ return when.promise(function(resolve, reject) {
     this.dataDS.getEvents(gameSessionId)
         .then(function(events){
             // Run distiller function
-            var distilledData = this.SD_Function(events);
+            var distilledData = this.SD_Function.process(events);
 
             // save distilled data
             return this.aeDS.saveDistilledData(gameSessionId, distilledData);
@@ -175,9 +175,9 @@ return when.promise(function(resolve, reject) {
             // all ok, done
 
             // Run Weka Server, use requestUtil below
-            resolve();
+            //resolve();
 
-            /*
+
             var url = this.assessmentUrl + gameSessionId;
             this.requestUtil.getRequest(url, null, function(err, res) {
                 if(err) {
@@ -195,7 +195,7 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("info", "ExecuteAssessment.Triggered");
                 resolve();
             }.bind(this));
-            */
+
         }.bind(this))
 
         // catch all error

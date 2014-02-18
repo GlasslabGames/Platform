@@ -23,8 +23,8 @@ function AE_DS_Couchbase(options){
     this.options = _.merge(
         {
             host:     "localhost:8091",
-            bucket:   "default",
-            password: ""
+            bucket:   "glasslab_assessment",
+            password: "glasslab"
         },
         options
     );
@@ -50,7 +50,7 @@ return when.promise(function(resolve, reject) {
     }.bind(this));
 
     this.client.on('connect', function () {
-        //console.log("CouchBase connected!");
+        console.log("CouchBase connected!");
         resolve();
     }.bind(this));
 
@@ -65,7 +65,7 @@ AE_DS_Couchbase.prototype.saveDistilledData = function(gameSessionId, data){
 // ------------------------------------------------
 
         // example - ae:dist:data:ABC-123-EFG
-        var key = aeConst.key+":"+aeConst.distiller.key+":"+aeConst.distiller.dataKey+":"+gameSessionId;
+        var key = aeConst.keys.assessment+":"+aeConst.keys.distiller+":"+aeConst.keys.distillerData+":"+gameSessionId;
         this.client.add(key, data, function(err) {
             if(err){
                 console.error("CouchBase Distiller DS: Set Distiller Data Error -", err);
