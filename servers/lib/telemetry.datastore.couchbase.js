@@ -21,8 +21,9 @@ function TelemDS_Couchbase(options){
     this.options = _.merge(
         {
             host:     "localhost:8091",
-            bucket:   "default",
-            password: ""
+            bucket:   "glasslab_data",
+            password: "glasslab",
+            timeout:  5000
         },
         options
     );
@@ -35,7 +36,9 @@ return when.promise(function(resolve, reject) {
     this.client = new couchbase.Connection({
         host:     this.options.host,
         bucket:   this.options.bucket,
-        password: this.options.password
+        password: this.options.password,
+        connectionTimeout: this.options.timeout || 5000,
+        operationTimeout:  this.options.timeout || 5000
     }, function(err) {
         console.error("CouchBase TelemetryStore: Error -", err);
 
@@ -49,6 +52,7 @@ return when.promise(function(resolve, reject) {
 
     this.client.on('connect', function () {
         //console.log("CouchBase connected!");
+        console.log("CouchBase TelemetryStore connected!");
         this.setupDocsAndViews()
             .then( resolve, reject );
     }.bind(this));

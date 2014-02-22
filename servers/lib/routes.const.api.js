@@ -28,9 +28,9 @@ module.exports = {
         endsession:          api+'/:type/endsession'
     },
     v2: {
-        sessionStart:  api+'/2/telem/session/start',
-        sendEvents:    api+'/2/telem/sendEvents',
-        sessionEnd:    api+'/2/telem/session/end'
+        sessionStart:  api+'/v2/data/session/start',
+        sessionEnd:    api+'/v2/data/session/end',
+        sendEvents:    api+'/v2/data/events'
     }
 
 };

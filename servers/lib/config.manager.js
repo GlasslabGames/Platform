@@ -28,7 +28,7 @@ ConfigManager.prototype.loadSync = function(files, fileType) {
 				file = file.replace("~", this.getUserHomeDir());
 
 				if(fs.existsSync(file)) {
-					data = fs.readFileSync(file, {encoding:"utf8"} );
+					data = fs.readFileSync(file);
 
 					if(fileType == "json") {
 						// merge in next
