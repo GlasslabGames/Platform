@@ -1,21 +1,29 @@
 {
-    "name": "Telemetry-Servers",
-    "version": "0.0.5",
+    "name": "Platform-Servers",
+    "version": "0.2.0",
     "private": true,
     "dependencies": {
-        "when":       "*",
-        "lodash":     "*",
-        "express":    "~3.4.4",
-        "multiparty": "~3.1.0",
-        "request":    "~2.27.0",
-        "mysql":      "~2.0.0-rc1",
-        "redis":      "~0.9.0",
-        "hiredis":    "~0.1.15",
-        "validator":  "~2.0.0",
-        "couchbase":  "*",
-        "passport":   "*",
-        "passport-local": "*",
-        "node-uuid":  "*",
-        "node-statsd": "*"
+        "when":       "2.7.x",
+        "lodash":     "2.4.x",
+        "express":    "3.4.x",
+        "multiparty": "3.1.x",
+        "request":    "2.27.x",
+        "mysql":      "2.0.x",
+        "redis":      "0.9.x",
+        "validator":  "2.0.x",
+        "couchbase":  "1.2.x",
+        "passport":   "0.1.x",
+        "passport-local": "0.1.x",
+        "node-uuid":      "1.4.x",
+        "node-statsd":    "0.0.x"
+    },
+    "devDependencies": {
+        "grunt": "*",
+        "grunt-mocha": "*",
+        "mocha": "*",
+        "chai":  "*"
+    },
+    "optionalDependencies": {
+        "hiredis": "0.1.x"
     }
 }
