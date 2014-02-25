@@ -167,6 +167,7 @@ return when.promise(function(resolve, reject) {
         .then(function(events){
             // Run distiller function
             var distilledData = this.SD_Function.process(events);
+            console.log( "Distilled data: " + distilledData );
 
             // save distilled data
             return this.aeDS.saveDistilledData(gameSessionId, distilledData);
@@ -178,8 +179,8 @@ return when.promise(function(resolve, reject) {
             //resolve();
 
 
-            var url = this.assessmentUrl + gameSessionId;
-            this.requestUtil.getRequest(url, null, function(err, res) {
+            var url = this.assessmentUrl;// + gameSessionId;
+            this.requestUtil.getRequest(url, null, function(err, res, data) {
                 if(err) {
                     console.error("url:", url, ", Error:", err);
                     this.stats.increment("error", "ExecuteAssessment");
@@ -190,11 +191,18 @@ return when.promise(function(resolve, reject) {
 
                 if(this.options.env == "dev") {
                     console.log("Distiller: Started Assessment - gameSessionId:", gameSessionId);
+                    console.log("Distiller: Received info from WEKA:", data);
                 }
 
                 this.stats.increment("info", "ExecuteAssessment.Triggered");
-                resolve();
-            }.bind(this));
+
+                // save bayes data
+                this.aeDS.saveBayesOutputData(gameSessionId, data)
+                .then(function(){
+                    // successfully ran bayes, done
+                    resolve();
+                }.bind(this));
+            }.bind(this))
 
         }.bind(this))
 
