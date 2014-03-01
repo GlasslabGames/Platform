@@ -21,3 +21,7 @@ var av = new Auth.Validate(options);
 process.on('uncaughtException', function(err) {
     console.error("AuthValidate: Uncaught Error -", err, ", stack:", err.stack);
 });
+
+/* Exposed to testing suite */
+module.exports = av;
+/* ------------------------ */
