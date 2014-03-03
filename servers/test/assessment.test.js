@@ -1,8 +1,6 @@
-/**
- * Assessment - App Server
- */
 var Assessment = require('../app-assessment.js'),
-    should     = require('chai').should();
+    should     = require('chai').should(),
+    testData   = require("./data/testData").assessment;
 
 // Test 1 : Assessment Server
 describe('Assessment Server', function () {

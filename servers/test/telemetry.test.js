@@ -1,6 +1,7 @@
 var collector = require("../app-telemetry-collector"),
     should    = require('chai').should(),
-    request   = require('supertest');
+    request   = require('supertest'),
+    testData  = require("./data/testData").telemetry;
 
 // Test 1 : Telem Server
 describe('Telemetry Collection Server', function () {
@@ -12,7 +13,7 @@ describe('Telemetry Collection Server', function () {
     });
 });
 
-/* Supertest unit testing an API call */
+/* Sample API call test */
 describe('GET /users', function(){
     it('respond with json', function(done){
         request(collector.app)
