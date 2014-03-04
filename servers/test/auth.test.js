@@ -1,19 +1,20 @@
-var authServer   = require("../app-auth"),
-    authValidate = require("../app-auth"),
+var AuthServer   = require("../app-auth"),
+    AuthValidate = require("../app-auth"),
     should       = require('chai').should(),
     request      = require('supertest'),
     testData     = require("./data/testData").auth;
 
 // Test 1 : Auth Server
-describe('Authorization Server Initialization', function () {
-    describe('Launch auth server', function() {
+describe('Authorization Server', function () {
+    describe('Auth server', function() {
         it('should launch without error', function (done) {
-            authServer.should.be.ok;
+            AuthServer.should.be.ok;
             done();
         });
-
+    });
+    describe('Auth validation server', function() {
         it('should launch without error', function (done) {
-            authValidate.should.be.ok;
+            AuthValidate.should.be.ok;
             done();
         });
     });
@@ -34,3 +35,16 @@ describe('Authorization Server Initialization', function () {
     });
 });
 /* ---- */
+
+// Test 3 : User Actions
+
+
+
+
+//user: {
+//    login:           api+'/user/login',
+//        logout:          api+'/user/logout',
+//        regUser:         api+'/user/register',
+//        regManager:      api+'/user/register/manager',     // TODO
+//        resetPassUpdate: api+'/user/resetpassword/update', // TODO
+//        updateUser:      api+'/user/:id'
