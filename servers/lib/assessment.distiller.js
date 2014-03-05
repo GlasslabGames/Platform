@@ -203,13 +203,13 @@ return when.promise(function(resolve, reject) {
             // Before we trigger the WEKA process, we need to make sure we set the current working directory
             // and execute the batch file or shell script, depending on the platform
             process.chdir( '../../Assessment/build' );
-            var scriptToExecute = 'run_assessment';
+            var scriptToExecute = '';
             console.log( "Executing bayes on " + process.platform + " at " + process.cwd() );
             if( process.platform === "win32" ) {
-                scriptToExecute += '.bat';
+                scriptToExecute += 'run_assessment.bat';
             }
-            else {
-                scriptToExecute += '.sh';
+            else if( process.platform === "darwin" ) {
+                scriptToExecute += './run_assessment.sh';
             }
             // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA process
             child_process.exec( scriptToExecute + commandString,
