@@ -145,12 +145,12 @@ Collector.prototype.startSession = function(req, outRes){
             }
 
             //console.log("req.params:", req.params, ", req.body:", req.body);
-            var gameLevel = req.body.gameType;
-            var userId   = data.userId;
-            var courseId = parseInt(req.body.courseId);
+            var gameLevel        = req.body.gameType;
+            var userId           = data.userId;
+            var courseId         = parseInt(req.body.courseId);
             var collectTelemetry = data.collectTelemetry;
-            var gSessionId = null;
-            var isVersionValid = false;
+            var gSessionId       = null;
+            var isVersionValid   = false;
 
             // only if game
             if(req.params.type == tConst.type.game) {

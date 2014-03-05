@@ -16,8 +16,12 @@ console.log("---------------------------------------------");
 console.log("-- Authentication App Server - Start");
 console.log("---------------------------------------------");
 
-var a = new Auth.Server(options);
+var authServer = new Auth.Server(options);
 
 process.on('uncaughtException', function(err) {
     console.error("Auth: Uncaught Error -", err, ", stack:", err.stack);
 });
+
+/* Exposed to testing suite */
+module.exports = authServer;
+/* ------------------------ */

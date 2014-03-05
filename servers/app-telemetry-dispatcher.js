@@ -16,8 +16,12 @@ console.log("---------------------------------------------");
 console.log("-- Telemetry Dispatcher App Server - Start");
 console.log("---------------------------------------------");
 
-var d = new telemetry.Dispatcher(options);
+var tDispatcher = new telemetry.Dispatcher(options);
 
 process.on('uncaughtException', function(err) {
     console.error("Dispatcher: Uncaught Error -", err, ", stack:", err.stack);
 });
+
+/* Exposed to testing suite */
+module.exports = tDispatcher;
+/* ------------------------ */

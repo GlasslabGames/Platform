@@ -20,5 +20,16 @@
     },
     "optionalDependencies": {
         "hiredis":        "0.1.x"
+    },
+    "devDependencies": {
+        "supertest":        "*",
+        "grunt":            "*",
+        "grunt-mocha":      "*",
+        "grunt-mocha-test": "*",
+        "mocha":            "*",
+        "chai":             "*"
+    },
+    "scripts": {
+        "test": "grunt"
     }
 }
