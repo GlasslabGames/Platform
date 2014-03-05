@@ -11,7 +11,7 @@ var _    = require('lodash');
 var when = require('when');
 var uuid = require('node-uuid');
 // load at runtime
-var MySQL, tConst;
+var MySQL, tConst, Util;
 
 module.exports = TelemDS_Mysql;
 
@@ -19,6 +19,7 @@ function TelemDS_Mysql(options){
     // Glasslab libs
     MySQL  = require('./datastore.mysql.js');
     tConst = require('./telemetry.const.js');
+    Util   = require('./util.js');
 
     this.options = _.merge(
         {
@@ -89,52 +90,26 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Mysql.prototype.getAllEvents = function(){
+TelemDS_Mysql.prototype.getGameSessionWithGameSection = function(){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        var Q = "SELECT * FROM GL_ACTIVITY_EVENTS_ARCHIVE WHERE version >= 0 ORDER BY game_session_id";
+        var Q = "SELECT session_id, activity_id FROM GL_SESSION WHERE activity_id IS NOT NULL";
         //console.log('Q:', Q);
 
         this.ds.query(Q)
             .then(
                 function(result){
                     if(result.length > 0) {
-                        var eventList = {};
-
-                        for(var i in result){
-                            var key = result[i].GAME_SESSION_ID;
-
-                            // if prop not set then set it
-                            if(!eventList.hasOwnProperty(key)) {
-                                eventList[key] = {
-                                    gameSessionId: result[i].GAME_SESSION_ID,
-                                    userId:        parseInt(result[i].USER_ID),
-                                    gameVersion:   result[i].GAME,
-                                    events:        []
-                                };
-                            }
-
-                            var edata;
-                            try{
-                                edata = JSON.parse(result[i].DATA);
-                            } catch(err) {
-                                // could not parse data
-                                edata = result[i].DATA;
-                            }
-
-                            eventList[key].events.push({
-                                name:      result[i].NAME,
-                                eventData: edata,
-                                timestamp: result[i].timestamp
-                            });
+                        // extract 'GAME_SESSION_ID' key value from results array with each row an object
+                        var data = {};
+                        for(var i = 0; i < result.length; i++){
+                            data[result[i]['session_id']] = result[i]['activity_id'];
                         }
 
-                        eventList = _.values(eventList);
-                        //console.log("eventList length:", eventList.length);
-                        resolve( eventList );
+                        resolve( data );
                     } else {
-                        resolve();
+                        resolve( );
                     }
                 }.bind(this),
                 reject
@@ -145,14 +120,157 @@ TelemDS_Mysql.prototype.getAllEvents = function(){
 // end promise wrapper
 };
 
-TelemDS_Mysql.prototype.disableArchiveEvents = function(gameSessionId){
+/*
+// deviceId & userId optional
+ example output:
+ [
+     {
+         "userId": 12,
+         "serverTimeStamp": 1392775453,
+         "clientTimeStamp": 1392775453,
+         "clientId": "SC-1",
+         "clientVersion": "1.2.4156",
+         "gameLevel": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
+         "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
+         "eventName": "$ScenarioScore",
+         "eventData": {
+             "float key": 1.23,
+             "int key": 1,
+             "string key": "asd"
+         }
+     },
+     {
+         "userId": 12,
+         "serverTimeStamp": 1392775453,
+         "clientTimeStamp": 1392775453,
+         "clientId": "SC",
+         "clientVersion": "1.2.4156",
+         "gameLevel": "Mission2.SubMission1",
+         "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
+         "eventName": "CustomEvent",
+         "eventData": {
+             "float key": 1.23,
+             "int key": 1,
+             "string key": "asd"
+         }
+     }
+ ]
+
+ // userId is optional
+*/
+TelemDS_Mysql.prototype.getArchiveEvents = function(limit){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        if(!limit) {
+            limit = 1000;
+        }
+
+        var Q = "SELECT "
+            + "ae.id, ae.user_id, ae.game_session_id, ae.date_created, ae.timestamp, ae.name, ae.game, ae.data "
+            + "FROM GL_ACTIVITY_EVENTS_ARCHIVE ae "
+            + "WHERE ae.version >= 0 LIMIT "+this.ds.escape(limit);
+        //console.log('Q:', Q);
+
+        this.ds.query(Q)
+            .then(
+                function(result){
+                    if(result.length > 0) {
+                        var data = [];
+                        var ids  = [];
+                        var edata;
+
+                        for(var i = 0; i < result.length; i++) {
+                            try{
+                                edata = JSON.parse(result[i].data);
+                            } catch(err) {
+                                // could not parse data
+                                edata = result[i].data;
+                            }
+
+                            var gameParts = result[i].game.split("_");
+                            var clientVersion = "";
+                            var clientId = "";
+                            if(gameParts.length > 2) {
+                                clientVersion = gameParts.pop();
+                                clientId      = gameParts.join("_");
+                            } else if(gameParts.length == 2) {
+                                clientVersion = gameParts[1];
+                                clientId      = gameParts[0];
+                            } else if(gameParts.length == 1) {
+                                clientVersion = gameParts[0];
+                                clientId      = gameParts[0];
+                            }
+
+                            /*
+                             {
+                                 "userId": 12,
+                                 "serverTimeStamp": 1392775453,
+                                 "clientTimeStamp": 1392775453,
+                                 "clientId": "SC",
+                                 "clientVersion": "1.2.4156",
+                                 "gameLevel": "Mission2.SubMission1",
+                                 "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
+                                 "eventName": "CustomEvent",
+                                 "eventData": {
+                                     "float key": 1.23,
+                                     "int key": 1,
+                                     "string key": "asd"
+                                 }
+                             }
+                             */
+
+                            data.push({
+                                id:              result[i].id,
+                                userId:          parseInt(result[i].user_id),
+                                serverTimeStamp: Util.GetTimeStamp(result[i].date_created),
+                                clientTimeStamp: result[i].timestamp,
+                                clientVersion:   clientVersion,
+                                clientId:        clientId,
+                                gameLevel:       "",
+                                gameSessionId:   result[i].game_session_id,
+                                eventName:       result[i].name,
+                                eventData:       edata
+                            });
+
+                            ids.push(result[i].id);
+                        }
+
+                        //console.log("data.events.length:", data.events.length);
+                        resolve({events: data, ids: ids});
+                    } else {
+                        resolve();
+                        return;
+                    }
+                }.bind(this),
+                reject
+            );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Mysql.prototype.getArchiveEventsLastId = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var Q = "UPDATE GL_ACTIVITY_EVENTS_ARCHIVE SET version=-1 WHERE game_session_id="+this.ds.escape(gameSessionId);
+    var Q = "SELECT MAX(id) as maxid FROM GL_ACTIVITY_EVENTS_ARCHIVE WHERE version >= 0";
     //console.log('Q:', Q);
 
-    this.ds.query(Q).then( resolve, reject );
+    this.ds.query(Q)
+        .then(
+            function(result){
+                //console.log("result:", result);
+                if(result[0].maxid) {
+                    resolve(result[0].maxid);
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+            reject
+        );
 
 // ------------------------------------------------
 }.bind(this));
@@ -160,37 +278,55 @@ return when.promise(function(resolve, reject) {
 };
 
 
-TelemDS_Mysql.prototype.getEvents = function(gameSessionId){
+TelemDS_Mysql.prototype.getArchiveEventsBySession = function(gameSessionId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var Q = "SELECT * FROM GL_ACTIVITY_EVENTS WHERE game_session_id="+this.ds.escape(gameSessionId);
+    var Q = "SELECT "
+        + "ae.id, ae.user_id, ae.game_session_id, ae.timestamp, ae.name, ae.game, ae.data, s.activity_id as gameLevel "
+        + "FROM GL_ACTIVITY_EVENTS_ARCHIVE ae JOIN GL_SESSION s on s.session_id = ae.game_session_id "
+        + "WHERE ae.version >= 0 AND ae.game_session_id="+this.ds.escape(gameSessionId);
     //console.log('Q:', Q);
 
     this.ds.query(Q)
         .then(
             function(result){
                 if(result.length > 0) {
-                    var data = {
-                        gameSessionId: gameSessionId,
-                        userId:        parseInt(result[0].USER_ID),
-                        gameVersion:   result[0].GAME,
-                        events:        []
-                    };
-
+                    var data = [];
                     var edata;
-                    try{
-                        edata = JSON.parse(result[i].DATA);
-                    } catch(err) {
-                        // could not parse data
-                        edata = result[i].DATA;
-                    }
 
-                    for(var i in result){
-                        data.events.push({
-                            name:      result[i].NAME,
-                            eventData: edata,
-                            timestamp: result[i].timestamp
+                    for(var i = 0; i < result.length; i++) {
+                        try{
+                            edata = JSON.parse(result[i].data);
+                        } catch(err) {
+                            // could not parse data
+                            edata = result[i].data;
+                        }
+
+                        var gameParts = result[i].game.split("_");
+                        var clientVersion = "";
+                        var clientId = "";
+                        if(gameParts.length > 2) {
+                            clientVersion = gameParts.pop();
+                            clientId      = gameParts.join("_");
+                        } else if(gameParts.length == 2) {
+                            clientVersion = gameParts[1];
+                            clientId      = gameParts[0];
+                        } else if(gameParts.length == 1) {
+                            clientVersion = gameParts[0];
+                            clientId      = gameParts[0];
+                        }
+
+                        data.push({
+                            clientTimeStamp: result[i].timestamp,
+                            clientVersion:   clientVersion,
+                            clientId:        clientId,
+                            gameLevel:       result[i].gameLevel,
+                            gameSessionId:   result[i].gameSessionId,
+                            eventName:       result[i].name,
+                            eventData:       edata,
+
+                            userId: parseInt(result[i].user_id)
                         });
                     }
 
@@ -209,6 +345,21 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+
+
+TelemDS_Mysql.prototype.disableArchiveEvents = function(ids){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var Q = "UPDATE GL_ACTIVITY_EVENTS_ARCHIVE SET version=-1 WHERE id IN ("+ids.join(',')+")";
+        //console.log('Q:', Q);
+
+        this.ds.query(Q).then( resolve, reject );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
 
 TelemDS_Mysql.prototype.startGameSession = function(userId, courseId, activityId){
 // add promise wrapper

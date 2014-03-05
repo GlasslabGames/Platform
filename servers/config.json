@@ -71,6 +71,19 @@
         "port":     8083
     },
     "assessment": {
-        "port":     8084
+        "port":     8084,
+        "datastore": {
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_assessment",
+                "password": "glasslab"
+            }
+        },
+        "queue": {
+            "host": "127.0.0.1",
+            "db": 0,
+            "port": 6379,
+            "sessionExpire" : 14400000, "//":"in milliseconds"
+        }
     }
 }
