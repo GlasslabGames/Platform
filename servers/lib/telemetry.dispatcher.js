@@ -28,7 +28,7 @@ function Dispatcher(options){
         {
             webapp: { protocol: "http", host: "localhost", port: 8080},
             dispatcher: {
-                telemetryGetMax: 20,
+                telemetryGetMax:    20,
                 telemetryPollDelay: 1000,     // (1 second) in milliseconds
                 assessmentDelay:    1000,     // (1 second) in milliseconds
                 cleanupPollDelay:   3600000,  // (1 hour)   in milliseconds

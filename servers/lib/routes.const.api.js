@@ -32,5 +32,4 @@ module.exports = {
         sendEvents:    api+'/2/telem/sendEvents',
         sessionEnd:    api+'/2/telem/session/end'
     }
-
 };
