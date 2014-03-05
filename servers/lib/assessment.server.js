@@ -69,7 +69,7 @@ function AssessmentServer(options){
             // couchbase ok
             .then(function(){
                 console.log("Assessment: DS Connected");
-                //this.migrateOldDBEvents();
+                this.migrateOldDBEvents();
             }.bind(this))
 
             // catch all errors
