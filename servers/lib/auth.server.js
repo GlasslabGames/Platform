@@ -235,7 +235,7 @@ AuthServer.prototype.setupRoutes = function() {
             this.stats.increment("info", "Route.Default");
 
             console.log("defaultRoute:", req.originalUrl);
-            //res.redirect(rConst.root);
+            res.redirect(rConst.root);
         }.bind(this));
 
     } catch(err){
