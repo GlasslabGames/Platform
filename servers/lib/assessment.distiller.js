@@ -11,6 +11,7 @@
 var _       = require('lodash');
 var when    = require('when');
 var redis   = require('redis');
+var child_process   = require('child_process');
 // Glasslab libs
 var aeConst;
 
@@ -169,40 +170,65 @@ return when.promise(function(resolve, reject) {
             var distilledData = this.SD_Function.process(events);
             console.log( "Distilled data: " + distilledData );
 
+            // If the distilled data has no WEKA key, don't save anything
+            if( !distilledData || !distilledData.bayesKey ) {
+                console.log( "no bayes key found in distilled data" );
+                resolve();
+                return;
+            }
+
             // save distilled data
             return this.aeDS.saveDistilledData(gameSessionId, distilledData);
         }.bind(this))
-        .then(function(){
-            // all ok, done
+        .then(function(distilledData){
 
-            // Run Weka Server, use requestUtil below
-            //resolve();
+            // If the bayes key is empty, there is no WEKA to perform, resolve
+            if( !distilledData || !distilledData.bayesKey ) {
+                console.log( "no bayes key found in weka data" );
+                resolve();
+                return;
+            }
 
 
-            var url = this.assessmentUrl;// + gameSessionId;
-            this.requestUtil.getRequest(url, null, function(err, res, data) {
-                if(err) {
-                    console.error("url:", url, ", Error:", err);
-                    this.stats.increment("error", "ExecuteAssessment");
-                    res.status(500).send('Error:'+err);
-                    reject(err);
-                    return;
-                }
+            // Set the command line string for the WEKA processor
+            var commandString = " SimpleBayes " + distilledData.bayesKey;
 
-                if(this.options.env == "dev") {
-                    console.log("Distiller: Started Assessment - gameSessionId:", gameSessionId);
-                    console.log("Distiller: Received info from WEKA:", data);
-                }
+            // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA server
+            var evidenceFragments = distilledData.fragments;
+            for( var i = 0; i < evidenceFragments.length; i++ ) {
+                commandString += " " + evidenceFragments[i].value;//evidenceFragments[i].key + "=" + evidenceFragments[i].value;
+            }
 
-                this.stats.increment("info", "ExecuteAssessment.Triggered");
 
-                // save bayes data
-                this.aeDS.saveBayesOutputData(gameSessionId, data)
-                .then(function(){
-                    // successfully ran bayes, done
-                    resolve();
-                }.bind(this));
-            }.bind(this))
+            // Before we trigger the WEKA process, we need to make sure we set the current working directory
+            // and execute the batch file or shell script, depending on the platform
+            process.chdir( '../../Assessment/build' );
+            var scriptToExecute = 'run_assessment';
+            console.log( "Executing bayes on " + process.platform + " at " + process.cwd() );
+            if( process.platform === "win32" ) {
+                scriptToExecute += '.bat';
+            }
+            else {
+                scriptToExecute += '.sh';
+            }
+            // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA process
+            child_process.exec( scriptToExecute + commandString,
+                function( error, data, stderr ) {
+                    console.log( "data: " + data );
+                    //console.log( "stderr: " + stderr );
+                    if( error !== null ) {
+                        console.log( "exec error: " + error );
+                        reject( error );
+                    } else {
+                        // save bayes data
+                        this.aeDS.saveBayesOutputData(gameSessionId, data)
+                        .then(function(){
+                            // successfully ran bayes, done
+                            resolve();
+                        }.bind(this));
+                    }
+                }.bind(this)
+            );
 
         }.bind(this))
 

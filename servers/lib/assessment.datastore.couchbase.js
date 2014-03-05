@@ -72,7 +72,7 @@ AE_DS_Couchbase.prototype.saveDistilledData = function(gameSessionId, data){
                 reject(err);
                 return;
             }
-            resolve();
+            resolve(data);
         }.bind(this));
 
 // ------------------------------------------------
