@@ -27,7 +27,8 @@
         "grunt-mocha":      "*",
         "grunt-mocha-test": "*",
         "mocha":            "*",
-        "chai":             "*"
+        "chai":             "*",
+        "grunt-git-describe": "*"
     },
     "scripts": {
         "test": "grunt"

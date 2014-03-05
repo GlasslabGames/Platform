@@ -192,24 +192,38 @@ AuthServer.prototype.setupRoutes = function() {
             this.app[rConst.auth.special[e].exclude](rConst.auth.special[e].route, excludeRoute);
         }
 
-        // static content
-        for(var i in rConst.static.include){
-
+        // static dir content
+        for(var i in rConst.static.dirs){
             var fullPath, route;
-            if(_.isObject(rConst.static.include[i])) {
-                route = rConst.static.include[i].route;
-                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.include[i].path);
+            if(_.isObject(rConst.static.dirs[i])) {
+                route = rConst.static.dirs[i].route;
+                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.dirs[i].path);
             } else {
-                route = rConst.static.include[i];
-                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.include[i]);
+                route = rConst.static.dirs[i];
+                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.dirs[i]);
             }
 
-            console.log("Static Content:", route, "->", fullPath);
+            console.log("Static Dir Content:", route, "->", fullPath);
             this.app.use(route, express.static(fullPath) );
         }
 
+        // static files content
+        _.forEach(rConst.static.files, function (item) {
+            var fullPath, route;
+            if(_.isObject(item)) {
+                route = item.route;
+                fullPath = path.resolve(this.options.webapp.staticContentPath + item.path);
+
+                console.log("Static File Content:", route, "->", fullPath);
+                this.app.get(route, function(req, res){
+                    // need to resolve relative path to absolute, to prevent "Error: Forbidden"
+                    res.sendfile( fullPath );
+                } );
+            }
+        }.bind(this));
+
         this.app.get(rConst.root, function(req, res){
-            //console.log("static root:", req.originalUrl);
+            console.log("static root:", req.originalUrl);
             this.stats.increment("info", "Route.Static.Root");
 
             var fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.root);
@@ -220,8 +234,8 @@ AuthServer.prototype.setupRoutes = function() {
         this.app.use(function defaultRoute(req, res) {
             this.stats.increment("info", "Route.Default");
 
-            //console.log("defaultRoute:", req.originalUrl);
-            res.redirect(rConst.root);
+            console.log("defaultRoute:", req.originalUrl);
+            //res.redirect(rConst.root);
         }.bind(this));
 
     } catch(err){
