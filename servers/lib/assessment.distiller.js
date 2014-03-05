@@ -52,21 +52,21 @@ function Distiller(options){
     this.dataDS.connect()
         .then(function(){
             console.log("Distiller: Data DS Connected");
-            this.stats.increment("info", "Couchbase.Connect");
+            this.stats.increment("info", "Telemetry.Couchbase.Connect");
         }.bind(this),
         function(err){
             console.trace("Distiller: Data DS Error -", err);
-            this.stats.increment("error", "Couchbase.Connect");
+            this.stats.increment("error", "Telemetry.Couchbase.Connect");
         }.bind(this));
 
     this.aeDS.connect()
         .then(function(){
             console.log("Distiller: AE DS Connected");
-            this.stats.increment("info", "Couchbase.Connect");
+            this.stats.increment("info", "Assessment.Couchbase.Connect");
         }.bind(this),
             function(err){
                 console.trace("Distiller: AE DS Error -", err);
-                this.stats.increment("error", "Couchbase.Connect");
+                this.stats.increment("error", "Assessment.Couchbase.Connect");
             }.bind(this));
 
     this.startTelemetryPoll();

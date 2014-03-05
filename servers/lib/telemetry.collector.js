@@ -17,13 +17,13 @@ var parallel   = require('when/parallel');
 var express    = require('express');
 var multiparty = require('multiparty');
 // load at runtime
-var aConst, tConst, rConst;
+var aConst, tConst, rConst, Util;
 
 module.exports = Collector;
 
 function Collector(options){
     try{
-        var Assessment, Telemetry, Util, WebStore;
+        var Assessment, Telemetry, WebStore;
 
         // Glasslab libs
         Telemetry  = require('./telemetry.js');
@@ -98,9 +98,12 @@ function Collector(options){
 // HTTP Server request functions
 Collector.prototype.setupRoutes = function() {
     this.app.post(rConst.api.v1.startsession,       this.startSession.bind(this));
-    this.app.post(rConst.api.v1.sendtelemetrybatch, this.sendBatchTelemetryV1.bind(this));
-    this.app.post(rConst.api.v2.sendEvents,         this.sendBatchTelemetryV2.bind(this));
     this.app.post(rConst.api.v1.endsession,         this.endSession.bind(this));
+    this.app.post(rConst.api.v1.sendtelemetrybatch, this.sendBatchTelemetryV1.bind(this));
+
+    //this.app.post(rConst.api.v2.startsession,       this.startSessionV2.bind(this));
+    //this.app.post(rConst.api.v2.endsession,         this.endSessionV2.bind(this));
+    this.app.post(rConst.api.v2.sendEvents,         this.sendBatchTelemetryV2.bind(this));
 }
 
 Collector.prototype.startSession = function(req, outRes){
@@ -546,7 +549,7 @@ return when.promise(function(resolve, reject) {
                         event.timestamp = data.events[i].timestamp;
                     }
                 } else {
-                    event.timestamp = Math.round(new Date().getTime()/1000.0);
+                    event.timestamp = Util.GetTimeStamp();
                 }
 
                 var vParts = data.gameVersion.split("_");
@@ -605,34 +608,229 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 }
 
-Collector.prototype._saveBatchV2 = function(gameSessionId, data) {
+/*
+example inputs:
+[
+    {
+        "clientTimeStamp": 1392775453,
+        "clientId": "SC-1",
+        "clientVersion": "1.2.4156",
+        "gameType": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
+        "eventName": "$ScenarioScore",
+        "eventData": {
+            "float key": 1.23,
+            "int key": 1,
+            "string key": "asd"
+        }
+    },
+    {
+        "clientTimeStamp": 1392775453,
+        "clientId": "SC-1",
+        "clientVersion": "1.2.4156",
+        "gameType": "Mission2.SubMission1",
+        "eventName": "CustomEvent",
+        "eventData": {
+            "float key": 1.23,
+            "int key": 1,
+            "string key": "asd"
+        }
+    }
+]
+ */
+/*
+Required properties
+    clientTimeStamp, clientId, eventName
+
+Input Types accepted
+    gameSessionId: String
+    eventList : (Array or Object)
+        clientTimeStamp: Integer
+        clientId: String
+        clientVersion: String
+        gameType: String
+        eventName: String
+        eventData: Object
+*/
+Collector.prototype._saveBatchV2 = function(gameSessionId, eventList) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        // TODO: move score to separate API
-        //console.log("saveBatch data: ", data);
+        // verify all required values are set
 
-        // data needs to be an object
-        if(_.isObject(data)) {
-            if(!data.length) {
+        // eventList is object but not array
+        if( _.isObject(eventList) &&
+            !_.isArray(eventList)) {
+            // convert to array
+            eventList = [eventList];
+        }
+
+        // eventList needs to be an array
+        if(_.isArray(eventList)) {
+            // empty list, just return
+            if(!eventList.length) {
                 resolve();
                 return;
             }
 
+            var processedEvents = [];
+            var errList = [];
+            for(var i = 0; i < eventList.length; i++)
+            {
+                var data = eventList[i];
+                var pData = {};
+
+                if( !_.isObject(data) ){
+                    errList.push(new Error("event is not an object"));
+                    continue; // skip to next item in list
+                }
+
+                // clientTimeStamp required
+                if( !data.hasOwnProperty("clientTimeStamp") ) {
+                    errList.push(new Error("clientTimeStamp missing"));
+                    continue; // skip to next item in list
+                } else {
+                    if( !_.isNumber(data.clientTimeStamp) ) {
+                        errList.push(new Error("clientTimeStamp invalid type"));
+                        continue; // skip to next item in list
+                    }
+
+                    // save
+                    pData.clientTimeStamp = data.clientTimeStamp;
+                }
+
+                // clientId required
+                if( !data.hasOwnProperty("clientId") ) {
+                    errList.push(new Error("clientId missing"));
+                    continue; // skip to next item in list
+                } else {
+                    if( !_.isString(data.clientId) ) {
+                        errList.push(new Error("clientId invalid type"));
+                        continue; // skip to next item in list
+                    }
+                    else if(data.clientId.length == 0) {
+                        errList.push(new Error("clientId can not be empty"));
+                        continue; // skip to next item in list
+                    }
+                    // TODO: add validate of clientId using DB
+                    // else if( this._eventValidateClientId(data.clientId) ){...}
+                    else {
+                        // save
+                        pData.clientId = data.clientId;
+                    }
+                }
+
+                // clientVersion NOT required
+                if( !data.hasOwnProperty("clientVersion") ) {
+                    // no clientVersion is ok
+                } else {
+                    if( !_.isString(data.clientVersion) ) {
+                        errList.push(new Error("clientVersion invalid type"));
+                    }
+                    else if(data.clientVersion.length == 0) {
+                        errList.push(new Error("clientVersion can not be empty"));
+                    }
+                    // TODO: add validate of clientVersion using DB
+                    // else if( this._eventValidateClientVersion(data.clientId, data.clientVersion) ){...}
+                    else {
+                        // save
+                        pData.clientVersion = data.clientVersion;
+                    }
+                }
+
+                // gameType NOT required
+                if( !data.hasOwnProperty("gameType") ) {
+                    // no gameType is ok
+                } else {
+                    if( !_.isString(data.gameType) ) {
+                        errList.push(new Error("gameType invalid type"));
+                    }
+                    else if(data.gameType.length == 0) {
+                        errList.push(new Error("gameType can not be empty"));
+                    }
+                    // TODO: add validation of gameType using DB
+                    // else if( this._eventValidateGameType(data.clientId, data.gameType) ){...}
+                    else {
+                        // save
+                        pData.gameType = data.gameType;
+                    }
+                }
+
+                // eventName required
+                if( !data.hasOwnProperty("eventName") ) {
+                    errList.push(new Error("eventName missing"));
+                    continue; // skip to next item in list
+                } else {
+                    if( !_.isString(data.eventName) ) {
+                        errList.push(new Error("eventName invalid type"));
+                        continue; // skip to next item in list
+                    }
+                    else if(data.eventName.length == 0) {
+                        errList.push(new Error("name can not be empty"));
+                        continue; // skip to next item in list
+                    }
+                    // try parse/analyze name
+                    try {
+                        // convert + save
+                        pData.eventName = this._convertEventName(data.eventName, data.clientId);
+                    }
+                    catch(err) {
+                        errList.push(err);
+                        continue; // skip to next item in list
+                    }
+                }
+
+                // eventData NOT required
+                if( !data.hasOwnProperty("eventData") ) {
+                    // no eventData is ok
+                } else {
+                    if( !_.isObject(data.eventData) ) {
+                        errList.push(new Error("invalid eventData type, should be an object"));
+                        eventErr = true;
+                    } else {
+                        try {
+                            // TODO: validate eventData based on eventName
+                            this._validateEventData(data.eventName, data.eventData);
+                            // save
+                            pData.eventData = data.eventData;
+                        }
+                        catch(err) {
+                            errList.push(err);
+                            continue; // skip to next item in list
+                        }
+                    }
+                }
+
+                // add server TimeStamp
+                pData.serverTimeStamp = Util.GetTimeStamp();
+                // add game session
+                pData.sessionId = gameSessionId;
+
+                // added saved data to list
+                processedEvents.push(pData);
+            }
+
             // adds the promise to the list
-            this.cbds.saveEvents(data)
+            this.cbds.saveEvents(processedEvents)
                 .then(
                     function(){
-                        this.stats.increment("info", "SaveBatch.Done");
-                        resolve();
+                        if(errList.length > 0){
+                            // some errors occurred
+                            this.stats.increment("error", "SaveBatch2");
+                            reject(errList);
+                        } else {
+                            this.stats.increment("info", "SaveBatch2.Done");
+                            resolve();
+                        }
                     }.bind(this),
                     function(err){
-                        reject(err);
+                        this.stats.increment("error", "SaveBatch2");
+                        errList.push(err);
+                        reject(errList);
                     }.bind(this)
                 );
         } else {
             console.error("Collector: Error - invalid data type");
-            this.stats.increment("error", "SaveBatch.Invalid.DataType");
+            this.stats.increment("error", "SaveBatch2.Invalid.DataType");
             reject(new Error("invalid data type"));
             return;
         }
@@ -640,4 +838,34 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, data) {
 // ------------------------------------------------
     }.bind(this));
 // end promise wrapper
+}
+
+// throw errors
+Collector.prototype._convertEventName = function(rawName, clientId) {
+    var eventName = "";
+
+    if(rawName.charAt(0) == '$'){
+        var tName = rawName.slice(1);
+
+        var glEventsPrefix = "GL";
+        var map = {
+            "SessionStart" : "Session_Start",
+            "ScenarioScore": "Scenario_Score"
+        };
+
+        if(map.hasOwnProperty(tName)){
+            return glEventsPrefix+"_"+map[tName];
+        } else {
+            throw new Error("invalid event name");
+        }
+    }
+    // custom name, add clientId
+    else {
+        return clientId + "_" + eventName;
+    }
+}
+
+// throw errors
+Collector.prototype._validateEventData = function(eventName, eventData) {
+
 }

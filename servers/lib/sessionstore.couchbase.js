@@ -20,12 +20,13 @@ module.exports = function(connect){
         this.options = _.merge(
             {
                 host:     "localhost:8091",
-                bucket:   "default",
-                password: "",
+                bucket:   "glasslab_auth",
+                password: "glasslab",
                 prefix:   "session",
                 ttl:      sessionMaxAge,
                 client:   null,
-                readonly: false
+                readonly: false,
+                timeout:  5000
             },
             options
         );
@@ -38,7 +39,9 @@ module.exports = function(connect){
             this.client = new couchbase.Connection({
                 host:     this.options.host,
                 bucket:   this.options.bucket,
-                password: this.options.password
+                password: this.options.password,
+                connectionTimeout: this.options.timeout || 5000,
+                operationTimeout:  this.options.timeout || 5000
             }, function(err) {
                 console.error("CouchBase SessionStore: Error -", err);
 
@@ -161,7 +164,7 @@ module.exports = function(connect){
         }
 
         var data = _.cloneDeep(session);
-        //console.log("CouchBaseStore set key:", key, ", data:", data);
+        console.log("CouchBaseStore setSession key:", key, ", ttl:", ttl);
         this.client.set(key, data, {
                 expiry: ttl // in seconds
             },

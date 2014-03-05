@@ -24,7 +24,8 @@ function AE_DS_Couchbase(options){
         {
             host:     "localhost:8091",
             bucket:   "glasslab_assessment",
-            password: "glasslab"
+            password: "glasslab",
+            timeout:  5000
         },
         options
     );
@@ -37,7 +38,9 @@ return when.promise(function(resolve, reject) {
     this.client = new couchbase.Connection({
         host:     this.options.host,
         bucket:   this.options.bucket,
-        password: this.options.password
+        password: this.options.password,
+        connectionTimeout: this.options.timeout || 5000,
+        operationTimeout:  this.options.timeout || 5000
     }, function(err) {
         console.error("CouchBase Distiller DS: Error -", err);
 
@@ -50,7 +53,7 @@ return when.promise(function(resolve, reject) {
     }.bind(this));
 
     this.client.on('connect', function () {
-        console.log("CouchBase connected!");
+        console.log("CouchBase Distiller DS connected!");
         resolve();
     }.bind(this));
 

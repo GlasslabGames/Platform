@@ -17,6 +17,11 @@ function promiseContinue(){
     });
 }
 
+// seconds from EPOC (unit time)
+function getTimeStamp(){
+    return Math.round(new Date().getTime()/1000.0);
+}
+
 function getExpressLogger(options, express, stats){
     express.logger.token('remote-addy', function(req, res){
         if( req.headers.hasOwnProperty('x-forwarded-for') ){
@@ -72,7 +77,8 @@ function getExpressLogger(options, express, stats){
 
         // status is null
         if(!status) {
-            console.trace("Error null status for response!!!");
+            console.error("Error null status for response!!!");
+            status = "";
         }
 
         return t['remote-addy'](req, res)+' - - ['+
@@ -98,6 +104,7 @@ module.exports = {
     Stats:   require('./util.stats.js'),
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,
+    GetTimeStamp: getTimeStamp,
     String: {
         capitalize: capitalize
     }
