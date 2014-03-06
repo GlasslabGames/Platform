@@ -19,7 +19,11 @@ function promiseContinue(){
 
 // seconds from EPOC (unit time)
 function getTimeStamp(dt){
-    return Math.round(new Date(dt).getTime()/1000.0);
+    if(dt) {
+        return Math.round(new Date(dt).getTime()/1000.0);
+    } else {
+        return Math.round(new Date().getTime()/1000.0);
+    }
 }
 
 function getExpressLogger(options, express, stats){
