@@ -265,7 +265,7 @@ Collector.prototype.sendBatchTelemetryV2 = function(req, outRes){
 
         //console.log("send telemetry batch body:", req.body);
         // Queue Data
-        this._validateSendBatch(2, outRes, req.body, req.body.gameSessionId);
+        this._validateSendBatch(2, outRes, req.body);
     } catch(err) {
         console.trace("Collector: Send Telemetry Batch Error -", err);
         this.stats.increment("error", "SendBatchTelemetry.Catch");
@@ -433,6 +433,19 @@ Collector.prototype._validateGameVersion = function(gameVersion){
 // ---------------------------------------
 Collector.prototype._validateSendBatch = function(version, res, data, gameSessionId){
     var promise;
+
+    // get session for version 2
+    if(version != 1) {
+        // eventList needs to be an array
+        if(!gameSessionId) {
+            if( _.isArray(data) && data.length > 0) {
+                gameSessionId = data[0].gameSessionId;
+            }
+            else if( _.isObject(data) && data.hasOwnProperty('gameSessionId')) {
+                gameSessionId = data.gameSessionId;
+            }
+        }
+    }
 
     if(gameSessionId) {
         // validate session and get data
@@ -602,6 +615,7 @@ Collector.prototype._saveBatchV1 = function(gameSessionId, userId, gameLevel, ev
                     event.serverTimeStamp = Util.GetTimeStamp();
 
                     // adds the promise to the list
+                    //console.log("event:", event);
                     events.push(event);
                 }
 
@@ -866,12 +880,14 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, ev
                     }
                 }
 
+                // add gameSessionId
+                pData.gameSessionId = gameSessionId;
+
                 // add server TimeStamp
                 pData.serverTimeStamp = Util.GetTimeStamp();
-                // add game session
-                pData.sessionId = gameSessionId;
 
                 // added saved data to list
+                //console.log("pData:", pData);
                 processedEvents.push(pData);
             }
 
