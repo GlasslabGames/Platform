@@ -3,6 +3,7 @@
 # verify ran as root
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
+   echo "run \"sudo -s\"" 1>&2
    exit 1
 fi
 
@@ -25,5 +26,9 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-cd servers
-./server_start.sh
+if [ -n "$(initctl list | grep hydra.service)" ]; then
+    service hydra restart
+else
+    cd servers
+    ./server_start.sh
+fi
