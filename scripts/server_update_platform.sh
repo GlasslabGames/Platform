@@ -28,6 +28,10 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ -n "$(initctl list | grep hydra.service)" ]; then
+    # copy haproxy config and restart service
+    cp ${PLATFORM_DIR}/scripts/haproxy.cfg /etc/haproxy
+    service hapoxy restart
+
     service hydra restart
 else
     cd servers
