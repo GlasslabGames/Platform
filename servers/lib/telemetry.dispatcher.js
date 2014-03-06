@@ -17,9 +17,10 @@ var tConst;
 module.exports = Dispatcher;
 
 function Dispatcher(options){
-    var Util, Telem;
+    var Util, Telem, Assessment;
 
     // Glasslab libs
+    Assessment = require('./assessment.js');
     Telem  = require('./telemetry.js');
     Util   = require('./util.js');
     tConst = Telem.Const;
@@ -39,7 +40,7 @@ function Dispatcher(options){
     );
 
     this.requestUtil   = new Util.Request(this.options);
-    this.queue         = new Telem.Queue.Redis(this.options);
+    this.queue         = new Assessment.Queue.Redis(this.options.assessment.queue);
     this.cbds          = new Telem.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
     this.stats         = new Util.Stats(this.options, "Telemetry.Dispatcher");
 

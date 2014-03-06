@@ -38,7 +38,9 @@ module.exports = function(connect){
             this.client = new couchbase.Connection({
                 host:     this.options.host,
                 bucket:   this.options.bucket,
-                password: this.options.password
+                password: this.options.password,
+                connectionTimeout: this.options.timeout || 5000,
+                operationTimeout:  this.options.timeout || 5000
             }, function(err) {
                 console.error("CouchBase SessionStore: Error -", err);
 

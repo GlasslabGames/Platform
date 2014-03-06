@@ -17,6 +17,11 @@ function promiseContinue(){
     });
 }
 
+// seconds from EPOC (unit time)
+function getTimeStamp(dt){
+    return Math.round(new Date(dt).getTime()/1000.0);
+}
+
 function getExpressLogger(options, express, stats){
     express.logger.token('remote-addy', function(req, res){
         if( req.headers.hasOwnProperty('x-forwarded-for') ){
@@ -60,7 +65,7 @@ function getExpressLogger(options, express, stats){
 
             stats.saveRoot();
             if(ulist.length > 0 &&
-               ulist[0] == 'api') {
+                ulist[0] == 'api') {
                 stats.setRoot('Route.Api');
             } else {
                 // static
@@ -72,7 +77,8 @@ function getExpressLogger(options, express, stats){
 
         // status is null
         if(!status) {
-            console.trace("Error null status for response!!!");
+            console.error("Error null status for response!!!");
+            status = "";
         }
 
         return t['remote-addy'](req, res)+' - - ['+
@@ -88,9 +94,9 @@ function getExpressLogger(options, express, stats){
     });
 
     /*
-    var logFormat = ':remote-addy - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" (:response-time ms)';
-    return express.logger(logFormat);
-    */
+     var logFormat = ':remote-addy - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" (:response-time ms)';
+     return express.logger(logFormat);
+     */
 }
 
 module.exports = {
@@ -98,6 +104,7 @@ module.exports = {
     Stats:   require('./util.stats.js'),
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,
+    GetTimeStamp: getTimeStamp,
     String: {
         capitalize: capitalize
     }
