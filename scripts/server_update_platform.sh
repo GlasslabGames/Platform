@@ -7,6 +7,7 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+export HOME="/root"
 PLATFORM_DIR="/home/dev/github/Platform/"
 
 # first arg is the branch name
