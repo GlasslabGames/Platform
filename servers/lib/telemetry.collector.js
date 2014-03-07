@@ -924,8 +924,6 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, ev
 
 // throw errors
 Collector.prototype._convertEventName = function(rawName, clientId) {
-    var eventName = "";
-
     if(rawName.charAt(0) == '$'){
         var tName = rawName.slice(1);
 
@@ -943,7 +941,7 @@ Collector.prototype._convertEventName = function(rawName, clientId) {
     }
     // custom name, add clientId
     else {
-        return clientId + "_" + eventName;
+        return clientId + "_" + rawName;
     }
 }
 
