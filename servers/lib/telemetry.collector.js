@@ -824,7 +824,7 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, ev
                     if( !_.isString(data.gameLevel) ) {
                         errList.push(new Error("gameLevel invalid type"));
                     }
-                    else if(data.gameType.length == 0) {
+                    else if(data.gameLevel.length == 0) {
                         errList.push(new Error("gameLevel can not be empty"));
                     }
                     // TODO: ??? add validation of gameLevel using DB ???
