@@ -31,7 +31,6 @@ function AE_Queue(options){
 
     this.q = redis.createClient(this.options.port, this.options.host, this.options);
 
-    this.keyMeta = aeConst.keys.assessment+":"+aeConst.keys.meta;
     this.keyIn   = aeConst.keys.assessment+":"+aeConst.keys.in;
 
     if(this.options.db) {
@@ -39,110 +38,33 @@ function AE_Queue(options){
     }
 }
 
-AE_Queue.prototype.startSession = function(sessionId, userId, gameLevel){
+AE_Queue.prototype.pushJob = function(gameSessionId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    this.q.hset(this.keyMeta, sessionId,
-        JSON.stringify( {
-            date:  new Date(),
-            userId: userId,
-            gameLevel: gameLevel,
-            state:  aeConst.queue.start
-        }),
-        function(err){
-            if(err) {
-                console.error("Queue: setSessionState Error:", err);
-                reject(err);
-                return;
-            }
+        // all ok, now add end to
+        this.q.lpush(this.keyIn,
+            JSON.stringify({
+                id: gameSessionId,
+                type: aeConst.queue.end
+            }),
+            function(err){
+                if(err) {
+                    console.error("Queue: End Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve();
+            }.bind(this)
+        );
 
-            resolve();
-        }.bind(this)
-    );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
 
-AE_Queue.prototype.validateSession = function(sessionId){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    this.q.hget(this.keyMeta, sessionId,
-        function(err, data){
-            if(err) {
-                console.error("Queue: getSessionState Error:", err);
-                reject(err);
-                return;
-            }
-
-            var jdata = null;
-            try {
-                jdata = JSON.parse(data);
-            } catch(err) {
-                console.error("Queue: Error -", err, ", JSON data:", row);
-                reject(err);
-                return;
-            }
-
-            resolve(jdata);
-        }.bind(this)
-    );
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-AE_Queue.prototype.endSession = function(sessionId){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    // get session first
-    this.validateSession(sessionId)
-        .then(function(data){
-
-            this.q.hset(this.keyMeta, sessionId,
-                JSON.stringify( {
-                    date:   new Date(), // update date
-                    userId: data.userId,
-                    state:  aeConst.queue.end  // update state
-                }),
-                function(err){
-                    if(err) {
-                        console.error("Queue: setSessionState Error:", err);
-                        reject(err);
-                        return;
-                    }
-
-                    // all ok, now add end to
-                    this.q.lpush(this.keyIn,
-                        JSON.stringify({
-                            id: sessionId,
-                            type: aeConst.queue.end
-                        }),
-                        function(err){
-                            if(err) {
-                                console.error("Queue: End Error -", err);
-                                reject(err);
-                                return;
-                            }
-
-                            resolve();
-                        }.bind(this)
-                    );
-                }.bind(this));
-
-        }.bind(this), reject);
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-AE_Queue.prototype.getInCount = function(){
+AE_Queue.prototype.getJobCount = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -161,85 +83,14 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-AE_Queue.prototype.cleanOldSessionCheck = function(){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
 
-    this.q.hgetall(this.keyMeta, function(err, data){
-        if(err) {
-            console.error("Queue: hgetall Error:", err);
-            reject(err);
-            return;
-        }
-
-        if(_.isObject(data)){
-            //console.log(telemetryMetaKey, " data:", data);
-            // check date
-
-            var promiseList = [];
-            _.forEach(data, function(value, gameSessionId){
-                var meta = value;
-                try {
-                    meta = JSON.parse(meta);
-                } catch(err) {
-                    console.error("Queue: parse meta Error -", err, ", JSON data:", meta);
-                    reject(err);
-                    return;
-                }
-                //console.log("id", gameSessionId, ", metaData:", meta);
-
-                var startTime = new Date(meta.date).getTime();
-                var now       = new Date().getTime();
-                if(now - startTime > this.options.sessionExpire){
-                    // clean up session
-                    console.log("Queue: !!! Expired Cleaning Up - id", gameSessionId, ", metaData:", meta);
-
-                    promiseList.push( this.cleanupSession(gameSessionId) );
-                }
-            }.bind(this));
-
-            when.all(promiseList)
-                .then(function(){
-                    resolve();
-                }.bind(this));
-        }
-    }.bind(this));
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-AE_Queue.prototype.cleanupSession = function(gameSessionId){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    // remove meta info
-    this.q.hdel(this.keyMeta, gameSessionId, function(err){
-        if(err) {
-            console.error("Queue: endBatchIn telemetryMetaKey del Error:", err);
-            reject(err);
-            return;
-        }
-
-        resolve();
-    }.bind(this));
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}
-
-
-AE_Queue.prototype.getTelemetryBatch = function(){
+AE_Queue.prototype.popJob = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // pop in item off telemetry queue
-    this.q.rpop(this.keyIn, function(err, telemData){
+    this.q.rpop(this.keyIn, function(err, data){
         if(err) {
             console.error("Queue: getTelemetryBatch Error:", err);
             reject(err);
@@ -247,18 +98,18 @@ return when.promise(function(resolve, reject) {
         }
 
         // if telemetry has data
-        if(telemData) {
+        if(data) {
             // convert string to object
             try {
-                telemData = JSON.parse(telemData);
+                data = JSON.parse(data);
             } catch(err) {
-                console.error("Queue: getTelemetryBatch Error -", err, ", JSON data:", telemData);
+                console.error("Queue: getTelemetryBatch Error -", err, ", JSON data:", data);
                 reject(err);
                 return;
             }
-            console.log("Queue: getTelemetryBatch data:", telemData);
+            //console.log("Queue: getTelemetryBatch data:", data);
 
-            resolve(telemData);
+            resolve(data);
         }
     }.bind(this));
 

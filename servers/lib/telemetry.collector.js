@@ -170,7 +170,7 @@ Collector.prototype.startSession = function(req, outRes){
                 .then(function (gameSessionId) {
                     // save for later
                     gSessionId = gameSessionId;
-                    return this.queue.startSession(gameSessionId, userId, gameLevel);
+                    return this.cbds.startGameSession(userId, courseId, gameLevel, gameSessionId);
                 }.bind(this))
 
                 // start activity session
@@ -286,15 +286,15 @@ Collector.prototype.endSession = function(req, outRes){
             if(jdata.gameSessionId) {
 
                 // validate session
-                this.queue.validateSession(jdata.gameSessionId)
+                this.cbds.validateSession(jdata.gameSessionId)
 
                     // save events
-                    .then(function(sdata){
+                    .then(function(sdata) {
                         return this._saveBatchV1(jdata.gameSessionId, sdata.userId, sdata.gameLevel, jdata)
                     }.bind(this))
 
                     // all done in parallel
-                    .then(function (score){
+                    .then(function (score) {
                         var p = parallel([
                             // create challenge submission if challenge exists
                             function() {
@@ -310,11 +310,15 @@ Collector.prototype.endSession = function(req, outRes){
                             }.bind(this)
                         ])
                             // when all done
-                            // add end session to Q
+                            // add end session in Datastore
                             .then( function() {
-                                console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
-
-                                return this.queue.endSession(jdata.gameSessionId);
+                                //console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                return this.cbds.endGameSession(jdata.gameSessionId);
+                            }.bind(this) )
+                            // push job on queue
+                            .then( function() {
+                                //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                return this.queue.pushJob(jdata.gameSessionId);
                             }.bind(this) );
 
                         return p;
@@ -449,7 +453,7 @@ Collector.prototype._validateSendBatch = function(version, res, data, gameSessio
 
     if(gameSessionId) {
         // validate session and get data
-        promise = this.queue.validateSession(gameSessionId)
+        promise = this.cbds.validateSession(gameSessionId)
             .then(function(sdata){
                 if(version == 1) {
                     return this._saveBatchV1(gameSessionId, sdata.userId, sdata.gameLevel, data);
