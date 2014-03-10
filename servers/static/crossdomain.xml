@@ -1,0 +1,7 @@
+<cross-domain-policy>
+    <allow-access-from domain="*.learning.com"/>
+    <allow-access-from domain="www.learning.com"/>
+    <allow-access-from domain="platform.learning.com"/>
+    <allow-access-from domain="stage.learning.com"/>
+    <allow-access-from domain="*.learning.local"/>
+</cross-domain-policy>

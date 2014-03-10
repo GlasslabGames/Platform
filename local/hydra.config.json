@@ -1,0 +1,43 @@
+{
+    "env": "dev",
+    "frontend": {
+        "port":     8000
+    },
+    "webapp": {
+        "host":     "localhost",
+        "port":     8080,
+        "staticContentPath": "../../../Root/web-app",
+        "datastore": {
+            "mysql": {
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab"
+            }
+        }
+    },
+    "sessionstore": {
+        "bucket":   "glasslab_webapp",
+        "password": "glasslab",
+        "ttl": 14400, "//":" 4 mins in seconds"
+    },
+    "telemetry": {
+        "datastore": {
+            "mysql": {
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "bucket":   "glasslab_gamedata",
+                "password": "glasslab"
+            }
+        }
+    },
+    "auth": {
+        "secret":   "keyboard kitty"
+    }
+}

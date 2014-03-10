@@ -1,0 +1,8 @@
+{
+    "glasslab": {
+        "name": "GlassLab API",
+        "protocol": "http",
+        "baseURL": "",
+        "publicPath": "/"
+    }
+}

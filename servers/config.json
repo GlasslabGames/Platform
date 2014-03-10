@@ -1,0 +1,83 @@
+{
+    "env": "dev",
+    "request": {
+        "httpTimeout": 5000, "//":"in milliseconds"
+    },
+    "frontend": {
+        "port":     8000
+    },
+    "webapp": {
+        "protocol": "http:",
+        "host":     "localhost",
+        "port":     8080,
+        "staticContentPath": "../../../Root/web-app",
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab"
+            }
+        }
+    },
+    "sessionstore": {
+        "host":     "localhost:8091",
+        "bucket":   "glasslab_webapp",
+        "password": "glasslab",
+        "ttl": 14400, "//":" 4 mins in seconds"
+    },
+    "collector": {
+        "port": 8081
+    },
+    "telemetry": {
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_gamedata",
+                "password": "glasslab"
+            }
+        }
+    },
+    "assessment": {
+        "port":     8084,
+        "datastore": {
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_assessment",
+                "password": "glasslab"
+            }
+        },
+        "queue": {
+            "host": "127.0.0.1",
+            "db": 0,
+            "port": 6379,
+            "sessionExpire" : 14400000, "//":"in milliseconds"
+        }
+    },
+    "distiller": {
+        "getMax":    20,
+        "pollDelay": 1000, "//":"in milliseconds",
+        "cleanupPollDelay"  : 3600000, "//":"in milliseconds",
+        "sessionExpire"     : 14400000, "//":"in milliseconds"
+    },
+    "auth": {
+        "protocol": "http:",
+        "host":     "localhost",
+        "port":     8082,
+        "secret":   "keyboard kitty"
+    },
+    "validate": {
+        "port":     8083
+    }
+}
