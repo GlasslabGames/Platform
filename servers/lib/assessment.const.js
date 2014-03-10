@@ -19,6 +19,8 @@ module.exports = {
         in:            'i',
         assessment:    'ae',
         distiller:     'dist',
-        distillerData: 'data'
+        distillerData: 'data',
+        bayes:         'baye',
+        bayesData:     'data'
     }
 };

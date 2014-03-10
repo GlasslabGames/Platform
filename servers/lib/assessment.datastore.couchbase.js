@@ -75,7 +75,7 @@ AE_DS_Couchbase.prototype.saveDistilledData = function(gameSessionId, data){
                 reject(err);
                 return;
             }
-            resolve();
+            resolve(data);
         }.bind(this));
 
 // ------------------------------------------------
@@ -83,3 +83,21 @@ AE_DS_Couchbase.prototype.saveDistilledData = function(gameSessionId, data){
 // end promise wrapper
 };
 
+AE_DS_Couchbase.prototype.saveBayesOutputData = function(gameSessionId, data){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+
+        // Set the key
+        var key = aeConst.keys.assessment+":"+aeConst.keys.bayes+":"+aeConst.keys.bayesData+":"+gameSessionId;
+        this.client.add(key, data, function(err) {
+            if(err){
+                console.error("CouchBase Bayes DS: Set Bayes Data Error -", err);
+                reject(err);
+                return;
+            }
+            resolve();
+        }.bind(this));
+
+    }.bind(this));
+// end promise wrapper
+};
