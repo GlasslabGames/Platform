@@ -1,0 +1,419 @@
+{
+    "endpoints": [
+        {
+            "name": "Activity",
+            "methods": [
+                {
+                    "MethodName": "Get all missions",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "cid",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "aid",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/activity/complete/:cid/:aid",
+                    "HTTPMethod": "GET",
+                    "Synopsis": "Get all missions"
+                },
+                {
+                    "MethodName": "Get leaderboard",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "cid",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "aid",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/activity/leaderboard/:cid/:aid",
+                    "HTTPMethod": "GET",
+                    "Synopsis": "Get leaderboard"
+                },
+                {
+                    "MethodName": "Get missions for course",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "courseId",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/activity/report/course/:courseId",
+                    "HTTPMethod": "GET",
+                    "Synopsis": "Get all mission for a given course"
+                },
+                {
+                    "MethodName": "Get Student Report",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "courseId",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "userId",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/activity/report/student/:courseId/:userId",
+                    "HTTPMethod": "GET",
+                    "Synopsis": "Get a report for a particular student in a certain course."
+                }
+            ]
+        },
+        {
+            "name": "Competency",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "(?)",
+                    "MethodName": "(?)",
+                    "URI": "/api/competency/list",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "(?)",
+                    "MethodName": "(?)",
+                    "URI": "/api/competency/report/:courseId/:chartId",
+                    "HTTPMethod": "GET"
+                }
+            ]
+        },
+        {
+            "name": "Config",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "(?)",
+                    "MethodName": "Get config",
+                    "URI": "/api/config",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "MethodName": "Create course (?)",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "institution",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "title",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "grade",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/course/create",
+                    "HTTPMethod": "POST",
+                    "Synopsis": "(?)"
+                }
+            ]
+        },
+        {
+            "name": "Course",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Get all courses. Currenlty configured to only return courses. Does not account for members or missions.",
+                    "MethodName": "Get courses",
+                    "URI": "/api/course",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "MethodName": "Set course",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "institution",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "title",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "level",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/course",
+                    "HTTPMethod": "POST",
+                    "Synopsis": "Provide details to create a course (?)"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Get a single course",
+                    "MethodName": "Get course",
+                    "URI": "/api/course/:id",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": " \"Save a single course.\"",
+                    "MethodName": "Save course",
+                    "URI": "/api/course/update",
+                    "HTTPMethod": "POST"
+                }
+            ]
+        },
+        {
+            "name": "EduCode",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "?",
+                    "MethodName": "?",
+                    "URI": "/api/code/regenerate",
+                    "HTTPMethod": "POST"
+                }
+            ]
+        },
+        {
+            "name": "Institution",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Get institution by id",
+                    "MethodName": "Get institution",
+                    "URI": "/api/institution/:id",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "MethodName": "Add institution",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "params.id",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "params.title",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "params.shared",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "params.secret",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "params.code",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/institution/:id",
+                    "HTTPMethod": "POST",
+                    "Synopsis": "Add institution (?)"
+                }
+            ]
+        },
+        {
+            "name": "License",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Get license for institution (?)",
+                    "MethodName": "Get License",
+                    "URI": "/api/license/institution",
+                    "HTTPMethod": "GET"
+                }
+            ]
+        },
+        {
+            "name": "Session",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Validate session",
+                    "MethodName": "Validate",
+                    "URI": "/api/session/validate",
+                    "HTTPMethod": "GET"
+                }
+            ]
+        },
+        {
+            "name": "Mission",
+            "methods": [
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Retrieve a list of missions",
+                    "MethodName": "Get all missions",
+                    "URI": "/api/mission/course/:id",
+                    "HTTPMethod": "GET"
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "methods": [
+                {
+                    "RequiresOAuth": "Y",
+                    "Synopsis": "Log user in",
+                    "MethodName": "login",
+                    "URI": "/api/user/login/",
+                    "HTTPMethod": "POST"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Log user out",
+                    "MethodName": "logout",
+                    "URI": "/api/user/logout",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "MethodName": "regUser",
+                    "parameters": [
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "int",
+                            "Name": "id",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "firstName",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "lastName",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "username",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "email",
+                            "Description": ""
+                        },
+                        {
+                            "Default": "",
+                            "Required": "y",
+                            "Type": "string",
+                            "Name": "password",
+                            "Description": ""
+                        }
+                    ],
+                    "RequiresOAuth": "N",
+                    "URI": "/api/user/register",
+                    "HTTPMethod": "POST",
+                    "Synopsis": "Register new user"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Validate user reg key?",
+                    "MethodName": "Validate user reg key?",
+                    "URI": "/api/code/valid",
+                    "HTTPMethod": "POST"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Retrieve current user data",
+                    "MethodName": "Get User",
+                    "URI": "/api/user",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Mocks the password reset",
+                    "MethodName": "Reset Password",
+                    "URI": "/api/user/resetpassword/send/",
+                    "HTTPMethod": "POST"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Mocks the password reset",
+                    "MethodName": "Verify Password",
+                    "URI": "/api/user/resetpassword/verify/:hash",
+                    "HTTPMethod": "GET"
+                },
+                {
+                    "RequiresOAuth": "N",
+                    "Synopsis": "Mocks the password reset",
+                    "MethodName": "Update Password",
+                    "URI": "/api/user/resetpassword/update/",
+                    "HTTPMethod": "POST"
+                }
+            ]
+        }
+    ]}
