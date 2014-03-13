@@ -48,7 +48,7 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
     //console.log("authenticate body:", req.body);
 
     if (!username || !password) {
-        return this.fail('Missing credentials');
+        return this.fail({error: 'Missing credentials'});
     }
 
     this._verify(username, password)
@@ -60,7 +60,8 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
                 this.success(data.user, data.info);
             }.bind(this),
             function (err) {
-                this.error(err);
+                // respond with generic answer
+                this.fail({error: "invalid username or password"});
             }.bind(this)
     );
 
@@ -153,7 +154,7 @@ return when.promise(function(resolve, reject) {
 
                 resolve(user);
             } else {
-                reject(null);
+                reject({"error": "user not found"});
             }
         }.bind(this), reject);
 // ------------------------------------------------
@@ -453,7 +454,7 @@ return when.promise(function(resolve, reject) {
                 // update password to use new password strength
                 this._migratePasswordToPDKDF2(givenPassword, user, resolve, reject);
             } else {
-                reject({"error": "invalid username/password"});
+                reject({"error": "invalid username or password"});
             }
         }
         else if(user.loginType == aConst.login.type.glassLabV2) {
@@ -481,12 +482,12 @@ return when.promise(function(resolve, reject) {
                         if(derivedKey.toString('base64') == p.key) {
                             resolve();
                         } else {
-                            reject({"error": "invalid username/password"});
+                            reject({"error": "invalid username or password"});
                         }
                     });
                 } else {
                     // invalid password type or algorithum
-                    reject({"error": "invalid username/password", code: 101});
+                    reject({"error": "invalid username or password", code: 101});
                 }
             } else {
                 // invalid password type
