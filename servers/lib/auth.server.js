@@ -337,12 +337,20 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
 
     this.stats.increment("info", "Route.Register.User");
     //console.log("Auth registerUserRoute - body:", req.body);
+
+    // make sure password is really a string
+    if(req.body.password && !_.isString(req.body.password)) {
+        req.body.password = req.body.password.toString();
+    }
+
     if( !(
-            req.body.username  &&
-            req.body.firstName && req.body.lastName &&
+            req.body.username &&
+            req.body.firstName &&
+            req.body.lastName &&
             req.body.type &&
-            _.isNumber(req.body.associatedId) &&
-            req.body.password  && !_.isEmpty(req.body.password)
+            req.body.password  &&
+            (req.body.password.length > 0) &&
+            _.isNumber(req.body.associatedId)
         ) )
     {
         this.stats.increment("error", "Route.Register.User.MissingFields");
@@ -452,14 +460,21 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
+    // make sure password is really a string
+    if(req.body.password && !_.isString(req.body.password)) {
+        req.body.password = req.body.password.toString();
+    }
+
     this.stats.increment("info", "Route.Register.Manager");
     //console.log("Auth registerManagerRoute - body:", req.body);
     if( !(
             req.body.email  &&
-            req.body.firstName && req.body.lastName &&
+            req.body.firstName &&
+            req.body.lastName &&
             req.body.key &&
             req.body.institution &&
-            req.body.password  && !_.isEmpty(req.body.password)
+            req.body.password  &&
+            (req.body.password.length > 0)
         ) )
     {
         this.stats.increment("error", "Route.Register.Manager.MissingFields");
