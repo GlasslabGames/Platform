@@ -252,7 +252,10 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
 
     this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
         function(err, sres, data){
-            var statusCode = Math.floor(sres.statusCode/100)*100;
+            var statusCode = 500;
+            if(sres.statusCode) {
+                statusCode = Math.floor(sres.statusCode/100)*100;
+            }
 
             if( statusCode == 200 ||
                 statusCode == 300) {
@@ -301,7 +304,7 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
                 this.stats.increment("error", "ForwardToWebApp");
 
                 // all else errors
-                this.requestUtil.errorResponse(res, data, sres.statusCode);
+                this.requestUtil.errorResponse(res, data, sres.statusCode || 500);
             }
     }.bind(this));
 }
@@ -608,7 +611,8 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
     var auth = passport.authenticate('glasslab', function(err, user, info) {
         if(err) {
             this.stats.increment("error", "Route.Login.Auth");
-            return next(err);
+            this.requestUtil.errorResponse(res, "login auth", 500);
+            return;
         }
 
         if (!user) {
