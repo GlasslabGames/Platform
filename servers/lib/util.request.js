@@ -30,6 +30,7 @@ RequestUtil.prototype.errorResponse = function(res, obj, code){
         } catch(err) {
             // this is ok
         }
+        obj = { error: obj };
     }
 
     if(_.isObject(obj)) {
