@@ -284,7 +284,7 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
                     this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
                         if(err) {
                             res.writeHead(sres.statusCode, sres.headers);
-                            res.end(data);
+                            res.end(JSON.stringify(data));
                             return;
                         }
 
@@ -313,7 +313,7 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
                     }.bind(this));
                 } else {
                     res.writeHead(sres.statusCode, sres.headers);
-                    res.end(data);
+                    res.end(JSON.stringify(data));
                     return;
                 }
             } else {
