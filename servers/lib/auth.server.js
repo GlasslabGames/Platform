@@ -269,37 +269,53 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
                     return;
                 }
 
-                // update session
-                this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
-                    if(err) {
-                        res.writeHead(sres.statusCode, sres.headers);
-                        res.end(data);
-                        return;
-                    }
+                try {
+                    data = JSON.parse(data);
+                } catch(err){
+                    // error is ok
+                }
 
-                    if(saveWebSession) {
+                // check if need to update webSession
+                if( sres.statusCode == 401 &&
+                    _.isObject(data) &&
+                    data.key == "must.login") {
 
-                        // save web session
-                        saveWebSession(waSession, req.session.id, function(err){
-                            if(err) {
-                                this.requestUtil.errorResponse(res, err, 500);
-                                return;
-                            }
+                    // update session
+                    this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
+                        if(err) {
+                            res.writeHead(sres.statusCode, sres.headers);
+                            res.end(data);
+                            return;
+                        }
 
-                            // update web session in session store
-                            req.session.passport.user[aConst.webappSessionPrefix] = waSession;
-                            this.sessionServer.updateWebSessionInSession(req.session.id, req.session, function(err, user){
+                        if(saveWebSession) {
+
+                            // save web session
+                            saveWebSession(waSession, req.session.id, function(err){
                                 if(err) {
                                     this.requestUtil.errorResponse(res, err, 500);
                                     return;
                                 }
 
-                                // try again
-                                this.forwardAuthenticatedRequestToWebApp(user, req, res, true);
+                                // update web session in session store
+                                req.session.passport.user[aConst.webappSessionPrefix] = waSession;
+                                this.sessionServer.updateWebSessionInSession(req.session.id, req.session, function(err, user){
+                                    if(err) {
+                                        this.requestUtil.errorResponse(res, err, 500);
+                                        return;
+                                    }
+
+                                    // try again
+                                    this.forwardAuthenticatedRequestToWebApp(user, req, res, true);
+                                }.bind(this));
                             }.bind(this));
-                        }.bind(this));
-                    }
-                }.bind(this));
+                        }
+                    }.bind(this));
+                } else {
+                    res.writeHead(sres.statusCode, sres.headers);
+                    res.end(data);
+                    return;
+                }
             } else {
                 this.stats.increment("error", "ForwardToWebApp");
 
