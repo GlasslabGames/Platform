@@ -262,7 +262,7 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
             else if(statusCode == 400){
                 //console.log("includeRoute forwardRequestToWebApp - err:", err, ", data:", data);
                 if(alreadyTried) {
-                    this.requestUtil.errorResponse(res, data, 500);
+                    this.requestUtil.errorResponse(res, data, sres.statusCode);
                     return;
                 }
 
@@ -466,6 +466,7 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
             } else {
                 this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
 
+                // don't use requestUtil response as it could contain custom headers, thus writing head
                 res.writeHead(sres.statusCode, sres.headers);
                 res.end(data);
             }
@@ -614,7 +615,7 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
             //req.session.messages =  [info];
             //res.redirect(rConst.api.user.login);
             this.stats.increment("error", "Route.Login.NoUser");
-            this.requestUtil.jsonResponse(res, info, 401);
+            this.requestUtil.errorResponse(res, info, 401);
             return;
         }
 
@@ -650,13 +651,11 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
                             if(saveWebSession) {
                                 saveWebSession(waSession, tuser.sessionId, function(){
                                     this.stats.increment("info", "Route.Login.Auth.GetUserCourses.SaveWebSession");
-                                    res.writeHead(200);
-                                    res.end( JSON.stringify(tuser) );
+                                    this.requestUtil.jsonResponse(res, tuser);
                                 }.bind(this));
                             } else {
                                 this.stats.increment("info", "Route.Login.Auth.GetUserCourses.Done");
-                                res.writeHead(200);
-                                res.end( JSON.stringify(tuser) );
+                                this.requestUtil.jsonResponse(res, tuser);
                             }
                         }.bind(this))
                         .then(null, function(err){

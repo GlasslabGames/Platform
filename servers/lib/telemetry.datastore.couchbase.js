@@ -106,16 +106,33 @@ var gdv_getEventsByGameSessionId = function (doc, meta)
     }
 };
 
+var gdv_getEventsByServerTimeStamp = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'e') &&
+        (meta.type == "json") &&
+        doc.hasOwnProperty('serverTimeStamp') )
+    {
+        var td = new Date(doc.serverTimeStamp * 1000);
+        emit( dateToArray( td ) );
+    }
+};
+
                 var telemDDoc = {
                     views: {
                         getEventsByGameSessionId : {
                             map: gdv_getEventsByGameSessionId
+                        },
+                        getEventsByServerTimeStamp : {
+                            map: gdv_getEventsByServerTimeStamp
                         }
                     }
                 };
 
                 // convert function to string
-                telemDDoc.views.getEventsByGameSessionId.map = telemDDoc.views.getEventsByGameSessionId.map.toString();
+                telemDDoc.views.getEventsByGameSessionId.map   = telemDDoc.views.getEventsByGameSessionId.map.toString();
+                telemDDoc.views.getEventsByServerTimeStamp.map = telemDDoc.views.getEventsByServerTimeStamp.map.toString();
                 //console.log("telemDDoc:", telemDDoc);
 
                 this.client.setDesignDoc("telemetry", telemDDoc, function(err){
