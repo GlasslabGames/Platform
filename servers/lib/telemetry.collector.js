@@ -170,7 +170,7 @@ Collector.prototype.startSession = function(req, outRes){
                 .then(function (gameSessionId) {
                     // save for later
                     gSessionId = gameSessionId;
-                    return this.queue.startSession(gameSessionId, userId, gameLevel);
+                    return this.cbds.startGameSession(userId, courseId, gameLevel, gameSessionId);
                 }.bind(this))
 
                 // start activity session
@@ -208,7 +208,7 @@ Collector.prototype.startSession = function(req, outRes){
                 .then(null,  function(err) {
                     console.error("Collector end Session Error:", err);
                     this.stats.increment("error", "StartSession.General");
-                    outRes.status(500).send(err);
+                    this.requestUtil.errorResponse(outRes, err, 500);
                 }.bind(this) );
 
         }.bind(this) );
@@ -231,7 +231,7 @@ Collector.prototype.sendBatchTelemetryV1 = function(req, outRes){
                 if(err){
                     console.error("Collector: Error -", err);
                     this.stats.increment("error", "SendBatchTelemetry.General");
-                    outRes.status(500).send('Error:'+err);
+                    this.requestUtil.errorResponse(outRes, err, 500);
                     return;
                 }
 
@@ -286,15 +286,15 @@ Collector.prototype.endSession = function(req, outRes){
             if(jdata.gameSessionId) {
 
                 // validate session
-                this.queue.validateSession(jdata.gameSessionId)
+                this.cbds.validateSession(jdata.gameSessionId)
 
                     // save events
-                    .then(function(sdata){
+                    .then(function(sdata) {
                         return this._saveBatchV1(jdata.gameSessionId, sdata.userId, sdata.gameLevel, jdata)
                     }.bind(this))
 
                     // all done in parallel
-                    .then(function (score){
+                    .then(function (score) {
                         var p = parallel([
                             // create challenge submission if challenge exists
                             function() {
@@ -310,11 +310,15 @@ Collector.prototype.endSession = function(req, outRes){
                             }.bind(this)
                         ])
                             // when all done
-                            // add end session to Q
+                            // add end session in Datastore
                             .then( function() {
-                                console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
-
-                                return this.queue.endSession(jdata.gameSessionId);
+                                //console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                return this.cbds.endGameSession(jdata.gameSessionId);
+                            }.bind(this) )
+                            // push job on queue
+                            .then( function() {
+                                //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                return this.queue.pushJob(jdata.gameSessionId);
                             }.bind(this) );
 
                         return p;
@@ -322,7 +326,7 @@ Collector.prototype.endSession = function(req, outRes){
 
                     // all done
                     .then( function() {
-                        outRes.status(200).send('{}');
+                        this.requestUtil.jsonResponse(outRes, {});
                         this.stats.increment("info", "Route.EndSession.Done");
                         return;
                     }.bind(this) )
@@ -331,14 +335,14 @@ Collector.prototype.endSession = function(req, outRes){
                     .then(null, function(err) {
                         console.error("Collector end Session Error:", err);
                         this.stats.increment("error", "Route.EndSession.CatchAll");
-                        outRes.status(500).send('Error:'+err);
+                        this.requestUtil.errorResponse(outRes, err, 500);
                     }.bind(this) );
 
             } else {
                 var err = "gameSessionId missing!";
                 console.error("Error:", err);
                 this.stats.increment("error", "Route.EndSession.GameSessionIdMissing");
-                outRes.status(500).send('Error:'+err);
+                this.requestUtil.errorResponse(outRes, err, 500);
             }
         }.bind(this);
 
@@ -348,7 +352,7 @@ Collector.prototype.endSession = function(req, outRes){
                 if(err){
                     console.error("Error:", err);
                     this.stats.increment("error", "Route.EndSession.General");
-                    outRes.status(500).send('Error:'+err);
+                    this.requestUtil.errorResponse(outRes, err, 500);
                     return;
                 }
 
@@ -368,6 +372,7 @@ Collector.prototype.endSession = function(req, outRes){
     } catch(err) {
         console.trace("Collector: End Session Error -", err);
         this.stats.increment("error", "Route.EndSession.Catch");
+        this.requestUtil.errorResponse(outRes, "End Session Error", 500);
     }
 };
 // ---------------------------------------
@@ -449,7 +454,7 @@ Collector.prototype._validateSendBatch = function(version, res, data, gameSessio
 
     if(gameSessionId) {
         // validate session and get data
-        promise = this.queue.validateSession(gameSessionId)
+        promise = this.cbds.validateSession(gameSessionId)
             .then(function(sdata){
                 if(version == 1) {
                     return this._saveBatchV1(gameSessionId, sdata.userId, sdata.gameLevel, data);
@@ -459,7 +464,7 @@ Collector.prototype._validateSendBatch = function(version, res, data, gameSessio
             }.bind(this));
     } else {
         this.stats.increment("error", "ValidateSendBatch.NoGameSessionId");
-        res.status(500).send('Error: GameSessionId missing');
+        this.requestUtil.errorResponse(res, "GameSessionId missing", 500);
         return;
     }
 
@@ -474,12 +479,12 @@ Collector.prototype._validateSendBatch = function(version, res, data, gameSessio
             .then(null, function(err){
                 console.error("Collector: Error -", err);
                 this.stats.increment("error", "ValidateSendBatch");
-                res.status(500).send('Error:'+err);
+                this.requestUtil.errorResponse(res, err, 500);
             }.bind(this));
     }
 };
 
-var tmp = {
+var example1 = {
     "userId": 12,
     "deviceId": "123",
     "clientTimeStamp": 1392775453,

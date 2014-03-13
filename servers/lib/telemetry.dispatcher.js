@@ -58,7 +58,6 @@ function Dispatcher(options){
         }.bind(this));
 
     this.startTelemetryPoll();
-    this.startCleanOldSessionPoll();
 
     console.log('---------------------------------------------');
     console.log('Dispatcher: Waiting for messages...');
@@ -75,11 +74,11 @@ Dispatcher.prototype.startTelemetryPoll = function(){
 }
 
 Dispatcher.prototype.telemetryCheck = function(){
-    this.queue.getInCount()
+    this.queue.getJobCount()
         .then(
-            function(count){
+            function(count) {
                 if(count > 0) {
-                    console.log("Dispatcher: telemetryCheck count:", count);
+                    //console.log("Dispatcher: telemetryCheck count:", count);
                     this.stats.increment("info", "GetIn.Count", count);
 
                     for(var i = 0; i < Math.min(count, this.options.dispatcher.telemetryGetMax); i++){
@@ -95,39 +94,18 @@ Dispatcher.prototype.telemetryCheck = function(){
 }
 
 
-Dispatcher.prototype.startCleanOldSessionPoll = function(){
-    // fetch telemetry loop
-    setInterval(function() {
-        this.cleanOldSessionCheck();
-    }.bind(this), this.options.dispatcher.cleanupPollDelay);
-}
-
-Dispatcher.prototype.cleanOldSessionCheck = function(){
-    this.queue.cleanOldSessionCheck()
-        .then(
-            function(){
-                console.log("Dispatcher: cleanOldSessionCheck done");
-                this.stats.increment("info", "CleanOldSessionCheck.Done");
-            }.bind(this),
-            function(err){
-                console.error("Dispatcher: cleanOldSessionCheck Error:", err);
-                this.stats.increment("error", "CleanOldSessionCheck");
-            }.bind(this)
-        );
-}
-
 Dispatcher.prototype.getTelemetryBatch = function(){
 
-    this.queue.getTelemetryBatch()
+    this.queue.popJob()
         // cleanup session
-        .then(function(telemData){
-            if(telemData.type == tConst.end) {
-                return this.executeAssessment(telemData.id)
+        .then(function(data){
+            if(data.type == tConst.end) {
+                return this.executeAssessment(data.id)
                             .then( function(){
-                                return this.queue.cleanupSession(telemData.id)
+                                return this.cbds.cleanupSession(data.id)
                             }.bind(this) );
             } else {
-                return this.queue.cleanupSession(telemData.id);
+                return this.cbds.cleanupSession(data.id);
             }
         }.bind(this))
 
@@ -138,7 +116,7 @@ Dispatcher.prototype.getTelemetryBatch = function(){
 
         // catch all errors
         .then(null, function(err){
-            console.error("Dispatcher: endBatchIn - Error:", err);
+            //console.error("Dispatcher: endBatchIn - Error:", err);
             this.stats.increment("error", "GetTelemetryBatch");
         }.bind(this));
 }
@@ -153,7 +131,7 @@ return when.promise(function(resolve, reject) {
     this.stats.increment("info", "ExecuteAssessment.StartDelay");
 
     // wait some time before start assessment
-    setTimeout(function(){
+    process.nextTick(function(){
         var url = this.assessmentUrl + gameSessionId;
         this.requestUtil.getRequest(url, null, function(err, res) {
             if(err) {
@@ -171,7 +149,7 @@ return when.promise(function(resolve, reject) {
             resolve();
         }.bind(this));
 
-    }.bind(this), this.options.dispatcher.assessmentDelay);
+    }.bind(this) );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper

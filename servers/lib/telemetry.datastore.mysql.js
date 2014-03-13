@@ -361,7 +361,7 @@ TelemDS_Mysql.prototype.disableArchiveEvents = function(ids){
 // end promise wrapper
 };
 
-TelemDS_Mysql.prototype.startGameSession = function(userId, courseId, activityId){
+TelemDS_Mysql.prototype.startGameSession = function(userId, courseId, gameLevel){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -371,7 +371,7 @@ return when.promise(function(resolve, reject) {
     var values = [
         "NULL",
         0,
-        this.ds.escape(activityId),
+        this.ds.escape(gameLevel),
         this.ds.escape(courseId),
         "NOW()",
         "NULL",
@@ -410,7 +410,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Mysql.prototype.cleanUpOldGameSessions = function(userId, activityId){
+TelemDS_Mysql.prototype.cleanUpOldGameSessions = function(userId, gameLevel){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -418,8 +418,8 @@ return when.promise(function(resolve, reject) {
         reject({"error": "failure", "exception": "invalid userId"}, 500);
         return;
     }
-    if(!activityId) {
-        reject({"error": "failure", "exception": "invalid activityId"}, 500);
+    if(!gameLevel) {
+        reject({"error": "failure", "exception": "invalid gameLevel"}, 500);
         return;
     }
 
@@ -429,7 +429,7 @@ return when.promise(function(resolve, reject) {
         "  reason_ended="+this.ds.escape(tConst.game.session.cleanup) +
         " WHERE" +
         "  user_id="+this.ds.escape(userId)+" AND" +
-        "  activity_id="+this.ds.escape(activityId)+" AND" +
+        "  activity_id="+this.ds.escape(gameLevel)+" AND" +
         "  end_time IS NULL";
 
     this.ds.query(Q).then( resolve, reject );

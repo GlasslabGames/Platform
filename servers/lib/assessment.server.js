@@ -116,11 +116,11 @@ AssessmentServer.prototype.getEventsByGameSession = function(req, res) {
         // catch all errors
         .then(null, function(err){
             this.stats.increment('error', 'GetEvents');
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
 
     } else {
         this.stats.increment('error', 'Session.Missing');
-        this.requestUtil.errorResponse(res, "missing session");
+        this.requestUtil.errorResponse(res, "missing session", 404);
     }
 };

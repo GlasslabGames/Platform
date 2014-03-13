@@ -178,8 +178,7 @@ AuthValidateServer.prototype.validateWASession = function(req, res, next) {
 
                 } else {
                     // request for missing session
-                    //res.end();
-                    console.error("CouchBase validateSession: could not find session");
+                    //console.error("CouchBase validateSession: could not find session");
                     this.stats.increment("error", "Route.ValidateWASession.CouldNotFindSesion");
                     this.requestUtil.errorResponse(res, "could not find session");
                 }

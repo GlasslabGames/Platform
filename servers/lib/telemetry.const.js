@@ -22,14 +22,16 @@ module.exports = {
   },
   game: {
       session: {
-          ended:   "ended",
-          cleanup: "cleanup"
+          started: 'started',
+          ended:   'ended',
+          cleanup: 'cleanup'
       },
-      dataKey:    "gd",
-      countKey:   "count",
-      eventKey:   "e",
-      eventsKey:  "events",
-      scoreKey:   "GL_Scenario_Score",
+      dataKey:    'gd',
+      countKey:   'count',
+      gameSessionKey: 'gs',
+      eventKey:   'e',
+      eventsKey:  'events',
+      scoreKey:   'GL_Scenario_Score',
       versions:   require('./telemetry.const.game_versions')
   },
   webapp: {
