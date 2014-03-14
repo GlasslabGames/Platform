@@ -260,7 +260,14 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
             if( statusCode == 200 ||
                 statusCode == 300) {
                 res.writeHead(sres.statusCode, sres.headers);
-                res.end(data);
+
+                // handle attachments
+                if( sres.headers['content-disposition'] &&
+                    (sres.headers['content-disposition'].indexOf('attachment') != -1) ) {
+                    res.end(data, 'binary');
+                } else {
+                    res.end(data);
+                }
             }
             else if(statusCode == 400){
                 //console.log("includeRoute forwardRequestToWebApp - err:", err, ", data:", data);

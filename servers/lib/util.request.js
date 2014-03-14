@@ -158,6 +158,12 @@ RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done)
 RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
 
     var sreq = http.request(options, function(sres) {
+        // handle attachments
+        if(  sres.headers['content-disposition'] &&
+            (sres.headers['content-disposition'].indexOf('attachment') != -1) ) {
+            sres.setEncoding('binary');
+        }
+
         //console.log("sendRequest statusCode:", sres.statusCode, ", headers:",  sres.headers);
         if(resOut) {
             // remove set cookie, but send rest
