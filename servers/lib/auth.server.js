@@ -348,12 +348,18 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
     this.stats.increment("info", "Route.Register.User");
     //console.log("Auth registerUserRoute - body:", req.body);
 
+    req.body.username  = Util.ConvertToString(req.body.username);
+    req.body.firstName = Util.ConvertToString(req.body.firstName);
+    req.body.lastName  = Util.ConvertToString(req.body.lastName);
+    req.body.password  = Util.ConvertToString(req.body.password);
+    req.body.type      = Util.ConvertToString(req.body.type);
+
     if( !(
             req.body.username &&
             req.body.firstName &&
             req.body.lastName &&
-            req.body.type &&
             req.body.password  &&
+            req.body.type &&
             _.isNumber(req.body.associatedId)
         ) )
     {
@@ -464,10 +470,12 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
-    // make sure password is really a string
-    if(req.body.password && !_.isString(req.body.password)) {
-        req.body.password = req.body.password.toString();
-    }
+    // make sure inputs are strings
+    req.body.email     = Util.ConvertToString(req.body.email);
+    req.body.firstName = Util.ConvertToString(req.body.firstName);
+    req.body.lastName  = Util.ConvertToString(req.body.lastName);
+    req.body.password  = Util.ConvertToString(req.body.password);
+    req.body.key       = Util.ConvertToString(req.body.key);
 
     this.stats.increment("info", "Route.Register.Manager");
     //console.log("Auth registerManagerRoute - body:", req.body);
@@ -475,10 +483,9 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
             req.body.email  &&
             req.body.firstName &&
             req.body.lastName &&
-            req.body.key &&
+            req.body.password &&
             req.body.institution &&
-            req.body.password  &&
-            (req.body.password.length > 0)
+            req.body.key
         ) )
     {
         this.stats.increment("error", "Route.Register.Manager.MissingFields");
