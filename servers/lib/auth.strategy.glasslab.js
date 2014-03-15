@@ -231,7 +231,16 @@ Glasslab_Strategy.prototype.getUserById = function(id){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var Q = "SELECT * FROM GL_USER WHERE id="+this.ds.escape(id);
+
+    var Q = "SELECT " +
+        "id, " +
+        "username, " +
+        "email, " +
+        "first_name as firstName, " +
+        "last_name as lastName, " +
+        "system_role as systemRole, " +
+        "institution_id as institutionId " +
+        "FROM GL_USER WHERE id="+this.ds.escape(id);
     this.ds.query(Q)
         .then(
             function(data){
@@ -546,26 +555,30 @@ return when.promise(function(resolve, reject) {
 };
 
 
-Glasslab_Strategy.prototype.updateUserData = function(userData, userSessionData){
+Glasslab_Strategy.prototype.updateUserData = function(userData, loginUserSessionData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var dbUserData;
-    var dataChanged = false;
+    var sessionDataChanged = false;
+    var isSelf = (loginUserSessionData.id == userData.id);
 
     // get/validate user by Id
     this.getUserById(userData.id)
         .then(function(data){
             dbUserData = data[0];
-            return this._checkUserPerminsToUpdateData(userSessionData, userData);
+            return this._checkUserPerminsToUpdateData(userData, loginUserSessionData);
         }.bind(this))
 
         // check email, if changed
         .then(function(){
-            if(userData.email.toLowerCase() != userSessionData.email.toLowerCase()) {
-                // update session data
-                userSessionData.email = userData.email;
-                dataChanged = true;
+            if(userData.email.toLowerCase() != dbUserData.email.toLowerCase()) {
+                // if self, update session data
+                if(isSelf) {
+                    loginUserSessionData.email = userData.email;
+                    sessionDataChanged = true;
+                }
+
                 return this._checkUserEmailUnique(userData.email);
             } else {
                 return Util.PromiseContinue();
@@ -575,16 +588,23 @@ return when.promise(function(resolve, reject) {
         // check UserName, if changed
         .then(function(){
             // If Instructors OR managers, then username is the same as there email
-            if( (userSessionData.role == aConst.role.instructor) ||
-                (userSessionData.role == aConst.role.manager)
+            if( ( (userData.systemRole == aConst.role.instructor) ||
+                  (userData.systemRole == aConst.role.manager) ) &&
+                  userData.email
               ) {
                 userData.username = userData.email;
             }
 
-            if(userData.username.toLowerCase() != userSessionData.username.toLowerCase()) {
-                // update session data
-                userSessionData.username = userData.username;
-                dataChanged = true;
+            // only if same user
+            if(userData.username.toLowerCase() != dbUserData.username.toLowerCase()) {
+
+                // if self, update session data
+                if(isSelf) {
+                    // update session data
+                    loginUserSessionData.email = userData.email;
+                    sessionDataChanged = true;
+                }
+
                 return this._checkUserNameUnique(userData.username);
             } else {
                 return Util.PromiseContinue();
@@ -610,13 +630,21 @@ return when.promise(function(resolve, reject) {
             // set password to encrypted version
             userData.password = password;
 
-            if(userData.firstName != userSessionData.firstName) {
-                dataChanged = true;
-                userSessionData.firstName = userData.firstName;
+            if(userData.firstName != dbUserData.firstName) {
+                // if self, update session data
+                if(isSelf) {
+                    // update session data
+                    loginUserSessionData.firstName = userData.firstName;
+                    sessionDataChanged = true;
+                }
             }
-            if(userData.lastName != userSessionData.lastName) {
-                dataChanged = true;
-                userSessionData.lastName = userData.lastName;
+            if(userData.lastName != dbUserData.lastName) {
+                // if self, update session data
+                if(isSelf) {
+                    // update session data
+                    loginUserSessionData.lastName = userData.lastName;
+                    sessionDataChanged = true;
+                }
             }
 
             return this._updateUserDataInDB(userData);
@@ -624,7 +652,7 @@ return when.promise(function(resolve, reject) {
 
         // all ok
         .then(function(){
-            resolve(dataChanged);
+            resolve(sessionDataChanged);
         }.bind(this))
 
         // catch all errors
@@ -638,22 +666,22 @@ return when.promise(function(resolve, reject) {
 };
 
 
-Glasslab_Strategy.prototype._checkUserPerminsToUpdateData = function(userSessionData, userData){
+Glasslab_Strategy.prototype._checkUserPerminsToUpdateData = function(userData, loginUserData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // check if you are the same as the Id to change
-    if(userSessionData.id == userData.id) {
+    if(loginUserData.id == userData.id) {
         resolve();
     }
     // are admin
-    else if(userSessionData.role == aConst.role.admin) {
+    else if(loginUserData.role == aConst.role.admin) {
         resolve();
     }
     // if instructor, then check if student their course
-    else if(userSessionData.role == aConst.role.instructor) {
-        this._isEnrolledInInstructorCourse(userSessionData.id, userData.id)
+    else if(loginUserData.role == aConst.role.instructor) {
+        this._isEnrolledInInstructorCourse(userData.id, loginUserData.id)
             .then(
                 // all ok
                 function(){
@@ -679,7 +707,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-Glasslab_Strategy.prototype._isEnrolledInInstructorCourse = function(instructorId, studentId) {
+Glasslab_Strategy.prototype._isEnrolledInInstructorCourse = function(studentId, instructorId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------

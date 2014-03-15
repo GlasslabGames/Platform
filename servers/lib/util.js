@@ -6,9 +6,20 @@
  *
  */
 var when = require('when');
+var _    = require('lodash');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+function convertToString(item) {
+    if(!item) {
+        item = "";
+    }
+    else if(!_.isString(item)) {
+        item = item.toString();
+    }
+    return item;
 }
 
 function promiseContinue(){
@@ -106,9 +117,10 @@ function getExpressLogger(options, express, stats){
 module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
+    ConvertToString:  convertToString,
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,
-    GetTimeStamp: getTimeStamp,
+    GetTimeStamp:     getTimeStamp,
     String: {
         capitalize: capitalize
     }

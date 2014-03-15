@@ -113,7 +113,7 @@ AuthServer.prototype.setupRoutes = function() {
         this.app.post(rConst.api.user.regManager, this.registerManagerRoute.bind(this));
 
         // POST - update user data
-        //this.app.post(rConst.api.user.updateUser, this.updateUserRoute.bind(this));
+        this.app.post(rConst.api.user.updateUser, this.updateUserRoute.bind(this));
 
         // Add include routes
         var includeRoute = function(req, res) {
@@ -123,7 +123,9 @@ AuthServer.prototype.setupRoutes = function() {
             if( req.isAuthenticated()) {
                 this.stats.increment("info", "Route.Auth.Ok");
 
+                /*
                 if( req.method == 'POST') {
+                    //
                     var results = req.path.match(/\/user\/([0-9]*)/);
                     // match finds results, an array with more then one element and the group is a number
                     if( results &&
@@ -136,6 +138,7 @@ AuthServer.prototype.setupRoutes = function() {
                         return;
                     }
                 }
+                */
 
                 //console.log("Auth passport user:", user);
                 var user = req.session.passport.user;
@@ -345,18 +348,18 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
     this.stats.increment("info", "Route.Register.User");
     //console.log("Auth registerUserRoute - body:", req.body);
 
-    // make sure password is really a string
-    if(req.body.password && !_.isString(req.body.password)) {
-        req.body.password = req.body.password.toString();
-    }
+    req.body.username  = Util.ConvertToString(req.body.username);
+    req.body.firstName = Util.ConvertToString(req.body.firstName);
+    req.body.lastName  = Util.ConvertToString(req.body.lastName);
+    req.body.password  = Util.ConvertToString(req.body.password);
+    req.body.type      = Util.ConvertToString(req.body.type);
 
     if( !(
             req.body.username &&
             req.body.firstName &&
             req.body.lastName &&
-            req.body.type &&
             req.body.password  &&
-            (req.body.password.length > 0) &&
+            req.body.type &&
             _.isNumber(req.body.associatedId)
         ) )
     {
@@ -467,10 +470,12 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
-    // make sure password is really a string
-    if(req.body.password && !_.isString(req.body.password)) {
-        req.body.password = req.body.password.toString();
-    }
+    // make sure inputs are strings
+    req.body.email     = Util.ConvertToString(req.body.email);
+    req.body.firstName = Util.ConvertToString(req.body.firstName);
+    req.body.lastName  = Util.ConvertToString(req.body.lastName);
+    req.body.password  = Util.ConvertToString(req.body.password);
+    req.body.key       = Util.ConvertToString(req.body.key);
 
     this.stats.increment("info", "Route.Register.Manager");
     //console.log("Auth registerManagerRoute - body:", req.body);
@@ -478,10 +483,9 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
             req.body.email  &&
             req.body.firstName &&
             req.body.lastName &&
-            req.body.key &&
+            req.body.password &&
             req.body.institution &&
-            req.body.password  &&
-            (req.body.password.length > 0)
+            req.body.key
         ) )
     {
         this.stats.increment("error", "Route.Register.Manager.MissingFields");
@@ -552,13 +556,13 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-AuthServer.prototype._updateUserData = function(userData, userSessionData){
+AuthServer.prototype._updateUserData = function(userData, loginUserSessionData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
         if( (userData.loginType == aConst.login.type.glassLabV1) ||
             (userData.loginType == aConst.login.type.glassLabV2) ){
-            this.glassLabStrategy.updateUserData(userData, userSessionData)
+            this.glassLabStrategy.updateUserData(userData, loginUserSessionData)
                 .then(resolve, reject);
         } else {
             this.stats.increment("error", "RegisterUser.InvalidLoginType");
@@ -571,7 +575,9 @@ return when.promise(function(resolve, reject) {
 
 AuthServer.prototype.updateUserRoute = function(req, res, next) {
     // only allow for POST on login
-    if(req.method != 'POST') { next(); return;}
+    if(req.method != 'POST') { next(); return; }
+    // only if authenticated
+    if(!req.isAuthenticated()) { next(); return; }
 
     this.stats.increment("info", "Route.Update.User");
     //console.log("Auth updateUserRoute - body:", req.body);
@@ -606,33 +612,31 @@ AuthServer.prototype.updateUserRoute = function(req, res, next) {
         loginType:     aConst.login.type.glassLabV2  // TODO add login type to user data on client
     };
 
-    var userSessionData = req.session.passport.user;
+    var loginUserSessionData = req.session.passport.user;
 
-    this._updateUserData(userData, userSessionData)
-        // save changed data
-        .then(
-            function(dataChanged){
-                if(dataChanged) {
-                    this.stats.increment("info", "Route.Update.User.Changed");
-                    return this.sessionServer.updateUserDataInSession(req.session);
-                } else {
-                    return Util.PromiseContinue();
-                }
-        }.bind(this))
-        // all ok
-        .then(
-            function(){
-                this.stats.increment("info", "Route.Update.User.Done");
-                this.requestUtil.jsonResponse(res, userData);
-        }.bind(this))
-        .then(null,
-            // error
-            function(err){
-                this.stats.increment("error", "Route.Update.User");
-                console.error("Auth - updateUserRoute error:", err);
-                this.requestUtil.errorResponse(res, err, 400);
-            }.bind(this)
-        );
+    // wrap getSession in promise
+    this._updateUserData(userData, loginUserSessionData)
+    // save changed data
+    .then(function(dataChanged){
+        if(dataChanged) {
+            this.stats.increment("info", "Route.Update.User.Changed");
+            return this.sessionServer.updateUserDataInSession(req.session);
+        } else {
+            return Util.PromiseContinue();
+        }
+    }.bind(this))
+    // all ok
+    .then(function(){
+        this.stats.increment("info", "Route.Update.User.Done");
+        this.requestUtil.jsonResponse(res, userData);
+    }.bind(this))
+    // error
+    .catch(function(err){
+        this.stats.increment("error", "Route.Update.User");
+        console.error("Auth - updateUserRoute error:", err);
+        this.requestUtil.errorResponse(res, err, 400);
+    }.bind(this)
+    );
 }
 
 
