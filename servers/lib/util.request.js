@@ -23,13 +23,24 @@ function RequestUtil(options){
 }
 
 RequestUtil.prototype.errorResponse = function(res, obj, code){
-    var json = _.isObject(obj) ? JSON.stringify(obj) : JSON.stringify({ error: obj });
-    if(!code) { code = 200; }
+    if(_.isString(obj)) {
+        try{
+            // is string, try to convert to object
+            obj = JSON.parse(obj);
+        } catch(err) {
+            // this is ok
+        }
+        obj = { error: obj };
+    }
 
-    res.writeHead(code, {
-        "Content-Type": "application/json"
-    });
-    res.end( json );
+    if(_.isObject(obj)) {
+        // if object does not contain error, then set error to object
+        if(!obj.error) {
+            obj = { error: obj };
+        }
+    }
+
+    this.jsonResponse(res, obj, code);
 };
 
 RequestUtil.prototype.jsonResponse = function(res, obj, code){
@@ -147,6 +158,12 @@ RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done)
 RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
 
     var sreq = http.request(options, function(sres) {
+        // handle attachments
+        if(  sres.headers['content-disposition'] &&
+            (sres.headers['content-disposition'].indexOf('attachment') != -1) ) {
+            sres.setEncoding('binary');
+        }
+
         //console.log("sendRequest statusCode:", sres.statusCode, ", headers:",  sres.headers);
         if(resOut) {
             // remove set cookie, but send rest

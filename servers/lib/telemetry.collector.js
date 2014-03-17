@@ -53,20 +53,20 @@ function Collector(options){
                 console.log("Collector: MySQL DS Connected");
                 this.stats.increment("info", "MySQL.Connect");
             }.bind(this),
-            function(err){
-                console.trace("Collector: MySQL Error -", err);
-                this.stats.increment("error", "MySQL.Connect");
-            }.bind(this));
+                function(err){
+                    console.trace("Collector: MySQL Error -", err);
+                    this.stats.increment("error", "MySQL.Connect");
+                }.bind(this));
 
         this.cbds.connect()
             .then(function(){
                 console.log("Collector: Couchbase DS Connected");
                 this.stats.increment("info", "Couchbase.Connect");
             }.bind(this),
-            function(err){
-                console.trace("Collector: Couchbase DS Error -", err);
-                this.stats.increment("error", "Couchbase.Connect");
-            }.bind(this));
+                function(err){
+                    console.trace("Collector: Couchbase DS Error -", err);
+                    this.stats.increment("error", "Couchbase.Connect");
+                }.bind(this));
 
         this.app = express();
         this.app.set('port', this.options.collector.port);
@@ -145,37 +145,37 @@ Collector.prototype.startSession = function(req, outRes){
             }
 
             //console.log("req.params:", req.params, ", req.body:", req.body);
-            var gameType = req.body.gameType;
-            var userId   = data.userId;
-            var courseId = parseInt(req.body.courseId);
+            var gameLevel        = req.body.gameType;
+            var userId           = data.userId;
+            var courseId         = parseInt(req.body.courseId);
             var collectTelemetry = data.collectTelemetry;
-            var gSessionId = null;
-            var isVersionValid = false;
+            var gSessionId       = null;
+            var isVersionValid   = false;
 
             // only if game
             if(req.params.type == tConst.type.game) {
                 // validate game version if version is passed exists
-                isVersionValid = this._validateGameVersion(gameType, req.body.gameVersion);
+                isVersionValid = this._validateGameVersion(req.body.gameVersion);
             }
 
             // clean up old game session
-            this.myds.cleanUpOldGameSessions(userId, gameType)
+            this.myds.cleanUpOldGameSessions(userId, gameLevel)
 
                 // start session in MySQL (GL_SESSION)
                 .then(function () {
-                    return this.myds.startGameSession(userId, courseId, gameType);
+                    return this.myds.startGameSession(userId, courseId, gameLevel);
                 }.bind(this))
 
                 // start queue session
                 .then(function (gameSessionId) {
                     // save for later
                     gSessionId = gameSessionId;
-                    return this.queue.startSession(gameSessionId, userId);
+                    return this.cbds.startGameSession(userId, courseId, gameLevel, gameSessionId);
                 }.bind(this))
 
                 // start activity session
                 .then(function () {
-                    return this.webstore.createActivityResults(gSessionId, userId, courseId, gameType);
+                    return this.webstore.createActivityResults(gSessionId, userId, courseId, gameLevel);
                 }.bind(this))
 
                 // get config settings
@@ -208,7 +208,7 @@ Collector.prototype.startSession = function(req, outRes){
                 .then(null,  function(err) {
                     console.error("Collector end Session Error:", err);
                     this.stats.increment("error", "StartSession.General");
-                    outRes.status(500).send(err);
+                    this.requestUtil.errorResponse(outRes, err, 500);
                 }.bind(this) );
 
         }.bind(this) );
@@ -231,7 +231,7 @@ Collector.prototype.sendBatchTelemetryV1 = function(req, outRes){
                 if(err){
                     console.error("Collector: Error -", err);
                     this.stats.increment("error", "SendBatchTelemetry.General");
-                    outRes.status(500).send('Error:'+err);
+                    this.requestUtil.errorResponse(outRes, err, 500);
                     return;
                 }
 
@@ -286,15 +286,15 @@ Collector.prototype.endSession = function(req, outRes){
             if(jdata.gameSessionId) {
 
                 // validate session
-                this.queue.validateSession(jdata.gameSessionId)
+                this.cbds.validateSession(jdata.gameSessionId)
 
                     // save events
-                    .then(function(sdata){
-                        return this._saveBatchV1(jdata.gameSessionId, jdata, sdata.userId)
+                    .then(function(sdata) {
+                        return this._saveBatchV1(jdata.gameSessionId, sdata.userId, sdata.gameLevel, jdata)
                     }.bind(this))
 
                     // all done in parallel
-                    .then(function (score){
+                    .then(function (score) {
                         var p = parallel([
                             // create challenge submission if challenge exists
                             function() {
@@ -309,20 +309,24 @@ Collector.prototype.endSession = function(req, outRes){
                                 return this.webstore.updateActivityResults(jdata.gameSessionId, score, jdata.cancelled);
                             }.bind(this)
                         ])
-                        // when all done
-                        // add end session to Q
-                        .then( function() {
-                            console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
-
-                            return this.queue.endSession(jdata.gameSessionId);
-                        }.bind(this) );
+                            // when all done
+                            // add end session in Datastore
+                            .then( function() {
+                                //console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                return this.cbds.endGameSession(jdata.gameSessionId);
+                            }.bind(this) )
+                            // push job on queue
+                            .then( function() {
+                                //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                return this.queue.pushJob(jdata.gameSessionId);
+                            }.bind(this) );
 
                         return p;
                     }.bind(this))
 
                     // all done
                     .then( function() {
-                        outRes.status(200).send('{}');
+                        this.requestUtil.jsonResponse(outRes, {});
                         this.stats.increment("info", "Route.EndSession.Done");
                         return;
                     }.bind(this) )
@@ -331,14 +335,14 @@ Collector.prototype.endSession = function(req, outRes){
                     .then(null, function(err) {
                         console.error("Collector end Session Error:", err);
                         this.stats.increment("error", "Route.EndSession.CatchAll");
-                        outRes.status(500).send('Error:'+err);
+                        this.requestUtil.errorResponse(outRes, err, 500);
                     }.bind(this) );
 
             } else {
                 var err = "gameSessionId missing!";
                 console.error("Error:", err);
                 this.stats.increment("error", "Route.EndSession.GameSessionIdMissing");
-                outRes.status(500).send('Error:'+err);
+                this.requestUtil.errorResponse(outRes, err, 500);
             }
         }.bind(this);
 
@@ -348,7 +352,7 @@ Collector.prototype.endSession = function(req, outRes){
                 if(err){
                     console.error("Error:", err);
                     this.stats.increment("error", "Route.EndSession.General");
-                    outRes.status(500).send('Error:'+err);
+                    this.requestUtil.errorResponse(outRes, err, 500);
                     return;
                 }
 
@@ -368,12 +372,13 @@ Collector.prototype.endSession = function(req, outRes){
     } catch(err) {
         console.trace("Collector: End Session Error -", err);
         this.stats.increment("error", "Route.EndSession.Catch");
+        this.requestUtil.errorResponse(outRes, "End Session Error", 500);
     }
 };
 // ---------------------------------------
 
 
-Collector.prototype._validateGameVersion = function(gameType, gameVersion){
+Collector.prototype._validateGameVersion = function(gameVersion){
     // Grab indices of specific delimeters
     var gameMajorDelimeter     = gameVersion.indexOf( "_" );
     var majorMinorDelimeter    = gameVersion.indexOf( "." );
@@ -393,7 +398,6 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
     var major          = parseInt(gameVersion.substring( gameMajorDelimeter + 1, majorMinorDelimeter ) );
     var minor          = parseInt(gameVersion.substring( majorMinorDelimeter + 1, minorRevisionDelimeter ) );
     var revisionString = gameVersion.substring( minorRevisionDelimeter + 1 );
-    var revision = 0;
 
     // Check the revision for an appended character (used internally to indicate server)
     // /^[a-z]/i == check if between a to z when lowercase
@@ -404,10 +408,10 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
     revision = parseInt(revisionString);
 
     console.log( "Game version:", gameVersion,
-                ", game:", game,
-                ", major:", major,
-                ", minor:", minor,
-                ", revision:", revision);
+        ", game:", game,
+        ", major:", major,
+        ", minor:", minor,
+        ", revision:", revision);
 
     var validGameVersions = tConst.game.versions;
     // Check existence of the game key
@@ -433,25 +437,35 @@ Collector.prototype._validateGameVersion = function(gameType, gameVersion){
 
 // ---------------------------------------
 Collector.prototype._validateSendBatch = function(version, res, data, gameSessionId){
-
     var promise;
+
+    // get session for version 2
+    if(version != 1) {
+        // eventList needs to be an array
+        if(!gameSessionId) {
+            if( _.isArray(data) && data.length > 0) {
+                gameSessionId = data[0].gameSessionId;
+            }
+            else if( _.isObject(data) && data.hasOwnProperty('gameSessionId')) {
+                gameSessionId = data.gameSessionId;
+            }
+        }
+    }
 
     if(gameSessionId) {
         // validate session and get data
-        promise = this.queue.validateSession(gameSessionId)
+        promise = this.cbds.validateSession(gameSessionId)
             .then(function(sdata){
                 if(version == 1) {
-                    return this._saveBatchV1(gameSessionId, data, sdata.userId);
+                    return this._saveBatchV1(gameSessionId, sdata.userId, sdata.gameLevel, data);
                 } else {
-                    return this._saveBatchV2(gameSessionId, data);
+                    return this._saveBatchV2(gameSessionId, sdata.userId, sdata.gameLevel, data);
                 }
             }.bind(this));
     } else {
-        if(version == 1) {
-            promise = this._saveBatchV1(gameSessionId, data);
-        } else {
-            promise = this._saveBatchV2(gameSessionId, data);
-        }
+        this.stats.increment("error", "ValidateSendBatch.NoGameSessionId");
+        this.requestUtil.errorResponse(res, "GameSessionId missing", 500);
+        return;
     }
 
     if(promise) {
@@ -465,193 +479,230 @@ Collector.prototype._validateSendBatch = function(version, res, data, gameSessio
             .then(null, function(err){
                 console.error("Collector: Error -", err);
                 this.stats.increment("error", "ValidateSendBatch");
-                res.status(500).send('Error:'+err);
+                this.requestUtil.errorResponse(res, err, 500);
             }.bind(this));
     }
 };
 
-Collector.prototype._saveBatchV1 = function(gameSessionId, data, userId) {
+var example1 = {
+    "userId": 12,
+    "deviceId": "123",
+    "clientTimeStamp": 1392775453,
+    "clientId": "SC",
+    "clientVersion": "1.2.4156",
+    "gameLevel": "Mission2.SubMission1",
+    "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
+    "eventName": "CustomEvent",
+    "eventData": {
+        "float key": 1.23,
+        "int key": 1,
+        "string key": "asd"
+    }
+}
+
+Collector.prototype._saveBatchV1 = function(gameSessionId, userId, gameLevel, eventList) {
 // add promise wrapper
-return when.promise(function(resolve, reject) {
+    return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var score = 0;
+        var score = 0;
 
-    //console.log("saveBatch data: ", data);
+        //console.log("saveBatch data: ", data);
 
-    // data needs to be an object
-    if(_.isObject(data)) {
-        if(data.stars) {
-            score = data.stars;
-        }
+        // data needs to be an object
+        if(_.isObject(eventList)) {
+            if(eventList.stars) {
+                score = eventList.stars;
+            }
 
-        if(data.events) {
+            if(eventList.events) {
 
-            // parse events
-            if( _.isString(data.events) ) {
-                try {
-                    data.events = JSON.parse(data.events);
-                } catch(err) {
-                    console.error("Collector: Error -", err, ", JSON events:", data.events);
-                    this.stats.increment("error", "SaveBatch.JSONParse");
-                    reject(err);
+                // parse events
+                if( _.isString(eventList.events) ) {
+                    try {
+                        eventList.events = JSON.parse(eventList.events);
+                    } catch(err) {
+                        console.error("Collector: Error -", err, ", JSON events:", eventList.events);
+                        this.stats.increment("error", "SaveBatch.JSONParse");
+                        reject(err);
+                        return;
+                    }
+                }
+
+                // object but not array, it should be an array
+                if(  _.isObject(eventList.events) &&
+                    !_.isArray(eventList.events) ) {
+                    eventList.events = [eventList.events];
+                }
+
+                // still not array, we have a problem
+                if(!_.isArray(eventList.events))
+                {
+                    reject(new Error("invalid event type"));
                     return;
                 }
-            }
 
-            // object but not array, it should be an array
-            if(  _.isObject(data.events) &&
-                !_.isArray(data.events) ) {
-                data.events = [data.events];
-            }
+                if(!eventList.events.length) {
+                    resolve(score);
+                    return;
+                }
 
-            // still not array, we have a problem
-            if(!_.isArray(data.events))
-            {
-                reject(new Error("invalid event type"));
-                return;
-            }
+                //console.log("Collector: data", data);
+                //console.log("Collector: gameVersion", data.gameVersion);
 
-            if(!data.events.length) {
+                // find score if it exists
+                var event;
+                var events = [];
+                for(var i = 0; i < eventList.events.length; i++) {
+                    event = {
+                        clientId: "",
+                        clientVersion: "",
+                        serverTimeStamp: 0,
+                        clientTimeStamp: 0,
+                        eventName: ""
+                    };
+
+                    // get name
+                    if(eventList.events[i].name) {
+                        event.eventName = eventList.events[i].name;
+                    } else {
+                        // skip to next event
+                        continue;
+                    }
+
+                    // get timestamp if provided
+                    if(eventList.events[i].timestamp) {
+                        // if string, convert timestamp to int
+                        if( _.isString(eventList.events[i].timestamp) ) {
+                            event.clientTimeStamp = parseInt(eventList.events[i].timestamp);
+                        }
+                        if( _.isNumber(eventList.events[i].timestamp) ) {
+                            event.clientTimeStamp = eventList.events[i].timestamp;
+                        }
+                    } else {
+                        event.clientTimeStamp = Util.GetTimeStamp();
+                    }
+
+                    var gameParts = eventList.gameVersion.split("_");
+                    var clientVersion;
+                    var clientId;
+                    if(gameParts.length > 2) {
+                        clientVersion = gameParts.pop();
+                        clientId      = gameParts.join("_");
+                    } else if(gameParts.length == 2) {
+                        clientVersion = gameParts[1];
+                        clientId      = gameParts[0];
+                    } else if(gameParts.length == 1) {
+                        clientVersion = gameParts[0];
+                        clientId      = gameParts[0];
+                    }
+                    event.clientId = clientId
+                    event.clientVersion = clientVersion;
+
+                    // add data
+                    if(eventList.events[i].eventData) {
+                        event.eventData = eventList.events[i].eventData;
+                    }
+
+                    if(userId) {
+                        event.userId = userId;
+                    }
+
+                    // get score
+                    if( eventList.events[i].name &&
+                        eventList.events[i].name == tConst.game.scoreKey) {
+                        if( eventList.events[i].eventData &&
+                            eventList.events[i].eventData.stars) {
+                            score = eventList.events[i].eventData.stars;
+                        }
+                    }
+
+                    event.gameSessionId = gameSessionId;
+                    event.serverTimeStamp = Util.GetTimeStamp();
+
+                    // adds the promise to the list
+                    //console.log("event:", event);
+                    events.push(event);
+                }
+
+                this.cbds.saveEvents(events)
+                    .then(
+                        function(){
+                            this.stats.increment("info", "SaveBatch.Done");
+                            resolve(score);
+                        }.bind(this),
+                        function(err){
+                            reject(err);
+                        }.bind(this)
+                    );
+
+            } else {
+                // no events
+                this.stats.increment("info", "SaveBatch.Done");
                 resolve(score);
                 return;
             }
-
-            //console.log("Collector: data", data);
-            //console.log("Collector: gameVersion", data.gameVersion);
-
-            // find score if it exists
-            var event;
-            var events = [];
-            for(var i in data.events) {
-                event = {
-                    timestamp: 0,
-                    name: "",
-                    clientId: "",
-                    tags: {},
-                    data: {}
-                };
-
-                // get name
-                if(data.events[i].name) {
-                    event.name = data.events[i].name;
-                } else {
-                    // skip to next event
-                    continue;
-                }
-
-                // get timestamp if provided
-                if(data.events[i].timestamp) {
-                    // if string, convert timestamp to int
-                    if( _.isString(data.events[i].timestamp) ) {
-                        event.timestamp = parseInt(data.events[i].timestamp);
-                    }
-                    if( _.isNumber(data.events[i].timestamp) ) {
-                        event.timestamp = data.events[i].timestamp;
-                    }
-                } else {
-                    event.timestamp = Util.GetTimeStamp();
-                }
-
-                var vParts = data.gameVersion.split("_");
-                event.clientId      = vParts[0];
-                event.clientVersion = vParts[1];
-
-                // add data
-                if(data.events[i].eventData) {
-                    event.data = data.events[i].eventData;
-                }
-
-                event.tags.gameSessionId = data.gameSessionId;
-                if(userId) {
-                    event.tags.userId    = userId;
-                }
-
-                // get score
-                if( data.events[i].name &&
-                    data.events[i].name == tConst.game.scoreKey) {
-                    if( data.events[i].eventData &&
-                        data.events[i].eventData.stars) {
-                        score = data.events[i].eventData.stars;
-                    }
-                }
-
-                // adds the promise to the list
-                events.push(event);
-            }
-
-            this.cbds.saveEvents(events)
-                .then(
-                    function(){
-                        this.stats.increment("info", "SaveBatch.Done");
-                        resolve(score);
-                    }.bind(this),
-                    function(err){
-                        reject(err);
-                    }.bind(this)
-                );
-
         } else {
-            // no events
-            this.stats.increment("info", "SaveBatch.Done");
-            resolve(score);
+            console.error("Collector: Error - invalid data type");
+            this.stats.increment("error", "SaveBatch.Invalid.DataType");
+            reject(new Error("invalid data type"));
             return;
         }
-    } else {
-        console.error("Collector: Error - invalid data type");
-        this.stats.increment("error", "SaveBatch.Invalid.DataType");
-        reject(new Error("invalid data type"));
-        return;
-    }
 
 // ------------------------------------------------
-}.bind(this));
+    }.bind(this));
 // end promise wrapper
 }
 
 /*
-example inputs:
-[
-    {
-        "clientTimeStamp": 1392775453,
-        "clientId": "SC-1",
-        "clientVersion": "1.2.4156",
-        "gameType": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
-        "eventName": "$ScenarioScore",
-        "eventData": {
-            "float key": 1.23,
-            "int key": 1,
-            "string key": "asd"
-        }
-    },
-    {
-        "clientTimeStamp": 1392775453,
-        "clientId": "SC-1",
-        "clientVersion": "1.2.4156",
-        "gameType": "Mission2.SubMission1",
-        "eventName": "CustomEvent",
-        "eventData": {
-            "float key": 1.23,
-            "int key": 1,
-            "string key": "asd"
-        }
-    }
-]
+ example inputs:
+ [
+     {
+         "userId": 12,
+         "deviceId": "123",
+         "clientTimeStamp": 1392775453,
+         "clientId": "SC-1",
+         "clientVersion": "1.2.4156",
+         "gameLevel": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
+         "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
+         "eventName": "$ScenarioScore",
+         "eventData": {
+             "float key": 1.23,
+             "int key": 1,
+             "string key": "asd"
+         }
+     },
+     {
+         "clientTimeStamp": 1392775453,
+         "clientId": "SC-1",
+         "clientVersion": "1.2.4156",
+         "gameLevel": "Mission2.SubMission1",
+         "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
+         "eventName": "CustomEvent",
+         "eventData": {
+             "float key": 1.23,
+             "int key": 1,
+             "string key": "asd"
+         }
+     }
+ ]
  */
 /*
-Required properties
-    clientTimeStamp, clientId, eventName
+ Required properties
+ clientTimeStamp, clientId, eventName
 
-Input Types accepted
-    gameSessionId: String
-    eventList : (Array or Object)
-        clientTimeStamp: Integer
-        clientId: String
-        clientVersion: String
-        gameType: String
-        eventName: String
-        eventData: Object
-*/
-Collector.prototype._saveBatchV2 = function(gameSessionId, eventList) {
+ Input Types accepted
+ gameSessionId: String
+ eventList : (Array or Object)
+     userId: String or Integer (Optional)
+     deviceId: String          (Optional)
+     clientTimeStamp: Integer  (Required)
+     clientId: String          (Required)
+     clientVersion: String     (Optional)
+     gameLevel: String         (Optional)
+     eventName: String         (Required)
+     eventData: Object         (Optional)
+ */
+Collector.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, eventList) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -684,7 +735,41 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, eventList) {
                     continue; // skip to next item in list
                 }
 
-                // clientTimeStamp required
+                // userId: String or Integer (Optional)
+                if( !data.hasOwnProperty("userId") ) {
+                    // no userId is ok
+                } else {
+                    if( !(_.isString(data.userId) || _.isNumber(data.userId)) ) {
+                        errList.push(new Error("userId invalid type"));
+                    }
+                    else if(_.isString(data.userId) && data.userId.length == 0) {
+                        errList.push(new Error("userId can not be empty"));
+                    }
+                    // TODO: add validate of userId using DB
+                    // else if( this._eventValidateUserId(data.userId) ){...}
+                    else {
+                        // save
+                        pData.userId = data.userId;
+                    }
+                }
+
+                // deviceId: String (Optional)
+                if( !data.hasOwnProperty("deviceId") ) {
+                    // no deviceId is ok
+                } else {
+                    if( !_.isString(data.deviceId) ) {
+                        errList.push(new Error("deviceId invalid type"));
+                    }
+                    else if(data.deviceId.length == 0) {
+                        errList.push(new Error("deviceId can not be empty"));
+                    }
+                    else {
+                        // save
+                        pData.deviceId = data.deviceId;
+                    }
+                }
+
+                // clientTimeStamp: Integer (Required)
                 if( !data.hasOwnProperty("clientTimeStamp") ) {
                     errList.push(new Error("clientTimeStamp missing"));
                     continue; // skip to next item in list
@@ -737,18 +822,18 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, eventList) {
                     }
                 }
 
-                // gameType NOT required
-                if( !data.hasOwnProperty("gameType") ) {
+                // gameLevel NOT required
+                if( !data.hasOwnProperty("gameLevel") ) {
                     // no gameType is ok
                 } else {
-                    if( !_.isString(data.gameType) ) {
-                        errList.push(new Error("gameType invalid type"));
+                    if( !_.isString(data.gameLevel) ) {
+                        errList.push(new Error("gameLevel invalid type"));
                     }
-                    else if(data.gameType.length == 0) {
-                        errList.push(new Error("gameType can not be empty"));
+                    else if(data.gameLevel.length == 0) {
+                        errList.push(new Error("gameLevel can not be empty"));
                     }
-                    // TODO: add validation of gameType using DB
-                    // else if( this._eventValidateGameType(data.clientId, data.gameType) ){...}
+                    // TODO: ??? add validation of gameLevel using DB ???
+                    // else if( this._eventValidateGameLevel(data.clientId, data.gameLevel) ){...}
                     else {
                         // save
                         pData.gameType = data.gameType;
@@ -800,12 +885,14 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, eventList) {
                     }
                 }
 
+                // add gameSessionId
+                pData.gameSessionId = gameSessionId;
+
                 // add server TimeStamp
                 pData.serverTimeStamp = Util.GetTimeStamp();
-                // add game session
-                pData.sessionId = gameSessionId;
 
                 // added saved data to list
+                //console.log("pData:", pData);
                 processedEvents.push(pData);
             }
 
@@ -842,8 +929,6 @@ Collector.prototype._saveBatchV2 = function(gameSessionId, eventList) {
 
 // throw errors
 Collector.prototype._convertEventName = function(rawName, clientId) {
-    var eventName = "";
-
     if(rawName.charAt(0) == '$'){
         var tName = rawName.slice(1);
 
@@ -861,7 +946,7 @@ Collector.prototype._convertEventName = function(rawName, clientId) {
     }
     // custom name, add clientId
     else {
-        return clientId + "_" + eventName;
+        return clientId + "_" + rawName;
     }
 }
 

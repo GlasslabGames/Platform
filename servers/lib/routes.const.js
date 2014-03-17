@@ -15,7 +15,7 @@ module.exports = {
 
     static: {
         root: "/index.html",
-        include: [
+        dirs: [
             {route:"/login", path:"/index.html"},
             "/challenges",
             "/css",
@@ -26,6 +26,10 @@ module.exports = {
             "/maintenance",
             "/template",
             "/updates"
+        ],
+        files: [
+            {route:"/version.json", path:"/version.json"},
+            {route:"/robot.txt", path:"/robot.txt"}
         ]
     },
 

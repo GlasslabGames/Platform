@@ -16,8 +16,12 @@ console.log("---------------------------------------------");
 console.log("-- Telemetry Collector App Server - Start");
 console.log("---------------------------------------------");
 
-var c = new telemetry.Collector(options);
+var tCollector = new telemetry.Collector(options);
 
 process.on('uncaughtException', function(err) {
     console.error("Collector: Uncaught Error -", err, ", stack:", err.stack);
 });
+
+/* Exposed to testing suite */
+module.exports = tCollector;
+/* ------------------------ */

@@ -113,7 +113,7 @@ AuthServer.prototype.setupRoutes = function() {
         this.app.post(rConst.api.user.regManager, this.registerManagerRoute.bind(this));
 
         // POST - update user data
-        //this.app.post(rConst.api.user.updateUser, this.updateUserRoute.bind(this));
+        this.app.post(rConst.api.user.updateUser, this.updateUserRoute.bind(this));
 
         // Add include routes
         var includeRoute = function(req, res) {
@@ -123,7 +123,9 @@ AuthServer.prototype.setupRoutes = function() {
             if( req.isAuthenticated()) {
                 this.stats.increment("info", "Route.Auth.Ok");
 
+                /*
                 if( req.method == 'POST') {
+                    //
                     var results = req.path.match(/\/user\/([0-9]*)/);
                     // match finds results, an array with more then one element and the group is a number
                     if( results &&
@@ -136,6 +138,7 @@ AuthServer.prototype.setupRoutes = function() {
                         return;
                     }
                 }
+                */
 
                 //console.log("Auth passport user:", user);
                 var user = req.session.passport.user;
@@ -192,24 +195,38 @@ AuthServer.prototype.setupRoutes = function() {
             this.app[rConst.auth.special[e].exclude](rConst.auth.special[e].route, excludeRoute);
         }
 
-        // static content
-        for(var i in rConst.static.include){
-
+        // static dir content
+        for(var i in rConst.static.dirs){
             var fullPath, route;
-            if(_.isObject(rConst.static.include[i])) {
-                route = rConst.static.include[i].route;
-                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.include[i].path);
+            if(_.isObject(rConst.static.dirs[i])) {
+                route = rConst.static.dirs[i].route;
+                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.dirs[i].path);
             } else {
-                route = rConst.static.include[i];
-                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.include[i]);
+                route = rConst.static.dirs[i];
+                fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.dirs[i]);
             }
 
-            console.log("Static Content:", route, "->", fullPath);
+            console.log("Static Dir Content:", route, "->", fullPath);
             this.app.use(route, express.static(fullPath) );
         }
 
+        // static files content
+        _.forEach(rConst.static.files, function (item) {
+            var fullPath, route;
+            if(_.isObject(item)) {
+                route = item.route;
+                fullPath = path.resolve(this.options.webapp.staticContentPath + item.path);
+
+                console.log("Static File Content:", route, "->", fullPath);
+                this.app.get(route, function(req, res){
+                    // need to resolve relative path to absolute, to prevent "Error: Forbidden"
+                    res.sendfile( fullPath );
+                } );
+            }
+        }.bind(this));
+
         this.app.get(rConst.root, function(req, res){
-            //console.log("static root:", req.originalUrl);
+            console.log("static root:", req.originalUrl);
             this.stats.increment("info", "Route.Static.Root");
 
             var fullPath = path.resolve(this.options.webapp.staticContentPath + rConst.static.root);
@@ -220,7 +237,7 @@ AuthServer.prototype.setupRoutes = function() {
         this.app.use(function defaultRoute(req, res) {
             this.stats.increment("info", "Route.Default");
 
-            //console.log("defaultRoute:", req.originalUrl);
+            console.log("defaultRoute:", req.originalUrl);
             res.redirect(rConst.root);
         }.bind(this));
 
@@ -238,56 +255,82 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
 
     this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
         function(err, sres, data){
-            var statusCode = Math.floor(sres.statusCode/100)*100;
+            var statusCode = 500;
+            if(sres.statusCode) {
+                statusCode = Math.floor(sres.statusCode/100)*100;
+            }
 
             if( statusCode == 200 ||
                 statusCode == 300) {
                 res.writeHead(sres.statusCode, sres.headers);
-                res.end(data);
+
+                // handle attachments
+                if( sres.headers['content-disposition'] &&
+                    (sres.headers['content-disposition'].indexOf('attachment') != -1) ) {
+                    res.end(data, 'binary');
+                } else {
+                    res.end(data);
+                }
             }
             else if(statusCode == 400){
                 //console.log("includeRoute forwardRequestToWebApp - err:", err, ", data:", data);
                 if(alreadyTried) {
-                    this.requestUtil.errorResponse(res, data, 500);
+                    this.requestUtil.errorResponse(res, data, sres.statusCode);
                     return;
                 }
 
-                // update session
-                this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
-                    if(err) {
-                        res.writeHead(sres.statusCode, sres.headers);
-                        res.end(data);
-                        return;
-                    }
+                try {
+                    data = JSON.parse(data);
+                } catch(err){
+                    // error is ok
+                }
 
-                    if(saveWebSession) {
+                // check if need to update webSession
+                if( sres.statusCode == 401 &&
+                    _.isObject(data) &&
+                    data.key == "must.login") {
 
-                        // save web session
-                        saveWebSession(waSession, req.session.id, function(err){
-                            if(err) {
-                                this.requestUtil.errorResponse(res, err, 500);
-                                return;
-                            }
+                    // update session
+                    this.sessionServer.getWebSession(function(err, waSession, saveWebSession){
+                        if(err) {
+                            res.writeHead(sres.statusCode, sres.headers);
+                            res.end(JSON.stringify(data));
+                            return;
+                        }
 
-                            // update web session in session store
-                            req.session.passport.user[aConst.webappSessionPrefix] = waSession;
-                            this.sessionServer.updateWebSessionInSession(req.session.id, req.session, function(err, user){
+                        if(saveWebSession) {
+
+                            // save web session
+                            saveWebSession(waSession, req.session.id, function(err){
                                 if(err) {
                                     this.requestUtil.errorResponse(res, err, 500);
                                     return;
                                 }
 
-                                // try again
-                                this.forwardAuthenticatedRequestToWebApp(user, req, res, true);
+                                // update web session in session store
+                                req.session.passport.user[aConst.webappSessionPrefix] = waSession;
+                                this.sessionServer.updateWebSessionInSession(req.session.id, req.session, function(err, user){
+                                    if(err) {
+                                        this.requestUtil.errorResponse(res, err, 500);
+                                        return;
+                                    }
+
+                                    // try again
+                                    this.forwardAuthenticatedRequestToWebApp(user, req, res, true);
+                                }.bind(this));
                             }.bind(this));
-                        }.bind(this));
-                    }
-                }.bind(this));
+                        }
+                    }.bind(this));
+                } else {
+                    res.writeHead(sres.statusCode, sres.headers);
+                    res.end(JSON.stringify(data));
+                    return;
+                }
             } else {
                 this.stats.increment("error", "ForwardToWebApp");
 
                 // all else errors
-                this.requestUtil.errorResponse(res, data, sres.statusCode);
+                this.requestUtil.errorResponse(res, data, sres.statusCode || 500);
             }
     }.bind(this));
 }
@@ -304,12 +347,20 @@ AuthServer.prototype.registerUserRoute = function(req, res, next) {
 
     this.stats.increment("info", "Route.Register.User");
     //console.log("Auth registerUserRoute - body:", req.body);
+
+    req.body.username  = Util.ConvertToString(req.body.username);
+    req.body.firstName = Util.ConvertToString(req.body.firstName);
+    req.body.lastName  = Util.ConvertToString(req.body.lastName);
+    req.body.password  = Util.ConvertToString(req.body.password);
+    req.body.type      = Util.ConvertToString(req.body.type);
+
     if( !(
-            req.body.username  &&
-            req.body.firstName && req.body.lastName &&
+            req.body.username &&
+            req.body.firstName &&
+            req.body.lastName &&
+            req.body.password  &&
             req.body.type &&
-            _.isNumber(req.body.associatedId) &&
-            req.body.password  && !_.isEmpty(req.body.password)
+            _.isNumber(req.body.associatedId)
         ) )
     {
         this.stats.increment("error", "Route.Register.User.MissingFields");
@@ -419,14 +470,22 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
+    // make sure inputs are strings
+    req.body.email     = Util.ConvertToString(req.body.email);
+    req.body.firstName = Util.ConvertToString(req.body.firstName);
+    req.body.lastName  = Util.ConvertToString(req.body.lastName);
+    req.body.password  = Util.ConvertToString(req.body.password);
+    req.body.key       = Util.ConvertToString(req.body.key);
+
     this.stats.increment("info", "Route.Register.Manager");
     //console.log("Auth registerManagerRoute - body:", req.body);
     if( !(
             req.body.email  &&
-            req.body.firstName && req.body.lastName &&
-            req.body.key &&
+            req.body.firstName &&
+            req.body.lastName &&
+            req.body.password &&
             req.body.institution &&
-            req.body.password  && !_.isEmpty(req.body.password)
+            req.body.key
         ) )
     {
         this.stats.increment("error", "Route.Register.Manager.MissingFields");
@@ -452,6 +511,7 @@ AuthServer.prototype.registerManagerRoute = function(req, res, next) {
             } else {
                 this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
 
+                // don't use requestUtil response as it could contain custom headers, thus writing head
                 res.writeHead(sres.statusCode, sres.headers);
                 res.end(data);
             }
@@ -496,13 +556,13 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-AuthServer.prototype._updateUserData = function(userData, userSessionData){
+AuthServer.prototype._updateUserData = function(userData, loginUserSessionData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
         if( (userData.loginType == aConst.login.type.glassLabV1) ||
             (userData.loginType == aConst.login.type.glassLabV2) ){
-            this.glassLabStrategy.updateUserData(userData, userSessionData)
+            this.glassLabStrategy.updateUserData(userData, loginUserSessionData)
                 .then(resolve, reject);
         } else {
             this.stats.increment("error", "RegisterUser.InvalidLoginType");
@@ -515,7 +575,9 @@ return when.promise(function(resolve, reject) {
 
 AuthServer.prototype.updateUserRoute = function(req, res, next) {
     // only allow for POST on login
-    if(req.method != 'POST') { next(); return;}
+    if(req.method != 'POST') { next(); return; }
+    // only if authenticated
+    if(!req.isAuthenticated()) { next(); return; }
 
     this.stats.increment("info", "Route.Update.User");
     //console.log("Auth updateUserRoute - body:", req.body);
@@ -550,33 +612,31 @@ AuthServer.prototype.updateUserRoute = function(req, res, next) {
         loginType:     aConst.login.type.glassLabV2  // TODO add login type to user data on client
     };
 
-    var userSessionData = req.session.passport.user;
+    var loginUserSessionData = req.session.passport.user;
 
-    this._updateUserData(userData, userSessionData)
-        // save changed data
-        .then(
-            function(dataChanged){
-                if(dataChanged) {
-                    this.stats.increment("info", "Route.Update.User.Changed");
-                    return this.sessionServer.updateUserDataInSession(req.session);
-                } else {
-                    return Util.PromiseContinue();
-                }
-        }.bind(this))
-        // all ok
-        .then(
-            function(){
-                this.stats.increment("info", "Route.Update.User.Done");
-                this.requestUtil.jsonResponse(res, userData);
-        }.bind(this))
-        .then(null,
-            // error
-            function(err){
-                this.stats.increment("error", "Route.Update.User");
-                console.error("Auth - updateUserRoute error:", err);
-                this.requestUtil.errorResponse(res, err, 400);
-            }.bind(this)
-        );
+    // wrap getSession in promise
+    this._updateUserData(userData, loginUserSessionData)
+    // save changed data
+    .then(function(dataChanged){
+        if(dataChanged) {
+            this.stats.increment("info", "Route.Update.User.Changed");
+            return this.sessionServer.updateUserDataInSession(req.session);
+        } else {
+            return Util.PromiseContinue();
+        }
+    }.bind(this))
+    // all ok
+    .then(function(){
+        this.stats.increment("info", "Route.Update.User.Done");
+        this.requestUtil.jsonResponse(res, userData);
+    }.bind(this))
+    // error
+    .catch(function(err){
+        this.stats.increment("error", "Route.Update.User");
+        console.error("Auth - updateUserRoute error:", err);
+        this.requestUtil.errorResponse(res, err, 400);
+    }.bind(this)
+    );
 }
 
 
@@ -593,14 +653,15 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
     var auth = passport.authenticate('glasslab', function(err, user, info) {
         if(err) {
             this.stats.increment("error", "Route.Login.Auth");
-            return next(err);
+            this.requestUtil.errorResponse(res, "login auth", 500);
+            return;
         }
 
         if (!user) {
             //req.session.messages =  [info];
             //res.redirect(rConst.api.user.login);
             this.stats.increment("error", "Route.Login.NoUser");
-            this.requestUtil.jsonResponse(res, info, 401);
+            this.requestUtil.errorResponse(res, info, 401);
             return;
         }
 
@@ -636,13 +697,11 @@ AuthServer.prototype.glassLabLogin = function(req, res, next) {
                             if(saveWebSession) {
                                 saveWebSession(waSession, tuser.sessionId, function(){
                                     this.stats.increment("info", "Route.Login.Auth.GetUserCourses.SaveWebSession");
-                                    res.writeHead(200);
-                                    res.end( JSON.stringify(tuser) );
+                                    this.requestUtil.jsonResponse(res, tuser);
                                 }.bind(this));
                             } else {
                                 this.stats.increment("info", "Route.Login.Auth.GetUserCourses.Done");
-                                res.writeHead(200);
-                                res.end( JSON.stringify(tuser) );
+                                this.requestUtil.jsonResponse(res, tuser);
                             }
                         }.bind(this))
                         .then(null, function(err){

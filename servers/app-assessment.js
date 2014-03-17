@@ -16,8 +16,12 @@ console.log("---------------------------------------------");
 console.log("-- Assessment App Server - Start");
 console.log("---------------------------------------------");
 
-var a = new Assessment.Server(options);
+var aServer = new Assessment.Server(options);
 
 process.on('uncaughtException', function(err) {
     console.error("Assessment: Uncaught Error -", err, ", stack:", err.stack);
 });
+
+/* Exposed to testing suite */
+module.exports = aServer;
+/* ------------------------ */

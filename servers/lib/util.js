@@ -6,9 +6,20 @@
  *
  */
 var when = require('when');
+var _    = require('lodash');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+function convertToString(item) {
+    if(!item) {
+        item = "";
+    }
+    else if(!_.isString(item)) {
+        item = item.toString();
+    }
+    return item;
 }
 
 function promiseContinue(){
@@ -18,8 +29,12 @@ function promiseContinue(){
 }
 
 // seconds from EPOC (unit time)
-function getTimeStamp(){
-    return Math.round(new Date().getTime()/1000.0);
+function getTimeStamp(dt){
+    if(dt) {
+        return Math.round(new Date(dt).getTime()/1000.0);
+    } else {
+        return Math.round(new Date().getTime()/1000.0);
+    }
 }
 
 function getExpressLogger(options, express, stats){
@@ -65,7 +80,7 @@ function getExpressLogger(options, express, stats){
 
             stats.saveRoot();
             if(ulist.length > 0 &&
-               ulist[0] == 'api') {
+                ulist[0] == 'api') {
                 stats.setRoot('Route.Api');
             } else {
                 // static
@@ -94,17 +109,18 @@ function getExpressLogger(options, express, stats){
     });
 
     /*
-    var logFormat = ':remote-addy - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" (:response-time ms)';
-    return express.logger(logFormat);
-    */
+     var logFormat = ':remote-addy - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" (:response-time ms)';
+     return express.logger(logFormat);
+     */
 }
 
 module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
+    ConvertToString:  convertToString,
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,
-    GetTimeStamp: getTimeStamp,
+    GetTimeStamp:     getTimeStamp,
     String: {
         capitalize: capitalize
     }

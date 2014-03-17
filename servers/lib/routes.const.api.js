@@ -32,5 +32,4 @@ module.exports = {
         sessionEnd:    api+'/v2/data/session/end',
         sendEvents:    api+'/v2/data/events'
     }
-
 };

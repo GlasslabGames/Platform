@@ -12,7 +12,6 @@ var http       = require('http');
 // Third-party libs
 var _          = require('lodash');
 var when       = require('when');
-var parallel   = require('when/parallel');
 var express    = require('express');
 // load at runtime
 var Util, aConst;
@@ -23,14 +22,19 @@ module.exports = AssessmentServer;
 function AssessmentServer(options){
     try{
         // Glasslab libs
-        aConst      = require('./assessment.js').Const;
-        myDS        = require('./telemetry.js').Datastore.MySQL;
-        cbDS        = require('./telemetry.js').Datastore.Couchbase;
-        Util        = require('./util.js');
+        aConst = require('./assessment.js').Const;
+        myDS   = require('./telemetry.js').Datastore.MySQL;
+        cbDS   = require('./telemetry.js').Datastore.Couchbase;
+        Util   = require('./util.js');
 
         this.options = _.merge(
             {
-                assessment: { port: 8084 }
+                assessment: {
+                    port: 8084
+                },
+                telemetry: {
+                    migrateCount: 5000
+                }
             },
             options
         );
@@ -63,13 +67,22 @@ function AssessmentServer(options){
         this.myds.connect()
             // mysql connection ok, connect to couchbase
             .then(function(){
+                console.log("Assessment: myDS Connected");
                 return this.cbds.connect();
             }.bind(this))
 
             // couchbase ok
             .then(function(){
-                console.log("Assessment: DS Connected");
-                this.migrateOldDBEvents();
+                console.log("Assessment: cbDS Connected");
+                this.cbds.migrateEventsFromMysql(this.stats, this.myds, this.options.telemetry.migrateCount)
+                    .then(function() {
+                        console.log("Assessment: Migrate Old DB Events Done!");
+                    }.bind(this))
+                    // catch all errors
+                    .then(null, function(err){
+                        // error
+                        console.log("Assessment: Migrate Old DB Events Errors!");
+                    }.bind(this));
             }.bind(this))
 
             // catch all errors
@@ -92,7 +105,7 @@ AssessmentServer.prototype.setupRoutes = function() {
 };
 
 
-AssessmentServer.prototype.getEventsByGameSession = function(req, res, next) {
+AssessmentServer.prototype.getEventsByGameSession = function(req, res) {
     if( req.params.id ) {
 
         this.cbds.getEvents(req.params.id)
@@ -103,62 +116,11 @@ AssessmentServer.prototype.getEventsByGameSession = function(req, res, next) {
         // catch all errors
         .then(null, function(err){
             this.stats.increment('error', 'GetEvents');
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
 
     } else {
         this.stats.increment('error', 'Session.Missing');
-        this.requestUtil.errorResponse(res, "missing session");
+        this.requestUtil.errorResponse(res, "missing session", 404);
     }
-};
-
-
-AssessmentServer.prototype.migrateOldDBEvents = function() {
-
-    this.myds.getAllEvents()
-        .then(function(ell){
-            //console.log("ell:", ell);
-
-            if(ell) {
-                // move the next process of this stack and onto the event list
-                setTimeout(function(){
-                    ell.forEach(function(gSession){
-                        //console.log("gSession:", gSession);
-
-                        this.stats.gauge('info',     'MigrateEvents', gSession.events.length);
-                        this.stats.increment('info', 'Events', gSession.events.length);
-
-                        this.cbds.saveEvents(gSession)
-                            // saveEvents, ok
-                            .then(function(){
-                                this.stats.increment('info', 'Couchbase.SaveEvents.Done');
-                                return this.myds.disableArchiveEvents(gSession.gameSessionId);
-                            }.bind(this),
-                            // saveEvents error
-                            function(err){
-                                console.error("Assessment: Couchbase Error: could not save events, err:", err);
-                                this.stats.increment('error', 'MigrateEvents.Couchbase.SaveEvents');
-                            }.bind(this))
-
-                            // disableArchiveEvents, ok
-                            .then(function(){
-                                console.log("Events migrated, events count:", gSession.events.length);
-                                this.stats.increment('info', 'MigrateEvents.MySQL.RemoveEvents.Done');
-                            }.bind(this),
-                            // disableArchiveEvents, error
-                            function(){
-                                console.error("Assessment: MySQL Error: could not remove events");
-                                this.stats.increment('error', 'MigrateEvents.MySQL.RemoveEvents');
-                            }.bind(this));
-                    }.bind(this));
-                }.bind(this), 100);
-            }
-
-        }.bind(this))
-        // catch all errors
-        .then(null, function(err){
-            console.error("Assessment: Error getting archived activity events, err:", err);
-            this.stats.increment('error', 'MySQL.ArchivedActivityEvents');
-        }.bind(this));
-
 };

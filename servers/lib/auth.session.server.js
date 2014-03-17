@@ -224,6 +224,8 @@ AuthSessionServer.prototype.getWebSession = function(done){
     this.requestUtil.getRequest(url, null, function(err, pres){
         if(err) {
             if(done) done(err);
+            console.error("Auth: sessionStore Error -", err, ", url:", url);
+            return;
         }
 
         this.stats.increment("info", "GetWebSession");

@@ -204,7 +204,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 }
 
-WebStore_MySQL.prototype.createActivityResults = function(gameSessionId, userId, courseId, gameType) {
+WebStore_MySQL.prototype.createActivityResults = function(gameSessionId, userId, courseId, gameLevel) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -213,7 +213,7 @@ return when.promise(function(resolve, reject) {
     var values = [
         "NULL",
         0,
-        this.ds.escape(gameType), // aka activityId
+        this.ds.escape(gameLevel), // aka activityId
         this.ds.escape(courseId),
         "NULL",
         "NOW()",

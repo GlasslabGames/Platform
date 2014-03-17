@@ -23,7 +23,7 @@ function MySQL(options){
             database: "",
             waitForConnections: true,
             connectionLimit: 10,
-            queueLimit:      1000
+            queueLimit:      100000
         },
         options
     );
