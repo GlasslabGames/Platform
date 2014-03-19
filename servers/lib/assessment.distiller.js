@@ -43,9 +43,8 @@ function Distiller(options){
     this.aeDS          = new Assessment.Datastore.Couchbase(this.options.assessment.datastore.couchbase);
     this.SD_Function   = new Assessment.Distiller.Func.SC();
     this.stats         = new Util.Stats(this.options, "Assessment.Distiller");
-    this.stats         = new Util.Stats(this.options, "Assessment.Distiller");
 
-    this.webAppUrl     = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port;
+    this.webAppUrl     = Util.BuildURI(this.options.webapp);
     this.assessmentUrl = this.webAppUrl+"/WekaServlet";//api/game/assessment/";
 
     this.dataDS.connect()
@@ -69,7 +68,6 @@ function Distiller(options){
             }.bind(this));
 
     this.startTelemetryPoll();
-    this.startCleanOldSessionPoll();
 
     console.log('---------------------------------------------');
     console.log('Distiller: Waiting for messages...');
@@ -86,11 +84,11 @@ Distiller.prototype.startTelemetryPoll = function(){
 }
 
 Distiller.prototype.telemetryCheck = function(){
-    this.queue.getInCount()
+    this.queue.getJobCount()
         .then(
-            function(count){
+            function(count) {
                 if(count > 0) {
-                    console.log("Distiller: telemetryCheck count:", count);
+                    //console.log("Distiller: telemetryCheck count:", count);
                     this.stats.increment("info", "GetIn.Count", count);
 
                     for(var i = 0; i < Math.min(count, this.options.distiller.getMax); i++){
@@ -105,40 +103,20 @@ Distiller.prototype.telemetryCheck = function(){
         );
 }
 
-
-Distiller.prototype.startCleanOldSessionPoll = function(){
-    // fetch assessment loop
-    setInterval(function() {
-        this.cleanOldSessionCheck();
-    }.bind(this), this.options.distiller.cleanupPollDelay);
-}
-
-Distiller.prototype.cleanOldSessionCheck = function(){
-    this.queue.cleanOldSessionCheck()
-        .then(
-            function(){
-                console.log("Distiller: cleanOldSessionCheck done");
-                this.stats.increment("info", "CleanOldSessionCheck.Done");
-            }.bind(this),
-            function(err){
-                console.error("Distiller: cleanOldSessionCheck Error:", err);
-                this.stats.increment("error", "CleanOldSessionCheck");
-            }.bind(this)
-        );
-}
-
 Distiller.prototype.getTelemetryBatch = function(){
 
-    this.queue.getTelemetryBatch()
+    this.queue.popJob()
         // cleanup session
-        .then(function(telemData){
-            if(telemData.type == aeConst.queue.end) {
-                return this.runAssessment(telemData.id)
+        .then(function(data){
+            if(data.type == aeConst.queue.end) {
+                return this.runAssessment(data.id)
                             .then( function(){
-                                return this.queue.cleanupSession(telemData.id)
+                                // TODO: use assessment DS for queue
+                                return this.cbds.endQSession(data.id)
                             }.bind(this) );
             } else {
-                return this.queue.cleanupSession(telemData.id);
+                // TODO: use assessment DS for queue
+                return this.cbds.cleanupQSession(data.id);
             }
         }.bind(this))
 
@@ -176,7 +154,6 @@ return when.promise(function(resolve, reject) {
 
             // Run Weka Server, use requestUtil below
             //resolve();
-
 
             var url = this.assessmentUrl + gameSessionId;
             this.requestUtil.getRequest(url, null, function(err, res) {

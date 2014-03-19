@@ -50,6 +50,8 @@
         }
     },
     "assessment": {
+        "protocol": "http:",
+        "host":     "localhost",
         "port":     8084,
         "datastore": {
             "couchbase": {
@@ -78,6 +80,8 @@
         "secret":   "keyboard kitty"
     },
     "validate": {
+        "protocol": "http:",
+        "host":     "localhost",
         "port":     8083
     }
 }

@@ -5,10 +5,22 @@
  *   when - https://github.com/cujojs/when
  *
  */
-var when = require('when');
+var moment = require('moment');
+var when   = require('when');
+var _      = require('lodash');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+function convertToString(item) {
+    if(!item) {
+        item = "";
+    }
+    else if(!_.isString(item)) {
+        item = item.toString();
+    }
+    return item;
 }
 
 function promiseContinue(){
@@ -17,9 +29,46 @@ function promiseContinue(){
     });
 }
 
-// seconds from EPOC (unit time)
-function getTimeStamp(){
-    return Math.round(new Date().getTime()/1000.0);
+// build valid URI/URL
+function buildUri(options, path) {
+    var uri = "";
+
+    if(options.protocol) {
+        uri += options.protocol+"//";
+    } else {
+        uri += "http://";
+    }
+
+    if(options.host) {
+        uri += options.host;
+    } else {
+        uri += "localhost";
+    }
+
+    if(options.port) {
+        uri += ":"+options.port;
+    }
+
+    if(path && _.isString(path)) {
+        // make sure first char is a slash
+        if(path.charAt(0) != '/') {
+            uri += "/";
+        }
+        uri += path;
+    }
+
+    return uri;
+}
+
+// seconds from Unix Epoch
+function getTimeStamp(dt){
+    if(!dt) {
+        dt = moment.utc();
+    } else if (dt instanceof Date) {
+        dt = moment.utc(dt);
+    }
+
+    return dt.unix();
 }
 
 function getExpressLogger(options, express, stats){
@@ -65,7 +114,7 @@ function getExpressLogger(options, express, stats){
 
             stats.saveRoot();
             if(ulist.length > 0 &&
-               ulist[0] == 'api') {
+                ulist[0] == 'api') {
                 stats.setRoot('Route.Api');
             } else {
                 // static
@@ -94,17 +143,19 @@ function getExpressLogger(options, express, stats){
     });
 
     /*
-    var logFormat = ':remote-addy - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" (:response-time ms)';
-    return express.logger(logFormat);
-    */
+     var logFormat = ':remote-addy - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" (:response-time ms)';
+     return express.logger(logFormat);
+     */
 }
 
 module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
+    ConvertToString:  convertToString,
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,
-    GetTimeStamp: getTimeStamp,
+    GetTimeStamp:     getTimeStamp,
+    BuildURI:         buildUri,
     String: {
         capitalize: capitalize
     }
