@@ -62,6 +62,7 @@ function Collector(options){
             .then(function(){
                 console.log("Collector: Couchbase DS Connected");
                 this.stats.increment("info", "Couchbase.Connect");
+                this.cbds.getAllOldGameSessions();
             }.bind(this),
                 function(err){
                     console.trace("Collector: Couchbase DS Error -", err);
@@ -97,19 +98,24 @@ function Collector(options){
 // ---------------------------------------
 // HTTP Server request functions
 Collector.prototype.setupRoutes = function() {
-    this.app.post(rConst.api.v1.startsession,       this.startSession.bind(this));
-    this.app.post(rConst.api.v1.endsession,         this.endSession.bind(this));
-    this.app.post(rConst.api.v1.sendtelemetrybatch, this.sendBatchTelemetryV1.bind(this));
+    // API v1
+    this.app.post(rConst.api.v1.sessionStart,       this.startSessionV1.bind(this));
+    this.app.post(rConst.api.v1.sessionEnd,         this.endSessionV1.bind(this));
+    this.app.post(rConst.api.v1.sendEvents,         this.sendBatchTelemetryV1.bind(this));
 
-    //this.app.post(rConst.api.v2.startsession,       this.startSessionV2.bind(this));
-    //this.app.post(rConst.api.v2.endsession,         this.endSessionV2.bind(this));
+    // API v2
+    this.app.post(rConst.api.v2.sessionStart,       this.startSessionV2.bind(this));
+    this.app.post(rConst.api.v2.sessionEnd,         this.endSessionV2.bind(this));
     this.app.post(rConst.api.v2.sendEvents,         this.sendBatchTelemetryV2.bind(this));
 }
 
-Collector.prototype.startSession = function(req, outRes){
+// ---------------------------------------
+// API V1
+// ---------------------------------------
+Collector.prototype.startSessionV1 = function(req, outRes){
     try {
         var headers = { cookie: "" };
-        var url = "http://localhost:" +this.options.validate.port + tConst.validate.api.session;
+        var url = Util.BuildURI(this.options.validate, tConst.validate.api.session);
 
         // TODO: validate all inputs
         //console.log("headers cookie:", req.headers.cookie);
@@ -257,23 +263,7 @@ Collector.prototype.sendBatchTelemetryV1 = function(req, outRes){
     }
 };
 
-Collector.prototype.sendBatchTelemetryV2 = function(req, outRes){
-    try {
-        // TODO: validate all inputs
-
-        this.stats.increment("info", "Route.SendBatchTelemetry2");
-
-        //console.log("send telemetry batch body:", req.body);
-        // Queue Data
-        this._validateSendBatch(2, outRes, req.body);
-    } catch(err) {
-        console.trace("Collector: Send Telemetry Batch Error -", err);
-        this.stats.increment("error", "SendBatchTelemetry.Catch");
-    }
-};
-
-
-Collector.prototype.endSession = function(req, outRes){
+Collector.prototype.endSessionV1 = function(req, outRes){
     try {
         // TODO: validate all inputs
         //console.log("req.params:", req.params, ", req.body:", req.body);
@@ -369,6 +359,183 @@ Collector.prototype.endSession = function(req, outRes){
             //console.log("end session body:", req.body);
             done(req.body);
         }
+    } catch(err) {
+        console.trace("Collector: End Session Error -", err);
+        this.stats.increment("error", "Route.EndSession.Catch");
+        this.requestUtil.errorResponse(outRes, "End Session Error", 500);
+    }
+};
+// ---------------------------------------
+
+
+// ---------------------------------------
+// API V2
+// ---------------------------------------
+var exampleInput = {};
+exampleInput.startSessionV2 = {
+    deviceId:  "123-ASD",
+    gameLevel: "Level1",
+    courseId:  12
+}
+Collector.prototype.startSessionV2 = function(req, outRes){
+    try {
+        var headers = { cookie: "" };
+        var url = "http://"+this.options.validate.host+":" +this.options.validate.port + tConst.validate.api.session;
+
+        // TODO: validate all inputs
+        //console.log("headers cookie:", req.headers.cookie);
+
+        headers.cookie = req.headers.cookie;
+        this.stats.increment("info", "Route.StartSessionV2");
+
+        if(!req.body.deviceId) {
+            this.stats.increment("error", "StartSession.DeviceId.Missing");
+            this.requestUtil.errorResponse(outRes, "DeviceId Missing", 404);
+            return;
+        }
+
+        //console.log("req:", req);
+        //console.log("headers:", headers);
+        //console.log("getSession url:", url);
+        // validate session
+        this.requestUtil.getRequest(url, headers, function(err, res, data){
+            if(err) {
+                console.log("Collector startSession Error:", err);
+                this.stats.increment("error", "StartSession.GetRequest");
+                return;
+            }
+
+            //console.log("statusCode:", res.statusCode, ", headers:",  res.headers);
+            //console.log("data:", data);
+            try {
+                data = JSON.parse(data);
+            } catch(err) {
+                console.log("Collector startSession JSON parse Error:", err);
+                this.stats.increment("error", "StartSession.JSONParse");
+                return;
+            }
+
+            //console.log("req.params:", req.params, ", req.body:", req.body);
+            // required
+            var deviceId         = req.body.deviceId;
+            // Optional
+            var userId           = data.userId;
+            var courseId         = parseInt(req.body.courseId);
+            var gameLevel        = req.body.gameLevel;
+            var gSessionId       = undefined;
+
+            // clean up old game session
+            this.cbds.cleanUpOldGameSessionsV2(deviceId)
+
+                // start queue session
+                .then(function () {
+                    return this.cbds.startGameSessionV2(deviceId, userId, courseId, gameLevel);
+                }.bind(this))
+
+                // get config settings
+                .then(function (gameSessionId) {
+                    gSessionId = gameSessionId;
+                    return this.webstore.getConfigs();
+                }.bind(this))
+
+                // all ok, done
+                .then(function (configs) {
+                    var outData = {
+                        gameSessionId:     gSessionId,
+                        eventsMaxSize:     configs.eventsMaxSize,
+                        eventsMinSize:     configs.eventsMinSize,
+                        eventsPeriodSecs:  configs.eventsPeriodSecs,
+                        eventsDetailLevel: configs.eventsDetailLevel
+                    };
+
+                    //console.log("configs:", configs);
+                    this.requestUtil.jsonResponse(outRes, outData);
+                    this.stats.increment("info", "StartSession.Done");
+                }.bind(this) )
+
+                // catch all errors
+                .then(null,  function(err) {
+                    console.error("Collector Start Session Error:", err);
+                    this.stats.increment("error", "StartSession.General");
+                    this.requestUtil.errorResponse(outRes, err, 500);
+                }.bind(this) );
+
+        }.bind(this) );
+
+    } catch(err) {
+        console.trace("Collector: Start Session Error -", err);
+        this.stats.increment("error", "StartSession.Catch");
+    }
+};
+
+
+Collector.prototype.sendBatchTelemetryV2 = function(req, outRes){
+    try {
+        // TODO: validate all inputs
+
+        this.stats.increment("info", "Route.SendBatchTelemetry2");
+
+        //console.log("send telemetry batch body:", req.body);
+        // Queue Data
+        this._validateSendBatch(2, outRes, req.body);
+    } catch(err) {
+        console.trace("Collector: Send Telemetry Batch Error -", err);
+        this.stats.increment("error", "SendBatchTelemetry.Catch");
+    }
+};
+
+exampleInput.endSessionV2 = {
+    gameSessionId:  "ASD-123-QWER"
+}
+Collector.prototype.endSessionV2 = function(req, outRes){
+    try {
+        // TODO: validate all inputs
+        //console.log("req.params:", req.params, ", req.body:", req.body);
+
+        this.stats.increment("info", "Route.EndSession");
+        var gSessionId = undefined;
+
+        //console.log("endSession jdata:", jdata);
+        // forward to webapp server
+        if(req.body.gameSessionId) {
+            gSessionId = req.body.gameSessionId;
+
+            // validate session
+            this.cbds.validateSession(gSessionId)
+
+                // all done in parallel
+                .then(function () {
+                    // when all done
+                    // add end session in Datastore
+                    return this.cbds.endGameSessionV2(gSessionId)
+                        // push job on queue
+                        .then( function() {
+                            //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
+                            return this.queue.pushJob(gSessionId);
+                        }.bind(this) );
+                }.bind(this))
+
+                // all done
+                .then( function() {
+                    this.requestUtil.jsonResponse(outRes, {});
+                    this.stats.increment("info", "Route.EndSession.Done");
+                    return;
+                }.bind(this) )
+
+                // catch all errors
+                .then(null, function(err) {
+                    console.error("Collector End Session Error:", err);
+                    this.stats.increment("error", "Route.EndSession.CatchAll");
+                    this.requestUtil.errorResponse(outRes, err, 500);
+                }.bind(this) );
+
+        } else {
+            var err = "gameSessionId missing!";
+            console.error("Error:", err);
+            this.stats.increment("error", "Route.EndSession.GameSessionIdMissing");
+            this.requestUtil.errorResponse(outRes, err, 500);
+        }
+
     } catch(err) {
         console.trace("Collector: End Session Error -", err);
         this.stats.increment("error", "Route.EndSession.Catch");
@@ -484,7 +651,7 @@ Collector.prototype._validateSendBatch = function(version, res, data, gameSessio
     }
 };
 
-var example1 = {
+exampleInput.saveBatchV1 = {
     "userId": 12,
     "deviceId": "123",
     "clientTimeStamp": 1392775453,
@@ -498,8 +665,7 @@ var example1 = {
         "int key": 1,
         "string key": "asd"
     }
-}
-
+};
 Collector.prototype._saveBatchV1 = function(gameSessionId, userId, gameLevel, eventList) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {

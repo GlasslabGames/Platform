@@ -5,8 +5,9 @@
  *   when - https://github.com/cujojs/when
  *
  */
-var when = require('when');
-var _    = require('lodash');
+var moment = require('moment');
+var when   = require('when');
+var _      = require('lodash');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -28,13 +29,46 @@ function promiseContinue(){
     });
 }
 
-// seconds from EPOC (unit time)
-function getTimeStamp(dt){
-    if(dt) {
-        return Math.round(new Date(dt).getTime()/1000.0);
+// build valid URI/URL
+function buildUri(options, path) {
+    var uri = "";
+
+    if(options.protocol) {
+        uri += options.protocol+"//";
     } else {
-        return Math.round(new Date().getTime()/1000.0);
+        uri += "http://";
     }
+
+    if(options.host) {
+        uri += options.host;
+    } else {
+        uri += "localhost";
+    }
+
+    if(options.port) {
+        uri += ":"+options.port;
+    }
+
+    if(path && _.isString(path)) {
+        // make sure first char is a slash
+        if(path.charAt(0) != '/') {
+            uri += "/";
+        }
+        uri += path;
+    }
+
+    return uri;
+}
+
+// seconds from Unix Epoch
+function getTimeStamp(dt){
+    if(!dt) {
+        dt = moment.utc();
+    } else if (dt instanceof Date) {
+        dt = moment.utc(dt);
+    }
+
+    return dt.unix();
 }
 
 function getExpressLogger(options, express, stats){
@@ -121,6 +155,7 @@ module.exports = {
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,
     GetTimeStamp:     getTimeStamp,
+    BuildURI:         buildUri,
     String: {
         capitalize: capitalize
     }

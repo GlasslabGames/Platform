@@ -74,8 +74,8 @@ RequestUtil.prototype.postRequest = function(url, headers, jdata, done){
     var data = JSON.stringify(jdata);
 
     var options = {
-        protocol: purl.protocol,
-        hostname: purl.hostname,
+        protocol: purl.protocol || "http:",
+        hostname: purl.hostname || "localhost",
         port:     purl.port,
         path:     purl.path,
         method:   "POST",
@@ -108,10 +108,11 @@ RequestUtil.prototype.forwardPostRequest = function(url, jdata, resOut, done){
 */
 
 RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done){
+
     var options = _.merge(
         {
             protocol: this.options.webapp.protocol || "http:",
-            host:     this.options.webapp.host,
+            host:     this.options.webapp.host     || "localhost",
             port:     this.options.webapp.port,
             path:     req.originalUrl,
             method:   req.method,

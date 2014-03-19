@@ -23,9 +23,9 @@ module.exports = {
     },
 
     v1: {
-        startsession:        api+'/:type/startsession',
-        sendtelemetrybatch:  api+'/:type/sendtelemetrybatch',
-        endsession:          api+'/:type/endsession'
+        sessionStart:  api+'/:type/startsession',
+        sessionEnd:    api+'/:type/endsession',
+        sendEvents:    api+'/:type/sendtelemetrybatch'
     },
     v2: {
         sessionStart:  api+'/v2/data/session/start',

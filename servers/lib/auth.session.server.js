@@ -21,13 +21,13 @@ var passport   = require('passport');
 var couchbase  = require('couchbase');
 
 // load at runtime
-var aConst, rConst;
+var aConst, rConst, Util;
 
 module.exports = AuthSessionServer;
 
 function AuthSessionServer(options, app, routes, loadStrategies){
     try {
-        var CouchbaseStore, Util;
+        var CouchbaseStore;
 
         aConst         = require('./auth.js').Const;
         rConst         = require('./routes.js').Const;
@@ -197,7 +197,7 @@ AuthSessionServer.prototype.updateWebSessionInSession = function(sessionId, sess
 };
 
 AuthSessionServer.prototype.getWebSession = function(done){
-    var url = this.options.webapp.protocol+"//"+this.options.webapp.host+":"+this.options.webapp.port+"/api/session";
+    var url = Util.BuildURI(this.options.webapp, "/api/session");
 
     var saveWebSession = function(waSession, sessionId, next){
         var key  = aConst.webappSessionPrefix+":"+waSession;
