@@ -21,11 +21,14 @@ module.exports = {
         api+"/user/register",
         api+"/user/resetpassword",
         api+"/code/valid",
-        api+"/game"
-        //,api+"/challenge"
+        api+"/game",
+        "/check",
+        "/privacy-policy",
+        "/register"
     ],
     include: [
         api,
+        "/welcome",
         "/classes",
         "/roster",
         "/class",
@@ -33,6 +36,7 @@ module.exports = {
         "/create",
         "/code",
         "/missions",
+        "/challenge",
         "/license",
         "/admin"
     ]

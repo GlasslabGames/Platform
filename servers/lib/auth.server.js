@@ -256,7 +256,21 @@ AuthServer.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, r
     this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
         function(err, sres, data){
             var statusCode = 500;
-            if(sres.statusCode) {
+
+            if(err) {
+                console.error("forwardRequestToWebApp:", err);
+                res.writeHead(statusCode);
+                res.end();
+                return;
+            }
+
+            if(!sres) {
+                res.writeHead(statusCode);
+                res.end();
+                return;
+            }
+
+            if( sres.statusCode) {
                 statusCode = Math.floor(sres.statusCode/100)*100;
             }
 
