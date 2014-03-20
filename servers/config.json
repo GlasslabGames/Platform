@@ -1,7 +1,7 @@
 {
     "env": "dev",
     "request": {
-        "httpTimeout": 5000, "//":"in milliseconds"
+        "httpTimeout": 60000, "//": "1 min in milliseconds"
     },
     "frontend": {
         "port":     8000
@@ -25,11 +25,16 @@
             }
         }
     },
+    "queue": {
+        "host": "127.0.0.1",
+        "db": 0,
+        "port": 6379
+    },
     "sessionstore": {
         "host":     "localhost:8091",
         "bucket":   "glasslab_webapp",
         "password": "glasslab",
-        "ttl": 14400, "//":" 4 mins in seconds"
+        "ttl": 86400, "//": "24 hours in seconds"
     },
     "collector": {
         "port": 8081
@@ -49,9 +54,23 @@
             }
         }
     },
-    "assessment": {
+    "dispatcher": {
+        "telemetryGetMax": 20,
+        "telemetryPollDelay": 1000,     "//": "1 sec in milliseconds",
+        "assessmentDelay"   : 1000,     "//": "1 sec in milliseconds, default 5000",
+        "cleanupPollDelay"  : 3600000,  "//": "1 hours in milliseconds",
+        "sessionExpire"     : 14400000, "//": "4 hours in milliseconds"
+    },
+    "auth": {
         "protocol": "http:",
         "host":     "localhost",
+        "port":     8082,
+        "secret":   "keyboard kitty"
+    },
+    "validate": {
+        "port":     8083
+    },
+    "assessment": {
         "port":     8084,
         "datastore": {
             "couchbase": {
@@ -64,24 +83,7 @@
             "host": "127.0.0.1",
             "db": 0,
             "port": 6379,
-            "sessionExpire" : 14400000, "//":"in milliseconds"
+            "sessionExpire" : 14400000, "//": "4 hours in milliseconds"
         }
-    },
-    "distiller": {
-        "getMax":    20,
-        "pollDelay": 1000, "//":"in milliseconds",
-        "cleanupPollDelay"  : 3600000, "//":"in milliseconds",
-        "sessionExpire"     : 14400000, "//":"in milliseconds"
-    },
-    "auth": {
-        "protocol": "http:",
-        "host":     "localhost",
-        "port":     8082,
-        "secret":   "keyboard kitty"
-    },
-    "validate": {
-        "protocol": "http:",
-        "host":     "localhost",
-        "port":     8083
     }
 }
