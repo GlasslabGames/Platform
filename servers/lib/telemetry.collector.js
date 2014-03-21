@@ -380,7 +380,7 @@ exampleInput.startSessionV2 = {
 Collector.prototype.startSessionV2 = function(req, outRes){
     try {
         var headers = { cookie: "" };
-        var url = "http://"+this.options.validate.host+":" +this.options.validate.port + tConst.validate.api.session;
+        var url = Util.BuildURI(this.options.validate, tConst.validate.api.session);
 
         // TODO: validate all inputs
         //console.log("headers cookie:", req.headers.cookie);
