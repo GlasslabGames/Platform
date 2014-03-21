@@ -1,8 +1,8 @@
 /**
  * Authentication Validate - App Server
  */
-var Auth          = require('./lib/auth.js');
-var ConfigManager = require('./lib/config.manager.js');
+var Auth          = require('./lib/auth/auth.js');
+var ConfigManager = require('./lib/core/config.manager.js');
 
 var config = new ConfigManager();
 // load config files from first to last until successful

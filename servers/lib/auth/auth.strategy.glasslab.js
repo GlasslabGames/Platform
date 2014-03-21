@@ -24,9 +24,9 @@ function Glasslab_Strategy(options) {
     this.options = options;
 
     // Glasslab libs
-    MySQL  = require('./datastore.mysql.js');
+    Util   = require('../core/util.js');
+    MySQL  = require('../core/datastore.mysql.js');
     aConst = require('./auth.js').Const;
-    Util   = require('./util.js');
 
     this._usernameField = 'username';
     this._passwordField = 'password';

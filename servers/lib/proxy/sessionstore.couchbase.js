@@ -4,6 +4,7 @@
 // Third-party libs
 var _         = require('lodash');
 var couchbase = require('couchbase');
+var when      = require('when');
 
 //
 var sessionMaxAge = 24*60*60; // one day in seconds
@@ -15,7 +16,7 @@ module.exports = function(connect){
     var Util;
 
     function CouchBaseStore(options) {
-        Util = require('./util.js');
+        Util = require('../core/util.js');
 
         this.options = _.merge(
             {
@@ -32,39 +33,45 @@ module.exports = function(connect){
         );
 
         Store.call(this, this.options);
-
-        if(this.options.client) {
-            this.client = this.options.client;
-        } else {
-            this.client = new couchbase.Connection({
-                host:     this.options.host,
-                bucket:   this.options.bucket,
-                password: this.options.password,
-                connectionTimeout: this.options.timeout || 5000,
-                operationTimeout:  this.options.timeout || 5000
-            }, function(err) {
-                console.error("CouchBase SessionStore: Error -", err);
-
-                if(err) throw err;
-            }.bind(this));
-        }
-
         this.stats = new Util.Stats(this.options, "CouchBase.SessionStore");
-
-        this.client.on('error', function (err) {
-            this.stats.increment("error", "Generic");
-            console.error("CouchBase SessionStore: Error -", err);
-            this.emit('disconnect');
-        }.bind(this));
-        this.client.on('connect', function () {
-            this.stats.increment("info", "Connect");
-            this.emit('connect');
-        }.bind(this));
-
     };
 
     // Inherit from Connect Session Store
     CouchBaseStore.prototype.__proto__ = Store.prototype;
+
+    CouchBaseStore.prototype.connect = function(){
+    // add promise wrapper
+    return when.promise(function(resolve, reject) {
+    // ------------------------------------------------
+        this.client = new couchbase.Connection({
+            host:     this.options.host,
+            bucket:   this.options.bucket,
+            password: this.options.password,
+            connectionTimeout: this.options.timeout || 5000,
+            operationTimeout:  this.options.timeout || 5000
+        }, function(err) {
+            console.error("CouchBase TelemetryStore: Error -", err);
+            reject(err);
+            if(err) throw err;
+        }.bind(this));
+
+        this.client.on('error', function (err) {
+            this.stats.increment("error", "Generic");
+            console.error("CouchBase TelemetryStore: Error -", err);
+            this.emit('disconnect');
+            reject(err);
+        }.bind(this));
+
+        this.client.on('connect', function () {
+            this.stats.increment("info", "Connect");
+            this.emit('connect');
+            resolve();
+        }.bind(this));
+
+    // ------------------------------------------------
+    }.bind(this));
+    // end promise wrapper
+    }
 
     CouchBaseStore.prototype.getSessionPrefix = function(){
         return this.options.prefix;
@@ -164,7 +171,7 @@ module.exports = function(connect){
         }
 
         var data = _.cloneDeep(session);
-        console.log("CouchBaseStore setSession key:", key, ", ttl:", ttl);
+        //console.log("CouchBaseStore setSession key:", key, ", ttl:", ttl);
         this.client.set(key, data, {
                 expiry: ttl // in seconds
             },

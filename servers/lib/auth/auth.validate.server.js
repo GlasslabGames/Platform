@@ -23,9 +23,9 @@ function AuthValidateServer(options){
     try {
         var Util, SessionServer;
         // Glasslab libs
+        rConst        = require('../routes.js').Const;
+        Util          = require('../core/util.js');
         aConst        = require('./auth.js').Const;
-        rConst        = require('./routes.js').Const;
-        Util          = require('./util.js');
         SessionServer = require('./auth.js').SessionServer;
 
         this.options = _.merge(
