@@ -20,8 +20,8 @@ module.exports = TelemDS_Couchbase;
 
 function TelemDS_Couchbase(options){
     // Glasslab libs
-    tConst = require('./telemetry.const.js');
-    Util   = require('./util.js');
+    Util   = require('../core/util.js');
+    tConst = require('./data.const.js');
 
     this.options = _.merge(
         {
@@ -134,10 +134,10 @@ var gdv_getAllStartedSessions = function (doc, meta)
     if( (values[0] == 'gd') &&
         (values[1] == 'gs') &&
         (meta.type == 'json') &&
-        doc.hasOwnProperty('startDate') &&
+        doc.hasOwnProperty('serverStartTimeStamp') &&
         doc['state'] == 'started' )
     {
-        var td = new Date(doc.startDate * 1000);
+        var td = new Date(doc.serverStartTimeStamp * 1000);
         emit( dateToArray( td ) );
     }
 };
@@ -258,7 +258,7 @@ return when.promise(function(resolve, reject) {
                                         _.isArray(ids) ) {
 
                                         stats.increment('info', 'Couchbase.MigrateOldDBEvents.Done');
-                                        console.log("Assessment: Migrate", ids.length, "events, last id:", ids[ids.length - 1]);
+                                        console.log("TelemetryStore: Migrate", ids.length, "events, last id:", ids[ids.length - 1]);
 
                                         // start process again, loop until no more events left
                                         process.nextTick( function(){
@@ -267,12 +267,12 @@ return when.promise(function(resolve, reject) {
                                     }
                                 }.bind(this));
                         } else {
-                            console.log("Assessment: no events to migrate");
+                            console.log("TelemetryStore: no events to migrate");
                             resolve();
                         }
                     }.bind(this));
             } else {
-                console.log("Assessment: no events to migrate");
+                console.log("TelemetryStore: no events to migrate");
                 resolve();
             }
 
@@ -280,10 +280,10 @@ return when.promise(function(resolve, reject) {
 
         // catch all errors
         .catch(function(err){
-            console.error("Assessment: Error getting game sessions, err:", err);
+            console.error("TelemetryStore: Error getting game sessions, err:", err);
             stats.increment('error', 'MySQL.MigrateEventsFromMysql');
 
-            reject(new Error("Assessment: Error migrate events from Mysql, err:", err));
+            reject(new Error("TelemetryStore: Error migrate events from Mysql, err:", err));
         }.bind(this));
 
 // ------------------------------------------------
@@ -550,8 +550,10 @@ return when.promise(function(resolve, reject) {
     var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
 
     this.client.add(key, {
-            startDate: Util.GetTimeStamp(),
-            endDate:   0,
+            serverStartTimeStamp: Util.GetTimeStamp(),
+            clientStartTimeStamp: Util.GetTimeStamp(),
+            serverEndTimeStamp:   0,
+            clientEndTimeStamp:   0,
             userId:    userId,
             deviceId:  userId, // old version deviceId and userId are the same
             gameLevel: gameLevel,
@@ -621,7 +623,8 @@ return when.promise(function(resolve, reject) {
             }
 
             var gameSessionData     = data.value;
-            gameSessionData.endDate = Util.GetTimeStamp();
+            gameSessionData.serverEndTimeStamp = Util.GetTimeStamp();
+            gameSessionData.clientEndTimeStamp = Util.GetTimeStamp();
             gameSessionData.state   = tConst.game.session.ended;
             gameSessionData.qstate  = tConst.game.session.started; // TODO: remove with assessment Q
 
@@ -723,7 +726,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
                     var datalist = {};
                     for (var i = 0; i < keys.length; ++i) {
                         var val = results[ keys[i] ].value;
-                        val.endDate = Util.GetTimeStamp();
+                        val.serverEndTimeStamp = Util.GetTimeStamp();
                         val.state = tConst.game.session.cleanup;
                         datalist[ keys[i] ] = {
                             value: _.clone(val)
@@ -756,7 +759,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
 
 
 
-TelemDS_Couchbase.prototype.startGameSessionV2 = function(deviceId, userId, courseId, gameLevel) {
+TelemDS_Couchbase.prototype.startGameSessionV2 = function(deviceId, userId, courseId, gameLevel, clientTimeStamp) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -765,12 +768,14 @@ return when.promise(function(resolve, reject) {
     var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
 
     var data = {
-        startDate:     Util.GetTimeStamp(),
-        endDate:       0,
-        deviceId:      deviceId,
-        gameSessionId: gameSessionId,
-        state:         tConst.game.session.started,
-        qstate:        '' // TODO: remove with assessment Q
+        serverStartTimeStamp: Util.GetTimeStamp(),
+        clientStartTimeStamp: clientTimeStamp,
+        serverEndTimeStamp:   0,
+        clientEndTimeStamp:   0,
+        deviceId:             deviceId,
+        gameSessionId:        gameSessionId,
+        state:                tConst.game.session.started,
+        qstate:               '' // TODO: remove with assessment Q
     };
     // optional
     if(userId) {
@@ -798,7 +803,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.endGameSessionV2 = function(gameSessionId){
+TelemDS_Couchbase.prototype.endGameSessionV2 = function(gameSessionId, clientTimeStamp){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -814,7 +819,8 @@ TelemDS_Couchbase.prototype.endGameSessionV2 = function(gameSessionId){
                 }
 
                 var gameSessionData = data.value;
-                gameSessionData.endDate = Util.GetTimeStamp();
+                gameSessionData.serverEndTimeStamp = Util.GetTimeStamp();
+                gameSessionData.clientEndTimeStamp = clientTimeStamp;
                 gameSessionData.state = tConst.game.session.ended;
 
                 // replace with updated

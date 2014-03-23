@@ -17,9 +17,9 @@ module.exports = TelemDS_Mysql;
 
 function TelemDS_Mysql(options){
     // Glasslab libs
-    MySQL  = require('./datastore.mysql.js');
-    tConst = require('./telemetry.const.js');
-    Util   = require('./util.js');
+    Util   = require('../core/util.js');
+    MySQL  = require('../core/datastore.mysql.js');
+    tConst = require('./data.const.js');
 
     this.options = _.merge(
         {

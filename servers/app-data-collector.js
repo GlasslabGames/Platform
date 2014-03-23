@@ -1,8 +1,8 @@
 /**
  * Telemetry Collector - App Server
  */
-var telemetry     = require('./lib/telemetry.js');
-var ConfigManager = require('./lib/config.manager.js');
+var telemetry     = require('./lib/data/telemetry.js');
+var ConfigManager = require('./lib/core/config.manager.js');
 
 var config = new ConfigManager();
 // load config files from first to last until successful

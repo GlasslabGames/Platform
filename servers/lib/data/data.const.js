@@ -25,7 +25,7 @@ module.exports = {
       eventKey:   'e',
       eventsKey:  'events',
       scoreKey:   'GL_Scenario_Score',
-      versions:   require('./telemetry.const.game_versions')
+      versions:   require('./data.const.game_versions')
   },
   webapp: {
       api: '/api',

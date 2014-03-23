@@ -15,9 +15,9 @@ module.exports = WebStore_MySQL;
 
 function WebStore_MySQL(options){
     // Glasslab libs
-    MySQL   = require('./datastore.mysql.js');
+    MySQL   = require('../core/datastore.mysql.js');
+    aConst  = require('../auth/auth.const.js');
     waConst = require('./webapp.const.js');
-    aConst  = require('./auth.const.js');
 
     this.options = _.merge(
         {

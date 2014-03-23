@@ -22,10 +22,10 @@ module.exports = AssessmentServer;
 function AssessmentServer(options){
     try{
         // Glasslab libs
+        myDS   = require('../data/telemetry.js').Datastore.MySQL;
+        cbDS   = require('../data/telemetry.js').Datastore.Couchbase;
+        Util   = require('../core/util.js');
         aConst = require('./assessment.js').Const;
-        myDS   = require('./telemetry.js').Datastore.MySQL;
-        cbDS   = require('./telemetry.js').Datastore.Couchbase;
-        Util   = require('./util.js');
 
         this.options = _.merge(
             {
@@ -74,15 +74,6 @@ function AssessmentServer(options){
             // couchbase ok
             .then(function(){
                 console.log("Assessment: cbDS Connected");
-                this.cbds.migrateEventsFromMysql(this.stats, this.myds, this.options.telemetry.migrateCount)
-                    .then(function() {
-                        console.log("Assessment: Migrate Old DB Events Done!");
-                    }.bind(this))
-                    // catch all errors
-                    .then(null, function(err){
-                        // error
-                        console.log("Assessment: Migrate Old DB Events Errors!");
-                    }.bind(this));
             }.bind(this))
 
             // catch all errors

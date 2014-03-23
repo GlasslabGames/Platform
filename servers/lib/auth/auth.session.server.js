@@ -29,10 +29,10 @@ function AuthSessionServer(options, app, routes, loadStrategies){
     try {
         var CouchbaseStore;
 
+        rConst         = require('../routes.js').Const;
+        Util           = require('../core/util.js');
+        CouchbaseStore = require('../proxy/sessionstore.couchbase.js')(express);
         aConst         = require('./auth.js').Const;
-        rConst         = require('./routes.js').Const;
-        CouchbaseStore = require('./sessionstore.couchbase.js')(express);
-        Util           = require('./util.js');
 
         this.options = _.merge(
             {

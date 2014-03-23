@@ -1,8 +1,8 @@
 /**
  * Telemetry Distiller - App Server
  */
-var assessment     = require('./lib/assessment.js');
-var ConfigManager = require('./lib/config.manager.js');
+var assessment     = require('./lib/aeng/assessment.js');
+var ConfigManager = require('./lib/core/config.manager.js');
 
 var config = new ConfigManager();
 // load config files from first to last until successful

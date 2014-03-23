@@ -20,9 +20,9 @@ function Distiller(options){
     var Util, Assessment, Telemetry;
 
     // Glasslab libs
-    Telemetry  = require('./telemetry.js');
+    Util       = require('../core/util.js');
+    Telemetry  = require('../data/telemetry.js');
     Assessment = require('./assessment.js');
-    Util       = require('./util.js');
     aeConst    = Assessment.Const;
 
     this.options = _.merge(

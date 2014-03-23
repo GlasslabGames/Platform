@@ -6,11 +6,14 @@
     "frontend": {
         "port":     8000
     },
+    "services": {
+        "port": 8081
+    },
     "webapp": {
         "protocol": "http:",
         "host":     "localhost",
         "port":     8080,
-        "staticContentPath": "../../../Root/web-app",
+        "staticContentPath": "../../OurGlass/app",
         "datastore": {
             "mysql": {
                 "host"    : "localhost",
