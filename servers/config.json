@@ -1,7 +1,7 @@
 {
     "env": "dev",
     "request": {
-        "httpTimeout": 5000, "//":"in milliseconds"
+        "httpTimeout": 60000, "//": "1 min in milliseconds"
     },
     "frontend": {
         "port":     8000
@@ -34,7 +34,7 @@
         "host":     "localhost:8091",
         "bucket":   "glasslab_webapp",
         "password": "glasslab",
-        "ttl": 14400, "//":" 4 mins in seconds"
+        "ttl": 86400, "//": "24 hours in seconds"
     },
     "collector": {
         "port": 8081
@@ -56,10 +56,10 @@
     },
     "dispatcher": {
         "telemetryGetMax": 20,
-        "telemetryPollDelay": 1000, "//":"in milliseconds",
-        "assessmentDelay"   : 1000, "//":"in milliseconds, default 5000",
-        "cleanupPollDelay"  : 3600000, "//":"in milliseconds",
-        "sessionExpire"     : 14400000, "//":"in milliseconds"
+        "telemetryPollDelay": 1000,     "//": "1 sec in milliseconds",
+        "assessmentDelay"   : 1000,     "//": "1 sec in milliseconds, default 5000",
+        "cleanupPollDelay"  : 3600000,  "//": "1 hours in milliseconds",
+        "sessionExpire"     : 14400000, "//": "4 hours in milliseconds"
     },
     "auth": {
         "protocol": "http:",
@@ -83,7 +83,7 @@
             "host": "127.0.0.1",
             "db": 0,
             "port": 6379,
-            "sessionExpire" : 14400000, "//":"in milliseconds"
+            "sessionExpire" : 14400000, "//": "4 hours in milliseconds"
         }
     }
 }
