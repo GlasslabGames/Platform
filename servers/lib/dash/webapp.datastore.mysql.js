@@ -44,7 +44,7 @@ return when.promise(function(resolve, reject) {
     var Q =
         "SELECT \
             c.id,\
-            m.role,\
+            m.role as systemRole,\
             c.title, \
             (SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND \
                 course_id=c.id \
@@ -104,13 +104,13 @@ return when.promise(function(resolve, reject) {
 };
 
 
-WebStore_MySQL.prototype.addUserToCourse = function(courseId, userId, role) {
+WebStore_MySQL.prototype.addUserToCourse = function(courseId, userId, systemRole) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // if manager, make role in members instructor
-    if(role == aConst.role.manager) {
+    if( role == aConst.role.manager) {
         role = aConst.role.instructor;
     }
 
@@ -120,7 +120,7 @@ return when.promise(function(resolve, reject) {
         this.ds.escape(courseId),
         "NOW()", // date created
         "NOW()", // last updated
-        this.ds.escape(role),
+        this.ds.escape(systemRole),
         this.ds.escape(userId)
     ];
     values = values.join(',');
@@ -279,6 +279,16 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+WebStore_MySQL.prototype.connect = function(){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        resolve();
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
 WebStore_MySQL.prototype.getConfigs = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -312,5 +322,73 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
+// end promise wrapper
+};
+
+var exampleOutput = {};
+exampleOutput.getUserInfo = {
+    "id": 175,
+    "username": "test2_s1",
+    "lastName": "test2_s1",
+    "firstName": "test2_s1",
+    "email": "",
+    "role": "student",
+    "type": null,
+    "institution": 10,
+    "collectTelemetry": false,
+    "enabled": true,
+    "courses":
+    [
+        {
+            "id": 8,
+            "title": "test2",
+            "role": "student",
+            "studentCount": 0
+        }
+    ]
+};
+WebStore_MySQL.prototype.getUserInfoById = function(id) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        if(!id) {
+            reject({"error": "failure", "exception": "invalid userId"}, 500);
+            return;
+        }
+
+        var Q =
+            "SELECT     \
+                id,   \
+                username,                  \
+                first_name as firstName,   \
+                last_name as lastName,     \
+                email,                     \
+                system_role as systemRole, \
+                user_type as type,         \
+                institution_id as institution, \
+                collect_Telemetry > 0 as collectTelemetry, \
+                enabled > 0 as enabled, \
+                login_Type as loginType \
+            FROM GL_USER  \
+            WHERE id="+ this.ds.escape(id);
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results.length > 0) {
+                    results = results[0];
+                    results.collectTelemetry = results.collectTelemetry ? true : false;
+                    results.enabled          = results.enabled ? true : false;
+                    resolve(results);
+                } else {
+                    reject({"error": "none found"}, 500);
+                }
+            }.bind(this),
+                function(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
+
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 };

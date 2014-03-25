@@ -39,7 +39,7 @@ module.exports = function(connect){
     // Inherit from Connect Session Store
     CouchBaseStore.prototype.__proto__ = Store.prototype;
 
-    CouchBaseStore.prototype.connect = function(){
+    CouchBaseStore.prototype.glsConnect = function(){
     // add promise wrapper
     return when.promise(function(resolve, reject) {
     // ------------------------------------------------

@@ -1,0 +1,8 @@
+/**
+ * LMS Consts
+ *
+ */
+
+module.exports = {
+
+};

@@ -1,10 +1,44 @@
 
+var aConst = require('../auth.const.js');
+var _      = require('lodash');
+var Util   = require('../../core/util.js');
+
 module.exports = {
+    showUser:        showUser,
     registerUser:    registerUser,
     registerManager: registerManager,
     updateUser:      updateUser
 };
 
+
+/**
+ TODO
+ */
+function showUser(req, res, next) {
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.params &&
+        req.params.hasOwnProperty("id")) {
+        var loginUserSessionData = req.session.passport.user;
+
+        // check perms before returning user info
+        this.webstore.getUserInfoById(req.params.id)
+            .then(function(userData){
+                return this.checkUserPerminsToUserData(userData, loginUserSessionData)
+            }.bind(this))
+            // ok, send data
+            .then(function(userData){
+                this.requestUtil.jsonResponse(res, userData);
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
 
 /**
  * Registers a user with role of instructor or student
@@ -191,7 +225,6 @@ function registerManager(req, res, next) {
     // TODO: refactor this and create license system
     /*
      // validate email
-     this.sessionServer.validateEmail(req.body.email)
 
      // validate license key
      .then(function(){
@@ -210,7 +243,7 @@ function registerManager(req, res, next) {
      */
 };
 
- function updateUser(req, res, next) {
+ function updateUser(req, res, next, serviceManager) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return; }
     // only if authenticated
@@ -238,32 +271,53 @@ function registerManager(req, res, next) {
 
     var userData = {
         id:            req.body.id,
-        username:      req.body.username,
-        firstName:     req.body.firstName,
-        lastName:      req.body.lastName,
-        email:         req.body.email,
-        name:          req.body.name,
-        password:      req.body.password,
-        systemRole:    req.body.role,
-        institutionId: req.body.institution,
         loginType:     aConst.login.type.glassLabV2  // TODO add login type to user data on client
     };
+    if(req.body.username) {
+        userData.username = req.body.username;
+    }
+    if(req.body.firstName) {
+        userData.firstName = req.body.firstName;
+    }
+    if(req.body.lastName) {
+        userData.lastName = req.body.lastName;
+    }
+    if(req.body.name) {
+        userData.name = req.body.name;
+    }
+    if(req.body.email) {
+        userData.email = req.body.email;
+    }
+    if(req.body.systemRole || req.body.role) {
+        userData.systemRole = req.body.systemRole || req.body.role;
+    }
+    if(req.body.institutionId || req.body.institution) {
+        userData.institutionId = req.body.institutionId || req.body.institution;
+    }
+    if(req.body.password) {
+        userData.password = req.body.password;
+    }
 
     var loginUserSessionData = req.session.passport.user;
 
     // wrap getSession in promise
     this._updateUserData(userData, loginUserSessionData)
         // save changed data
-        .then(function(dataChanged){
-            if(dataChanged) {
+        .then(function(data){
+            if(data.changed) {
+                // update session user data
+                req.session.passport.user = data.user;
                 this.stats.increment("info", "Route.Update.User.Changed");
-                return this.sessionServer.updateUserDataInSession(req.session);
+                return serviceManager.updateUserDataInSession(req.session)
+                    .then(function() {
+                        return data.user;
+                    }.bind(this));
             } else {
-                return Util.PromiseContinue();
+                return data.user;
             }
         }.bind(this))
         // all ok
-        .then(function(){
+        .then(function(userData){
             this.stats.increment("info", "Route.Update.User.Done");
             this.requestUtil.jsonResponse(res, userData);
         }.bind(this))

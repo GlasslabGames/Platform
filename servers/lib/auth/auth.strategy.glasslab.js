@@ -133,7 +133,7 @@ return when.promise(function(resolve, reject) {
             FIRST_NAME as firstName, \
             EMAIL as email,          \
             PASSWORD as password,    \
-            SYSTEM_ROLE as role,     \
+            SYSTEM_ROLE as systemRole,     \
             USER_TYPE as type,       \
             LOGIN_TYPE as loginType, \
             institution_id as institution, \
@@ -567,7 +567,7 @@ return when.promise(function(resolve, reject) {
     this.getUserById(userData.id)
         .then(function(data){
             dbUserData = data[0];
-            return this._checkUserPerminsToUpdateData(userData, loginUserSessionData);
+            return this.checkUserPerminsToUserData(userData, loginUserSessionData);
         }.bind(this))
 
         // check email, if changed
@@ -616,8 +616,6 @@ return when.promise(function(resolve, reject) {
             if(userData.password) {
                 // passing old password to salt new password to validate
                 return this._comparePassword(userData.password, dbUserData.PASSWORD);
-            } else {
-                return Util.PromiseContinue();
             }
         }.bind(this))
 
@@ -652,7 +650,10 @@ return when.promise(function(resolve, reject) {
 
         // all ok
         .then(function(){
-            resolve(sessionDataChanged);
+            // remove resetCode, password before sending back
+            delete userData.resetCode;
+            delete userData.password;
+            resolve({changed: sessionDataChanged, user: userData});
         }.bind(this))
 
         // catch all errors
@@ -666,46 +667,47 @@ return when.promise(function(resolve, reject) {
 };
 
 
-Glasslab_Strategy.prototype._checkUserPerminsToUpdateData = function(userData, loginUserData){
+Glasslab_Strategy.prototype.checkUserPerminsToUserData = function(userData, loginUserData){
 // add promise wrapper
-return when.promise(function(resolve, reject) {
+    return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // check if you are the same as the Id to change
-    if(loginUserData.id == userData.id) {
-        resolve();
-    }
-    // are admin
-    else if(loginUserData.role == aConst.role.admin) {
-        resolve();
-    }
-    // if instructor, then check if student their course
-    else if(loginUserData.role == aConst.role.instructor) {
-        this._isEnrolledInInstructorCourse(userData.id, loginUserData.id)
-            .then(
-                // all ok
-                function(){
-                    resolve();
-                }.bind(this),
+        // check if you are the same as the Id to change
+        if(loginUserData.id == userData.id) {
+            resolve(userData);
+        }
+        // are admin
+        else if(loginUserData.systemRole == aConst.role.admin) {
+            resolve(userData);
+        }
+        // if instructor, then check if student their course
+        else if(loginUserData.systemRole == aConst.role.instructor) {
+            this._isEnrolledInInstructorCourse(userData.id, loginUserData.id)
+                .then(
+                    // all ok
+                    function(){
+                        resolve(userData);
+                    }.bind(this),
 
-                // error
-                function(err, code){
-                    if(code != 500) {
-                        reject({"error": "user does not have permission"}, 403);
-                    } else {
-                        reject(err, code);
-                    }
-                }.bind(this)
-            );
-    }
-    else {
-        reject({"error": "user does not have permission"}, 403);
-    }
+                    // error
+                    function(err, code){
+                        if(code != 500) {
+                            reject({"error": "user does not have permission"}, 403);
+                        } else {
+                            reject(err, code);
+                        }
+                    }.bind(this)
+                );
+        }
+        else {
+            reject({"error": "user does not have permission"}, 403);
+        }
 
 // ------------------------------------------------
-}.bind(this));
+    }.bind(this));
 // end promise wrapper
 };
+
 
 Glasslab_Strategy.prototype._isEnrolledInInstructorCourse = function(studentId, instructorId) {
 // add promise wrapper
