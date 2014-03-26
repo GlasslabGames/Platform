@@ -1,6 +1,6 @@
 {
-    "name": "Platform-Servers",
-    "version": "0.2.0",
+    "name": "Platform-Services",
+    "version": "0.4.0",
     "private": true,
     "dependencies": {
         "when":           "2.7.x",
