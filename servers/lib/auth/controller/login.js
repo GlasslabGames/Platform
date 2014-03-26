@@ -5,7 +5,7 @@ var _      = require('lodash');
 
 module.exports = {
     logout:   logout,
-    glasslab: glassLabLogin
+    glassLabLogin: glassLabLogin
 };
 
 function logout(req, res){
@@ -53,15 +53,17 @@ function glassLabLogin(req, res, next) {
             }
 
             // get courses
-            if( (user.role == aConst.role.student) ||
-                (user.role == aConst.role.instructor) ||
-                (user.role == aConst.role.manager) ||
-                (user.role == aConst.role.admin) ) {
+            if( (user.systemRole == aConst.role.student) ||
+                (user.systemRole == aConst.role.instructor) ||
+                (user.systemRole == aConst.role.manager) ||
+                (user.systemRole == aConst.role.admin) ) {
                 this.webstore.getUserCourses(user.id)
                     .then(function(courses){
                         // add courses
                         var tuser = _.clone(user);
                         tuser.courses = courses;
+                        // TODO: remove after the web site dep has been updated
+                        tuser.role = tuser.systemRole;
 
                         this.stats.increment("info", "Route.Login.Auth.GetUserCourses.Done");
                         this.requestUtil.jsonResponse(res, tuser);

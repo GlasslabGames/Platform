@@ -7,7 +7,7 @@
         "port":     8000
     },
     "services": {
-        "port": 8081
+        "port": 8001
     },
     "webapp": {
         "protocol": "http:",
@@ -25,6 +25,16 @@
                 "host":     "localhost:8091",
                 "bucket":   "glasslab_webapp",
                 "password": "glasslab"
+            }
+        }
+    },
+    "lms": {
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
             }
         }
     },

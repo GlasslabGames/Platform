@@ -326,6 +326,27 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+AuthService.prototype.checkUserPerminsToUserData = function(userData, loginUserSessionData){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    // TODO: switch based on user (from userId) login type
+    if( (userData.loginType == aConst.login.type.glassLabV1) ||
+        (userData.loginType == aConst.login.type.glassLabV2) ){
+        this.glassLabStrategy.checkUserPerminsToUserData(userData, loginUserSessionData)
+            .then(resolve, reject);
+    } else {
+            this.stats.increment("error", "RegisterUser.InvalidLoginType");
+            reject({error: "invalid login type"});
+    }
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+
 AuthService.prototype._updateUserData = function(userData, loginUserSessionData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {

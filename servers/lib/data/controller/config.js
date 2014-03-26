@@ -7,6 +7,11 @@ module.exports = {
 
 function index(req, res, next)
 {
-    // TODO
-    this.requestUtil.jsonResponse(res, {test:123});
+    this.webstore.getConfigs()
+        .then(function(data){
+            this.requestUtil.jsonResponse(res, data);
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this))
 }

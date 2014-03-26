@@ -1,5 +1,12 @@
 /**
  * Manager for Services
+ *
+ * Module dependencies:
+ *  lodash     - https://github.com/lodash/lodash
+ *  when       - https://github.com/cujojs/when
+ *  express    - https://github.com/visionmedia/express
+ *  multiparty - https://github.com/superjoe30/node-multiparty
+ *
  */
 var fs         = require('fs');
 var http       = require('http');
@@ -45,13 +52,13 @@ ServiceManager.prototype.initExpress = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var CouchbaseStore = require('../proxy/sessionstore.couchbase.js')(express);
+    var CouchbaseStore = require('../service/sessionstore.couchbase.js')(express);
 
     // express session store
     this.exsStore = new CouchbaseStore(this.options.sessionstore);
 
     console.log('SessionStore Connecting...');
-    this.exsStore.connect()
+    this.exsStore.glsConnect()
         .then(function(){
             console.log('SessionStore Connected');
 
@@ -344,3 +351,24 @@ ServiceManager.prototype.start = function() {
         }.bind(this));
 }
 
+ServiceManager.prototype.updateUserDataInSession = function(session){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var data = _.cloneDeep(session);
+        delete data.id;
+        delete data.req;
+
+        var key = this.exsStore.getSessionPrefix()+":"+data.passport.user.sessionId;
+        this.exsStore.set(key, data, function(err) {
+            if(err) {
+                this.stats.increment("error", "UpdateUserDataInSession");
+                reject({"error": "failure", "exception": err}, 500);
+                return;
+            }
+            resolve();
+        }.bind(this));
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};

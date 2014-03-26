@@ -31,7 +31,7 @@ function AuthSessionServer(options, app, routes, loadStrategies){
 
         rConst         = require('../routes.js').Const;
         Util           = require('../core/util.js');
-        CouchbaseStore = require('../proxy/sessionstore.couchbase.js')(express);
+        CouchbaseStore = require('../service/sessionstore.couchbase.js')(express);
         aConst         = require('./auth.js').Const;
 
         this.options = _.merge(
@@ -251,26 +251,4 @@ AuthSessionServer.prototype.getWebSession = function(done){
             if(done) done(new Error("could not get cookie"));
         }
     }.bind(this));
-};
-
-AuthSessionServer.prototype.updateUserDataInSession = function(session){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    var data = _.cloneDeep(session);
-    delete data.id;
-    delete data.req;
-
-    var key = this.exsStore.getSessionPrefix()+":"+data.passport.user.sessionId;
-    this.exsStore.set(key, data, function(err) {
-        if(err) {
-            this.stats.increment("error", "UpdateUserDataInSession");
-            reject({"error": "failure", "exception": err}, 500);
-            return;
-        }
-        resolve();
-    }.bind(this));
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
 };
