@@ -1,5 +1,5 @@
 
-var aConst = require('../auth.const.js');
+var lConst = require('../../lms/lms.const.js');
 var _      = require('lodash');
 var Util   = require('../../core/util.js');
 
@@ -11,9 +11,7 @@ module.exports = {
 };
 
 
-/**
- TODO
- */
+
 function showUser(req, res, next) {
     if( req.session &&
         req.session.passport &&
@@ -73,7 +71,7 @@ function registerUser(req, res, next) {
         return;
     }
 
-    var systemRole = aConst.role.student;
+    var systemRole = lConst.role.student;
     var courseId, institutionId;
 
     var registerErr = function(err, code){
@@ -99,10 +97,10 @@ function registerUser(req, res, next) {
         this._registerUser(userData)
             .then(function(userId){
                 // if student, enroll in course
-                if(systemRole == aConst.role.student) {
+                if(systemRole == lConst.role.student) {
                     // courseId
                     this.stats.increment("info", "AddUserToCourse");
-                    this.webstore.addUserToCourse(courseId, userId, systemRole)
+                    this.lmsStore.addUserToCourse(userId, courseId, systemRole)
                         .then(function(){
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(systemRole)+".Created");
                             this.glassLabLogin(req, res, next);
@@ -120,10 +118,10 @@ function registerUser(req, res, next) {
 
     // is institution -> instructor
     if(req.body.type.toLowerCase() == aConst.code.type.institution) {
-        systemRole = aConst.role.instructor;
+        systemRole = lConst.role.instructor;
         // validate institution Id (associatedId == institutionId)
         institutionId = req.body.associatedId;
-        this.webstore.getInstitution(institutionId)
+        this.lmsStore.getInstitution(institutionId)
             // register, passing in institutionId
             .then(function(data){
                 if( data &&
@@ -141,7 +139,7 @@ function registerUser(req, res, next) {
         // else student
         // get institution Id from course
         courseId = req.body.associatedId;
-        this.webstore.getInstitutionIdFromCourse(courseId)
+        this.lmsStore.getInstitutionIdFromCourse(courseId)
             // register, passing in institutionId
             .then(function(data){
                 if(data && data.length) {

@@ -23,13 +23,13 @@ var couchbase  = require('couchbase');
 var check      = require('validator').check;
 
 // load at runtime
-var Util, aConst, rConst;
+var Util, aConst, rConst, lConst;
 
 module.exports = AuthService;
 
 function AuthService(options){
     try {
-        var Strategy, WebStore;
+        var Strategy, WebStore, LMSStore;
         this.options = _.merge(
             {
                 auth: { port: 8082 }
@@ -41,12 +41,16 @@ function AuthService(options){
         rConst        = require('../routes.js').Const;
         Util          = require('../core/util.js');
         WebStore      = require('../dash/webapp.js').Datastore.MySQL;
+        lConst        = require('../lms/lms.js').Const;
+        LMSStore      = require('../lms/lms.js').Datastore.MySQL;
+
         aConst        = require('./auth.js').Const;
         Strategy      = require('./auth.js').Strategy;
 
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options);
         this.webstore         = new WebStore(this.options.webapp.datastore.mysql);
+        this.lmsStore         = new LMSStore(this.options.lms.datastore.mysql);
         this.glassLabStrategy = new Strategy.Glasslab(this.options);
 
     } catch(err){

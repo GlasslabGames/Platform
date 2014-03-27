@@ -7,7 +7,7 @@ module.exports = {
 
 function index(req, res, next)
 {
-    this.webstore.getConfigs()
+    this.myds.getConfigs()
         .then(function(data){
             this.requestUtil.jsonResponse(res, data);
         }.bind(this))

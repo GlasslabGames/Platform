@@ -28,7 +28,7 @@ function LMSService(options){
         Util       = require('../core/util.js');
 
         this.requestUtil = new Util.Request(this.options);
-        //this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
+        this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
         this.myds        = new LMSStore(this.options.lms.datastore.mysql);
         this.stats       = new Util.Stats(this.options, "LMS");
 
@@ -49,6 +49,18 @@ return when.promise(function(resolve, reject) {
             }.bind(this),
             function(err){
                 console.trace("LMSService: MySQL Error -", err);
+                this.stats.increment("error", "MySQL.Connect");
+            }.bind(this))
+
+        .then(function(){
+            return this.webstore.connect();
+        }.bind(this))
+        .then(function(){
+            console.log("WebApp: MySQL DS Connected");
+            this.stats.increment("info", "MySQL.Connect");
+        }.bind(this),
+            function(err){
+                console.trace("WebApp: MySQL Error -", err);
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
 

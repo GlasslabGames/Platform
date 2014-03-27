@@ -361,8 +361,8 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // if instructor or manager check email
-    if( userData.systemRole == aConst.role.instructor ||
-        userData.systemRole == aConst.role.manager ) {
+    if( userData.systemRole == lConst.role.instructor ||
+        userData.systemRole == lConst.role.manager ) {
         //console.log("Auth registerUserRoute - institution isEmail:", check(userData.email).isEmail());
         // if no email -> error
         if( !userData.email ||
@@ -588,8 +588,8 @@ return when.promise(function(resolve, reject) {
         // check UserName, if changed
         .then(function(){
             // If Instructors OR managers, then username is the same as there email
-            if( ( (userData.systemRole == aConst.role.instructor) ||
-                  (userData.systemRole == aConst.role.manager) ) &&
+            if( ( (userData.systemRole == lConst.role.instructor) ||
+                  (userData.systemRole == lConst.role.manager) ) &&
                   userData.email
               ) {
                 userData.username = userData.email;
@@ -677,11 +677,11 @@ Glasslab_Strategy.prototype.checkUserPerminsToUserData = function(userData, logi
             resolve(userData);
         }
         // are admin
-        else if(loginUserData.systemRole == aConst.role.admin) {
+        else if(loginUserData.systemRole == lConst.role.admin) {
             resolve(userData);
         }
         // if instructor, then check if student their course
-        else if(loginUserData.systemRole == aConst.role.instructor) {
+        else if(loginUserData.systemRole == lConst.role.instructor) {
             this._isEnrolledInInstructorCourse(userData.id, loginUserData.id)
                 .then(
                     // all ok

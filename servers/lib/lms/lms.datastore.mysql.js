@@ -6,8 +6,10 @@
  *
  */
 // Third-party libs
-var _     = require('lodash');
-var when  = require('when');
+var _      = require('lodash');
+var when   = require('when');
+var lConst = require('./lms.const.js');
+
 // load at runtime
 var MySQL;
 
@@ -56,14 +58,10 @@ exampleOut.getCourses =
         "freePlay": false
     }
 ];
-LMS_MySQL.prototype.getEnrolledCourses = function(id) {
+LMS_MySQL.prototype.getEnrolledCourses = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    if(!id) {
-        reject({"error": "failure", "exception": "invalid userId"}, 500);
-        return;
-    }
 
     var Q =
         "SELECT         \
@@ -78,14 +76,14 @@ return when.promise(function(resolve, reject) {
             c.archived_Date as archivedDate,    \
             c.institution_id as institution     \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
-        WHERE m.user_id="+ this.ds.escape(id);
+        WHERE m.user_id="+ this.ds.escape(userId);
 
     this.ds.query(Q)
         .then(function(results) {
                 for(var i = 0; i < results.length; i++) {
                     results[i].archived = results[i].archived ? true : false;
                     results[i].freePlay = results[i].freePlay ? true : false;
-                    results[i].locked   = results[i].locked ? true : false;
+                    results[i].locked   = results[i].locked   ? true : false;
                 }
 
                 resolve(results);
@@ -101,14 +99,10 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.getStudentsOfCourse = function(id) {
+LMS_MySQL.prototype.getStudentsOfCourse = function(courseId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    if(!id) {
-        reject({"error": "failure", "exception": "invalid userId"}, 500);
-        return;
-    }
 
     var Q =
         "SELECT     \
@@ -120,8 +114,205 @@ return when.promise(function(resolve, reject) {
             u.system_role as systemRole \
         FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
         WHERE m.role='student' AND  \
-        m.course_id="+ this.ds.escape(id);
+        m.course_id="+ this.ds.escape(courseId);
 
+    this.ds.query(Q)
+        .then(resolve,
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.removeUserFromCourse = function(userId, courseId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q =
+        "DELETE FROM GL_MEMBERSHIP WHERE "+
+            "user_id="+ this.ds.escape(userId)+" AND "+
+            "course_id="+this.ds.escape(courseId);
+
+    this.ds.query(Q)
+        .then(resolve,
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.getCourseIdFromCourseCode = function(courseCode) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q =
+        "SELECT course_id FROM GL_CODE WHERE code="+ this.ds.escape(courseCode);
+
+    this.ds.query(Q)
+        .then(function(results) {
+            if(results && results.length > 0){
+                resolve(results[0].course_id);
+            } else {
+                resolve();
+            }
+        }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.isUserInCourse = function(userId, courseId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q =
+        "SELECT id FROM GL_MEMBERSHIP WHERE "+
+            "user_id="+ this.ds.escape(userId)+" AND "+
+            "course_id="+this.ds.escape(courseId);
+
+    this.ds.query(Q)
+        .then(function(results) {
+                if(results){
+                    resolve(results.length > 0);
+                } else {
+                    reject({"error": "failure", "exception": err}, 500);
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, systemRole) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    // if manager, make role in members instructor
+    if( systemRole == lConst.role.manager) {
+        systemRole = lConst.role.instructor;
+    }
+
+    var values = [
+        "NULL",  // id
+        0,       // version
+        this.ds.escape(courseId),
+        "NOW()", // date created
+        "NOW()", // last updated
+        this.ds.escape(systemRole),
+        this.ds.escape(userId)
+    ];
+    values = values.join(',');
+
+    var Q = "INSERT INTO GL_MEMBERSHIP (" +
+        "id," +
+        "version," +
+        "course_id," +
+        "date_created," +
+        "last_updated," +
+        "role," +
+        "user_id" +
+        ") VALUES("+values+")";
+
+    this.ds.query(Q)
+        .then(
+            function(data){
+                resolve(data.insertId);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.getUserCourses = function(id) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    if(!id) {
+        reject({"error": "failure", "exception": "invalid userId"}, 500);
+        return;
+    }
+
+    var Q =
+        "SELECT \
+            c.id,\
+            m.role as systemRole,\
+            c.title, \
+            (SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND \
+                course_id=c.id \
+            GROUP BY course_id) as studentCount \
+        FROM \
+            GL_MEMBERSHIP m \
+            INNER JOIN GL_COURSE as c ON m.course_id=c.id \
+        WHERE \
+            user_id=" + this.ds.escape(id);
+
+    this.ds.query(Q)
+        .then(resolve,
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.getInstitutionIdFromCourse = function(courseId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT id, institution_id as institutionId FROM GL_COURSE WHERE id=" + this.ds.escape(courseId);
+    this.ds.query(Q)
+        .then(resolve,
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.getInstitution = function(institutionId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT * FROM GL_INSTITUTION WHERE id=" + this.ds.escape(institutionId);
     this.ds.query(Q)
         .then(resolve,
             function(err) {

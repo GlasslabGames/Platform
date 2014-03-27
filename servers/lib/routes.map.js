@@ -79,7 +79,7 @@ module.exports = {
             service: "lms",
             controller: "course",
             method: {
-                get: "enrolledCourses"
+                get: "getEnrolledCourses"
             }
         },
         {
@@ -124,7 +124,7 @@ module.exports = {
             service: "lms",
             controller: "course",
             method: {
-                get: "enroll"
+                post: "enrollInCourse"
             }
         },
         {
@@ -133,7 +133,7 @@ module.exports = {
             service: "lms",
             controller: "course",
             method: {
-                get: "unenroll"
+                post: "unenrollFromCourse"
             }
         },
         // ---------------------------------------------------
@@ -222,7 +222,7 @@ module.exports = {
             service: "lms",
             controller: "course",
             method: {
-                get: "enrolledCourses"
+                get: "getEnrolledCourses"
             }
         }
     ]

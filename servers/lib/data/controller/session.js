@@ -53,7 +53,7 @@ function startSessionV2(req, outRes){
             // get config settings
             .then(function (gameSessionId) {
                 gSessionId = gameSessionId;
-                return this.webstore.getConfigs();
+                return this.myds.getConfigs();
             }.bind(this))
 
             // all ok, done
@@ -202,7 +202,7 @@ function startSessionV1(req, outRes){
 
             // get config settings
             .then(function () {
-                return this.webstore.getConfigs();
+                return this.myds.getConfigs();
             }.bind(this))
 
             // all ok, done
