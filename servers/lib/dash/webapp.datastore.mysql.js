@@ -9,14 +9,14 @@
 var _     = require('lodash');
 var when  = require('when');
 // load at runtime
-var MySQL, waConst, aConst;
+var MySQL, waConst, lConst;
 
 module.exports = WebStore_MySQL;
 
 function WebStore_MySQL(options){
     // Glasslab libs
     MySQL   = require('../core/datastore.mysql.js');
-    aConst  = require('../auth/auth.const.js');
+    lConst  = require('../lms/lms.const.js');
     waConst = require('./webapp.const.js');
 
     this.options = _.merge(
@@ -32,121 +32,83 @@ function WebStore_MySQL(options){
     this.ds = new MySQL(this.options);
 }
 
-WebStore_MySQL.prototype.getUserCourses = function(id) {
+
+WebStore_MySQL.prototype.connect = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    if(!id) {
-        reject({"error": "failure", "exception": "invalid userId"}, 500);
-        return;
-    }
-
-    var Q =
-        "SELECT \
-            c.id,\
-            m.role as systemRole,\
-            c.title, \
-            (SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND \
-                course_id=c.id \
-            GROUP BY course_id) as studentCount \
-        FROM \
-            GL_MEMBERSHIP m \
-            INNER JOIN GL_COURSE as c ON m.course_id=c.id \
-        WHERE \
-            user_id=" + this.ds.escape(id);
-
-    this.ds.query(Q)
-        .then(resolve,
-            function(err) {
-                reject({"error": "failure", "exception": err}, 500);
-            }.bind(this)
-        );
-
+    resolve();
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
 
-WebStore_MySQL.prototype.getInstitutionIdFromCourse = function(courseId) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
 
-        var Q = "SELECT id, institution_id as institutionId FROM GL_COURSE WHERE id=" + this.ds.escape(courseId);
+var exampleOutput = {};
+exampleOutput.getUserInfo = {
+    "id": 175,
+    "username": "test2_s1",
+    "lastName": "test2_s1",
+    "firstName": "test2_s1",
+    "email": "",
+    "role": "student",
+    "type": null,
+    "institution": 10,
+    "collectTelemetry": false,
+    "enabled": true,
+    "courses":
+        [
+            {
+                "id": 8,
+                "title": "test2",
+                "role": "student",
+                "studentCount": 0
+            }
+        ]
+};
+WebStore_MySQL.prototype.getUserInfoById = function(id) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        if(!id) {
+            reject({"error": "failure", "exception": "invalid userId"}, 500);
+            return;
+        }
+
+        var Q =
+            "SELECT     \
+                id,   \
+                username,                  \
+                first_name as firstName,   \
+                last_name as lastName,     \
+                email,                     \
+                system_role as systemRole, \
+                user_type as type,         \
+                institution_id as institution, \
+                collect_Telemetry > 0 as collectTelemetry, \
+                enabled > 0 as enabled, \
+                login_Type as loginType \
+            FROM GL_USER  \
+            WHERE id="+ this.ds.escape(id);
+
         this.ds.query(Q)
-            .then(resolve,
+            .then(function(results) {
+                if(results.length > 0) {
+                    results = results[0];
+                    results.collectTelemetry = results.collectTelemetry ? true : false;
+                    results.enabled          = results.enabled ? true : false;
+                    resolve(results);
+                } else {
+                    reject({"error": "none found"}, 500);
+                }
+            }.bind(this),
                 function(err) {
                     reject({"error": "failure", "exception": err}, 500);
                 }.bind(this)
             );
 
 // ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-WebStore_MySQL.prototype.getInstitution = function(institutionId) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    var Q = "SELECT * FROM GL_INSTITUTION WHERE id=" + this.ds.escape(institutionId);
-    this.ds.query(Q)
-        .then(resolve,
-            function(err) {
-                reject({"error": "failure", "exception": err}, 500);
-            }.bind(this)
-        );
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-
-WebStore_MySQL.prototype.addUserToCourse = function(courseId, userId, systemRole) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    // if manager, make role in members instructor
-    if( role == aConst.role.manager) {
-        role = aConst.role.instructor;
-    }
-
-    var values = [
-        "NULL",  // id
-        0,       // version
-        this.ds.escape(courseId),
-        "NOW()", // date created
-        "NOW()", // last updated
-        this.ds.escape(systemRole),
-        this.ds.escape(userId)
-    ];
-    values = values.join(',');
-
-    var Q = "INSERT INTO GL_MEMBERSHIP (" +
-        "id," +
-        "version," +
-        "course_id," +
-        "date_created," +
-        "last_updated," +
-        "role," +
-        "user_id" +
-        ") VALUES("+values+")";
-
-    this.ds.query(Q)
-        .then(
-            function(data){
-                resolve(data.insertId);
-            }.bind(this),
-            function(err) {
-                reject({"error": "failure", "exception": err}, 500);
-            }.bind(this)
-        );
-
-// ------------------------------------------------
-}.bind(this));
+    }.bind(this));
 // end promise wrapper
 };
 
@@ -203,6 +165,7 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 }
+
 
 WebStore_MySQL.prototype.createActivityResults = function(gameSessionId, userId, courseId, gameLevel) {
 // add promise wrapper
@@ -276,119 +239,5 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
-// end promise wrapper
-};
-
-WebStore_MySQL.prototype.connect = function(){
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-        resolve();
-// ------------------------------------------------
-    }.bind(this));
-// end promise wrapper
-};
-
-WebStore_MySQL.prototype.getConfigs = function() {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    var Q = "SELECT * FROM GL_CONFIG";
-    this.ds.query(Q)
-        .then(
-            function(data){
-                //console.log("data:", data);
-                var config = {};
-                var n, v, nv;
-                // build config from list
-                for(var i in data){
-                    n = data[i].NAME;
-                    v = data[i].VALUE;
-
-                    // convert string to number
-                    nv = parseFloat(v);
-                    // if string was a number then set value to converted
-                    if( !isNaN(nv) ) { v = nv; }
-
-                    config[n] = v;
-                }
-                //console.log("config:", config);
-
-                resolve(config);
-            }.bind(this),
-            reject
-        );
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-var exampleOutput = {};
-exampleOutput.getUserInfo = {
-    "id": 175,
-    "username": "test2_s1",
-    "lastName": "test2_s1",
-    "firstName": "test2_s1",
-    "email": "",
-    "role": "student",
-    "type": null,
-    "institution": 10,
-    "collectTelemetry": false,
-    "enabled": true,
-    "courses":
-    [
-        {
-            "id": 8,
-            "title": "test2",
-            "role": "student",
-            "studentCount": 0
-        }
-    ]
-};
-WebStore_MySQL.prototype.getUserInfoById = function(id) {
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-        if(!id) {
-            reject({"error": "failure", "exception": "invalid userId"}, 500);
-            return;
-        }
-
-        var Q =
-            "SELECT     \
-                id,   \
-                username,                  \
-                first_name as firstName,   \
-                last_name as lastName,     \
-                email,                     \
-                system_role as systemRole, \
-                user_type as type,         \
-                institution_id as institution, \
-                collect_Telemetry > 0 as collectTelemetry, \
-                enabled > 0 as enabled, \
-                login_Type as loginType \
-            FROM GL_USER  \
-            WHERE id="+ this.ds.escape(id);
-
-        this.ds.query(Q)
-            .then(function(results) {
-                if(results.length > 0) {
-                    results = results[0];
-                    results.collectTelemetry = results.collectTelemetry ? true : false;
-                    results.enabled          = results.enabled ? true : false;
-                    resolve(results);
-                } else {
-                    reject({"error": "none found"}, 500);
-                }
-            }.bind(this),
-                function(err) {
-                    reject({"error": "failure", "exception": err}, 500);
-                }.bind(this)
-            );
-
-// ------------------------------------------------
-    }.bind(this));
 // end promise wrapper
 };

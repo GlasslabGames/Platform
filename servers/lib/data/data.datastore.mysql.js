@@ -455,3 +455,40 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Mysql.prototype.getConfigs = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT * FROM GL_CONFIG";
+    this.ds.query(Q)
+        .then(
+            function(data){
+                //console.log("data:", data);
+                var config = {};
+                var n, v, nv;
+                // build config from list
+                for(var i in data){
+                    n = data[i].NAME;
+                    v = data[i].VALUE;
+
+                    // convert string to number
+                    nv = parseFloat(v);
+                    // if string was a number then set value to converted
+                    if( !isNaN(nv) ) { v = nv; }
+
+                    config[n] = v;
+                }
+                //console.log("config:", config);
+
+                resolve(config);
+            }.bind(this),
+            reject
+        );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};

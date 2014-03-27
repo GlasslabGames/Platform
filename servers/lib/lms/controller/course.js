@@ -1,27 +1,108 @@
 
 var _      = require('lodash');
 var when   = require('when');
+var lConst = require('../lms.const.js');
 
 module.exports = {
-    enrolledCourses: enrolledCourses
+    getEnrolledCourses: getEnrolledCourses,
+    enrollInCourse:     enrollInCourse,
+    unenrollFromCourse: unenrollFromCourse
 };
 
 var exampleOut = {};
+
 exampleOut.getCourses =
-[
-    {
-        "id": 27,
-        "title": "Test",
-        "grade": "7",
-        "locked": false,
-        "archived": false,
-        "archivedDate": null,
-        "institution": 18,
-        "code": "18ZBD",
-        "studentCount": 1,
-        "freePlay": false
+{
+    courseCode: "COU34"
+};
+function enrollInCourse(req, res, next) {
+
+    if( req.session &&
+        req.session.passport) {
+
+        if( req.body &&
+            req.body.courseCode) {
+            var userData = req.session.passport.user;
+            var courseCode = req.body.courseCode;
+
+            this.myds.getCourseIdFromCourseCode(courseCode)
+
+                .then(function(courseId) {
+                    if(courseId) {
+                        return this.myds.isUserInCourse(userData.id, courseId)
+                            .then(function(inCourse) {
+                                // only if they are NOT in the class
+                                if(!inCourse) {
+                                    this.myds.addUserToCourse(userData.id, courseId, lConst.role.student)
+                                        .then(function() {
+                                            this.requestUtil.jsonResponse(res, {});
+                                        }.bind(this))
+                                } else {
+                                    this.requestUtil.errorResponse(res, "already enrolled");
+                                }
+                            }.bind(this))
+                    } else {
+                        this.requestUtil.errorResponse(res, "invalid courseCode");
+                    }
+                }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, "missing courseId");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
     }
-];
+}
+
+exampleOut.getCourses =
+{
+    courseId: 123
+};
+function unenrollFromCourse(req, res, next) {
+    if( req.session &&
+        req.session.passport) {
+
+        if( req.body &&
+            req.body.courseId) {
+            var userData = req.session.passport.user;
+            var courseId = req.body.courseId;
+
+            this.myds.isUserInCourse(userData.id, courseId)
+                .then(function(inCourse) {
+
+                    // only if they are in the class
+                    if(inCourse) {
+                        this.myds.removeUserFromCourse(userData.id, courseId)
+                            .then(function() {
+                                this.requestUtil.jsonResponse(res, {});
+                            }.bind(this))
+                    } else {
+                        this.requestUtil.errorResponse(res, "not enrolled in course");
+                    }
+                }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, "missing courseId");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+
+exampleOut.getCourses =
+    [
+        {
+            "id": 27,
+            "title": "Test",
+            "grade": "7",
+            "locked": false,
+            "archived": false,
+            "archivedDate": null,
+            "institution": 18,
+            "code": "18ZBD",
+            "studentCount": 1,
+            "freePlay": false
+        }
+    ];
 
 
 exampleOut.getCoursesWithMembers =[
@@ -72,8 +153,7 @@ exampleOut.getCoursesWithMembers =[
             ]
     }
 ];
-
-function enrolledCourses(req, res, next){
+function getEnrolledCourses(req, res, next) {
 
     if( req.session &&
         req.session.passport) {

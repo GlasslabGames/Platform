@@ -14,12 +14,6 @@ module.exports = {
             license:     "license"
         }
     },
-    role: {
-        admin:      "admin",
-        instructor: "instructor",
-        manager:    "manager",
-        student:    "student"
-    },
     encrypt: {
         type: {
             pdkdf2: "{X-PDKDF2}"

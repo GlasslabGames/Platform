@@ -1,5 +1,5 @@
 
-var aConst = require('../auth.const.js');
+var lConst = require('../../lms/lms.const.js');
 var _      = require('lodash');
 
 
@@ -53,11 +53,11 @@ function glassLabLogin(req, res, next) {
             }
 
             // get courses
-            if( (user.systemRole == aConst.role.student) ||
-                (user.systemRole == aConst.role.instructor) ||
-                (user.systemRole == aConst.role.manager) ||
-                (user.systemRole == aConst.role.admin) ) {
-                this.webstore.getUserCourses(user.id)
+            if( (user.systemRole == lConst.role.student) ||
+                (user.systemRole == lConst.role.instructor) ||
+                (user.systemRole == lConst.role.manager) ||
+                (user.systemRole == lConst.role.admin) ) {
+                this.lmsStore.getUserCourses(user.id)
                     .then(function(courses){
                         // add courses
                         var tuser = _.clone(user);
