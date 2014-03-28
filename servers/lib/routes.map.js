@@ -4,18 +4,6 @@ module.exports = {
     // --------------------------------------------------------------------------------------
     statics: [
         {
-            routes: [
-                "/home",
-                "/mars1",
-                "/login",
-                "/check",
-                "/privacy-policy",
-                "/register",
-                "/contact"
-            ],
-            file: "index"
-        },
-        {
             requireAuth: true,
             routes: [
                 "/welcome",
@@ -36,7 +24,7 @@ module.exports = {
     ],
 
     // --------------------------------------------------------------------------------------
-    apis:[
+    apis: [
     // ---------------------------------------------------
     // Version 2
     // ---------------------------------------------------
@@ -142,7 +130,7 @@ module.exports = {
             service: "auth",
             controller: "user",
             method: {
-                post: "registerUser"
+                post: "registerUserV2"
             }
         },
         {
@@ -223,6 +211,33 @@ module.exports = {
             controller: "course",
             method: {
                 get: "getEnrolledCourses"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/course/create",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "createCourse"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/course/:id",
+            service: "lms",
+            controller: "course",
+            method: {
+                get: "getCourse"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/course/update",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "updateCourse"
             }
         }
     ]

@@ -99,6 +99,49 @@ return when.promise(function(resolve, reject) {
 };
 
 
+LMS_MySQL.prototype.getCourse = function(couserId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q =
+            "SELECT         \
+                c.id,       \
+                c.title,    \
+                c.grade,    \
+                c.locked > 0 as locked,      \
+                c.archived > 0 as archived,  \
+                c.free_Play > 0 as freePlay, \
+                (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
+                IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
+                c.archived_Date as archivedDate,    \
+                c.institution_id as institution     \
+            FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
+            WHERE c.id="+ this.ds.escape(couserId);
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results.length > 0) {
+                    results = results[0];
+                    results.archived = results.archived ? true : false;
+                    results.freePlay = results.freePlay ? true : false;
+                    results.locked   = results.locked   ? true : false;
+
+                    resolve(results);
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+                function(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
 LMS_MySQL.prototype.getStudentsOfCourse = function(courseId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -174,6 +217,35 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.getInstitutionIdFromCourseCode = function(courseCode) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q =
+            "SELECT course.institution_id as institutionId " +
+                "FROM GL_COURSE course INNER JOIN GL_CODE co ON course.id=co.course_id " +
+                "WHERE co.code="+ this.ds.escape(courseCode);
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results && results.length > 0){
+                    resolve(results[0].institutionId);
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+                function(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
+
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 };
 
@@ -322,5 +394,131 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.createCourse = function(title, grade, institutionId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var values = [
+            "NULL",  // id
+            0,       // version
+            0,       // archived
+            "NULL",  // archived date
+            "NULL",  // code
+            "NOW()", // date created
+            0,       // free play
+            this.ds.escape(grade),    // grade
+            parseInt(institutionId),  // institution id
+            "NOW()",                  // last updated
+            0,                        // locked
+            this.ds.escape(title)     // title
+        ];
+        values = values.join(',');
+
+        var Q = "INSERT INTO GL_COURSE (" +
+            "id," +
+            "version," +
+            "archived," +
+            "archived_date," +
+            "code," +
+            "date_created," +
+            "free_play," +
+            "grade," +
+            "institution_id," +
+            "last_updated," +
+            "locked," +
+            "title" +
+            ") VALUES("+values+")";
+
+        this.ds.query(Q)
+            .then(function(data){
+                    resolve(data.insertId);
+                }.bind(this),
+                function(err) {
+                    if(err.code == "ER_DUP_ENTRY") {
+                        reject({"error":"data validation","key":"course.not.unique"}, 400);
+                    } else {
+                        reject({"error": "failure", "exception": err}, 500);
+                    }
+                }.bind(this)
+            );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.addCode = function(code, id, type) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var values = [
+            "NULL",  // id
+            0,       // version
+            this.ds.escape(code),    // code
+            (type == lConst.code.type.course)      ? parseInt(id) : "NULL", // courseId
+            "NOW()", // date created
+            1,       // enabled
+            (type == lConst.code.type.institution) ? parseInt(id) : "NULL", // institution id
+            "NOW()", // last updated
+            this.ds.escape(type)    // type
+        ];
+        values = values.join(',');
+
+        var Q = "INSERT INTO GL_CODE (" +
+            "id," +
+            "version," +
+            "code," +
+            "course_Id," +
+            "date_created," +
+            "enabled," +
+            "institution_id," +
+            "last_updated," +
+            "type" +
+            ") VALUES("+values+")";
+
+        this.ds.query(Q)
+            .then(function(data){
+                resolve(data.insertId);
+            }.bind(this),
+                function(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.isEnrolledInCourse = function(userId, courseId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q = "SELECT * FROM GL_MEMBERSHIP " +
+            "WHERE user_Id="+this.ds.escape(userId) +
+            "AND course_Id="+this.ds.escape(courseId);
+
+        this.ds.query(Q)
+            .then(function(results) {
+                    if(results.length > 0) {
+                        resolve();
+                    } else {
+                        reject({"error": "user not found"}, 500);
+                    }
+                }.bind(this),
+                function(err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
+
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 };

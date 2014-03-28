@@ -45,6 +45,7 @@ function ServiceManager(){
     this.stats     = new Util.Stats(this.options, "ServiceManager");
     this.routesMap = require('../routes.map.js');
     this.services  = {};
+    this.routeList = {};
 }
 
 ServiceManager.prototype.initExpress = function() {
@@ -154,8 +155,11 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
     this.app.use(function defaultRoute(req, res) {
         this.stats.increment("info", "Route.Default");
 
+        // server up index
         //console.log("defaultRoute:", req.originalUrl);
-        res.redirect("/");
+        //res.redirect("/");
+        var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
+        res.sendfile( fullPath );
     }.bind(this));
 }
 
@@ -232,6 +236,11 @@ ServiceManager.prototype.setupApiRoutes = function() {
                     controller[ funcName ] ) {
                     func = controller[ funcName ];
 
+                    // save route in list for route lookup
+                    this.routeList[ a.api ] = {
+                        service: service,
+                        func:    func
+                    };
                     // if require auth
                     if(a.requireAuth) {
                         console.log("Auth API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
@@ -267,7 +276,7 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         this.app[ m ](a.api, function(req, res, next) {
                             //this.stats.increment("info", "Route.Auth");
                             func.call(service, req, res, next, this);
-                        });
+                        }.bind(this));
                     }
                 }
             }.bind(this));
@@ -371,4 +380,19 @@ ServiceManager.prototype.updateUserDataInSession = function(session){
 // ------------------------------------------------
     }.bind(this));
 // end promise wrapper
+};
+
+ServiceManager.prototype.internalRoute = function(routePath, args){
+    if(this.routeList.hasOwnProperty(routePath)) {
+
+        var route = this.routeList[routePath];
+
+        if(_.isArray(args)) {
+            args.push(this);
+        } else {
+            args = [args, this];
+        }
+
+        route.func.apply(route.service, args);
+    }
 };

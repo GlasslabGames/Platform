@@ -6,10 +6,13 @@ var lConst = require('../lms.const.js');
 module.exports = {
     getEnrolledCourses: getEnrolledCourses,
     enrollInCourse:     enrollInCourse,
-    unenrollFromCourse: unenrollFromCourse
+    unenrollFromCourse: unenrollFromCourse,
+    createCourse:       createCourse,
+    getCourse:          getCourse,
+    updateCourse:       updateCourse
 };
 
-var exampleOut = {};
+var exampleOut = {}, exampleIn = {};
 
 exampleOut.getCourses =
 {
@@ -206,5 +209,251 @@ function getEnrolledCourses(req, res, next) {
             }.bind(this))
     } else {
         this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+exampleIn.createCourse = {
+    "title": "test",
+    "grade": "7",
+    "institution": 10
+};
+
+exampleOut.createCourse = {
+    "id": 16,
+    "title": "test1",
+    "grade": "7, 8, 9",
+    "locked": false,
+    "archived": false,
+    "archivedDate": null,
+    "institution": 10,
+    "code": "VMZ2P",
+    "studentCount": 0,
+    "freePlay": false
+};
+function createCourse(req, res, next)
+{
+    if( req.body &&
+        req.body.title &&
+        req.body.grade &&
+        req.body.institution ) {
+        var userData = req.session.passport.user;
+
+        // check if instructor, manager or admin
+        if( userData.systemRole == lConst.role.instructor ||
+            userData.systemRole == lConst.role.manager ||
+            userData.systemRole == lConst.role.admin ) {
+
+            var courseData = {
+                title:       req.body.title,
+                grade:       req.body.grade,
+                institution: req.body.institution,
+                id:    0,
+                code: "",
+                studentCount: 0,
+                freePlay: false,
+                locked:   false,
+                archived: false,
+                archivedDate: null
+
+            };
+
+            this.myds.createCourse(courseData.title, courseData.grade, courseData.institution)
+
+                .then(function(courseId){
+                    if( userData.systemRole == lConst.role.instructor ||
+                        userData.systemRole == lConst.role.manager) {
+                        return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor)
+                            .then(function() {
+                                return courseId;
+                            }.bind(this))
+                    } else {
+                        return courseId;
+                    }
+                }.bind(this))
+
+                .then(function(courseId){
+                    courseData.id   = courseId;
+                    courseData.code = this._generateCode();
+                    return this.myds.addCode(courseData.code, courseId, lConst.code.type.course)
+                        .then(function(){
+                            this.requestUtil.jsonResponse(res, courseData);
+                        }.bind(this));
+                }.bind(this))
+
+                // error catchall
+                .then(null, function(err){
+                    this.requestUtil.errorResponse(res, err, 400);
+                }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, "user does not have permission");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "missing arguments");
+    }
+}
+
+/*
+     "/api/course/37?showMembers=1"
+*/
+function getCourse(req, res, next) {
+
+    if( req.session &&
+        req.session.passport) {
+        var userData = req.session.passport.user;
+
+        if( req.params &&
+            req.params.hasOwnProperty("id") ) {
+            var courseId = req.params.id;
+
+            // check if enrolled in course
+            var promise;
+            if( userData.systemRole == lConst.role.instructor ||
+                userData.systemRole == lConst.role.manager ||
+                userData.systemRole == lConst.role.admin ) {
+                // do nothing promise
+                promise = when.promise(function(resolve){resolve(1)}.bind(this));
+            } else {
+                // check if enrolled
+                promise = this.myds.isEnrolledInCourse(userData.id, courseId);
+            }
+
+            promise
+                .then(function(){
+                    return this.myds.getCourse(courseId);
+                }.bind(this))
+                .then(function(course){
+
+                    if( !course ){
+                        this.requestUtil.errorResponse(res, "invalid course id");
+                        return;
+                    }
+
+                    // cousers is not empty
+                    // showMembers is in query
+                    // convert showMembers to int and then check it's value
+                    if( req.query.hasOwnProperty("showMembers") &&
+                        parseInt(req.query.showMembers) ) {
+
+                        if(course.id) {
+                            //console.log("id:", course.id);
+                            // init user
+                            course.users = [];
+
+                            // only get students if instructor, manager or admin
+                            if( userData.systemRole == lConst.role.instructor ||
+                                userData.systemRole == lConst.role.manager ||
+                                userData.systemRole == lConst.role.admin ) {
+                                this.myds.getStudentsOfCourse(course.id)
+                                    .then(function(studentList){
+                                        course.users = _.clone(studentList);
+                                        // need to return something for reduce to continue
+                                        this.requestUtil.jsonResponse(res, course);
+                                    }.bind(this))
+
+                                    .then(null, function(err){
+                                        this.requestUtil.errorResponse(res, err);
+                                    }.bind(this))
+                            } else {
+                                this.requestUtil.jsonResponse(res, course);
+                            }
+
+                        } else {
+                            this.requestUtil.errorResponse(res, "invalid course id");
+                        }
+                    } else {
+                        this.requestUtil.jsonResponse(res, course);
+                    }
+
+                }.bind(this))
+                .then(null, function(err){
+                    this.requestUtil.errorResponse(res, err);
+                }.bind(this))
+        } else {
+            this.requestUtil.errorResponse(res, "missing course id");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+
+exampleIn.updateCourse = {
+    "id": 8,
+    "title": "test61",
+    "grade": "7",
+    "locked": false,
+    "archived": false,
+    "freePlay": false,
+    "code": "YD8WV",
+    "studentCount": 2,
+    "archivedDate": null,
+    "institution": 10,
+    "users": [
+        {"id": 175, "firstName": "test2_s0", "lastName": "test2_s1", "username": "test2_s1", "email": "test2_s1@test.com", "systemRole": "student"},
+        {"id": 176, "firstName": "test2_s2", "lastName": "test2_s2", "username": "test2_s2", "email": "", "systemRole": "student"}
+    ],
+    "showMembers": 1,
+    "cb": 1395992841665
+};
+// TODO
+function updateCourse(req, res, next)
+{
+    if( req.body &&
+        req.body.title &&
+        req.body.grade &&
+        req.body.institution ) {
+        var userData = req.session.passport.user;
+
+        // check if instructor, manager or admin
+        if( userData.systemRole == lConst.role.instructor ||
+            userData.systemRole == lConst.role.manager ||
+            userData.systemRole == lConst.role.admin ) {
+
+            var courseData = {
+                title:       req.body.title,
+                grade:       req.body.grade,
+                institution: req.body.institution,
+                id:    0,
+                code: "",
+                studentCount: 0,
+                freePlay: false,
+                locked:   false,
+                archived: false,
+                archivedDate: null
+
+            };
+
+            this.myds.createCourse(courseData.title, courseData.grade, courseData.institution)
+
+                .then(function(courseId){
+                    if( userData.systemRole == lConst.role.instructor ||
+                        userData.systemRole == lConst.role.manager) {
+                        return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor)
+                            .then(function() {
+                                return courseId;
+                            }.bind(this))
+                    } else {
+                        return courseId;
+                    }
+                }.bind(this))
+
+                .then(function(courseId){
+                    courseData.id   = courseId;
+                    courseData.code = this._generateCode();
+                    return this.myds.addCode(courseData.code, courseId, lConst.code.type.course)
+                        .then(function(){
+                            this.requestUtil.jsonResponse(res, courseData);
+                        }.bind(this));
+                }.bind(this))
+
+                // error catchall
+                .then(null, function(err){
+                    this.requestUtil.errorResponse(res, err, 400);
+                }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, "user does not have permission");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "missing arguments");
     }
 }
