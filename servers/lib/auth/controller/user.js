@@ -1,15 +1,16 @@
 
-var lConst = require('../../lms/lms.const.js');
 var _      = require('lodash');
+var lConst = require('../../lms/lms.const.js');
+var aConst = require('../../auth/auth.const.js');
 var Util   = require('../../core/util.js');
 
 module.exports = {
     showUser:        showUser,
-    registerUser:    registerUser,
+    registerUserV1:  registerUserV1,
+    registerUserV2:  registerUserV2,
     registerManager: registerManager,
     updateUser:      updateUser
 };
-
 
 
 function showUser(req, res, next) {
@@ -44,7 +45,7 @@ function showUser(req, res, next) {
  * 2. create the new user
  * 3. if student, enroll them in the course
  */
-function registerUser(req, res, next) {
+function registerUserV1(req, res, next) {
     // only allow for POST on login
     if(req.method != 'POST') { next(); return;}
 
@@ -326,4 +327,143 @@ function registerManager(req, res, next) {
             this.requestUtil.errorResponse(res, err, 400);
         }.bind(this)
         );
+};
+
+
+/**
+ * Registers a user with role of instructor or student
+ * 1. get institution
+ * 2. create the new user
+ * 3. if student, enroll them in the course
+ */
+function registerUserV2(req, res, next, serviceManager) {
+    // only allow for POST on login
+    if(req.method != 'POST') { next(); return;}
+
+    this.stats.increment("info", "Route.Register.User");
+    //console.log("Auth registerUserRoute - body:", req.body);
+
+    var regData = {
+        username:      "",
+        firstName:     "",
+        lastName:      "",
+        password:      "",
+        email:         "",
+        systemRole:    req.body.systemRole,
+        loginType:     aConst.login.type.glassLabV2
+    };
+
+    if(regData.systemRole == lConst.role.student) {
+        regData.username   = Util.ConvertToString(req.body.username);
+        regData.password   = Util.ConvertToString(req.body.password);
+        regData.firstName  = Util.ConvertToString(req.body.firstName);
+        regData.lastName   = Util.ConvertToString(req.body.lastName);
+
+        regData.regCode    = Util.ConvertToString(req.body.regCode);
+
+        if(!regData.username) {
+            this.requestUtil.errorResponse(res, "missing username", 400);
+            return;
+        }
+        if(!regData.password) {
+            this.requestUtil.errorResponse(res, "missing password", 400);
+            return;
+        }
+        if(!regData.firstName) {
+            this.requestUtil.errorResponse(res, "missing firstName", 400);
+            return;
+        }
+        if(!regData.regCode) {
+            this.requestUtil.errorResponse(res, "missing regCode", 400);
+            return;
+        }
+    }
+    else if(regData.systemRole == lConst.role.instructor) {
+        // email and username is the same
+        req.body.username  = req.body.email;
+        regData.username   = Util.ConvertToString(req.body.username);
+        regData.password   = Util.ConvertToString(req.body.password);
+        regData.firstName  = Util.ConvertToString(req.body.firstName);
+        regData.lastName   = Util.ConvertToString(req.body.lastName);
+
+        regData.email      = Util.ConvertToString(req.body.email);
+
+        if(!regData.username) {
+            this.requestUtil.errorResponse(res, "missing email", 400);
+            return;
+        }
+        if(!regData.password) {
+            this.requestUtil.errorResponse(res, "missing password", 400);
+            return;
+        }
+        if(!regData.firstName) {
+            this.requestUtil.errorResponse(res, "missing firstName", 400);
+            return;
+        }
+        if(!regData.email) {
+            this.requestUtil.errorResponse(res, "missing email", 400);
+            return;
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "invalid systemRole", 401);
+        return;
+    }
+
+    var registerErr = function(err, code){
+        if(!code) code = 500;
+
+        this.stats.increment("error", "Route.Register.User");
+        console.error("AuthServer registerUser Error:", err);
+        this.requestUtil.jsonResponse(res, err, code);
+    }.bind(this);
+
+    var register = function(regData, courseId) {
+
+        this._registerUser(regData)
+            .then(function(userId){
+                // if student, enroll in course
+                if(regData.systemRole == lConst.role.student) {
+                    // courseId
+                    this.stats.increment("info", "AddUserToCourse");
+                    this.lmsStore.addUserToCourse(userId, courseId, regData.systemRole)
+                        .then(function(){
+                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                            serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                        }.bind(this))
+                        // catch all errors
+                        .then(null, registerErr);
+                } else {
+                    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                    serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                }
+            }.bind(this))
+            // catch all errors
+            .then(null, registerErr);
+    }.bind(this);
+
+    // instructor
+    if(regData.systemRole == lConst.role.instructor) {
+        register(regData);
+    }
+    // else student
+    else if(regData.systemRole == lConst.role.student) {
+        // get course Id from course code
+        this.lmsStore.getCourseIdFromCourseCode(regData.regCode)
+            // register, passing in institutionId
+            .then(function(courseId){
+                if(courseId) {
+                    // get rid of reg code, not longer needed
+                    delete regData.regCode;
+;
+                    register(regData, courseId);
+                } else {
+                    this.stats.increment("error", "Route.Register.User.InvalidInstitution");
+                    registerErr({"error": "course not found"});
+                }
+            }.bind(this))
+            // catch all errors
+            .then(null, registerErr);
+    }
+
+    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole));
 };

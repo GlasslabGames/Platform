@@ -15,7 +15,7 @@ var check    = require('validator').check;
 
 // load at runtime
 // Glasslab libs
-var Util, aConst, MySQL;
+var Util, aConst, lConst, MySQL;
 
 module.exports = Glasslab_Strategy;
 
@@ -26,7 +26,9 @@ function Glasslab_Strategy(options) {
     // Glasslab libs
     Util   = require('../core/util.js');
     MySQL  = require('../core/datastore.mysql.js');
+    lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
+
 
     this._usernameField = 'username';
     this._passwordField = 'password';
@@ -276,7 +278,7 @@ return when.promise(function(resolve, reject) {
         email:          this.ds.escape(userData.email),
         first_name:     this.ds.escape(userData.firstName),
         last_name:      this.ds.escape(userData.lastName),
-        institution_id: this.ds.escape(userData.institutionId),
+        institution_id: userData.institutionId ? this.ds.escape(userData.institutionId) : "NULL",
         last_updated:   "NOW()",
         password:       this.ds.escape(userData.password),
         reset_code:     "NULL",
@@ -709,6 +711,7 @@ Glasslab_Strategy.prototype.checkUserPerminsToUserData = function(userData, logi
 };
 
 
+// TODO move to LMS
 Glasslab_Strategy.prototype._isEnrolledInInstructorCourse = function(studentId, instructorId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {

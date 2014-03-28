@@ -8,7 +8,7 @@ var http       = require('http');
 var _          = require('lodash');
 var when       = require('when');
 // load at runtime
-var Util;
+var Util, lConst;
 
 module.exports = LMSService;
 
@@ -26,6 +26,7 @@ function LMSService(options){
         LMSStore   = require('./lms.js').Datastore.MySQL;
         WebStore   = require('../dash/webapp.js').Datastore.MySQL;
         Util       = require('../core/util.js');
+        lConst     = require('./lms.js').Const;
 
         this.requestUtil = new Util.Request(this.options);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
@@ -70,3 +71,13 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+
+LMSService.prototype._generateCode = function() {
+
+    var code = "";
+    for( var i = 0; i < lConst.code.length; i++) {
+        code += lConst.code.charSet.charAt(Math.floor(Math.random() * lConst.code.charSet.length));
+    }
+
+    return code;
+};
