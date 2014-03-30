@@ -97,17 +97,6 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/lms/course/:id",
-            service: "lms",
-            controller: "course",
-            method: {
-                get: "showCourse",
-                post: "updateCourse",
-                "delete": "deleteCourse"
-            }
-        },
-        {
-            requireAuth: true,
             api: "/api/v2/lms/course/enroll",
             service: "lms",
             controller: "course",
@@ -122,6 +111,17 @@ module.exports = {
             controller: "course",
             method: {
                 post: "unenrollFromCourse"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/lms/course/:id",
+            service: "lms",
+            controller: "course",
+            method: {
+                get: "showCourse",
+                post: "updateCourse",
+                "delete": "deleteCourse"
             }
         },
         // ---------------------------------------------------
@@ -238,6 +238,39 @@ module.exports = {
             controller: "course",
             method: {
                 post: "updateCourse"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/course/unenroll/:id",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "unenrollUserFromCourse"
+            }
+        },
+        {
+            api: "/api/user/resetpassword/send",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "resetPasswordSend"
+            }
+        },
+        {
+            api: "/api/user/resetpassword/verify/:code",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "resetPasswordVerify"
+            }
+        },
+        {
+            api: "/api/user/resetpassword/update",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "resetPasswordUpdate"
             }
         }
     ]

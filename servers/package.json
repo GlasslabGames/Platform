@@ -17,7 +17,10 @@
         "node-uuid":      "1.4.x",
         "node-statsd":    "0.0.x",
         "statsd":         "0.7.x",
-        "moment":         "*"
+        "moment":         "*",
+        "nodemailer":     "*",
+        "email-templates": "*"
+
     },
     "optionalDependencies": {
         "hiredis":        "0.1.x"

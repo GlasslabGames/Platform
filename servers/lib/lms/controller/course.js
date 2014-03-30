@@ -1,15 +1,17 @@
 
 var _      = require('lodash');
 var when   = require('when');
+var Util   = require('../../core/util.js');
 var lConst = require('../lms.const.js');
 
 module.exports = {
-    getEnrolledCourses: getEnrolledCourses,
-    enrollInCourse:     enrollInCourse,
-    unenrollFromCourse: unenrollFromCourse,
-    createCourse:       createCourse,
-    getCourse:          getCourse,
-    updateCourse:       updateCourse
+    getEnrolledCourses:     getEnrolledCourses,
+    enrollInCourse:         enrollInCourse,
+    unenrollFromCourse:     unenrollFromCourse,
+    unenrollUserFromCourse: unenrollUserFromCourse,
+    createCourse:           createCourse,
+    getCourse:              getCourse,
+    updateCourse:           updateCourse
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -84,6 +86,55 @@ function unenrollFromCourse(req, res, next) {
                 }.bind(this));
         } else {
             this.requestUtil.errorResponse(res, "missing courseId");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+
+exampleOut.getCourses =
+{
+    course: 8,
+    showMembers: 1,
+    user: 176
+};
+function unenrollUserFromCourse(req, res, next, serviceManager) {
+    if( req.session &&
+        req.session.passport) {
+
+        if( req.body) {
+            if(!req.body.course){
+                this.requestUtil.errorResponse(res, "missing course id");
+                return;
+            }
+            if(!req.body.user){
+                this.requestUtil.errorResponse(res, "missing user id");
+                return;
+            }
+            var userId   = req.body.user;
+            var courseId = req.body.course;
+
+            this.myds.isUserInCourse(userId, courseId)
+                .then(function(inCourse) {
+
+                    // only if they are in the class
+                    if(inCourse) {
+                        this.myds.removeUserFromCourse(userId, courseId)
+                            .then(function() {
+
+                                req.query.showMembers = req.body.showMembers;
+                                req.params.id = courseId;
+                                // get and respond with course
+                                serviceManager.internalRoute('/api/course/:id', [req, res, next]);
+
+                            }.bind(this))
+                    } else {
+                        this.requestUtil.errorResponse(res, "not enrolled in course");
+                    }
+                }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, "missing arguments");
         }
     } else {
         this.requestUtil.errorResponse(res, "not logged in");
@@ -395,13 +446,14 @@ exampleIn.updateCourse = {
     "showMembers": 1,
     "cb": 1395992841665
 };
-// TODO
 function updateCourse(req, res, next)
 {
     if( req.body &&
         req.body.title &&
         req.body.grade &&
-        req.body.institution ) {
+        req.body.institution &&
+        req.body.id &&
+        _.isNumber(req.body.id)) {
         var userData = req.session.passport.user;
 
         // check if instructor, manager or admin
@@ -410,50 +462,32 @@ function updateCourse(req, res, next)
             userData.systemRole == lConst.role.admin ) {
 
             var courseData = {
-                title:       req.body.title,
-                grade:       req.body.grade,
-                institution: req.body.institution,
-                id:    0,
-                code: "",
-                studentCount: 0,
-                freePlay: false,
-                locked:   false,
-                archived: false,
-                archivedDate: null
-
+                id:            req.body.id,
+                title:         req.body.title,
+                grade:         req.body.grade,
+                institutionId: req.body.institution,
+                archived:      req.body.archived
             };
 
-            this.myds.createCourse(courseData.title, courseData.grade, courseData.institution)
+            if(courseData.archived) {
+                courseData.archivedDate = Util.GetTimeStamp();
+            }
 
-                .then(function(courseId){
-                    if( userData.systemRole == lConst.role.instructor ||
-                        userData.systemRole == lConst.role.manager) {
-                        return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor)
-                            .then(function() {
-                                return courseId;
-                            }.bind(this))
-                    } else {
-                        return courseId;
-                    }
-                }.bind(this))
+            this.myds.updateCourse(courseData)
 
-                .then(function(courseId){
-                    courseData.id   = courseId;
-                    courseData.code = this._generateCode();
-                    return this.myds.addCode(courseData.code, courseId, lConst.code.type.course)
-                        .then(function(){
-                            this.requestUtil.jsonResponse(res, courseData);
-                        }.bind(this));
+                .then(function() {
+                    // respond with all data passed in plus an changes (example archived date)
+                    this.requestUtil.jsonResponse(res, _.merge(req.body, courseData));
                 }.bind(this))
 
                 // error catchall
-                .then(null, function(err){
+                .then(null, function(err) {
                     this.requestUtil.errorResponse(res, err, 400);
                 }.bind(this));
         } else {
             this.requestUtil.errorResponse(res, "user does not have permission");
         }
     } else {
-        this.requestUtil.errorResponse(res, "missing arguments");
+        this.requestUtil.errorResponse(res, "missing arguments or invalid");
     }
 }

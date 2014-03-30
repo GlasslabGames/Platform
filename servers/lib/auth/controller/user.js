@@ -1,17 +1,25 @@
 
+var path   = require('path');
 var _      = require('lodash');
 var lConst = require('../../lms/lms.const.js');
 var aConst = require('../../auth/auth.const.js');
 var Util   = require('../../core/util.js');
+var emailTemplates = require('email-templates');
+var nodemailer     = require('nodemailer');
+var uuid      = require('node-uuid');
 
 module.exports = {
-    showUser:        showUser,
-    registerUserV1:  registerUserV1,
-    registerUserV2:  registerUserV2,
-    registerManager: registerManager,
-    updateUser:      updateUser
+    showUser:            showUser,
+    registerUserV1:      registerUserV1,
+    registerUserV2:      registerUserV2,
+    registerManager:     registerManager,
+    updateUser:          updateUser,
+    resetPasswordSend:   resetPasswordSend,
+    resetPasswordVerify: resetPasswordVerify,
+    resetPasswordUpdate: resetPasswordUpdate
 };
-
+var exampleIn = {};
+var exampleOut = {};
 
 function showUser(req, res, next) {
     if( req.session &&
@@ -46,9 +54,6 @@ function showUser(req, res, next) {
  * 3. if student, enroll them in the course
  */
 function registerUserV1(req, res, next) {
-    // only allow for POST on login
-    if(req.method != 'POST') { next(); return;}
-
     this.stats.increment("info", "Route.Register.User");
     //console.log("Auth registerUserRoute - body:", req.body);
 
@@ -171,9 +176,6 @@ function registerUserV1(req, res, next) {
  * 7. update user with institutionId
  */
 function registerManager(req, res, next) {
-    // only allow for POST on login
-    if(req.method != 'POST') { next(); return;}
-
     // make sure inputs are strings
     req.body.email     = Util.ConvertToString(req.body.email);
     req.body.firstName = Util.ConvertToString(req.body.firstName);
@@ -243,11 +245,6 @@ function registerManager(req, res, next) {
 };
 
  function updateUser(req, res, next, serviceManager) {
-    // only allow for POST on login
-    if(req.method != 'POST') { next(); return; }
-    // only if authenticated
-    if(!req.isAuthenticated()) { next(); return; }
-
     this.stats.increment("info", "Route.Update.User");
     //console.log("Auth updateUserRoute - body:", req.body);
     if( !(req.body.id) )
@@ -337,9 +334,6 @@ function registerManager(req, res, next) {
  * 3. if student, enroll them in the course
  */
 function registerUserV2(req, res, next, serviceManager) {
-    // only allow for POST on login
-    if(req.method != 'POST') { next(); return;}
-
     this.stats.increment("info", "Route.Register.User");
     //console.log("Auth registerUserRoute - body:", req.body);
 
@@ -358,7 +352,7 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.password   = Util.ConvertToString(req.body.password);
         regData.firstName  = Util.ConvertToString(req.body.firstName);
         regData.lastName   = Util.ConvertToString(req.body.lastName);
-
+        // optional
         regData.regCode    = Util.ConvertToString(req.body.regCode);
 
         if(!regData.username) {
@@ -371,10 +365,6 @@ function registerUserV2(req, res, next, serviceManager) {
         }
         if(!regData.firstName) {
             this.requestUtil.errorResponse(res, "missing firstName", 400);
-            return;
-        }
-        if(!regData.regCode) {
-            this.requestUtil.errorResponse(res, "missing regCode", 400);
             return;
         }
     }
@@ -417,12 +407,15 @@ function registerUserV2(req, res, next, serviceManager) {
         this.requestUtil.jsonResponse(res, err, code);
     }.bind(this);
 
-    var register = function(regData, courseId) {
 
+    var register = function(regData, courseId) {
         this._registerUser(regData)
             .then(function(userId){
+
                 // if student, enroll in course
-                if(regData.systemRole == lConst.role.student) {
+                if( regData.systemRole == lConst.role.student &&
+                    courseId) {
+
                     // courseId
                     this.stats.increment("info", "AddUserToCourse");
                     this.lmsStore.addUserToCourse(userId, courseId, regData.systemRole)
@@ -433,6 +426,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         // catch all errors
                         .then(null, registerErr);
                 } else {
+
                     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
                     serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
                 }
@@ -441,29 +435,208 @@ function registerUserV2(req, res, next, serviceManager) {
             .then(null, registerErr);
     }.bind(this);
 
+
     // instructor
     if(regData.systemRole == lConst.role.instructor) {
         register(regData);
     }
     // else student
     else if(regData.systemRole == lConst.role.student) {
-        // get course Id from course code
-        this.lmsStore.getCourseIdFromCourseCode(regData.regCode)
-            // register, passing in institutionId
-            .then(function(courseId){
-                if(courseId) {
-                    // get rid of reg code, not longer needed
-                    delete regData.regCode;
-;
-                    register(regData, courseId);
-                } else {
-                    this.stats.increment("error", "Route.Register.User.InvalidInstitution");
-                    registerErr({"error": "course not found"});
-                }
-            }.bind(this))
-            // catch all errors
-            .then(null, registerErr);
+        if(regData.regCode)
+        {
+            // get course Id from course code
+            this.lmsStore.getCourseIdFromCourseCode(regData.regCode)
+                // register, passing in institutionId
+                .then(function(courseId){
+                    if(courseId) {
+                        // get rid of reg code, not longer needed
+                        delete regData.regCode;
+                        ;
+                        register(regData, courseId);
+                    } else {
+                        this.stats.increment("error", "Route.Register.User.InvalidInstitution");
+                        registerErr({"error": "course not found"});
+                    }
+                }.bind(this))
+                // catch all errors
+                .then(null, registerErr);
+        } else {
+            register(regData);
+        }
     }
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole));
+}
+
+exampleIn.resetPasswordSend =
+{
+    "email": "asdasd@test.com"
 };
+function resetPasswordSend(req, res, next) {
+    if( req.body.email &&
+        _.isString(req.body.email) &&
+        req.body.email.length) {
+        var email = req.body.email;
+        var resetCode = uuid.v1();
+
+        var expirationTime = Util.GetTimeStamp() + aConst.passwordReset.expirationInterval;
+
+        // 1) valid user email and get the user data
+        //    update user account with code
+        this.glassLabStrategy.getUserByEmail(email)
+            .then(function(userData) {
+                userData.resetCode           = resetCode;
+                userData.resetCodeExpiration = expirationTime;
+                userData.resetCodeStatus     = aConst.passwordReset.status.sent;
+
+                return this.glassLabStrategy.updateUserDataInDS(userData)
+                    .then(function(){
+
+                        var emailData = {
+                            user: userData,
+                            server: {
+                                host: req.headers.host,
+                                code: resetCode
+                            }
+                        };
+
+                        // TODO: move this to a util
+                        // 2) send email
+                        var templatesDir = path.join(__dirname, "../email-templates");
+
+                        emailTemplates(templatesDir, { open: '{{', close: '}}' }, function(err, template) {
+                            if(err) {
+                                this.stats.increment("error", "Route.ResetPasswordSend.ReadingTemplates");
+                                console.err("Auth: Error reading templates -", err);
+                                this.requestUtil.errorResponse(res, {error: "internal error, try again later"}, 500);
+                                return;
+                            }
+
+                            // Send a single email
+                            template('password-reset', emailData, function(err, html, text) {
+                                if (err) {
+                                    this.stats.increment("error", "Route.ResetPasswordSend.BuildingEmail");
+                                    console.err("Auth: Error building email -", err);
+                                    this.requestUtil.errorResponse(res, {error: "internal error, try again later"}, 500);
+                                } else {
+
+                                    var transport = nodemailer.createTransport("SMTP", this.options.auth.transport);
+                                    var emailSettings = {
+                                        from: "<accounts@glasslabgames.org>",
+                                        to: userData.email,
+                                        subject: "Reset your password for Glasslab",
+                                        html: html,
+                                        // generateTextFromHTML: true,
+                                        text: text
+                                    };
+
+                                    transport.sendMail(emailSettings, function(err, responseStatus) {
+                                        if (err) {
+                                            this.stats.increment("error", "Route.ResetPasswordSend.SendEmail");
+                                            console.err("Auth: Error sending email -", err);
+                                            this.requestUtil.errorResponse(res, {error: "internal error, try again later"}, 500);
+                                        } else {
+                                            this.stats.increment("info", "Route.ResetPasswordSend.SendEmail");
+                                            console.log(responseStatus.message);
+                                            this.requestUtil.jsonResponse(res, {});
+                                        }
+                                    }.bind(this));
+
+                                }
+                            }.bind(this));
+                        }.bind(this));
+                    }.bind(this));
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err, 400);
+            }.bind(this))
+
+    } else {
+        this.requestUtil.errorResponse(res, "invalid or missing email", 401);
+    }
+}
+
+function resetPasswordVerify(req, res, next) {
+    if( req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) {
+
+        // 1) validate the code and get user data
+        this.glassLabStrategy.findUser("reset_code", req.params.code)
+            .then(function(userData) {
+                if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
+                    this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                } else {
+                    if(userData.resetCodeStatus == aConst.passwordReset.status.sent) {
+                        // update status
+                        userData.resetCodeStatus = aConst.passwordReset.status.inProgress;
+                        return this.glassLabStrategy.updateUserDataInDS(userData)
+                            .then(function() {
+                                this.requestUtil.jsonResponse(res, {});
+                            }.bind(this));
+                    } else {
+                        this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                    }
+                }
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err) {
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                } else {
+                    this.requestUtil.errorResponse(res, err, 400);
+                }
+            }.bind(this));
+
+    } else {
+        this.requestUtil.errorResponse(res, {error: "missing code", key:"missing.code.pass"}, 401);
+    }
+}
+
+exampleIn.resetPasswordUpdate = {
+    "password":"123",
+    "code":"c987c960-b6fc-11e3-9058-7d52ee769e0e"
+};
+function resetPasswordUpdate(req, res, next) {
+    if( req.body.code &&
+        _.isString(req.body.code) &&
+        req.body.code.length &&
+        req.body.password &&
+        _.isString(req.body.password) &&
+        req.body.password.length) {
+
+        // 1) validate the code and get user data
+        this.glassLabStrategy.findUser("reset_code", req.body.code)
+            .then(function(userData) {
+                if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
+                    this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                } else if(userData.resetCodeStatus == aConst.passwordReset.status.inProgress) {
+                    return this.glassLabStrategy.encryptPassword(req.body.password)
+                        .then(function(password) {
+                            // update status
+                            userData.password = password;
+                            userData.resetCodeStatus = "NULL";
+                            userData.resetCodeExpiration = "NULL";
+                            userData.resetCode = "NULL";
+
+                            return this.glassLabStrategy.updateUserDataInDS(userData);
+                        }.bind(this))
+                        .then(function() {
+                            this.requestUtil.jsonResponse(res, {});
+                        }.bind(this));
+                }
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err) {
+                this.requestUtil.errorResponse(res, err, 400);
+            }.bind(this));
+
+    } else {
+        this.requestUtil.errorResponse(res, {error: "missing code", key:"missing.code.pass"}, 401);
+    }
+}

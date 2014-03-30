@@ -29,5 +29,12 @@ module.exports = {
             edmodo:     "edmodo",
             learning:   "learning.com"
         }
+    },
+    passwordReset: {
+        expirationInterval: 10800, // 3 hours in seconds
+        status: {
+            sent:       "sent",
+            inProgress: "in progress"
+        }
     }
 };
