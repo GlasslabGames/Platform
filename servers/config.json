@@ -78,7 +78,17 @@
         "protocol": "http:",
         "host":     "localhost",
         "port":     8082,
-        "secret":   "keyboard kitty"
+        "secret":   "keyboard kitty",
+        "email": {
+            "from": "<accounts@glasslabgames.org>",
+            "transport": {
+                "service": "Gmail",
+                "auth": {
+                    "user": "glasslab@glasslabgames.org",
+                    "pass": "glasslab"
+                }
+            }
+        }
     },
     "validate": {
         "protocol": "http:",

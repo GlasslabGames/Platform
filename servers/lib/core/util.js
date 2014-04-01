@@ -151,6 +151,7 @@ function getExpressLogger(options, express, stats){
 module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
+    Email:   require('./util.email.js'),
     ConvertToString:  convertToString,
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,

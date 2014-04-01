@@ -90,10 +90,10 @@ return when.promise(function(resolve, reject) {
     //console.log("Auth: check user/pass");
 
     // try username
-    this._findUser("username", username)
+    this.findUser("username", username)
         // error, try email
         .then(null, function(user){
-            return this._findUser("email", username);
+            return this.findUser("email", username);
         }.bind(this))
         // valid user
         .then(function(user){
@@ -121,7 +121,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-Glasslab_Strategy.prototype._findUser = function(type, value, cb) {
+Glasslab_Strategy.prototype.findUser = function(type, value) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -130,16 +130,19 @@ return when.promise(function(resolve, reject) {
     var Q =
         "SELECT \
             id, \
-            USERNAME as username,    \
-            LAST_NAME as lastName,   \
-            FIRST_NAME as firstName, \
-            EMAIL as email,          \
-            PASSWORD as password,    \
-            SYSTEM_ROLE as systemRole,     \
+            username as username,    \
+            last_Name as lastName,   \
+            first_Name as firstName, \
+            email as email,          \
+            password as password,    \
+            system_Role as systemRole, \
             USER_TYPE as type,       \
-            LOGIN_TYPE as loginType, \
+            login_Type as loginType, \
             institution_id as institution, \
-            COLLECT_TELEMETRY as collectTelemetry \
+            collect_Telemetry as collectTelemetry, \
+            reset_Code as resetCode, \
+            reset_Code_Expiration as resetCodeExpiration, \
+            reset_Code_Status as resetCodeStatus \
         FROM \
             GL_USER \
         WHERE \
@@ -229,6 +232,42 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Glasslab_Strategy.prototype.getUserByEmail = function(email){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT " +
+        "id, " +
+        "username, " +
+        "email, " +
+        "first_name as firstName, " +
+        "last_name as lastName, " +
+        "system_role as systemRole, " +
+        "institution_id as institutionId " +
+        "FROM GL_USER WHERE email="+this.ds.escape(email);
+    this.ds.query(Q)
+        .then(
+            function(data){
+                if( !data ||
+                    !_.isArray(data) ||
+                    data.length < 1) {
+                    reject({"error": "user not found"}, 404);
+                    return;
+                }
+
+                resolve(data[0]);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
 Glasslab_Strategy.prototype.getUserById = function(id){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -311,51 +350,114 @@ return when.promise(function(resolve, reject) {
 };
 
 
-Glasslab_Strategy.prototype._updateUserDataInDB = function(userData){
+Glasslab_Strategy.prototype.updateUserDataInDS = function(userData){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var data = {
-            username:       this.ds.escape(userData.username),
-            email:          this.ds.escape(userData.email),
-            first_name:     this.ds.escape(userData.firstName),
-            last_name:      this.ds.escape(userData.lastName),
-            last_updated:   "NOW()"
-        };
+    var data = {
+        username:       this.ds.escape(userData.username),
+        email:          this.ds.escape(userData.email),
+        first_name:     this.ds.escape(userData.firstName),
+        last_name:      this.ds.escape(userData.lastName),
+        last_updated:   "NOW()"
+    };
 
-        if(userData.password) {
-            data["password"] = this.ds.escape(userData.password);
+    if(userData.password) {
+        data.password = this.ds.escape(userData.password);
+    }
+
+    if(userData.reset_code) {
+        userData.resetCode = userData.reset_code;
+    }
+    if(userData.resetCode) {
+        if(userData.resetCode == "NULL") {
+            data.reset_code = "NULL";
+        } else {
+            data.reset_code = this.ds.escape(userData.resetCode);
         }
-        if(userData.reset_code) {
-            if(userData.reset_code == "NULL") {
-                data["reset_code"] = "NULL";
-            } else {
-                data["reset_code"] = this.ds.escape(userData.reset_code);
-            }
+    }
+    if(userData.resetCodeExpiration) {
+        if(userData.resetCodeExpiration == "NULL") {
+            data.reset_Code_Expiration = "NULL";
+        } else {
+            data.reset_Code_Expiration = this.ds.escape(userData.resetCodeExpiration);
         }
+    }
+    if(userData.resetCodeStatus) {
+        if(userData.resetCodeStatus == "NULL") {
+            data.reset_Code_Status = "NULL";
+        } else {
+            data.reset_Code_Status = this.ds.escape(userData.resetCodeStatus);
+        }
+    }
 
-        // build set list
-        var values = _.map(data, function(value, key){
-            return key+"="+value;
-        });
-        values     = values.join(',');
-        var Q      = "UPDATE GL_USER SET "+values+" WHERE id="+this.ds.escape(userData.id);
+    // build set list
+    var values = _.map(data, function(value, key){
+        return key+"="+value;
+    });
+    values     = values.join(',');
+    var Q      = "UPDATE GL_USER SET "+values+" WHERE id="+this.ds.escape(userData.id);
 
-        this.ds.query(Q)
-            .then(
-                function(data){
-                    resolve(data.insertId);
-                }.bind(this),
-                function(err) {
-                    reject({"error": "failure", "exception": err}, 500);
-                }.bind(this)
-            );
+    this.ds.query(Q)
+        .then(
+            function(data){
+                resolve(data.insertId);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
+Glasslab_Strategy.prototype.getUserDataFromResetCode = function(code){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q = "SELECT * FROM GL_USER WHERE reset_code="+this.ds.escape(code);
+    this.ds.query(Q)
+        .then(
+            function(data){
+                if(data.length > 0) {
+                    resolve(data[0]);
+                } else {
+                    reject({"error": "data validation", "key": "code.not.valid"});
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
+
+
+Glasslab_Strategy.prototype.isValidEmail = function(email){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    this._checkUserEmailUnique(email)
+        .then(function(){
+                resolve(false);
+            }.bind(this),
+            function(err){
+                // not.unique == exists
+                if(err.key == "email.not.unique") {
+                    resolve(true);
+                } else {
+                    reject(err);
+                }
+
+            }.bind(this));
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
 
 Glasslab_Strategy.prototype.registerUser = function(userData){
 // add promise wrapper
@@ -391,7 +493,7 @@ return when.promise(function(resolve, reject) {
         }.bind(this))
         // encrypt password
         .then(function(){
-            return this._encryptPassword(userData.password);
+            return this.encryptPassword(userData.password);
         }.bind(this))
         // add user
         .then(function(password){
@@ -413,7 +515,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-Glasslab_Strategy.prototype._encryptPassword = function(password, passwordScheme){
+Glasslab_Strategy.prototype.encryptPassword = function(password, passwordScheme){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -514,7 +616,7 @@ return when.promise(function(resolve, reject) {
 };
 
 Glasslab_Strategy.prototype._migratePasswordToPDKDF2 = function(givenPassword, user, resolve, reject){
-    this._encryptPassword(givenPassword)
+    this.encryptPassword(givenPassword)
         .then(function(password){
             user.password = password;
             return this._updateUserPassword(user.id, password, aConst.login.type.glassLabV2);
@@ -535,13 +637,13 @@ Glasslab_Strategy.prototype._comparePassword = function(givenPassword, storedPas
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     // encrypt password using stored password scheme
-    this._encryptPassword(givenPassword, storedPassword)
+    this.encryptPassword(givenPassword, storedPassword)
         // if encrypted Given Password
         // encrypt password using new salt and default format
         .then(function(encryptedGivenPassword){
             if( encryptedGivenPassword &&
                 storedPassword != encryptedGivenPassword) {
-                return this._encryptPassword(givenPassword);
+                return this.encryptPassword(givenPassword);
             } else {
                 resolve(storedPassword);
             }
@@ -647,7 +749,7 @@ return when.promise(function(resolve, reject) {
                 }
             }
 
-            return this._updateUserDataInDB(userData);
+            return this.updateUserDataInDS(userData);
         }.bind(this))
 
         // all ok

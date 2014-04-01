@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+Dear {{= user.firstName }} {{= user.lastName }},<br />
+<br />
+Worry no longer! We are here to help you with that pesky little problem of (oops!) forgetting your password.
+Just click on the following secure link
+<a href="http://{{= server.host }}/passwordreset/{{= server.code }}">http://{{= server.host }}/passwordreset/{{= server.code }}</a>
+and you can reset you password in no time.<br />
+<br />
+Sincerely,<br />
+Your Best Friends at GlassLab
+</body>
+</html>

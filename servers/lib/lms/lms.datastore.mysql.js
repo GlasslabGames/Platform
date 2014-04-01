@@ -7,6 +7,7 @@
  */
 // Third-party libs
 var _      = require('lodash');
+var moment = require('moment');
 var when   = require('when');
 var lConst = require('./lms.const.js');
 
@@ -498,27 +499,50 @@ LMS_MySQL.prototype.addCode = function(code, id, type) {
 
 LMS_MySQL.prototype.isEnrolledInCourse = function(userId, courseId) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var Q = "SELECT * FROM GL_MEMBERSHIP " +
-            "WHERE user_Id="+this.ds.escape(userId) +
-            "AND course_Id="+this.ds.escape(courseId);
+    var Q = "SELECT * FROM GL_MEMBERSHIP " +
+        "WHERE user_Id="+this.ds.escape(userId) +
+        "AND course_Id="+this.ds.escape(courseId);
 
-        this.ds.query(Q)
-            .then(function(results) {
-                    if(results.length > 0) {
-                        resolve();
-                    } else {
-                        reject({"error": "user not found"}, 500);
-                    }
-                }.bind(this),
-                function(err) {
-                    reject({"error": "failure", "exception": err}, 500);
-                }.bind(this)
-            );
+    this.ds.query(Q)
+        .then(function(results) {
+                if(results.length > 0) {
+                    resolve();
+                } else {
+                    reject({"error": "user not found"}, 500);
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.updateCourse = function(courseData) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q = "UPDATE GL_COURSE " +
+        "SET last_updated=NOW(), " +
+        "title="+this.ds.escape(courseData.title)+", "+
+        "grade="+this.ds.escape(courseData.grade)+", ";
+    if(courseData.archived) {
+        Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
+    } else {
+        Q += "archived=false, archived_date=NULL, ";
+    }
+    Q += "institution_Id="+this.ds.escape(courseData.institutionId)+" "+
+         "WHERE id="+courseData.id;
+
+    this.ds.query(Q).then( resolve, reject );
+// ------------------------------------------------
+}.bind(this));
 // end promise wrapper
 };
