@@ -527,22 +527,22 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.updateCourse = function(courseData) {
 // add promise wrapper
-        return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-            var Q = "UPDATE GL_COURSE " +
-                "SET last_updated=NOW(), " +
-                "title="+this.ds.escape(courseData.title)+", "+
-                "grade="+this.ds.escape(courseData.grade)+", ";
-            if(courseData.archived) {
-                Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
-            } else {
-                Q += "archived=false, archived_date=NULL, ";
-            }
-            Q += "institution_Id="+this.ds.escape(courseData.institutionId)+" "+
-                 "WHERE id="+courseData.id;
+    var Q = "UPDATE GL_COURSE " +
+        "SET last_updated=NOW(), " +
+        "title="+this.ds.escape(courseData.title)+", "+
+        "grade="+this.ds.escape(courseData.grade)+", ";
+    if(courseData.archived) {
+        Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
+    } else {
+        Q += "archived=false, archived_date=NULL, ";
+    }
+    Q += "institution_Id="+this.ds.escape(courseData.institutionId)+" "+
+         "WHERE id="+courseData.id;
 
-            this.ds.query(Q).then( resolve, reject );
+    this.ds.query(Q).then( resolve, reject );
 // ------------------------------------------------
-        }.bind(this));
+}.bind(this));
 // end promise wrapper
-    };
+};

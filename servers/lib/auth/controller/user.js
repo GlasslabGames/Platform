@@ -4,9 +4,7 @@ var _      = require('lodash');
 var lConst = require('../../lms/lms.const.js');
 var aConst = require('../../auth/auth.const.js');
 var Util   = require('../../core/util.js');
-var emailTemplates = require('email-templates');
-var nodemailer     = require('nodemailer');
-var uuid      = require('node-uuid');
+var uuid   = require('node-uuid');
 
 module.exports = {
     showUser:            showUser,
@@ -419,7 +417,7 @@ function registerUserV2(req, res, next, serviceManager) {
                     // courseId
                     this.stats.increment("info", "AddUserToCourse");
                     this.lmsStore.addUserToCourse(userId, courseId, regData.systemRole)
-                        .then(function(){
+                        .then(function() {
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
                             serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
                         }.bind(this))
@@ -427,8 +425,33 @@ function registerUserV2(req, res, next, serviceManager) {
                         .then(null, registerErr);
                 } else {
 
-                    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
-                    serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                    var verifyCode = uuid.v1();
+                    // store code
+                    // 1) store code
+                    // TODO
+
+                    // instructor, manager or admin (all require email)
+                    // 2) send email
+                    var emailData = {
+                        user: regData,
+                        server: {
+                            host: req.headers.host,
+                            code: verifyCode
+                        }
+                    };
+                    var templatesDir = path.join(__dirname, "../email-templates");
+                    var email = new Util.Email(this.options.auth.email, templatesDir, this.stats);
+                    email.send('register-welcome', emailData, "Welcome to Mars Generation One!")
+                        .then(function(){
+                            // all ok
+                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                            serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            this.requestUtil.errorResponse(res, err, 500);
+                        }.bind(this));
+
                 }
             }.bind(this))
             // catch all errors
@@ -492,6 +515,7 @@ function resetPasswordSend(req, res, next) {
                 return this.glassLabStrategy.updateUserDataInDS(userData)
                     .then(function(){
 
+                        // 2) send email
                         var emailData = {
                             user: userData,
                             server: {
@@ -499,52 +523,18 @@ function resetPasswordSend(req, res, next) {
                                 code: resetCode
                             }
                         };
-
-                        // TODO: move this to a util
-                        // 2) send email
                         var templatesDir = path.join(__dirname, "../email-templates");
-
-                        emailTemplates(templatesDir, { open: '{{', close: '}}' }, function(err, template) {
-                            if(err) {
-                                this.stats.increment("error", "Route.ResetPasswordSend.ReadingTemplates");
-                                console.err("Auth: Error reading templates -", err);
-                                this.requestUtil.errorResponse(res, {error: "internal error, try again later"}, 500);
-                                return;
-                            }
-
-                            // Send a single email
-                            template('password-reset', emailData, function(err, html, text) {
-                                if (err) {
-                                    this.stats.increment("error", "Route.ResetPasswordSend.BuildingEmail");
-                                    console.err("Auth: Error building email -", err);
-                                    this.requestUtil.errorResponse(res, {error: "internal error, try again later"}, 500);
-                                } else {
-
-                                    var transport = nodemailer.createTransport("SMTP", this.options.auth.transport);
-                                    var emailSettings = {
-                                        from: "<accounts@glasslabgames.org>",
-                                        to: userData.email,
-                                        subject: "Reset your password for Glasslab",
-                                        html: html,
-                                        // generateTextFromHTML: true,
-                                        text: text
-                                    };
-
-                                    transport.sendMail(emailSettings, function(err, responseStatus) {
-                                        if (err) {
-                                            this.stats.increment("error", "Route.ResetPasswordSend.SendEmail");
-                                            console.err("Auth: Error sending email -", err);
-                                            this.requestUtil.errorResponse(res, {error: "internal error, try again later"}, 500);
-                                        } else {
-                                            this.stats.increment("info", "Route.ResetPasswordSend.SendEmail");
-                                            console.log(responseStatus.message);
-                                            this.requestUtil.jsonResponse(res, {});
-                                        }
-                                    }.bind(this));
-
-                                }
+                        var email = new Util.Email(this.options.auth.email, templatesDir, this.stats);
+                        email.send('register-verify', emailData, "Your Mars Generation One Password")
+                            .then(function(){
+                                // all ok
+                                this.requestUtil.jsonResponse(res, {});
+                            }.bind(this))
+                            // error
+                            .then(null, function(err){
+                                this.requestUtil.errorResponse(res, err, 500);
                             }.bind(this));
-                        }.bind(this));
+
                     }.bind(this));
             }.bind(this))
 

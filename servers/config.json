@@ -79,11 +79,14 @@
         "host":     "localhost",
         "port":     8082,
         "secret":   "keyboard kitty",
-        "transport": {
-            "service": "Gmail",
-            "auth": {
-                "user": "glasslab@glasslabgames.org",
-                "pass": "glasslab"
+        "email": {
+            "from": "<accounts@glasslabgames.org>",
+            "transport": {
+                "service": "Gmail",
+                "auth": {
+                    "user": "glasslab@glasslabgames.org",
+                    "pass": "glasslab"
+                }
             }
         }
     },
