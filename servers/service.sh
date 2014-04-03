@@ -9,11 +9,7 @@ start() {
     grunt
 
     ./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
-    ./service_start.sh data-collector
-    ./service_start.sh auth
-    ./service_start.sh auth-validate
-    ./service_start.sh assessment
-    ./service_start.sh assessment-distiller
+    ./service_start.sh app
 }
 
 stop() {
