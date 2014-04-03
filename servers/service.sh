@@ -9,7 +9,7 @@ start() {
     grunt
 
     ./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
-    ./service_start.sh app
+    ./service_start.sh app "app.js"
 }
 
 stop() {
