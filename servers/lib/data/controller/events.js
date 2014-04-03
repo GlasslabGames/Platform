@@ -1,9 +1,12 @@
 
-var Util = require('../../core/util.js');
+var when   = require('when');
+var Util   = require('../../core/util.js');
+var lConst = require('../../lms/lms.const.js');
 
 module.exports = {
     sendBatchTelemetryV2: sendBatchTelemetryV2,
-    sendBatchTelemetryV1: sendBatchTelemetryV1
+    sendBatchTelemetryV1: sendBatchTelemetryV1,
+    getEventsByUserId:    getEventsByUserId
 };
 
 function sendBatchTelemetryV2(req, outRes){
@@ -19,7 +22,7 @@ function sendBatchTelemetryV2(req, outRes){
         console.trace("Collector: Send Telemetry Batch Error -", err);
         this.stats.increment("error", "SendBatchTelemetry.Catch");
     }
-};
+}
 
 function sendBatchTelemetryV1(req, outRes){
     try {
@@ -57,4 +60,73 @@ function sendBatchTelemetryV1(req, outRes){
         console.trace("Collector: Send Telemetry Batch Error -", err);
         this.stats.increment("error", "SendBatchTelemetry.Catch");
     }
-};
+}
+
+/*
+ http://localhost:8001/api/v2/data/events/get?userId=25
+ requires userId
+ */
+function getEventsByUserId(req, res, next){
+    try {
+        if( req.session &&
+            req.session.passport) {
+            var userData = req.session.passport.user;
+
+            this.stats.increment("info", "Route.GetUserData");
+
+            if( req.query &&
+                req.query.userId) {
+
+                if(userData.systemRole  == lConst.role.admin) {
+                    this.myds.getSessionsByUserId(req.query.userId)
+                        .then(function(sessionList){
+
+                            if(!sessionList || (sessionList.length == 0)) {
+                                this.requestUtil.jsonResponse(res, []);
+                                return;
+                            }
+
+                            when.reduce(sessionList, function(currentResult, sessionId, index){
+
+                                    if(sessionId.length > 0) {
+                                        return this.cbds.getRawEvents(sessionId)
+                                            .then( function (results) {
+
+                                                //if(results.length > 0) console.log("getRawEvents length:", results.length);
+
+                                                return currentResult.concat(results);
+                                            }.bind(this));
+                                    } else {
+                                        return currentResult;
+                                    }
+                                }.bind(this), [])
+
+                                // done
+                                .then(function(result){
+                                    // output in pretty format
+                                    this.requestUtil.jsonResponse(res, JSON.stringify(result, undefined, 2));
+                                }.bind(this))
+
+                                // error
+                                .then(null, function(err){
+                                    console.error("err:", err);
+                                }.bind(this))
+
+
+                        }.bind(this))
+
+                } else {
+                    this.requestUtil.errorResponse(res, {error: "invalid access"});
+                }
+            } else {
+                this.requestUtil.errorResponse(res, {error: "missing userId"}, 401);
+            }
+        } else {
+            this.requestUtil.errorResponse(res, {error: "not logged in"});
+        }
+    } catch(err) {
+        console.trace("Collector: Get User Data Error -", err);
+        this.stats.increment("error", "GetUserData.Catch");
+        this.requestUtil.errorResponse(res, {error: err});
+    }
+}

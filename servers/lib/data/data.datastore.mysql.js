@@ -492,3 +492,23 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Mysql.prototype.getSessionsByUserId = function(userId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q = "SELECT session_id as sessionId FROM GL_SESSION WHERE activity_id IS NOT NULL AND user_id="+userId;
+        this.ds.query(Q)
+            .then(
+                function(data) {
+                    resolve( _.pluck(data, 'sessionId') );
+                }.bind(this),
+                reject
+            );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
