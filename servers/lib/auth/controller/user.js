@@ -428,20 +428,27 @@ function registerUserV2(req, res, next, serviceManager) {
                     var verifyCode = uuid.v1();
                     // store code
                     // 1) store code
+                    /*
+                     var emailData = {
+                        user: regData,
+                        code: verifyCode
+                     };
+                    */
                     // TODO
 
                     // instructor, manager or admin (all require email)
                     // 2) send email
                     var emailData = {
+                        subject: "Welcome to Mars Generation One!",
+                        to:   regData.email,
                         user: regData,
-                        server: {
-                            host: req.headers.host,
-                            code: verifyCode
-                        }
+                        host: req.headers.host
                     };
-                    var templatesDir = path.join(__dirname, "../email-templates");
-                    var email = new Util.Email(this.options.auth.email, templatesDir, this.stats);
-                    email.send('register-welcome', emailData, "Welcome to Mars Generation One!")
+                    var email = new Util.Email(
+                        this.options.auth.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    email.send('register-welcome', emailData)
                         .then(function(){
                             // all ok
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
@@ -514,18 +521,21 @@ function resetPasswordSend(req, res, next) {
 
                 return this.glassLabStrategy.updateUserDataInDS(userData)
                     .then(function(){
-
+                        //
                         // 2) send email
                         var emailData = {
+                            subject: "Your Mars Generation One Password",
+                            to:   userData.email,
                             user: userData,
-                            server: {
-                                host: req.headers.host,
-                                code: resetCode
-                            }
+                            code: resetCode,
+                            host: req.headers.host
                         };
-                        var templatesDir = path.join(__dirname, "../email-templates");
-                        var email = new Util.Email(this.options.auth.email, templatesDir, this.stats);
-                        email.send('register-verify', emailData, "Your Mars Generation One Password")
+
+                        var email = new Util.Email(
+                            this.options.auth.email,
+                            path.join(__dirname, "../email-templates"),
+                            this.stats);
+                        email.send('password-reset', emailData)
                             .then(function(){
                                 // all ok
                                 this.requestUtil.jsonResponse(res, {});

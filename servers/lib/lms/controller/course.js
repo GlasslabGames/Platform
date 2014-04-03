@@ -43,15 +43,15 @@ function enrollInCourse(req, res, next) {
                                             this.requestUtil.jsonResponse(res, {});
                                         }.bind(this))
                                 } else {
-                                    this.requestUtil.errorResponse(res, "already enrolled");
+                                    this.requestUtil.errorResponse(res, {error:"already enrolled", key:"already.enrolled"}, 400);
                                 }
                             }.bind(this))
                     } else {
-                        this.requestUtil.errorResponse(res, "invalid courseCode");
+                        this.requestUtil.errorResponse(res, {error:"invalid courseCode", key:"code.invalid"}, 400);
                     }
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, "missing courseId");
+            this.requestUtil.errorResponse(res, {error:"missing courseCode", key:"code.missing"}, 401);
         }
     } else {
         this.requestUtil.errorResponse(res, "not logged in");

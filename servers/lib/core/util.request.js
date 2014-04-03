@@ -23,6 +23,9 @@ function RequestUtil(options){
 }
 
 RequestUtil.prototype.errorResponse = function(res, obj, code){
+    // default 400 error code
+    if(!code) { code = 400; }
+
     if(_.isString(obj)) {
         try{
             // is string, try to convert to object
