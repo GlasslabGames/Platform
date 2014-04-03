@@ -17,10 +17,10 @@
         "node-uuid":      "1.4.x",
         "node-statsd":    "0.0.x",
         "statsd":         "0.7.x",
-        "moment":         "*",
-        "nodemailer":     "*",
-        "email-templates": "*"
-
+        "moment":         "2.5.x",
+        "nodemailer":     "0.6.x",
+        "ejs":            "1.0.x",
+        "q-io":           "1.11.x"
     },
     "optionalDependencies": {
         "hiredis":        "0.1.x"
