@@ -53,6 +53,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/data/events/get",
+            service: "data",
+            controller: "events",
+            method: {
+                get: "getEventsByUserId"
+            }
+        },
+        {
             api: "/api/v2/data/events",
             service: "data",
             controller: "events",

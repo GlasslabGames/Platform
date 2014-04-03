@@ -466,6 +466,11 @@ return when.promise(function(resolve, reject) {
                 return;
             }
 
+            if(results.length == 0) {
+                resolve({});
+                return;
+            }
+
             var keys = [];
             for (var i = 0; i < results.length; ++i) {
                 keys.push(results[i].id);
@@ -533,6 +538,59 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
+// end promise wrapper
+};
+
+
+
+TelemDS_Couchbase.prototype.getRawEvents = function(gameSessionId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        this.client.view("telemetry", "getEventsByGameSessionId").query({
+                stale: false,
+                key: gameSessionId
+            },
+            function(err, results){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Get Events View Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                if(results.length == 0) {
+                    resolve([]);
+                    return;
+                }
+
+                var keys = [];
+                for (var i = 0; i < results.length; ++i) {
+                    keys.push(results[i].id);
+                }
+
+                //console.log("CouchBase TelemetryStore: keys", keys);
+                this.client.getMulti(keys, {},
+                    function(err, results){
+                        if(err){
+                            console.error("CouchBase TelemetryStore: Multi Get Events Error -", err);
+                            reject(err);
+                            return;
+                        }
+
+                        var events = [];
+                        for(var i in results) {
+                            events.push( results[i].value );
+                        }
+
+                        //console.log("getRawEvents events:", events);
+                        resolve(events);
+                    }.bind(this));
+
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 };
 
