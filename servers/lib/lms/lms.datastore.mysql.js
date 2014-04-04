@@ -403,6 +403,11 @@ LMS_MySQL.prototype.createCourse = function(title, grade, institutionId) {
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
+        // if institutionId not set then set it to zero
+        if(!institutionId) {
+            institutionId = 1;
+        }
+
         var values = [
             "NULL",  // id
             0,       // version

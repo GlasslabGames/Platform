@@ -63,7 +63,7 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
             }.bind(this),
             function (err) {
                 // respond with generic answer
-                this.fail({error: "invalid username or password"});
+                this.fail({error: "invalid username or password", key:"invalid"});
             }.bind(this)
     );
 

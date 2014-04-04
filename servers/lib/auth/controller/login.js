@@ -2,11 +2,21 @@
 var lConst = require('../../lms/lms.const.js');
 var _      = require('lodash');
 
-
 module.exports = {
     logout:   logout,
-    glassLabLogin: glassLabLogin
+    glassLabLogin: glassLabLogin,
+    loginStatus: loginStatus
 };
+
+
+function loginStatus(req, res){
+
+    if( req.isAuthenticated() ) {
+        this.requestUtil.jsonResponse(res, { status: "ok", info: "login valid"} );
+    } else {
+        this.requestUtil.errorResponse(res, "login invalid");
+    }
+}
 
 function logout(req, res){
     //console.log("logout:", req.originalUrl);
@@ -30,7 +40,7 @@ function glassLabLogin(req, res, next) {
     var auth = this.passport.authenticate('glasslab', function(err, user, info) {
         if(err) {
             this.stats.increment("error", "Route.Login.Auth");
-            this.requestUtil.errorResponse(res, "login auth", 500);
+            this.requestUtil.errorResponse(res, {error:"try again later", key:"general"}, 500);
             return;
         }
 

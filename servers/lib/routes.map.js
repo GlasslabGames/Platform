@@ -160,6 +160,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/login/status",
+            service: "auth",
+            controller: "login",
+            method: {
+                get: "loginStatus"
+            }
+        },
+        {
             api: "/api/v2/auth/resetpassword/send",
             service: "auth",
             controller: "resetpassword",
@@ -200,6 +208,14 @@ module.exports = {
             controller: "login",
             method: {
                 post: "glassLabLogin"
+            }
+        },
+        {
+            api: "/api/user/logout",
+            service: "auth",
+            controller: "login",
+            method: {
+                post: "logout"
             }
         },
         {
