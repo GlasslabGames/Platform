@@ -285,8 +285,7 @@ function createCourse(req, res, next)
 {
     if( req.body &&
         req.body.title &&
-        req.body.grade &&
-        req.body.institution ) {
+        req.body.grade ) {
         var userData = req.session.passport.user;
 
         // check if instructor, manager or admin

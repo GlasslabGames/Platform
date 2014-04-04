@@ -349,8 +349,9 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.username   = Util.ConvertToString(req.body.username);
         regData.password   = Util.ConvertToString(req.body.password);
         regData.firstName  = Util.ConvertToString(req.body.firstName);
-        regData.lastName   = Util.ConvertToString(req.body.lastName);
+
         // optional
+        regData.lastName   = Util.ConvertToString(req.body.lastName);
         regData.regCode    = Util.ConvertToString(req.body.regCode);
 
         if(!regData.username) {
