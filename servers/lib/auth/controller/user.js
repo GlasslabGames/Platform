@@ -402,7 +402,7 @@ function registerUserV2(req, res, next, serviceManager) {
         if(!code) code = 500;
 
         this.stats.increment("error", "Route.Register.User");
-        console.error("AuthServer registerUser Error:", err);
+        //console.error("AuthServer registerUser Error:", err);
         this.requestUtil.jsonResponse(res, err, code);
     }.bind(this);
 
@@ -411,32 +411,40 @@ function registerUserV2(req, res, next, serviceManager) {
         this._registerUser(regData)
             .then(function(userId){
 
-                // if student, enroll in course
-                if( regData.systemRole == lConst.role.student &&
-                    courseId) {
+                // if student
+                if( regData.systemRole == lConst.role.student) {
 
-                    // courseId
-                    this.stats.increment("info", "AddUserToCourse");
-                    this.lmsStore.addUserToCourse(userId, courseId, regData.systemRole)
-                        .then(function() {
-                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
-                            serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
-                        }.bind(this))
-                        // catch all errors
-                        .then(null, registerErr);
-                } else {
-
+                    // if courseId then enroll in class
+                    if(courseId) {
+                        // courseId
+                        this.stats.increment("info", "AddUserToCourse");
+                        this.lmsStore.addUserToCourse(userId, courseId, regData.systemRole)
+                            .then(function() {
+                                this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                            }.bind(this))
+                            // catch all errors
+                            .then(null, registerErr);
+                    } else {
+                        this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                        serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                    }
+                }
+                // if instructor or manager
+                // send email
+                else if( regData.systemRole == lConst.role.instructor ||
+                        regData.systemRole == lConst.role.manager)
+                {
                     var verifyCode = uuid.v1();
                     // store code
                     // 1) store code
                     /*
                      var emailData = {
-                        user: regData,
-                        code: verifyCode
+                     user: regData,
+                     code: verifyCode
                      };
-                    */
+                     */
                     // TODO
-
                     // instructor, manager or admin (all require email)
                     // 2) send email
                     var emailData = {
@@ -449,6 +457,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         this.options.auth.email,
                         path.join(__dirname, "../email-templates"),
                         this.stats);
+
                     email.send('register-welcome', emailData)
                         .then(function(){
                             // all ok
@@ -459,7 +468,6 @@ function registerUserV2(req, res, next, serviceManager) {
                         .then(null, function(err){
                             this.requestUtil.errorResponse(res, err, 500);
                         }.bind(this));
-
                 }
             }.bind(this))
             // catch all errors
