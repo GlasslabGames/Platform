@@ -16,7 +16,8 @@ module.exports = {
     updateUser:          updateUser,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
-    resetPasswordUpdate: resetPasswordUpdate
+    resetPasswordUpdate: resetPasswordUpdate,
+    updateUserDevice:    updateUserDevice
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -299,7 +300,7 @@ function registerManager(req, res, next) {
     // wrap getSession in promise
     this._updateUserData(userData, loginUserSessionData)
         // save changed data
-        .then(function(data){
+        .then(function(data) {
             if(data.changed) {
                 // update session user data
                 req.session.passport.user = data.user;
@@ -738,5 +739,40 @@ function resetPasswordUpdate(req, res, next) {
 
     } else {
         this.requestUtil.errorResponse(res, {error: "missing code", key:"missing.code.pass"}, 401);
+    }
+}
+
+
+exampleIn.updateUserDevice = {
+    deviceId: "ASD-QWER-ASD"
+};
+function updateUserDevice(req, res, next) {
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user) {
+
+        var userData = req.session.passport.user;
+
+        // deviveId required
+        if( req.body &&
+            req.body.deviceId &&
+            req.body.deviceId.length ) {
+
+            // update device Id
+            //console.log("deviceId:", req.body.deviceId);
+            this.authStore.updateUserDeviceId(userData.id, req.body.deviceId)
+                .then(function(){
+                    this.requestUtil.jsonResponse(res, { status: "ok" } );
+                }.bind(this))
+
+                // catch all errors
+                .then(null, function(err){
+                    this.requestUtil.errorResponse(res, err);
+                }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, "missing deviceId");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
     }
 }

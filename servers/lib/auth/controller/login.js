@@ -14,7 +14,7 @@ module.exports = {
 function loginStatus(req, res){
 
     if( req.isAuthenticated() ) {
-        this.requestUtil.jsonResponse(res, { status: "ok", info: "login valid"} );
+        this.requestUtil.jsonResponse(res, { status: "ok", info: "login valid" } );
     } else {
         this.requestUtil.errorResponse(res, "login invalid");
     }
@@ -37,10 +37,13 @@ function logout(req, res){
 
 /*
 Cases:
-  1) already logged in without deviceId in body
-  2) already logged in with deviceId in body
-  3) not logged in without deviceId in body
-  4) not logged in with deviceId in body
+  1) already logged
+    - update session
+    - respond with user data
+  2) not logged
+    - validate user login
+    - update session
+    - respond with user data
 */
 function glassLabLogin(req, res, next) {
     this.stats.increment("info", "Route.Login");
@@ -67,25 +70,6 @@ function glassLabLogin(req, res, next) {
             }.bind(this))
     } else {
         promise = Util.PromiseContinue(userInfo);
-    }
-
-    if( req.body &&
-        req.body.deviceId &&
-        req.body.deviceId.length ) {
-        // deviceId exists and is not none zero length
-        promise.then(function(user){
-                // update device Id
-                //console.log("deviceId:", req.body.deviceId);
-                return this.authStore.updateUserDeviceId(user.id, req.body.deviceId)
-                    .then(function(){
-                        return user;
-                    }.bind(this));
-            }.bind(this))
-
-            // catch all errors
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
-            }.bind(this));
     }
 
     promise.then(function(user){
