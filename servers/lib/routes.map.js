@@ -143,6 +143,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/auth/user/device",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "updateUserDevice"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/auth/user/:id",
             service: "auth",
             controller: "user",

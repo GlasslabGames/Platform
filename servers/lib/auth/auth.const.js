@@ -36,5 +36,11 @@ module.exports = {
             sent:       "sent",
             inProgress: "in progress"
         }
+    },
+    datastore: {
+        keys: {
+            user: "u",
+            device: "d"
+        }
     }
 };

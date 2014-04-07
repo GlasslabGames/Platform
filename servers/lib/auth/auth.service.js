@@ -29,7 +29,7 @@ module.exports = AuthService;
 
 function AuthService(options){
     try {
-        var Strategy, WebStore, LMSStore;
+        var Strategy, WebStore, LMSStore, AuthStore;
         this.options = _.merge(
             {
                 auth: { port: 8082 }
@@ -40,18 +40,21 @@ function AuthService(options){
         // Glasslab libs
         rConst        = require('../routes.js').Const;
         Util          = require('../core/util.js');
-        WebStore      = require('../dash/webapp.js').Datastore.MySQL;
-        lConst        = require('../lms/lms.js').Const;
-        LMSStore      = require('../lms/lms.js').Datastore.MySQL;
-
         aConst        = require('./auth.js').Const;
         Strategy      = require('./auth.js').Strategy;
+        AuthStore     = require('./auth.js').Datastore.Couchbase;
 
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options);
+        this.glassLabStrategy = new Strategy.Glasslab(this.options);
+        this.authStore        = new AuthStore(this.options.auth.datastore.couchbase);
+
+        // TODO: find all webstore, lmsStore dependancies and move to using service APIs
+        WebStore      = require('../dash/webapp.js').Datastore.MySQL;
+        lConst        = require('../lms/lms.js').Const;
+        LMSStore      = require('../lms/lms.js').Datastore.MySQL;
         this.webstore         = new WebStore(this.options.webapp.datastore.mysql);
         this.lmsStore         = new LMSStore(this.options.lms.datastore.mysql);
-        this.glassLabStrategy = new Strategy.Glasslab(this.options);
 
     } catch(err){
         console.trace("Auth: Error -", err);
@@ -83,8 +86,46 @@ AuthService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    // do nothing
-    resolve();
+
+    // connect to auth store
+    this.authStore.connect()
+        .then(function(){
+            console.log("AuthService: Couchbase Auth DS Connected");
+            this.stats.increment("info", "Couchbase.Connect");
+        }.bind(this),
+            function(err){
+                console.trace("AuthService: Couchbase Auth Error -", err);
+                this.stats.increment("error", "Couchbase.Connect");
+            }.bind(this))
+
+        // connect to webstore
+        .then(function(){
+            return this.webstore.connect();
+        }.bind(this))
+        .then(function(){
+            console.log("AuthService: MySQL Web DS Connected");
+            this.stats.increment("info", "MySQL.Connect");
+        }.bind(this),
+            function(err){
+                console.trace("AuthService: MySQL Web DS Error -", err);
+                this.stats.increment("error", "MySQL.Connect");
+            }.bind(this))
+
+        // connect to lmsStore
+        .then(function(){
+            return this.lmsStore.connect();
+        }.bind(this))
+        .then(function(){
+            console.log("AuthService: MySQL LMS DS Connected");
+            this.stats.increment("info", "MySQL.Connect");
+        }.bind(this),
+            function(err){
+                console.trace("AuthService: MySQL LMS DS Error -", err);
+                this.stats.increment("error", "MySQL.Connect");
+            }.bind(this))
+
+        .then(resolve, reject);
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
