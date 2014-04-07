@@ -400,12 +400,14 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.createCourse = function(title, grade, institutionId) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         // if institutionId not set then set it to zero
         if(!institutionId) {
-            institutionId = 1;
+            institutionId = "NULL";
+        } else {
+            institutionId = parseInt(institutionId);
         }
 
         var values = [
@@ -417,7 +419,7 @@ LMS_MySQL.prototype.createCourse = function(title, grade, institutionId) {
             "NOW()", // date created
             0,       // free play
             this.ds.escape(grade),    // grade
-            parseInt(institutionId),  // institution id
+            institutionId,            // institution id
             "NOW()",                  // last updated
             0,                        // locked
             this.ds.escape(title)     // title
@@ -453,13 +455,13 @@ LMS_MySQL.prototype.createCourse = function(title, grade, institutionId) {
             );
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
 LMS_MySQL.prototype.addCode = function(code, id, type) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         var values = [
@@ -497,7 +499,7 @@ LMS_MySQL.prototype.addCode = function(code, id, type) {
             );
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 

@@ -80,6 +80,10 @@
         "port":     8082,
         "secret":   "keyboard kitty",
         "email": {
+            "mailChimp" : {
+                "apiKey": "da5ee9608f83677177482e05c1ed2d14-us2",
+                "mailListName": "GlassLab"
+            },
             "from": "<accounts@glasslabgames.org>",
             "transport": {
                 "service": "Gmail",
@@ -87,6 +91,13 @@
                     "user": "glasslab@glasslabgames.org",
                     "pass": "glasslab"
                 }
+            }
+        },
+        "datastore": {
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab"
             }
         }
     },

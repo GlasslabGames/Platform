@@ -23,9 +23,9 @@ function convertToString(item) {
     return item;
 }
 
-function promiseContinue(){
+function promiseContinue(val){
     return when.promise( function(resolve){
-        resolve();
+        resolve(val);
     });
 }
 

@@ -645,7 +645,7 @@ return when.promise(function(resolve, reject) {
     var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
     this.client.get(key, function(err, data){
         if(err){
-            console.error("CouchBase TelemetryStore: Validate Sessionn Error -", err);
+            console.error("CouchBase TelemetryStore: Validate Session Error -", err);
             reject(err);
             return;
         }

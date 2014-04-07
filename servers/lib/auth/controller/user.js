@@ -1,10 +1,12 @@
 
-var path   = require('path');
-var _      = require('lodash');
-var lConst = require('../../lms/lms.const.js');
-var aConst = require('../../auth/auth.const.js');
-var Util   = require('../../core/util.js');
-var uuid   = require('node-uuid');
+var path      = require('path');
+var _         = require('lodash');
+var when      = require('when');
+var mailChimp = require('mailchimp').MailChimpAPI;
+var lConst    = require('../../lms/lms.const.js');
+var aConst    = require('../../auth/auth.const.js');
+var Util      = require('../../core/util.js');
+var uuid      = require('node-uuid');
 
 module.exports = {
     showUser:            showUser,
@@ -435,39 +437,37 @@ function registerUserV2(req, res, next, serviceManager) {
                 else if( regData.systemRole == lConst.role.instructor ||
                         regData.systemRole == lConst.role.manager)
                 {
-                    var verifyCode = uuid.v1();
-                    // store code
-                    // 1) store code
-                    /*
-                     var emailData = {
-                     user: regData,
-                     code: verifyCode
-                     };
-                     */
-                    // TODO
-                    // instructor, manager or admin (all require email)
-                    // 2) send email
-                    var emailData = {
-                        subject: "Welcome to Mars Generation One!",
-                        to:   regData.email,
-                        user: regData,
-                        host: req.headers.host
-                    };
-                    var email = new Util.Email(
-                        this.options.auth.email,
-                        path.join(__dirname, "../email-templates"),
-                        this.stats);
+                    var promise;
+                    if(req.body.newsletter) {
+                        promise = subscribeToNewsletter(
+                            this.options.auth.email.mailChimp.apiKey,
+                            this.options.auth.email.mailChimp.mailListName,
+                            regData)
+                            // errors
+                            .then(null, function(err){
+                                this.stats.increment("error", "Route.Register.User.SubscribeToNewsletter");
+                                console.error("Auth: RegisterUserV2 - Error", err);
+                                this.requestUtil.errorResponse(res, err, 500);
+                            }.bind(this))
+                    } else {
+                        // do nothing api
+                        promise = Util.PromiseContinue();
+                    }
 
-                    email.send('register-welcome', emailData)
+                    promise
                         .then(function(){
-                            // all ok
+                            return sendRegisterEmail(this.options.auth.email, regData, req.headers.host);
+                        }.bind(this))
+                        // all ok
+                        .then(function(){
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
                             serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
                         }.bind(this))
                         // error
                         .then(null, function(err){
                             this.requestUtil.errorResponse(res, err, 500);
-                        }.bind(this));
+                        }.bind(this))
+
                 }
             }.bind(this))
             // catch all errors
@@ -490,7 +490,7 @@ function registerUserV2(req, res, next, serviceManager) {
                     if(courseId) {
                         // get rid of reg code, not longer needed
                         delete regData.regCode;
-                        ;
+
                         register(regData, courseId);
                     } else {
                         this.stats.increment("error", "Route.Register.User.InvalidInstitution");
@@ -506,6 +506,97 @@ function registerUserV2(req, res, next, serviceManager) {
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole));
 }
+
+
+function sendRegisterEmail(emailOptions, regData, host){
+    var verifyCode = uuid.v1();
+    // store code
+    // 1) store code
+    /*
+     var emailData = {
+     user: regData,
+     code: verifyCode
+     };
+     */
+    // TODO
+    // instructor, manager or admin (all require email)
+    // 2) send email
+    var emailData = {
+        subject: "Welcome to Mars Generation One!",
+        to:   regData.email,
+        user: regData,
+        host: host
+    };
+    var email = new Util.Email(
+        emailOptions,
+        path.join(__dirname, "../email-templates"),
+        this.stats);
+
+    return email.send('register-welcome', emailData);
+}
+
+
+function subscribeToNewsletter(apiKey, mailListName, regData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    try {
+        var api = new mailChimp(apiKey, { version : '2.0' });
+    } catch (err) {
+        reject(err);
+        return;
+    }
+
+    api.call('lists', 'list', {
+        filters: {
+            list_name: mailListName
+        }
+    }, function (err, listData) {
+        if (err) {
+            reject(err);
+            return;
+        }
+
+        //console.log(listData);
+        // find correct id
+        var mailListId = "";
+        if(listData.data) {
+            for(var i = 0; i < listData.data.length; i++) {
+                if(listData.data[i].name == mailListName) {
+                    mailListId = listData.data[i].id;
+                }
+            }
+
+            if(mailListId && mailListId.length > 0) {
+                var subscribeParams = {
+                    id: mailListId,
+                    email: {
+                        email: regData.email
+                    },
+                    merge_vars: {
+                        FNAME: regData.firstName,
+                        LNAME: regData.lastName
+                    }
+                };
+                api.call('lists', 'subscribe', subscribeParams, function (err, subscribeData) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+
+                    //console.log( subscribeData );
+                    resolve();
+                });
+            }
+        }
+
+    });
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
+
 
 exampleIn.resetPasswordSend =
 {

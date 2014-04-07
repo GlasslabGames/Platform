@@ -16,5 +16,9 @@ module.exports = {
 
     Strategy:  require('./auth.strategy.js'),
     Validate:  require('./auth.validate.server.js'),
-    SessionServer: require('./auth.session.server.js')
+    SessionServer: require('./auth.session.server.js'),
+
+    Datastore: {
+        Couchbase:  require('./auth.datastore.couchbase.js')
+    }
 };
