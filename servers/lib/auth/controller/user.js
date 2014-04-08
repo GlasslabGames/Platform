@@ -17,7 +17,8 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
-    updateUserDevice:    updateUserDevice
+    updateUserDevice:    updateUserDevice,
+    renderEmailTemplate: renderEmailTemplate
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -457,7 +458,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
                     promise
                         .then(function(){
-                            return sendRegisterEmail(this.options.auth.email, regData, req.headers.host);
+                            return sendRegisterEmail.call(this, this.options.auth.email, regData, req.headers.host);
                         }.bind(this))
                         // all ok
                         .then(function(){
@@ -526,7 +527,7 @@ function sendRegisterEmail(emailOptions, regData, host){
         subject: "Welcome to Mars Generation One!",
         to:   regData.email,
         user: regData,
-        host: host
+        host: this.options.webapp.protocol+"//"+host
     };
     var email = new Util.Email(
         emailOptions,
@@ -629,7 +630,7 @@ function resetPasswordSend(req, res, next) {
                             to:   userData.email,
                             user: userData,
                             code: resetCode,
-                            host: req.headers.host
+                            host: this.options.webapp.protocol+"//"+req.headers.host
                         };
 
                         var email = new Util.Email(
@@ -775,4 +776,35 @@ function updateUserDevice(req, res, next) {
     } else {
         this.requestUtil.errorResponse(res, "not logged in");
     }
+}
+
+
+function renderEmailTemplate(req, res, next) {
+
+    var emailData = {
+        subject: "This is a test",
+        to:   "test@test.com",
+        user: {
+            firstName: "First",
+            lastName: "Last Name"
+        },
+        host: this.options.webapp.protocol+"//"+req.headers.host
+    };
+    var email = new Util.Email(
+        this.options.auth.email,
+        path.join(__dirname, "../email-templates"),
+        this.stats);
+
+    email.test('register-welcome', emailData)
+        .then(function(data){
+            res.writeHead(200, {
+                "Content-Type": "text/html"
+            });
+            res.end( data );
+        }.bind(this))
+
+        // catch all errors
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        a { text-decoration: none; }
+        a:hover, a:active, a:focus { text-decoration: none; }
+        a span { color: #11ADB7; }
+        a span:hover, a span:active, a span:focus { color: #0d8284; }
+    </style>
+</head>
+<body padding="0" margin="0" style="margin: 0; padding: 0;">
+<table border="0" width="805px" cellpadding="0" cellspacing="0" style="color: #FFFFFF; font-family: Sans-serif; font-size: 12pt;">
+    <!-- header -->
+    <tr><td style="padding-left: 44px;" bgcolor="#343539" height="64px" align="left" valign="middle">
+        <table border="0" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td width="34px"><img style="padding-left: 16px; padding-right: 16px;" src="{{= host }}/images/email-template/glasslab_logo.png" /></td>
+            <td valign="middle">{{= subject }}</td>
+        </tr></table>
+    </td></tr>
+    <!-- banner -->
+    <tr><td style="margin: 0; padding: 0; height: 155px;"><img width="100%" src="{{= host }}/images/email-template/banner.jpg" /></td></tr>
+    <!-- body -->
+    <tr><td style="padding-left: 33px; padding-right: 33px; padding-top: 17px; padding-bottom: 17px; color: #7E8C8D;" padding="17px" bgcolor="#F4F4F2">
+
+            <table bgcolor="#FFFFFF" border="0" width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td style="padding: 20px;">{{- body }}</td>
+            </tr></table>
+    </td></tr>
+    <!-- footer -->
+    <tr><td class="footer" bgcolor="#343539" align="center">
+        <table border="0" width="100%" cellpadding="0" cellspacing="0" style="font-size: 9pt; padding-left: 25px; padding-top: 25px; padding-bottom: 25px; font-weight: normal;"><tbody><tr>
+            <td>
+                <a target="_blank" href="http://facebook.com"><img src="{{= host }}/images/email-template/icon_facebook.png" /> <span style="color: #FFFFF6;">Friend on Facebook</span></a>
+            </td>
+            <td>
+                <a target="_blank" href="http://twitter.com"><img src="{{= host }}/images/email-template/icon_twitter.png" /> <span style="color: #FFFFF6;">Follow on Twitter</span></a>
+            </td>
+            <td>
+                <a target="_blank" href="mailto:support@glasslabgames.org"><img src="{{= host }}/images/email-template/icon_contact.png" /> <span style="color: #FFFFF6;">Contact Us</span></a>
+            </td>
+            <td>
+                <a target="_blank" href="http://glgames.com"><img src="{{= host }}/images/email-template/icon_newsletter.png" /> <span style="color: #FFFFF6;">Subscribe to our Newsletter</span></a>
+            </td>
+        </tr></tbody></table>
+        <div style="padding-bottom: 35px;">&copy; 2014 GlassLab, A Project of Institute of Play</div>
+    </td></tr>
+</table>
+</body>
+</html>

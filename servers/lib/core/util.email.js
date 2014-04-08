@@ -17,57 +17,146 @@ function EmailUtil(options, templatesDir, stats){
     this.stats = stats;
 }
 
+EmailUtil.prototype.test = function(templateName, emailData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    this.build(templateName, emailData, false)
+        .then(function(templateData){
+
+            resolve(templateData.html);
+            //resolve(templateData.text);
+
+        }.bind(this))
+
+        // errors
+        .then(null, function(err){
+            if(this.stats) this.stats.increment("error", "Email."+templateName+".ReadingTemplates");
+            console.error("Email: Error reading templates -", err);
+            reject({error: "internal error, try again later"});
+        }.bind(this));
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
+
+EmailUtil.prototype.build = function(templateName, emailData, cacheTemplate){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var mainHtmlFile = path.join(this.templatesDir, "main-template", "html.ejs");
+    var mainTextFile = path.join(this.templatesDir, "main-template", "text.ejs");
+    var htmlFile = path.join(this.templatesDir, templateName, "html.ejs");
+    var textFile = path.join(this.templatesDir, templateName, "text.ejs");
+    var emailHtml, emailText;
+    var promiseList = [];
+
+    if(cacheTemplate !== false) {
+        cacheTemplate = true;
+    }
+
+    emailData.$imageDir = path.join(this.templatesDir, templateName, "images");
+
+    this._renderFile(mainHtmlFile, htmlFile, emailData, cacheTemplate)
+        .then(function(body){
+            emailHtml = body;
+
+            return this._renderFile(mainTextFile, textFile, emailData, cacheTemplate);
+        }.bind(this))
+        // text rendered data
+        .then(function(body){
+            emailText = body;
+        }.bind(this))
+        // send html/text back
+        .then(function(){
+            resolve({
+                html: emailHtml,
+                text: emailText
+            })
+        }.bind(this))
+        // errors
+        .then(null, function(err) {
+            if(this.stats) this.stats.increment("error", "Email."+templateName+".ReadingTemplates");
+            console.error("Email: Error reading templates -", err);
+            reject({error: "internal error, try again later"});
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
+
+EmailUtil.prototype._renderFile = function(mainFile, tmplfile, emailData, cacheTemplate){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var tmplFileData, mainFileData, p;
+    var promiseList = [];
+
+    p = qFS.read(tmplfile)
+        .then(function(fileData) {
+            tmplFileData = fileData;
+        }.bind(this));
+    promiseList.push(p);
+
+    p = qFS.read(mainFile)
+        .then(function(fileData) {
+            mainFileData = fileData;
+        }.bind(this));
+    promiseList.push(p);
+
+    when.all(promiseList)
+        .then(function() {
+            var body = null;
+            if(tmplFileData) {
+                //console.log("fileData:", fileData);
+                body = ejs.render(tmplFileData, _.merge({
+                    cache: cacheTemplate,
+                    filename: tmplfile
+                }, emailData)
+                );
+            }
+
+            if(mainFileData) {
+                //console.log("fileData:", fileData);
+                body = ejs.render(mainFileData, _.merge({
+                    cache: cacheTemplate,
+                    filename: mainFile,
+                    body: body
+                }, emailData)
+                );
+            }
+
+            resolve(body);
+
+        }.bind(this))
+        // errors
+        .then(null, function(err) {
+            reject(err);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
+
+
 EmailUtil.prototype.send = function(templateName, emailData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var htmlFile = path.join(this.templatesDir, templateName, "html.ejs");
-    var textFile = path.join(this.templatesDir, templateName, "text.ejs");
-    var emailHtml, emailText
+    this.build(templateName, emailData)
+        .then(function(templateData){
 
-    emailData.$imageDir = path.join(this.templatesDir, templateName, "images");
-
-    qFS.isFile(htmlFile)
-        .then(function(fileExists){
-            if(fileExists) {
-                return qFS.read(htmlFile)
-                    .then(function(htmlFileData){
-                        //console.log("fileData:", htmlFileData);
-                        emailHtml = ejs.render(htmlFileData, _.merge({
-                                cache: true,
-                                filename: htmlFile
-                            }, emailData)
-                        );
-                    }.bind(this));
-            }
-        }.bind(this))
-
-        .then(function(){
-            return qFS.isFile(textFile);
-        }.bind(this))
-        .then(function(fileExists){
-            if(fileExists) {
-                return qFS.read(textFile)
-                    .then(function(textFileData){
-                        //console.log("fileData:", textFileData);
-                        emailText = ejs.render(textFileData, _.merge({
-                                cache: true,
-                                filename: textFile
-                            }, emailData)
-                        );
-                    }.bind(this));
-            }
-        }.bind(this))
-
-        .then(function(){
             var transport = nodemailer.createTransport("SMTP", this.options.transport);
             var emailSettings = {
                 from:    this.options.from,
                 to:      emailData.to,
                 subject: emailData.subject,
-                html:    emailHtml,
-                text:    emailText,
+                html:    templateData.html,
+                text:    templateData.text,
                 generateTextFromHTML: true,
                 forceEmbeddedImages: true
             };
@@ -91,51 +180,6 @@ return when.promise(function(resolve, reject) {
             console.error("Email: Error reading templates -", err);
             reject({error: "internal error, try again later"});
         }.bind(this));
-
-    /*
-    emailTemplates(this.templatesDir, { open: '{{', close: '}}' }, function(err, template) {
-        if(err) {
-            if(this.stats) this.stats.increment("error", "Email."+templateName+".ReadingTemplates");
-            console.err("Email: Error reading templates -", err);
-            reject({error: "internal error, try again later"});
-            return;
-        }
-
-        // Send a single email
-        template(templateName, emailData, function(err, html, text) {
-            if (err) {
-                if(this.stats) this.stats.increment("error", "Email."+templateName+".BuildingEmail");
-                console.err("Email: Error building email -", err);
-                reject({error: "internal error, try again later"});
-            } else {
-
-                var transport = nodemailer.createTransport("SMTP", this.options.transport);
-                var emailSettings = {
-                    from: this.options.from,
-                    to: emailData.user.email,
-                    subject: emailSubject,
-                    html: html,
-                    text: text,
-                    generateTextFromHTML: true,
-                    forceEmbeddedImages: true
-                };
-
-                transport.sendMail(emailSettings, function(err, responseStatus) {
-                    if (err) {
-                        if(this.stats) this.stats.increment("error", "Email."+templateName+".SendEmail");
-                        console.err("Email: Error sending email -", err);
-                        reject({error: "internal error, try again later"});
-                    } else {
-                        if(this.stats) this.stats.increment("info", "Email."+templateName+".SendEmail");
-                        //console.log(responseStatus.message);
-                        resolve(responseStatus);
-                    }
-                }.bind(this));
-
-            }
-        }.bind(this));
-    }.bind(this));
-    */
 
 // ------------------------------------------------
 }.bind(this));
