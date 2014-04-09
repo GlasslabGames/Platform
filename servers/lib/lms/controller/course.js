@@ -450,7 +450,6 @@ function updateCourse(req, res, next)
     if( req.body &&
         req.body.title &&
         req.body.grade &&
-        req.body.institution &&
         req.body.id &&
         _.isNumber(req.body.id)) {
         var userData = req.session.passport.user;
