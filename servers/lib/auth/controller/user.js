@@ -524,7 +524,7 @@ function sendRegisterEmail(emailOptions, regData, host){
     // instructor, manager or admin (all require email)
     // 2) send email
     var emailData = {
-        subject: "Welcome to Mars Generation One!",
+        subject: "Welcome to Argubot Academy!",
         to:   regData.email,
         user: regData,
         host: this.options.webapp.protocol+"//"+host
