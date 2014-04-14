@@ -572,7 +572,9 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                     // try parse/analyze name
                     try {
                         // convert + save
-                        pData.eventName = this._convertEventName(data.eventName, data.clientId);
+                        // TODO: use convertEventName
+                        //pData.eventName = this._convertEventName(data.eventName, data.clientId);
+                        pData.eventName = data.eventName;
                     }
                     catch(err) {
                         errList.push(err);
