@@ -31,7 +31,16 @@ function startSessionV2(req, outRes){
 
         //console.log("req:", req);
         //console.log("getSession url:", url);
-        var userData = req.session.passport.user;
+        // account for anon users
+        var userData = {
+            id: null,
+            collectTelemetry: true
+        }
+        if( req.session &&
+            req.session.passport &&
+            req.session.passport.user) {
+            userData = req.session.passport.user;
+        }
 
         //console.log("req.params:", req.params, ", req.body:", req.body);
         // required
