@@ -1,4 +1,7 @@
 
+var _      = require('lodash');
+var when   = require('when');
+//
 var Util   = require('../../core/util.js');
 var tConst = require('../data.const.js');
 
@@ -20,7 +23,6 @@ exampleInput.startSessionV2 = {
 
 function startSessionV2(req, outRes){
     try {
-        // TODO: validate all inputs
         this.stats.increment("info", "Route.StartSessionV2");
 
         if(!req.body.deviceId) {
@@ -45,9 +47,34 @@ function startSessionV2(req, outRes){
         //console.log("req.params:", req.params, ", req.body:", req.body);
         // required
         var deviceId         = req.body.deviceId;
-        var clientTimeStamp  = req.body.timestamp || Util.GetTimeStamp();
+        var clientTimeStamp  = Util.GetTimeStamp();
+        try {
+            if(req.body.timestamp) {
+                var t =  parseInt(req.body.timestamp);
+                if(!_.isNaN(t)) {
+                    clientTimeStamp = t;
+                } else {
+                    //console.log("startSessionV2 invalid input data:", req.body)
+                    this.requestUtil.errorResponse(outRes, "invalid timestamp format", 400);
+                    return;
+                }
+            }
+        } catch(err) {
+            // this is ok
+        }
+
         // Optional
-        var courseId         = parseInt(req.body.courseId);
+        var courseId = undefined;
+        try {
+            if(req.body.courseId) {
+                var t = parseInt(req.body.courseId);
+                if(!_.isNaN(t)) {
+                    courseId = t;
+                }
+            }
+        } catch(err) {
+            // this is ok
+        }
         var gameLevel        = req.body.gameLevel;
         var gSessionId       = undefined;
 
@@ -117,7 +144,22 @@ function endSessionV2(req, outRes){
         if(req.body.gameSessionId) {
             gSessionId = req.body.gameSessionId;
 
-            var clientTimeStamp  = req.body.timestamp || Util.GetTimeStamp();
+            // required
+            var clientTimeStamp = Util.GetTimeStamp();
+            try {
+                if(req.body.timestamp) {
+                    var t =  parseInt(req.body.timestamp);
+                    if(!_.isNaN(t)) {
+                        clientTimeStamp = t;
+                    } else {
+                        //console.log("startSessionV2 invalid input data:", req.body)
+                        this.requestUtil.errorResponse(outRes, "invalid timestamp format", 400);
+                        return;
+                    }
+                }
+            } catch(err) {
+                // this is ok
+            }
 
             // validate session
             this.cbds.validateSession(gSessionId)

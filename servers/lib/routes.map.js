@@ -71,6 +71,24 @@ module.exports = {
         // ---------------------------------------------------
         {
             requireAuth: true,
+            api: "/api/v2/dash/reports/achievements",
+            service: "dash",
+            controller: "reports",
+            method: {
+                get: "getAchievements"
+            }
+        },
+        {
+            api: "/api/v2/dash/game/:id/achievements",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getAchievements"
+            }
+        },
+        // ---------------------------------------------------
+        {
+            requireAuth: true,
             api: "/api/v2/lms/courses",
             service: "lms",
             controller: "course",
@@ -127,7 +145,7 @@ module.exports = {
             service: "lms",
             controller: "course",
             method: {
-                get: "showCourse",
+                get: "getCourse",
                 post: "updateCourse",
                 "delete": "deleteCourse"
             }

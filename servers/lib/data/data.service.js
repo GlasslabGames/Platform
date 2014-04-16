@@ -29,7 +29,7 @@ function DataService(options){
         Assessment = require('../aeng/assessment.js');
         aConst     = require('../auth/auth.js').Const;
         rConst     = require('../routes.js').Const;
-        WebStore   = require('../dash/webapp.js').Datastore.MySQL;
+        WebStore   = require('../dash/dash.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         Telemetry  = require('./data.js');
         tConst     = Telemetry.Const;

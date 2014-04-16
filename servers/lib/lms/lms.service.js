@@ -24,7 +24,7 @@ function LMSService(options){
 
         // Glasslab libs
         LMSStore   = require('./lms.js').Datastore.MySQL;
-        WebStore   = require('../dash/webapp.js').Datastore.MySQL;
+        WebStore   = require('../dash/dash.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         lConst     = require('./lms.js').Const;
 
