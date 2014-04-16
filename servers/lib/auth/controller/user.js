@@ -652,7 +652,12 @@ function resetPasswordSend(req, res, next) {
 
             // catch all errors
             .then(null, function(err){
-                this.requestUtil.errorResponse(res, err, 400);
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {error: err.error, key:"email.no.exist"}, 400);
+                } else {
+                    this.requestUtil.errorResponse(res, err, 400);
+                }
             }.bind(this))
 
     } else {
