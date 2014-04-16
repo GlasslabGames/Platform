@@ -7,6 +7,11 @@ module.exports = {
 
 function index(req, res, next)
 {
+    if( req.params &&
+        req.params.hasOwnProperty("id") ) {
+        // config for game
+    }
+
     this.myds.getConfigs()
         .then(function(data){
             this.requestUtil.jsonResponse(res, data);

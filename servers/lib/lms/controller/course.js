@@ -16,7 +16,7 @@ module.exports = {
 
 var exampleOut = {}, exampleIn = {};
 
-exampleOut.getCourses =
+exampleOut.enrollInCourse =
 {
     courseCode: "COU34"
 };
@@ -93,7 +93,7 @@ function unenrollFromCourse(req, res, next) {
 }
 
 
-exampleOut.getCourses =
+exampleOut.unenrollUserFromCourse =
 {
     course: 8,
     showMembers: 1,
@@ -142,7 +142,7 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
 }
 
 
-exampleOut.getCourses =
+exampleOut.getEnrolledCourses =
     [
         {
             "id": 27,
@@ -159,7 +159,7 @@ exampleOut.getCourses =
     ];
 
 
-exampleOut.getCoursesWithMembers =[
+exampleOut.getEnrolledCourses_WithMembers =[
     {
         "id": 8,
         "title": "test2",

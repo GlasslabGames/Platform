@@ -17,7 +17,7 @@ function WebStore_MySQL(options){
     // Glasslab libs
     MySQL   = require('../core/datastore.mysql.js');
     lConst  = require('../lms/lms.const.js');
-    waConst = require('./webapp.const.js');
+    waConst = require('./dash.const.js');
 
     this.options = _.merge(
         {

@@ -65,55 +65,91 @@ return when.promise(function(resolve, reject) {
 
 AuthDS_Couchbase.prototype.updateUserDeviceId = function(userId, deviceId) {
 // add promise wrapper
-return when.promise(function(resolve, reject) {
+    return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var key = aConst.datastore.keys.user+":"+aConst.datastore.keys.device+":"+userId;
-    this.client.get(key, function(err, data){
-        var userDeviceInfo;
-        if(err) {
-            // "No such key"
-            if(err.code == 13)
-            {
-                userDeviceInfo = {
-                    lastDevice: "",
-                    devices: {}
-                };
-            } else {
-                console.error("CouchBase AuthStore: Error -", err);
-                reject(err);
-                return;
-            }
-        } else {
-            userDeviceInfo = data.value;
-        }
-
-        // if not seen this device before, add inner object
-        if( !userDeviceInfo.devices.hasOwnProperty(deviceId) ){
-            userDeviceInfo.devices[deviceId] = {
-                lastSeenTimestamp: 0
-            }
-        }
-
-        // update info
-        userDeviceInfo.lastDevice = deviceId;
-        userDeviceInfo.devices[deviceId].lastSeenTimestamp = Util.GetTimeStamp();
-
-        // update data
-        this.client.set(key, userDeviceInfo,
-            function(err, data) {
-                if(err) {
+        var key = aConst.datastore.keys.user+":"+aConst.datastore.keys.device+":"+userId;
+        this.client.get(key, function(err, data){
+            var userDeviceInfo;
+            if(err) {
+                // "No such key"
+                if(err.code == 13)
+                {
+                    userDeviceInfo = {
+                        lastDevice: "",
+                        devices: {}
+                    };
+                } else {
                     console.error("CouchBase AuthStore: Error -", err);
                     reject(err);
                     return;
                 }
+            } else {
+                userDeviceInfo = data.value;
+            }
 
-                resolve(data);
-            }.bind(this));
+            // if not seen this device before, add inner object
+            if( !userDeviceInfo.devices.hasOwnProperty(deviceId) ){
+                userDeviceInfo.devices[deviceId] = {
+                    lastSeenTimestamp: 0
+                }
+            }
 
-    }.bind(this));
+            // update info
+            userDeviceInfo.lastDevice = deviceId;
+            userDeviceInfo.devices[deviceId].lastSeenTimestamp = Util.GetTimeStamp();
+
+            // update data
+            this.client.set(key, userDeviceInfo,
+                function(err, data) {
+                    if(err) {
+                        console.error("CouchBase AuthStore: Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    resolve(data);
+                }.bind(this));
+
+        }.bind(this));
 
 // ------------------------------------------------
-}.bind(this));
+    }.bind(this));
+// end promise wrapper
+};
+
+
+AuthDS_Couchbase.prototype.getLastUserDeviceId = function(userId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var key = aConst.datastore.keys.user+":"+aConst.datastore.keys.device+":"+userId;
+        this.client.get(key, function(err, data){
+            if(err) {
+                if(err.code == 13)
+                {
+                    console.error("CouchBase AuthStore: error not found userId -", userId);
+                    reject(new Error('none found'));
+                    return;
+                } else {
+                    console.error("CouchBase AuthStore: Error -", err);
+                    reject(err);
+                    return;
+                }
+            }
+
+            if( data &&
+                data.value &&
+                data.value.hasOwnProperty('lastDevice')) {
+                var deviceId = data.value.lastDevice;
+                resolve(deviceId);
+            } else {
+                reject(new Error('none found'));
+            }
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 };

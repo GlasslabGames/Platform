@@ -50,7 +50,7 @@ function AuthService(options){
         this.authStore        = new AuthStore(this.options.auth.datastore.couchbase);
 
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
-        WebStore      = require('../dash/webapp.js').Datastore.MySQL;
+        WebStore      = require('../dash/dash.js').Datastore.MySQL;
         lConst        = require('../lms/lms.js').Const;
         LMSStore      = require('../lms/lms.js').Datastore.MySQL;
         this.webstore         = new WebStore(this.options.webapp.datastore.mysql);

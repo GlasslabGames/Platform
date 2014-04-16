@@ -142,6 +142,20 @@ var gdv_getAllStartedSessions = function (doc, meta)
     }
 };
 
+var gdv_getAllAchievementsByDeviceId = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'e') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('deviceId') &&
+        doc.hasOwnProperty('eventName') &&
+        doc['eventName'] == '$Achievement' )
+    {
+        emit( doc['deviceId'] );
+    }
+};
+
     this.telemDDoc = {
         views: {
             getEventsByGameSessionId : {
@@ -155,15 +169,19 @@ var gdv_getAllStartedSessions = function (doc, meta)
             },
             getAllStartedSessions : {
                 map: gdv_getAllStartedSessions
+            },
+            getAllAchievementsByDeviceId: {
+                map: gdv_getAllAchievementsByDeviceId
             }
         }
     };
 
     // convert function to string
-    this.telemDDoc.views.getEventsByGameSessionId.map     = this.telemDDoc.views.getEventsByGameSessionId.map.toString();
-    this.telemDDoc.views.getEventsByServerTimeStamp.map   = this.telemDDoc.views.getEventsByServerTimeStamp.map.toString();
-    this.telemDDoc.views.getStartedSessionsByDeviceId.map = this.telemDDoc.views.getStartedSessionsByDeviceId.map.toString();
-    this.telemDDoc.views.getAllStartedSessions.map        = this.telemDDoc.views.getAllStartedSessions.map.toString();
+    for(var i in this.telemDDoc.views) {
+        if( this.telemDDoc.views[i].hasOwnProperty('map') ) {
+            this.telemDDoc.views[i].map = this.telemDDoc.views[i].map.toString();
+        }
+    }
     //console.log("telemDDoc:", telemDDoc);
 
     // TODO: add variable search and replace after convert to string
@@ -607,19 +625,22 @@ return when.promise(function(resolve, reject) {
 
     var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
 
-    this.client.add(key, {
-            serverStartTimeStamp: Util.GetTimeStamp(),
+    var gameSessionData = {
+        serverStartTimeStamp: Util.GetTimeStamp(),
             clientStartTimeStamp: Util.GetTimeStamp(),
-            serverEndTimeStamp:   0,
-            clientEndTimeStamp:   0,
-            userId:    userId,
-            deviceId:  userId, // old version deviceId and userId are the same
-            gameLevel: gameLevel,
-            courseId:  courseId,
-            gameSessionId: gameSessionId,
-            state:  tConst.game.session.started,
-            qstate: '' // TODO: remove with assessment Q
-        },
+        serverEndTimeStamp:   0,
+        clientEndTimeStamp:   0,
+        userId:    userId,
+        deviceId:  userId, // old version deviceId and userId are the same
+        gameLevel: gameLevel,
+        courseId:  courseId,
+        gameSessionId: gameSessionId,
+        state:  tConst.game.session.started,
+        qstate: '' // TODO: remove with assessment Q
+    };
+    console.log("start gameSessionData:", gameSessionData);
+
+    this.client.add(key, gameSessionData,
         //{ expiry: this.options.gameSessionExpire },
         function(err, data){
             if(err){
@@ -685,6 +706,7 @@ return when.promise(function(resolve, reject) {
             gameSessionData.clientEndTimeStamp = Util.GetTimeStamp();
             gameSessionData.state   = tConst.game.session.ended;
             gameSessionData.qstate  = tConst.game.session.started; // TODO: remove with assessment Q
+            console.log("end gameSessionData:", gameSessionData);
 
             // replace with updated
             this.client.replace(key, gameSessionData,
@@ -971,3 +993,56 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 }
+
+
+
+TelemDS_Couchbase.prototype.getAchievements = function(deviceId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        this.client.view("telemetry", "getAllAchievementsByDeviceId").query({
+                stale: false,
+                key: deviceId
+            },
+            function(err, results){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Get Achievements View Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                if(results.length == 0) {
+                    resolve({});
+                    return;
+                }
+
+                var keys = [];
+                for (var i = 0; i < results.length; ++i) {
+                    keys.push(results[i].id);
+                }
+
+                //console.log("CouchBase TelemetryStore: keys", keys);
+                this.client.getMulti(keys, {},
+                    function(err, results){
+                        if(err){
+                            console.error("CouchBase TelemetryStore: Multi Get Achievements Error -", err);
+                            reject(err);
+                            return;
+                        }
+
+                        var out = [];
+                        for(var i in results) {
+                            out.push( results[i].value );
+                        }
+
+                        //console.log("getAchievements out:", out);
+                        resolve(out);
+                    }.bind(this));
+
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
