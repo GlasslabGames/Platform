@@ -32,7 +32,8 @@ function logout(req, res){
 
     this.stats.increment("info", "Logout");
     req.logout();
-    res.redirect("/");
+    //res.redirect("/");
+    this.requestUtil.jsonResponse(res, {} );
 }
 
 /*
@@ -63,11 +64,7 @@ function glassLabLogin(req, res, next) {
         // login validation
         //console.log("Auth loginRoute");
         var authenticate = glassLabLogin_Authenticate.bind(this);
-
-        promise = authenticate(req, res, next)
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err.message, err.code);
-            }.bind(this))
+        promise = authenticate(req, res, next);
     } else {
         promise = Util.PromiseContinue(userInfo);
     }
@@ -82,7 +79,7 @@ function glassLabLogin(req, res, next) {
 
         // catch all errors
         .then(null, function(err){
-            next(err);
+            this.requestUtil.errorResponse(res, err.message, err.code);
         }.bind(this));
 }
 
@@ -94,7 +91,7 @@ return when.promise(function(resolve, reject) {
     var auth = this.passport.authenticate('glasslab', function(err, user, info) {
         if(err) {
             this.stats.increment("error", "Route.Login.Auth");
-            reject({ message: {error:"try again later", key:"general"}, code:500 });
+            reject({ message: { error:"try again later", key:"general" }, code:500 });
             return;
         }
 
@@ -102,7 +99,7 @@ return when.promise(function(resolve, reject) {
             //req.session.messages =  [info];
             //res.redirect(rConst.api.user.login);
             this.stats.increment("error", "Route.Login.NoUser");
-            reject({ message: info, code:401 });
+            reject({ message: { error:info, key:"invalid"}, code: 401 });
             return;
         }
 
