@@ -256,16 +256,7 @@ function registerManager(req, res, next) {
         return;
     }
 
-    if( !(
-        req.body.username &&
-            req.body.firstName &&
-            req.body.lastName
-        ) )
-    {
-        this.stats.increment("error", "Route.Update.User.MissingFields");
-        this.requestUtil.errorResponse(res, "missing data fields", 400);
-        return;
-    }
+    var loginUserSessionData = req.session.passport.user;
 
     var userData = {
         id:            req.body.id,
@@ -279,9 +270,8 @@ function registerManager(req, res, next) {
     }
     if(req.body.lastName) {
         userData.lastName = req.body.lastName;
-    }
-    if(req.body.name) {
-        userData.name = req.body.name;
+    } else {
+        userData.lastName = '';
     }
     if(req.body.email) {
         userData.email = req.body.email;
@@ -295,8 +285,6 @@ function registerManager(req, res, next) {
     if(req.body.password) {
         userData.password = req.body.password;
     }
-
-    var loginUserSessionData = req.session.passport.user;
 
     // wrap getSession in promise
     this._updateUserData(userData, loginUserSessionData)
@@ -651,7 +639,7 @@ function resetPasswordSend(req, res, next) {
             }.bind(this))
 
             // catch all errors
-            .then(null, function(err){
+            .then(null, function(err) {
                 if( err.error &&
                     err.error == "user not found") {
                     this.requestUtil.errorResponse(res, {error: err.error, key:"email.no.exist"}, 400);
