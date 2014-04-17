@@ -1,4 +1,4 @@
-Dear {{= user.firstName }} {{= user.lastName }},<br />
+Dear {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},<br />
 <br />
 Worry no longer! We are here to help you with that pesky little problem of (oops!) forgetting your password.
 Just click on the following secure link

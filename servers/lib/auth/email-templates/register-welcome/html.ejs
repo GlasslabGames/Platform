@@ -1,4 +1,4 @@
-Dear <span>{{= user.firstName +' '+ user.lastName }}</span>,<br />
+Dear <span>{{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }}</span>,<br />
 <br />
 Mars may be 225 million kilometers away, but great ELA instruction is right at your fingertips!<br />
 <br />

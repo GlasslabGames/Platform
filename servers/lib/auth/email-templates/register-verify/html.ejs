@@ -1,4 +1,4 @@
-Hello {{= user.firstName }} {{= user.lastName }},<br />
+Hello {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},<br />
 <br />
 Someone recently requested to change your Glasslab account's password.<br />
 <br />

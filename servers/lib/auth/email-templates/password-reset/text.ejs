@@ -1,4 +1,4 @@
-Dear {{= user.firstName }} {{= user.lastName }},
+Dear {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},
 
 Worry no longer! We are here to help you with that pesky little problem of (oops!) forgetting your password.
 Just go to the following secure link {{= host }}/passwordreset/{{= code }} and you can reset you password in no time.
