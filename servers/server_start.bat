@@ -1,2 +1,2 @@
-start /wait npm install
-start node app.js
+call /wait npm install
+call node app.js
