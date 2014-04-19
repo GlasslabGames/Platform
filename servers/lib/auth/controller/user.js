@@ -499,7 +499,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
 
 function sendRegisterEmail(emailOptions, regData, host){
-    var verifyCode = uuid.v1();
+    var verifyCode = uuid.v4();
     // store code
     // 1) store code
     /*
@@ -597,7 +597,7 @@ function resetPasswordSend(req, res, next) {
         _.isString(req.body.email) &&
         req.body.email.length) {
         var email = req.body.email;
-        var resetCode = uuid.v1();
+        var resetCode = uuid.v4();
 
         var expirationTime = Util.GetTimeStamp() + aConst.passwordReset.expirationInterval;
 

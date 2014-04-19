@@ -21,7 +21,7 @@ EmailUtil.prototype.test = function(templateName, emailData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    this.build(templateName, emailData, false)
+    this.build(templateName, emailData)
         .then(function(templateData){
 
             resolve(templateData.html);
@@ -40,7 +40,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 }
 
-EmailUtil.prototype.build = function(templateName, emailData, cacheTemplate){
+EmailUtil.prototype.build = function(templateName, emailData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -52,17 +52,13 @@ return when.promise(function(resolve, reject) {
     var emailHtml, emailText;
     var promiseList = [];
 
-    if(cacheTemplate !== false) {
-        cacheTemplate = true;
-    }
-
     emailData.$imageDir = path.join(this.templatesDir, templateName, "images");
 
-    this._renderFile(mainHtmlFile, htmlFile, emailData, cacheTemplate)
+    this._renderFile(mainHtmlFile, htmlFile, emailData)
         .then(function(body){
             emailHtml = body;
 
-            return this._renderFile(mainTextFile, textFile, emailData, cacheTemplate);
+            return this._renderFile(mainTextFile, textFile, emailData);
         }.bind(this))
         // text rendered data
         .then(function(body){
@@ -87,7 +83,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 }
 
-EmailUtil.prototype._renderFile = function(mainFile, tmplfile, emailData, cacheTemplate){
+EmailUtil.prototype._renderFile = function(mainFile, tmplfile, emailData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -112,17 +108,17 @@ return when.promise(function(resolve, reject) {
             if(tmplFileData) {
                 //console.log("fileData:", fileData);
                 body = ejs.render(tmplFileData, _.merge({
-                    cache: cacheTemplate,
-                    filename: tmplfile
+                    //cache: false,
+                    //filename: tmplfile
                 }, emailData)
                 );
             }
 
             if(mainFileData) {
-                //console.log("fileData:", fileData);
+                console.log("emailData:", emailData);
                 body = ejs.render(mainFileData, _.merge({
-                    cache: cacheTemplate,
-                    filename: mainFile,
+                    //cache: false,
+                    //filename: mainFile,
                     body: body
                 }, emailData)
                 );
