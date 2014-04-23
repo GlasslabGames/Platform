@@ -6,7 +6,6 @@ var mailChimp = require('mailchimp').MailChimpAPI;
 var lConst    = require('../../lms/lms.const.js');
 var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
-var uuid      = require('node-uuid');
 
 module.exports = {
     showUser:            showUser,
@@ -499,7 +498,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
 
 function sendRegisterEmail(emailOptions, regData, host){
-    var verifyCode = uuid.v4();
+    var verifyCode = Util.CreateUUID();
     // store code
     // 1) store code
     /*
@@ -597,7 +596,7 @@ function resetPasswordSend(req, res, next) {
         _.isString(req.body.email) &&
         req.body.email.length) {
         var email = req.body.email;
-        var resetCode = uuid.v4();
+        var resetCode = Util.CreateUUID();
 
         var expirationTime = Util.GetTimeStamp() + aConst.passwordReset.expirationInterval;
 

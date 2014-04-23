@@ -1,0 +1,104 @@
+{
+    "name": "Mars Generation One - Argument Wars",
+    "episodes": {
+        "1" : {
+            "title": "Episode 1",
+            "enabled": true,
+            "$Achievements": {
+                "groups": {
+                    "CCSS.ELA-Literacy.WHST.6-8.1a": {
+                        "description": "Common Core Standards",
+                        "title": "Standards",
+                        "subGroups": {
+                            "CCSS.ELA-Literacy.WHST.6-8.1a-a": {
+                                "title": "Organizing Claims",
+                                "description": "Write arguments focused on discipline-specific content",
+                                "items": {
+                                    "Explorer": {
+                                        "title": "Explorer",
+                                        "description": "Explorer"
+                                    },
+                                    "Tinkerer": {
+                                        "title": "Tinkerer",
+                                        "description": "Tinkerer"
+                                    },
+                                    "Battle Pro": {
+                                        "title": "Battle Pro",
+                                        "description": "Battle Pro"
+                                    }
+                                },
+                                "total": 3
+                            },
+                            "CCSS.ELA-Literacy.WHST.6-8.1a-b": {
+                                "title": "Supporting Claims",
+                                "description": "Write arguments to support claims with clear reasons and relevant evidence",
+                                "items": {
+                                    "Core Master": {
+                                        "title": "Core Master",
+                                        "description": "Core Master"
+                                    },
+                                    "Battle Tested": {
+                                        "title": "Battle Tested",
+                                        "description": "Battle Tested"
+                                    }
+                                },
+                                "total": 2
+                            }
+                        },
+                        "total": 5
+                    },
+                    "CCSS.ELA-Literacy.WHST.6-8.1b" : {
+                        "description": "21st Century Skills",
+                        "title": "21st Century Skills",
+                        "subGroups": {
+                            "CCSS.ELA-Literacy.WHST.6-8.1b-a": {
+                                "title": "Problem Solving",
+                                "description": "Distinguish among fact, opinion, and reasoned judgement in a text",
+                                "items": {
+                                    "Deliberate": {
+                                        "title": "Deliberate",
+                                        "description": "Deliberate"
+                                    },
+                                    "Bold": {
+                                        "title": "Bold",
+                                        "description": "Bold"
+                                    },
+                                    "Persistent": {
+                                        "title": "Persistent",
+                                        "description": "Persistent"
+                                    }
+                                },
+                                "total": 3
+                            },
+                            "CCSS.ELA-Literacy.WHST.6-8.1b-b": {
+                                "title": "Citizenship",
+                                "description": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
+                                "items": {
+                                    "Curious": {
+                                        "title": "Curious",
+                                        "description": "Curious"
+                                    },
+                                    "Empathetic": {
+                                        "title": "Empathetic",
+                                        "description": "Empathetic"
+                                    }
+                                },
+                                "total": 2
+                            }
+                        },
+                        "total": 5
+                    }
+                },
+                "total": 10
+            }
+        },
+        "2" : {
+            "title": "Episode 2",
+            "enabled": false
+        },
+        "3" : {
+            "title": "Episode 3",
+            "enabled": false
+        }
+    }
+}
