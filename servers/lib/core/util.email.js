@@ -115,7 +115,7 @@ return when.promise(function(resolve, reject) {
             }
 
             if(mainFileData) {
-                console.log("emailData:", emailData);
+                //console.log("emailData:", emailData);
                 body = ejs.render(mainFileData, _.merge({
                     //cache: false,
                     //filename: mainFile,

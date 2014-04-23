@@ -8,6 +8,7 @@
 var moment = require('moment');
 var when   = require('when');
 var _      = require('lodash');
+var uuid   = require('node-uuid');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -27,6 +28,10 @@ function promiseContinue(val){
     return when.promise( function(resolve){
         resolve(val);
     });
+}
+
+function createUUID() {
+    return uuid.v1();
 }
 
 // build valid URI/URL
@@ -157,6 +162,7 @@ module.exports = {
     GetExpressLogger: getExpressLogger,
     GetTimeStamp:     getTimeStamp,
     BuildURI:         buildUri,
+    CreateUUID:       createUUID,
     String: {
         capitalize: capitalize
     }

@@ -18,7 +18,7 @@ module.exports = {
     },
 
     Games: {
-        'SC-1': require('./gameinfo/sc-1.json'),
-        'AA-1': require('./gameinfo/aa-1.json')
+        'SC': require('./gameinfo/sc.json'),
+        'AA': require('./gameinfo/aa.json')
     }
 }

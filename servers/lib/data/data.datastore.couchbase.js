@@ -620,7 +620,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     if(!gameSessionId) {
-        gameSessionId = uuid.v1();
+        gameSessionId = Util.CreateUUID();
     }
 
     var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
@@ -844,7 +844,9 @@ TelemDS_Couchbase.prototype.startGameSessionV2 = function(deviceId, userId, cour
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var gameSessionId = uuid.v1();
+    var gameSessionId = Util.CreateUUID();
+    //console.log("gameSessionId:", gameSessionId);
+
     var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
 
     var data = {
@@ -996,14 +998,14 @@ return when.promise(function(resolve, reject) {
 
 
 
-TelemDS_Couchbase.prototype.getAchievements = function(deviceId){
+TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         this.client.view("telemetry", "getAllAchievementsByDeviceId").query({
                 stale: false,
-                key: deviceId
+                keys: deviceIds
             },
             function(err, results){
                 if(err){
@@ -1031,11 +1033,7 @@ TelemDS_Couchbase.prototype.getAchievements = function(deviceId){
                             return;
                         }
 
-                        var out = [];
-                        for(var i in results) {
-                            out.push( results[i].value );
-                        }
-
+                        var out = _.pluck(results, 'value');
                         //console.log("getAchievements out:", out);
                         resolve(out);
                     }.bind(this));
