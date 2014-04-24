@@ -46,10 +46,12 @@ function getAchievements(req, res){
             userIds = [ id ];
         }
 
+        //console.log("userIds:", userIds);
         var deviceUserIdMap = {};
-        this.authStore.getLastMultiUserDeviceIds(userIds)
+        this.authStore.getMultiUserLastDeviceId(userIds)
             .then(function(deviceMap) {
                 deviceUserIdMap = deviceMap;
+                //console.log("deviceUserIdMap:", deviceUserIdMap);
                 var deviceIds = _.keys(deviceUserIdMap);
                 return this.telmStore.getAchievements(deviceIds);
             }.bind(this))

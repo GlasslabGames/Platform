@@ -119,7 +119,7 @@ AuthDS_Couchbase.prototype.updateUserDeviceId = function(userId, deviceId) {
 };
 
 
-AuthDS_Couchbase.prototype.getLastMultiUserDeviceIds = function(userIds) {
+AuthDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
