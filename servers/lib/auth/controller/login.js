@@ -99,7 +99,7 @@ return when.promise(function(resolve, reject) {
             //req.session.messages =  [info];
             //res.redirect(rConst.api.user.login);
             this.stats.increment("error", "Route.Login.NoUser");
-            reject({ message: { error:info, key:"invalid"}, code: 401 });
+            reject({ message: _.merge( { error:"invalid username or password", key:"invalid" }, info ), code: 401 });
             return;
         }
 
