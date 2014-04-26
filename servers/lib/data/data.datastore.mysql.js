@@ -9,7 +9,6 @@
 // Third-party libs
 var _    = require('lodash');
 var when = require('when');
-var uuid = require('node-uuid');
 // load at runtime
 var MySQL, tConst, Util;
 
@@ -365,7 +364,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // create session ID
-    var gameSessionId = uuid.v1();
+    var gameSessionId = Util.CreateUUID();
     var values = [
         "NULL",
         0,

@@ -83,7 +83,15 @@ module.exports = {
             service: "dash",
             controller: "game",
             method: {
-                get: "getAchievements"
+                get: "getGameAchievements"
+            }
+        },
+        {
+            api: "/api/v2/dash/game/:id/info",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getGameInfo"
             }
         },
         // ---------------------------------------------------
