@@ -483,7 +483,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         register(regData, courseId);
                     } else {
                         this.stats.increment("error", "Route.Register.User.InvalidInstitution");
-                        registerErr({"error": "course not found"});
+                        registerErr({"error": "registration course code not found", key:"code.invalid"});
                     }
                 }.bind(this))
                 // catch all errors
