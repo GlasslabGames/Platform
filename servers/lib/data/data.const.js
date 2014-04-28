@@ -20,6 +20,7 @@ module.exports = {
           cleanup: 'cleanup'
       },
       dataKey:    'gd',
+      saveKey:    'save',
       countKey:   'count',
       gameSessionKey: 'gs',
       eventKey:   'e',

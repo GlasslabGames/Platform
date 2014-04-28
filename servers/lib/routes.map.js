@@ -52,6 +52,8 @@ module.exports = {
                 post: "endSessionV2"
             }
         },
+        // ADMIN only
+        // TODO: remove
         {
             api: "/api/v2/data/events/get",
             service: "data",
@@ -66,6 +68,15 @@ module.exports = {
             controller: "events",
             method: {
                 post: "sendBatchTelemetryV2"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "saveGameData"
             }
         },
         // ---------------------------------------------------

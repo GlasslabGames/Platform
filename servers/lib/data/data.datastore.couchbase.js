@@ -1044,3 +1044,27 @@ TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
     }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Couchbase.prototype.saveGameData = function(userId, data){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+userId;
+
+    // set game data
+    this.client.set(key, data,
+        function(err, data){
+            if(err){
+                console.error("CouchBase TelemetryStore: Save Game Error -", err);
+                reject(err);
+                return;
+            }
+
+            resolve(data);
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
