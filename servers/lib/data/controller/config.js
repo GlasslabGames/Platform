@@ -18,5 +18,5 @@ function index(req, res, next)
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
-        }.bind(this))
+        }.bind(this));
 }

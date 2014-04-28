@@ -6,40 +6,44 @@
             "enabled": true,
             "$Achievements": {
                 "groups": {
-                    "CCSS.ELA-Literacy.WHST.6-8.1a": {
+                    "CCSS.ELA-Literacy.WHST.6-8.1": {
                         "description": "Common Core Standards",
                         "title": "Standards",
                         "subGroups": {
-                            "CCSS.ELA-Literacy.WHST.6-8.1a-a": {
-                                "title": "Organizing Claims",
-                                "description": "Write arguments focused on discipline-specific content",
+                            "a": {
+                                "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
+                                "description": "Organizing Claims",
+                                "details": "Write arguments focused on discipline-specific content",
+                                "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically.",
                                 "items": {
                                     "Explorer": {
                                         "title": "Explorer",
-                                        "description": "Explorer"
+                                        "info": "Student has collected a wide range of evidence and has selected evidence relevant to the topic."
                                     },
                                     "Tinkerer": {
                                         "title": "Tinkerer",
-                                        "description": "Tinkerer"
+                                        "info": "Student is trying out a variety of claims and positions!"
                                     },
                                     "Battle Pro": {
                                         "title": "Battle Pro",
-                                        "description": "Battle Pro"
+                                        "info": "Player has won all battles played!"
                                     }
                                 },
                                 "total": 3
                             },
-                            "CCSS.ELA-Literacy.WHST.6-8.1a-b": {
-                                "title": "Supporting Claims",
-                                "description": "Write arguments to support claims with clear reasons and relevant evidence",
+                            "b": {
+                                "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
+                                "description": "Supporting Claims",
+                                "details": "Write arguments to support claims with clear reasons and relevant evidence",
+                                "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources.",
                                 "items": {
                                     "Core Master": {
                                         "title": "Core Master",
-                                        "description": "Core Master"
+                                        "info": "Student makes many attempts at Claim Core construction with a high success rate."
                                     },
                                     "Battle Tested": {
                                         "title": "Battle Tested",
-                                        "description": "Battle Tested"
+                                        "info": "Student makes many attempts at Argubot Battles with strong supporting evidence."
                                     }
                                 },
                                 "total": 2
@@ -47,40 +51,44 @@
                         },
                         "total": 5
                     },
-                    "CCSS.ELA-Literacy.WHST.6-8.1b" : {
+                    "21st.Century.Skills" : {
                         "description": "21st Century Skills",
                         "title": "21st Century Skills",
                         "subGroups": {
-                            "CCSS.ELA-Literacy.WHST.6-8.1b-a": {
+                            "a": {
                                 "title": "Problem Solving",
-                                "description": "Distinguish among fact, opinion, and reasoned judgement in a text",
+                                "description": "Problem Solving",
+                                "details": "Distinguish among fact, opinion, and reasoned judgement in a text",
+                                "info": "Experimentation of new and familiar concepts while processing￼information until a viable solution is reached.",
                                 "items": {
                                     "Deliberate": {
                                         "title": "Deliberate",
-                                        "description": "Deliberate"
+                                        "info": "Gathered 100% evidence before equipping an argubot."
                                     },
                                     "Bold": {
                                         "title": "Bold",
-                                        "description": "Bold"
+                                        "info": "Student is taking the initiative to change positions at difficult times in order to make a better argument."
                                     },
                                     "Persistent": {
                                         "title": "Persistent",
-                                        "description": "Persistent"
+                                        "info": "After failing a battle, immediately selects the option to try again."
                                     }
                                 },
                                 "total": 3
                             },
-                            "CCSS.ELA-Literacy.WHST.6-8.1b-b": {
+                            "b": {
                                 "title": "Citizenship",
-                                "description": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
+                                "description": "Citizenship",
+                                "details": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
+                                "info": "Demonstration of proper technology use, global awareness, and moral capacity in and outside of the classroom.",
                                 "items": {
                                     "Curious": {
                                         "title": "Curious",
-                                        "description": "Curious"
+                                        "info": "Touches all the objects in a scene before leaving the room."
                                     },
                                     "Empathetic": {
                                         "title": "Empathetic",
-                                        "description": "Empathetic"
+                                        "info": "The student is choosing empathetic dialogue when speaking with other characters."
                                     }
                                 },
                                 "total": 2
