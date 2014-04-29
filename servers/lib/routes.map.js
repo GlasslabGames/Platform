@@ -79,6 +79,15 @@ module.exports = {
                 post: "saveGameData"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/user/device",
+            service: "data",
+            controller: "user",
+            method: {
+                post: "updateUserDevice"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
@@ -185,15 +194,6 @@ module.exports = {
             controller: "user",
             method: {
                 post: "registerUserV2"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/auth/user/device",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "updateUserDevice"
             }
         },
         {

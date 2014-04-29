@@ -48,7 +48,7 @@ function getAchievements(req, res){
 
         //console.log("userIds:", userIds);
         var deviceUserIdMap = {};
-        this.authStore.getMultiUserLastDeviceId(userIds)
+        this.telmStore.getMultiUserLastDeviceId(userIds)
             .then(function(deviceMap) {
                 deviceUserIdMap = deviceMap;
                 //console.log("deviceUserIdMap:", deviceUserIdMap);
@@ -202,7 +202,12 @@ function getAchievements(req, res){
 
             // error
             .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
+                if(err == 'none found') {
+                    // empty list
+                    this.requestUtil.jsonResponse(res, {});
+                } else {
+                    this.requestUtil.errorResponse(res, err);
+                }
             }.bind(this));
 
     } catch(err) {

@@ -10,7 +10,8 @@ module.exports = {
         config:  require('./controller/config.js'),
         session: require('./controller/session.js'),
         events:  require('./controller/events.js'),
-        game:    require('./controller/game.js')
+        game:    require('./controller/game.js'),
+        user:    require('./controller/user.js')
     },
     Service: require('./data.service.js'),
     Const:   require('./data.const.js'),

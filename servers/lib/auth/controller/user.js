@@ -16,7 +16,6 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
-    updateUserDevice:    updateUserDevice,
     renderEmailTemplate: renderEmailTemplate
 };
 var exampleIn = {};
@@ -734,42 +733,6 @@ function resetPasswordUpdate(req, res, next) {
         this.requestUtil.errorResponse(res, {error: "missing code", key:"missing.code.pass"}, 401);
     }
 }
-
-
-exampleIn.updateUserDevice = {
-    deviceId: "ASD-QWER-ASD"
-};
-function updateUserDevice(req, res, next) {
-    if( req.session &&
-        req.session.passport &&
-        req.session.passport.user) {
-
-        var userData = req.session.passport.user;
-
-        // deviveId required
-        if( req.body &&
-            req.body.deviceId &&
-            req.body.deviceId.length ) {
-
-            // update device Id
-            //console.log("deviceId:", req.body.deviceId);
-            this.authStore.updateUserDeviceId(userData.id, req.body.deviceId)
-                .then(function(){
-                    this.requestUtil.jsonResponse(res, { status: "ok" } );
-                }.bind(this))
-
-                // catch all errors
-                .then(null, function(err){
-                    this.requestUtil.errorResponse(res, err);
-                }.bind(this));
-        } else {
-            this.requestUtil.errorResponse(res, "missing deviceId");
-        }
-    } else {
-        this.requestUtil.errorResponse(res, "not logged in");
-    }
-}
-
 
 function renderEmailTemplate(req, res, next) {
 
