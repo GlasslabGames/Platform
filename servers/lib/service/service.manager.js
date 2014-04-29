@@ -81,6 +81,8 @@ return when.promise(function(resolve, reject) {
                     secret: this.options.auth.secret,
                     cookie: {
                         path: '/'
+                        , httpOnly : false
+                        //, maxAge: 1000 * 60 * 24 // 24 hours
                         //, domain: this.options.auth.host+":"+this.options.frontend.port
                     },
                     store:  this.exsStore
