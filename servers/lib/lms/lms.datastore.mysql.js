@@ -494,6 +494,7 @@ return when.promise(function(resolve, reject) {
             "title" +
             ") VALUES("+values+")";
 
+        //console.log(Q);
         this.ds.query(Q)
             .then(function(data){
                     resolve(data.insertId);
