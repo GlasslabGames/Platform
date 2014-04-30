@@ -1184,3 +1184,61 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds) {
     }.bind(this));
 // end promise wrapper
 };
+
+TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var keys = [];
+        for(var i = 0; i < userIds.length; i++){
+            var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+userIds[i];
+            keys.push(key);
+        }
+
+        this.client.getMulti(keys, {}, function(err, data){
+            // it's ok if one fails, need to check them all for errors
+            if( err &&
+                !err.code == 4101) {
+                console.error("CouchBase AuthStore: Error -", err);
+                reject(err);
+                return;
+            }
+
+            var userIdGameDataMap = {};
+            var failed = false;
+            _.forEach(data, function(gamedata, key) {
+
+                // check if errors
+                if(gamedata.error) {
+                    // it's ok if no device in list for a user
+                    // otherwise fail
+                    if(gamedata.error.code != 13) {
+                        console.error("CouchBase AuthStore: Error -", err);
+                        reject(err);
+                        failed = true;
+                        return;
+                    }
+                }
+
+                // split to get user id
+                var parts = key.split(':');
+                if( gamedata &&
+                    gamedata.value ) {
+                    userIdGameDataMap[ parts[2] ] = gamedata.value;
+                }
+            });
+
+            if(!failed) {
+                if( Object.keys(userIdGameDataMap).length > 0 ) {
+                    resolve(userIdGameDataMap);
+                } else {
+                    reject('none found');
+                }
+            }
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};

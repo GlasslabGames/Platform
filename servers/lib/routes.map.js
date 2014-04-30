@@ -99,6 +99,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/reports/totalTimePlayed",
+            service: "dash",
+            controller: "reports",
+            method: {
+                get: "getTotalTimePlayed"
+            }
+        },
+        {
             api: "/api/v2/dash/game/:id/achievements",
             service: "dash",
             controller: "game",

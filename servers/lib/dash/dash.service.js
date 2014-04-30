@@ -24,6 +24,7 @@ function DashService(options){
         Util          = require('../core/util.js');
         AuthStore     = require('../auth/auth.js').Datastore.Couchbase;
         TelmStore     = require('../data/data.js').Datastore.Couchbase;
+        LmsStore      = require('../lms/lms.js').Datastore.MySQL;
 
         this.options = _.merge(
             {
@@ -37,6 +38,8 @@ function DashService(options){
 
         this.authStore   = new AuthStore(this.options.auth.datastore.couchbase);
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
+        this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
+
         this.gameInfo    = require('./dash.js').Games;
 
     } catch(err){
