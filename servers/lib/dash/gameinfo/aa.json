@@ -10,43 +10,43 @@
                         "description": "Common Core Standards",
                         "title": "Standards",
                         "subGroups": {
-                            "a": {
-                                "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
-                                "description": "Organizing Claims",
-                                "details": "Write arguments focused on discipline-specific content",
-                                "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically.",
-                                "items": {
-                                    "Explorer": {
-                                        "title": "Explorer",
-                                        "info": "Student has collected a wide range of evidence and has selected evidence relevant to the topic."
-                                    },
-                                    "Tinkerer": {
-                                        "title": "Tinkerer",
-                                        "info": "Student is trying out a variety of claims and positions!"
-                                    },
-                                    "Battle Pro": {
-                                        "title": "Battle Pro",
-                                        "info": "Player has won all battles played!"
-                                    }
-                                },
-                                "total": 3
-                            },
                             "b": {
                                 "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
                                 "description": "Supporting Claims",
                                 "details": "Write arguments to support claims with clear reasons and relevant evidence",
                                 "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources.",
                                 "items": {
-                                    "Core Master": {
-                                        "title": "Core Master",
-                                        "info": "Student makes many attempts at Claim Core construction with a high success rate."
+                                    "Core Cadet": {
+                                        "title": "Core Cadet",
+                                        "info": "Student has completed greater than 15 Claim Cores with a high success rate!"
                                     },
                                     "Battle Tested": {
                                         "title": "Battle Tested",
-                                        "info": "Student makes many attempts at Argubot Battles with strong supporting evidence."
+                                        "info": "Student has 100% accuracy at identifying strengths and weaknesses of claim-data pairs for his/her 5 most recent attempts."
+                                    },
+                                    "Bot Defender": {
+                                        "title": "Bot Defender",
+                                        "info": "Student dominated a battle by successfully critiquing an opposing argument while defending his/her own."
                                     }
                                 },
                                 "total": 2
+                            },
+                            "a": {
+                                "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
+                                "description": "Organizing Claims",
+                                "details": "Write arguments focused on discipline-specific content",
+                                "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically.",
+                                "items": {
+                                    "Evidence Cadet": {
+                                        "title": "Evidence Cadet",
+                                        "info": "Great detective work! Student has collected a wide range of evidence."
+                                    },
+                                    "Bot Champion": {
+                                        "title": "Bot Champion",
+                                        "info": "Student has won three argubot battles in a row!"
+                                    }
+                                },
+                                "total": 3
                             }
                         },
                         "total": 5
