@@ -280,6 +280,59 @@ return when.promise(function(resolve, reject) {
 };
 
 
+LMS_MySQL.prototype.isMultiUsersInInstructorCourse = function(userIds, instructorId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q;
+        Q = "SELECT \
+                DISTINCT user_id as userId  \
+            FROM GL_MEMBERSHIP              \
+            WHERE                           \
+                ROLE='student' AND course_id in \
+                (SELECT                 \
+                    course_id           \
+                FROM GL_MEMBERSHIP      \
+                WHERE                   \
+                    ROLE='instructor'   \
+                    AND user_id=";
+        Q += parseInt(instructorId);
+        Q += ") ORDER BY user_id";
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results){
+
+                    var userIdList = {};
+                    for(var i = 0; i < results.length; i++) {
+                        userIdList[ results[i].userId ] = true;
+                    }
+
+                    for(var i = 0; i < userIds.length; i++) {
+                        if(! userIdList[ userIds[i] ] ) {
+                            // missing
+                            resolve(false);
+                        }
+                    }
+
+                    resolve(true);
+
+                } else {
+                    reject({"error": "failure", "exception": err}, 500);
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
 LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, systemRole) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {

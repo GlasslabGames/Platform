@@ -5,10 +5,90 @@ var lConst    = require('../../lms/lms.const.js');
 //
 
 module.exports = {
-    getAchievements: getAchievements
+    getAchievements: getAchievements,
+    getTotalTimePlayed: getTotalTimePlayed
 };
 
 var exampleIn = {};
+
+exampleIn.getTotalTimePlayed = {
+    userIds: [1, 2]
+};
+function getTotalTimePlayed(req, res) {
+    try {
+        if( !(req.session &&
+            req.session.passport &&
+            req.session.passport.user &&
+            req.session.passport.user.id ) ) {
+            this.requestUtil.errorResponse(res, {error: "not logged in"});
+            return;
+        }
+
+        var loginUserSessionData = req.session.passport.user;
+        if(loginUserSessionData.role == lConst.role.student) {
+            this.requestUtil.errorResponse(res, {error: "invalid access"});
+            return;
+        }
+
+        if(!req.query.userIds) {
+            this.requestUtil.errorResponse(res, {error: "missing parameters"});
+            return;
+        }
+
+        // make sure userId is array
+        var userIds = req.query.userIds;
+        if(!_.isArray(userIds)) {
+            var id = parseInt(userIds);
+            if(_.isNaN(id)) {
+                this.requestUtil.errorResponse(res, {error: "invalid parameter"});
+                return;
+            }
+            userIds = [ id ];
+        }
+
+        //console.log("userIds:", userIds);
+        // validate users in teachers class
+        this.lmsStore.isMultiUsersInInstructorCourse(userIds, loginUserSessionData.id)
+            .then(function(verified) {
+                if(verified) {
+                    return this.telmStore.getMultiUserSavedGames(userIds);
+                } else {
+                    this.requestUtil.errorResponse(res, {error: "invalid access"});
+                }
+            }.bind(this))
+            .then(function(userIdGameDataMap) {
+                if(userIdGameDataMap) {
+
+                    // Look in save file for total TimePlayed
+                    for(var i in userIdGameDataMap) {
+                        if( userIdGameDataMap[i] &&
+                            userIdGameDataMap[i].hasOwnProperty('ExplorationManager') &&
+                            userIdGameDataMap[i].ExplorationManager &&
+                            userIdGameDataMap[i].ExplorationManager.hasOwnProperty('ExplorationManager') &&
+                            userIdGameDataMap[i].ExplorationManager.ExplorationManager &&
+                            userIdGameDataMap[i].ExplorationManager.ExplorationManager.hasOwnProperty('m_totalTimePlayed') &&
+                            userIdGameDataMap[i].ExplorationManager.ExplorationManager.m_totalTimePlayed )
+                        {
+                            userIdGameDataMap[i] = userIdGameDataMap[i].ExplorationManager.ExplorationManager.m_totalTimePlayed;
+                        } else {
+                            delete userIdGameDataMap[i];
+                        }
+                    }
+
+                    this.requestUtil.jsonResponse(res, userIdGameDataMap);
+                }
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this));
+
+    } catch(err) {
+        console.trace("Reports: Get Achievements Error -", err);
+        this.stats.increment("error", "GetAchievements.Catch");
+    }
+}
+
 
 exampleIn.getAchievements = {
     userIds: [1, 2]
@@ -42,20 +122,33 @@ function getAchievements(req, res){
                 this.requestUtil.errorResponse(res, {error: "invalid parameter"});
                 return;
             }
-
             userIds = [ id ];
         }
 
         //console.log("userIds:", userIds);
         var deviceUserIdMap = {};
-        this.telmStore.getMultiUserLastDeviceId(userIds)
+        // validate users in teachers class
+        this.lmsStore.isMultiUsersInInstructorCourse(userIds, loginUserSessionData.id)
+            .then(function(verified) {
+                if(verified) {
+                    return this.telmStore.getMultiUserLastDeviceId(userIds);
+                } else {
+                    this.requestUtil.errorResponse(res, {error: "invalid access"});
+                }
+            }.bind(this))
+            // User LastDeviceId
             .then(function(deviceMap) {
+                // if no deviceMap skip to next
+                if(!deviceMap) return;
+
                 deviceUserIdMap = deviceMap;
                 //console.log("deviceUserIdMap:", deviceUserIdMap);
                 var deviceIds = _.keys(deviceUserIdMap);
                 return this.telmStore.getAchievements(deviceIds);
             }.bind(this))
             .then(function(events) {
+                // if no events skip to next
+                if(!events) return;
 
                 var out = { }, e, ed, tevent, userId;
                 for(var i in events) {
