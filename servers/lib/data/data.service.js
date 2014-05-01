@@ -58,6 +58,7 @@ DataService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+    // test connection to MySQL
     this.myds.connect()
         .then(function(){
                 console.log("DataService: MySQL DS Connected");
@@ -68,6 +69,7 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
 
+        // test connection to Couchbase
         .then(function(){
             return this.cbds.connect();
         }.bind(this))
@@ -80,6 +82,7 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "Couchbase.Connect");
             }.bind(this))
 
+        // Migrate Old DB Events Done
         .then(function(){
             return this.cbds.migrateEventsFromMysql(this.stats, this.myds, this.options.telemetry.migrateCount);
         }.bind(this))

@@ -307,7 +307,7 @@ function createCourse(req, res, next)
 
             };
 
-            this.myds.createCourse(courseData.title, courseData.grade, courseData.institution)
+            this.myds.createCourse(userData.id, courseData.title, courseData.grade, courseData.institution)
 
                 .then(function(courseId){
                     if( userData.systemRole == lConst.role.instructor ||
