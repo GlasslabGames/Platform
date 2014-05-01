@@ -20,6 +20,7 @@ module.exports = {
             cleanup: 'cleanup'
         },
         dataKey: 'gd',
+        deviceKey: 'd',
         saveKey: 'save',
         countKey: 'count',
         gameSessionKey: 'gs',
@@ -27,12 +28,6 @@ module.exports = {
         eventsKey: 'events',
         scoreKey: 'GL_Scenario_Score',
         versions: require('./data.const.game_versions')
-    },
-    datastore: {
-        keys: {
-            user: 'u',
-            device: 'd'
-        }
     },
     webapp: {
         api: '/api',

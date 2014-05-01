@@ -509,7 +509,7 @@ return when.promise(function(resolve, reject) {
                         "deviceId": "123",
                         "clientTimeStamp": 1392775453,
                         "serverTimeStamp": 1392776453,
-                        "clientId": "SC",
+                        "gameId": "SC",
                         "clientVersion": "1.2.4156",
                         "gameLevel": "Mission2.SubMission1",
                         "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -1046,17 +1046,17 @@ TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
 };
 
 
-TelemDS_Couchbase.prototype.saveGameData = function(userId, data){
+TelemDS_Couchbase.prototype.saveGameData = function(userId, gameId, data){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+userId;
+    var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
 
     // set game data
     this.client.set(key, data,
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: Save Game Error -", err);
+                console.error("CouchBase TelemetryStore: Save Game Data Error -", err);
                 reject(err);
                 return;
             }
@@ -1069,13 +1069,35 @@ TelemDS_Couchbase.prototype.saveGameData = function(userId, data){
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype.getGameData = function(userId, gameId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
 
-TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, deviceId) {
+        // get game data
+        this.client.get(key,
+            function(err, data){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Get Game Data Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve(data);
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, deviceId) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var key = tConst.datastore.keys.user+":"+tConst.datastore.keys.device+":"+userId;
+        var key = tConst.game.dataKey+":"+tConst.game.deviceKey+":"+gameId+":"+userId;
         this.client.get(key, function(err, data){
             var userDeviceInfo;
             if(err) {
@@ -1126,18 +1148,18 @@ TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, deviceId) {
 };
 
 
-TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds) {
+TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         var keys = [];
-        for(var i = 0; i < userIds.length; i++){
-            var key = tConst.datastore.keys.user+":"+tConst.datastore.keys.device+":"+userIds[i];
+        for(var i = 0; i < userIds.length; i++) {
+            var key = tConst.game.dataKey+":"+tConst.game.deviceKey+":"+gameId+":"+userIds[i];
             keys.push(key);
         }
 
-        this.client.getMulti(keys, {}, function(err, data){
+        this.client.getMulti(keys, {}, function(err, data) {
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
@@ -1166,8 +1188,8 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds) {
                 var parts = key.split(':');
                 if( device &&
                     device.value &&
-                    device.value.hasOwnProperty('lastDevice') ) {
-                    deviceUserIdMap[ device.value.lastDevice ] = parts[2];
+                    device.value.lastDevice ) {
+                    deviceUserIdMap[ device.value.lastDevice ] = parts[3];
                 }
             });
 
@@ -1185,14 +1207,14 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds) {
+TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         var keys = [];
-        for(var i = 0; i < userIds.length; i++){
-            var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+userIds[i];
+        for(var i = 0; i < userIds.length; i++) {
+            var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userIds[i];
             keys.push(key);
         }
 
@@ -1225,7 +1247,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds) {
                 var parts = key.split(':');
                 if( gamedata &&
                     gamedata.value ) {
-                    userIdGameDataMap[ parts[2] ] = gamedata.value;
+                    userIdGameDataMap[ parts[3] ] = gamedata.value;
                 }
             });
 
