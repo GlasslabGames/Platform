@@ -14,7 +14,7 @@ var exampleIn = {};
 // game AA, episode 1
 exampleIn.getGameAchievements = {
     id: 'AA-1'
-}
+};
 function getGameAchievements(req, res){
     try {
 

@@ -12,6 +12,7 @@ module.exports = {
 var exampleIn = {};
 
 exampleIn.getTotalTimePlayed = {
+    gameId: "AA-1",
     userIds: [1, 2]
 };
 function getTotalTimePlayed(req, res) {
@@ -30,13 +31,20 @@ function getTotalTimePlayed(req, res) {
             return;
         }
 
-        if(!req.query.userIds) {
-            this.requestUtil.errorResponse(res, {error: "missing parameters"});
+        if(!req.query.gameId) {
+            this.requestUtil.errorResponse(res, {error: "missing gameId"});
             return;
         }
 
-        // make sure userId is array
+        if(!req.query.userIds) {
+            this.requestUtil.errorResponse(res, {error: "missing userIds"});
+            return;
+        }
+
+        var gameId  = req.query.gameId;
         var userIds = req.query.userIds;
+
+        // make sure userId is array
         if(!_.isArray(userIds)) {
             var id = parseInt(userIds);
             if(_.isNaN(id)) {
@@ -51,7 +59,7 @@ function getTotalTimePlayed(req, res) {
         this.lmsStore.isMultiUsersInInstructorCourse(userIds, loginUserSessionData.id)
             .then(function(verified) {
                 if(verified) {
-                    return this.telmStore.getMultiUserSavedGames(userIds);
+                    return this.telmStore.getMultiUserSavedGames(userIds, gameId);
                 } else {
                     this.requestUtil.errorResponse(res, {error: "invalid access"});
                 }
@@ -91,6 +99,7 @@ function getTotalTimePlayed(req, res) {
 
 
 exampleIn.getAchievements = {
+    gameId: "AA-1",
     userIds: [1, 2]
 };
 function getAchievements(req, res){
@@ -110,12 +119,18 @@ function getAchievements(req, res){
         }
 
         if(!req.query.userIds) {
-            this.requestUtil.errorResponse(res, {error: "missing parameters"});
+            this.requestUtil.errorResponse(res, {error: "missing userIds"});
+            return;
+        }
+        if(!req.query.gameId) {
+            this.requestUtil.errorResponse(res, {error: "missing gameId"});
             return;
         }
 
-        // make sure userId is array
         var userIds = req.query.userIds;
+        var gameId = req.query.gameId;
+
+        // make sure userId is array
         if(!_.isArray(userIds)) {
             var id = parseInt(userIds);
             if(_.isNaN(id)) {
@@ -131,7 +146,7 @@ function getAchievements(req, res){
         this.lmsStore.isMultiUsersInInstructorCourse(userIds, loginUserSessionData.id)
             .then(function(verified) {
                 if(verified) {
-                    return this.telmStore.getMultiUserLastDeviceId(userIds);
+                    return this.telmStore.getMultiUserLastDeviceId(userIds, gameId);
                 } else {
                     this.requestUtil.errorResponse(res, {error: "invalid access"});
                 }
@@ -144,6 +159,7 @@ function getAchievements(req, res){
                 deviceUserIdMap = deviceMap;
                 //console.log("deviceUserIdMap:", deviceUserIdMap);
                 var deviceIds = _.keys(deviceUserIdMap);
+
                 return this.telmStore.getAchievements(deviceIds);
             }.bind(this))
             .then(function(events) {
@@ -166,12 +182,12 @@ function getAchievements(req, res){
                     }
 
                     // per client Id (aka game Id)
-                    if( !out[userId].hasOwnProperty(e.clientId) ) {
-                        out[userId][e.clientId] = { groups:{}, won: 0 };
+                    if( !out[userId].hasOwnProperty(e.gameId) ) {
+                        out[userId][e.gameId] = { groups:{}, won: 0 };
                     }
 
                     //
-                    o = out[userId][e.clientId];
+                    o = out[userId][e.gameId];
                     if( !o.groups.hasOwnProperty(ed.group) ) {
                         o.groups[ed.group] = { subGroups:{}, won: 0 };
                     }
@@ -198,7 +214,7 @@ function getAchievements(req, res){
                  {
                  "deviceId": "cheese",
                  "clientTimeStamp": 1397607228,
-                 "clientId": "SC-1",
+                 "gameId": "SC-1",
                  "clientVersion": "1.2.4156",
                  "eventName": "$Achievement",
                  "eventData": {
@@ -223,17 +239,17 @@ function getAchievements(req, res){
                     }
 
                     // per client Id (aka game Id)
-                    if( !out[userId].hasOwnProperty(e.clientId) ) {
-                        if( this.gameInfo.hasOwnProperty(e.clientId) &&
-                            this.gameInfo[e.clientId].hasOwnProperty('$Achievements') ) {
-                            out[userId][e.clientId] = _.cloneDeep( this.gameInfo[e.clientId]['$Achievements'] );
+                    if( !out[userId].hasOwnProperty(e.gameId) ) {
+                        if( this.gameInfo.hasOwnProperty(e.gameId) &&
+                            this.gameInfo[e.gameId].hasOwnProperty('$Achievements') ) {
+                            out[userId][e.gameId] = _.cloneDeep( this.gameInfo[e.gameId]['$Achievements'] );
                         } else {
                             // skip this event because it's not in client list
                             continue;
                         }
                     }
                     //
-                    o = out[userId][e.clientId];
+                    o = out[userId][e.gameId];
 
                     ed = e.eventData;
                     tevent = {
