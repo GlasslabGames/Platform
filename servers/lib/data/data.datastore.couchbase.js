@@ -1255,7 +1255,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
                 if( Object.keys(userIdGameDataMap).length > 0 ) {
                     resolve(userIdGameDataMap);
                 } else {
-                    reject('none found');
+                    resolve();
                 }
             }
         }.bind(this));
