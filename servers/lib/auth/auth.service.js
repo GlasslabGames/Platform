@@ -6,10 +6,11 @@
  *  when       - https://github.com/cujojs/when
  *  express    - https://github.com/visionmedia/express
  *  passport   - https://github.com/jaredhanson/passport
+ *  validator  - https://github.com/chriso/node-validator
+ *  google oauth - https://github.com/jaredhanson/passport-google-oauth
  *
  *  node-edmodo-api - https://github.com/gabceb/node-edmodo-api
  *
- *  validator       - https://github.com/chriso/node-validator
  *
  */
 var http       = require('http');
@@ -21,6 +22,7 @@ var express    = require('express');
 var passport   = require('passport');
 var couchbase  = require('couchbase');
 var check      = require('validator').check;
+var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 // load at runtime
 var Util, aConst, rConst, lConst;
@@ -66,8 +68,35 @@ AuthService.prototype.appConfig = function(app) {
 
     this.passport = passport;
 
-    // add auth Strategy
+    // add auth Strategies
     this.passport.use(this.glassLabStrategy);
+
+    // http://localhost:8001/auth/google
+    // notasecret
+    this.passport.use(new GoogleStrategy({
+            clientID:     "763558968513-trn6s9uff4vdork95290koq27t1uat5l.apps.googleusercontent.com",
+            clientSecret: "3IwY-_gUyCN42YqP3N3BQOeD",
+            callbackURL: "http://127.0.0.1:8001/auth/google/callback"
+        },
+        function(accessToken, refreshToken, profile, done) {
+            console.log("google user - profile:", profile);
+
+            // profile.provider
+            var userId = profile.id;
+            var firstName = profile.name.givenName;
+            var lastName = profile.name.familyName;
+            //
+            var email = "";
+            if(profile.emails.length > 0) {
+                if(profile.emails[0].hasOwnProperty('value')) {
+                    email = profile.emails[0].value;
+                }
+            }
+
+            // TODO: create user account
+            done(null, profile);
+        }
+    ));
 
     // session de/serialize
     this.passport.serializeUser(function serializeUser(user, done) {
@@ -79,6 +108,28 @@ AuthService.prototype.appConfig = function(app) {
 
     app.use(this.passport.initialize());
     app.use(this.passport.session());
+
+    // route to trigger google oauth authorization
+    app.get('/auth/google',
+        this.passport.authenticate('google',
+            {
+                scope: ['https://www.googleapis.com/auth/userinfo.profile',
+                        'https://www.googleapis.com/auth/userinfo.email']
+            }),
+        function(req, res) {
+            // The request will be redirected to Google for authentication, so this
+            // function will not be called.
+        }.bind(this)
+    );
+
+    // callback route
+    app.get('/auth/google/callback',
+        this.passport.authenticate('google'),
+        function(req, res) {
+            // Successful authentication, redirect home.
+            res.redirect('/');
+        });
+
 }
 
 
