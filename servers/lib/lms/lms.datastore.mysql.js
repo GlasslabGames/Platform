@@ -43,6 +43,51 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+
+LMS_MySQL.prototype.updateCourseTable = function() {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "DESCRIBE GL_COURSE";
+    this.ds.query(Q)
+        .then(function(results) {
+            var updating = false;
+            for(var i = 0; i < results.length; i++) {
+                if( (results[i]['Field'] == 'institution_id') &&
+                    (results[i]['Null'] == 'NO') ) {
+
+                    updating = true;
+                    // need to update
+                    var Q = "ALTER TABLE `GL_COURSE` CHANGE COLUMN `institution_id` `institution_id` BIGINT(20) NULL";
+                    this.ds.query(Q)
+                        .then(function(results) {
+                            //console.log(results);
+                            resolve(true);
+                        }.bind(this),
+                        function(err) {
+                            reject({"error": "failure", "exception": err}, 500);
+                        }.bind(this)
+                    );
+                }
+            }
+
+            if(!updating) {
+                resolve(false);
+            }
+        }.bind(this),
+        function(err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this)
+    );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+
 var exampleOut = {};
 exampleOut.getCourses =
 [
@@ -451,7 +496,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.createCourse = function(title, grade, institutionId) {
+LMS_MySQL.prototype.createCourse = function(userId, title, grade, institutionId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -462,6 +507,8 @@ return when.promise(function(resolve, reject) {
         } else {
             institutionId = parseInt(institutionId);
         }
+
+        title = this.ds.escape(title);
 
         var values = [
             "NULL",  // id
@@ -475,11 +522,12 @@ return when.promise(function(resolve, reject) {
             institutionId,            // institution id
             "NOW()",                  // last updated
             0,                        // locked
-            this.ds.escape(title)     // title
+            title                     // title
         ];
         values = values.join(',');
 
-        var Q = "INSERT INTO GL_COURSE (" +
+        var Q;
+        Q = "INSERT INTO GL_COURSE (" +
             "id," +
             "version," +
             "archived," +
@@ -492,12 +540,19 @@ return when.promise(function(resolve, reject) {
             "last_updated," +
             "locked," +
             "title" +
-            ") VALUES("+values+")";
+            ") SELECT "+values+" FROM GL_COURSE ";
+        // check if course name already exists for null institution_id's
+        Q += "WHERE NOT EXISTS " +
+             "(SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE c.institution_id IS NULL AND m.role='instructor' AND ";
+        Q += "c.title="+title+" AND m.user_id="+parseInt(userId)+") LIMIT 1";
 
-        //console.log(Q);
         this.ds.query(Q)
             .then(function(data){
-                    resolve(data.insertId);
+                    if(data.affectedRows == 0) {
+                        reject({"error":"data validation","key":"course.not.unique"}, 400);
+                    } else {
+                        resolve(data.insertId);
+                    }
                 }.bind(this),
                 function(err) {
                     if(err.code == "ER_DUP_ENTRY") {

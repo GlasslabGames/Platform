@@ -43,6 +43,8 @@ LMSService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+
+    // test connection to LMS MySQL
     this.myds.connect()
         .then(function(){
                 console.log("LMSService: MySQL DS Connected");
@@ -53,6 +55,22 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
 
+        // update course table in LMS MySQL
+        .then(function(){
+            return this.myds.updateCourseTable();
+        }.bind(this))
+        .then(function(updated){
+            if(updated) {
+                console.log("LMSService: Updated Course Table!");
+            }
+            this.stats.increment("info", "MySQL.Connect");
+        }.bind(this),
+        function(err){
+            console.trace("LMSService: MySQL Error -", err);
+            this.stats.increment("error", "MySQL.Connect");
+        }.bind(this))
+
+        // test connection to WebApp MySQL
         .then(function(){
             return this.webstore.connect();
         }.bind(this))
