@@ -82,8 +82,9 @@ function getTotalTimePlayed(req, res) {
                             delete userIdGameDataMap[i];
                         }
                     }
-
                     this.requestUtil.jsonResponse(res, userIdGameDataMap);
+                } else {
+                    this.requestUtil.jsonResponse(res, {});
                 }
             }.bind(this))
             // error
