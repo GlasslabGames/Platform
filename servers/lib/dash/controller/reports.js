@@ -77,13 +77,15 @@ function getTotalTimePlayed(req, res) {
                             userIdGameDataMap[i].ExplorationManager.ExplorationManager.hasOwnProperty('m_totalTimePlayed') &&
                             userIdGameDataMap[i].ExplorationManager.ExplorationManager.m_totalTimePlayed )
                         {
-                            userIdGameDataMap[i] = userIdGameDataMap[i].ExplorationManager.ExplorationManager.m_totalTimePlayed;
+                            // ensure it's a float and make it milliseconds
+                            userIdGameDataMap[i] = 1000 * parseFloat( userIdGameDataMap[i].ExplorationManager.ExplorationManager.m_totalTimePlayed );
                         } else {
-                            delete userIdGameDataMap[i];
+                            userIdGameDataMap[i] = 0;
                         }
                     }
-
                     this.requestUtil.jsonResponse(res, userIdGameDataMap);
+                } else {
+                    this.requestUtil.jsonResponse(res, {});
                 }
             }.bind(this))
             // error
@@ -167,27 +169,30 @@ function getAchievements(req, res){
                 if(!events) return;
 
                 var out = { }, e, ed, tevent, userId;
+
+                // re-set all users map values
+                for(var i = 0; i < userIds.length; i++) {
+                    out[ userIds[i] ] = { groups:{}, won: 0 };
+                }
+
                 for(var i in events) {
                     e = events[i];
                     ed = e.eventData;
                     tevent = {
                         timestamp: e.serverTimeStamp,
+                        timestamp: e.serverTimeStamp,
                         gameSessionId: e.gameSessionId
                     };
+                    // get user id from use device map
                     userId = deviceUserIdMap[ e.deviceId ];
 
                     // if user id not in list, then init object
                     if( !out.hasOwnProperty(userId) ) {
-                        out[userId] = {};
-                    }
-
-                    // per client Id (aka game Id)
-                    if( !out[userId].hasOwnProperty(e.gameId) ) {
-                        out[userId][e.gameId] = { groups:{}, won: 0 };
+                        out[userId] = { groups:{}, won: 0 };
                     }
 
                     //
-                    o = out[userId][e.gameId];
+                    o = out[userId];
                     if( !o.groups.hasOwnProperty(ed.group) ) {
                         o.groups[ed.group] = { subGroups:{}, won: 0 };
                     }

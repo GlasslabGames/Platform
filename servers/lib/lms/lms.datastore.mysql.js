@@ -89,7 +89,7 @@ LMS_MySQL.prototype.updateCourseTable = function() {
 
 
 var exampleOut = {};
-exampleOut.getCourses =
+exampleOut.getEnrolledCourses =
 [
     {
         "id": 27,
@@ -540,12 +540,20 @@ return when.promise(function(resolve, reject) {
             "last_updated," +
             "locked," +
             "title" +
-            ") SELECT "+values+" FROM GL_COURSE ";
-        // check if course name already exists for null institution_id's
-        Q += "WHERE NOT EXISTS " +
-             "(SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE c.institution_id IS NULL AND m.role='instructor' AND ";
-        Q += "c.title="+title+" AND m.user_id="+parseInt(userId)+") LIMIT 1";
+            ") ";
 
+        // if institutionId == NULL unique constraint will not apply so we need to check it
+        if(institutionId == "NULL") {
+            Q += "SELECT "+values+" FROM GL_COURSE ";
+            // check if course name already exists for null institution_id's
+            Q += "WHERE NOT EXISTS " +
+                "(SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
+            Q += "c.title="+title+" AND m.user_id="+parseInt(userId)+") LIMIT 1";
+        } else {
+            Q += "VALUES("+values+")";
+        }
+
+        //console.log("createCourse Q:", Q);
         this.ds.query(Q)
             .then(function(data){
                     if(data.affectedRows == 0) {
@@ -567,6 +575,55 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+LMS_MySQL.prototype.updateCourse = function(userId, courseData) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var title = this.ds.escape(courseData.title);
+
+        var promise;
+        if(!courseData.institutionId) {
+            courseData.institutionId = "NULL";
+
+            var Q = "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
+            Q += "c.id!="+courseData.id+" AND c.title="+title+" AND m.user_id="+parseInt(userId);
+
+            //console.log("getCourses Q:", Q);
+            promise = this.ds.query(Q);
+        } else {
+            courseData.institutionId = parseInt(courseData.institutionId);
+            promise = this.Utils.PromiseContinue();
+        }
+
+        promise.then(function(data){
+                if(data.length == 0) {
+                    var Q = "UPDATE GL_COURSE " +
+                        "SET last_updated=NOW(), " +
+                        "title="+title+", "+
+                        "grade="+this.ds.escape(courseData.grade)+", ";
+                    if(courseData.archived) {
+                        Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
+                    } else {
+                        Q += "archived=false, archived_date=NULL, ";
+                    }
+                    Q += "institution_Id="+courseData.institutionId+" "+
+                        "WHERE id="+courseData.id;
+
+                    //console.log("updateCourse Q:", Q);
+                    this.ds.query(Q).then(resolve);
+                } else {
+                    reject({"error":"data validation","key":"course.not.unique"}, 400);
+                }
+            }.bind(this),
+            reject
+        );
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
 
 LMS_MySQL.prototype.addCode = function(code, id, type) {
 // add promise wrapper
@@ -635,29 +692,6 @@ return when.promise(function(resolve, reject) {
             }.bind(this)
         );
 
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-
-LMS_MySQL.prototype.updateCourse = function(courseData) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    var Q = "UPDATE GL_COURSE " +
-        "SET last_updated=NOW(), " +
-        "title="+this.ds.escape(courseData.title)+", "+
-        "grade="+this.ds.escape(courseData.grade)+", ";
-    if(courseData.archived) {
-        Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
-    } else {
-        Q += "archived=false, archived_date=NULL, ";
-    }
-    Q += "institution_Id="+this.ds.escape(courseData.institutionId)+" "+
-         "WHERE id="+courseData.id;
-
-    this.ds.query(Q).then( resolve, reject );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
