@@ -471,7 +471,7 @@ function updateCourse(req, res, next)
                 courseData.archivedDate = Util.GetTimeStamp();
             }
 
-            this.myds.updateCourse(courseData)
+            this.myds.updateCourse(userData.id, courseData)
 
                 .then(function() {
                     // respond with all data passed in plus an changes (example archived date)
