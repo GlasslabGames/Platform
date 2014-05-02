@@ -1169,7 +1169,7 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
             }
 
             var deviceUserIdMap = {};
-            var failed = false;
+            var failed;
             _.forEach(data, function(device, key) {
 
                 // check if errors
@@ -1177,9 +1177,8 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(device.error.code != 13) {
-                        console.error("CouchBase AuthStore: Error -", err);
-                        reject(err);
-                        failed = true;
+                        console.error("CouchBase AuthStore: Error -", device.error);
+                        failed = device.error;
                         return;
                     }
                 }
@@ -1197,8 +1196,10 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
                 if( Object.keys(deviceUserIdMap).length > 0 ) {
                     resolve(deviceUserIdMap);
                 } else {
-                    reject('none found');
+                    reject();
                 }
+            } else {
+                reject(failed);
             }
         }.bind(this));
 
@@ -1228,7 +1229,12 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
             }
 
             var userIdGameDataMap = {};
-            var failed = false;
+            // re-set all users map values
+            for(var i = 0; i < userIds.length; i++) {
+                userIdGameDataMap[ userIds[i] ] = {};
+            }
+
+            var failed;
             _.forEach(data, function(gamedata, key) {
 
                 // check if errors
@@ -1236,9 +1242,8 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(gamedata.error.code != 13) {
-                        console.error("CouchBase AuthStore: Error -", err);
-                        reject(err);
-                        failed = true;
+                        console.error("CouchBase AuthStore: Error -", gamedata.error);
+                        failed = gamedata.error;
                         return;
                     }
                 }
@@ -1257,6 +1262,8 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
                 } else {
                     resolve();
                 }
+            } else {
+                reject(failed);
             }
         }.bind(this));
 
