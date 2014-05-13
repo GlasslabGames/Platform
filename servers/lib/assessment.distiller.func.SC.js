@@ -96,38 +96,39 @@ SC_Distiller.prototype.process = function(events){
     //
 
     // Process data through distiller function
-    for( var i = 0; i < events.length; i++ ) {
+    var eventsList = events.events;
+    for( var i = 0; i < eventsList.length; i++ ) {
         // Get the event name
-        var eventName = events[i].getElementById( "name" );
+        var eventName = eventsList[i].name;//.getElementById( "name" );
 
         //--- Identify the event ---//
         // A scenario accepted event identifies which scenario is being played
         // Right now, we only check for Sierra Madre or Jackson City
-        if( eventName == "GL_Scenario_Accepted" ) {
+        if( eventName == "GL_Scenario_Loaded" ) {
             // Get the scenario name in the event data
-            scenarioName = events[i].getElementById( "data" ).getElementById( "name" );
+            scenarioName = eventsList[i].eventData.name;
 
             // Check which scenario was played and set variables
             if( scenarioName == "Medusa A4 - PowerPollution.txt" ) {
                 isScenarioSet = true;
                 scenarioName = "SIERRA_MADRE";
-                wekaFile = "sierra_madre.xml";
+                wekaFile = "sierra_madre";
             }
             else if( scenarioName == "Medusa A3 - Large City.txt" ) {
                 isScenarioSet = true;
                 scenarioName = "JACKSON_CITY";
-                wekaFile = "jackson_city.xml";
+                wekaFile = "jackson_city";
             }
         }
         // A score event informs the star rating, rating text, and teacher feedback code
         else if( eventName == "GL_Scenario_Score" ) {
             // Get the score data
-            var scoreData = events[i].getElementById( "data" );
+            var scoreData = eventsList[i].eventData;
 
             // Set the score data
-            starRating = scoreData.getElementById( "stars" );
-            ratingText = scoreData.getElementById( "text" );
-            teacherFeedbackCode = scoreData.getElementById( "teacherFeedback" );
+            starRating = scoreData.stars;
+            ratingText = scoreData.text;
+            teacherFeedbackCode = scoreData.teacherFeedback;
         }
         // Only continue with the remaining events if the scenario variable was set properly
         else if( isScenarioSet ) {
@@ -135,52 +136,52 @@ SC_Distiller.prototype.process = function(events){
             // or pollution and power (SIERRA MADRE ONLY)
             if( eventName == "GL_Scenario_Summary" ) {
                 // Get the summary data
-                var summaryData = events[i].getElementById( "data" );
+                var summaryData = eventsList[i].eventData;
 
                 // Set thermometer scores for SIERRA_MADRE
                 if( scenarioName == "SIERRA_MADRE" ) {
-                    pollutionEndState = parseInt( summaryData.getElementById( "pollutionScore" ) );
+                    pollutionEndState = parseInt( summaryData.pollutionScore );
                     pollutionTargetMin = 10000000;
                     pollutionTargetMax = 20000000;
                 }
                 // Set thermometer scores for JACKSON_CITY
                 else if( scenarioName == "JACKSON_CITY" ) {
-                    jobsEndState = summaryData.getElementById( "jobsScore" ).replace( /,/g , "" );
-                    pollutionEndState = parseInt( summaryData.getElementById( "pollutionScore" ) );
+                    jobsEndState = summaryData.jobsScore.replace( /,/g , "" );
+                    pollutionEndState = parseInt( summaryData.pollutionScore );
                 }
             }
             // Data heartbeats are captured at certain intervals (ex. 30 seconds)
             // These help describe state change over time
             else if( eventName == "GL_Challenge_Secondary_Heartbeat" ) {
                 // Get the heartbeat data
-                var heartbeatData = events[i].getElementById( "data" );
+                var heartbeatData = eventsList[i].eventData;
 
                 // Set the heartbeat data
-                powerProducedEndState = parseInt( heartbeatData.getElementById( "PowerTransmitted" ) );
-                powerConsumedEndState = parseInt( heartbeatData.getElementById( "PowerConsumed" ) );
-                powerCoalProduced = parseInt( heartbeatData.getElementById( "CoalPower" ) );
-                powerWindProduced = parseInt( heartbeatData.getElementById( "WindPower" ) );
-                powerSolarProduced = parseInt( heartbeatData.getElementById( "SolarPower" ) );
+                powerProducedEndState = parseInt( heartbeatData.PowerTransmitted );
+                powerConsumedEndState = parseInt( heartbeatData.PowerConsumed );
+                powerCoalProduced = parseInt( heartbeatData.CoalPower );
+                powerWindProduced = parseInt( heartbeatData.WindPower );
+                powerSolarProduced = parseInt( heartbeatData.SolarPower );
             }
 
             //--- Identify sequences with remaining event types ---//
             // Look for sequences with power events
-            if( powerSequenceEvents.contains( eventName ) ) {
+            if( powerSequenceEvents.indexOf( eventName ) > -1 ) {
                 // Store catalyst states so we know when certain events occur
                 var eCCatalystIdentified = false;
                 var eDCatalystIdentified = false;
 
                 // Get the data for the event
-                var eventData = events[i].getElementById( "data" );
+                var eventData = eventsList[i].eventData;
 
                 //--- Update the local sequences ---//
                 // Check for any building plops
                 if( eventName == "GL_Unit_Plop" ) {
                     // Get the building guid
-                    var guid = eventData.getElementById( "UGuid" );
+                    var guid = eventData.UGuid;
 
                     // Check for green power plants in this plop
-                    if( powerPlantGuidsGreen.contains( guid ) ) {
+                    if( powerPlantGuidsGreen.indexOf( guid ) > -1 ) {
                         // Catalyst identified
                         eDCatalystIdentified = true;
 
@@ -191,10 +192,10 @@ SC_Distiller.prototype.process = function(events){
                 // Check for building bulldozes
                 else if( eventName == "GL_Unit_Bulldoze" ) {
                     // Get the building guid
-                    var guid = eventData.getElementById( "UGuid" );
+                    var guid = eventData.UGuid;
 
                     // Check for green power plants in this plop
-                    if( powerPlantGuidsCoal.contains( guid ) ) {
+                    if( powerPlantGuidsCoal.indexOf( guid ) > -1 ) {
                         // Catalyst identified
                         eCCatalystIdentified = true;
 
@@ -205,11 +206,11 @@ SC_Distiller.prototype.process = function(events){
                 // Check for generic actions on buildings
                 else if( eventName == "GL_Action_Building" ) {
                     // Get the building name and action
-                    var buildingName = eventData.getElementById( "name" );
-                    var buildingAction = eventData.getElementById( "action" );
+                    var buildingName = eventData.name;
+                    var buildingAction = eventData.action;
 
                     // Only check for the "turnedOff" action for the appropriate buildings
-                    if( buildingAction == "turnedOff" && powerPlantNamesCoal.contains( buildingName ) ) {
+                    if( buildingAction == "turnedOff" && powerPlantNamesCoal.indexOf( buildingName ) > -1 ) {
                         // Catalyst identified
                         eCCatalystIdentified = true;
 
@@ -226,7 +227,7 @@ SC_Distiller.prototype.process = function(events){
                     // Check for the catalyst, "coal removal"
                     if( eCCatalystIdentified ) {
                         // Get the scenario time
-                        var scenarioTimeAsString = eventData.getElementById( "scenarioTime" );
+                        var scenarioTimeAsString = eventData.scenarioTime;
                         var scenarioTimeInSeconds = convertFormattedTimeToSeconds( scenarioTimeAsString );
 
                         // The Element C catalyst will always restart the sequence timer
@@ -243,7 +244,7 @@ SC_Distiller.prototype.process = function(events){
                     // Check for the catalyst, "green placed"
                     if( eDCatalystIdentified ) {
                         // Get the scenario time
-                        var scenarioTimeAsString = eventData.getElementById( "scenarioTime" );
+                        var scenarioTimeAsString = eventData.scenarioTime;
                         var scenarioTimeInSeconds = convertFormattedTimeToSeconds( scenarioTimeAsString );
 
                         // The Element D catalyst will always restart the sequence timer
@@ -260,19 +261,19 @@ SC_Distiller.prototype.process = function(events){
                 }
             }
             // Look for sequences with RCI events
-            if( rciSequenceEvents.contains( eventName ) ) {
+            if( rciSequenceEvents.indexOf( eventName ) > -1 ) {
                 // Store catalyst states so we know when certain events occur
                 var eCCatalystIdentified = false;
                 var eDCatalystIdentified = false;
 
                 // Get the data for the event
-                var eventData = events[i].getElementById( "data" );
+                var eventData = eventsList[i].eventData;
 
                 //--- Update the local sequences ---//
                 // Check for zoning operations
                 if( eventName == "GL_Zone" ) {
                     // Get the type
-                    var type = eventData.getElementById( "type" ).substring( 0, 3 );
+                    var type = eventData.type.substring( 0, 3 );
 
                     // Update Element B for any zone type
                     rciElementBIdentified++;
@@ -286,7 +287,7 @@ SC_Distiller.prototype.process = function(events){
                 // Check for dezoning operations
                 else if( eventName == "GL_Dezone" ) {
                     // Get the type
-                    var type = eventData.getElementById( "type" ).substring( 0, 3 );
+                    var type = eventData.type.substring( 0, 3 );
 
                     // Update Element A for any zone type
                     rciElementAIdentified++;
@@ -300,7 +301,7 @@ SC_Distiller.prototype.process = function(events){
                 // Check for building bulldozes
                 else if( eventName == "GL_Unit_Bulldoze" ) {
                     // Get the building name
-                    var buildingName = eventData.getElementById( "name" );
+                    var buildingName = eventData.name;
                     if( buildingName.length >= 3 ) {
                         buildingName = buildingName.substring( 0, 3 );
                     }
@@ -316,7 +317,7 @@ SC_Distiller.prototype.process = function(events){
                 // Check for the catalyst, "bulldoze industry"
                 if( eCCatalystIdentified ) {
                     // Get the scenario time
-                    var scenarioTimeAsString = eventData.getElementById( "scenarioTime" );
+                    var scenarioTimeAsString = eventData.scenarioTime;
                     var scenarioTimeInSeconds = convertFormattedTimeToSeconds( scenarioTimeAsString );
 
                     // The Element C catalyst will always restart the sequence timer
@@ -334,7 +335,7 @@ SC_Distiller.prototype.process = function(events){
                 // Check for the catalyst, "dezone industry"
                 if( eDCatalystIdentified ) {
                     // Get the scenario time
-                    var scenarioTimeAsString = eventData.getElementById( "scenarioTime" );
+                    var scenarioTimeAsString = eventData.scenarioTime;
                     var scenarioTimeInSeconds = convertFormattedTimeToSeconds( scenarioTimeAsString );
 
                     // The Element D catalyst will always restart the sequence timer
@@ -511,15 +512,29 @@ SC_Distiller.prototype.process = function(events){
      *
      * This information needs to be stored in Couchbase: glasslab_assessment
      */
+    /*var bayesInfo = {
+     bayesFile: wekaFile,
+     evidenceFragments: [
+     endStateCategory,
+     combinedRRCategory
+     ]
+     };*/
+
     var bayesInfo = {
-        bayesFile: wekaFile,
-        evidenceFragments: [
-            endStateCategory,
-            combinedRRCategory
+        bayesKey: wekaFile,
+        fragments: [
+            {
+                key: "category_end_state",
+                value: endStateCategory
+            },
+            {
+                key: "category_remove_replace",
+                value: combinedRRCategory
+            }
         ]
     };
 
-    // return distilled data
+    // return distilled data for Sierra Madre and Jackson City
     return bayesInfo;
 }
 
