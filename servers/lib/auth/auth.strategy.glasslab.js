@@ -29,7 +29,6 @@ function Glasslab_Strategy(options) {
     lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
 
-
     this._usernameField = 'username';
     this._passwordField = 'password';
 

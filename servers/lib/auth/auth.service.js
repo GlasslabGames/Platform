@@ -22,7 +22,6 @@ var express    = require('express');
 var passport   = require('passport');
 var couchbase  = require('couchbase');
 var check      = require('validator').check;
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 // load at runtime
 var Util, aConst, rConst, lConst;
@@ -31,7 +30,7 @@ module.exports = AuthService;
 
 function AuthService(options){
     try {
-        var Strategy, WebStore, LMSStore, AuthStore;
+        var Accounts, WebStore, LMSStore, AuthStore;
         this.options = _.merge(
             {
                 auth: { port: 8082 }
@@ -43,20 +42,21 @@ function AuthService(options){
         rConst        = require('../routes.js').Const;
         Util          = require('../core/util.js');
         aConst        = require('./auth.js').Const;
-        Strategy      = require('./auth.js').Strategy;
+        Accounts      = require('./auth.js').Accounts;
         AuthStore     = require('./auth.js').Datastore.Couchbase;
 
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options);
-        this.glassLabStrategy = new Strategy.Glasslab(this.options);
         this.authStore        = new AuthStore(this.options.auth.datastore.couchbase);
+        this.accountsManager  = new Accounts.Manager(this.options);
+        this.glassLabStrategy = this.accountsManager.get("glasslab");
 
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
         WebStore      = require('../dash/dash.js').Datastore.MySQL;
         lConst        = require('../lms/lms.js').Const;
         LMSStore      = require('../lms/lms.js').Datastore.MySQL;
-        this.webstore         = new WebStore(this.options.webapp.datastore.mysql);
-        this.lmsStore         = new LMSStore(this.options.lms.datastore.mysql);
+        this.webstore = new WebStore(this.options.webapp.datastore.mysql);
+        this.lmsStore = new LMSStore(this.options.lms.datastore.mysql);
 
     } catch(err){
         console.trace("Auth: Error -", err);
@@ -65,38 +65,10 @@ function AuthService(options){
 }
 
 AuthService.prototype.appConfig = function(app) {
-
     this.passport = passport;
 
-    // add auth Strategies
-    this.passport.use(this.glassLabStrategy);
-
-    // http://localhost:8001/auth/google
-    // notasecret
-    this.passport.use(new GoogleStrategy({
-            clientID:     "763558968513-trn6s9uff4vdork95290koq27t1uat5l.apps.googleusercontent.com",
-            clientSecret: "3IwY-_gUyCN42YqP3N3BQOeD",
-            callbackURL: "http://127.0.0.1:8001/auth/google/callback"
-        },
-        function(accessToken, refreshToken, profile, done) {
-            console.log("google user - profile:", profile);
-
-            // profile.provider
-            var userId = profile.id;
-            var firstName = profile.name.givenName;
-            var lastName = profile.name.familyName;
-            //
-            var email = "";
-            if(profile.emails.length > 0) {
-                if(profile.emails[0].hasOwnProperty('value')) {
-                    email = profile.emails[0].value;
-                }
-            }
-
-            // TODO: create user account
-            done(null, profile);
-        }
-    ));
+    // setup passport for all account types
+    this.accountsManager.setupPassport(this.passport, this);
 
     // session de/serialize
     this.passport.serializeUser(function serializeUser(user, done) {
@@ -109,27 +81,8 @@ AuthService.prototype.appConfig = function(app) {
     app.use(this.passport.initialize());
     app.use(this.passport.session());
 
-    // route to trigger google oauth authorization
-    app.get('/auth/google',
-        this.passport.authenticate('google',
-            {
-                scope: ['https://www.googleapis.com/auth/userinfo.profile',
-                        'https://www.googleapis.com/auth/userinfo.email']
-            }),
-        function(req, res) {
-            // The request will be redirected to Google for authentication, so this
-            // function will not be called.
-        }.bind(this)
-    );
-
-    // callback route
-    app.get('/auth/google/callback',
-        this.passport.authenticate('google'),
-        function(req, res) {
-            // Successful authentication, redirect home.
-            res.redirect('/');
-        });
-
+    // setup app routes for all account types
+    this.accountsManager.setupRoutes(app, this.passport);
 }
 
 
@@ -405,18 +358,14 @@ AuthService.prototype.forwardAuthenticatedRequestToWebApp = function(user, req, 
 }
 
 
-AuthService.prototype._registerUser = function(userData){
+AuthService.prototype.registerUser = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        if( (userData.loginType == aConst.login.type.glassLabV1) ||
-            (userData.loginType == aConst.login.type.glassLabV2) ){
-            this.glassLabStrategy.registerUser(userData)
-                .then(resolve, reject);
-        } else {
-            this.stats.increment("error", "RegisterUser.InvalidLoginType");
-            reject({error: "invalid login type"});
-        }
+
+    this.glassLabStrategy.registerUser(userData)
+        .then(resolve, reject);
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper

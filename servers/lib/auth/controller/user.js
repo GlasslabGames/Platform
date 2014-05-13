@@ -100,7 +100,7 @@ function registerUserV1(req, res, next) {
             loginType:     aConst.login.type.glassLabV2
         };
 
-        this._registerUser(userData)
+        this.registerUser(userData)
             .then(function(userId){
                 // if student, enroll in course
                 if(systemRole == lConst.role.student) {
@@ -398,7 +398,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
 
     var register = function(regData, courseId) {
-        this._registerUser(regData)
+        this.registerUser(regData)
             .then(function(userId){
 
                 // if student

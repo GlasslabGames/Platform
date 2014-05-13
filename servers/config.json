@@ -99,6 +99,11 @@
                 "bucket":   "glasslab_webapp",
                 "password": "glasslab"
             }
+        },
+        "google": {
+            "clientID": "763558968513-trn6s9uff4vdork95290koq27t1uat5l.apps.googleusercontent.com",
+            "clientSecret": "3IwY-_gUyCN42YqP3N3BQOeD",
+            "callbackURL": "http://127.0.0.1:8001/auth/google/callback"
         }
     },
     "validate": {
