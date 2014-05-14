@@ -7,10 +7,11 @@
  *  couchnode  - https://github.com/couchbase/couchnode
  *
  */
+var fs      = require('fs');
+var path    = require('path');
 // Third-party libs
 var _       = require('lodash');
 var when    = require('when');
-var redis   = require('redis');
 var child_process   = require('child_process');
 // Glasslab libs
 var aeConst;
@@ -23,7 +24,7 @@ function Distiller(options){
     // Glasslab libs
     Telemetry  = require('./telemetry.js');
     Assessment = require('./assessment.js');
-    Util       = require('./util.js');
+    Util       = require('./util.js')
     aeConst    = Assessment.Const;
 
     this.options = _.merge(
@@ -41,32 +42,43 @@ function Distiller(options){
     this.requestUtil   = new Util.Request(this.options);
     this.queue         = new Assessment.Queue.Redis(this.options.assessment.queue);
     this.dataDS        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
+    this.userDS        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
     this.aeDS          = new Assessment.Datastore.Couchbase(this.options.assessment.datastore.couchbase);
     this.SD_Function   = new Assessment.Distiller.Func.SC();
     this.stats         = new Util.Stats(this.options, "Assessment.Distiller");
 
-    this.webAppUrl     = Util.BuildURI(this.options.webapp);
-    this.assessmentUrl = this.webAppUrl+"/WekaServlet";//api/game/assessment/";
+    this.wekaFileData = {};
+    this.loadWekaFiles();
 
     this.dataDS.connect()
         .then(function(){
             console.log("Distiller: Data DS Connected");
-            this.stats.increment("info", "Telemetry.Couchbase.Connect");
+            this.stats.increment("info", "Telemetry.Data.Couchbase.Connect");
         }.bind(this),
         function(err){
             console.trace("Distiller: Data DS Error -", err);
-            this.stats.increment("error", "Telemetry.Couchbase.Connect");
+            this.stats.increment("error", "Telemetry.Data.Couchbase.Connect");
         }.bind(this));
 
     this.aeDS.connect()
         .then(function(){
             console.log("Distiller: AE DS Connected");
-            this.stats.increment("info", "Assessment.Couchbase.Connect");
+            this.stats.increment("info", "Assessment.AE.Couchbase.Connect");
         }.bind(this),
             function(err){
                 console.trace("Distiller: AE DS Error -", err);
-                this.stats.increment("error", "Assessment.Couchbase.Connect");
+                this.stats.increment("error", "Assessment.AE.Couchbase.Connect");
             }.bind(this));
+
+    this.userDS.connect()
+        .then(function(){
+            console.log("Distiller: User DS Connected");
+            this.stats.increment("info", "Assessment.User.MySQL.Connect");
+        }.bind(this),
+        function(err){
+            console.trace("Distiller: User DS Error -", err);
+            this.stats.increment("error", "Assessment.User.MySQL.Connect");
+        }.bind(this));
 
     this.startTelemetryPoll();
 
@@ -77,12 +89,33 @@ function Distiller(options){
 }
 
 
+Distiller.prototype.loadWekaFiles = function(){
+    try{
+        var dir = "./lib/bayes/";
+        var files = fs.readdirSync(dir);
+
+        files.forEach(function(file){
+            // skip dot files
+            if(file.charAt(0) != '.') {
+                var name = path.basename(file, path.extname(file));
+                this.wekaFileData[name] = fs.readFileSync(dir + file, 'utf-8');
+            }
+        }.bind(this));
+    } catch(err) {
+        console.error("Distiller: Load Weka Files Error -", err);
+    }
+
+    console.log('Distiller: Loaded Weka XML Files');
+};
+
+
 Distiller.prototype.startTelemetryPoll = function(){
     // fetch assessment loop
     setInterval(function() {
         this.telemetryCheck();
     }.bind(this), this.options.distiller.pollDelay);
-}
+};
+
 
 Distiller.prototype.telemetryCheck = function(){
     this.queue.getJobCount()
@@ -111,13 +144,13 @@ Distiller.prototype.getTelemetryBatch = function(){
         .then(function(data){
             if(data.type == aeConst.queue.end) {
                 return this.runAssessment(data.id)
-                            .then( function(){
-                                // TODO: use assessment DS for queue
-                                return this.dataDS.endQSession(data.id)
-                            }.bind(this) );
+                    .then( function(){
+                        // TODO: use assessment DS for queue
+                        return this.dataDS.endQSession(data.id)
+                    }.bind(this) );
             } else {
                 // TODO: use assessment DS for queue
-                return this.cbds.cleanupQSession(data.id);
+                return this.dataDS.cleanupQSession(data.id);
             }
         }.bind(this))
 
@@ -127,7 +160,7 @@ Distiller.prototype.getTelemetryBatch = function(){
         }.bind(this))
 
         // catch all errors
-        .then(null, function(err){
+        .then(null, function(err) {
             console.error("Distiller: endBatchIn - Error:", err);
             this.stats.increment("error", "GetTelemetryBatch");
         }.bind(this));
@@ -145,77 +178,111 @@ return when.promise(function(resolve, reject) {
     this.dataDS.getEvents(gameSessionId)
         .then(function(events){
             // Run distiller function
-            var distilledData = this.SD_Function.process(events);
-            console.log( "Distilled data: " + distilledData );
+            var distilledData = this.SD_Function.preProcess(events);
+            //console.log( "Distilled data:", JSON.stringify(distilledData, null, 2) );
 
             // If the distilled data has no WEKA key, don't save anything
-            if( !distilledData || !distilledData.bayesKey ) {
+            if( !distilledData || !distilledData.bayes.key ) {
                 console.log( "no bayes key found in distilled data" );
                 resolve();
                 return;
             }
 
             // save distilled data
-            return this.aeDS.saveDistilledData(gameSessionId, distilledData);
+            //return this.aeDS.saveDistilledData(gameSessionId, distilledData);
+            return distilledData;
         }.bind(this))
-        .then(function(distilledData){
+        .then(function(distilledData) {
+            // shortcut missing distilledData
+            if(!distilledData) return;
+            //console.log("distilledData:", distilledData);
 
             // If the bayes key is empty, there is no WEKA to perform, resolve
-            if( !distilledData || !distilledData.bayesKey ) {
-                console.log( "no bayes key found in weka data" );
+            if( !distilledData || !distilledData.bayes.key ) {
+                //console.log( "no bayes key found in weka data" );
                 resolve();
                 return;
             }
 
             // Set the command line string for the WEKA processor
-            var commandString = " SimpleBayes " + distilledData.bayesKey;
-            /*var url = this.assessmentUrl + gameSessionId;
-            this.requestUtil.getRequest(url, null, function(err, res) {
-                if(err) {
-                    console.error("url:", url, ", Error:", err);
-                    this.stats.increment("error", "ExecuteAssessment");
-                    res.status(500).send('Error:'+err);
-                    reject(err);
-                    return;
-                }*/
+            var commandString = " SimpleBayes";
+            // weka files was not loaded
+            if(!this.wekaFileData.hasOwnProperty(distilledData.bayes.key)) {
+                console.error( "Distiller: weka file missing from cache: ", distilledData.bayes.key);
+                reject();
+                return;
+            }
+            // add weka file length
+            commandString += " " + this.wekaFileData[distilledData.bayes.key].length;
+
+            // add root node
+            commandString += " " + distilledData.bayes.root;
 
             // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA server
-            var evidenceFragments = distilledData.fragments;
-            for( var i = 0; i < evidenceFragments.length; i++ ) {
-                commandString += " " + evidenceFragments[i].value;//evidenceFragments[i].key + "=" + evidenceFragments[i].value;
+            var evidenceFragments = distilledData.bayes.fragments;
+            for(var i in evidenceFragments) {
+                commandString += " " + i + " " + evidenceFragments[i];
             }
-
 
             // Before we trigger the WEKA process, we need to make sure we set the current working directory
             // and execute the batch file or shell script, depending on the platform
             process.chdir( '../../Assessment/build' );
             var scriptToExecute = '';
-            console.log( "Executing bayes on " + process.platform + " at " + process.cwd() );
+            //console.log( "Executing bayes on " + process.platform + " at " + process.cwd() );
             if( process.platform === "win32" ) {
                 scriptToExecute += 'run_assessment.bat';
             }
             else if( process.platform === "darwin" ) {
                 scriptToExecute += './run_assessment.sh';
             }
-            // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA process
-            child_process.exec( scriptToExecute + commandString,
-                function( error, data, stderr ) {
-                    console.log( "data: " + data );
-                    //console.log( "stderr: " + stderr );
-                    if( error !== null ) {
-                        console.log( "exec error: " + error );
-                        reject( error );
-                    } else {
-                        // save bayes data
-                        this.aeDS.saveBayesOutputData(gameSessionId, data)
-                        .then(function(){
-                            // successfully ran bayes, done
-                            resolve();
-                        }.bind(this));
-                    }
-                }.bind(this)
-            );
 
+            // run child process in promise
+            return when.promise( function(resolve2, reject2) {
+                // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA process
+                //console.log( "execute: ", scriptToExecute + commandString );
+
+                var aeWeka = child_process.exec( scriptToExecute + commandString,
+                    function( error, data, stderr ) {
+                        //console.log( "weka data: ", data );
+                        //console.log( "stderr: ", stderr );
+                        if( error !== null ) {
+                            //console.log( "exec error: " + error );
+                            reject2( error );
+                        } else {
+                            resolve2({distilled: distilledData, weka: data});
+                        }
+                    }.bind(this)
+                );
+
+                aeWeka.stdin.write(this.wekaFileData[distilledData.bayes.key]);
+                aeWeka.stdin.end();
+            }.bind(this))
+        }.bind(this))
+
+        .then(function(data) {
+            // shortcut missing data
+            if(!data) return;
+
+            try {
+                data.weka = JSON.parse(data.weka);
+                // process wekaResults and distilled Data
+                var compData = this.SD_Function.postProcess(data.distilled, data.weka);
+
+                if(compData) {
+                    // get session info (userId, courseId)
+                    return this.userDS.getSessionInfo(gameSessionId)
+                        .then(function(sessionInfo) {
+                            if(sessionInfo) {
+                                // save Competency Results to DB
+                                return this.userDS.saveCompetencyResults(sessionInfo, compData);
+                            }
+                        }.bind(this));
+                }
+            } catch(err) {
+                // invalid json data
+                console.error("Distiller: Invalid Competency JSON data - Error:", err);
+                reject(err);
+            }
         }.bind(this))
 
         // catch all error

@@ -457,3 +457,77 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Mysql.prototype.getSessionInfo = function(gameSessionId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q = "SELECT activity_id as activityId, course_id as courseId, user_id as userId FROM GL_SESSION WHERE" +
+            "  session_id="+this.ds.escape(gameSessionId);
+
+        this.ds.query(Q)
+            .then(
+            function(result){
+                if(result[0]) {
+                    resolve(result[0]);
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+            reject
+        );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Mysql.prototype.saveCompetencyResults = function(sessionInfo, compData){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        // create session ID
+        var values = [
+            "NULL",
+            0,
+            parseInt(compData.numAttempts), // numAttempts
+            parseInt(sessionInfo.courseId),
+            this.ds.escape("POINTID"),
+            this.ds.escape(compData.competencyType), // competency type
+            "NOW()",
+            this.ds.escape(compData.info), // info
+            "NOW()",
+            parseInt(compData.level), // competency level
+            this.ds.escape(compData.studentFeedbackCode), // student feedback
+            this.ds.escape(compData.teacherFeedbackCode), // teacher feedback
+            this.ds.escape(compData.timeSpentSec), // time spent secs
+            this.ds.escape(sessionInfo.userId)
+        ];
+        values = values.join(',');
+
+        var Q = "INSERT INTO GL_COMPETENCY_RESULTS (" +
+            "id," +
+            "version," +
+            "num_attempts," +
+            "course_id," +
+            "c_point," +
+            "c_type," +
+            "date_created," +
+            "info," +
+            "last_updated," +
+            "level," +
+            "student_feedback_code," +
+            "teacher_feedback_code," +
+            "time_spent_secs," +
+            "user_id" +
+            ") VALUES("+values+")";
+
+        this.ds.query(Q).then(resolve, reject);
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};

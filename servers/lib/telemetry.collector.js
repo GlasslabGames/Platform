@@ -56,13 +56,13 @@ function Collector(options){
                 function(err){
                     console.trace("Collector: MySQL Error -", err);
                     this.stats.increment("error", "MySQL.Connect");
-                }.bind(this));
-
-        this.cbds.connect()
+                }.bind(this))
+            .then(function(){
+                return this.cbds.connect();
+            }.bind(this))
             .then(function(){
                 console.log("Collector: Couchbase DS Connected");
                 this.stats.increment("info", "Couchbase.Connect");
-                this.cbds.getAllOldGameSessions();
             }.bind(this),
                 function(err){
                     console.trace("Collector: Couchbase DS Error -", err);
