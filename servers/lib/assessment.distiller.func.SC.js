@@ -20,8 +20,58 @@ function SC_Distiller(){
     // Glasslab libs
 }
 
-SC_Distiller.prototype.process = function(events){
-    console.log("events:", events);
+
+var cTypeConst = {
+    TYPE_COMPLEX_PROBLEM_SOLVING: "cps",
+    TYPE_COMPLEX_PROBLEM_SOLVING_MAPS: "cpssm",
+    TYPE_COMPLEX_PROBLEM_SOLVING_M3: "cps_m3",
+    TYPE_COMPLEX_PROBLEM_SOLVING_M5: "cps_m5",
+    TYPE_INTEGRATING_INFO_FROM_TEXT_DIAGRAMS: "iiftd",
+    TYPE_INTEGRATING_INFO_FROM_TEXT_DIAGRAMS_M3: "iiftd_m3",
+    TYPE_INTEGRATING_INFO_FROM_TEXT_DIAGRAMS_M5: "iiftd_m5",
+    TYPE_LOCATING_EVIDENCE_WITHIN_TEXT: "lewt",
+    TYPE_LOCATING_EVIDENCE_WITHIN_TEXT_M3: "lewt_m3",
+    TYPE_LOCATING_EVIDENCE_WITHIN_TEXT_M5: "lewt_m5",
+    TYPE_COMPLEX_PROBLEM_SOLVING_SYSTEMS_MAP: "cpssm"
+};
+
+var activityIdToCompetencyMap = {
+    "MedusaA1Power01": {
+        "competency": "Complex Problem Solving -Games",
+        "competencyCode": cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING
+    },
+    "MedusaA1Pollution01": {
+        "competency": "Complex Problem Solving -Games",
+        "competencyCode": cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING
+    },
+    "063cf110-e0f6-11e2-a9b1-fbf5ea959a8c": {
+        "competency": "Complex Problem Solving -Systems Map",
+        "competencyCode": cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING_SYSTEMS_MAP
+    },
+    "723dfa90-e0f5-11e2-a9b1-fbf5ea959a8c": {
+        "competency": "Complex Problem Solving -Systems Map",
+        "competencyCode": cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING_SYSTEMS_MAP
+    },
+    "b71d8d00-e0f6-11e2-a9b1-fbf5ea959a8c": {
+        "competency": "Complex Problem Solving -Systems Map",
+        "competencyCode": cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING_SYSTEMS_MAP
+    },
+    "249ed870-e0f7-11e2-a9b1-fbf5ea959a8c": {
+        "competency": "Complex Problem Solving -Systems Map",
+        "competencyCode": cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING_SYSTEMS_MAP
+    },
+    "2bfb6dc0-e40a-11e2-9336-d1ab0cf51c41": {
+        "competency": "Integrating Info From Text and Diagrams",
+        "competencyCode": cTypeConst.TYPE_INTEGRATING_INFO_FROM_TEXT_DIAGRAMS
+    },
+    "12252b50-e01f-11e2-a7e8-3f4343712aaf": {
+        "competency": "Locating Evidence Within Text",
+        "competencyCode": cTypeConst.TYPE_LOCATING_EVIDENCE_WITHIN_TEXT
+    }
+};
+
+SC_Distiller.prototype.preProcess = function(events){
+    //console.log("events:", events);
 
     //--- Setup initial member variables ---//
     // Scenario type info
@@ -33,6 +83,7 @@ SC_Distiller.prototype.process = function(events){
     var starRating = 0;
     var ratingText = "";
     var teacherFeedbackCode = "";
+    var cType = "";
 
     // Thermometer summary info
     var jobsEndState = 0;
@@ -113,11 +164,13 @@ SC_Distiller.prototype.process = function(events){
                 isScenarioSet = true;
                 scenarioName = "SIERRA_MADRE";
                 wekaFile = "sierra_madre";
+                cType = cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING_M3;
             }
             else if( scenarioName == "Medusa A3 - Large City.txt" ) {
                 isScenarioSet = true;
                 scenarioName = "JACKSON_CITY";
                 wekaFile = "jackson_city";
+                cType = cTypeConst.TYPE_COMPLEX_PROBLEM_SOLVING_M5;
             }
         }
         // A score event informs the star rating, rating text, and teacher feedback code
@@ -520,23 +573,49 @@ SC_Distiller.prototype.process = function(events){
      ]
      };*/
 
-    var bayesInfo = {
-        bayesKey: wekaFile,
-        fragments: [
-            {
-                key: "category_end_state",
-                value: endStateCategory
-            },
-            {
-                key: "category_remove_replace",
-                value: combinedRRCategory
+    var distillInfo = {
+        competencyType : cType,
+        teacherFeedbackCode: teacherFeedbackCode,
+        bayes: {
+            key: wekaFile,
+            root: "category_sys_mod",
+            fragments: {
+                "category_end_state": endStateCategory,
+                "category_remove_replace": combinedRRCategory
             }
-        ]
+        }
     };
 
     // return distilled data for Sierra Madre and Jackson City
-    return bayesInfo;
-}
+    return distillInfo;
+};
+
+SC_Distiller.prototype.postProcess = function(distilled, wekaResults) {
+    var compData = {};
+    //console.log("postProcess distilled:", distilled);
+    //console.log("postProcess wekaResults:", wekaResults);
+
+    // Get the competency level
+    var competencyLevel = 0;
+    var maxValue = 0;
+    for( var i = 0; i < wekaResults.length; i++ ) {
+        if(wekaResults[i] > maxValue) {
+            maxValue = wekaResults[i];
+            competencyLevel = i + 1;
+        }
+    }
+
+    // competency type
+    compData.competencyType = distilled.competencyType;
+    compData.level = competencyLevel;
+    compData.teacherFeedbackCode = distilled.teacherFeedbackCode;
+    compData.studentFeedbackCode = distilled.teacherFeedbackCode;
+    compData.info = JSON.stringify(wekaResults);
+    compData.timeSpentSec = 0;
+    compData.numAttempts = 1;
+
+    return compData;
+};
 
 function convertFormattedTimeToSeconds( timeAsString ) {
     var indexOfSeparator = timeAsString.indexOf( ":" );
