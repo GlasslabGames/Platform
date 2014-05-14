@@ -610,7 +610,11 @@ SC_Distiller.prototype.postProcess = function(distilled, wekaResults) {
     compData.level = competencyLevel;
     compData.teacherFeedbackCode = distilled.teacherFeedbackCode;
     compData.studentFeedbackCode = distilled.teacherFeedbackCode;
-    compData.info = JSON.stringify(wekaResults);
+
+    var info =_.cloneDeep(distilled);
+    info.bayes.wekaResults = wekaResults;
+    compData.info = JSON.stringify(info);
+
     compData.timeSpentSec = 0;
     compData.numAttempts = 1;
 
