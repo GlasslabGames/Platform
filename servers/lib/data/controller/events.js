@@ -77,7 +77,7 @@ function getEventsByUserId(req, res, next){
             if( req.query &&
                 req.query.userId) {
 
-                if(userData.systemRole  == lConst.role.admin) {
+                if(userData.role  == lConst.role.admin) {
                     this.myds.getSessionsByUserId(req.query.userId)
                         .then(function(sessionList){
 

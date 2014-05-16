@@ -110,55 +110,6 @@ RequestUtil.prototype.forwardPostRequest = function(url, jdata, resOut, done){
 };
 */
 
-RequestUtil.prototype.forwardRequestToWebApp = function(opts, req, resOut, done){
-
-    var options = _.merge(
-        {
-            protocol: this.options.webapp.protocol || "http:",
-            host:     this.options.webapp.host     || "localhost",
-            port:     this.options.webapp.port,
-            path:     req.originalUrl,
-            method:   req.method,
-            headers:  _.cloneDeep(req.headers)
-        },
-        opts
-    );
-
-    // if user, override cookie otherwise no cookie
-    if(options.cookie) {
-        options.headers.cookie = options.cookie;
-        delete options.cookie;
-    } else {
-        delete options.headers.cookie;
-    }
-
-    // remove unnecessary headers
-    delete options.headers['user-agent'];
-    delete options.headers['origin'];
-    delete options.headers['accept-encoding'];
-    delete options.headers['content-length'];
-    delete options.headers['referer'];
-
-    var data = "";
-    if(req.body && req.method == "POST") {
-        if(options.headers['content-type'] == 'application/x-www-form-urlencoded')
-        {
-            var querystring = require('querystring');
-            data = querystring.stringify(req.body);
-        } else {
-            // default to json
-            data = JSON.stringify(req.body);
-            options.headers['content-type'] = 'application/json';
-        }
-        options.headers['content-length'] = data.length;
-    }
-
-    //console.log("forwardRequest options:", options);
-    //console.log("forwardRequest data:", data);
-
-    this.sendRequest(options, data, resOut, done);
-};
-
 RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
 
     var sreq = http.request(options, function(sres) {

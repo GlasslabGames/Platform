@@ -56,6 +56,13 @@ function glassLabLogin(req, res, next) {
         // already logged in?
         if( req.isAuthenticated() ) {
             userInfo = req.session.passport.user;
+
+            // for old cached sessions, migrate them over to role instead of systemRole
+            if(userInfo.systemRole && !userInfo.role)
+            {
+                userInfo.role = userInfo.systemRole;
+                delete userInfo.systemRole;
+            }
         }
     }
 
@@ -131,17 +138,15 @@ return when.promise(function(resolve, reject) {
 
         // TODO: move this to LMS service API, for service isolation
         // get courses
-        if( (user.systemRole == lConst.role.student) ||
-            (user.systemRole == lConst.role.instructor) ||
-            (user.systemRole == lConst.role.manager) ||
-            (user.systemRole == lConst.role.admin) ) {
+        if( (user.role == lConst.role.student) ||
+            (user.role == lConst.role.instructor) ||
+            (user.role == lConst.role.manager) ||
+            (user.role == lConst.role.admin) ) {
             this.lmsStore.getUserCourses(user.id)
                 .then(function(courses){
                     // add courses
                     var tuser = _.clone(user);
                     tuser.courses = courses;
-                    // TODO: remove after the web site dep has been updated
-                    tuser.role = tuser.systemRole;
 
                     this.stats.increment("info", "Route.Login.Auth.GetUserCourses.Done");
                     resolve(tuser);

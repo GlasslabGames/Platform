@@ -1,6 +1,6 @@
 
 /**
- * Telemetry Dispatcher Module
+ * Auth Couchbase Datastore Module
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash

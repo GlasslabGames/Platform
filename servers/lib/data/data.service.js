@@ -17,7 +17,7 @@ var parallel   = require('when/parallel');
 var express    = require('express');
 var multiparty = require('multiparty');
 // load at runtime
-var aConst, tConst, rConst, Util;
+var aConst, tConst, Util;
 
 module.exports = DataService;
 
@@ -28,7 +28,6 @@ function DataService(options){
         // Glasslab libs
         Assessment = require('../aeng/assessment.js');
         aConst     = require('../auth/auth.js').Const;
-        rConst     = require('../routes.js').Const;
         WebStore   = require('../dash/dash.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         Telemetry  = require('./data.js');

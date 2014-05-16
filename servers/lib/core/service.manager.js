@@ -53,10 +53,10 @@ ServiceManager.prototype.initExpress = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var CouchbaseStore = require('../service/sessionstore.couchbase.js')(express);
+    var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
 
     // express session store
-    this.exsStore = new CouchbaseStore(this.options.sessionstore);
+    this.exsStore = new CouchbaseStore(this.options.services.sessionstore);
 
     console.log('SessionStore Connecting...');
     this.exsStore.glsConnect()
@@ -83,7 +83,6 @@ return when.promise(function(resolve, reject) {
                         path: '/'
                         , httpOnly : false
                         //, maxAge: 1000 * 60 * 24 // 24 hours
-                        //, domain: this.options.auth.host+":"+this.options.frontend.port
                     },
                     store:  this.exsStore
                 }));

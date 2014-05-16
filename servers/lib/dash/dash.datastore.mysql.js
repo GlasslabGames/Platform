@@ -82,7 +82,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 first_name as firstName,   \
                 last_name as lastName,     \
                 email,                     \
-                system_role as systemRole, \
+                system_role as role, \
                 user_type as type,         \
                 institution_id as institution, \
                 collect_Telemetry > 0 as collectTelemetry, \

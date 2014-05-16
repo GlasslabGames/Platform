@@ -43,7 +43,7 @@ GoogleAccount.prototype.setupPassport = function(passport, authService) {
                 userData.firstName = profile.name.givenName;
                 userData.lastName = profile.name.familyName;
                 userData.password = accessToken;
-                userData.systemRole = "student";
+                userData.role = "student";
 
                 //
                 userData.email = "";

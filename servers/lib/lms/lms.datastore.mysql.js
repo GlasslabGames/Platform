@@ -200,7 +200,7 @@ return when.promise(function(resolve, reject) {
             u.last_name as lastName,    \
             u.username,                 \
             u.email,                    \
-            u.system_role as systemRole \
+            u.system_role as role \
         FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
         WHERE m.role='student' AND  \
         m.course_id="+ this.ds.escape(courseId);
@@ -378,14 +378,14 @@ LMS_MySQL.prototype.isMultiUsersInInstructorCourse = function(userIds, instructo
 };
 
 
-LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, systemRole) {
+LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, role) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // if manager, make role in members instructor
-    if( systemRole == lConst.role.manager) {
-        systemRole = lConst.role.instructor;
+    if( role == lConst.role.manager) {
+        role = lConst.role.instructor;
     }
 
     var values = [
@@ -394,7 +394,7 @@ return when.promise(function(resolve, reject) {
         this.ds.escape(courseId),
         "NOW()", // date created
         "NOW()", // last updated
-        this.ds.escape(systemRole),
+        this.ds.escape(role),
         this.ds.escape(userId)
     ];
     values = values.join(',');
@@ -437,7 +437,7 @@ return when.promise(function(resolve, reject) {
     var Q =
         "SELECT \
             c.id,\
-            m.role as systemRole,\
+            m.role as role,\
             c.title, \
             (SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND \
                 course_id=c.id \
