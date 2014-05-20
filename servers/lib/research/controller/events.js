@@ -43,8 +43,8 @@ function getEventsByDate(req, res, next){
         }
         var startDate = moment(req.query.startDate);
 
-        var endDate   = moment();
-        if(!req.query.endDate) {
+        var endDate = moment();
+        if(req.query.endDate) {
             endDate = moment(req.query.endDate);
         }
 
