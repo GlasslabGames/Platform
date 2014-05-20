@@ -53,7 +53,12 @@ function getEventsByDate(req, res, next){
             timeFormat = req.query.timeFormat;
         }
 
-        this.store.getEventsByDate(startDate.toArray(), endDate.toArray())
+        var limit;
+        if(req.query.limit) {
+            limit = req.query.limit;
+        }
+
+        this.store.getEventsByDate(startDate.toArray(), endDate.toArray(), limit)
             .then(function(events){
 
                 try {

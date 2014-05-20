@@ -62,7 +62,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-ResearchDS_Couchbase.prototype.getEventsByDate = function(startDateArray, endDateArray){
+ResearchDS_Couchbase.prototype.getEventsByDate = function(startDateArray, endDateArray, limit){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -78,7 +78,8 @@ return when.promise(function(resolve, reject) {
     this.client.view("telemetry", "getEventsByServerTimeStamp").query({
             stale: false,
             startkey: startDateArray,
-            endkey:   endDateArray
+            endkey:   endDateArray,
+            limit: limit || null
         },
         function(err, results){
            if(err){
