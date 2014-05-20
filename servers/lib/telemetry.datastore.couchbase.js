@@ -53,7 +53,7 @@ return when.promise(function(resolve, reject) {
     }.bind(this));
 
     this.client.on('connect', function () {
-        //console.log("CouchBase connected!");
+        console.log("CouchBase TelemetryStore: updating the docs...");
         this.setupDocsAndViews()
             .then( resolve, reject );
     }.bind(this));
@@ -142,6 +142,7 @@ var gdv_getEventsByServerTimeStamp = function (doc, meta)
                         return;
                     }
 
+                    console.log("CouchBase TelemetryStore: Docs Updated!!");
                     resolve();
                 }.bind(this));
 
