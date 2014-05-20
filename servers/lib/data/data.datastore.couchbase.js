@@ -1,5 +1,5 @@
 /**
- * Telemetry Couchbase Datastore Module
+ * Auth Couchbase Datastore Module
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
@@ -856,6 +856,7 @@ return when.promise(function(resolve, reject) {
         deviceId:             deviceId,
         gameSessionId:        gameSessionId,
         state:                tConst.game.session.started,
+        attempt:              1, // TODO: inc this from last session
         qstate:               '' // TODO: remove with assessment Q
     };
     // optional

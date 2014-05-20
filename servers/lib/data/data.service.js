@@ -10,12 +10,9 @@
  */
 
 var http       = require('http');
+var when       = require('when');
 // Third-party libs
 var _          = require('lodash');
-var when       = require('when');
-var parallel   = require('when/parallel');
-var express    = require('express');
-var multiparty = require('multiparty');
 // load at runtime
 var aConst, tConst, Util;
 
@@ -47,7 +44,7 @@ function DataService(options){
         this.queue       = new Assessment.Queue.Redis(this.options.assessment.queue);
         this.stats       = new Util.Stats(this.options, "Data");
 
-    } catch(err){
+    } catch(err) {
         console.trace("DataService: Error -", err);
         this.stats.increment("error", "Generic");
     }

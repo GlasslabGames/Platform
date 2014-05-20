@@ -242,6 +242,21 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         service: service,
                         func:    func
                     };
+
+                    if(a.basicAuth) {
+                        console.log("Basic Auth API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
+
+                        // add wrapper function to check auth
+                        this.app[ m ](a.api, express.basicAuth(
+                                function(user, pass){
+                                    return ( user == a.basicAuth.user &&
+                                             pass == a.basicAuth.pass
+                                    );
+                                }
+                            )
+                        );
+                    }
+
                     // if require auth
                     if(a.requireAuth) {
                         console.log("Auth API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
@@ -308,7 +323,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 }
 
-ServiceManager.prototype.start = function() {
+ServiceManager.prototype.start = function(port) {
 
     // start express (session store,...), then start services
     this.initExpress()
@@ -340,11 +355,15 @@ ServiceManager.prototype.start = function() {
                     // setup routes
                     this.setupRoutes();
                     console.log('----------------------------');
-                    console.log('Routes Setup');
+                    console.log('Routes Setup')
+
+                    var serverPort = port || this.app.get('port');
+
+                    console.log('Starting Server on port', serverPort, "...");
 
                     // start server
-                    http.createServer(this.app).listen(this.app.get('port'), function createServer(){
-                        console.log('ServiceManager: Server listening on port ' + this.app.get('port'));
+                    http.createServer(this.app).listen(serverPort, function createServer(){
+                        console.log('Server listening on port ' + serverPort);
                         console.log('---------------------------------------------');
                         this.stats.increment("info", "ServerStarted");
                     }.bind(this));

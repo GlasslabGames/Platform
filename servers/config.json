@@ -100,5 +100,15 @@
             "port": 6379,
             "sessionExpire" : 14400000, "//": "4 hours in milliseconds"
         }
+    },
+    "research": {
+        "port": 8090,
+        "datastore": {
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_gamedata",
+                "password": "glasslab"
+            }
+        }
     }
 }
