@@ -89,10 +89,10 @@ return when.promise(function(resolve, reject) {
                         .on('end', function(){
                             console.log("Parsed Schema for", name, ":", this.parsedSchema[name]);
                             resolve();
-                        })
+                        }.bind(this))
                         .on('error', function(error){
                             reject(error);
-                        });
+                        }.bind(this));
                 }.bind(this));
             }.bind(this));
 

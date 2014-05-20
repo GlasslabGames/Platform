@@ -99,6 +99,7 @@ function getEventsByDate(req, res, next){
 function processEvents(gameId, events, timeFormat) {
     //console.log("events:", events);
     var parsedSchema = this.parsedSchema[gameId];
+    console.log("Parsed Schema for", gameId, ":", parsedSchema);
 
     var sessionOrderList = {};
     var out = parsedSchema.header + "\n";
