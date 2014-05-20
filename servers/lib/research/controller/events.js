@@ -69,7 +69,7 @@ function getEventsByDate(req, res, next){
                         }
                     );
 
-                    console.log("Process Events...");
+                    console.log("Process", events.length, "Events...");
                     // process events
                     var out = processEvents.call(this, gameId, events, timeFormat);
                     res.writeHead(200, {
@@ -97,7 +97,7 @@ function getEventsByDate(req, res, next){
 }
 
 function processEvents(gameId, events, timeFormat) {
-    //console.log("events:", events);
+    console.log("events:", events);
     var parsedSchema = this.parsedSchema[gameId];
 
     var sessionOrderList = {};
