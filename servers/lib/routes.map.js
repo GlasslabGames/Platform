@@ -29,7 +29,7 @@ module.exports = {
     // Research
     // ---------------------------------------------------
         {
-            basicAuth: { user: "test", pass: "test" },
+            basicAuth: { user: "glasslab", pass: "hz2M7V4fYb" },
             api: "/research/events/get",
             service: "research",
             controller: "events",
