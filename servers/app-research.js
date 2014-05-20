@@ -1,7 +1,7 @@
 /**
  * App Server
  */
-var ServiceManager = require('./lib/service/service.manager.js');
+var ServiceManager = require('./lib/core/service.manager.js');
 var Research       = require('./lib/research/research.js');
 var manager = new ServiceManager();
 
