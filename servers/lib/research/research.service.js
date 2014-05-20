@@ -87,7 +87,7 @@ return when.promise(function(resolve, reject) {
                             //console.log(this.parsedSchema[name]);
                         }.bind(this))
                         .on('end', function(){
-                            console.log("Parsed Schema for", name, ":", this.parsedSchema[name]);
+                            //console.log("Parsed Schema for", name, ":", this.parsedSchema[name]);
                             resolve();
                         }.bind(this))
                         .on('error', function(error){

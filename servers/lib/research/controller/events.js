@@ -99,7 +99,7 @@ function getEventsByDate(req, res, next){
 function processEvents(gameId, events, timeFormat) {
     //console.log("events:", events);
     var parsedSchema = this.parsedSchema[gameId];
-    console.log("Parsed Schema for", gameId, ":", parsedSchema);
+    //console.log("Parsed Schema for", gameId, ":", parsedSchema);
 
     var sessionOrderList = {};
     var out = parsedSchema.header + "\n";
@@ -137,7 +137,7 @@ function processEvents(gameId, events, timeFormat) {
             }
 
             out += row + "\n";
-            //console.log(row);
+            console.log("Process Event - row:", row);
         } else {
             console.log("Process Event - Event Name not in List:", event.eventName);
         }
