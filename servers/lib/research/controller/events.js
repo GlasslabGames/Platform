@@ -105,7 +105,7 @@ function processEvents(gameId, events, timeFormat) {
     var out = parsedSchema.header + "\n";
     var row = "";
 
-    for(var i = 0; i < events; i++) {
+    for(var i = 0; i < events.length; i++) {
         var event = events[i];
 
         //console.log("Process Event", i);
