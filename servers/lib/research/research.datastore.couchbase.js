@@ -101,6 +101,9 @@ return when.promise(function(resolve, reject) {
                 function(err, results){
                     if(err){
                         console.error("CouchBase ResearchStore: Multi Get Events Error -", err);
+                        if(results) {
+                            console.error("CouchBase ResearchStore: Multi Get Events Error - results:", results);
+                        }
                         reject(err);
                         return;
                     }
