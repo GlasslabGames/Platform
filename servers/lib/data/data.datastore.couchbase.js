@@ -1,6 +1,5 @@
-
 /**
- * Telemetry Dispatcher Module
+ * Auth Couchbase Datastore Module
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
@@ -509,7 +508,7 @@ return when.promise(function(resolve, reject) {
                         "deviceId": "123",
                         "clientTimeStamp": 1392775453,
                         "serverTimeStamp": 1392776453,
-                        "clientId": "SC",
+                        "gameId": "SC",
                         "clientVersion": "1.2.4156",
                         "gameLevel": "Mission2.SubMission1",
                         "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -857,6 +856,7 @@ return when.promise(function(resolve, reject) {
         deviceId:             deviceId,
         gameSessionId:        gameSessionId,
         state:                tConst.game.session.started,
+        attempt:              1, // TODO: inc this from last session
         qstate:               '' // TODO: remove with assessment Q
     };
     // optional
@@ -1039,6 +1039,233 @@ TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
                     }.bind(this));
 
             }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Couchbase.prototype.saveGameData = function(userId, gameId, data){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
+
+    // set game data
+    this.client.set(key, data,
+        function(err, data){
+            if(err){
+                console.error("CouchBase TelemetryStore: Save Game Data Error -", err);
+                reject(err);
+                return;
+            }
+
+            resolve(data);
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.getGameData = function(userId, gameId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
+
+        // get game data
+        this.client.get(key,
+            function(err, data){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Get Game Data Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve(data);
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, deviceId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var key = tConst.game.dataKey+":"+tConst.game.deviceKey+":"+gameId+":"+userId;
+        this.client.get(key, function(err, data){
+            var userDeviceInfo;
+            if(err) {
+                // "No such key"
+                if(err.code == 13)
+                {
+                    userDeviceInfo = {
+                        lastDevice: "",
+                        devices: {}
+                    };
+                } else {
+                    console.error("CouchBase AuthStore: Error -", err);
+                    reject(err);
+                    return;
+                }
+            } else {
+                userDeviceInfo = data.value;
+            }
+
+            // if not seen this device before, add inner object
+            if( !userDeviceInfo.devices.hasOwnProperty(deviceId) ){
+                userDeviceInfo.devices[deviceId] = {
+                    lastSeenTimestamp: 0
+                }
+            }
+
+            // update info
+            userDeviceInfo.lastDevice = deviceId;
+            userDeviceInfo.devices[deviceId].lastSeenTimestamp = Util.GetTimeStamp();
+
+            // update data
+            this.client.set(key, userDeviceInfo,
+                function(err, data) {
+                    if(err) {
+                        console.error("CouchBase AuthStore: Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    resolve(data);
+                }.bind(this));
+
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var keys = [];
+        for(var i = 0; i < userIds.length; i++) {
+            var key = tConst.game.dataKey+":"+tConst.game.deviceKey+":"+gameId+":"+userIds[i];
+            keys.push(key);
+        }
+
+        this.client.getMulti(keys, {}, function(err, data) {
+            // it's ok if one fails, need to check them all for errors
+            if( err &&
+                !err.code == 4101) {
+                console.error("CouchBase AuthStore: Error -", err);
+                reject(err);
+                return;
+            }
+
+            var deviceUserIdMap = {};
+            var failed;
+            _.forEach(data, function(device, key) {
+
+                // check if errors
+                if(device.error) {
+                    // it's ok if no device in list for a user
+                    // otherwise fail
+                    if(device.error.code != 13) {
+                        console.error("CouchBase AuthStore: Error -", device.error);
+                        failed = device.error;
+                        return;
+                    }
+                }
+
+                // split to get user id
+                var parts = key.split(':');
+                if( device &&
+                    device.value &&
+                    device.value.lastDevice ) {
+                    deviceUserIdMap[ device.value.lastDevice ] = parts[3];
+                }
+            });
+
+            if(!failed) {
+                if( Object.keys(deviceUserIdMap).length > 0 ) {
+                    resolve(deviceUserIdMap);
+                } else {
+                    reject();
+                }
+            } else {
+                reject(failed);
+            }
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var keys = [];
+        for(var i = 0; i < userIds.length; i++) {
+            var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userIds[i];
+            keys.push(key);
+        }
+
+        this.client.getMulti(keys, {}, function(err, data){
+            // it's ok if one fails, need to check them all for errors
+            if( err &&
+                !err.code == 4101) {
+                console.error("CouchBase AuthStore: Error -", err);
+                reject(err);
+                return;
+            }
+
+            var userIdGameDataMap = {};
+            // re-set all users map values
+            for(var i = 0; i < userIds.length; i++) {
+                userIdGameDataMap[ userIds[i] ] = {};
+            }
+
+            var failed;
+            _.forEach(data, function(gamedata, key) {
+
+                // check if errors
+                if(gamedata.error) {
+                    // it's ok if no device in list for a user
+                    // otherwise fail
+                    if(gamedata.error.code != 13) {
+                        console.error("CouchBase AuthStore: Error -", gamedata.error);
+                        failed = gamedata.error;
+                        return;
+                    }
+                }
+
+                // split to get user id
+                var parts = key.split(':');
+                if( gamedata &&
+                    gamedata.value ) {
+                    userIdGameDataMap[ parts[3] ] = gamedata.value;
+                }
+            });
+
+            if(!failed) {
+                if( Object.keys(userIdGameDataMap).length > 0 ) {
+                    resolve(userIdGameDataMap);
+                } else {
+                    resolve();
+                }
+            } else {
+                reject(failed);
+            }
+        }.bind(this));
 
 // ------------------------------------------------
     }.bind(this));

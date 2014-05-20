@@ -29,7 +29,6 @@ function Glasslab_Strategy(options) {
     lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
 
-
     this._usernameField = 'username';
     this._passwordField = 'password';
 
@@ -135,7 +134,7 @@ return when.promise(function(resolve, reject) {
             first_Name as firstName, \
             email as email,          \
             password as password,    \
-            system_Role as systemRole, \
+            system_Role as role, \
             USER_TYPE as type,       \
             login_Type as loginType, \
             institution_id as institution, \
@@ -243,7 +242,7 @@ return when.promise(function(resolve, reject) {
         "email, " +
         "first_name as firstName, " +
         "last_name as lastName, " +
-        "system_role as systemRole, " +
+        "system_role as role, " +
         "institution_id as institutionId " +
         "FROM GL_USER WHERE email="+this.ds.escape(email);
     this.ds.query(Q)
@@ -279,7 +278,7 @@ return when.promise(function(resolve, reject) {
         "email, " +
         "first_name as firstName, " +
         "last_name as lastName, " +
-        "system_role as systemRole, " +
+        "system_role as role, " +
         "institution_id as institutionId " +
         "FROM GL_USER WHERE id="+this.ds.escape(id);
     this.ds.query(Q)
@@ -323,7 +322,7 @@ return when.promise(function(resolve, reject) {
         reset_code:     "NULL",
         reset_code_expiration:  "NULL",
         reset_code_status:      "NULL",
-        system_role:    this.ds.escape(userData.systemRole),
+        system_role:    this.ds.escape(userData.role),
         user_type:      "NULL",
         username:       this.ds.escape(userData.username),
         collect_telemetry:      0,
@@ -465,13 +464,13 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // if instructor or manager check email
-    if( userData.systemRole == lConst.role.instructor ||
-        userData.systemRole == lConst.role.manager ) {
+    if( userData.role == lConst.role.instructor ||
+        userData.role == lConst.role.manager ) {
         //console.log("Auth registerUserRoute - institution isEmail:", check(userData.email).isEmail());
         // if no email -> error
         if( !userData.email ||
             !userData.email.length ) {
-            reject({"error": "missing email for "+userData.systemRole});
+            reject({"error": "missing email for "+userData.role});
             return;
         }
     }
@@ -692,8 +691,8 @@ return when.promise(function(resolve, reject) {
         // check UserName, if changed
         .then(function(){
             // If Instructors OR managers, then username is the same as there email
-            if( ( (userData.systemRole == lConst.role.instructor) ||
-                  (userData.systemRole == lConst.role.manager) ) &&
+            if( ( (userData.role == lConst.role.instructor) ||
+                  (userData.role == lConst.role.manager) ) &&
                   userData.email
               ) {
                 userData.username = userData.email;
@@ -781,11 +780,11 @@ Glasslab_Strategy.prototype.checkUserPerminsToUserData = function(userData, logi
             resolve(userData);
         }
         // are admin
-        else if(loginUserData.systemRole == lConst.role.admin) {
+        else if(loginUserData.role == lConst.role.admin) {
             resolve(userData);
         }
         // if instructor, then check if student their course
-        else if(loginUserData.systemRole == lConst.role.instructor) {
+        else if(loginUserData.role == lConst.role.instructor) {
             this._isEnrolledInInstructorCourse(userData.id, loginUserData.id)
                 .then(
                     // all ok

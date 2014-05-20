@@ -10,14 +10,11 @@
  */
 
 var http       = require('http');
+var when       = require('when');
 // Third-party libs
 var _          = require('lodash');
-var when       = require('when');
-var parallel   = require('when/parallel');
-var express    = require('express');
-var multiparty = require('multiparty');
 // load at runtime
-var aConst, tConst, rConst, Util;
+var aConst, tConst, Util;
 
 module.exports = DataService;
 
@@ -28,7 +25,6 @@ function DataService(options){
         // Glasslab libs
         Assessment = require('../aeng/assessment.js');
         aConst     = require('../auth/auth.js').Const;
-        rConst     = require('../routes.js').Const;
         WebStore   = require('../dash/dash.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         Telemetry  = require('./data.js');
@@ -48,7 +44,7 @@ function DataService(options){
         this.queue       = new Assessment.Queue.Redis(this.options.assessment.queue);
         this.stats       = new Util.Stats(this.options, "Data");
 
-    } catch(err){
+    } catch(err) {
         console.trace("DataService: Error -", err);
         this.stats.increment("error", "Generic");
     }
@@ -58,6 +54,7 @@ DataService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+    // test connection to MySQL
     this.myds.connect()
         .then(function(){
                 console.log("DataService: MySQL DS Connected");
@@ -68,6 +65,7 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
 
+        // test connection to Couchbase
         .then(function(){
             return this.cbds.connect();
         }.bind(this))
@@ -80,6 +78,7 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "Couchbase.Connect");
             }.bind(this))
 
+        // Migrate Old DB Events Done
         .then(function(){
             return this.cbds.migrateEventsFromMysql(this.stats, this.myds, this.options.telemetry.migrateCount);
         }.bind(this))
@@ -205,7 +204,7 @@ exampleInput.saveBatchV1 = {
     "userId": 12,
     "deviceId": "123",
     "clientTimeStamp": 1392775453,
-    "clientId": "SC",
+    "gameId": "SC",
     "clientVersion": "1.2.4156",
     "gameLevel": "Mission2.SubMission1",
     "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -270,7 +269,7 @@ return when.promise(function(resolve, reject) {
             var events = [];
             for(var i = 0; i < eventList.events.length; i++) {
                 event = {
-                    clientId: "",
+                    gameId: "",
                     clientVersion: "",
                     serverTimeStamp: 0,
                     clientTimeStamp: 0,
@@ -300,18 +299,18 @@ return when.promise(function(resolve, reject) {
 
                 var gameParts = eventList.gameVersion.split("_");
                 var clientVersion;
-                var clientId;
+                var gameId;
                 if(gameParts.length > 2) {
                     clientVersion = gameParts.pop();
-                    clientId      = gameParts.join("_");
+                    gameId        = gameParts.join("_");
                 } else if(gameParts.length == 2) {
                     clientVersion = gameParts[1];
-                    clientId      = gameParts[0];
+                    gameId        = gameParts[0];
                 } else if(gameParts.length == 1) {
                     clientVersion = gameParts[0];
-                    clientId      = gameParts[0];
+                    gameId        = gameParts[0];
                 }
-                event.clientId = clientId
+                event.gameId = gameId
                 event.clientVersion = clientVersion;
 
                 // add data
@@ -376,7 +375,7 @@ return when.promise(function(resolve, reject) {
          "userId": 12,
          "deviceId": "123",
          "clientTimeStamp": 1392775453,
-         "clientId": "SC-1",
+         "gameId": "SC-1",
          "clientVersion": "1.2.4156",
          "gameLevel": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
          "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -389,7 +388,7 @@ return when.promise(function(resolve, reject) {
      },
      {
          "clientTimeStamp": 1392775453,
-         "clientId": "SC-1",
+         "gameId": "SC-1",
          "clientVersion": "1.2.4156",
          "gameLevel": "Mission2.SubMission1",
          "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -404,7 +403,7 @@ return when.promise(function(resolve, reject) {
  */
 /*
  Required properties
- clientTimeStamp, clientId, eventName
+ clientTimeStamp, gameId, eventName
 
  Input Types accepted
  gameSessionId: String
@@ -412,7 +411,7 @@ return when.promise(function(resolve, reject) {
      userId: String or Integer (Optional)
      deviceId: String          (Optional)
      clientTimeStamp: Integer  (Required)
-     clientId: String          (Required)
+     gameId: String          (Required)
      clientVersion: String     (Optional)
      gameLevel: String         (Optional)
      eventName: String         (Required)
@@ -499,24 +498,24 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                     pData.clientTimeStamp = data.clientTimeStamp;
                 }
 
-                // clientId required
-                if( !data.hasOwnProperty("clientId") ) {
-                    errList.push(new Error("clientId missing"));
+                // gameId required
+                if( !data.hasOwnProperty("gameId") ) {
+                    errList.push(new Error("gameId missing"));
                     continue; // skip to next item in list
                 } else {
-                    if( !_.isString(data.clientId) ) {
-                        errList.push(new Error("clientId invalid type"));
+                    if( !_.isString(data.gameId) ) {
+                        errList.push(new Error("gameId invalid type"));
                         continue; // skip to next item in list
                     }
-                    else if(data.clientId.length == 0) {
-                        errList.push(new Error("clientId can not be empty"));
+                    else if(data.gameId.length == 0) {
+                        errList.push(new Error("gameId can not be empty"));
                         continue; // skip to next item in list
                     }
-                    // TODO: add validate of clientId using DB
-                    // else if( this._eventValidateClientId(data.clientId) ){...}
+                    // TODO: add validate of gameId using DB
+                    // else if( this._eventValidateClientId(data.gameId) ){...}
                     else {
                         // save
-                        pData.clientId = data.clientId;
+                        pData.gameId = data.gameId;
                     }
                 }
 
@@ -531,7 +530,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                         errList.push(new Error("clientVersion can not be empty"));
                     }
                     // TODO: add validate of clientVersion using DB
-                    // else if( this._eventValidateClientVersion(data.clientId, data.clientVersion) ){...}
+                    // else if( this._eventValidateClientVersion(data.gameId, data.clientVersion) ){...}
                     else {
                         // save
                         pData.clientVersion = data.clientVersion;
@@ -549,7 +548,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                         errList.push(new Error("gameLevel can not be empty"));
                     }
                     // TODO: ??? add validation of gameLevel using DB ???
-                    // else if( this._eventValidateGameLevel(data.clientId, data.gameLevel) ){...}
+                    // else if( this._eventValidateGameLevel(data.gameId, data.gameLevel) ){...}
                     else {
                         // save
                         pData.gameType = data.gameType;
@@ -573,7 +572,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                     try {
                         // convert + save
                         // TODO: use convertEventName
-                        //pData.eventName = this._convertEventName(data.eventName, data.clientId);
+                        //pData.eventName = this._convertEventName(data.eventName, data.gameId);
                         pData.eventName = data.eventName;
                     }
                     catch(err) {
@@ -646,7 +645,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
 }
 
 // throw errors
-DataService.prototype._convertEventName = function(rawName, clientId) {
+DataService.prototype._convertEventName = function(rawName, gameId) {
     if(rawName.charAt(0) == '$'){
         var tName = rawName.slice(1);
 
@@ -662,9 +661,9 @@ DataService.prototype._convertEventName = function(rawName, clientId) {
             throw new Error("invalid event name");
         }
     }
-    // custom name, add clientId
+    // custom name, add gameId
     else {
-        return clientId + "_" + rawName;
+        return gameId + "_" + rawName;
     }
 }
 

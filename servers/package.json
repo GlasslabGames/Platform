@@ -21,7 +21,9 @@
         "q-io":           "1.11.x",
         "nodemailer":     "0.6.x",
         "ejs":            "1.0.x",
-        "mailchimp":      "*"
+        "mailchimp":      "*",
+        "csv":            "0.3.x",
+        "csv-stringify":  "0.0.x"
     },
     "optionalDependencies": {
         "hiredis":        "0.1.x"

@@ -16,7 +16,6 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
-    updateUserDevice:    updateUserDevice,
     renderEmailTemplate: renderEmailTemplate
 };
 var exampleIn = {};
@@ -78,7 +77,7 @@ function registerUserV1(req, res, next) {
         return;
     }
 
-    var systemRole = lConst.role.student;
+    var role = lConst.role.student;
     var courseId, institutionId;
 
     var registerErr = function(err, code){
@@ -96,26 +95,26 @@ function registerUserV1(req, res, next) {
             lastName:      req.body.lastName,
             email:         req.body.email,
             password:      req.body.password,
-            systemRole:    systemRole,
+            role:          role,
             institutionId: institutionId,
             loginType:     aConst.login.type.glassLabV2
         };
 
-        this._registerUser(userData)
+        this.registerUser(userData)
             .then(function(userId){
                 // if student, enroll in course
-                if(systemRole == lConst.role.student) {
+                if(role == lConst.role.student) {
                     // courseId
                     this.stats.increment("info", "AddUserToCourse");
-                    this.lmsStore.addUserToCourse(userId, courseId, systemRole)
+                    this.lmsStore.addUserToCourse(userId, courseId, role)
                         .then(function(){
-                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(systemRole)+".Created");
+                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(role)+".Created");
                             this.glassLabLogin(req, res, next);
                         }.bind(this))
                         // catch all errors
                         .then(null, registerErr);
                 } else {
-                    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(systemRole)+".Created");
+                    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(role)+".Created");
                     this.glassLabLogin(req, res, next);
                 }
             }.bind(this))
@@ -125,7 +124,7 @@ function registerUserV1(req, res, next) {
 
     // is institution -> instructor
     if(req.body.type.toLowerCase() == aConst.code.type.institution) {
-        systemRole = lConst.role.instructor;
+        role = lConst.role.instructor;
         // validate institution Id (associatedId == institutionId)
         institutionId = req.body.associatedId;
         this.lmsStore.getInstitution(institutionId)
@@ -161,7 +160,7 @@ function registerUserV1(req, res, next) {
             .then(null, registerErr);
     }
 
-    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(systemRole));
+    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(role));
 };
 
 /**
@@ -206,26 +205,26 @@ function registerManager(req, res, next) {
     if(user){
         cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
     }
-    this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
-        function(err, sres, data){
-            if(err) {
-                this.requestUtil.errorResponse(res, err, 500);
-            }
-
-            if(sres.statusCode == 200) {
-                this.stats.increment("info", "Route.Register.Manager.Created");
-                this.glassLabLogin(req, res, next);
-            } else {
-                this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
-
-                // don't use requestUtil response as it could contain custom headers, thus writing head
-                res.writeHead(sres.statusCode, sres.headers);
-                res.end(data);
-            }
-        }.bind(this));
-
     // TODO: refactor this and create license system
     /*
+     this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
+     function(err, sres, data){
+     if(err) {
+     this.requestUtil.errorResponse(res, err, 500);
+     }
+
+     if(sres.statusCode == 200) {
+     this.stats.increment("info", "Route.Register.Manager.Created");
+     this.glassLabLogin(req, res, next);
+     } else {
+     this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
+
+     // don't use requestUtil response as it could contain custom headers, thus writing head
+     res.writeHead(sres.statusCode, sres.headers);
+     res.end(data);
+     }
+     }.bind(this));
+
      // validate email
 
      // validate license key
@@ -275,8 +274,8 @@ function registerManager(req, res, next) {
     if(req.body.email) {
         userData.email = req.body.email;
     }
-    if(req.body.systemRole || req.body.role) {
-        userData.systemRole = req.body.systemRole || req.body.role;
+    if(req.body.role) {
+        userData.role = req.body.role;
     }
     if(req.body.institutionId || req.body.institution) {
         userData.institutionId = req.body.institutionId || req.body.institution;
@@ -332,11 +331,11 @@ function registerUserV2(req, res, next, serviceManager) {
         lastName:      "",
         password:      "",
         email:         "",
-        systemRole:    req.body.systemRole,
+        role:          req.body.role,
         loginType:     aConst.login.type.glassLabV2
     };
 
-    if(regData.systemRole == lConst.role.student) {
+    if(regData.role == lConst.role.student) {
         regData.username   = Util.ConvertToString(req.body.username);
         regData.password   = Util.ConvertToString(req.body.password);
         regData.firstName  = Util.ConvertToString(req.body.firstName);
@@ -358,7 +357,7 @@ function registerUserV2(req, res, next, serviceManager) {
             return;
         }
     }
-    else if(regData.systemRole == lConst.role.instructor) {
+    else if(regData.role == lConst.role.instructor) {
         // email and username is the same
         req.body.username  = req.body.email;
         regData.username   = Util.ConvertToString(req.body.username);
@@ -385,7 +384,7 @@ function registerUserV2(req, res, next, serviceManager) {
             return;
         }
     } else {
-        this.requestUtil.errorResponse(res, "invalid systemRole", 401);
+        this.requestUtil.errorResponse(res, "invalid role", 401);
         return;
     }
 
@@ -399,32 +398,32 @@ function registerUserV2(req, res, next, serviceManager) {
 
 
     var register = function(regData, courseId) {
-        this._registerUser(regData)
+        this.registerUser(regData)
             .then(function(userId){
 
                 // if student
-                if( regData.systemRole == lConst.role.student) {
+                if( regData.role == lConst.role.student) {
 
                     // if courseId then enroll in class
                     if(courseId) {
                         // courseId
                         this.stats.increment("info", "AddUserToCourse");
-                        this.lmsStore.addUserToCourse(userId, courseId, regData.systemRole)
+                        this.lmsStore.addUserToCourse(userId, courseId, regData.role)
                             .then(function() {
-                                this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                                this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
                                 serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
                             }.bind(this))
                             // catch all errors
                             .then(null, registerErr);
                     } else {
-                        this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                        this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
                         serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
                     }
                 }
                 // if instructor or manager
                 // send email
-                else if( regData.systemRole == lConst.role.instructor ||
-                        regData.systemRole == lConst.role.manager)
+                else if( regData.role == lConst.role.instructor ||
+                         regData.role == lConst.role.manager)
                 {
                     var promise;
                     if(req.body.newsletter) {
@@ -449,7 +448,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         }.bind(this))
                         // all ok
                         .then(function(){
-                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole)+".Created");
+                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
                             serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
                         }.bind(this))
                         // error
@@ -465,11 +464,11 @@ function registerUserV2(req, res, next, serviceManager) {
 
 
     // instructor
-    if(regData.systemRole == lConst.role.instructor) {
+    if(regData.role == lConst.role.instructor) {
         register(regData);
     }
     // else student
-    else if(regData.systemRole == lConst.role.student) {
+    else if(regData.role == lConst.role.student) {
         if(regData.regCode)
         {
             // get course Id from course code
@@ -483,7 +482,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         register(regData, courseId);
                     } else {
                         this.stats.increment("error", "Route.Register.User.InvalidInstitution");
-                        registerErr({"error": "course not found"});
+                        registerErr({"error": "registration course code not found", key:"code.invalid"});
                     }
                 }.bind(this))
                 // catch all errors
@@ -493,7 +492,7 @@ function registerUserV2(req, res, next, serviceManager) {
         }
     }
 
-    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.systemRole));
+    this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
 }
 
 
@@ -734,42 +733,6 @@ function resetPasswordUpdate(req, res, next) {
         this.requestUtil.errorResponse(res, {error: "missing code", key:"missing.code.pass"}, 401);
     }
 }
-
-
-exampleIn.updateUserDevice = {
-    deviceId: "ASD-QWER-ASD"
-};
-function updateUserDevice(req, res, next) {
-    if( req.session &&
-        req.session.passport &&
-        req.session.passport.user) {
-
-        var userData = req.session.passport.user;
-
-        // deviveId required
-        if( req.body &&
-            req.body.deviceId &&
-            req.body.deviceId.length ) {
-
-            // update device Id
-            //console.log("deviceId:", req.body.deviceId);
-            this.authStore.updateUserDeviceId(userData.id, req.body.deviceId)
-                .then(function(){
-                    this.requestUtil.jsonResponse(res, { status: "ok" } );
-                }.bind(this))
-
-                // catch all errors
-                .then(null, function(err){
-                    this.requestUtil.errorResponse(res, err);
-                }.bind(this));
-        } else {
-            this.requestUtil.errorResponse(res, "missing deviceId");
-        }
-    } else {
-        this.requestUtil.errorResponse(res, "not logged in");
-    }
-}
-
 
 function renderEmailTemplate(req, res, next) {
 

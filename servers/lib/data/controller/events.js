@@ -13,6 +13,14 @@ function sendBatchTelemetryV2(req, outRes){
     try {
         // TODO: validate all inputs
 
+        // if logged in auto add userId
+        if( req.session &&
+            req.session.passport &&
+            req.session.passport.user &&
+            req.session.passport.user.id) {
+            req.body.userId = req.session.passport.user.id;
+         }
+
         this.stats.increment("info", "Route.SendBatchTelemetry2");
 
         //console.log("send telemetry batch body:", req.body);
@@ -77,7 +85,7 @@ function getEventsByUserId(req, res, next){
             if( req.query &&
                 req.query.userId) {
 
-                if(userData.systemRole  == lConst.role.admin) {
+                if(userData.role  == lConst.role.admin) {
                     this.myds.getSessionsByUserId(req.query.userId)
                         .then(function(sessionList){
 

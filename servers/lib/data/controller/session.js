@@ -19,7 +19,7 @@ exampleInput.startSessionV2 = {
     gameLevel: "Level1",
     courseId:  12,
     timestamp: 123456789
-}
+};
 
 function startSessionV2(req, outRes){
     try {

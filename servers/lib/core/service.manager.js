@@ -53,10 +53,10 @@ ServiceManager.prototype.initExpress = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var CouchbaseStore = require('../service/sessionstore.couchbase.js')(express);
+    var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
 
     // express session store
-    this.exsStore = new CouchbaseStore(this.options.sessionstore);
+    this.exsStore = new CouchbaseStore(this.options.services.sessionstore);
 
     console.log('SessionStore Connecting...');
     this.exsStore.glsConnect()
@@ -81,7 +81,8 @@ return when.promise(function(resolve, reject) {
                     secret: this.options.auth.secret,
                     cookie: {
                         path: '/'
-                        //, domain: this.options.auth.host+":"+this.options.frontend.port
+                        , httpOnly : false
+                        //, maxAge: 1000 * 60 * 24 // 24 hours
                     },
                     store:  this.exsStore
                 }));
@@ -241,6 +242,21 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         service: service,
                         func:    func
                     };
+
+                    if(a.basicAuth) {
+                        console.log("Basic Auth API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
+
+                        // add wrapper function to check auth
+                        this.app[ m ](a.api, express.basicAuth(
+                                function(user, pass){
+                                    return ( user == a.basicAuth.user &&
+                                             pass == a.basicAuth.pass
+                                    );
+                                }
+                            )
+                        );
+                    }
+
                     // if require auth
                     if(a.requireAuth) {
                         console.log("Auth API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
@@ -307,7 +323,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 }
 
-ServiceManager.prototype.start = function() {
+ServiceManager.prototype.start = function(port) {
 
     // start express (session store,...), then start services
     this.initExpress()
@@ -339,11 +355,15 @@ ServiceManager.prototype.start = function() {
                     // setup routes
                     this.setupRoutes();
                     console.log('----------------------------');
-                    console.log('Routes Setup');
+                    console.log('Routes Setup')
+
+                    var serverPort = port || this.app.get('port');
+
+                    console.log('Starting Server on port', serverPort, "...");
 
                     // start server
-                    http.createServer(this.app).listen(this.app.get('port'), function createServer(){
-                        console.log('ServiceManager: Server listening on port ' + this.app.get('port'));
+                    http.createServer(this.app).listen(serverPort, function createServer(){
+                        console.log('Server listening on port ' + serverPort);
                         console.log('---------------------------------------------');
                         this.stats.increment("info", "ServerStarted");
                     }.bind(this));

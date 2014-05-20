@@ -43,8 +43,53 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+
+LMS_MySQL.prototype.updateCourseTable = function() {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "DESCRIBE GL_COURSE";
+    this.ds.query(Q)
+        .then(function(results) {
+            var updating = false;
+            for(var i = 0; i < results.length; i++) {
+                if( (results[i]['Field'] == 'institution_id') &&
+                    (results[i]['Null'] == 'NO') ) {
+
+                    updating = true;
+                    // need to update
+                    var Q = "ALTER TABLE `GL_COURSE` CHANGE COLUMN `institution_id` `institution_id` BIGINT(20) NULL";
+                    this.ds.query(Q)
+                        .then(function(results) {
+                            //console.log(results);
+                            resolve(true);
+                        }.bind(this),
+                        function(err) {
+                            reject({"error": "failure", "exception": err}, 500);
+                        }.bind(this)
+                    );
+                }
+            }
+
+            if(!updating) {
+                resolve(false);
+            }
+        }.bind(this),
+        function(err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this)
+    );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+
 var exampleOut = {};
-exampleOut.getCourses =
+exampleOut.getEnrolledCourses =
 [
     {
         "id": 27,
@@ -155,7 +200,7 @@ return when.promise(function(resolve, reject) {
             u.last_name as lastName,    \
             u.username,                 \
             u.email,                    \
-            u.system_role as systemRole \
+            u.system_role as role \
         FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
         WHERE m.role='student' AND  \
         m.course_id="+ this.ds.escape(courseId);
@@ -280,14 +325,67 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, systemRole) {
+LMS_MySQL.prototype.isMultiUsersInInstructorCourse = function(userIds, instructorId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q;
+        Q = "SELECT \
+                DISTINCT user_id as userId  \
+            FROM GL_MEMBERSHIP              \
+            WHERE                           \
+                ROLE='student' AND course_id in \
+                (SELECT                 \
+                    course_id           \
+                FROM GL_MEMBERSHIP      \
+                WHERE                   \
+                    ROLE='instructor'   \
+                    AND user_id=";
+        Q += parseInt(instructorId);
+        Q += ") ORDER BY user_id";
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results){
+
+                    var userIdList = {};
+                    for(var i = 0; i < results.length; i++) {
+                        userIdList[ results[i].userId ] = true;
+                    }
+
+                    for(var i = 0; i < userIds.length; i++) {
+                        if(! userIdList[ userIds[i] ] ) {
+                            // missing
+                            resolve(false);
+                        }
+                    }
+
+                    resolve(true);
+
+                } else {
+                    reject({"error": "failure", "exception": err}, 500);
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, role) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // if manager, make role in members instructor
-    if( systemRole == lConst.role.manager) {
-        systemRole = lConst.role.instructor;
+    if( role == lConst.role.manager) {
+        role = lConst.role.instructor;
     }
 
     var values = [
@@ -296,7 +394,7 @@ return when.promise(function(resolve, reject) {
         this.ds.escape(courseId),
         "NOW()", // date created
         "NOW()", // last updated
-        this.ds.escape(systemRole),
+        this.ds.escape(role),
         this.ds.escape(userId)
     ];
     values = values.join(',');
@@ -339,7 +437,7 @@ return when.promise(function(resolve, reject) {
     var Q =
         "SELECT \
             c.id,\
-            m.role as systemRole,\
+            m.role as role,\
             c.title, \
             (SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND \
                 course_id=c.id \
@@ -398,7 +496,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.createCourse = function(title, grade, institutionId) {
+LMS_MySQL.prototype.createCourse = function(userId, title, grade, institutionId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -409,6 +507,8 @@ return when.promise(function(resolve, reject) {
         } else {
             institutionId = parseInt(institutionId);
         }
+
+        title = this.ds.escape(title);
 
         var values = [
             "NULL",  // id
@@ -422,11 +522,12 @@ return when.promise(function(resolve, reject) {
             institutionId,            // institution id
             "NOW()",                  // last updated
             0,                        // locked
-            this.ds.escape(title)     // title
+            title                     // title
         ];
         values = values.join(',');
 
-        var Q = "INSERT INTO GL_COURSE (" +
+        var Q;
+        Q = "INSERT INTO GL_COURSE (" +
             "id," +
             "version," +
             "archived," +
@@ -439,11 +540,27 @@ return when.promise(function(resolve, reject) {
             "last_updated," +
             "locked," +
             "title" +
-            ") VALUES("+values+")";
+            ") ";
 
+        // if institutionId == NULL unique constraint will not apply so we need to check it
+        if(institutionId == "NULL") {
+            Q += "SELECT "+values+" FROM GL_COURSE ";
+            // check if course name already exists for null institution_id's
+            Q += "WHERE NOT EXISTS " +
+                "(SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
+            Q += "c.title="+title+" AND m.user_id="+parseInt(userId)+") LIMIT 1";
+        } else {
+            Q += "VALUES("+values+")";
+        }
+
+        //console.log("createCourse Q:", Q);
         this.ds.query(Q)
             .then(function(data){
-                    resolve(data.insertId);
+                    if(data.affectedRows == 0) {
+                        reject({"error":"data validation","key":"course.not.unique"}, 400);
+                    } else {
+                        resolve(data.insertId);
+                    }
                 }.bind(this),
                 function(err) {
                     if(err.code == "ER_DUP_ENTRY") {
@@ -458,6 +575,55 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+LMS_MySQL.prototype.updateCourse = function(userId, courseData) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var title = this.ds.escape(courseData.title);
+
+        var promise;
+        if(!courseData.institutionId) {
+            courseData.institutionId = "NULL";
+
+            var Q = "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
+            Q += "c.id!="+courseData.id+" AND c.title="+title+" AND m.user_id="+parseInt(userId);
+
+            //console.log("getCourses Q:", Q);
+            promise = this.ds.query(Q);
+        } else {
+            courseData.institutionId = parseInt(courseData.institutionId);
+            promise = this.Utils.PromiseContinue();
+        }
+
+        promise.then(function(data){
+                if(data.length == 0) {
+                    var Q = "UPDATE GL_COURSE " +
+                        "SET last_updated=NOW(), " +
+                        "title="+title+", "+
+                        "grade="+this.ds.escape(courseData.grade)+", ";
+                    if(courseData.archived) {
+                        Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
+                    } else {
+                        Q += "archived=false, archived_date=NULL, ";
+                    }
+                    Q += "institution_Id="+courseData.institutionId+" "+
+                        "WHERE id="+courseData.id;
+
+                    //console.log("updateCourse Q:", Q);
+                    this.ds.query(Q).then(resolve);
+                } else {
+                    reject({"error":"data validation","key":"course.not.unique"}, 400);
+                }
+            }.bind(this),
+            reject
+        );
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
 
 LMS_MySQL.prototype.addCode = function(code, id, type) {
 // add promise wrapper
@@ -526,29 +692,6 @@ return when.promise(function(resolve, reject) {
             }.bind(this)
         );
 
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-
-LMS_MySQL.prototype.updateCourse = function(courseData) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    var Q = "UPDATE GL_COURSE " +
-        "SET last_updated=NOW(), " +
-        "title="+this.ds.escape(courseData.title)+", "+
-        "grade="+this.ds.escape(courseData.grade)+", ";
-    if(courseData.archived) {
-        Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
-    } else {
-        Q += "archived=false, archived_date=NULL, ";
-    }
-    Q += "institution_Id="+this.ds.escape(courseData.institutionId)+" "+
-         "WHERE id="+courseData.id;
-
-    this.ds.query(Q).then( resolve, reject );
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper

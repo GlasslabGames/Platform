@@ -125,7 +125,7 @@ TelemDS_Mysql.prototype.getGameSessionWithGameSection = function(){
          "userId": 12,
          "serverTimeStamp": 1392775453,
          "clientTimeStamp": 1392775453,
-         "clientId": "SC-1",
+         "gameId": "SC-1",
          "clientVersion": "1.2.4156",
          "gameLevel": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
          "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -140,7 +140,7 @@ TelemDS_Mysql.prototype.getGameSessionWithGameSection = function(){
          "userId": 12,
          "serverTimeStamp": 1392775453,
          "clientTimeStamp": 1392775453,
-         "clientId": "SC",
+         "gameId": "SC",
          "clientVersion": "1.2.4156",
          "gameLevel": "Mission2.SubMission1",
          "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -187,16 +187,16 @@ TelemDS_Mysql.prototype.getArchiveEvents = function(limit){
 
                             var gameParts = result[i].game.split("_");
                             var clientVersion = "";
-                            var clientId = "";
+                            var gameId = "";
                             if(gameParts.length > 2) {
                                 clientVersion = gameParts.pop();
-                                clientId      = gameParts.join("_");
+                                gameId        = gameParts.join("_");
                             } else if(gameParts.length == 2) {
                                 clientVersion = gameParts[1];
-                                clientId      = gameParts[0];
+                                gameId        = gameParts[0];
                             } else if(gameParts.length == 1) {
                                 clientVersion = gameParts[0];
-                                clientId      = gameParts[0];
+                                gameId        = gameParts[0];
                             }
 
                             /*
@@ -204,7 +204,7 @@ TelemDS_Mysql.prototype.getArchiveEvents = function(limit){
                                  "userId": 12,
                                  "serverTimeStamp": 1392775453,
                                  "clientTimeStamp": 1392775453,
-                                 "clientId": "SC",
+                                 "gameId": "SC",
                                  "clientVersion": "1.2.4156",
                                  "gameLevel": "Mission2.SubMission1",
                                  "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
@@ -223,7 +223,7 @@ TelemDS_Mysql.prototype.getArchiveEvents = function(limit){
                                 serverTimeStamp: Util.GetTimeStamp(result[i].date_created),
                                 clientTimeStamp: result[i].timestamp,
                                 clientVersion:   clientVersion,
-                                clientId:        clientId,
+                                gameId:          gameId,
                                 gameLevel:       "",
                                 gameSessionId:   result[i].game_session_id,
                                 eventName:       result[i].name,
@@ -302,22 +302,22 @@ return when.promise(function(resolve, reject) {
 
                         var gameParts = result[i].game.split("_");
                         var clientVersion = "";
-                        var clientId = "";
+                        var gameId = "";
                         if(gameParts.length > 2) {
                             clientVersion = gameParts.pop();
-                            clientId      = gameParts.join("_");
+                            gameId        = gameParts.join("_");
                         } else if(gameParts.length == 2) {
                             clientVersion = gameParts[1];
-                            clientId      = gameParts[0];
+                            gameId        = gameParts[0];
                         } else if(gameParts.length == 1) {
                             clientVersion = gameParts[0];
-                            clientId      = gameParts[0];
+                            gameId        = gameParts[0];
                         }
 
                         data.push({
                             clientTimeStamp: result[i].timestamp,
                             clientVersion:   clientVersion,
-                            clientId:        clientId,
+                            gameId:          gameId,
                             gameLevel:       result[i].gameLevel,
                             gameSessionId:   result[i].gameSessionId,
                             eventName:       result[i].name,

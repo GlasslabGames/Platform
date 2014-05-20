@@ -289,9 +289,9 @@ function createCourse(req, res, next)
         var userData = req.session.passport.user;
 
         // check if instructor, manager or admin
-        if( userData.systemRole == lConst.role.instructor ||
-            userData.systemRole == lConst.role.manager ||
-            userData.systemRole == lConst.role.admin ) {
+        if( userData.role == lConst.role.instructor ||
+            userData.role == lConst.role.manager ||
+            userData.role == lConst.role.admin ) {
 
             var courseData = {
                 title:       req.body.title,
@@ -307,11 +307,11 @@ function createCourse(req, res, next)
 
             };
 
-            this.myds.createCourse(courseData.title, courseData.grade, courseData.institution)
+            this.myds.createCourse(userData.id, courseData.title, courseData.grade, courseData.institution)
 
                 .then(function(courseId){
-                    if( userData.systemRole == lConst.role.instructor ||
-                        userData.systemRole == lConst.role.manager) {
+                    if( userData.role == lConst.role.instructor ||
+                        userData.role == lConst.role.manager) {
                         return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor)
                             .then(function() {
                                 return courseId;
@@ -357,9 +357,9 @@ function getCourse(req, res, next) {
 
             // check if enrolled in course
             var promise;
-            if( userData.systemRole == lConst.role.instructor ||
-                userData.systemRole == lConst.role.manager ||
-                userData.systemRole == lConst.role.admin ) {
+            if( userData.role == lConst.role.instructor ||
+                userData.role == lConst.role.manager ||
+                userData.role == lConst.role.admin ) {
                 // do nothing promise
                 promise = when.promise(function(resolve){resolve(1)}.bind(this));
             } else {
@@ -390,9 +390,9 @@ function getCourse(req, res, next) {
                             course.users = [];
 
                             // only get students if instructor, manager or admin
-                            if( userData.systemRole == lConst.role.instructor ||
-                                userData.systemRole == lConst.role.manager ||
-                                userData.systemRole == lConst.role.admin ) {
+                            if( userData.role == lConst.role.instructor ||
+                                userData.role == lConst.role.manager ||
+                                userData.role == lConst.role.admin ) {
                                 this.myds.getStudentsOfCourse(course.id)
                                     .then(function(studentList){
                                         course.users = _.clone(studentList);
@@ -439,8 +439,8 @@ exampleIn.updateCourse = {
     "archivedDate": null,
     "institution": 10,
     "users": [
-        {"id": 175, "firstName": "test2_s0", "lastName": "test2_s1", "username": "test2_s1", "email": "test2_s1@test.com", "systemRole": "student"},
-        {"id": 176, "firstName": "test2_s2", "lastName": "test2_s2", "username": "test2_s2", "email": "", "systemRole": "student"}
+        {"id": 175, "firstName": "test2_s0", "lastName": "test2_s1", "username": "test2_s1", "email": "test2_s1@test.com", "role": "student"},
+        {"id": 176, "firstName": "test2_s2", "lastName": "test2_s2", "username": "test2_s2", "email": "", "role": "student"}
     ],
     "showMembers": 1,
     "cb": 1395992841665
@@ -455,9 +455,9 @@ function updateCourse(req, res, next)
         var userData = req.session.passport.user;
 
         // check if instructor, manager or admin
-        if( userData.systemRole == lConst.role.instructor ||
-            userData.systemRole == lConst.role.manager ||
-            userData.systemRole == lConst.role.admin ) {
+        if( userData.role == lConst.role.instructor ||
+            userData.role == lConst.role.manager ||
+            userData.role == lConst.role.admin ) {
 
             var courseData = {
                 id:            req.body.id,
@@ -471,7 +471,7 @@ function updateCourse(req, res, next)
                 courseData.archivedDate = Util.GetTimeStamp();
             }
 
-            this.myds.updateCourse(courseData)
+            this.myds.updateCourse(userData.id, courseData)
 
                 .then(function() {
                     // respond with all data passed in plus an changes (example archived date)

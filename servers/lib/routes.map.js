@@ -26,6 +26,18 @@ module.exports = {
     // --------------------------------------------------------------------------------------
     apis: [
     // ---------------------------------------------------
+    // Research
+    // ---------------------------------------------------
+        {
+            basicAuth: { user: "test", pass: "test" },
+            api: "/research/events/get",
+            service: "research",
+            controller: "events",
+            method: {
+                get: "getEventsByDate"
+            }
+        },
+    // ---------------------------------------------------
     // Version 2
     // ---------------------------------------------------
         {
@@ -53,19 +65,30 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/data/events/get",
-            service: "data",
-            controller: "events",
-            method: {
-                get: "getEventsByUserId"
-            }
-        },
-        {
             api: "/api/v2/data/events",
             service: "data",
             controller: "events",
             method: {
                 post: "sendBatchTelemetryV2"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/device",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "updateDevice"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/:id",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "saveGameData",
+                get: "getGameData"
             }
         },
         // ---------------------------------------------------
@@ -76,6 +99,14 @@ module.exports = {
             controller: "reports",
             method: {
                 get: "getAchievements"
+            }
+        },
+        {
+            api: "/api/v2/dash/reports/totalTimePlayed",
+            service: "dash",
+            controller: "reports",
+            method: {
+                get: "getTotalTimePlayed"
             }
         },
         {
@@ -174,15 +205,6 @@ module.exports = {
             controller: "user",
             method: {
                 post: "registerUserV2"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/auth/user/device",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "updateUserDevice"
             }
         },
         {
