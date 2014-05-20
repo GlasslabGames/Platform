@@ -74,6 +74,7 @@ return when.promise(function(resolve, reject) {
     endDateArray[1]++;   // month starts at 0, so need to add one
     endDateArray[6]   = "\u0fff";
 
+    console.log("CouchBase ResearchStore: getEventsByDate - startDateArray:", startDateArray, ", endDateArray:", endDateArray);
     this.client.view("telemetry", "getEventsByServerTimeStamp").query({
             stale: false,
             startkey: startDateArray,
