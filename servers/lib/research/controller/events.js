@@ -12,6 +12,9 @@ module.exports = {
 
 /*
  http://localhost:8090/research/events/get?gameId=AA-1&startDate=2014-05-01&endDate=2014-05-14&timeFormat="mm/dd/yyyy hh:mm:ss"
+
+ http://localhost:8001/research/events/get?gameId=AA-1&startDate=2014-05-01&endDate=2014-05-14&timeFormat="mm/dd/yyyy hh:mm:ss"
+
  required:
     gameId
     startDate
@@ -53,25 +56,36 @@ function getEventsByDate(req, res, next){
         this.store.getEventsByDate(startDate.toArray(), endDate.toArray())
             .then(function(events){
 
-                console.log("Running Filter...");
-                events = _.filter(events,
-                    function(event) {
-                        return (event.gameId == gameId);
-                    }
-                );
+                try {
+                    console.log("Running Filter...");
+                    events = _.filter(events,
+                        function (event) {
+                            return (event.gameId == gameId);
+                        }
+                    );
 
-                console.log("Process Events...");
-                // process events
-                var out = processEvents.call(this, gameId, events, timeFormat);
-                res.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                    //'Content-Type': 'text/csv'
-                });
-                res.end(out);
+                    console.log("Process Events...");
+                    // process events
+                    var out = processEvents.call(this, gameId, events, timeFormat);
+                    res.writeHead(200, {
+                        'Content-Type': 'text/plain'
+                        //'Content-Type': 'text/csv'
+                    });
+                    res.end(out);
 
-            }.bind(this));
+                } catch(err) {
+                    console.trace("Research: Process Events -", err);
+                    this.stats.increment("error", "ProcessEvents.Catch");
+                    this.requestUtil.errorResponse(res, {error: err});
+                }
+
+            }.bind(this),
+            function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this)
+        );
     } catch(err) {
-        console.trace("Collector: Get User Data Error -", err);
+        console.trace("Research: Get User Data Error -", err);
         this.stats.increment("error", "GetUserData.Catch");
         this.requestUtil.errorResponse(res, {error: err});
     }
