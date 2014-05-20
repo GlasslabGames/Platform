@@ -39,8 +39,8 @@ return when.promise(function(resolve, reject) {
         host:     this.options.host,
         bucket:   this.options.bucket,
         password: this.options.password,
-        connectionTimeout: this.options.timeout || 5000,
-        operationTimeout:  this.options.timeout || 5000
+        connectionTimeout: this.options.timeout || 60000,
+        operationTimeout:  this.options.timeout || 60000
     }, function(err) {
         console.error("CouchBase ResearchStore: Error -", err);
 
