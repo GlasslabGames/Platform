@@ -74,13 +74,19 @@ return when.promise(function(resolve, reject) {
     endDateArray[1]++;   // month starts at 0, so need to add one
     endDateArray[6]   = "\u0fff";
 
+    var options = {
+        stale: false,
+        startkey: startDateArray,
+        endkey:   endDateArray
+    };
+
+    if(limit) {
+        options.limit = limit;
+    }
+
     console.log("CouchBase ResearchStore: getEventsByDate - startDateArray:", startDateArray, ", endDateArray:", endDateArray);
-    this.client.view("telemetry", "getEventsByServerTimeStamp").query({
-            stale: false,
-            startkey: startDateArray,
-            endkey:   endDateArray,
-            limit: limit || null
-        },
+    this.client.view("telemetry", "getEventsByServerTimeStamp").query(
+        options,
         function(err, results){
            if(err){
                 console.error("CouchBase ResearchStore: Get Events View Error -", err);
@@ -99,6 +105,7 @@ return when.promise(function(resolve, reject) {
             }
 
             //console.log("CouchBase ResearchStore: keys", keys);
+            console.log("CouchBase ResearchStore: getEventsByDate events:", keys.length);
             this.client.getMulti(keys, {},
                 function(err, results){
                     if(err){
