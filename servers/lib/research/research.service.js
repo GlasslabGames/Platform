@@ -78,6 +78,7 @@ return when.promise(function(resolve, reject) {
 
                             // header
                             if(index == 0) {
+                                row.shift(); // remove first column
                                 this.parsedSchema[name].header = csv().stringifier.stringify(row);
                             } else {
                                 this.parsedSchema[name].rows[ row[0] ] = csv().stringifier.stringify(row.slice(1));

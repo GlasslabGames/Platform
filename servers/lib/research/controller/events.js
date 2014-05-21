@@ -41,11 +41,12 @@ function getEventsByDate(req, res, next){
             this.requestUtil.errorResponse(res, {error: "missing startDate"}, 401);
             return;
         }
-        var startDate = moment(req.query.startDate);
+        var startDate = moment(req.query.startDate).toArray();
 
-        var endDate = moment();
+        var endDate;
         if(req.query.endDate) {
             endDate = moment(req.query.endDate);
+            endDate = endDate.toArray();
         }
 
         var timeFormat = "";
@@ -58,7 +59,7 @@ function getEventsByDate(req, res, next){
             limit = req.query.limit;
         }
 
-        this.store.getEventsByDate(startDate.toArray(), endDate.toArray(), limit)
+        this.store.getEventsByDate(startDate, endDate, limit)
             .then(function(events){
 
                 try {
@@ -111,7 +112,7 @@ function processEvents(gameId, events, timeFormat) {
         //console.log("Process Event", i);
         // event name exists in parse map
         if( parsedSchema.rows.hasOwnProperty(event.eventName) ) {
-            row = parsedSchema.rows[ event.eventName ];
+            row = _.clone( parsedSchema.rows[ event.eventName ] );
 
             if(timeFormat) {
                 event.clientTimeStamp = moment(event.clientTimeStamp).format(timeFormat);
@@ -126,20 +127,26 @@ function processEvents(gameId, events, timeFormat) {
             }
             event.gameSessionOrder = sessionOrderList[event.gameSessionId];
 
-            for(e in event) {
-                var re = new RegExp('{'+e+'}', 'g');
+            for(var e in event) {
+                var re = new RegExp("\\{"+e+"\\}", 'g');
                 row = row.replace(re, event[e]);
             }
+            // clear out all remaining variables
+            var re = new RegExp("\\{.*\\}", 'g');
+            row = row.replace(re, '');
 
-            for(d in event.eventData) {
-                var re = new RegExp('['+d+']', 'g');
-                row = row.replace(re, event[d]);
+            for(var d in event.eventData) {
+                var re = new RegExp("\\["+d+"\\]", 'g');
+                row = row.replace(re, event.eventData[d]);
             }
+            // clear out all remaining variables
+            var re = new RegExp("\\[.*\\]", 'g');
+            row = row.replace(re, '');
 
             out += row + "\n";
-            console.log("Process Event - row:", row);
+            //console.log("Process Event - row:", row);
         } else {
-            console.log("Process Event - Event Name not in List:", event.eventName);
+            //console.log("Process Event - Event Name not in List:", event.eventName);
         }
     }
 

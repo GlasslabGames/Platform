@@ -69,16 +69,20 @@ return when.promise(function(resolve, reject) {
 
     startDateArray[1]++; // month starts at 0, so need to add one
     startDateArray[6] = null;
-    startDateArray.pop();
-
-    endDateArray[1]++;   // month starts at 0, so need to add one
-    endDateArray[6]   = "\u0fff";
+    //startDateArray.pop();
 
     var options = {
         stale: false,
-        startkey: startDateArray,
-        endkey:   endDateArray
+        startkey: startDateArray
     };
+
+    if(endDateArray) {
+        endDateArray[1]++;   // month starts at 0, so need to add one
+        endDateArray[6]   = "\u0fff";
+
+        options.endkey = endDateArray;
+        options.inclusive_end = true;
+    }
 
     if(limit) {
         options.limit = limit;
