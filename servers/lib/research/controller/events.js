@@ -132,7 +132,7 @@ function processEvents(gameId, events, timeFormat) {
                 row = row.replace(re, event[e]);
             }
             // clear out all remaining variables
-            var re = new RegExp("\\{.*\\}", 'g');
+            var re = new RegExp("\\{[\\$a-zA-Z0-9]*\\}", 'g');
             row = row.replace(re, '');
 
             for(var d in event.eventData) {
@@ -140,7 +140,7 @@ function processEvents(gameId, events, timeFormat) {
                 row = row.replace(re, event.eventData[d]);
             }
             // clear out all remaining variables
-            var re = new RegExp("\\[.*\\]", 'g');
+            var re = new RegExp("\\[[\\$a-zA-Z0-9]*\\]", 'g');
             row = row.replace(re, '');
 
             out += row + "\n";
