@@ -1196,7 +1196,7 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
                 if( Object.keys(deviceUserIdMap).length > 0 ) {
                     resolve(deviceUserIdMap);
                 } else {
-                    reject();
+                    resolve();
                 }
             } else {
                 reject(failed);
