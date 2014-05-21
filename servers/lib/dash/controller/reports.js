@@ -9,7 +9,7 @@ module.exports = {
     getTotalTimePlayed: getTotalTimePlayed
 };
 
-var exampleIn = {};
+var exampleIn = {}, exampleOut = {};
 
 exampleIn.getTotalTimePlayed = {
     gameId: "AA-1",
@@ -104,6 +104,10 @@ exampleIn.getAchievements = {
     gameId: "AA-1",
     userIds: [1, 2]
 };
+exampleOut.getAchievements = {
+    1 : { groups:{}, won: 0 },
+    2 : { groups:{}, won: 0 }
+};
 function getAchievements(req, res){
     try {
         if( !(req.session &&
@@ -165,14 +169,17 @@ function getAchievements(req, res){
                 return this.telmStore.getAchievements(deviceIds);
             }.bind(this))
             .then(function(events) {
-                // if no events skip to next
-                if(!events) return;
-
                 var out = { }, e, ed, tevent, userId;
 
                 // re-set all users map values
                 for(var i = 0; i < userIds.length; i++) {
                     out[ userIds[i] ] = { groups:{}, won: 0 };
+                }
+
+                // if no events skip to next
+                if(!events) {
+                    this.requestUtil.jsonResponse(res, out);
+                    return;
                 }
 
                 for(var i in events) {
