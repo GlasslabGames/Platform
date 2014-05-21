@@ -119,13 +119,21 @@ function processEvents(gameId, events, timeFormat) {
                 event.serverTimeStamp = moment(event.serverTimeStamp).format(timeFormat);
             }
 
-            // if session not in list then gen
-            if(!sessionOrderList.hasOwnProperty(event.gameSessionId)) {
-                sessionOrderList[event.gameSessionId] = 1;
+            // if gameSessionEventOrder not exist,
+            // then maintain one in mem
+            if(!event.gameSessionEventOrder) {
+                // if session not in list then gen
+                if(!sessionOrderList.hasOwnProperty(event.gameSessionId)) {
+                    sessionOrderList[event.gameSessionId] = 1;
+                } else {
+                    sessionOrderList[event.gameSessionId]++;
+                }
+                event.gameSessionEventOrder = sessionOrderList[event.gameSessionId];
             } else {
-                sessionOrderList[event.gameSessionId]++;
+                // else update in mem in case an event doesn't have an order
+                sessionOrderList[event.gameSessionId] = event.gameSessionEventOrder;
             }
-            event.gameSessionOrder = sessionOrderList[event.gameSessionId];
+
 
             for(var e in event) {
                 var re = new RegExp("\\{"+e+"\\}", 'g');
