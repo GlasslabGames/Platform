@@ -39,7 +39,7 @@ function ServiceManager(){
         "~/hydra.config.json"
     ]);
 
-    global.ENV     = this.options.env || 'dev';
+    global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = global.ENV;
 
     this.stats     = new Util.Stats(this.options, "ServiceManager");

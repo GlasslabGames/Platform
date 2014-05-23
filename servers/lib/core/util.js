@@ -5,6 +5,7 @@
  *   when - https://github.com/cujojs/when
  *
  */
+var url    = require('url');
 var moment = require('moment');
 var when   = require('when');
 var _      = require('lodash');
@@ -89,26 +90,28 @@ function getExpressLogger(options, express, stats){
         var rTime = t['response-time'](req, res);
         var contentLength = t['res'](req, res, 'content-length');
         var status = t['status'](req, res);
-        var url = t['url'](req, res);
+        var URL = t['url'](req, res);
 
         if(stats) {
-            // split url by /
-            var URL = url;
-            if(URL.charAt(0) == '/') {
-                URL = URL.slice(1);
+            var pathname = url.parse(URL).pathname;
+            // remove initial slash if it exists
+            if(pathname.charAt(0) == '/') {
+                pathname = pathname.slice(1);
             }
-            URL = URL.replace('//', '/');
+            // replace all double slashes with single
+            pathname = pathname.replace(/\/\//g, '/');
 
-            var ulist = URL.split('/');
+            // create list delimitated by slashes so we can detect root and api
+            var ulist = pathname.split('/');
             // capitalize each key
             if(ulist.length > 0) {
                 // merge to dots
-                URL = ulist.join('.');
+                pathname = ulist.join('.');
             } else {
-                URL = "Root";
+                pathname = "_root";
             }
 
-            stats.gauge("info", "Route.ResponseTime."+URL, rTime);
+            stats.gauge("info", "Route.ResponseTime."+pathname, rTime);
 
             if(ulist.length > 0 &&
                 ulist[0] == 'api') {
@@ -138,7 +141,7 @@ function getExpressLogger(options, express, stats){
         return t['remote-addy'](req, res)+' - - ['+
             t['date'](req, res)+'] "'+
             t['method'](req, res)+' '+
-            url+' HTTP/'+
+            URL+' HTTP/'+
             t['http-version'](req, res)+'" '+
             status+' '+
             (contentLength || '-')+' "'+

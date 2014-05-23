@@ -44,13 +44,13 @@ return when.promise(function(resolve, reject) {
         connectionTimeout: this.options.timeout || 5000,
         operationTimeout:  this.options.timeout || 5000
     }, function(err) {
-        console.error("CouchBase TelemetryStore: Error -", err);
+        console.error("[Data] CouchBase TelemetryStore: Error -", err);
 
         if(err) throw err;
     }.bind(this));
 
     this.client.on('error', function (err) {
-        console.error("CouchBase TelemetryStore: Error -", err);
+        console.error("[Data] CouchBase TelemetryStore: Error -", err);
         reject(err);
     }.bind(this));
 

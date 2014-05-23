@@ -161,7 +161,13 @@ return when.promise(function(resolve, reject) {
                 if (err) {
                     if(this.stats) this.stats.increment("error", "Email."+templateName+".SendEmail");
                     console.error("Email: Error sending email -", err);
-                    reject({error: "internal error, try again later"});
+
+                    if(process.env.HYDRA_ENV == "dev") {
+                        // dev env it's ok if email does not work
+                        resolve(200);
+                    } else {
+                        reject({error: "internal error, try again later"});
+                    }
                 } else {
                     if(this.stats) this.stats.increment("info", "Email."+templateName+".SendEmail");
                     //console.log(responseStatus.message);

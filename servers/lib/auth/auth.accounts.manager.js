@@ -41,7 +41,9 @@ AccountsManager.prototype.setupPassport = function(passport, authService) {
 };
 
 AccountsManager.prototype.get = function(name) {
-
+    if(this.accounts.hasOwnProperty(name)) {
+        return this.accounts[name];
+    }
 }
 
 AccountsManager.prototype.setupRoutes = function(app, passport) {
