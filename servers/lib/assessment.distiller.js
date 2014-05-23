@@ -231,8 +231,7 @@ return when.promise(function(resolve, reject) {
             //console.log( "Executing bayes on " + process.platform + " at " + process.cwd() );
             if( process.platform === "win32" ) {
                 scriptToExecute += 'run_assessment.bat';
-            }
-            else if( process.platform === "darwin" ) {
+            } else {
                 scriptToExecute += './run_assessment.sh';
             }
 
