@@ -67,8 +67,8 @@
             "transport": {
                 "service": "Gmail",
                 "auth": {
-                    "user": "glasslab@glasslabgames.org",
-                    "pass": "glasslab"
+                    "user": "--ReplaceInCustomConfig--",
+                    "pass": "--ReplaceInCustomConfig--"
                 }
             }
         },
@@ -86,7 +86,6 @@
         }
     },
     "assessment": {
-        "port":     8084,
         "datastore": {
             "couchbase": {
                 "host":     "localhost:8091",

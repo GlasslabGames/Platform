@@ -50,14 +50,14 @@ module.exports = function(connect){
             connectionTimeout: this.options.timeout || 5000,
             operationTimeout:  this.options.timeout || 5000
         }, function(err) {
-            console.error("CouchBase TelemetryStore: Error -", err);
+            console.error("[SessionStore] CouchBase TelemetryStore: Error -", err);
             reject(err);
             if(err) throw err;
         }.bind(this));
 
         this.client.on('error', function (err) {
             this.stats.increment("error", "Generic");
-            console.error("CouchBase TelemetryStore: Error -", err);
+            console.error("[SessionStore] CouchBase TelemetryStore: Error -", err);
             this.emit('disconnect');
             reject(err);
         }.bind(this));

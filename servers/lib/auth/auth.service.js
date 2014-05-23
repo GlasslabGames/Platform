@@ -48,7 +48,7 @@ function AuthService(options){
         this.requestUtil      = new Util.Request(this.options);
         this.authStore        = new AuthStore(this.options.auth.datastore.couchbase);
         this.accountsManager  = new Accounts.Manager(this.options);
-        this.glassLabStrategy = this.accountsManager.get("glasslab");
+        this.glassLabStrategy = this.accountsManager.get("Glasslab");
 
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
         WebStore      = require('../dash/dash.js').Datastore.MySQL;

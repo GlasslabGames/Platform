@@ -28,7 +28,8 @@ function Stats(options, root){
     });
 
     this.sRoot = root;
-    this.root =  root;
+    this.root  = root;
+    this.env   = process.env.HYDRA_ENV || "dev";
 }
 
 Stats.prototype.saveRoot = function() {
@@ -43,56 +44,32 @@ Stats.prototype.restoreRoot = function() {
     this.root = this.sRoot;
 }
 
-
 Stats.prototype.increment = function(level, key, count) {
     if(!count) {
         count = 1;
     }
 
-    /*
-    if(ENV == "dev") {
-        if(level == 'info') {
-            console.log("Stats:", this.root+"."+key, ", count:", count);
-        }
-        else if(level == 'warn') {
-            console.warn("Stats:", this.root+"."+key, ", count:", count);
-        }
-        else if(level == 'error') {
-            console.error("Stats:", this.root+"."+key, ", count:", count);
-        }
-    }
-    */
-
     if(this.statsd) {
         level = level.toLowerCase();
-        // Info.App.Loaded
-        this.statsd.increment(level+"."+this.root+"."+key, count);
-        // App.Info.Loaded
-        this.statsd.increment(this.root+"."+level+"."+key, count);
-        // Info.App
-        this.statsd.increment(level+"."+this.root, count);
-        // Info
-        this.statsd.increment(level, count);
+
+        // dev.App.error.Loaded
+        this.statsd.increment(this.env+"."+this.root+"."+level+"."+key, count);
+
+        // dev.error.App.Loaded
+        this.statsd.increment(this.env+"."+level+"."+this.root+"."+key, count);
+        // dev.error.App._total
+        this.statsd.increment(this.env+"."+level+"."+this.root+"._total", count);
+        // dev.error._total
+        this.statsd.increment(this.env+"."+level+"._total", count);
     }
 };
 
 Stats.prototype.gauge = function(level, key, value) {
-    /*
-    if(ENV == "dev") {
-        if(level == 'info') {
-            console.log("Stats:", this.root+"."+key, ", value:", value);
-        }
-        else if(level == 'warn') {
-            console.warn("Stats:", this.root+"."+key, ", value:", value);
-        }
-        else if(level == 'error') {
-            console.error("Stats:", this.root+"."+key, ", value:", value);
-        }
-    }
-    */
 
     if(this.statsd) {
         level = level.toLowerCase();
-        this.statsd.gauge(level+"."+this.root+"."+key, value);
+
+        // dev.error.App.Loaded
+        this.statsd.gauge(this.env+"."+level+"."+this.root+"."+key, value);
     }
 };

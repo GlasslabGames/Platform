@@ -35,3 +35,15 @@ GlasslabAccount.prototype.setupPassport = function(passport) {
 GlasslabAccount.prototype.setupRoutes = function(app) {
     // handled in the service API route (see route.map.js)
 };
+
+GlasslabAccount.prototype.registerUser = function(userData) {
+    return this.strategy.registerUser(userData);
+};
+
+GlasslabAccount.prototype.checkUserPerminsToUserData = function(userData, loginUserSessionData) {
+    return this.strategy.checkUserPerminsToUserData(userData, loginUserSessionData);
+};
+
+GlasslabAccount.prototype.updateUserData = function(userData, loginUserSessionData) {
+    return this.strategy.updateUserData(userData, loginUserSessionData);
+};
