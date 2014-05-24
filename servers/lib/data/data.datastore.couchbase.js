@@ -1092,6 +1092,53 @@ TelemDS_Couchbase.prototype.getGameData = function(userId, gameId){
 };
 
 
+
+TelemDS_Couchbase.prototype.saveUserPref = function(userId, gameId, data){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var key = tConst.game.dataKey+":"+tConst.game.prefKey+":"+gameId+":"+userId;
+
+        // set user game pref
+        this.client.set(key, data,
+            function(err, data){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Save User Pref Data Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                resolve(data);
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.getUserPref = function(userId, gameId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var key = tConst.game.dataKey+":"+tConst.game.prefKey+":"+gameId+":"+userId;
+
+        // get user game pref
+        this.client.get(key,
+            function(err, data){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Get User Pref Data Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve(data);
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
 TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, deviceId) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {

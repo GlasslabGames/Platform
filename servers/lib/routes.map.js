@@ -83,6 +83,16 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/data/user/pref/:id",
+            service: "data",
+            controller: "user",
+            method: {
+                post: "saveUserPref",
+                get: "getUserPref"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/data/game/:id",
             service: "data",
             controller: "game",
