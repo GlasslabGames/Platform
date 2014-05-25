@@ -10,7 +10,6 @@ start() {
 
     ./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
     ./service_start.sh app "app.js"
-    ./service_start.sh app-research "app-research.js"
 }
 
 stop() {

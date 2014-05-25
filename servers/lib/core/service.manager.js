@@ -26,7 +26,7 @@ process.on('uncaughtException', function(err) {
     console.error("ServiceManager: Uncaught Error -", err, ", stack:", err.stack);
 });
 
-function ServiceManager(){
+function ServiceManager(configFiles){
     Util              = require('../core/util.js');
     var ConfigManager = require('../core/config.manager.js');
 
@@ -34,10 +34,19 @@ function ServiceManager(){
     console.log('Loading Configuration...');
     var config        = new ConfigManager();
     // load config files from first to last until successful
-    this.options = config.loadSync([
-        "./config.json",
-        "~/hydra.config.json"
-    ]);
+    // if not set, then make array
+    if(!configFiles) {
+        configFiles = [];
+    }
+
+    // if string then make array
+    if(_.isString(configFiles)) {
+        configFiles = [configFiles];
+    }
+
+    // always add the root config first
+    configFiles.unshift("./config.json");
+    this.options = config.loadSync(configFiles);
 
     global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = global.ENV;
@@ -56,7 +65,7 @@ return when.promise(function(resolve, reject) {
     var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
 
     // express session store
-    this.exsStore = new CouchbaseStore(this.options.services.sessionstore);
+    this.exsStore = new CouchbaseStore(this.options.services.session.store);
 
     console.log('SessionStore Connecting...');
     this.exsStore.glsConnect()
@@ -78,12 +87,12 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.methodOverride());
 
                 this.app.use(express.session({
-                    secret: this.options.auth.secret,
-                    cookie: {
+                    secret: this.options.services.session.secret,
+                    cookie: _.merge({
                         path: '/'
                         , httpOnly : false
                         //, maxAge: 1000 * 60 * 24 // 24 hours
-                    },
+                    }, this.options.services.session.cookie),
                     store:  this.exsStore
                 }));
 

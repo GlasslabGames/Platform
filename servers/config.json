@@ -5,11 +5,18 @@
     },
     "services": {
         "port": 8001,
-        "sessionstore": {
-            "host":     "localhost:8091",
-            "bucket":   "glasslab_webapp",
-            "password": "glasslab",
-            "ttl": 86400, "//": "24 hours in seconds"
+        "session": {
+            "secret": "keyboard kitty",
+            "cookie": {
+                "path": "/",
+                "httpOnly": false
+            },
+            "store": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab",
+                "ttl": 86400, "//": "24 hours in seconds"
+            }
         }
     },
     "webapp": {
@@ -54,10 +61,6 @@
         }
     },
     "auth": {
-        "protocol": "http:",
-        "host":     "localhost",
-        "port":     8082,
-        "secret":   "keyboard kitty",
         "email": {
             "mailChimp" : {
                 "apiKey": "da5ee9608f83677177482e05c1ed2d14-us2",
@@ -79,10 +82,17 @@
                 "password": "glasslab"
             }
         },
-        "google": {
-            "clientID": "763558968513-trn6s9uff4vdork95290koq27t1uat5l.apps.googleusercontent.com",
-            "clientSecret": "3IwY-_gUyCN42YqP3N3BQOeD",
-            "callbackURL": "http://127.0.0.1:8001/auth/google/callback"
+        "accounts" : {
+            "google": {
+                "clientID": "763558968513-trn6s9uff4vdork95290koq27t1uat5l.apps.googleusercontent.com",
+                "clientSecret": "3IwY-_gUyCN42YqP3N3BQOeD",
+                "callbackURL": "http://127.0.0.1:8001/auth/google/callback"
+            },
+            "edmodo": {
+                "clientID": "--AddMe--",
+                "clientSecret": "--AddMe--",
+                "callbackURL": "http://127.0.0.1:8001/auth/edmodo/callback"
+            }
         }
     },
     "assessment": {
@@ -98,16 +108,6 @@
             "db": 0,
             "port": 6379,
             "sessionExpire" : 14400000, "//": "4 hours in milliseconds"
-        }
-    },
-    "research": {
-        "port": 8090,
-        "datastore": {
-            "couchbase": {
-                "host":     "localhost:8091",
-                "bucket":   "glasslab_gamedata",
-                "password": "glasslab"
-            }
         }
     }
 }
