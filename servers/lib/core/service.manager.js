@@ -56,7 +56,7 @@ return when.promise(function(resolve, reject) {
     var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
 
     // express session store
-    this.exsStore = new CouchbaseStore(this.options.services.sessionstore);
+    this.exsStore = new CouchbaseStore(this.options.services.session.store);
 
     console.log('SessionStore Connecting...');
     this.exsStore.glsConnect()
@@ -78,12 +78,12 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.methodOverride());
 
                 this.app.use(express.session({
-                    secret: this.options.auth.secret,
-                    cookie: {
+                    secret: this.options.services.session.secret,
+                    cookie: _.merge({
                         path: '/'
                         , httpOnly : false
                         //, maxAge: 1000 * 60 * 24 // 24 hours
-                    },
+                    }, this.options.services.session.cookie),
                     store:  this.exsStore
                 }));
 

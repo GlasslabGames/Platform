@@ -2,18 +2,16 @@
  * Authentication Server Module
  *
  * Module dependencies:
- *  lodash     - https://github.com/lodash/lodash
- *  express    - https://github.com/visionmedia/express
- *  passport-google-oauth - https://github.com/jaredhanson/passport-google-oauth
+
  *
  */
 // Third-party libs
 var _          = require('lodash');
-var Strategy   = require('passport-google-oauth').OAuth2Strategy;
+var Strategy   = require('./auth.strategy.edmodo.js');
 
-module.exports = GoogleAccount;
+module.exports = EdmodoAccount;
 
-function GoogleAccount(options){
+function EdmodoAccount(options){
     try {
         this.options = _.merge(
             {},
@@ -21,22 +19,22 @@ function GoogleAccount(options){
         );
 
     } catch(err) {
-        console.trace("GoogleAccount: Error -", err);
+        console.trace("EdmodoAccount: Error -", err);
         this.stats.increment("error", "Generic");
     }
 }
 
-GoogleAccount.prototype.setupPassport = function(passport, authService) {
-    // http://localhost:8001/auth/google
-    // notasecret
+EdmodoAccount.prototype.setupPassport = function(passport, authService) {
+
     passport.use(new Strategy({
-                clientID:     this.options.auth.accounts.google.clientID,
-                clientSecret: this.options.auth.accounts.google.clientSecret,
-                callbackURL:  this.options.auth.accounts.google.callbackURL
+                clientID:     this.options.auth.accounts.edmodo.clientID,
+                clientSecret: this.options.auth.accounts.edmodo.clientSecret,
+                callbackURL:  this.options.auth.accounts.edmodo.callbackURL
             },
             function(accessToken, refreshToken, profile, done) {
-                //console.log("google user - profile:", profile);
+                console.log("edmodo user - profile:", profile);
 
+                /*
                 var userData = {};
                 // profile.provider
                 //userData.userId = profile.id;
@@ -64,19 +62,17 @@ GoogleAccount.prototype.setupPassport = function(passport, authService) {
                         done(null, profile);
                     }
                 );
+                */
             }
         )
     );
 };
 
-GoogleAccount.prototype.setupRoutes = function(app, passport) {
+EdmodoAccount.prototype.setupRoutes = function(app, passport) {
+
     // route to trigger google oauth authorization
-    app.get('/auth/google',
-        passport.authenticate('google',
-            {
-                scope: ['https://www.googleapis.com/auth/userinfo.profile',
-                        'https://www.googleapis.com/auth/userinfo.email']
-            }),
+    app.get('/auth/edmodo',
+        passport.authenticate('edmodo'),
         function(req, res) {
             // The request will be redirected to Google for authentication, so this
             // function will not be called.
@@ -84,8 +80,8 @@ GoogleAccount.prototype.setupRoutes = function(app, passport) {
     );
 
     // callback route
-    app.get('/auth/google/callback',
-        passport.authenticate('google'),
+    app.get('/auth/edmodo/callback',
+        passport.authenticate('edmodo'),
         function(req, res) {
             // Successful authentication, redirect home.
             res.redirect('/');
@@ -93,6 +89,6 @@ GoogleAccount.prototype.setupRoutes = function(app, passport) {
 };
 
 
-GoogleAccount.prototype.createAccount = function(){
+EdmodoAccount.prototype.createAccount = function(){
 
 };

@@ -14,6 +14,7 @@
         "couchbase":      "1.2.x",
         "passport":       "0.1.x",
         "passport-local": "0.1.x",
+        "passport-oauth": "1.0.x",
         "node-uuid":      "1.4.x",
         "node-statsd":    "0.0.x",
         "statsd":         "0.7.x",
@@ -21,7 +22,7 @@
         "q-io":           "1.11.x",
         "nodemailer":     "0.6.x",
         "ejs":            "1.0.x",
-        "mailchimp":      "*",
+        "mailchimp":      "1.1.x",
         "csv":            "0.3.x",
         "csv-stringify":  "0.0.x"
     },
