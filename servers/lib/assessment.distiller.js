@@ -93,7 +93,7 @@ function Distiller(options){
         }.bind(this));
 
     // TODO: remove this after running test
-    /*
+
     this.addAllOldSessionsForProcess()
         .then(function(){
             this.startTelemetryPoll();
@@ -102,8 +102,8 @@ function Distiller(options){
             console.trace("Distiller: Add All Old Session For Process Error -", err);
             this.stats.increment("error", "Assessment.OldSessionProcess");
         }.bind(this));
-    */
-    this.startTelemetryPoll();
+
+    //this.startTelemetryPoll();
 
     console.log('---------------------------------------------');
     console.log('Distiller: Waiting for messages...');
@@ -224,14 +224,22 @@ return when.promise(function(resolve, reject) {
     this.stats.increment("info", "ExecuteAssessment.StartDelay");
 
     this.dataDS.getEvents(gameSessionId)
-        .then(function(events){
+        .then(function(eventsData) {
+            if(!eventsData ||
+               !eventsData.events ||
+                eventsData.events.length == 0) {
+                console.warn( "Distiller: No events found to distilled" );
+                resolve();
+                return;
+            }
+
             // Run distiller function
-            var distilledData = this.SD_Function.preProcess(events);
+            var distilledData = this.SD_Function.preProcess(eventsData);
             //console.log( "Distilled data:", JSON.stringify(distilledData, null, 2) );
 
             // If the distilled data has no WEKA key, don't save anything
             if( !distilledData || !distilledData.bayes.key ) {
-                console.log( "no bayes key found in distilled data" );
+                console.warn( "Distiller: No bayes key found in distilled data" );
                 resolve();
                 return;
             }
@@ -332,7 +340,7 @@ return when.promise(function(resolve, reject) {
                 reject(err);
             }
         }.bind(this))
-        .then(function(sessionId) {
+        .then(function() {
             console.log( "Distiller: Assessment Complete -", gameSessionId);
         }.bind(this))
 
