@@ -38,9 +38,7 @@ TelemDS_Mysql.prototype.connect = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-
     resolve();
-
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
