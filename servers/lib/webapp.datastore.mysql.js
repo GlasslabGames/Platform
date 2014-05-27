@@ -32,6 +32,17 @@ function WebStore_MySQL(options){
     this.ds = new MySQL(this.options);
 }
 
+WebStore_MySQL.prototype.connect = function(){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    resolve();
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
 WebStore_MySQL.prototype.getUserCourses = function(id) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -309,6 +320,33 @@ return when.promise(function(resolve, reject) {
             }.bind(this),
             reject
         );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+WebStore_MySQL.prototype.getAllGameSessions = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q =
+        "SELECT \
+            session_id as sessionId\
+        FROM \
+            GL_SESSION \
+        WHERE \
+            activity_id IS NOT NULL";
+
+    this.ds.query(Q)
+        .then(function(data){
+            // return just a list of session Id's
+            resolve( _.pluck(data, 'sessionId') );
+        }.bind(this),
+        function(err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this)
+    );
 
 // ------------------------------------------------
 }.bind(this));

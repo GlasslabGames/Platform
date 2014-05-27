@@ -19,11 +19,12 @@ var aeConst;
 module.exports = Distiller;
 
 function Distiller(options){
-    var Util, Assessment, Telemetry;
+    var Util, Assessment, Telemetry, WebStore;
 
     // Glasslab libs
     Telemetry  = require('./telemetry.js');
     Assessment = require('./assessment.js');
+    WebStore   = require('./webapp.js').Datastore.MySQL;
     Util       = require('./util.js')
     aeConst    = Assessment.Const;
 
@@ -44,6 +45,7 @@ function Distiller(options){
     this.dataDS        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
     this.userDS        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
     this.aeDS          = new Assessment.Datastore.Couchbase(this.options.assessment.datastore.couchbase);
+    this.webstore      = new WebStore(this.options.webapp.datastore.mysql);
     this.SD_Function   = new Assessment.Distiller.Func.SC();
     this.stats         = new Util.Stats(this.options, "Assessment.Distiller");
 
@@ -80,7 +82,27 @@ function Distiller(options){
             this.stats.increment("error", "Assessment.User.MySQL.Connect");
         }.bind(this));
 
-    this.startTelemetryPoll();
+    this.webstore.connect()
+        .then(function(){
+            console.log("Distiller: WebStore DS Connected");
+            this.stats.increment("info", "Assessment.WebStore.MySQL.Connect");
+        }.bind(this),
+        function(err){
+            console.trace("Distiller: WebStore DS Error -", err);
+            this.stats.increment("error", "Assessment.WebStore.MySQL.Connect");
+        }.bind(this));
+
+    // TODO: remove this after running test
+    this.addAllOldSessionsForProcess()
+        .then(function(){
+            this.startTelemetryPoll();
+        }.bind(this),
+        function(err){
+            console.trace("Distiller: Add All Old Session For Process Error -", err);
+            this.stats.increment("error", "Assessment.OldSessionProcess");
+        }.bind(this));
+
+    //this.startTelemetryPoll();
 
     console.log('---------------------------------------------');
     console.log('Distiller: Waiting for messages...');
@@ -88,6 +110,31 @@ function Distiller(options){
     this.stats.increment("info", "ServerStarted");
 }
 
+Distiller.prototype.addAllOldSessionsForProcess = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    this.webstore.getAllGameSessions()
+        .then(function(sessionList){
+            var promiseList = [];
+
+            for(var i = 0; i < sessionList.length; i++) {
+                // add queue push api to promise list
+                promiseList.push( this.queue.pushJob( sessionList[i] ) );
+            }
+
+            return when.all(promiseList);
+        }.bind(this))
+
+        .then(function(){
+            console.log("Done adding all old sessions for process");
+        }.bind(this))
+
+        .then(resolve, reject);
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
 
 Distiller.prototype.loadWekaFiles = function(){
     try{
@@ -272,6 +319,7 @@ return when.promise(function(resolve, reject) {
                     return this.userDS.getSessionInfo(gameSessionId)
                         .then(function(sessionInfo) {
                             if(sessionInfo) {
+                                console.log( "Distiller: Running Assessment..." );
                                 // save Competency Results to DB
                                 return this.userDS.saveCompetencyResults(sessionInfo, compData);
                             }
@@ -282,6 +330,9 @@ return when.promise(function(resolve, reject) {
                 console.error("Distiller: Invalid Competency JSON data - Error:", err);
                 reject(err);
             }
+        }.bind(this))
+        .then(function(sessionId) {
+            console.log( "Distiller: Assessment Complete -", gameSessionId);
         }.bind(this))
 
         // catch all error
