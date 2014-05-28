@@ -76,6 +76,12 @@
             }
         },
         "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
             "couchbase": {
                 "host":     "localhost:8091",
                 "bucket":   "glasslab_webapp",
@@ -89,8 +95,8 @@
                 "callbackURL": "http://127.0.0.1:8001/auth/google/callback"
             },
             "edmodo": {
-                "clientID": "--AddMe--",
-                "clientSecret": "--AddMe--",
+                "clientID": "89a1f95422c621c85c623504bee5a69a1dd5804329749c0b7b9dbdf7a758892a",
+                "clientSecret": "41c06d364624552e26b7eb405eab502aa4fded5a0c1e9d63b20a4bbfa2bccb3c",
                 "callbackURL": "http://127.0.0.1:8001/auth/edmodo/callback"
             }
         }

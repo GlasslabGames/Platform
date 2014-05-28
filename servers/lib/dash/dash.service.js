@@ -18,11 +18,10 @@ module.exports = DashService;
 
 function DashService(options){
     try{
-        var AuthStore, TelmStore;
+        var TelmStore;
 
         // Glasslab libs
         Util          = require('../core/util.js');
-        AuthStore     = require('../auth/auth.js').Datastore.Couchbase;
         TelmStore     = require('../data/data.js').Datastore.Couchbase;
         LmsStore      = require('../lms/lms.js').Datastore.MySQL;
 
@@ -36,7 +35,6 @@ function DashService(options){
         this.requestUtil = new Util.Request(this.options);
         this.stats       = new Util.Stats(this.options, "Dash");
 
-        this.authStore   = new AuthStore(this.options.auth.datastore.couchbase);
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
 
@@ -52,19 +50,7 @@ DashService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    this.authStore.connect()
-        .then(function(){
-                console.log("DashService: Auth DS Connected");
-                this.stats.increment("info", "AuthDS.Connect");
-            }.bind(this),
-            function(err){
-                console.trace("DashService: Auth DS Error -", err);
-                this.stats.increment("error", "AuthDS.Connect");
-            }.bind(this))
-
-        .then(function(){
-            return this.telmStore.connect();
-        }.bind(this))
+    this.telmStore.connect()
         .then(function(){
                 console.log("DashService: Telemetry DS Connected");
                 this.stats.increment("info", "TelemetryDS.Connect");

@@ -5,6 +5,8 @@
  *  lodash     - https://github.com/lodash/lodash
  *  express    - https://github.com/visionmedia/express
  *
+ * TODO: refactor this file, auth.strategy.glasslab
+ *      move mysql functions to auth.datastore.mysql
  */
 // Third-party libs
 var _          = require('lodash');

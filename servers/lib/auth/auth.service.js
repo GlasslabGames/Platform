@@ -30,7 +30,7 @@ module.exports = AuthService;
 
 function AuthService(options){
     try {
-        var Accounts, WebStore, LMSStore, AuthStore;
+        var Auth, Accounts, WebStore, LMSStore, AuthStore;
         this.options = _.merge(
             {
                 auth: { port: 8082 }
@@ -40,13 +40,14 @@ function AuthService(options){
 
         // Glasslab libs
         Util          = require('../core/util.js');
-        aConst        = require('./auth.js').Const;
-        Accounts      = require('./auth.js').Accounts;
-        AuthStore     = require('./auth.js').Datastore.Couchbase;
+        Auth          = require('./auth.js');
+        aConst        = Auth.Const;
+        Accounts      = Auth.Accounts;
+        AuthStore     = Auth.Datastore.MySQL;
 
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options);
-        this.authStore        = new AuthStore(this.options.auth.datastore.couchbase);
+        this.authStore        = new AuthStore(this.options.auth.datastore.mysql);
         this.accountsManager  = new Accounts.Manager(this.options);
         this.glassLabStrategy = this.accountsManager.get("Glasslab");
 
@@ -79,7 +80,9 @@ AuthService.prototype.appConfig = function(app) {
 
     app.use(this.passport.initialize());
     app.use(this.passport.session());
-}
+
+    this.accountsManager.setupRoutes(app, this.passport);
+};
 
 
 AuthService.prototype.start = function() {
@@ -90,16 +93,22 @@ return when.promise(function(resolve, reject) {
     // connect to auth store
     this.authStore.connect()
         .then(function(){
-            console.log("AuthService: Couchbase Auth DS Connected");
-            this.stats.increment("info", "Couchbase.Connect");
+            console.log("AuthService: MySQL Auth DS Connected");
+            this.stats.increment("info", "MySQL.Connect");
+
+            return this.authStore.updateUserTable();
         }.bind(this),
             function(err){
-                console.trace("AuthService: Couchbase Auth Error -", err);
-                this.stats.increment("error", "Couchbase.Connect");
+                console.trace("AuthService: MySQL Auth Error -", err);
+                this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
 
         // connect to webstore
-        .then(function(){
+        .then(function(updated){
+            if(updated) {
+                console.log("AuthService: MySQL User Auth Table Updated!");
+            }
+
             return this.webstore.connect();
         }.bind(this))
         .then(function(){

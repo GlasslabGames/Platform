@@ -1156,7 +1156,7 @@ TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, device
                         devices: {}
                     };
                 } else {
-                    console.error("CouchBase AuthStore: Error -", err);
+                    console.error("CouchBase DataStore: Error -", err);
                     reject(err);
                     return;
                 }
@@ -1179,7 +1179,7 @@ TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, device
             this.client.set(key, userDeviceInfo,
                 function(err, data) {
                     if(err) {
-                        console.error("CouchBase AuthStore: Error -", err);
+                        console.error("CouchBase DataStore: Error -", err);
                         reject(err);
                         return;
                     }
@@ -1210,7 +1210,7 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
-                console.error("CouchBase AuthStore: Error -", err);
+                console.error("CouchBase DataStore: Error -", err);
                 reject(err);
                 return;
             }
@@ -1224,7 +1224,7 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(device.error.code != 13) {
-                        console.error("CouchBase AuthStore: Error -", device.error);
+                        console.error("CouchBase DataStore: Error -", device.error);
                         failed = device.error;
                         return;
                     }
@@ -1270,7 +1270,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
-                console.error("CouchBase AuthStore: Error -", err);
+                console.error("CouchBase DataStore: Error -", err);
                 reject(err);
                 return;
             }
@@ -1289,7 +1289,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(gamedata.error.code != 13) {
-                        console.error("CouchBase AuthStore: Error -", gamedata.error);
+                        console.error("CouchBase DataStore: Error -", gamedata.error);
                         failed = gamedata.error;
                         return;
                     }

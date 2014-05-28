@@ -5,6 +5,11 @@ var util = require('util')
     , OAuth2Strategy     = require('passport-oauth').OAuth2Strategy
     , InternalOAuthError = require('passport-oauth').InternalOAuthError;
 
+var _ = require('lodash');
+
+// load at runtime
+// Glasslab libs
+var aConst, lConst;
 
 /**
  * `Strategy` constructor.
@@ -41,9 +46,11 @@ var util = require('util')
  * @api public
  */
 function Strategy(options, verify) {
-    options = options || {};
-    options.authorizationURL = options.authorizationURL || 'https://api.edmodo.com/oauth/authorize';
-    options.tokenURL = options.tokenURL || 'https://api.edmodo.com/oauth/token';
+    options.authorizationURL = 'https://api.edmodo.com/oauth/authorize';
+    options.tokenURL         = 'https://api.edmodo.com/oauth/token';
+
+    lConst = require('../lms/lms.js').Const;
+    aConst = require('./auth.js').Const;
 
     OAuth2Strategy.call(this, options, verify);
     this.name = 'edmodo';
@@ -70,29 +77,47 @@ util.inherits(Strategy, OAuth2Strategy);
  * @api protected
  */
 Strategy.prototype.userProfile = function(accessToken, done) {
-    this._oauth2.get('https://api.edmodo.com/users/me', accessToken, function (err, body, res) {
+    this._getUserProfile('https://api.edmodo.com/users/me', accessToken, done);
+};
+
+Strategy.prototype._getUserProfile = function(url, accessToken, done) {
+    this._oauth2.get(url, accessToken, function (err, body, res) {
         if (err) { return done(new InternalOAuthError('failed to fetch user profile', err)); }
 
-        try {
-            var json = JSON.parse(body);
+        if( res.statusCode == 302 &&
+            res.headers &&
+            res.headers.location) {
+            console.log("Edmodo Strategy: Redirecting to", res.headers.location);
+            this._getUserProfile(res.headers.location, accessToken, done);
+        } else {
+            try {
+                var json = JSON.parse(body);
 
-            var profile = { provider: 'edmodo' };
-            profile._raw  = body;
-            profile._json = json;
+                var profile = {
+                    loginType: aConst.login.type.edmodo
+                };
+                profile._raw      = body;
+                profile._json     = json;
 
-            profile.id   = json.id;
-            profile.type = json.type;
-            profile.username = json.username;
-            profile.firstName = json.first_name;
-            profile.lastName = json.last_name;
+                if(json.type == "teacher") {
+                    profile.role = lConst.role.instructor;
+                } else {
+                    profile.role = lConst.role.student;
+                }
 
-            done(null, profile);
-        } catch(e) {
-            done(e);
+                profile.username  = json.id+"."+json.username;
+                profile.firstName = json.first_name;
+                profile.lastName  = json.last_name;
+                profile.email     = json.email || "";
+                profile.password  = body;
+
+                done(null, profile);
+            } catch (err) {
+                done(err);
+            }
         }
-    });
-}
-
+    }.bind(this));
+};
 
 /**
  * Expose `Strategy`.

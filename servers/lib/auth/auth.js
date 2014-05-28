@@ -16,6 +16,7 @@ module.exports = {
     Accounts:  require('./auth.accounts.js'),
 
     Datastore: {
-        Couchbase:  require('./auth.datastore.couchbase.js')
+        Couchbase: require('./auth.datastore.couchbase.js'),
+        MySQL:     require('./auth.datastore.mysql.js')
     }
 };

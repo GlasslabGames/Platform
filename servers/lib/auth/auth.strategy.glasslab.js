@@ -349,7 +349,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-Glasslab_Strategy.prototype.updateUserDataInDS = function(userData){
+Glasslab_Strategy.prototype.updateUserData = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -748,7 +748,7 @@ return when.promise(function(resolve, reject) {
                 }
             }
 
-            return this.updateUserDataInDS(userData);
+            return this.updateUserData(userData);
         }.bind(this))
 
         // all ok

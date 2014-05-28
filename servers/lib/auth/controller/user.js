@@ -8,11 +8,11 @@ var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
 
 module.exports = {
-    showUser:            showUser,
+    getUserProfileData:  getUserProfileData,
     registerUserV1:      registerUserV1,
     registerUserV2:      registerUserV2,
     registerManager:     registerManager,
-    updateUser:          updateUser,
+    updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
@@ -21,7 +21,28 @@ module.exports = {
 var exampleIn = {};
 var exampleOut = {};
 
-function showUser(req, res, next) {
+function getUserProfileData(req, res, next) {
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user) {
+        var userData = req.session.passport.user;
+
+        // check perms before returning user info
+        this.webstore.getUserInfoById(userData.id)
+            // ok, send data
+            .then(function(userData){
+                this.requestUtil.jsonResponse(res, userData);
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+function getUserData(req, res, next) {
     if( req.session &&
         req.session.passport &&
         req.session.passport.user &&
@@ -244,7 +265,7 @@ function registerManager(req, res, next) {
      */
 };
 
- function updateUser(req, res, next, serviceManager) {
+ function updateUserData(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Update.User");
     //console.log("Auth updateUserRoute - body:", req.body);
     if( !(req.body.id) )
@@ -607,7 +628,7 @@ function resetPasswordSend(req, res, next) {
                 userData.resetCodeExpiration = expirationTime;
                 userData.resetCodeStatus     = aConst.passwordReset.status.sent;
 
-                return this.glassLabStrategy.updateUserDataInDS(userData)
+                return this.glassLabStrategy.updateUserData(userData)
                     .then(function(){
                         //
                         // 2) send email
@@ -665,7 +686,7 @@ function resetPasswordVerify(req, res, next) {
                     if(userData.resetCodeStatus == aConst.passwordReset.status.sent) {
                         // update status
                         userData.resetCodeStatus = aConst.passwordReset.status.inProgress;
-                        return this.glassLabStrategy.updateUserDataInDS(userData)
+                        return this.glassLabStrategy.updateUserData(userData)
                             .then(function() {
                                 this.requestUtil.jsonResponse(res, {});
                             }.bind(this));
@@ -716,7 +737,7 @@ function resetPasswordUpdate(req, res, next) {
                             userData.resetCodeExpiration = "NULL";
                             userData.resetCode = "NULL";
 
-                            return this.glassLabStrategy.updateUserDataInDS(userData);
+                            return this.glassLabStrategy.updateUserData(userData);
                         }.bind(this))
                         .then(function() {
                             this.requestUtil.jsonResponse(res, {});
