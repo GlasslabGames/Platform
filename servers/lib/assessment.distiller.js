@@ -93,7 +93,7 @@ function Distiller(options){
         }.bind(this));
 
     // TODO: remove this after running test
-
+    /*
     this.addAllOldSessionsForProcess()
         .then(function(){
             this.startTelemetryPoll();
@@ -102,8 +102,8 @@ function Distiller(options){
             console.trace("Distiller: Add All Old Session For Process Error -", err);
             this.stats.increment("error", "Assessment.OldSessionProcess");
         }.bind(this));
-
-    //this.startTelemetryPoll();
+    */
+    this.startTelemetryPoll();
 
     console.log('---------------------------------------------');
     console.log('Distiller: Waiting for messages...');
