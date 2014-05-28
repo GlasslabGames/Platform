@@ -696,3 +696,40 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+LMS_MySQL.prototype.isEnrolledInInstructorCourse = function(studentId, instructorId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q =
+            "SELECT " +
+            "m1.* " +
+            "FROM " +
+            "GL_MEMBERSHIP m1 " +
+            "JOIN " +
+            "(SELECT course_id FROM GL_MEMBERSHIP WHERE user_id="+this.ds.escape(instructorId)+") m2 on m1.course_id=m2.course_id " +
+            "WHERE " +
+            "m1.role='student' AND " +
+            "m1.user_id="+this.ds.escape(studentId);
+
+        this.ds.query(Q)
+            .then(
+            function(data){
+                if( !data ||
+                    !_.isArray(data) ||
+                    data.length < 1) {
+                    reject({"error": "user not found"}, 404);
+                    return;
+                }
+
+                resolve(data);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+}

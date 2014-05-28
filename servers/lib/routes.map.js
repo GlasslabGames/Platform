@@ -223,6 +223,16 @@ module.exports = {
                 post: "glassLabLogin"
             }
         },
+        /* ROUTE DEFINED IN auth.account.edmodo
+        {
+            api: "/api/v2/auth/login/edmodo",
+            service: "auth",
+            controller: "login",
+            method: {
+                post: "edmodoLogin"
+            }
+        },
+        */
         {
             api: "/api/v2/auth/login/status",
             service: "auth",
@@ -284,12 +294,21 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/user/profile",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserProfileData"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/user/:id",
             service: "auth",
             controller: "user",
             method: {
-                get: "showUser",
-                post: "updateUser"
+                get: "getUserData",
+                post: "updateUserData"
             }
         },
         {
