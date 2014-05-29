@@ -29,6 +29,7 @@ module.exports = {
     // Version 2
     // ---------------------------------------------------
         {
+            // id -> gameId
             api: "/api/v2/data/config/:id",
             service: "data",
             controller: "config",
@@ -71,6 +72,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            // id -> userId
             api: "/api/v2/data/user/pref/:id",
             service: "data",
             controller: "user",
@@ -81,6 +83,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            // id -> userId
             api: "/api/v2/data/game/:id",
             service: "data",
             controller: "game",
@@ -108,6 +111,7 @@ module.exports = {
             }
         },
         {
+            // id -> gameId
             api: "/api/v2/dash/game/:id/achievements",
             service: "dash",
             controller: "game",
@@ -116,6 +120,7 @@ module.exports = {
             }
         },
         {
+            // id -> gameId
             api: "/api/v2/dash/game/:id/info",
             service: "dash",
             controller: "game",
@@ -178,6 +183,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            // id -> courseId
             api: "/api/v2/lms/course/:id",
             service: "lms",
             controller: "course",
@@ -207,6 +213,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            // id -> userId
             api: "/api/v2/auth/user/:id",
             service: "auth",
             controller: "user",
@@ -303,6 +310,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            // id -> userId
             api: "/api/user/:id",
             service: "auth",
             controller: "user",
@@ -331,6 +339,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            // id -> courseId
             api: "/api/course/:id",
             service: "lms",
             controller: "course",
@@ -349,6 +358,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            // id -> courseId
             api: "/api/course/unenroll/:id",
             service: "lms",
             controller: "course",
