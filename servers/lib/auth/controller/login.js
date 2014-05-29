@@ -56,7 +56,7 @@ function glassLabLogin(req, res, next) {
         // already logged in?
         if( req.isAuthenticated() ) {
             userInfo = req.session.passport.user;
-
+            
             // for old cached sessions, migrate them over to role instead of systemRole
             if(userInfo.systemRole && !userInfo.role)
             {
@@ -135,7 +135,7 @@ return when.promise(function(resolve, reject) {
             reject(err);
             return;
         }
-
+        
         // TODO: move this to LMS service API, for service isolation
         // get courses
         if( (user.role == lConst.role.student) ||
