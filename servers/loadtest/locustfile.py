@@ -52,7 +52,8 @@ def postAPIUrlList():
             x[postapi] = []
             # remove first char a slash and replace all slashes with underscores
             pfh = open( baseLoadTestDateDir + "/post_api/" + postapi[1:].replace("/", "_"));
-            if (postapi == "/api/game/sendtelemetrybatch") or (postapi == "/api/game/endsession"):
+#            if (postapi == "/api/game/sendtelemetrybatch") or (postapi == "/api/game/endsession"):
+            if (postapi in [ "/api/v2/data/events", "/api/v2/data/user/pref/AA-1", "/api/v2/data/game/AA-1" ] ):
                 data = ""
                 for pline in pfh.readlines():
                     data = data + pline
