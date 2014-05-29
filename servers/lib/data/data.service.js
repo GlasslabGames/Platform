@@ -451,21 +451,9 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 }
 
                 // userId: String or Integer (Optional)
-                if( !data.hasOwnProperty("userId") ) {
-                    // no userId is ok
-                } else {
-                    if( !(_.isString(data.userId) || _.isNumber(data.userId)) ) {
-                        errList.push(new Error("userId invalid type"));
-                    }
-                    else if(_.isString(data.userId) && data.userId.length == 0) {
-                        errList.push(new Error("userId can not be empty"));
-                    }
-                    // TODO: add validate of userId using DB
-                    // else if( this._eventValidateUserId(data.userId) ){...}
-                    else {
-                        // save
-                        pData.userId = data.userId;
-                    }
+                // add userId to all events
+                if(userId) {
+                    data.userId = userId;
                 }
 
                 // deviceId: String (Optional)
