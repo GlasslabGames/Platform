@@ -566,14 +566,15 @@ SC_Distiller.prototype.preProcess = function(events){
      * This information needs to be stored in Couchbase: glasslab_assessment
      */
 
-     /*var bayesInfo = {
-     bayesFile: wekaFile,
-     evidenceFragments: [
-     endStateCategory,
-     combinedRRCategory
-     ]
-     };*/
-
+    /*
+    var bayesInfo = {
+        bayesFile: wekaFile,
+        evidenceFragments: [
+            endStateCategory,
+            combinedRRCategory
+        ]
+    };
+    */
 
     var distillInfo = {
         competencyType : cType,
@@ -607,9 +608,6 @@ SC_Distiller.prototype.postProcess = function(distilled, wekaResults) {
             competencyLevel = i + 1;
         }
     }
-
-    // DATA: { competencyLevel, distilled.competencyType }
-    // NOTE: ratingText
 
     // competency type
     compData.competencyType = distilled.competencyType;
