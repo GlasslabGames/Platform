@@ -53,7 +53,7 @@ EdmodoAccount.prototype.setupPassport = function(passport, authService) {
                         done(null, profile);
                     }.bind(this),
                     function(err) {
-                        done(err, profile);
+                        done(JSON.stringify(err), profile);
                     }.bind(this)
                 );
             }.bind(this)
@@ -112,6 +112,7 @@ return when.promise(function(resolve, reject) {
 
         // catch all errors
         .then(null, function(err, code){
+            console.error("EdmodoAccount: _AddOrFindUser Error -", err);
             return reject(err, code);
         }.bind(this));
 // ------------------------------------------------

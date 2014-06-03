@@ -78,7 +78,7 @@ return when.promise(function(resolve, reject) {
             this.app.configure(function() {
 
                 this.app.use(Util.GetExpressLogger(this.options, express, this.stats));
-                this.app.use(express.compress());
+                this.app.use(express.compress()); // gzip compress, Need to disable for loadtest
                 this.app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
 
                 this.app.use(express.cookieParser());
