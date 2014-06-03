@@ -8,7 +8,8 @@ var Util      = require('../../core/util.js');
 module.exports = {
     saveGameData: saveGameData,
     getGameData:  getGameData,
-    updateDevice: updateDevice
+    updateDevice: updateDevice,
+    addTotalTimePlayed: addTotalTimePlayed
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -42,7 +43,7 @@ function saveGameData(req, res, next)
         this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
         return
     }
-    var gameId = req.params.id;
+    var gameId = req.params.gameId;
 
     var data = req.body;
     try{
@@ -87,7 +88,7 @@ function getGameData(req, res, next)
         this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
         return
     }
-    var gameId = req.params.id;
+    var gameId = req.params.gameId;
 
     var data = req.body;
     try{
@@ -136,6 +137,44 @@ function updateDevice(req, res, next) {
         // update device Id
         //console.log("deviceId:", req.body.deviceId);
         this.cbds.updateUserDeviceId(userData.id, req.body.gameId, req.body.deviceId)
+            .then(function(){
+                this.requestUtil.jsonResponse(res, { status: "ok" } );
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this));
+
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+exampleIn.addTotalTimePlayed = {
+    addDiff: 123
+};
+function addTotalTimePlayed(req, res, next) {
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user) {
+
+        var userData = req.session.passport.user;
+
+        // deviveId required
+        if( !(req.body &&
+            req.body.addDiff &&
+            _.isNumber(req.body.addDiff) ) ) {
+            this.requestUtil.errorResponse(res, "missing addDiff from data");
+            return;
+        }
+        var gameId = req.params.gameId;
+
+        // TODO: validate gameId
+
+        // update device Id
+        //console.log("deviceId:", req.body.deviceId);
+        this.cbds.addTotalTimePlayed(userData.id, gameId, req.body.addDiff)
             .then(function(){
                 this.requestUtil.jsonResponse(res, { status: "ok" } );
             }.bind(this))

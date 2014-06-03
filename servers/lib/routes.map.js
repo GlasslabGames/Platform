@@ -81,10 +81,31 @@ module.exports = {
                 get: "getUserPref"
             }
         },
+        /*
         {
             requireAuth: true,
-            // id -> userId
-            api: "/api/v2/data/game/:id",
+            api: "/api/v2/data/game/:gameId/totalTimePlayed",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "addTotalTimePlayed"
+                //,get:  "getTotalTimePlayed"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/:gameId/achievement",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "addGameAchievements",
+                get: "getAchievements"
+            }
+        },
+        /*
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/:gameId",
             service: "data",
             controller: "game",
             method: {
@@ -270,6 +291,14 @@ module.exports = {
             controller: "resetpassword",
             method: {
                 post: "resetPasswordVerifyLink"
+            }
+        },
+        {
+            api: "/api/v2/auth/logout",
+            service: "auth",
+            controller: "login",
+            method: {
+                post: "logout"
             }
         },
     // ---------------------------------------------------

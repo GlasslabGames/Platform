@@ -1313,3 +1313,59 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
     }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Couchbase.prototype.addTotalTimePlayed = function(userId, gameId, deviceId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var key = tConst.game.dataKey+":"+tConst.game.deviceKey+":"+gameId+":"+userId;
+        this.client.get(key, function(err, data){
+            var userDeviceInfo;
+            if(err) {
+                // "No such key"
+                if(err.code == 13)
+                {
+                    userDeviceInfo = {
+                        lastDevice: "",
+                        devices: {}
+                    };
+                } else {
+                    console.error("CouchBase DataStore: Error -", err);
+                    reject(err);
+                    return;
+                }
+            } else {
+                userDeviceInfo = data.value;
+            }
+
+            // if not seen this device before, add inner object
+            if( !userDeviceInfo.devices.hasOwnProperty(deviceId) ){
+                userDeviceInfo.devices[deviceId] = {
+                    lastSeenTimestamp: 0
+                }
+            }
+
+            // update info
+            userDeviceInfo.lastDevice = deviceId;
+            userDeviceInfo.devices[deviceId].lastSeenTimestamp = Util.GetTimeStamp();
+
+            // update data
+            this.client.set(key, userDeviceInfo,
+                function(err, data) {
+                    if(err) {
+                        console.error("CouchBase DataStore: Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    resolve(data);
+                }.bind(this));
+
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
