@@ -1111,11 +1111,11 @@ TelemDS_Couchbase.prototype.saveUserPref = function(userId, gameId, data){
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.getUserPref = function(userId, gameId){
+TelemDS_Couchbase.prototype.getGamePlayInfo = function(userId, gameId){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        var key = tConst.game.dataKey+":"+tConst.game.prefKey+":"+gameId+":"+userId;
+        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
 
         // get user game pref
         this.client.get(key,
@@ -1315,47 +1315,97 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
 };
 
 
-TelemDS_Couchbase.prototype.addTotalTimePlayed = function(userId, gameId, deviceId) {
+TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, timeDiff) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var key = tConst.game.dataKey+":"+tConst.game.deviceKey+":"+gameId+":"+userId;
+        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
         this.client.get(key, function(err, data){
-            var userDeviceInfo;
+            var playInfo = {
+                totalTimePlayed: 0
+            };
             if(err) {
-                // "No such key"
-                if(err.code == 13)
-                {
-                    userDeviceInfo = {
-                        lastDevice: "",
-                        devices: {}
-                    };
-                } else {
-                    console.error("CouchBase DataStore: Error -", err);
+                // "NO - No such key"
+                if(err.code != 13) {
+                    console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
                     reject(err);
                     return;
                 }
             } else {
-                userDeviceInfo = data.value;
-            }
-
-            // if not seen this device before, add inner object
-            if( !userDeviceInfo.devices.hasOwnProperty(deviceId) ){
-                userDeviceInfo.devices[deviceId] = {
-                    lastSeenTimestamp: 0
-                }
+                playInfo = data.value;
             }
 
             // update info
-            userDeviceInfo.lastDevice = deviceId;
-            userDeviceInfo.devices[deviceId].lastSeenTimestamp = Util.GetTimeStamp();
+            playInfo.totalTimePlayed += timeDiff;
 
             // update data
-            this.client.set(key, userDeviceInfo,
+            this.client.set(key, playInfo,
                 function(err, data) {
                     if(err) {
-                        console.error("CouchBase DataStore: Error -", err);
+                        console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    resolve(data);
+                }.bind(this));
+
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+var exampleIn = {};
+exampleIn.postGameAchievement_achievement = {
+    group:    "CCSS.ELA-Literacy.WHST.6-8.1",
+    subGroup: "b",
+    item:     "Core Cadet"
+};
+TelemDS_Couchbase.prototype.postGameAchievement = function(userId, gameId, achievement) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
+        this.client.get(key, function(err, data){
+            var playInfo = {
+                achievement: {
+                    "groups": {}
+                }
+            };
+            if(err) {
+                // "NO - No such key"
+                if(err.code != 13) {
+                    console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
+                    reject(err);
+                    return;
+                }
+            } else {
+                playInfo = data.value;
+            }
+
+            // create object tree
+            if(!playInfo.achievement.groups.hasOwnProperty( achievement.group )) {
+                playInfo.achievement.groups [achievement.group] = { "subGroups": {} };
+            }
+            if(!playInfo.achievement.groups[achievement.group].subGroups.hasOwnProperty( achievement.subGroup )) {
+                playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup] = { "items": {} };
+            }
+            if(!playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items.hasOwnProperty( achievement.item )) {
+                playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items[achievement.item] = { "won": false };
+            }
+
+            // update info
+            playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items[achievement.item].won = true;
+
+            // update data
+            this.client.set(key, playInfo,
+                function(err, data) {
+                    if(err) {
+                        console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
                         reject(err);
                         return;
                     }

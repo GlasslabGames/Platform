@@ -72,24 +72,20 @@ module.exports = {
         },
         {
             requireAuth: true,
-            // id -> userId
-            api: "/api/v2/data/user/pref/:id",
+            api: "/api/v2/data/game/:gameId/playInfo",
             service: "data",
-            controller: "user",
+            controller: "game",
             method: {
-                post: "saveUserPref",
-                get: "getUserPref"
+                get: "getGamePlayInfo"
             }
         },
-        /*
         {
             requireAuth: true,
             api: "/api/v2/data/game/:gameId/totalTimePlayed",
             service: "data",
             controller: "game",
             method: {
-                post: "addTotalTimePlayed"
-                //,get:  "getTotalTimePlayed"
+                post: "postTotalTimePlayed"
             }
         },
         {
@@ -98,11 +94,9 @@ module.exports = {
             service: "data",
             controller: "game",
             method: {
-                post: "addGameAchievements",
-                get: "getAchievements"
+                post: "postGameAchievement"
             }
         },
-        /*
         {
             requireAuth: true,
             api: "/api/v2/data/game/:gameId",

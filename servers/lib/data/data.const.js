@@ -23,6 +23,7 @@ module.exports = {
         deviceKey: 'd',
         saveKey: 'save',
         prefKey: 'pref',
+        playInfoKey: 'play',
         countKey: 'count',
         gameSessionKey: 'gs',
         eventKey: 'e',
