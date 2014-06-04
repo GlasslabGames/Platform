@@ -8,32 +8,33 @@ Installation
 ------------
 1. Install Brew
    * http://brew.sh/
-   * ```sh
-   ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
-   ```
+    ```sh
+    $ ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
+    ```
 2. Install Node.js
-   *  ```sh
-   brew install node
+   * Use Brew to install node
+   ```sh
+   $ brew install node
    ```
 3. Install MySQL
-   1.  ```sh
-   brew install mysql
-   ```
-   2.  ```sh
-   ln -sfv /usr/local/opt/mysql/*.plist ~/Library/LaunchAgents
-   ```
-   3.  ```sh
-   launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist
-   ```
-   4 Verify by running
-        * ```sh
-          brew services list
-          ```
-        * This should display "mysql      started..."
-   5. Add MySQL user and Import SQL Schema data
-        * ```sh
-          cd local && ./setup_db.sh
-          ```
+   1. Use Brew to install MySQL
+    ```sh
+    $ brew install mysql
+    $ ln -sfv /usr/local/opt/mysql/*.plist ~/Library/LaunchAgents
+    $ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist
+    ```
+   2. Verify by running
+      * List all Brew services
+      ```sh
+      $ brew services list
+      ```
+      * This should display "mysql      started..."
+   3. Add MySQL user and Import SQL Schema data
+        * Change to "local" dir and run setup_db.sh script
+        ```sh
+        $ cd local
+        $ ./setup_db.sh
+        ```
         * This will create a DB called **"glasslab_dev"** and a user named **"glasslab"** with password **"glasslab"**
 4. Install/Setup Couchbase Server
    1. Download: http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.zip
