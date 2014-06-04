@@ -1326,7 +1326,7 @@ TelemDS_Couchbase.prototype.getGamePlayInfo = function(userId, gameId){
 };
 
 
-TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, timeDiff) {
+TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, timeDiff, totalTimePlayed) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -1348,8 +1348,14 @@ TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, 
                 playInfo = _.merge(playInfo, data.value);
             }
 
-            // update info
-            playInfo.totalTimePlayed += timeDiff;
+            if(totalTimePlayed) {
+                // set totalTimePlayed
+                playInfo.totalTimePlayed = totalTimePlayed;
+            }
+            if(timeDiff) {
+                // add time to totalTimePlayed
+                playInfo.totalTimePlayed += timeDiff;
+            }
 
             // update data
             this.client.set(key, playInfo,

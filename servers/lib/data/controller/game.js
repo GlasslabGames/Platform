@@ -153,8 +153,10 @@ function updateDevice(req, res, next) {
     }
 }
 
+// TODO: look at security around totalTimePlayed setting
 exampleIn.postTotalTimePlayed = {
-    addDiff: 123
+    addTimeDiff: 123,
+    setTime: 123456
 };
 function postTotalTimePlayed(req, res, next) {
     if( req.session &&
@@ -162,28 +164,35 @@ function postTotalTimePlayed(req, res, next) {
         req.session.passport.user) {
 
         var userData = req.session.passport.user;
+        var timeDiff = null;
+        var totalTimePlayed = null;
 
-        // deviveId required
-        if( !(req.body &&
-            req.body.addDiff &&
-            _.isNumber(req.body.addDiff) ) ) {
-            this.requestUtil.errorResponse(res, "missing addDiff from data");
+        if( (req.body && req.body.addDiff && _.isNumber(req.body.addDiff) ) ) {
+            timeDiff = parseFloat(req.body.addDiff);
+        }
+        if( (req.body && req.body.setTime && _.isNumber(req.body.setTime) ) ) {
+            totalTimePlayed = parseFloat(req.body.setTime);
+        }
+
+        // addDiff required
+        if( !timeDiff && !totalTimePlayed ) {
+            this.requestUtil.errorResponse(res, "missing addDiff or totalTimePlayed from data");
             return;
         }
 
         if( !( req.params &&
-            req.params.hasOwnProperty("gameId") ) ) {
+               req.params.hasOwnProperty("gameId") )
+          ) {
             this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
             return
         }
         var gameId = req.params.gameId;
-        var timeDiff = parseFloat(req.body.addDiff);
 
         // TODO: validate gameId
 
         // update device Id
         //console.log("deviceId:", req.body.deviceId);
-        this.cbds.addDiffToTotalTimePlayed(userData.id, gameId, timeDiff)
+        this.cbds.addDiffToTotalTimePlayed(userData.id, gameId, timeDiff, totalTimePlayed)
             .then(function(){
                 this.requestUtil.jsonResponse(res, { status: "ok" } );
             }.bind(this))
