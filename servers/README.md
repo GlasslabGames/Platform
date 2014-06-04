@@ -4,19 +4,29 @@ This is the Glasslab game service platform server.
 It is a nodeJS web server. nodeJS servers is used for producing REST endpoints. Angular is used for frontend rendering and navigation.
 
 
+Requirments
+------------
+OSX with 8GB or ram
+
+
 Installation
 ------------
-1. Install Brew
+1. Install **Brew**
    * http://brew.sh/
     ```sh
     $ ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
     ```
-2. Install Node.js
+2. Install **Node.js**
    * Use Brew to install node
    ```sh
    $ brew install node
    ```
-3. Install MySQL
+3. Install Forever node process manager
+  * Use NPM to install forever process manager globally
+  ```sh
+  $ sudo npm install forever -g
+  ```
+4. Install **MySQL**
    1. Use Brew to install MySQL
     ```sh
     $ brew install mysql
@@ -36,7 +46,7 @@ Installation
         $ ./setup_db.sh
         ```
         * This will create a DB called **"glasslab_dev"** and a user named **"glasslab"** with password **"glasslab"**
-4. Install Redis
+5. Install **Redis**
    1. Use Brew to install redis
       ```sh
       $ brew install redis
@@ -63,7 +73,7 @@ Installation
       $ pkill -f redis
       ```
 
-5. Install/Setup Couchbase Server
+6. Install/Setup **Couchbase** Server
    1. Download: http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.zip
    2. Extract and Install App
    3. Login into admin console [http://localhost:8091](http://localhost:8091)
@@ -91,21 +101,22 @@ Installation
                3. Access Control: Standard port password "glasslab"
                4. Replicas: uncheck "Enable"
                5. Click Create button at bottom of modal.
-5. Installation COMPLETE
+7. Installation Complete
 
 Running the app
 ---------------
-1. To start services run the following command:
-```sh
-$ ./service.sh start
-```
+1. Start/Stop/Restart servies
+  * To start services run the following command:
+  ```sh
+  $ ./service.sh start
+  ```
   * To stop services run the following command:
-```sh
-$ ./service.sh stop
-```
+  ```sh
+  $ ./service.sh stop
+  ```
   * To restart services run the following command:
-```sh
-$ ./service.sh restart
-```
+  ```sh
+  $ ./service.sh restart
+  ```
 2. In a browser go to [http://localhost:8001](http://localhost:8001)
 
