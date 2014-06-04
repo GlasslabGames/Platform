@@ -21,7 +21,7 @@ Installation
    ```sh
    $ brew install node
    ```
-3. Install Forever node process manager
+3. Install **Forever** node process manager
   * Use NPM to install forever process manager globally
   ```sh
   $ sudo npm install forever -g
