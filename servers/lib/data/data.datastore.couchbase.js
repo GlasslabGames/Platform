@@ -1111,29 +1111,6 @@ TelemDS_Couchbase.prototype.saveUserPref = function(userId, gameId, data){
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.getGamePlayInfo = function(userId, gameId){
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
-
-        // get user game pref
-        this.client.get(key,
-            function(err, data){
-                if(err){
-                    console.error("CouchBase TelemetryStore: Get User Pref Data Error -", err);
-                    reject(err);
-                    return;
-                }
-                resolve(data);
-            }.bind(this));
-
-// ------------------------------------------------
-    }.bind(this));
-// end promise wrapper
-};
-
-
 TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, deviceId) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -1315,6 +1292,40 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
 };
 
 
+TelemDS_Couchbase.prototype.getGamePlayInfo = function(userId, gameId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
+
+        // get user game pref
+        this.client.get(key,
+            function(err, data){
+                var playInfo = playInfo = {
+                    totalTimePlayed: 0,
+                    achievement: { "groups": {} }
+                };
+                if(err){
+                    // NOT "No such key"
+                    if(err.code != 13)
+                    {
+                        console.error("CouchBase TelemetryStore: Get User Pref Data Error -", err);
+                        reject(err);
+                        return;
+                    }
+                } else {
+                    playInfo = _.merge(playInfo, data.value);
+                }
+
+                resolve(playInfo);
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
 TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, timeDiff) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -1323,7 +1334,8 @@ TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, 
         var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
         this.client.get(key, function(err, data){
             var playInfo = {
-                totalTimePlayed: 0
+                totalTimePlayed: 0,
+                achievement: { "groups": {} }
             };
             if(err) {
                 // "NO - No such key"
@@ -1333,7 +1345,7 @@ TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, 
                     return;
                 }
             } else {
-                playInfo = data.value;
+                playInfo = _.merge(playInfo, data.value);
             }
 
             // update info
@@ -1372,9 +1384,8 @@ TelemDS_Couchbase.prototype.postGameAchievement = function(userId, gameId, achie
         var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
         this.client.get(key, function(err, data){
             var playInfo = {
-                achievement: {
-                    "groups": {}
-                }
+                    totalTimePlayed: 0,
+                    achievement: { "groups": {} }
             };
             if(err) {
                 // "NO - No such key"
@@ -1384,7 +1395,7 @@ TelemDS_Couchbase.prototype.postGameAchievement = function(userId, gameId, achie
                     return;
                 }
             } else {
-                playInfo = data.value;
+                playInfo = _.merge(playInfo, data.value);
             }
 
             // create object tree

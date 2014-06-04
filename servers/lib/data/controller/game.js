@@ -9,6 +9,7 @@ module.exports = {
     saveGameData: saveGameData,
     getGameData:  getGameData,
     updateDevice: updateDevice,
+    getGamePlayInfo: getGamePlayInfo,
     postTotalTimePlayed: postTotalTimePlayed,
     postGameAchievement: postGameAchievement
 };
