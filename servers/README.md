@@ -36,10 +36,37 @@ Installation
         $ ./setup_db.sh
         ```
         * This will create a DB called **"glasslab_dev"** and a user named **"glasslab"** with password **"glasslab"**
-4. Install/Setup Couchbase Server
+4. Install Redis
+   1. Use Brew to install redis
+      ```sh
+      $ brew install redis
+      $ mkdir ~/Library/LaunchAgents
+      $ ln -sfv /usr/local/opt/redis/*.plist ~/Library/LaunchAgents
+      $ launchctl load ~/Library/LaunchAgents/homebrew.mxcl.redis.plist
+      ```
+
+      * Note: to restart the redis brew service, use the following command
+
+      ```sh
+      $ brew services restart redis
+      ```
+
+      * If the service does not start automatically, you can start manually by running:
+
+      ```sh
+      $ redis-server /usr/local/etc/redis.conf
+      ```
+
+      * You may need to kill extraneous redis process with:
+
+      ```sh
+      $ pkill -f redis
+      ```
+
+5. Install/Setup Couchbase Server
    1. Download: http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.zip
    2. Extract and Install App
-   3. Login into admin console (http://localhost:8091
+   3. Login into admin console [http://localhost:8091](http://localhost:8091)
    4. Create user (remember the username/password this is your admin account)
    5. For the default bucket choose the 100MB (minimal size) for ram
      * You can delete this bucket later it's not used
@@ -64,28 +91,21 @@ Installation
                3. Access Control: Standard port password "glasslab"
                4. Replicas: uncheck "Enable"
                5. Click Create button at bottom of modal.
-2. Install Redis
-
-4. Installation COMPLETE
+5. Installation COMPLETE
 
 Running the app
 ---------------
-2. Execute the following command to run the app: "grails run-app"
-3. Access the app at the URL reported in the grails logs
-    http://localhost:8080/
-
-To start services run the following command:
+1. To start services run the following command:
 ```sh
-$ cd servers
 $ ./service.sh start
 ```
-To stop services run the following command:
+  * To stop services run the following command:
 ```sh
-$ cd servers
 $ ./service.sh stop
 ```
-To restart services run the following command:
+  * To restart services run the following command:
 ```sh
-$ cd servers
 $ ./service.sh restart
 ```
+2. In a browser go to [http://localhost:8001](http://localhost:8001)
+
