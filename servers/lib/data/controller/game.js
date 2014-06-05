@@ -41,7 +41,7 @@ function saveGameData(req, res, next)
     }
 
     if( !( req.params &&
-        req.params.hasOwnProperty("id") ) ) {
+        req.params.hasOwnProperty("gameId") ) ) {
         this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
         return
     }
