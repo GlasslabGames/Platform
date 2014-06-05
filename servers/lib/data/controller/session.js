@@ -15,12 +15,12 @@ module.exports = {
 
 var exampleInput = {};
 exampleInput.startSessionV2 = {
+    clientId:  "AA-1",
     deviceId:  "123-ASD",
     gameLevel: "Level1",
     courseId:  12,
     timestamp: 123456789
 };
-
 function startSessionV2(req, outRes){
     try {
         this.stats.increment("info", "Route.StartSessionV2");
@@ -29,6 +29,13 @@ function startSessionV2(req, outRes){
             this.stats.increment("error", "StartSession.DeviceId.Missing");
             this.requestUtil.errorResponse(outRes, "DeviceId Missing", 404);
             return;
+        }
+
+        // optional clientId
+        // TODO: in future make required
+        var clientId = '';
+        if(req.body.clientId) {
+            clientId = req.body.clientId;
         }
 
         //console.log("req:", req);
@@ -83,7 +90,7 @@ function startSessionV2(req, outRes){
 
             // start queue session
             .then(function () {
-                return this.cbds.startGameSessionV2(deviceId, userData.id, courseId, gameLevel, clientTimeStamp);
+                return this.cbds.startGameSessionV2(userData.id, deviceId, clientId, courseId, gameLevel, clientTimeStamp);
             }.bind(this))
 
             // get config settings
@@ -130,7 +137,7 @@ function startSessionV2(req, outRes){
 exampleInput.endSessionV2 = {
     gameSessionId:  "ASD-123-QWER",
     timestamp:      123456789
-}
+};
 function endSessionV2(req, outRes){
     try {
         // TODO: validate all inputs
@@ -165,14 +172,14 @@ function endSessionV2(req, outRes){
             this.cbds.validateSession(gSessionId)
 
                 // all done in parallel
-                .then(function () {
+                .then(function (gSessionData) {
                     // when all done
                     // add end session in Datastore
                     return this.cbds.endGameSessionV2(gSessionId, clientTimeStamp)
                         // push job on queue
                         .then( function() {
                             //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
-                            return this.queue.pushJob(gSessionId);
+                            return this.queue.pushJob(gSessionId, gSessionData.clientId);
                         }.bind(this) );
                 }.bind(this))
 

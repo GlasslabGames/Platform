@@ -43,8 +43,13 @@ function DistillerService(options){
     this.dataDS        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
     this.userDS        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
 
-    // TODO: move this to a object map
-    this.SD_Function   = new Assessment.DistillerFunc.SC();
+    // TODO: move to DB
+    this.AEFunc = {};
+    console.log('DistillerService: Loading functions...');
+    for(var f in Assessment.DistillerFunc) {
+        console.log('DistillerService: Function "' + f + '" Loaded!');
+        this.AEFunc[f] = new Assessment.DistillerFunc[f]();
+    }
 
     this.stats         = new Util.Stats(this.options, "Assessment.DistillerService");
 
@@ -161,8 +166,8 @@ DistillerService.prototype.getTelemetryBatch = function(){
         // cleanup session
         .then(function(data){
             if(data.type == aeConst.queue.end) {
-                return this.runAssessment(data.id)
-                    .then( function(){
+                return this.runAssessment(data.id, data.clientId)
+                    .then( function() {
                         // TODO: use assessment DS for queue
                         return this.dataDS.endQSession(data.id)
                     }.bind(this) );
@@ -184,29 +189,64 @@ DistillerService.prototype.getTelemetryBatch = function(){
         }.bind(this));
 }
 
-DistillerService.prototype.runAssessment = function(gameSessionId){
+DistillerService.prototype.runAssessment = function(gameSessionId, clientId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    if(this.options.env == "dev") {
-        console.log("DistillerService: Execute Assessment Delay - gameSessionId:", gameSessionId);
+    var run = true;
+    if( !clientId ||
+        !clientId.length) {
+        // default to using SimCity's
+        clientId = 'SC';
     }
-    this.stats.increment("info", "ExecuteAssessment.StartDelay");
 
+    // check if clientId in function list, if not then don't run
+    if(!this.AEFunc.hasOwnProperty(clientId) ){
+        run = false;
+    }
+
+    if(!run) {
+        // nothing to do
+        if(this.options.env == "dev") {
+            console.log("DistillerService: Skipping Assessment Execution - gameSessionId:", gameSessionId, ", clientId:", clientId);
+        }
+        this.stats.increment("info", "ExecuteAssessment.Skipping");
+        resolve();
+        return;
+    }
+
+    if(this.options.env == "dev") {
+        console.log("DistillerService: Execute Assessment Started - gameSessionId:", gameSessionId, ", clientId:", clientId);
+    }
+    this.stats.increment("info", "ExecuteAssessment.Started");
     this.dataDS.getEvents(gameSessionId)
         .then(function(events){
-            // Run distiller function
-            var distilledData = this.SD_Function.preProcess(events);
-            //console.log( "Distilled data:", JSON.stringify(distilledData, null, 2) );
 
-            // If the distilled data has no WEKA key, don't save anything
-            if( !distilledData || !distilledData.bayes.key ) {
-                console.log( "no bayes key found in distilled data" );
-                resolve();
+            if(!events.events.length) {
+                if(this.options.env == "dev") {
+                    console.log("DistillerService: Execute Assessment No Events - gameSessionId:", gameSessionId, ", clientId:", clientId);
+                }
+                // nothing to process
                 return;
             }
 
-            return distilledData;
+            try {
+                // Run distiller function
+                var distilledData = this.AEFunc[clientId].preProcess(events);
+                //console.log( "Distilled data:", JSON.stringify(distilledData, null, 2) );
+
+                // If the distilled data has no WEKA key, don't save anything
+                if( !distilledData || !distilledData.bayes.key ) {
+                    console.log( "no bayes key found in distilled data" );
+                    resolve();
+                    return;
+                }
+
+                return distilledData;
+            } catch(err){
+                console.trace("DistillerService: Execute Assessment Error -", err);
+                this.stats.increment("error", "ExecuteAssessment.Running");
+            }
         }.bind(this))
         .then(function(distilledData) {
             // shortcut missing distilledData
