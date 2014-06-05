@@ -240,8 +240,8 @@ function getGamePlayInfo(req, res, next)
     }
 
     this.cbds.getGamePlayInfo(userId, gameId)
-        .then(function(){
-            this.requestUtil.jsonResponse(res, { status: "ok" });
+        .then(function(data){
+            this.requestUtil.jsonResponse(res, data);
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
