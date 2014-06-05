@@ -473,7 +473,8 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     this.client.view("telemetry", "getEventsByGameSessionId").query({
-            key: gameSessionId
+            key: gameSessionId,
+            stale: false
         },
         function(err, results){
             if(err){
@@ -481,9 +482,14 @@ return when.promise(function(resolve, reject) {
                 reject(err);
                 return;
             }
+            var eventsData = {
+                userId: 0,
+                gameSessionId: '',
+                events: []
+            };
 
             if(results.length == 0) {
-                resolve({});
+                resolve(eventsData);
                 return;
             }
 
@@ -519,11 +525,6 @@ return when.promise(function(resolve, reject) {
                         }
                     }
                     */
-                    var eventsData = {
-                        userId: 0,
-                        gameSessionId: '',
-                        events: []
-                    };
                     var event, revent;
                     for(var i in results) {
                         revent = results[i].value;
@@ -565,7 +566,8 @@ TelemDS_Couchbase.prototype.getRawEvents = function(gameSessionId){
 // ------------------------------------------------
 
         this.client.view("telemetry", "getEventsByGameSessionId").query({
-                key: gameSessionId
+                key: gameSessionId,
+                stale: false
             },
             function(err, results){
                 if(err){
@@ -834,7 +836,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
 
 
 
-TelemDS_Couchbase.prototype.startGameSessionV2 = function(deviceId, userId, courseId, gameLevel, clientTimeStamp) {
+TelemDS_Couchbase.prototype.startGameSessionV2 = function(userId, deviceId, clientId, courseId, gameLevel, clientTimeStamp) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -849,6 +851,7 @@ return when.promise(function(resolve, reject) {
         clientStartTimeStamp: clientTimeStamp,
         serverEndTimeStamp:   0,
         clientEndTimeStamp:   0,
+        clientId:             clientId,
         deviceId:             deviceId,
         gameSessionId:        gameSessionId,
         state:                tConst.game.session.started,
@@ -1000,7 +1003,8 @@ TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
 // ------------------------------------------------
 
         this.client.view("telemetry", "getAllAchievementsByDeviceId").query({
-                keys: deviceIds
+                keys: deviceIds,
+                stale: false
             },
             function(err, results){
                 if(err){
