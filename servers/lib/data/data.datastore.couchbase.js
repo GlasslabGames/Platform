@@ -674,7 +674,7 @@ return when.promise(function(resolve, reject) {
         if(gameSessionData.state == tConst.game.session.started) {
             resolve(gameSessionData);
         } else {
-            reject(new Error("session "+gameSessionData.state ));
+            reject(new Error("session "+gameSessionId+" "+gameSessionData.state ));
         }
 
     }.bind(this));
