@@ -15,7 +15,7 @@ module.exports = {
 
 var exampleInput = {};
 exampleInput.startSessionV2 = {
-    clientId:  "AA-1",
+    gameId:    "AA-1",
     deviceId:  "123-ASD",
     gameLevel: "Level1",
     courseId:  12,
@@ -31,11 +31,11 @@ function startSessionV2(req, outRes){
             return;
         }
 
-        // optional clientId
+        // optional gameId
         // TODO: in future make required
-        var clientId = '';
-        if(req.body.clientId) {
-            clientId = req.body.clientId;
+        var gameId = '';
+        if(req.body.gameId) {
+            gameId = req.body.gameId;
         }
 
         //console.log("req:", req);
@@ -90,7 +90,7 @@ function startSessionV2(req, outRes){
 
             // start queue session
             .then(function () {
-                return this.cbds.startGameSessionV2(userData.id, deviceId, clientId, courseId, gameLevel, clientTimeStamp);
+                return this.cbds.startGameSessionV2(userData.id, deviceId, gameId, courseId, gameLevel, clientTimeStamp);
             }.bind(this))
 
             // get config settings
@@ -179,7 +179,7 @@ function endSessionV2(req, outRes){
                         // push job on queue
                         .then( function() {
                             //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
-                            return this.queue.pushJob(gSessionId, gSessionData.clientId);
+                            return this.queue.pushJob(gSessionId, gSessionData.gameId);
                         }.bind(this) );
                 }.bind(this))
 

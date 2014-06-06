@@ -808,6 +808,8 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
                         datalist[ keys[i] ] = {
                             value: _.clone(val)
                         };
+
+                        console.log("CouchBase TelemetryStore: Cleaning up game sessions :", val.gameSessionId);
                     }
 
                     this.client.setMulti(datalist, {},
@@ -818,7 +820,6 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
                                 return;
                             }
 
-                            console.log("CouchBase TelemetryStore: Cleaned up", keys.length, "game sessions");
                             resolve();
                         }.bind(this)
                     );
@@ -836,7 +837,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
 
 
 
-TelemDS_Couchbase.prototype.startGameSessionV2 = function(userId, deviceId, clientId, courseId, gameLevel, clientTimeStamp) {
+TelemDS_Couchbase.prototype.startGameSessionV2 = function(userId, deviceId, gameId, courseId, gameLevel, clientTimeStamp) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -851,7 +852,7 @@ return when.promise(function(resolve, reject) {
         clientStartTimeStamp: clientTimeStamp,
         serverEndTimeStamp:   0,
         clientEndTimeStamp:   0,
-        clientId:             clientId,
+        gameId:               gameId,
         deviceId:             deviceId,
         gameSessionId:        gameSessionId,
         state:                tConst.game.session.started,

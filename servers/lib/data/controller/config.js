@@ -8,8 +8,8 @@ module.exports = {
 function index(req, res, next)
 {
     if( req.params &&
-        req.params.hasOwnProperty("id") ) {
-        // config for game
+        req.params.hasOwnProperty("gameId") ) {
+        // TODO: config for game
     }
 
     this.myds.getConfigs()
