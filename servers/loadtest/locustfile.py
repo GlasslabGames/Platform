@@ -1,6 +1,7 @@
-import random, json, re, time
+import string, random, json, re, time
 from locust import Locust, HttpLocust, TaskSet, task
 from random import randint
+
 
 #baseLoadTestDateDir = "./loadtest_apis.local"
 baseLoadTestDateDir = "./loadtest_apis.mgoaa.stage5"
@@ -13,7 +14,7 @@ hostname = "stage.argubotacademy.org"
 
 #maxLoopSeconds = 10
 maxLoopSeconds = 10*60
-displayInfo = True
+displayInfo = False
 displayPostError = True
 
 startUserID = 1
@@ -99,7 +100,7 @@ def replaceString(data, strname, strvalue):
     #print "replaceString before data: "+str(data)+", strname: "+str(strname)+", strvalue: "+str(strvalue)
     
     if isJSON(data):
-        found = re.search(r'"' + re.escape(strname) + r'"[\s:]*"([a-zA-Z0-9\-%]*)"', data)
+        found = re.search(r'"' + re.escape(strname) + r'"[\s:]*"([a-zA-Z0-9_\-%]*)"', data)
     else:
         found = re.search(re.escape(strname) + r'=([a-zA-Z0-9\-%]*)', data)
 
@@ -133,7 +134,13 @@ class MainTaskSet(TaskSet):
         while True:
             self.client.headers = {"content-type": "application/json"}
 #            r = self.client.post("/api/user/login", '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
-            r = self.client.post(API_POST_LOGIN, '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
+            loginStr = '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}'
+            self.deviceId = str(self.c_id)+'-'+''.join(random.choice(string.lowercase) for x in range(5))
+            
+            if displayInfo:
+                print "Login deviceId: " + str(self.deviceId)
+                print "Login Info: " + str(loginStr)
+            r = self.client.post(API_POST_LOGIN, loginStr)
             if r.status_code != 200:
                 if displayInfo:
                     print "Error Login - " + str(r.content)
@@ -276,6 +283,8 @@ class MainTaskSet(TaskSet):
         if displayInfo:
             print "postGameTelemetry gameSessionId: " + str(gameSessionId)
         postdata = replaceString(postdata, "gameSessionId", gameSessionId)
+        postdata = replaceString(postdata, "deviceId", self.deviceId)
+
         r = self.post(posturl, postdata)
 
     # end game session
