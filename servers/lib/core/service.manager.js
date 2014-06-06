@@ -283,7 +283,7 @@ ServiceManager.prototype.setupApiRoutes = function() {
                                 this.stats.increment("error", "Route.Auth.Fail");
                                 // error in auth, redirect back to login
                                 //console.log("headers:", req.headers);
-                                console.error("Not Authenticated");
+                                //console.error("Not Authenticated");
 
                                 // if an api then return 401
                                 if(req.originalUrl.indexOf("/api") != -1) {

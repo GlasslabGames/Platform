@@ -2,31 +2,38 @@ import random, json, re, time
 from locust import Locust, HttpLocust, TaskSet, task
 from random import randint
 
-
-#maxLoopSeconds = 10
-maxLoopSeconds = 10*60
-displayInfo = False
-displayPostError = False
-
-
 #baseLoadTestDateDir = "./loadtest_apis.local"
 baseLoadTestDateDir = "./loadtest_apis.mgoaa.stage5"
 #username = "jstudent"
 username = "jlt_test1_"
 password = username
 
-
+gameId = "AA-1"
 hostname = "stage.argubotacademy.org"
 
+#maxLoopSeconds = 10
+maxLoopSeconds = 10*60
+displayInfo = True
+displayPostError = True
 
 startUserID = 1
 userId = 0
 minWaitTime = 1000
 maxWaitTime = 1000
 
+API_POST_LOGIN         = "/api/user/login"
+API_POST_SESSION_START = "/api/v2/data/session/start"
+API_POST_SESSION_END   = "/api/v2/data/session/end"
+API_POST_EVENTS        = "/api/v2/data/events"
+
+API_GET_COURSES        = "/api/v2/lms/courses"
+API_GET_CONFIG         = "/api/v2/data/config/"+gameId
+API_GET_PLAYERINFO     = "/api/v2/data/game/"+gameId+"/playInfo"
+API_POST_SAVEGAME      = "/api/v2/data/game/"+gameId
+API_POST_TOTALTIMEPLAYED = "/api/v2/data/game/"+gameId+"/totalTimePlayed"
 
 def getUrlList():
-    fh = open( baseLoadTestDateDir + "/get_urls" );
+    fh = open( baseLoadTestDateDir + "/get_urls" )
     x = []
     for line in fh.readlines():
         x.append( line[:-1] )
@@ -34,7 +41,7 @@ def getUrlList():
     return x
 
 def getAPIUrlList():
-    fh = open( baseLoadTestDateDir + "/get_api_urls" );
+    fh = open( baseLoadTestDateDir + "/get_api_urls" )
     x = []
     for line in fh.readlines():
         x.append( line[:-1] )
@@ -42,7 +49,7 @@ def getAPIUrlList():
     return x
 
 def postAPIUrlList():
-    fh = open( baseLoadTestDateDir + "/post_api_urls" );
+    fh = open( baseLoadTestDateDir + "/post_api_urls" )
     x = {}
     for line in fh.readlines():
         postapi = line[:-1]
@@ -51,15 +58,24 @@ def postAPIUrlList():
         if postapi not in x:
             x[postapi] = []
             # remove first char a slash and replace all slashes with underscores
-            pfh = open( baseLoadTestDateDir + "/post_api/" + postapi[1:].replace("/", "_"));
-#            if (postapi == "/api/game/sendtelemetrybatch") or (postapi == "/api/game/endsession"):
-            if (postapi in [ "/api/v2/data/events", "/api/v2/data/user/pref/AA-1", "/api/v2/data/game/AA-1" ] ):
+            pfh = open( baseLoadTestDateDir + "/post_api/" + postapi[1:].replace("/", "_"))
+            if (postapi in [ 
+                    API_POST_EVENTS, 
+                    API_POST_SAVEGAME,
+                    API_POST_TOTALTIMEPLAYED ] ):
                 data = ""
                 for pline in pfh.readlines():
                     data = data + pline
                 fh.close()
+
                 x[postapi] = data.split("&")[:-1]
                 #print "x[" + str(postapi) + "] len: " + str( len(x[postapi]) )
+
+                # try again, if not elements, split by "\n"
+                if len(x[postapi]) == 0:
+                    x[postapi] = data.split("\n")[:-1]
+                #print "x[" + str(postapi) + "] len: " + str( len(x[postapi]) )
+
                 #print "x[postapi]:" + str(x[postapi])
             else:
                 for pline in pfh.readlines():
@@ -69,20 +85,30 @@ def postAPIUrlList():
     fh.close()
     return x
 
+def isJSON(data):
+    offset = 0
+    while data[offset] in ["\n", "\r", "\t", " "]:
+        offset = offset + 1
+
+    if data[offset] in ["{", "["]:
+        return True
+    else:
+        return False
+
 def replaceString(data, strname, strvalue):
-    if data[:1] == "{":
-        found = re.search(r'"' + re.escape(strname) + r'":"([a-zA-Z0-9\-%]*)"', data)
+    #print "replaceString before data: "+str(data)+", strname: "+str(strname)+", strvalue: "+str(strvalue)
+    
+    if isJSON(data):
+        found = re.search(r'"' + re.escape(strname) + r'"[\s:]*"([a-zA-Z0-9\-%]*)"', data)
     else:
         found = re.search(re.escape(strname) + r'=([a-zA-Z0-9\-%]*)', data)
 
-    if found and found.groups() > 0:
-        #print "data before:" + data
-        start = data[:found.start(1)]
-        end = data[found.end(1):]
-        if start and end and strvalue:
-            data = start + strvalue + end
-        #print "data  after:" + data
-
+    if found and len(found.groups()) > 0:
+        oldVal = found.group(1)
+        #print "replaceString oldVal: " + oldVal
+        data = data.replace(oldVal, str(strvalue))
+    
+    #print "replaceString data after: " + data
     return data
 
 
@@ -107,7 +133,7 @@ class MainTaskSet(TaskSet):
         while True:
             self.client.headers = {"content-type": "application/json"}
 #            r = self.client.post("/api/user/login", '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
-            r = self.client.post("/api/v2/auth/login/glasslab", '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
+            r = self.client.post(API_POST_LOGIN, '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
             if r.status_code != 200:
                 if displayInfo:
                     print "Error Login - " + str(r.content)
@@ -128,6 +154,10 @@ class MainTaskSet(TaskSet):
                         if displayInfo:
                             print "Login ok - sessionId: " + str(self.userSessionId) + " , courseId: " + str(self.courseId)
 
+                        # login ok, now get config info
+                        self.getConfig()
+                        self.getPlayInfo()
+
                         # all set
                         # stop while loop
                         break;
@@ -138,9 +168,32 @@ class MainTaskSet(TaskSet):
         time.sleep(0.5)
 
     def getCourseId(self):
-#        r = self.client.get("/api/user/course/random")
-        r = self.client.get("/api/v2/lms/courses")
+        r = self.client.get(API_GET_COURSES)
         if r.status_code == 200:
+            res = json.loads(r.content)
+            if displayInfo:
+                print "getCourseId content: " + str(r.content)
+            
+            courseId = res[0]['id']
+            if displayInfo:
+                print "getCourseId courseId: " + str(courseId)
+
+            return courseId
+        return None
+
+    def getConfig(self):
+        r = self.client.get(API_GET_CONFIG)
+        if r.status_code == 200:
+            if displayInfo:
+                print "getConfig: " + str(r.content)
+            return r.content
+        return None
+
+    def getPlayInfo(self):
+        r = self.client.get(API_GET_PLAYERINFO)
+        if r.status_code == 200:
+            if displayInfo:
+                print "getPlayInfo: " + str(r.content)
             return r.content
         return None
 
@@ -148,7 +201,9 @@ class MainTaskSet(TaskSet):
         if customType:
             contentType = customType
         else:
-            if data[:1] == "{":
+            if isJSON(data):
+                if displayInfo:
+                    print "post JSON"
                 contentType = "application/json"
             else:
                 contentType = "application/x-www-form-urlencoded"
@@ -162,13 +217,34 @@ class MainTaskSet(TaskSet):
 
         return r
 
+    # post TotalTimePlayed
+    def postTotalTimePlayed(self):
+        if displayInfo:
+            print "Post Total Time Played"
+        # pick random post data
+        posturl = API_POST_TOTALTIMEPLAYED
+        postdata = random.choice(self.post_api_urls[posturl])
+        # post start session and get game session id
+        r = self.post(posturl, postdata)
+
+    # post Saved Game
+    def postSavedGame(self):
+        if displayInfo:
+            print "Post Saved Game"
+        # pick random post data
+        posturl = API_POST_SAVEGAME
+        postdata = random.choice(self.post_api_urls[posturl])
+        # post start session and get game session id
+        r = self.post(posturl, postdata)
+
     # start game session
     def startGameSession(self):
-
         if self.userSessionId:
+            if displayInfo:
+                print "Post Start Game Session"
+
             # pick random post data
-#            posturl = "/api/game/startsession"
-            posturl = "/api/v2/data/session/start"
+            posturl = API_POST_SESSION_START
     
             postdata = random.choice(self.post_api_urls[posturl])
 
@@ -180,54 +256,40 @@ class MainTaskSet(TaskSet):
             # post start session and get game session id
             r = self.post(posturl, postdata)
             if r.status_code == 200:
-                #print "session:" + r.content
+                if displayInfo:
+                    print "startGameSession content:" + str(r.content)
+
                 res = json.loads(r.content)
                 #print "Game Session Info: " + str(res)
                 return res
 
         return None
 
-    def postGameData(self, posturl, postdata, gameSessionId):
-        found = re.search(r'name="gameSessionId"\r\n\r\n([a-zA-Z0-9\-]*)\r\n', postdata)
-        if found and found.groups() > 0:
-            #print "data before:" + postdata
-            start = postdata[:found.start(1)]
-            end = postdata[found.end(1):]
-            #print "data start:" + start
-            #print "data end:" + end
-
-            if start and end and gameSessionId:
-                postdata = str(start) + str(gameSessionId) + str(end)
-                #print "data after:" + postdata
-
-                # post session data
-                r = self.post(posturl, postdata, "multipart/form-data; boundary=EA_HTTP_REQUEST_SIMPLE_BOUNDARY")
-                #print "telemetry post:" + r.content
-            #print "data  after:" + postdata
-
     # post Game telemetry
     def postGameTelemetry(self, gameSessionId):
         #print "Post Game Telemetry"
         # pick random post data
-#        posturl = "/api/game/sendtelemetrybatch"
-        posturl = "/api/v2/data/events"
+        posturl = API_POST_EVENTS
     
         postdata = random.choice(self.post_api_urls[posturl])
         # replace game session
-        #print "gameSessionId: " + gameSessionId
-        #postdata = replaceString(postdata, "gameSessionId", gameSessionId)
-        self.postGameData(posturl, postdata, gameSessionId)
+        if displayInfo:
+            print "postGameTelemetry gameSessionId: " + str(gameSessionId)
+        postdata = replaceString(postdata, "gameSessionId", gameSessionId)
+        r = self.post(posturl, postdata)
 
     # end game session
     def endGameSession(self, gameSessionId):
         # print "End Game Session"
         # pick random post data
-#        posturl = "/api/game/endsession"
-        posturl = "/api/v2/data/session/end"
+        posturl = API_POST_SESSION_END
         # 
         postdata = random.choice(self.post_api_urls[posturl])
         # replace session
-        self.postGameData(posturl, postdata, gameSessionId)
+        if displayInfo:
+            print "endGameSession gameSessionId: " + str(gameSessionId)
+        postdata = replaceString(postdata, "gameSessionId", gameSessionId)
+        r = self.post(posturl, postdata)
 
 
     # Start Challenge Session
@@ -236,8 +298,7 @@ class MainTaskSet(TaskSet):
 
         if self.userSessionId:
             # pick random post data
-#            posturl = "/api/challenge/startsession"
-            posturl = "/api/v2/data/session/start"
+            posturl = API_POST_SESSION_START
     
             postdata = random.choice(self.post_api_urls[posturl])
 
@@ -276,23 +337,6 @@ class MainTaskSet(TaskSet):
                     print "template:" + r.content
         return None
 
-    # post telemetry
-#    @task(33)
-    def postChallengeTelemetry(self, gameSessionId):
-        #print "Post Game Telemetry"
-        # pick random post data
-        
-        # FIXME - may not be the same for MGOAA
-#        posturl = "/api/challenge/sendtelemetrybatch"
-        posturl = "/api/v2/data/events"
-        
-        postdata = random.choice(self.post_api_urls[posturl])
-        # replace game session
-        postdata = replaceString(postdata, "gameSessionId", gameSessionId)
-        # post start session and get game session id
-        r = self.post(posturl, postdata)
-        #print "telemetry post:" + r.content
-
     # End Challenge Session
     def endChallengeSession(self, gameSessionId, challengeId):
         #print "End Challenge Session"
@@ -307,14 +351,73 @@ class MainTaskSet(TaskSet):
         # post start session and get game session id
         r = self.post(posturl, postdata)
 
+# ----------------------------------------
+# Tasks (functions that are run during the load test)
+# to disable a task, just comment out the @task(<probability this task is ran>)
+# ----------------------------------------
+    @task(7)
+    def task_postSavedGame(self):
+        self.postSavedGame()
+        # wait more
+        time.sleep( randint(1, 10) )
 
-    @task(10)
+    @task(5)
+    def task_postTotalTimePlayed(self):
+        self.postTotalTimePlayed()
+        # wait more
+        time.sleep( randint(1, 10) )
+
+    @task(82)
+    # 1) start session
+    # 2) send events
+    # 3) end session
+    def task_postGameTelemetry(self):
+        info = self.startGameSession()
+        if info:
+            maxInterations = max(2, int( float(maxLoopSeconds)/float(info['eventsPeriodSecs']) ) )
+            numInterations = randint(2, maxInterations)
+            #if displayInfo:
+            #    print "maxInterations: " + str(maxInterations)
+            #    print "numInterations: " + str(numInterations)
+
+            for x in range(1, numInterations ):
+                if displayInfo:
+                    print "i:"+str(x)
+                
+                # if min telem, eat time, don't sent telem every X seconds
+                if int(info['eventsDetailLevel']) != 1:
+                    if displayInfo:
+                        print "repeat eventsDetailLevel: " + str( int(info['eventsDetailLevel']) )
+                    self.postGameTelemetry(info['gameSessionId'])
+
+                if displayInfo:
+                    print "eventsPeriodSecs: " + str( float(info['eventsPeriodSecs']) )
+                time.sleep(float(info['eventsPeriodSecs']))
+
+            # if min telem, only send one telemetry
+            if int(info['eventsDetailLevel']) == 1:
+                if displayInfo:
+                    print "once eventsDetailLevel: " + str( int(info['eventsDetailLevel']) )
+                self.postGameTelemetry(info['gameSessionId'])
+
+            # wait
+            time.sleep( float(info['eventsPeriodSecs']) )
+            # done
+            self.endGameSession(info['gameSessionId'])
+            # wait more
+            time.sleep( randint(10, 30) )
+        else:
+            time.sleep(30)
+
+
+
+#    @task(10)
     def random_get_page(self):
         url = random.choice(self.get_urls)
         url = replaceString(url, "sessionId", self.userSessionId)
         r = self.client.get(url)
 
-    @task(10)
+#   @task(10)
     def random_getapi_page(self):
         validurls = [k for k in self.get_api_urls if (
             "challenge" not in k and
@@ -324,7 +427,7 @@ class MainTaskSet(TaskSet):
             url = random.choice(validurls)
             r = self.client.get(url)
 
-    @task(33)
+#    @task(33)
     def challenge_api_page(self):
         info = self.startChallengeSession()
         if info:
@@ -361,39 +464,20 @@ class MainTaskSet(TaskSet):
         else:
             time.sleep(30)
 
-    @task(66)
-    def game_api_page(self):
-        info = self.startGameSession()
-        #print "game_api_page info: " + str(info)
-        if info:
-            maxInterations = max(2, int( float(maxLoopSeconds)/float(info['eventsPeriodSecs']) ) )
-            numInterations = randint(2, maxInterations)
-            #print "maxInterations: " + str(maxInterations)
-            #print "numInterations: " + str(numInterations)
+    # post telemetry
+#    @task(33)
+    def postChallengeTelemetry(self, gameSessionId):
+        #print "Post Game Telemetry"
+        # pick random post data
+        posturl = API_POST_EVENTS
+        
+        postdata = random.choice(self.post_api_urls[posturl])
+        # replace game session
+        postdata = replaceString(postdata, "gameSessionId", gameSessionId)
+        # post start session and get game session id
+        r = self.post(posturl, postdata)
+        #print "telemetry post:" + r.content
 
-            for x in range(1, numInterations ):
-                #print "i:"+str(x)
-                #print "eventsPeriodSecs: " + str( float(info['eventsPeriodSecs']) )
-                time.sleep(float(info['eventsPeriodSecs']))
-
-                # if min telem, eat time, don't sent telem every X seconds
-                if int(info['eventsDetailLevel']) != 1:
-                    #print "repeat eventsDetailLevel: " + str( int(info['eventsDetailLevel']) )
-                    self.postGameTelemetry(info['gameSessionId'])
-
-            # if min telem, only send one telemetry
-            if int(info['eventsDetailLevel']) == 1:
-                #print "once eventsDetailLevel: " + str( int(info['eventsDetailLevel']) )
-                self.postGameTelemetry(info['gameSessionId'])
-
-            # wait
-            time.sleep( float(info['eventsPeriodSecs']) )
-            # done
-            self.endGameSession(info['gameSessionId'])
-            # wait more
-            time.sleep( randint(10, 30) )
-        else:
-            time.sleep(30)
 
 #    @task(20)
     def random_postapi_page(self):
@@ -411,6 +495,9 @@ class MainTaskSet(TaskSet):
             self.post(posturl, postdata)
 
 
+# ----------------------------------------
+# Init
+# ----------------------------------------
 get_urls = getUrlList()
 get_api_urls = getAPIUrlList()
 post_api_urls = postAPIUrlList()

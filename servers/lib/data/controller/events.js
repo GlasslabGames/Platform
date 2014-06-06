@@ -9,6 +9,22 @@ module.exports = {
     getEventsByUserId:    getEventsByUserId
 };
 
+/*
+ Required properties
+ clientTimeStamp, gameId, eventName
+
+ Input Types accepted
+ gameSessionId: String
+ eventList : (Array or Object)
+     userId: String or Integer (Optional)
+     deviceId: String          (Optional)
+     clientTimeStamp: Integer  (Required)
+     gameId: String            (Required)
+     clientVersion: String     (Optional)
+     gameLevel: String         (Optional)
+     eventName: String         (Required)
+     eventData: Object         (Optional)
+ */
 function sendBatchTelemetryV2(req, outRes){
     try {
         // TODO: validate all inputs

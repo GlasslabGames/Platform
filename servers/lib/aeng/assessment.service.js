@@ -166,7 +166,7 @@ DistillerService.prototype.getTelemetryBatch = function(){
         // cleanup session
         .then(function(data){
             if(data.type == aeConst.queue.end) {
-                return this.runAssessment(data.id, data.clientId)
+                return this.runAssessment(data.id, data.gameId)
                     .then( function() {
                         // TODO: use assessment DS for queue
                         return this.dataDS.endQSession(data.id)
@@ -189,26 +189,26 @@ DistillerService.prototype.getTelemetryBatch = function(){
         }.bind(this));
 }
 
-DistillerService.prototype.runAssessment = function(gameSessionId, clientId){
+DistillerService.prototype.runAssessment = function(gameSessionId, gameId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var run = true;
-    if( !clientId ||
-        !clientId.length) {
+    if( !gameId ||
+        !gameId.length) {
         // default to using SimCity's
-        clientId = 'SC';
+        gameId = 'SC';
     }
 
-    // check if clientId in function list, if not then don't run
-    if(!this.AEFunc.hasOwnProperty(clientId) ){
+    // check if gameId in function list, if not then don't run
+    if(!this.AEFunc.hasOwnProperty(gameId) ){
         run = false;
     }
 
     if(!run) {
         // nothing to do
         if(this.options.env == "dev") {
-            console.log("DistillerService: Skipping Assessment Execution - gameSessionId:", gameSessionId, ", clientId:", clientId);
+            console.log("DistillerService: Skipping Assessment Execution - gameSessionId:", gameSessionId, ", gameId:", gameId);
         }
         this.stats.increment("info", "ExecuteAssessment.Skipping");
         resolve();
@@ -216,7 +216,7 @@ return when.promise(function(resolve, reject) {
     }
 
     if(this.options.env == "dev") {
-        console.log("DistillerService: Execute Assessment Started - gameSessionId:", gameSessionId, ", clientId:", clientId);
+        console.log("DistillerService: Execute Assessment Started - gameSessionId:", gameSessionId, ", gameId:", gameId);
     }
     this.stats.increment("info", "ExecuteAssessment.Started");
     this.dataDS.getEvents(gameSessionId)
@@ -224,7 +224,7 @@ return when.promise(function(resolve, reject) {
 
             if(!events.events.length) {
                 if(this.options.env == "dev") {
-                    console.log("DistillerService: Execute Assessment No Events - gameSessionId:", gameSessionId, ", clientId:", clientId);
+                    console.log("DistillerService: Execute Assessment No Events - gameSessionId:", gameSessionId, ", gameId:", gameId);
                 }
                 // nothing to process
                 return;
@@ -232,7 +232,7 @@ return when.promise(function(resolve, reject) {
 
             try {
                 // Run distiller function
-                var distilledData = this.AEFunc[clientId].preProcess(events);
+                var distilledData = this.AEFunc[gameId].preProcess(events);
                 //console.log( "Distilled data:", JSON.stringify(distilledData, null, 2) );
 
                 // If the distilled data has no WEKA key, don't save anything

@@ -500,7 +500,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                         continue; // skip to next item in list
                     }
                     // TODO: add validate of gameId using DB
-                    // else if( this._eventValidateClientId(data.gameId) ){...}
+                    // else if( this._eventValidateGameId(data.gameId) ){...}
                     else {
                         // save
                         pData.gameId = data.gameId;
