@@ -97,19 +97,22 @@ def isJSON(data):
         return False
 
 def replaceString(data, strname, strvalue):
-    #print "replaceString before data: "+str(data)+", strname: "+str(strname)+", strvalue: "+str(strvalue)
+    if displayInfo:
+        print "replaceString before data: "+str(data)+", strname: "+str(strname)+", strvalue: "+str(strvalue)
     
     if isJSON(data):
         found = re.search(r'"' + re.escape(strname) + r'"[\s:]*"([a-zA-Z0-9_\-%]*)"', data)
     else:
-        found = re.search(re.escape(strname) + r'=([a-zA-Z0-9\-%]*)', data)
+        found = re.search(re.escape(strname) + r'=([a-zA-Z0-9_\-%]*)&', data)
 
     if found and len(found.groups()) > 0:
         oldVal = found.group(1)
-        #print "replaceString oldVal: " + oldVal
+        if displayInfo:
+            print "replaceString oldVal: " + oldVal
         data = data.replace(oldVal, str(strvalue))
     
-    #print "replaceString data after: " + data
+    if displayInfo:
+        print "replaceString data after: " + data
     return data
 
 
@@ -259,6 +262,8 @@ class MainTaskSet(TaskSet):
             postdata = replaceString(postdata, "userSessionId", self.userSessionId)
             # replace course ID
             postdata = replaceString(postdata, "courseId", self.courseId)
+            # replace device ID
+            postdata = replaceString(postdata, "deviceId", self.deviceId)
         
             # post start session and get game session id
             r = self.post(posturl, postdata)
@@ -282,7 +287,10 @@ class MainTaskSet(TaskSet):
         # replace game session
         if displayInfo:
             print "postGameTelemetry gameSessionId: " + str(gameSessionId)
+
+        # replace game session ID
         postdata = replaceString(postdata, "gameSessionId", gameSessionId)
+        # replace device ID
         postdata = replaceString(postdata, "deviceId", self.deviceId)
 
         r = self.post(posturl, postdata)
@@ -298,6 +306,7 @@ class MainTaskSet(TaskSet):
         if displayInfo:
             print "endGameSession gameSessionId: " + str(gameSessionId)
         postdata = replaceString(postdata, "gameSessionId", gameSessionId)
+
         r = self.post(posturl, postdata)
 
 
@@ -380,7 +389,7 @@ class MainTaskSet(TaskSet):
     # 1) start session
     # 2) send events
     # 3) end session
-    def task_postGameTelemetry(self):
+    def task_postGameTelemetry(self):       
         info = self.startGameSession()
         if info:
             maxInterations = max(2, int( float(maxLoopSeconds)/float(info['eventsPeriodSecs']) ) )

@@ -10,6 +10,8 @@ var StatsD = require('node-statsd').StatsD;
 
 module.exports = Stats;
 
+var statsdInst = null;
+
 function Stats(options, root){
     this.options = _.merge(
         {
@@ -21,11 +23,14 @@ function Stats(options, root){
         options
     );
 
-    this.statsd = new StatsD(this.options.statsd);
-    this.statsd.socket.on('error', function(err) {
+    /*
+    // disabled for now
+    statsdInst = new StatsD(this.options.statsd);
+    statsdInst.socket.on('error', function(err) {
         this.statsd = null;
         return console.error("StatsD: Error connecting to server. ", err);
     });
+    */
 
     this.sRoot = root;
     this.root  = root;
@@ -49,7 +54,7 @@ Stats.prototype.increment = function(level, key, count) {
         count = 1;
     }
 
-    if(this.statsd) {
+    if(statsdInst) {
         level = level.toLowerCase();
 
         // dev.App.error.Loaded
@@ -66,7 +71,7 @@ Stats.prototype.increment = function(level, key, count) {
 
 Stats.prototype.gauge = function(level, key, value) {
 
-    if(this.statsd) {
+    if(statsdInst) {
         level = level.toLowerCase();
 
         // dev.error.App.Loaded
