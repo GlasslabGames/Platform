@@ -12,6 +12,7 @@ module.exports = {
     registerUserV1:      registerUserV1,
     registerUserV2:      registerUserV2,
     registerManager:     registerManager,
+    getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
@@ -42,16 +43,16 @@ function getUserProfileData(req, res, next) {
     }
 }
 
-function getUserData(req, res, next) {
+function getUserDataById(req, res, next) {
     if( req.session &&
         req.session.passport &&
         req.session.passport.user &&
         req.params &&
-        req.params.hasOwnProperty("id")) {
+        req.params.hasOwnProperty("userId")) {
         var loginUserSessionData = req.session.passport.user;
 
         // check perms before returning user info
-        this.webstore.getUserInfoById(req.params.id)
+        this.webstore.getUserInfoById(req.params.userId)
             .then(function(userData){
                 return this.checkUserPerminsToUserData(userData, loginUserSessionData)
             }.bind(this))

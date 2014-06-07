@@ -332,12 +332,11 @@ module.exports = {
         },
         {
             requireAuth: true,
-            // id -> userId
-            api: "/api/user/:id",
+            api: "/api/user/:userId",
             service: "auth",
             controller: "user",
             method: {
-                get: "getUserData",
+                get:  "getUserDataById",
                 post: "updateUserData"
             }
         },
