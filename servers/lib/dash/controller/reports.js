@@ -73,7 +73,8 @@ function getTotalTimePlayed(req, res) {
                                 // if totalTime set to zero try getting from saved game
                                 if (totalTimePlayed != 0) {
                                     console.log("totalTimePlayed from PlayInfo - userId:", userId, ", totalTimePlayed:", totalTimePlayed);
-                                    return totalTimePlayed;
+                                    // ensure it's a float and make it seconds
+                                    return parseFloat(totalTimePlayed);
                                 }
 
                                 // TODO: remove this!!! but will need to write a migrate script to pull old over to use user pref
@@ -92,8 +93,8 @@ function getTotalTimePlayed(req, res) {
                                                 gameData.ExplorationManager.ExplorationManager.m_totalTimePlayed) {
 
                                                 console.log("totalTimePlayed from SaveGame - userId:", userId, ", totalTimePlayed:", totalTimePlayed);
-                                                // ensure it's a float and make it milliseconds
-                                                totalTimePlayed = 1000 * parseFloat(gameData.ExplorationManager.ExplorationManager.m_totalTimePlayed);
+                                                // ensure it's a float and make it seconds
+                                                totalTimePlayed = parseFloat(gameData.ExplorationManager.ExplorationManager.m_totalTimePlayed);
                                             }
 
                                             return totalTimePlayed;

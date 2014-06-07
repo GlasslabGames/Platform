@@ -8,12 +8,13 @@ start() {
     npm install
     grunt
 
-    ./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
+    #./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
     ./service_start.sh app "app.js"
 }
 
 stop() {
-    forever stopall
+    #forever stop node_modules/statsd/stats.js
+    forever stop app.js
 }
 
 case "$1" in
