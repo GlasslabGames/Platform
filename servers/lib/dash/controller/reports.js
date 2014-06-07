@@ -59,33 +59,67 @@ function getTotalTimePlayed(req, res) {
         this.lmsStore.isMultiUsersInInstructorCourse(userIds, loginUserSessionData.id)
             .then(function(verified) {
                 if(verified) {
-                    return this.telmStore.getMultiUserSavedGames(userIds, gameId);
+
+                    var promiseList = [];
+
+                    userIds.forEach(function(userId) {
+                        var p = this.telmStore.getGamePlayInfo(userId, gameId)
+                            .then(function (info) {
+                                if (info) {
+                                    return info.totalTimePlayed;
+                                }
+                            }.bind(this))
+                            .then(function (totalTimePlayed) {
+                                // if totalTime set to zero try getting from saved game
+                                if (totalTimePlayed != 0) {
+                                    console.log("totalTimePlayed from PlayInfo - userId:", userId, ", totalTimePlayed:", totalTimePlayed);
+                                    return totalTimePlayed;
+                                }
+
+                                // TODO: remove this!!! but will need to write a migrate script to pull old over to use user pref
+                                return this.telmStore.getUserSavedGame(userId, gameId)
+                                    .then(function (gameData) {
+                                        if (gameData) {
+                                            // Look in save file for total TimePlayed
+
+                                            var totalTimePlayed = 0;
+                                            if (gameData &&
+                                                gameData.hasOwnProperty('ExplorationManager') &&
+                                                gameData.ExplorationManager &&
+                                                gameData.ExplorationManager.hasOwnProperty('ExplorationManager') &&
+                                                gameData.ExplorationManager.ExplorationManager &&
+                                                gameData.ExplorationManager.ExplorationManager.hasOwnProperty('m_totalTimePlayed') &&
+                                                gameData.ExplorationManager.ExplorationManager.m_totalTimePlayed) {
+
+                                                console.log("totalTimePlayed from SaveGame - userId:", userId, ", totalTimePlayed:", totalTimePlayed);
+                                                // ensure it's a float and make it milliseconds
+                                                totalTimePlayed = 1000 * parseFloat(gameData.ExplorationManager.ExplorationManager.m_totalTimePlayed);
+                                            }
+
+                                            return totalTimePlayed;
+                                        }
+                                    }.bind(this))
+                            }.bind(this))
+                            .then(function (totalTimePlayed) {
+                                // create object, with userId and totalTimePlayed
+                                var data = {};
+                                data[userId] = totalTimePlayed;
+                                return data;
+                            }.bind(this));
+                        promiseList.push(p);
+                    }.bind(this));
+
+                    // join all results
+                    var reduceList = when.reduce(promiseList, function(list, item){
+                            list = _.merge(list, item);
+                            return list;
+                        }.bind(this));
+
+                    reduceList.then(function(list){
+                            this.requestUtil.jsonResponse(res, list);
+                        }.bind(this));
                 } else {
                     this.requestUtil.errorResponse(res, {error: "invalid access"});
-                }
-            }.bind(this))
-            .then(function(userIdGameDataMap) {
-                if(userIdGameDataMap) {
-
-                    // Look in save file for total TimePlayed
-                    for(var i in userIdGameDataMap) {
-                        if( userIdGameDataMap[i] &&
-                            userIdGameDataMap[i].hasOwnProperty('ExplorationManager') &&
-                            userIdGameDataMap[i].ExplorationManager &&
-                            userIdGameDataMap[i].ExplorationManager.hasOwnProperty('ExplorationManager') &&
-                            userIdGameDataMap[i].ExplorationManager.ExplorationManager &&
-                            userIdGameDataMap[i].ExplorationManager.ExplorationManager.hasOwnProperty('m_totalTimePlayed') &&
-                            userIdGameDataMap[i].ExplorationManager.ExplorationManager.m_totalTimePlayed )
-                        {
-                            // ensure it's a float and make it milliseconds
-                            userIdGameDataMap[i] = 1000 * parseFloat( userIdGameDataMap[i].ExplorationManager.ExplorationManager.m_totalTimePlayed );
-                        } else {
-                            userIdGameDataMap[i] = 0;
-                        }
-                    }
-                    this.requestUtil.jsonResponse(res, userIdGameDataMap);
-                } else {
-                    this.requestUtil.jsonResponse(res, {});
                 }
             }.bind(this))
             // error
