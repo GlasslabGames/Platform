@@ -576,6 +576,7 @@ SC_Distiller.prototype.preProcess = function(events){
     var distillInfo = {
         competencyType : cType,
         teacherFeedbackCode: teacherFeedbackCode,
+        note : ratingText,
         bayes: {
             key: wekaFile,
             root: "category_sys_mod",
@@ -610,6 +611,8 @@ SC_Distiller.prototype.postProcess = function(distilled, wekaResults) {
     compData.level = competencyLevel;
     compData.teacherFeedbackCode = distilled.teacherFeedbackCode;
     compData.studentFeedbackCode = distilled.teacherFeedbackCode;
+    compData.data = { competencyLevel : competencyLevel, competencyType : distilled.competencyType };
+    compData.note = distilled.note;
 
     var info =_.cloneDeep(distilled);
     info.bayes.wekaResults = wekaResults;
