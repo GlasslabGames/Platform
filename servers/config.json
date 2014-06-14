@@ -74,6 +74,7 @@
     },
     "assessment": {
         "port":     8084,
+        "wekaPath": "../../Assessment/build",
         "datastore": {
             "couchbase": {
                 "host":     "localhost:8091",

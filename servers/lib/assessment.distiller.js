@@ -282,7 +282,7 @@ return when.promise(function(resolve, reject) {
 
             // Before we trigger the WEKA process, we need to make sure we set the current working directory
             // and execute the batch file or shell script, depending on the platform
-            process.chdir( '../../Assessment/build' );
+            process.chdir( this.options.assessment.wekaPath );
             var scriptToExecute = '';
             //console.log( "Executing bayes on " + process.platform + " at " + process.cwd() );
             if( process.platform === "win32" ) {
@@ -294,6 +294,7 @@ return when.promise(function(resolve, reject) {
             // run child process in promise
             return when.promise( function(resolve2, reject2) {
                 // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA process
+                //console.log( "bayes file: ", distilledData.bayes.key );
                 //console.log( "execute: ", scriptToExecute + commandString );
 
                 var aeWeka = child_process.exec( scriptToExecute + commandString,
