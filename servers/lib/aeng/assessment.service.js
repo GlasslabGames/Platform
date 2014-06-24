@@ -1,5 +1,5 @@
 /**
- * Assessment Distiller Module
+ * Assessment DistillerService Module
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
@@ -16,9 +16,9 @@ var child_process   = require('child_process');
 // Glasslab libs
 var aeConst;
 
-module.exports = Distiller;
+module.exports = DistillerService;
 
-function Distiller(options){
+function DistillerService(options){
     var Util, Assessment, Telemetry;
 
     // Glasslab libs
@@ -42,40 +42,36 @@ function Distiller(options){
     this.queue         = new Assessment.Queue.Redis(this.options.assessment.queue);
     this.dataDS        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
     this.userDS        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
-    this.aeDS          = new Assessment.Datastore.Couchbase(this.options.assessment.datastore.couchbase);
-    this.SD_Function   = new Assessment.Distiller.Func.SC();
-    this.stats         = new Util.Stats(this.options, "Assessment.Distiller");
+    this.stats         = new Util.Stats(this.options, "Assessment.DistillerService");
+
+    // TODO: move to DB
+    this.AEFunc = {};
+    console.log('DistillerService: Loading functions...');
+    for(var f in Assessment.DistillerFunc) {
+        console.log('DistillerService: Function "' + f + '" Loaded!');
+        this.AEFunc[f] = new Assessment.DistillerFunc[f]();
+    }
 
     this.wekaFileData = {};
     this.loadWekaFiles();
 
     this.dataDS.connect()
         .then(function(){
-            console.log("Distiller: Data DS Connected");
+            console.log("DistillerService: Data DS Connected");
             this.stats.increment("info", "Telemetry.Data.Couchbase.Connect");
         }.bind(this),
         function(err){
-            console.trace("Distiller: Data DS Error -", err);
+            console.trace("DistillerService: Data DS Error -", err);
             this.stats.increment("error", "Telemetry.Data.Couchbase.Connect");
         }.bind(this));
 
-    this.aeDS.connect()
-        .then(function(){
-            console.log("Distiller: AE DS Connected");
-            this.stats.increment("info", "Assessment.AE.Couchbase.Connect");
-        }.bind(this),
-            function(err){
-                console.trace("Distiller: AE DS Error -", err);
-                this.stats.increment("error", "Assessment.AE.Couchbase.Connect");
-            }.bind(this));
-
     this.userDS.connect()
         .then(function(){
-            console.log("Distiller: User DS Connected");
+            console.log("DistillerService: User DS Connected");
             this.stats.increment("info", "Assessment.User.MySQL.Connect");
         }.bind(this),
         function(err){
-            console.trace("Distiller: User DS Error -", err);
+            console.trace("DistillerService: User DS Error -", err);
             this.stats.increment("error", "Assessment.User.MySQL.Connect");
         }.bind(this));
 
@@ -86,19 +82,19 @@ function Distiller(options){
             this.startTelemetryPoll();
         }.bind(this),
         function(err){
-            console.trace("Distiller: Add All Old Session For Process Error -", err);
+            console.trace("DistillerService: Add All Old Session For Process Error -", err);
             this.stats.increment("error", "Assessment.OldSessionProcess");
         }.bind(this));
     */
     this.startTelemetryPoll();
 
     console.log('---------------------------------------------');
-    console.log('Distiller: Waiting for messages...');
+    console.log('DistillerService: Waiting for messages...');
     console.log('---------------------------------------------');
     this.stats.increment("info", "ServerStarted");
 }
 
-Distiller.prototype.addAllOldSessionsForProcess = function() {
+DistillerService.prototype.addAllOldSessionsForProcess = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -125,7 +121,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-Distiller.prototype.loadWekaFiles = function(){
+DistillerService.prototype.loadWekaFiles = function(){
     try{
         var dir = "./lib/aeng/bayes/";
         var files = fs.readdirSync(dir);
@@ -138,14 +134,14 @@ Distiller.prototype.loadWekaFiles = function(){
             }
         }.bind(this));
     } catch(err) {
-        console.error("Distiller: Load Weka Files Error -", err);
+        console.error("DistillerService: Load Weka Files Error -", err);
     }
 
-    console.log('Distiller: Loaded Weka XML Files');
+    console.log('DistillerService: Loaded Weka XML Files');
 };
 
 
-Distiller.prototype.startTelemetryPoll = function(){
+DistillerService.prototype.startTelemetryPoll = function(){
     // fetch assessment loop
     setInterval(function() {
         this.telemetryCheck();
@@ -153,12 +149,12 @@ Distiller.prototype.startTelemetryPoll = function(){
 };
 
 
-Distiller.prototype.telemetryCheck = function(){
+DistillerService.prototype.telemetryCheck = function(){
     this.queue.getJobCount()
         .then(
             function(count) {
                 if(count > 0) {
-                    //console.log("Distiller: telemetryCheck count:", count);
+                    //console.log("DistillerService: telemetryCheck count:", count);
                     this.stats.increment("info", "GetIn.Count", count);
 
                     for(var i = 0; i < Math.min(count, this.options.distiller.getMax); i++){
@@ -167,13 +163,13 @@ Distiller.prototype.telemetryCheck = function(){
                 }
             }.bind(this),
             function(err){
-                console.log("Distiller: telemetryCheck Error:", err);
+                console.log("DistillerService: telemetryCheck Error:", err);
                 this.stats.increment("error", "TelemetryCheck.GetInCount");
             }.bind(this)
         );
 }
 
-Distiller.prototype.getTelemetryBatch = function(){
+DistillerService.prototype.getTelemetryBatch = function(){
 
     this.queue.popJob()
         // cleanup session
@@ -192,49 +188,73 @@ Distiller.prototype.getTelemetryBatch = function(){
 
         // catch all ok
         .then( function(){
-            //console.log("Distiller: all done");
+            //console.log("DistillerService: all done");
         }.bind(this))
 
         // catch all errors
         .then(null, function(err) {
-            console.error("Distiller: endBatchIn - Error:", err);
+            console.error("DistillerService: endBatchIn - Error:", err);
             this.stats.increment("error", "GetTelemetryBatch");
         }.bind(this));
 }
 
-Distiller.prototype.runAssessment = function(gameSessionId){
+DistillerService.prototype.runAssessment = function(gameSessionId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    if(this.options.env == "dev") {
-        console.log("Distiller: Execute Assessment Delay - gameSessionId:", gameSessionId);
+    var run = true;
+    if( !gameId ||
+        !gameId.length) {
+        // default to using SimCity's
+        gameId = 'sc';
     }
-    this.stats.increment("info", "ExecuteAssessment.StartDelay");
+    gameId = gameId.toLowerCase(); // gameId is not case sensitive
 
+    // check if gameId in function list, if not then don't run
+    if(!this.AEFunc.hasOwnProperty(gameId) ){
+        run = false;
+    }
+
+    if(!run) {
+        // nothing to do
+        if(this.options.env == "dev") {
+            console.log("DistillerService: Skipping Assessment Execution - gameSessionId:", gameSessionId, ", gameId:", gameId);
+        }
+        this.stats.increment("info", "ExecuteAssessment.Skipping");
+        resolve();
+        return;
+    }
+
+    if(this.options.env == "dev") {
+        console.log("DistillerService: Execute Assessment Started - gameSessionId:", gameSessionId, ", gameId:", gameId);
+    }
+    this.stats.increment("info", "ExecuteAssessment.Started");
     this.dataDS.getEvents(gameSessionId)
-        .then(function(eventsData) {
-            if(!eventsData ||
-               !eventsData.events ||
-                eventsData.events.length == 0) {
-                console.warn( "Distiller: No events found to distilled" );
-                resolve();
+        .then(function(events){
+            if(!events.events.length) {
+                if(this.options.env == "dev") {
+                    console.log("DistillerService: Execute Assessment No Events - gameSessionId:", gameSessionId, ", gameId:", gameId);
+                }
+                // nothing to process
                 return;
             }
 
-            // Run distiller function
-            var distilledData = this.SD_Function.preProcess(eventsData);
-            //console.log( "Distilled data:", JSON.stringify(distilledData, null, 2) );
+            try {
+                // Run distiller function
+                var distilledData = this.AEFunc[gameId].preProcess(events);
+                //console.log( "Distilled data:", JSON.stringify(distilledData, null, 2) );
 
-            // If the distilled data has no WEKA key, don't save anything
-            if( !distilledData || !distilledData.bayes.key ) {
-                console.warn( "Distiller: No bayes key found in distilled data" );
-                resolve();
-                return;
+                // If the distilled data has no WEKA key, don't save anything
+                if( !distilledData || !distilledData.bayes.key ) {
+                    console.log( "no bayes key found in distilled data" );
+                    resolve();
+                    return;
+                }
+                return distilledData;
+            } catch(err){
+                console.trace("DistillerService: Execute Assessment Error -", err);
+                this.stats.increment("error", "ExecuteAssessment.Running");
             }
-
-            // save distilled data
-            //return this.aeDS.saveDistilledData(gameSessionId, distilledData);
-            return distilledData;
         }.bind(this))
         .then(function(distilledData) {
             // shortcut missing distilledData
@@ -252,7 +272,7 @@ return when.promise(function(resolve, reject) {
             var commandString = " SimpleBayes";
             // weka files was not loaded
             if(!this.wekaFileData.hasOwnProperty(distilledData.bayes.key)) {
-                console.error( "Distiller: weka file missing from cache: ", distilledData.bayes.key);
+                console.error( "DistillerService: weka file missing from cache: ", distilledData.bayes.key);
                 reject();
                 return;
             }
@@ -317,7 +337,7 @@ return when.promise(function(resolve, reject) {
                     return this.userDS.getSessionInfo(gameSessionId)
                         .then(function(sessionInfo) {
                             if(sessionInfo) {
-                                console.log( "Distiller: Running Assessment..." );
+                                console.log( "DistillerService: Running Assessment..." );
                                 // save Competency Results to DB
                                 return this.userDS.saveCompetencyResults(sessionInfo, compData);
                             }
@@ -325,17 +345,17 @@ return when.promise(function(resolve, reject) {
                 }
             } catch(err) {
                 // invalid json data
-                console.error("Distiller: Invalid Competency JSON data - Error:", err);
+                console.error("DistillerService: Invalid Competency JSON data - Error:", err);
                 reject(err);
             }
         }.bind(this))
         .then(function() {
-            console.log( "Distiller: Assessment Complete -", gameSessionId);
+            console.log( "DistillerService: Assessment Complete -", gameSessionId);
         }.bind(this))
 
         // catch all error
         .then(null, function(err){
-            console.error("Distiller: runAssessment - Error:", err);
+            console.error("DistillerService: runAssessment - Error:", err);
             this.stats.increment("error", "GetTelemetryBatch");
 
             reject(err);
