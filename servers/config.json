@@ -108,6 +108,7 @@
         }
     },
     "assessment": {
+        "wekaPath": "../../Assessment/build",
         "datastore": {
             "couchbase": {
                 "host":     "localhost:8091",
