@@ -102,10 +102,8 @@ Distiller.prototype.addAllOldSessionsForProcess = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var WebStore = require('./webapp.js').Datastore.MySQL;
-    var webstore = new WebStore(this.options.webapp.datastore.mysql);
 
-    this.webstore.getAllGameSessions()
+    this.userDS.getAllGameSessions()
         .then(function(sessionList){
             var promiseList = [];
 
