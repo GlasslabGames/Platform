@@ -1,0 +1,22 @@
+{
+    "gameId": "SC",
+    "enabled": true,
+    "shortName": "SimCity Edu",
+    "longName": "SimCityEdu",
+    "shortDescription": "",
+    "longDescription": "",
+    "settings" : {
+        "missionProgressLock": true
+    },
+    "license": {
+        "type":  "tier",
+        "valid": true
+    },
+    "reports": [
+        "sowo",
+        "competency",
+        "mission-progress",
+        "learning-progress",
+        "diagram-view"
+    ]
+}

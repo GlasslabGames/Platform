@@ -9,6 +9,7 @@ module.exports = {
 
     List : {
         Glasslab: require('./auth.account.glasslab.js'),
-        Edmodo:   require('./auth.account.edmodo.js')
+        Edmodo:   require('./auth.account.edmodo.js'),
+        ICivics:  require('./auth.account.icivics.js')
     }
 };

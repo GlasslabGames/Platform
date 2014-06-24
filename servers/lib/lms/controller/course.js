@@ -141,36 +141,42 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
     }
 }
 
-
+/*
+ /api/v2/lms/courses
+ */
 exampleOut.getEnrolledCourses =
     [
         {
             "id": 27,
+            "dateCreated": 123456789,
             "title": "Test",
-            "grade": "7",
-            "locked": false,
+            "grade": "7,8",
             "archived": false,
             "archivedDate": null,
             "institution": 18,
             "code": "18ZBD",
             "studentCount": 1,
-            "freePlay": false
+            "gameIds": [ "AA-1", "AW-1", "SC" ],
+            "lockedRegistration": false
         }
     ];
 
-
+/*
+ /api/v2/lms/courses?showMembers=true
+ */
 exampleOut.getEnrolledCourses_WithMembers =[
     {
         "id": 8,
+        "dateCreated": 123456789,
         "title": "test2",
-        "grade": "7",
-        "locked": false,
+        "grade": "9,10",
+        "lockedRegistration": false,
         "archived": false,
         "archivedDate": null,
         "institution": 10,
         "code": "YD8WV",
+        "gameIds": [ "AA-1", "AW-1", "SC" ],
         "studentCount": 2,
-        "freePlay": false,
         "users":
             [
                 {
@@ -193,21 +199,20 @@ exampleOut.getEnrolledCourses_WithMembers =[
     },
     {
         "id": 9,
+        "dateCreated": 123456789,
         "title": "test3",
         "grade": "7",
-        "locked": false,
+        "lockedRegistration": false,
         "archived": false,
         "archivedDate": null,
         "institution": 10,
+        "gameIds": [ "AA-1", "AW-1", "SC" ],
         "code": "SK1FC",
         "studentCount": 0,
-        "freePlay": false,
-        "users":
-            [
-            ]
+        "users": []
     }
 ];
-function getEnrolledCourses(req, res, next) {
+function getEnrolledCourses(req, res, next, serviceManager) {
 
     if( req.session &&
         req.session.passport) {
@@ -216,40 +221,54 @@ function getEnrolledCourses(req, res, next) {
         this.myds.getEnrolledCourses(userData.id)
             .then(function(courses){
 
-                // cousers is not empty
-                // showMembers is in query
-                // convert showMembers to int and then check it's value
                 if( courses &&
-                    courses.length &&
-                    req.query.hasOwnProperty("showMembers") &&
-                    parseInt(req.query.showMembers) ) {
+                    courses.length) {
 
-                    // added empty object for reduce to work
-                    courses.unshift({});
+                    // TODO: replace using internal route, but needs callback when route is done
+                    var dash = serviceManager.get("dash").service;
+                    var gameIds = dash.getListOfGameIds();
 
-                    when.reduce(courses, function(data, course, i){
-                                if(course.id) {
-                                    //console.log("id:", course.id);
-                                    // init user
-                                    course.users = [];
-                                    return this.myds.getStudentsOfCourse(course.id)
-                                        .then(function(studentList){
-                                            course.users = _.clone(studentList);
-                                            // need to return something for reduce to continue
-                                            return 1;
-                                        }.bind(this));
-                                }
+                    // add games to each course
+                    // TODO: replace this with request to get games per class
+                    for(var i = 0; i < courses.length; i++) {
+                        courses[i].gameIds = gameIds;
+                    }
+
+                    // cousers is not empty
+                    // showMembers is in query
+                    // convert showMembers to int and then check it's value
+                    if( req.query.hasOwnProperty("showMembers") &&
+                        parseInt(req.query.showMembers) ) {
+
+                        // added empty object for reduce to work
+                        courses.unshift({});
+
+                        when.reduce(courses, function(data, course, i){
+                            if(course.id) {
+                                //console.log("id:", course.id);
+                                // init user
+                                course.users = [];
+                                return this.myds.getStudentsOfCourse(course.id)
+                                    .then(function(studentList){
+                                        course.users = _.clone(studentList);
+                                        // need to return something for reduce to continue
+                                        return 1;
+                                    }.bind(this));
+                            }
+                        }.bind(this))
+                            .then(null, function(err){
+                                this.requestUtil.errorResponse(res, err);
                             }.bind(this))
-                        .then(null, function(err){
-                            this.requestUtil.errorResponse(res, err);
-                        }.bind(this))
-                        .done(function(){
-                            //console.log("done");
-                            // added empty object for reduce to work
-                            courses.shift();
-                            this.requestUtil.jsonResponse(res, courses);
-                        }.bind(this))
+                            .done(function(){
+                                //console.log("done");
+                                // added empty object for reduce to work
+                                courses.shift();
+                                this.requestUtil.jsonResponse(res, courses);
+                            }.bind(this))
 
+                    } else {
+                        this.requestUtil.jsonResponse(res, courses);
+                    }
                 } else {
                     this.requestUtil.jsonResponse(res, courses);
                 }

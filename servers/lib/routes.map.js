@@ -125,8 +125,7 @@ module.exports = {
             }
         },
         {
-            // id -> gameId
-            api: "/api/v2/dash/game/:id/achievements",
+            api: "/api/v2/dash/game/:gameId/achievements",
             service: "dash",
             controller: "game",
             method: {
@@ -134,12 +133,27 @@ module.exports = {
             }
         },
         {
-            // id -> gameId
-            api: "/api/v2/dash/game/:id/info",
+            api: "/api/v2/dash/game/:gameId/info",
             service: "dash",
             controller: "game",
             method: {
                 get: "getGameInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/minimal",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesMinInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesAllInfo"
             }
         },
         // ---------------------------------------------------
@@ -251,6 +265,14 @@ module.exports = {
             controller: "login",
             method: {
                 post: "edmodoLogin"
+            }
+        },
+        {
+            api: "/api/v2/auth/login/icivics",
+            service: "auth",
+            controller: "login",
+            method: {
+                post: "icivicsLogin"
             }
         },
         */

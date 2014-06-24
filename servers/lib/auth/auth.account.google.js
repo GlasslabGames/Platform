@@ -29,11 +29,8 @@ function GoogleAccount(options){
 GoogleAccount.prototype.setupPassport = function(passport, authService) {
     // http://localhost:8001/auth/google
     // notasecret
-    passport.use(new Strategy({
-                clientID:     this.options.auth.accounts.google.clientID,
-                clientSecret: this.options.auth.accounts.google.clientSecret,
-                callbackURL:  this.options.auth.accounts.google.callbackURL
-            },
+    passport.use( new Strategy(
+            this.options.auth.accounts.google,
             function(accessToken, refreshToken, profile, done) {
                 //console.log("google user - profile:", profile);
 

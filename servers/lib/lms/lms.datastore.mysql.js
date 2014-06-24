@@ -93,15 +93,15 @@ exampleOut.getEnrolledCourses =
 [
     {
         "id": 27,
+        "dateCreated": 123456789,
         "title": "Test",
         "grade": "7",
-        "locked": false,
         "archived": false,
         "archivedDate": null,
         "institution": 18,
         "code": "18ZBD",
         "studentCount": 1,
-        "freePlay": false
+        "lockedRegistration": false
     }
 ];
 LMS_MySQL.prototype.getEnrolledCourses = function(userId) {
@@ -112,24 +112,25 @@ return when.promise(function(resolve, reject) {
     var Q =
         "SELECT         \
             c.id,       \
+            UNIX_TIMESTAMP(c.date_created) as dateCreated, \
             c.title,    \
             c.grade,    \
-            c.locked > 0 as locked,      \
             c.archived > 0 as archived,  \
-            c.free_Play > 0 as freePlay, \
+            c.locked > 0 as lockedRegistration,      \
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
             c.institution_id as institution     \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
-        WHERE m.user_id="+ this.ds.escape(userId);
+        WHERE m.user_id="+ this.ds.escape(userId)+
+        " ORDER BY c.date_created";
 
     this.ds.query(Q)
         .then(function(results) {
                 for(var i = 0; i < results.length; i++) {
                     results[i].archived = results[i].archived ? true : false;
-                    results[i].freePlay = results[i].freePlay ? true : false;
-                    results[i].locked   = results[i].locked   ? true : false;
+                    results[i].lockedRegistration = results[i].lockedRegistration   ? true : false;
+                    //results[i].freePlay = results[i].freePlay ? true : false;
                 }
 
                 resolve(results);

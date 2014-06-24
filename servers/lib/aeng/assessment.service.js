@@ -66,7 +66,7 @@ DistillerService.prototype.start = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     // load all weka files
-    this.loadWekaFiles()
+    this._loadWekaFiles()
         .then(function(){
             // check data DS connection
             return this.dataDS.connect();
@@ -105,7 +105,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-DistillerService.prototype.loadWekaFiles = function(){
+DistillerService.prototype._loadWekaFiles = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -197,8 +197,9 @@ return when.promise(function(resolve, reject) {
     if( !gameId ||
         !gameId.length) {
         // default to using SimCity's
-        gameId = 'SC';
+        gameId = 'sc';
     }
+    gameId = gameId.toLowerCase(); // gameId is not case sensitive
 
     // check if gameId in function list, if not then don't run
     if(!this.AEFunc.hasOwnProperty(gameId) ){

@@ -2,20 +2,20 @@
  * Authentication Server Module
  *
  * Module dependencies:
-
+ * http://127.0.0.1:8001/auth/icivics/login
  *
  */
 // Third-party libs
 var _          = require('lodash');
 var when       = require('when');
-var Strategy   = require('./auth.strategy.edmodo.js');
+var Strategy   = require('./auth.strategy.icivics.js');
 // load at runtime
 // Glasslab libs
 var aConst, lConst;
 
-module.exports = EdmodoAccount;
+module.exports = ICivicsAccount;
 
-function EdmodoAccount(options){
+function ICivicsAccount(options){
     try {
         var Auth, LMS;
         this.options = _.merge(
@@ -32,18 +32,19 @@ function EdmodoAccount(options){
         this.ds = new Auth.Datastore.MySQL(this.options.auth.datastore.mysql);
 
     } catch(err) {
-        console.trace("EdmodoAccount: Error -", err);
+        console.trace("ICivicsAccount: Error -", err);
         this.stats.increment("error", "Generic");
     }
 }
 
-EdmodoAccount.prototype.setupPassport = function(passport, authService) {
+ICivicsAccount.prototype.setupPassport = function(passport) {
 
     passport.use( new Strategy(
-            this.options.auth.accounts.edmodo,
-            function(accessToken, refreshToken, profile, done) {
-                //console.log("edmodo user - profile:", profile);
+            this.options.auth.accounts.icivics,
+            function(token, tokenSecret, profile, done) {
+                console.log("ICivicsAccount user - profile:", profile);
 
+                /*
                 this._AddOrFindUser(profile)
                     .then( function(profile) {
                         done(null, profile);
@@ -52,16 +53,17 @@ EdmodoAccount.prototype.setupPassport = function(passport, authService) {
                         done(JSON.stringify(err), profile);
                     }.bind(this)
                 );
+                */
             }.bind(this)
         )
     );
 };
 
-EdmodoAccount.prototype.setupRoutes = function(app, passport) {
+ICivicsAccount.prototype.setupRoutes = function(app, passport) {
 
     // route to trigger google oauth authorization
-    app.get('/auth/edmodo/login',
-        passport.authenticate('edmodo'),
+    app.get('/auth/icivics/login',
+        passport.authenticate('icivics'),
         function(req, res) {
             // The request will be redirected to Google for authentication, so this
             // function will not be called.
@@ -69,21 +71,21 @@ EdmodoAccount.prototype.setupRoutes = function(app, passport) {
     );
 
     // callback route
-    app.get('/auth/edmodo/callback',
-        passport.authenticate('edmodo'),
+    app.get('/auth/icivics/callback',
+        passport.authenticate('icivics'),
         function(req, res) {
             // Successful authentication, redirect home.
-            res.redirect('/auth/edmodo');
+            res.redirect('/auth/icivics');
         });
 };
 
 
-EdmodoAccount.prototype.createAccount = function(){
+ICivicsAccount.prototype.createAccount = function(){
     // client should handle this
 };
 
 
-EdmodoAccount.prototype._AddOrFindUser = function(userData){
+ICivicsAccount.prototype._AddOrFindUser = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -108,7 +110,7 @@ return when.promise(function(resolve, reject) {
 
         // catch all errors
         .then(null, function(err, code){
-            console.error("EdmodoAccount: _AddOrFindUser Error -", err);
+            console.error("ICivicsAccount: _AddOrFindUser Error -", err);
             return reject(err, code);
         }.bind(this));
 // ------------------------------------------------
