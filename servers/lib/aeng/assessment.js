@@ -20,6 +20,6 @@ module.exports = {
     },
 
     DistillerFunc: {
-        SC: require('./distiller/SC.js')
+        sc: require('./distiller/sc.js')
     }
 }

@@ -89,31 +89,58 @@ return when.promise(function(resolve, reject) {
 
 TelemDS_Mysql.prototype.getGameSessionWithGameSection = function(){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        var Q = "SELECT session_id, activity_id FROM GL_SESSION WHERE activity_id IS NOT NULL";
-        //console.log('Q:', Q);
+    var Q = "SELECT session_id, activity_id FROM GL_SESSION WHERE activity_id IS NOT NULL";
+    //console.log('Q:', Q);
 
-        this.ds.query(Q)
-            .then(
-                function(result){
-                    if(result.length > 0) {
-                        // extract 'GAME_SESSION_ID' key value from results array with each row an object
-                        var data = {};
-                        for(var i = 0; i < result.length; i++){
-                            data[result[i]['session_id']] = result[i]['activity_id'];
-                        }
-
-                        resolve( data );
-                    } else {
-                        resolve( );
+    this.ds.query(Q)
+        .then(
+            function(result){
+                if(result.length > 0) {
+                    // extract 'GAME_SESSION_ID' key value from results array with each row an object
+                    var data = {};
+                    for(var i = 0; i < result.length; i++){
+                        data[result[i]['session_id']] = result[i]['activity_id'];
                     }
-                }.bind(this),
-                reject
-            );
+
+                    resolve( data );
+                } else {
+                    resolve( );
+                }
+            }.bind(this),
+            reject
+        );
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Mysql.prototype.getAllGameSessions = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var Q =
+        "SELECT \
+            session_id as sessionId\
+        FROM \
+            GL_SESSION \
+        WHERE \
+            activity_id IS NOT NULL";
+
+    this.ds.query(Q)
+        .then(function(data){
+            // return just a list of session Id's
+            resolve( _.pluck(data, 'sessionId') );
+        }.bind(this),
+        function(err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this)
+    );
+
+// ------------------------------------------------
+}.bind(this));
 // end promise wrapper
 };
 

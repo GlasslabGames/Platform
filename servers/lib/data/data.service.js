@@ -453,7 +453,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 // userId: String or Integer (Optional)
                 // add userId to all events
                 if(userId) {
-                    data.userId = userId;
+                    pData.userId = userId;
                 }
 
                 // deviceId: String (Optional)

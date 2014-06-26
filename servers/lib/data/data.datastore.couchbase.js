@@ -498,7 +498,18 @@ return when.promise(function(resolve, reject) {
                 keys.push(results[i].id);
             }
 
-            //console.log("CouchBase TelemetryStore: keys", keys);
+            var eventsData = {
+                userId: 0,
+                gameSessionId: gameSessionId,
+                events: []
+            };
+
+            if(keys.length == 0) {
+                resolve(eventsData);
+                return;
+            }
+
+            //console.log("CouchBase TelemetryStore: getEvents keys length", keys.length);
             this.client.getMulti(keys, {},
                 function(err, results){
                     if(err){
@@ -536,9 +547,6 @@ return when.promise(function(resolve, reject) {
 
                         if(revent.userId) {
                             eventsData.userId = revent.userId;
-                        }
-                        if( revent.gameSessionId) {
-                            eventsData.gameSessionId = revent.gameSessionId;
                         }
                         if( revent.gameVersion) {
                             eventsData.gameVersion = revent.clientVersion;
@@ -895,7 +903,7 @@ TelemDS_Couchbase.prototype.endGameSessionV2 = function(gameSessionId, clientTim
         this.client.get(key,
             function(err, data){
                 if(err){
-                    console.error("CouchBase TelemetryStore: End Game Session Error -", err);
+                    console.error("CouchBase TelemetryStore: End Game Session V2 Error -", err);
                     reject(err);
                     return;
                 }
@@ -934,8 +942,13 @@ return when.promise(function(resolve, reject) {
     this.client.get(key,
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: End Game Session Error -", err);
-                reject(err);
+                if(err.code == 13) {
+                    console.warn("CouchBase TelemetryStore: End Q - Session Id Missing -", gameSessionId);
+                    resolve();
+                } else {
+                    console.error("CouchBase TelemetryStore: End Q Session Error -", err);
+                    reject(err);
+                }
                 return;
             }
 
@@ -970,7 +983,7 @@ return when.promise(function(resolve, reject) {
     this.client.get(key,
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: End Game Session Error -", err);
+                console.error("CouchBase TelemetryStore: Cleanup Q Session Error -", err);
                 reject(err);
                 return;
             }

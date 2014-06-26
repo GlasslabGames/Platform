@@ -1,0 +1,18 @@
+{
+    "gameId": "AA-1",
+    "enabled": true,
+    "shortName": "Mars Generation One",
+    "longName": "Mars Generation One - Argubot Academy",
+    "shortDescription": "",
+    "longDescription": "",
+    "settings" : {
+    },
+    "license": {
+        "type":  "free",
+        "valid": true
+    },
+    "reports": [
+        "sowo",
+        "achievements"
+    ]
+}

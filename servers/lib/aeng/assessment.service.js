@@ -42,6 +42,7 @@ function DistillerService(options){
     this.queue         = new Assessment.Queue.Redis(this.options.assessment.queue);
     this.dataDS        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
     this.userDS        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
+    this.stats         = new Util.Stats(this.options, "Assessment.DistillerService");
 
     // TODO: move to DB
     this.AEFunc = {};
@@ -51,9 +52,41 @@ function DistillerService(options){
         this.AEFunc[f] = new Assessment.DistillerFunc[f]();
     }
 
-    this.stats         = new Util.Stats(this.options, "Assessment.DistillerService");
-
     this.wekaFileData = {};
+    this.loadWekaFiles();
+
+    this.dataDS.connect()
+        .then(function(){
+            console.log("DistillerService: Data DS Connected");
+            this.stats.increment("info", "Telemetry.Data.Couchbase.Connect");
+        }.bind(this),
+        function(err){
+            console.trace("DistillerService: Data DS Error -", err);
+            this.stats.increment("error", "Telemetry.Data.Couchbase.Connect");
+        }.bind(this));
+
+    this.userDS.connect()
+        .then(function(){
+            console.log("DistillerService: User DS Connected");
+            this.stats.increment("info", "Assessment.User.MySQL.Connect");
+        }.bind(this),
+        function(err){
+            console.trace("DistillerService: User DS Error -", err);
+            this.stats.increment("error", "Assessment.User.MySQL.Connect");
+        }.bind(this));
+
+    /*
+    // TODO: remove this after running test
+    this.addAllOldSessionsForProcess()
+        .then(function(){
+            this.startTelemetryPoll();
+        }.bind(this),
+        function(err){
+            console.trace("DistillerService: Add All Old Session For Process Error -", err);
+            this.stats.increment("error", "Assessment.OldSessionProcess");
+        }.bind(this));
+    */
+    this.startTelemetryPoll();
 
     console.log('---------------------------------------------');
     console.log('DistillerService: Waiting for messages...');
@@ -61,43 +94,26 @@ function DistillerService(options){
     this.stats.increment("info", "ServerStarted");
 }
 
-DistillerService.prototype.start = function() {
+DistillerService.prototype.addAllOldSessionsForProcess = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    // load all weka files
-    this.loadWekaFiles()
-        .then(function(){
-            // check data DS connection
-            return this.dataDS.connect();
-        }.bind(this))
-            .then(function(){
-                console.log("DistillerService: Data DS Connected");
-                this.stats.increment("info", "Telemetry.Data.Couchbase.Connect");
-            }.bind(this),
-            function(err){
-                console.trace("DistillerService: Data DS Error -", err);
-                this.stats.increment("error", "Telemetry.Data.Couchbase.Connect");
-            }.bind(this))
 
-        // check user datastore connection
-        .then(function(){
-            return this.userDS.connect();
-        }.bind(this))
-            .then(function(){
-                console.log("DistillerService: User DS Connected");
-                this.stats.increment("info", "Assessment.User.MySQL.Connect");
-            }.bind(this),
-            function(err){
-                console.trace("DistillerService: User DS Error -", err);
-                this.stats.increment("error", "Assessment.User.MySQL.Connect");
-            }.bind(this))
+    this.userDS.getAllGameSessions()
+        .then(function(sessionList){
+            var promiseList = [];
 
-        // start telemetry poll timer
-        .then(function(){
-            this.startTelemetryPoll()
+            for(var i = 0; i < sessionList.length; i++) {
+                // add queue push api to promise list
+                promiseList.push( this.queue.pushJob( sessionList[i] ) );
+            }
+
+            return when.all(promiseList);
         }.bind(this))
 
+        .then(function(){
+            console.log("Done adding all old sessions for process");
+        }.bind(this))
 
         .then(resolve, reject);
 // ------------------------------------------------
@@ -106,9 +122,6 @@ return when.promise(function(resolve, reject) {
 };
 
 DistillerService.prototype.loadWekaFiles = function(){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
     try{
         var dir = "./lib/aeng/bayes/";
         var files = fs.readdirSync(dir);
@@ -125,10 +138,6 @@ return when.promise(function(resolve, reject) {
     }
 
     console.log('DistillerService: Loaded Weka XML Files');
-    resolve();
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
 };
 
 
@@ -166,8 +175,8 @@ DistillerService.prototype.getTelemetryBatch = function(){
         // cleanup session
         .then(function(data){
             if(data.type == aeConst.queue.end) {
-                return this.runAssessment(data.id, data.gameId)
-                    .then( function() {
+                return this.runAssessment(data.id)
+                    .then( function(){
                         // TODO: use assessment DS for queue
                         return this.dataDS.endQSession(data.id)
                     }.bind(this) );
@@ -189,7 +198,7 @@ DistillerService.prototype.getTelemetryBatch = function(){
         }.bind(this));
 }
 
-DistillerService.prototype.runAssessment = function(gameSessionId, gameId){
+DistillerService.prototype.runAssessment = function(gameSessionId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -197,8 +206,9 @@ return when.promise(function(resolve, reject) {
     if( !gameId ||
         !gameId.length) {
         // default to using SimCity's
-        gameId = 'SC';
+        gameId = 'sc';
     }
+    gameId = gameId.toLowerCase(); // gameId is not case sensitive
 
     // check if gameId in function list, if not then don't run
     if(!this.AEFunc.hasOwnProperty(gameId) ){
@@ -221,7 +231,6 @@ return when.promise(function(resolve, reject) {
     this.stats.increment("info", "ExecuteAssessment.Started");
     this.dataDS.getEvents(gameSessionId)
         .then(function(events){
-
             if(!events.events.length) {
                 if(this.options.env == "dev") {
                     console.log("DistillerService: Execute Assessment No Events - gameSessionId:", gameSessionId, ", gameId:", gameId);
@@ -241,7 +250,6 @@ return when.promise(function(resolve, reject) {
                     resolve();
                     return;
                 }
-
                 return distilledData;
             } catch(err){
                 console.trace("DistillerService: Execute Assessment Error -", err);
@@ -282,7 +290,7 @@ return when.promise(function(resolve, reject) {
 
             // Before we trigger the WEKA process, we need to make sure we set the current working directory
             // and execute the batch file or shell script, depending on the platform
-            process.chdir( '../../Assessment/build' );
+            process.chdir( this.options.assessment.wekaPath );
             var scriptToExecute = '';
             //console.log( "Executing bayes on " + process.platform + " at " + process.cwd() );
             if( process.platform === "win32" ) {
@@ -294,6 +302,7 @@ return when.promise(function(resolve, reject) {
             // run child process in promise
             return when.promise( function(resolve2, reject2) {
                 // Use the distilled data to get the bayes key and evidence fragments to pass to the WEKA process
+                //console.log( "bayes file: ", distilledData.bayes.key );
                 //console.log( "execute: ", scriptToExecute + commandString );
 
                 var aeWeka = child_process.exec( scriptToExecute + commandString,
@@ -328,6 +337,7 @@ return when.promise(function(resolve, reject) {
                     return this.userDS.getSessionInfo(gameSessionId)
                         .then(function(sessionInfo) {
                             if(sessionInfo) {
+                                console.log( "DistillerService: Running Assessment..." );
                                 // save Competency Results to DB
                                 return this.userDS.saveCompetencyResults(sessionInfo, compData);
                             }
@@ -338,6 +348,9 @@ return when.promise(function(resolve, reject) {
                 console.error("DistillerService: Invalid Competency JSON data - Error:", err);
                 reject(err);
             }
+        }.bind(this))
+        .then(function() {
+            console.log( "DistillerService: Assessment Complete -", gameSessionId);
         }.bind(this))
 
         // catch all error

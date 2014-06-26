@@ -1,0 +1,18 @@
+{
+    "gameId": "AW-1",
+    "enabled": true,
+    "shortName": "Argument Wars",
+    "longName": "Argument Wars",
+    "shortDescription": "",
+    "longDescription": "",
+    "settings" : {
+    },
+    "license": {
+        "type":  "free",
+        "valid": true
+    },
+    "reports": [
+        "sowo",
+        "achievements"
+    ]
+}

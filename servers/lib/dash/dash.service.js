@@ -6,10 +6,11 @@
  *  when       - https://github.com/cujojs/when
  *
  */
-
+var fs      = require('fs');
+var path    = require('path');
 // Third-party libs
-var _          = require('lodash');
-var when       = require('when');
+var _       = require('lodash');
+var when    = require('when');
 
 // load at runtime
 var Util;
@@ -38,7 +39,7 @@ function DashService(options){
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
 
-        this.gameInfo    = require('./dash.js').Games;
+        this.games = {};
 
     } catch(err){
         console.trace("DashService: Error -", err);
@@ -50,7 +51,10 @@ DashService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    this.telmStore.connect()
+    this._loadGameFiles()
+        .then(function(){
+                return this.telmStore.connect();
+            }.bind(this))
         .then(function(){
                 console.log("DashService: Telemetry DS Connected");
                 this.stats.increment("info", "TelemetryDS.Connect");
@@ -61,6 +65,49 @@ return when.promise(function(resolve, reject) {
             }.bind(this))
 
         .then(resolve, reject);
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+DashService.prototype.getListOfGameIds = function() {
+    var gameIds = [];
+    for(var g in this.games) {
+        gameIds.push(this.games[g].info.gameId);
+    }
+    return gameIds;
+};
+
+DashService.prototype._loadGameFiles = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    try{
+        var dir = path.join(__dirname, "games");
+        var files = fs.readdirSync(dir);
+
+        files.forEach(function(gameName){
+            // skip dot files
+            if(gameName.charAt(0) != '.') {
+                this.games[gameName] = {};
+
+                var gameFiles = fs.readdirSync( path.join(dir, gameName) );
+
+                gameFiles.forEach(function(file){
+                    if(file.charAt(0) != '.') {
+                        var name = path.basename(file, path.extname(file));
+                        var filePath = path.join(dir, gameName, file);
+                        this.games[gameName][name] = require(filePath);
+                    }
+                }.bind(this));
+            }
+        }.bind(this));
+    } catch(err) {
+        console.error("DashService: Load Game Files Error -", err);
+    }
+
+    console.log('DashService: Loaded Game Files');
+    resolve();
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper

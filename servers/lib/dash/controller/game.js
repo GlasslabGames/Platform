@@ -20,32 +20,24 @@ function getGameAchievements(req, res){
 
         // check input
         if( !( req.params &&
-               req.params.hasOwnProperty("id") ) ) {
+               req.params.hasOwnProperty("gameId") ) ) {
             this.requestUtil.errorResponse(res, {error: "invalid game id"});
             return
         }
 
-        var gameId = req.params.id;
-        var gameIdParts = gameId.split('-');
-        gameId = gameIdParts[0];
-        gameEpisodeId = gameIdParts[1];
+        var gameId = req.params.gameId;
+        // gameIds are not case sensitive
+        gameId = gameId.toLowerCase();
 
         // check gameId exists
-        if( !this.gameInfo.hasOwnProperty(gameId) ) {
+        if( !this.games.hasOwnProperty(gameId) ) {
             this.requestUtil.errorResponse(res, {error: "invalid game id"});
             return
         }
 
-        var info;
-        if( this.gameInfo[gameId].hasOwnProperty('episodes') &&
-            this.gameInfo[gameId].episodes.hasOwnProperty(gameEpisodeId) ) {
-            info = this.gameInfo[gameId].episodes[gameEpisodeId];
-        } else {
-            info = this.gameInfo[gameId];
-        }
-
-        if(info.hasOwnProperty('$Achievements')) {
-            this.requestUtil.jsonResponse(res, info['$Achievements']);
+        var game = this.games[gameId];
+        if(game.hasOwnProperty('achievements')) {
+            this.requestUtil.jsonResponse(res, game['achievements']);
         } else {
             this.requestUtil.jsonResponse(res, {});
         }
@@ -65,38 +57,31 @@ function getGameInfo(req, res){
 
         // check input
         if( !( req.params &&
-            req.params.hasOwnProperty("id") ) ) {
+            req.params.hasOwnProperty("gameId") ) ) {
             this.requestUtil.errorResponse(res, {error: "invalid game id"});
             return
         }
 
-        var gameId = req.params.id;
-        var gameIdParts = gameId.split('-');
-        gameId = gameIdParts[0];
-        gameEpisodeId = gameIdParts[1];
+        var gameId = req.params.gameId;
+        // gameIds are not case sensitive
+        gameId = gameId.toLowerCase();
 
         // check gameId exists
-        if( !this.gameInfo.hasOwnProperty(gameId) ) {
+        if( !this.games.hasOwnProperty(gameId) ) {
             this.requestUtil.errorResponse(res, {error: "invalid game id"});
             return
         }
 
-        var info;
-        if( this.gameInfo[gameId].hasOwnProperty('episodes') &&
-            this.gameInfo[gameId].episodes.hasOwnProperty(gameEpisodeId) ) {
-            info = _.cloneDeep( this.gameInfo[gameId].episodes[gameEpisodeId] );
+        var game = this.games[gameId];
+        if(game.hasOwnProperty('info')) {
+            this.requestUtil.jsonResponse(res, game['info']);
         } else {
-            info = _.cloneDeep( this.gameInfo[gameId] );
+            this.requestUtil.jsonResponse(res, {});
         }
 
-        // remove all keys that start with '$'
-        removeSpecialMembers(info);
-
-        this.requestUtil.jsonResponse(res, info);
-
     } catch(err) {
-        console.trace("Reports: Get Achievements Error -", err);
-        this.stats.increment("error", "GetAchievements.Catch");
+        console.trace("Reports: Get Game Info Error -", err);
+        this.stats.increment("error", "GetGameInfo.Catch");
     }
 }
 

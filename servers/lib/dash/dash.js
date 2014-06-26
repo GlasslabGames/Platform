@@ -8,17 +8,13 @@ module.exports = {
     ServiceName: "dash",
     Controller: {
         reports:  require('./controller/reports.js'),
-        game:  require('./controller/game.js')
+        game:     require('./controller/game.js'),
+        games:    require('./controller/games.js')
     },
     Service:     require('./dash.service.js'),
     Const:       require('./dash.const.js'),
 
     Datastore: {
         MySQL:   require('./dash.datastore.mysql.js')
-    },
-
-    Games: {
-        'SC': require('./gameinfo/sc.json'),
-        'AA': require('./gameinfo/aa.json')
     }
 }
