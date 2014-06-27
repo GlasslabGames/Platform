@@ -105,6 +105,8 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                     profile.role = lConst.role.student;
                 }
 
+                // TODO: add "edmodo" string to username
+                // add to migration
                 profile.username  = json.id+"."+json.username;
                 profile.firstName = json.first_name;
                 profile.lastName  = json.last_name;

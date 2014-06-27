@@ -443,7 +443,6 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
             for(var i = 0; i < eventList.length; i++)
             {
                 var data = eventList[i];
-                var pData = {};
 
                 if( !_.isObject(data) ){
                     errList.push(new Error("event is not an object"));
@@ -453,7 +452,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 // userId: String or Integer (Optional)
                 // add userId to all events
                 if(userId) {
-                    pData.userId = userId;
+                    data.userId = userId;
                 }
 
                 // deviceId: String (Optional)
@@ -462,13 +461,11 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 } else {
                     if( !_.isString(data.deviceId) ) {
                         errList.push(new Error("deviceId invalid type"));
+                        delete data.deviceId;
                     }
                     else if(data.deviceId.length == 0) {
                         errList.push(new Error("deviceId can not be empty"));
-                    }
-                    else {
-                        // save
-                        pData.deviceId = data.deviceId;
+                        delete data.deviceId;
                     }
                 }
 
@@ -481,9 +478,6 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                         errList.push(new Error("clientTimeStamp invalid type"));
                         continue; // skip to next item in list
                     }
-
-                    // save
-                    pData.clientTimeStamp = data.clientTimeStamp;
                 }
 
                 // gameId required
@@ -501,10 +495,6 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                     }
                     // TODO: add validate of gameId using DB
                     // else if( this._eventValidateGameId(data.gameId) ){...}
-                    else {
-                        // save
-                        pData.gameId = data.gameId;
-                    }
                 }
 
                 // clientVersion NOT required
@@ -513,16 +503,14 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 } else {
                     if( !_.isString(data.clientVersion) ) {
                         errList.push(new Error("clientVersion invalid type"));
+                        delete data.clientVersion;
                     }
                     else if(data.clientVersion.length == 0) {
                         errList.push(new Error("clientVersion can not be empty"));
+                        delete data.clientVersion;
                     }
                     // TODO: add validate of clientVersion using DB
                     // else if( this._eventValidateClientVersion(data.gameId, data.clientVersion) ){...}
-                    else {
-                        // save
-                        pData.clientVersion = data.clientVersion;
-                    }
                 }
 
                 // gameLevel NOT required
@@ -531,16 +519,14 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 } else {
                     if( !_.isString(data.gameLevel) ) {
                         errList.push(new Error("gameLevel invalid type"));
+                        delete data.gameLevel;
                     }
                     else if(data.gameLevel.length == 0) {
                         errList.push(new Error("gameLevel can not be empty"));
+                        delete data.gameLevel;
                     }
                     // TODO: ??? add validation of gameLevel using DB ???
                     // else if( this._eventValidateGameLevel(data.gameId, data.gameLevel) ){...}
-                    else {
-                        // save
-                        pData.gameType = data.gameType;
-                    }
                 }
 
                 // eventName required
@@ -560,8 +546,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                     try {
                         // convert + save
                         // TODO: use convertEventName
-                        //pData.eventName = this._convertEventName(data.eventName, data.gameId);
-                        pData.eventName = data.eventName;
+                        //data.eventName = this._convertEventName(data.eventName, data.gameId);
                     }
                     catch(err) {
                         errList.push(err);
@@ -580,8 +565,6 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                         try {
                             // TODO: validate eventData based on eventName
                             this._validateEventData(data.eventName, data.eventData);
-                            // save
-                            pData.eventData = data.eventData;
                         }
                         catch(err) {
                             errList.push(err);
@@ -591,14 +574,14 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 }
 
                 // add gameSessionId
-                pData.gameSessionId = gameSessionId;
+                data.gameSessionId = gameSessionId;
 
                 // add server TimeStamp
-                pData.serverTimeStamp = Util.GetTimeStamp();
+                data.serverTimeStamp = Util.GetTimeStamp();
 
                 // added saved data to list
-                //console.log("pData:", pData);
-                processedEvents.push(pData);
+                //console.log("data:", data);
+                processedEvents.push(data);
             }
 
             // adds the promise to the list

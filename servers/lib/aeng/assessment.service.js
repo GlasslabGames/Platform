@@ -175,7 +175,7 @@ DistillerService.prototype.getTelemetryBatch = function(){
         // cleanup session
         .then(function(data){
             if(data.type == aeConst.queue.end) {
-                return this.runAssessment(data.id)
+                return this.runAssessment(data.id, data.gameId)
                     .then( function(){
                         // TODO: use assessment DS for queue
                         return this.dataDS.endQSession(data.id)
@@ -198,7 +198,7 @@ DistillerService.prototype.getTelemetryBatch = function(){
         }.bind(this));
 }
 
-DistillerService.prototype.runAssessment = function(gameSessionId){
+DistillerService.prototype.runAssessment = function(gameSessionId, gameId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
