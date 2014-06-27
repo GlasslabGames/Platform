@@ -37,7 +37,7 @@ function EdmodoAccount(options){
     }
 }
 
-EdmodoAccount.prototype.setupPassport = function(passport, authService) {
+EdmodoAccount.prototype.setupPassport = function(passport) {
 
     passport.use( new Strategy(
             this.options.auth.accounts.edmodo,

@@ -63,6 +63,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
+    var MemoryStore    = express.session.MemoryStore;
 
     // express session store
     this.exsStore = new CouchbaseStore(this.options.services.session.store);
@@ -94,6 +95,7 @@ return when.promise(function(resolve, reject) {
                         //, maxAge: 1000 * 60 * 24 // 24 hours
                     }, this.options.services.session.cookie),
                     store:  this.exsStore
+                    //store: new MemoryStore()
                 }));
 
                 resolve();

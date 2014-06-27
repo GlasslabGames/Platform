@@ -42,9 +42,8 @@ ICivicsAccount.prototype.setupPassport = function(passport) {
     passport.use( new Strategy(
             this.options.auth.accounts.icivics,
             function(token, tokenSecret, profile, done) {
-                console.log("ICivicsAccount user - profile:", profile);
+                //console.log("ICivicsAccount user - profile:", profile);
 
-                /*
                 this._AddOrFindUser(profile)
                     .then( function(profile) {
                         done(null, profile);
@@ -53,7 +52,6 @@ ICivicsAccount.prototype.setupPassport = function(passport) {
                         done(JSON.stringify(err), profile);
                     }.bind(this)
                 );
-                */
             }.bind(this)
         )
     );

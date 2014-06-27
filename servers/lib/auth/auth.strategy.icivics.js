@@ -49,17 +49,17 @@ function Strategy(options, verify) {
     // need to disable auth check because there ssl cert is invalid
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-    var baseURL = options.baseURL || 'https://www.icivics.com';
+    this._baseURL = options.baseURL || 'https://www.icivics.com';
     options = options || {};
-    options.requestTokenURL = options.requestTokenURL || baseURL+'/oauth/request_token';
-    options.accessTokenURL  = options.accessTokenURL  || baseURL+'/oauth/access_token';
+    options.requestTokenURL = options.requestTokenURL || this._baseURL+'/oauth/request_token';
+    options.accessTokenURL  = options.accessTokenURL  || this._baseURL+'/oauth/access_token';
 
     if(options.callbackURL) {
         var params = {
             oauth_callback: options.callbackURL
         };
 
-        options.userAuthorizationURL = baseURL+"/oauth/authorize?" + querystring.stringify(params);
+        options.userAuthorizationURL = this._baseURL+"/oauth/authorize?" + querystring.stringify(params);
     }
     options.sessionKey = options.sessionKey || 'oauth:icivics';
 
@@ -91,25 +91,26 @@ util.inherits(Strategy, OAuthStrategy);
  * @api protected
  */
 
-Strategy.prototype.userProfile = function(accessToken, tokenSecret, params, done) {
-    console.log("ICivics - accessToken:", accessToken, ", tokenSecret:", tokenSecret, ", params:", params);
-    this._getUserProfile('https://staging.icivics.org/services/rest/service_system/connect.json', accessToken, done);
+Strategy.prototype.userProfile = function(token, tokenSecret, params, done) {
+    console.log("ICivics - token:", token, ", tokenSecret:", tokenSecret, ", params:", params);
+    this._getUserProfile(this._baseURL+ '/services/rest/service_system/connect.json', token, tokenSecret, done);
 };
 
-Strategy.prototype._getUserProfile = function(url, accessToken, done) {
-    this._oauth2.post(url, accessToken, function (err, body, res) {
+Strategy.prototype._getUserProfile = function(url, token, tokenSecret, done) {
+    var data = null;//{ "oauth_token": token, "oauth_token_secret": tokenSecret};
+    this._oauth.post(url, token, tokenSecret, data, function (err, body, res) {
         if (err) { return done(new InternalOAuthError('failed to fetch user profile', err)); }
 
         if( res.statusCode == 302 &&
             res.headers &&
             res.headers.location) {
             console.log("ICivics Strategy: Redirecting to", res.headers.location);
-            this._getUserProfile(res.headers.location, accessToken, done);
+            this._getUserProfile(res.headers.location, token, tokenSecret, done);
         } else {
             try {
                 console.log("ICivics - body:", body);
-                /*
                 var json = JSON.parse(body);
+                console.log("ICivics - json:", json);
 
                 var profile = {
                     loginType: aConst.login.type.icivics
@@ -117,19 +118,24 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 profile._raw      = body;
                 profile._json     = json;
 
-                if(json.type == "teacher") {
+                // TODO: fix role using real data
+                profile.role = lConst.role.instructor;
+                /*
+                if(json.user.role == "teacher") {
                     profile.role = lConst.role.instructor;
                 } else {
                     profile.role = lConst.role.student;
                 }
-
-                profile.username  = json.id+"."+json.username;
-                profile.firstName = json.first_name;
-                profile.lastName  = json.last_name;
-                profile.email     = json.email || "";
-                profile.password  = body;
-                done(null, profile);
                 */
+
+                // TODO: add real firstName and lastName
+                profile.username  = "icivics."+json.user.uid;
+                profile.firstName = json.user.firstName || "Joe";
+                profile.lastName  = json.user.lastName || "Bob";
+                profile.email     = json.user.email || "";
+                profile.password  = body;
+
+                done(null, profile);
             } catch (err) {
                 done(err);
             }

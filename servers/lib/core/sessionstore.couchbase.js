@@ -120,8 +120,10 @@ module.exports = function(connect){
                 return;
             }
 
-            var key     = this.options.prefix+":"+sessionId;
+            var key = this.options.prefix+":"+sessionId;
+            this._setSession(key, session, done);
 
+            /*
             // get before set
             this.client.get(key, function(err, result){
                 if(err){
@@ -135,9 +137,9 @@ module.exports = function(connect){
                 } else {
                     // if result has user data AND user data same then touch
                     // otherwise set a new
-                    if( result.value &&
-                        result.value.passport &&
-                        _.isEqual(session.passport, result.value.passport)
+                    if( session &&
+                        result.value &&
+                        _.isEqual(session, result.value)
                     ){
                         // already has user data
                         //console.log("CouchBaseStore: touching session key:", key);
@@ -152,6 +154,7 @@ module.exports = function(connect){
                 }
 
             }.bind(this));
+            */
 
         } catch (err) {
             console.error("CouchBase SessionStore: Set Error -", err);

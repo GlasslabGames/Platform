@@ -167,10 +167,16 @@ function postTotalTimePlayed(req, res, next) {
         var timeDiff = null;
         var totalTimePlayed = null;
 
-        if( (req.body && req.body.addDiff && _.isNumber(req.body.addDiff) ) ) {
+        if( (req.body &&
+            req.body.addDiff &&
+            _.isNumber(req.body.addDiff) ) ) {
             timeDiff = parseFloat(req.body.addDiff);
         }
-        if( (req.body && req.body.setTime && _.isNumber(req.body.setTime) ) ) {
+
+        if( req.body &&
+            req.body.hasOwnProperty('setTime') &&
+            _.isNumber(req.body.setTime))
+        {
             totalTimePlayed = parseFloat(req.body.setTime);
         }
 

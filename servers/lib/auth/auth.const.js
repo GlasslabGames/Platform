@@ -27,7 +27,10 @@ module.exports = {
             glassLabV1: "",
             glassLabV2: "glasslabv2",
             edmodo:     "edmodo",
-            learning:   "learning.com"
+            learning:   "learning.com",
+            docent:     "docent",
+            icivics:    "icivics",
+            google:     "google"
         }
     },
     passwordReset: {
