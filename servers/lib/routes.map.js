@@ -223,6 +223,34 @@ module.exports = {
         },
         // ---------------------------------------------------
         {
+            requireAuth: true,
+            api: "/api/v2/license/validate/:licenseKey",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "validateLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/current",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getLicenses"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/register",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "registerLicense"
+            }
+        },
+        // ---------------------------------------------------
+        {
             // used for testing templates
             api: "/api/v2/auth/user/email-template",
             service: "auth",

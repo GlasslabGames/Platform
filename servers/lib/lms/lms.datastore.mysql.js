@@ -37,7 +37,18 @@ LMS_MySQL.prototype.connect = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    resolve();
+
+    this.updateCourseTable()
+        .then(function(updated){
+            if(updated) {
+                console.log("LMS MySQL: Updated Course Table!");
+            }
+            resolve();
+        }.bind(this),
+        function(err){
+            reject(err);
+        }.bind(this));
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
