@@ -286,7 +286,8 @@ module.exports = {
                 post: "glassLabLogin"
             }
         },
-        /* ROUTE DEFINED IN auth.account.edmodo
+        /*
+        // ROUTE DEFINED IN auth.account.edmodo
         {
             api: "/api/v2/auth/login/edmodo",
             service: "auth",
@@ -315,25 +316,25 @@ module.exports = {
         {
             api: "/api/v2/auth/resetpassword/send",
             service: "auth",
-            controller: "resetpassword",
+            controller: "user",
             method: {
-                post: "resetPasswordSendLink"
+                post: "resetPasswordSend"
+            }
+        },
+        {
+            api: "/api/v2/auth/resetpassword/verify/:code",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "resetPasswordVerify"
             }
         },
         {
             api: "/api/v2/auth/resetpassword/update",
             service: "auth",
-            controller: "resetpassword",
+            controller: "user",
             method: {
                 post: "resetPasswordUpdate"
-            }
-        },
-        {
-            api: "/api/v2/auth/resetpassword/verify",
-            service: "auth",
-            controller: "resetpassword",
-            method: {
-                post: "resetPasswordVerifyLink"
             }
         },
         {
