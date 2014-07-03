@@ -433,13 +433,13 @@ function registerUserV2(req, res, next, serviceManager) {
                         this.lmsStore.addUserToCourse(userId, courseId, regData.role)
                             .then(function() {
                                 this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
-                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                             }.bind(this))
                             // catch all errors
                             .then(null, registerErr);
                     } else {
                         this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
-                        serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                        serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                     }
                 }
                 // if instructor or manager
@@ -471,7 +471,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         // all ok
                         .then(function(){
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
-                            serviceManager.internalRoute('/api/v2/auth/login/glasslab', [req, res, next]);
+                            serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                         }.bind(this))
                         // error
                         .then(null, function(err){

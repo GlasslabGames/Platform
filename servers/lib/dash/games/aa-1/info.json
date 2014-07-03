@@ -3,16 +3,35 @@
     "enabled": true,
     "shortName": "Mars Generation One",
     "longName": "Mars Generation One - Argubot Academy",
-    "shortDescription": "",
-    "longDescription": "",
-    "settings" : {
+    "settings": {
     },
     "license": {
-        "type":  "free",
+        "type": "free",
         "valid": true
     },
-    "reports": [
-        "sowo",
-        "achievements"
-    ]
+    "reports": {
+        "sowo": {},
+        "achievements": {}
+    },
+    "details": {
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab"
+        },
+        "release": "beta",
+        "shortDescription": "",
+        "longDescription": "",
+        "price": "Free",
+        "releaseDate": "April 22, 2014",
+        "type": "App",
+        "platform": "iPad",
+        "subject": "ELA",
+        "grades": "6 - 8",
+        "productDescription": "",
+        "standards": [],
+        "lessonPlans": [],
+        "research": {
+            "links": []
+        }
+    }
 }

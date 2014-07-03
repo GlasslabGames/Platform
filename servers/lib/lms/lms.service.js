@@ -39,13 +39,13 @@ function LMSService(options){
     }
 }
 
-LMSService.prototype.start = function() {
+LMSService.prototype.start = function(serviceManager) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // test connection to LMS MySQL
-    this.myds.connect()
+    this.myds.connect(serviceManager)
         .then(function(){
                 console.log("LMSService: MySQL DS Connected");
                 this.stats.increment("info", "MySQL.Connect");

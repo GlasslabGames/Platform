@@ -1,18 +1,35 @@
 {
     "gameId": "AW-1",
-    "enabled": true,
+    "enabled": false,
     "shortName": "Argument Wars",
     "longName": "Argument Wars",
-    "shortDescription": "",
-    "longDescription": "",
-    "settings" : {
+    "settings": {
     },
     "license": {
-        "type":  "free",
+        "type": "free",
         "valid": true
     },
-    "reports": [
-        "sowo",
-        "achievements"
-    ]
+    "reports": {
+        "sowo": {},
+        "achievements": {}
+    },
+    "details": {
+        "developer": {
+            "id": "IC",
+            "name": "iCivics"
+        },
+        "release": "alpha",
+        "shortDescription": "",
+        "longDescription": "",
+        "price": "Free",
+        "releaseDate": "TBA",
+        "type": "Browser",
+        "platform": "Browser",
+        "subject": "ELA",
+        "grades": "6 - 8",
+        "productDescription": "",
+        "standards": "",
+        "lessonPlans": "",
+        "research": ""
+    }
 }
