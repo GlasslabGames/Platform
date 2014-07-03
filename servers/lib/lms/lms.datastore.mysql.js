@@ -113,6 +113,7 @@ return when.promise(function(resolve, reject) {
         `id` BIGINT(20) NULL AUTO_INCREMENT, \
         `course_id` BIGINT(20) NOT NULL, \
         `game_id` VARCHAR(255) NOT NULL, \
+        `game_settings` TEXT NOT NULL, \
         PRIMARY KEY (`id`), \
         INDEX `fk_course_id_idx` (`course_id` ASC), \
         UNIQUE INDEX `uq_course_game` (`course_id` ASC, `game_id` ASC), \
@@ -129,7 +130,7 @@ return when.promise(function(resolve, reject) {
                 //console.log("updateGamesTable create course/game map:", results);
 
                 // get all courses
-                Q = "SELECT id as course_id FROM GL_COURSE";
+                Q = "SELECT id as course_id, free_play FROM GL_COURSE";
                 return this.ds.query(Q);
             }
         }.bind(this))
@@ -140,6 +141,7 @@ return when.promise(function(resolve, reject) {
 
                 //console.log("updateLicenseTable all license:", results);
                 var gameIds = [];
+                var games = serviceManager.get("dash").service.getGames();
                 if(serviceManager) {
                     gameIds = serviceManager.get("dash").service.getListOfGameIds();
                 }
@@ -147,11 +149,23 @@ return when.promise(function(resolve, reject) {
                 Q = [];
                 for(var i = 0; i < results.length; i++) {
                     for(var j = 0; j < gameIds.length; j++) {
-                        Q.push(" ("+this.ds.escape(results[i].course_id)+", "+this.ds.escape(gameIds[j])+")");
+                        var settings = {};
+                        var gameId = gameIds[j].toLowerCase();
+                        if(gameId == "sc") {
+                            settings = _.cloneDeep( games[ gameId ].info.settings );
+                            // free_play is the opposite of missionProgressLock, thus the condition is flipped
+                            settings.missionProgressLock = (results[i].free_play[0] == 0);
+                        }
+
+                        Q.push(" ("+
+                            this.ds.escape(results[i].course_id)+", "+
+                            this.ds.escape(gameIds[j])+", "+
+                            this.ds.escape(JSON.stringify(settings))+
+                            ")");
                     }
                 }
 
-                Q = "INSERT INTO GL_COURSE_GAME_MAP (`course_id`, `game_id`) VALUES\n"+Q.join(",\n");
+                Q = "INSERT INTO GL_COURSE_GAME_MAP (`course_id`, `game_id`, `game_settings`) VALUES\n"+Q.join(",\n");
                 //console.log("updateGamesTable Q:", Q);
                 return this.ds.query(Q);
             }
@@ -833,13 +847,20 @@ LMS_MySQL.prototype.getGamesForCourse = function(courseId) {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var Q = "SELECT game_id FROM GL_COURSE_GAME_MAP WHERE course_id="+this.ds.escape(courseId);
+    var Q = "SELECT game_id as id, game_settings as settings FROM GL_COURSE_GAME_MAP WHERE course_id="+this.ds.escape(courseId);
 
     this.ds.query(Q)
         .then(
         function(results){
-            results = _.pluck(results, 'game_id');
-            resolve(results);
+            try {
+                for(var i = 0; i < results.length; i++) {
+                    results[i].settings = JSON.parse(results[i].settings);
+                }
+
+                resolve(results);
+            } catch (err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }
         }.bind(this),
         function(err) {
             reject({"error": "failure", "exception": err}, 500);
@@ -851,17 +872,21 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.addGamesToCourse = function(courseId, gameIds) {
+LMS_MySQL.prototype.addGamesToCourse = function(courseId, games) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var Q = [];
-    for(var i = 0; i < gameIds.length; i++) {
-        Q.push(" ("+this.ds.escape(courseId)+", "+this.ds.escape(gameIds[i])+")");
+    for(var i = 0; i < games.length; i++) {
+        Q.push(" ("+
+            this.ds.escape(courseId)+", "+
+            this.ds.escape(games[i].id)+", "+
+            this.ds.escape(JSON.stringify(games[i].settings))+
+            ")");
     }
 
-    Q = "INSERT INTO GL_COURSE_GAME_MAP (`course_id`, `game_id`) VALUES\n"+Q.join(",\n");
+    Q = "INSERT INTO GL_COURSE_GAME_MAP (`course_id`, `game_id`, `game_settings`) VALUES\n"+Q.join(",\n");
     //console.log("addGamesToCourse Q:", Q);
     this.ds.query(Q)
         .then(
@@ -878,15 +903,18 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.removeGamesInCourse = function(courseId, gameIds) {
+LMS_MySQL.prototype.removeGamesFromCourse = function(courseId, games) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var promiseList = [];
-    for(var i = 0; i < gameIds.length; i++) {
-        Q = "DELETE FROM GL_COURSE_GAME_MAP WHERE course_id=" +this.ds.escape(courseId)+" AND game_id="+this.ds.escape(gameIds[i]);
-        //console.log("addGamesToCourse Q:", Q);
+    var Q;
+    for(var i = 0; i < games.length; i++) {
+        Q = "DELETE FROM GL_COURSE_GAME_MAP" +
+            " WHERE course_id=" +this.ds.escape(courseId)+
+            " AND game_id="+this.ds.escape(games[i].id);
+        //console.log("removeGamesFromCourse Q:", Q);
         promiseList.push(this.ds.query(Q));
     }
 
@@ -900,5 +928,33 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.updateGamesInCourse = function(courseId, games) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var promiseList = [];
+        var Q;
+        for(var i = 0; i < games.length; i++) {
+            Q = "UPDATE GL_COURSE_GAME_MAP" +
+                " SET game_settings="+this.ds.escape(JSON.stringify(games[i].settings))+
+                " WHERE course_id="+this.ds.escape(courseId)+
+                " AND game_id="+this.ds.escape(games[i].id);
+            //console.log("updateGamesInCourse Q:", Q);
+            promiseList.push(this.ds.query(Q));
+        }
+
+        when.all(promiseList)
+            .done(function(results){
+                resolve(results);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this));
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 };

@@ -78,6 +78,10 @@ DashService.prototype.getListOfGameIds = function() {
     return gameIds;
 };
 
+DashService.prototype.getGames = function() {
+    return this.games;
+};
+
 DashService.prototype._loadGameFiles = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {

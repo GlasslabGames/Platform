@@ -256,15 +256,17 @@ function getEnrolledCourses(req, res, next) {
  institution - optional
  */
 exampleIn.createCourse = {
-    "title": "test",
+    "title": "test17",
     "grade": "7",
-    "institution": 10,
-    "gameIds": ["SC", "AA-1"]
+    "games": [
+        { "id": "SC",   "settings": { "missionProgressLock": false } },
+        { "id": "AA-1", "settings": {} }
+    ]
 };
 
 exampleOut.createCourse = {
     "id": 16,
-    "title": "test1",
+    "title": "test17",
     "grade": "7, 8, 9",
     "locked": false,
     "archived": false,
@@ -273,7 +275,10 @@ exampleOut.createCourse = {
     "code": "VMZ2P",
     "studentCount": 0,
     "freePlay": false,
-    "gameIds": ['SC', 'AA-1']
+    "games": [
+        { "id": "SC",   "settings": { "missionProgressLock": false } },
+        { "id": "AA-1", "settings": {} }
+    ]
 };
 function createCourse(req, res, next, serviceManager)
 {
@@ -282,9 +287,9 @@ function createCourse(req, res, next, serviceManager)
         req.body.grade ) {
         var userData = req.session.passport.user;
 
-        if(!req.body.gameIds ||
-           !_.isArray(req.body.gameIds) ) {
-            this.requestUtil.errorResponse(res, {error: "gameIds missing or not array", key:"gameids.invalid"});
+        if(!req.body.games ||
+           !_.isArray(req.body.games) ) {
+            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"gameids.invalid"});
             return;
         }
 
@@ -297,7 +302,7 @@ function createCourse(req, res, next, serviceManager)
                 title:       req.body.title,
                 grade:       req.body.grade,
                 institution: req.body.institution,
-                gameIds:     req.body.gameIds,
+                games:       req.body.games,
                 id:    0,
                 code: "",
                 studentCount: 0,
@@ -311,11 +316,11 @@ function createCourse(req, res, next, serviceManager)
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
             var gameIds = dash.getListOfGameIds();
-            for(var i = 0; i < courseData.gameIds.length; i++){
+            for(var i = 0; i < courseData.games.length; i++){
                 var found = false;
                 // check if gameId is in the course
                 for(var j = 0; j < gameIds.length; j++) {
-                    if(courseData.gameIds[i] == gameIds[j]) {
+                    if(courseData.games[i].id == gameIds[j]) {
                         found = true;
                         break;
                     }
@@ -333,7 +338,7 @@ function createCourse(req, res, next, serviceManager)
 
                     if( userData.role == lConst.role.instructor ||
                         userData.role == lConst.role.manager) {
-                        return this.myds.addGamesToCourse(courseId, courseData.gameIds)
+                        return this.myds.addGamesToCourse(courseId, courseData.games)
                                 .then(function() {
                                     return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor);
                                 }.bind(this));
@@ -373,8 +378,10 @@ exampleOut.getCourse = {
     "institution": 10,
     "code": "VMZ2P",
     "studentCount": 0,
-    "freePlay": false,
-    "gameIds": ['SC', 'AA-1']
+    "games": [
+        { "id": "SC",   "settings": {"missionProgressLock": true } },
+        { "id": "AA-1", "settings": {} }
+    ]
 };
 function getCourse(req, res, next) {
 
@@ -417,6 +424,9 @@ function getCourse(req, res, next) {
 
                     var courses    = [];
                     courses.push(course); // add course
+
+                    // TODO: remove free_play from the DB, game settings are now stored in the game table
+                    delete course.freePlay;
 
                     var getCourses = _getCourses.bind(this)
                     getCourses(courses, showMembers)
@@ -475,8 +485,8 @@ return when.promise(function(resolve, reject) {
                     p = this.myds.getGamesForCourse(course.id);
                 }
 
-                p.then(function(gameIds) {
-                    course.gameIds = _.clone(gameIds);
+                p.then(function(games) {
+                    course.games = _.clone(games);
                     // need to return something for reduce to continue
                     return 1;
                 }.bind(this));
@@ -565,16 +575,16 @@ function updateCourseInfo(req, res, next, serviceManager)
 /*
  POST http://localhost:8001/api/v2/lms/course/107/games
  */
-exampleIn.updateGamesInCourse = {
-    "gameIds": ["SC"]
-};
+exampleIn.updateGamesInCourse = [
+    { "id": "SC",   "settings": {"missionProgressLock": true } },
+    { "id": "AA-1", "settings": {} }
+];
 function updateGamesInCourse(req, res, next, serviceManager)
 {
     if( req.body &&
-        req.body.gameIds &&
-        _.isArray(req.body.gameIds) ) {
+        _.isArray(req.body) ) {
         var userData = req.session.passport.user;
-        var updateGameIds = req.body.gameIds;
+        var userInputGames = req.body;
 
         if( !req.params ||
             !req.params.hasOwnProperty("courseId") ) {
@@ -592,11 +602,11 @@ function updateGamesInCourse(req, res, next, serviceManager)
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
             var gameIds = dash.getListOfGameIds();
-            for(var i = 0; i < updateGameIds.length; i++){
+            for(var i = 0; i < userInputGames.length; i++){
                 var found = false;
                 // check if gameId is in the course
                 for(var j = 0; j < gameIds.length; j++) {
-                    if(updateGameIds[i] == gameIds[j]) {
+                    if(userInputGames[i].id == gameIds[j]) {
                         found = true;
                         break;
                     }
@@ -609,46 +619,57 @@ function updateGamesInCourse(req, res, next, serviceManager)
             }
 
             this.myds.getGamesForCourse(courseId)
-                .then(function (currentGameIds) {
-                    var addGameIds = [];
-                    var removeGameIds = [];
+                .then(function (currentGames) {
+                    var addGames = [];
+                    var removeGames = [];
+                    var updateGames = [];
 
-                    // find gameIds to remove
-                    for (var i = 0; i < currentGameIds.length; i++) {
+                    // find games to remove or update
+                    for (var i = 0; i < currentGames.length; i++) {
                         var found = false;
-                        for (var j = 0; j < updateGameIds.length; j++) {
-                            if (updateGameIds[j] == currentGameIds[i]) {
+                        for (var j = 0; j < userInputGames.length; j++) {
+                            if (userInputGames[j].id == currentGames[i].id) {
                                 found = true;
+
+                                // if not equal then add userInput for update
+                                if(!_.isEqual(userInputGames[j], currentGames[i])) {
+                                    updateGames.push(userInputGames[j]);
+                                }
+
                                 break;
                             }
                         }
                         if (!found) {
-                            removeGameIds.push(currentGameIds[i]);
+                            removeGames.push(currentGames[i]);
                         }
                     }
 
-                    // find gameIds to add
-                    for (var i = 0; i < updateGameIds.length; i++) {
+                    // find games to add
+                    for (var i = 0; i < userInputGames.length; i++) {
                         var found = false;
-                        for (var j = 0; j < currentGameIds.length; j++) {
-                            if (currentGameIds[j] == updateGameIds[i]) {
+                        for (var j = 0; j < currentGames.length; j++) {
+                            if (currentGames[j].id == userInputGames[i].id) {
                                 found = true;
                                 break;
                             }
                         }
                         if (!found) {
-                            addGameIds.push(updateGameIds[i]);
+                            addGames.push(userInputGames[i]);
                         }
                     }
 
                     var promiseList = [];
-                    if(removeGameIds.length > 0) {
-                        //console.log("updateCourse removeGameIds:", removeGameIds);
-                        promiseList.push(this.myds.removeGamesInCourse(courseId, removeGameIds));
+                    if(removeGames.length > 0) {
+                        //console.log("updateCourse removeGames:", removeGames);
+                        promiseList.push(this.myds.removeGamesFromCourse(courseId, removeGames));
                     }
-                    if(addGameIds.length > 0) {
-                        //console.log("updateCourse addGameIds:", addGameIds);
-                        promiseList.push(this.myds.addGamesToCourse(courseId, addGameIds));
+                    if(addGames.length > 0) {
+                        //console.log("updateCourse addGames:", addGames);
+                        promiseList.push(this.myds.addGamesToCourse(courseId, addGames));
+                    }
+                    if(updateGames.length > 0) {
+                        //console.log("updateCourse updateGames:", updateGames);
+                        promiseList.push(this.myds.updateGamesInCourse(courseId, updateGames));
                     }
                     return when.all(promiseList);
                 }.bind(this))
