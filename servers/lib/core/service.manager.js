@@ -240,6 +240,9 @@ ServiceManager.prototype.setupApiRoutes = function() {
                 controller = ControllerList[a.controller];
             }
 
+            // save route in list for route lookup
+            this.routeList[ a.api ] = {};
+
             // add each method
             _.forEach(a.method, function(funcName, m) {
                 var func = function(){};
@@ -248,8 +251,8 @@ ServiceManager.prototype.setupApiRoutes = function() {
                     controller[ funcName ] ) {
                     func = controller[ funcName ];
 
-                    // save route in list for route lookup
-                    this.routeList[ a.api ] = {
+                    // save route with method
+                    this.routeList[ a.api ][m] = {
                         service: service,
                         func:    func
                     };
@@ -351,7 +354,7 @@ ServiceManager.prototype.start = function(port) {
             for(var s in this.services) {
                 if( this.services[s].service &&
                     this.services[s].service.start) {
-                    promiseList.push( this.services[s].service.start() );
+                    promiseList.push( this.services[s].service.start(this) );
                 }
             }
 
@@ -413,10 +416,12 @@ ServiceManager.prototype.updateUserDataInSession = function(session){
 // end promise wrapper
 };
 
-ServiceManager.prototype.internalRoute = function(routePath, args){
-    if(this.routeList.hasOwnProperty(routePath)) {
+ServiceManager.prototype.internalRoute = function(routePath, method, args){
+    if( this.routeList.hasOwnProperty(routePath) &&
+        this.routeList[routePath].hasOwnProperty(method)
+      ) {
 
-        var route = this.routeList[routePath];
+        var route = this.routeList[routePath][method];
 
         if(_.isArray(args)) {
             args.push(this);

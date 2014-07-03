@@ -11,7 +11,8 @@ module.exports = {
     unenrollUserFromCourse: unenrollUserFromCourse,
     createCourse:           createCourse,
     getCourse:              getCourse,
-    updateCourse:           updateCourse
+    updateCourseInfo:       updateCourseInfo,
+    updateGamesInCourse:    updateGamesInCourse
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -126,7 +127,7 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
                                 req.query.showMembers = req.body.showMembers;
                                 req.params.id = courseId;
                                 // get and respond with course
-                                serviceManager.internalRoute('/api/course/:id', [req, res, next]);
+                                serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next]);
 
                             }.bind(this))
                     } else {
@@ -212,7 +213,7 @@ exampleOut.getEnrolledCourses_WithMembers =[
         "users": []
     }
 ];
-function getEnrolledCourses(req, res, next, serviceManager) {
+function getEnrolledCourses(req, res, next) {
 
     if( req.session &&
         req.session.passport) {
@@ -221,57 +222,21 @@ function getEnrolledCourses(req, res, next, serviceManager) {
         this.myds.getEnrolledCourses(userData.id)
             .then(function(courses){
 
-                if( courses &&
-                    courses.length) {
+                var getCourses = _getCourses.bind(this)
 
-                    // TODO: replace using internal route, but needs callback when route is done
-                    var dash = serviceManager.get("dash").service;
-                    var gameIds = dash.getListOfGameIds();
-
-                    // add games to each course
-                    // TODO: replace this with request to get games per class
-                    for(var i = 0; i < courses.length; i++) {
-                        courses[i].gameIds = gameIds;
-                    }
-
-                    // cousers is not empty
-                    // showMembers is in query
-                    // convert showMembers to int and then check it's value
-                    if( req.query.hasOwnProperty("showMembers") &&
-                        parseInt(req.query.showMembers) ) {
-
-                        // added empty object for reduce to work
-                        courses.unshift({});
-
-                        when.reduce(courses, function(data, course, i){
-                            if(course.id) {
-                                //console.log("id:", course.id);
-                                // init user
-                                course.users = [];
-                                return this.myds.getStudentsOfCourse(course.id)
-                                    .then(function(studentList){
-                                        course.users = _.clone(studentList);
-                                        // need to return something for reduce to continue
-                                        return 1;
-                                    }.bind(this));
-                            }
-                        }.bind(this))
-                            .then(null, function(err){
-                                this.requestUtil.errorResponse(res, err);
-                            }.bind(this))
-                            .done(function(){
-                                //console.log("done");
-                                // added empty object for reduce to work
-                                courses.shift();
-                                this.requestUtil.jsonResponse(res, courses);
-                            }.bind(this))
-
-                    } else {
-                        this.requestUtil.jsonResponse(res, courses);
-                    }
-                } else {
-                    this.requestUtil.jsonResponse(res, courses);
+                var showMembers = false;
+                if( req.query.hasOwnProperty("showMembers") ) {
+                    showMembers = parseInt(req.query.showMembers);
                 }
+
+                getCourses(courses, showMembers)
+                    .then(function(courses){
+                            this.requestUtil.jsonResponse(res, courses);
+                        }.bind(this),
+                        function(err){
+                            this.requestUtil.errorResponse(res, err);
+                        }.bind(this)
+                    );
 
             }.bind(this))
             .then(null, function(err){
@@ -282,10 +247,19 @@ function getEnrolledCourses(req, res, next, serviceManager) {
     }
 }
 
+/*
+ http://localhost:8001/api/v2/lms/course/create
+
+ title   - required
+ grade   - required
+ gameIds - required
+ institution - optional
+ */
 exampleIn.createCourse = {
     "title": "test",
     "grade": "7",
-    "institution": 10
+    "institution": 10,
+    "gameIds": ["SC", "AA-1"]
 };
 
 exampleOut.createCourse = {
@@ -298,14 +272,21 @@ exampleOut.createCourse = {
     "institution": 10,
     "code": "VMZ2P",
     "studentCount": 0,
-    "freePlay": false
+    "freePlay": false,
+    "gameIds": ['SC', 'AA-1']
 };
-function createCourse(req, res, next)
+function createCourse(req, res, next, serviceManager)
 {
     if( req.body &&
         req.body.title &&
         req.body.grade ) {
         var userData = req.session.passport.user;
+
+        if(!req.body.gameIds ||
+           !_.isArray(req.body.gameIds) ) {
+            this.requestUtil.errorResponse(res, {error: "gameIds missing or not array", key:"gameids.invalid"});
+            return;
+        }
 
         // check if instructor, manager or admin
         if( userData.role == lConst.role.instructor ||
@@ -316,6 +297,7 @@ function createCourse(req, res, next)
                 title:       req.body.title,
                 grade:       req.body.grade,
                 institution: req.body.institution,
+                gameIds:     req.body.gameIds,
                 id:    0,
                 code: "",
                 studentCount: 0,
@@ -323,27 +305,44 @@ function createCourse(req, res, next)
                 locked:   false,
                 archived: false,
                 archivedDate: null
-
             };
 
-            this.myds.createCourse(userData.id, courseData.title, courseData.grade, courseData.institution)
+            // validate gameId's
+            // TODO: replace using internal route, but needs callback when route is done
+            var dash = serviceManager.get("dash").service;
+            var gameIds = dash.getListOfGameIds();
+            for(var i = 0; i < courseData.gameIds.length; i++){
+                var found = false;
+                // check if gameId is in the course
+                for(var j = 0; j < gameIds.length; j++) {
+                    if(courseData.gameIds[i] == gameIds[j]) {
+                        found = true;
+                        break;
+                    }
+                }
 
+                if(!found) {
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.gameIds[i]+"' is not valid", key:"gameid.invalid"});
+                    return; // exit function
+                }
+            }
+
+            this.myds.createCourse(userData.id, courseData.title, courseData.grade, courseData.institution)
                 .then(function(courseId){
+                    courseData.id = courseId;
+
                     if( userData.role == lConst.role.instructor ||
                         userData.role == lConst.role.manager) {
-                        return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor)
-                            .then(function() {
-                                return courseId;
-                            }.bind(this))
-                    } else {
-                        return courseId;
+                        return this.myds.addGamesToCourse(courseId, courseData.gameIds)
+                                .then(function() {
+                                    return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor);
+                                }.bind(this));
                     }
                 }.bind(this))
 
-                .then(function(courseId){
-                    courseData.id   = courseId;
+                .then(function(){
                     courseData.code = this._generateCode();
-                    return this.myds.addCode(courseData.code, courseId, lConst.code.type.course)
+                    return this.myds.addCode(courseData.code, courseData.id, lConst.code.type.course)
                         .then(function(){
                             this.requestUtil.jsonResponse(res, courseData);
                         }.bind(this));
@@ -362,8 +361,21 @@ function createCourse(req, res, next)
 }
 
 /*
-     "/api/course/37?showMembers=1"
+ GET http://localhost:8001/api/v2/lms/course/107/info?showMembers=1
 */
+exampleOut.getCourse = {
+    "id": 16,
+    "title": "test1",
+    "grade": "7, 8, 9",
+    "locked": false,
+    "archived": false,
+    "archivedDate": null,
+    "institution": 10,
+    "code": "VMZ2P",
+    "studentCount": 0,
+    "freePlay": false,
+    "gameIds": ['SC', 'AA-1']
+};
 function getCourse(req, res, next) {
 
     if( req.session &&
@@ -371,14 +383,20 @@ function getCourse(req, res, next) {
         var userData = req.session.passport.user;
 
         if( req.params &&
-            req.params.hasOwnProperty("id") ) {
-            var courseId = req.params.id;
+            req.params.hasOwnProperty("courseId") ) {
+            var courseId = req.params.courseId;
 
             // check if enrolled in course
+            var showMembers = false;
             var promise;
             if( userData.role == lConst.role.instructor ||
                 userData.role == lConst.role.manager ||
                 userData.role == lConst.role.admin ) {
+                // only show members if not student
+                if( req.query.hasOwnProperty("showMembers") ) {
+                    showMembers = parseInt(req.query.showMembers);
+                }
+
                 // do nothing promise
                 promise = when.promise(function(resolve){resolve(1)}.bind(this));
             } else {
@@ -397,41 +415,23 @@ function getCourse(req, res, next) {
                         return;
                     }
 
-                    // cousers is not empty
-                    // showMembers is in query
-                    // convert showMembers to int and then check it's value
-                    if( req.query.hasOwnProperty("showMembers") &&
-                        parseInt(req.query.showMembers) ) {
+                    var courses    = [];
+                    courses.push(course); // add course
 
-                        if(course.id) {
-                            //console.log("id:", course.id);
-                            // init user
-                            course.users = [];
-
-                            // only get students if instructor, manager or admin
-                            if( userData.role == lConst.role.instructor ||
-                                userData.role == lConst.role.manager ||
-                                userData.role == lConst.role.admin ) {
-                                this.myds.getStudentsOfCourse(course.id)
-                                    .then(function(studentList){
-                                        course.users = _.clone(studentList);
-                                        // need to return something for reduce to continue
-                                        this.requestUtil.jsonResponse(res, course);
-                                    }.bind(this))
-
-                                    .then(null, function(err){
-                                        this.requestUtil.errorResponse(res, err);
-                                    }.bind(this))
+                    var getCourses = _getCourses.bind(this)
+                    getCourses(courses, showMembers)
+                        .then(function(courses){
+                            if( courses &&
+                                courses.length > 0) {
+                                this.requestUtil.jsonResponse(res, courses[0]);
                             } else {
-                                this.requestUtil.jsonResponse(res, course);
+                                this.requestUtil.errorResponse(res, "missing course");
                             }
-
-                        } else {
-                            this.requestUtil.errorResponse(res, "invalid course id");
-                        }
-                    } else {
-                        this.requestUtil.jsonResponse(res, course);
-                    }
+                        }.bind(this),
+                        function(err){
+                            this.requestUtil.errorResponse(res, err);
+                        }.bind(this)
+                    );
 
                 }.bind(this))
                 .then(null, function(err){
@@ -446,32 +446,87 @@ function getCourse(req, res, next) {
 }
 
 
+function _getCourses(courses, showMembers){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    if( courses &&
+        courses.length) {
+
+        // added empty object for reduce to work
+        courses.unshift({});
+
+        when.reduce(courses, function(data, course, i){
+            if(course.id) {
+                //console.log("id:", course.id);
+
+                // convert showMembers to int and then check it's value
+                var p;
+                if(showMembers) {
+                    // init user
+                    course.users = [];
+
+                    p = this.myds.getStudentsOfCourse(course.id)
+                        .then(function(studentList) {
+                            course.users = _.clone(studentList);
+                            return this.myds.getGamesForCourse(course.id);
+                        }.bind(this));
+                } else {
+                    p = this.myds.getGamesForCourse(course.id);
+                }
+
+                p.then(function(gameIds) {
+                    course.gameIds = _.clone(gameIds);
+                    // need to return something for reduce to continue
+                    return 1;
+                }.bind(this));
+
+                return p;
+            }
+        }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            }.bind(this))
+
+            .done(function(){
+                //console.log("done");
+                // added empty object for reduce to work
+                courses.shift();
+                resolve(courses);
+            }.bind(this))
+    } else {
+        resolve(courses);
+    }
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}
+
+/*
+ POST http://localhost:8001/api/v2/lms/course/107/info
+
+ title - required
+ grade - required
+ institutionId - optional
+ archived - optional
+ */
 exampleIn.updateCourse = {
-    "id": 8,
     "title": "test61",
-    "grade": "7",
-    "locked": false,
-    "archived": false,
-    "freePlay": false,
-    "code": "YD8WV",
-    "studentCount": 2,
-    "archivedDate": null,
-    "institution": 10,
-    "users": [
-        {"id": 175, "firstName": "test2_s0", "lastName": "test2_s1", "username": "test2_s1", "email": "test2_s1@test.com", "role": "student"},
-        {"id": 176, "firstName": "test2_s2", "lastName": "test2_s2", "username": "test2_s2", "email": "", "role": "student"}
-    ],
-    "showMembers": 1,
-    "cb": 1395992841665
+    "grade": "7"
 };
-function updateCourse(req, res, next)
+function updateCourseInfo(req, res, next, serviceManager)
 {
     if( req.body &&
         req.body.title &&
-        req.body.grade &&
-        req.body.id &&
-        _.isNumber(req.body.id)) {
+        req.body.grade ) {
         var userData = req.session.passport.user;
+
+        if( !req.params ||
+            !req.params.hasOwnProperty("courseId") ) {
+            this.requestUtil.errorResponse(res, "missing course id");
+            return;
+        }
+        var courseId = req.params.courseId;
 
         // check if instructor, manager or admin
         if( userData.role == lConst.role.instructor ||
@@ -479,7 +534,7 @@ function updateCourse(req, res, next)
             userData.role == lConst.role.admin ) {
 
             var courseData = {
-                id:            req.body.id,
+                id:            courseId,
                 title:         req.body.title,
                 grade:         req.body.grade,
                 institutionId: req.body.institution,
@@ -490,17 +545,123 @@ function updateCourse(req, res, next)
                 courseData.archivedDate = Util.GetTimeStamp();
             }
 
-            this.myds.updateCourse(userData.id, courseData)
-
+            this.myds.updateCourseInfo(userData.id, courseData)
                 .then(function() {
-                    // respond with all data passed in plus an changes (example archived date)
-                    this.requestUtil.jsonResponse(res, _.merge(req.body, courseData));
+                    serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next]);
                 }.bind(this))
 
                 // error catchall
                 .then(null, function(err) {
                     this.requestUtil.errorResponse(res, err, 400);
                 }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, "user does not have permission");
+        }
+    } else {
+        this.requestUtil.errorResponse(res, "missing arguments or invalid");
+    }
+}
+
+/*
+ POST http://localhost:8001/api/v2/lms/course/107/games
+ */
+exampleIn.updateGamesInCourse = {
+    "gameIds": ["SC"]
+};
+function updateGamesInCourse(req, res, next, serviceManager)
+{
+    if( req.body &&
+        req.body.gameIds &&
+        _.isArray(req.body.gameIds) ) {
+        var userData = req.session.passport.user;
+        var updateGameIds = req.body.gameIds;
+
+        if( !req.params ||
+            !req.params.hasOwnProperty("courseId") ) {
+            this.requestUtil.errorResponse(res, "missing course id");
+            return;
+        }
+        var courseId = req.params.courseId;
+
+        // check if instructor, manager or admin
+        if( userData.role == lConst.role.instructor ||
+            userData.role == lConst.role.manager ||
+            userData.role == lConst.role.admin ) {
+
+            // validate gameId's
+            // TODO: replace using internal route, but needs callback when route is done
+            var dash = serviceManager.get("dash").service;
+            var gameIds = dash.getListOfGameIds();
+            for(var i = 0; i < updateGameIds.length; i++){
+                var found = false;
+                // check if gameId is in the course
+                for(var j = 0; j < gameIds.length; j++) {
+                    if(updateGameIds[i] == gameIds[j]) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(!found) {
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+updateGameIds[i]+"' is not valid", key:"gameid.invalid"});
+                    return; // exit function
+                }
+            }
+
+            this.myds.getGamesForCourse(courseId)
+                .then(function (currentGameIds) {
+                    var addGameIds = [];
+                    var removeGameIds = [];
+
+                    // find gameIds to remove
+                    for (var i = 0; i < currentGameIds.length; i++) {
+                        var found = false;
+                        for (var j = 0; j < updateGameIds.length; j++) {
+                            if (updateGameIds[j] == currentGameIds[i]) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            removeGameIds.push(currentGameIds[i]);
+                        }
+                    }
+
+                    // find gameIds to add
+                    for (var i = 0; i < updateGameIds.length; i++) {
+                        var found = false;
+                        for (var j = 0; j < currentGameIds.length; j++) {
+                            if (currentGameIds[j] == updateGameIds[i]) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            addGameIds.push(updateGameIds[i]);
+                        }
+                    }
+
+                    var promiseList = [];
+                    if(removeGameIds.length > 0) {
+                        //console.log("updateCourse removeGameIds:", removeGameIds);
+                        promiseList.push(this.myds.removeGamesInCourse(courseId, removeGameIds));
+                    }
+                    if(addGameIds.length > 0) {
+                        //console.log("updateCourse addGameIds:", addGameIds);
+                        promiseList.push(this.myds.addGamesToCourse(courseId, addGameIds));
+                    }
+                    return when.all(promiseList);
+                }.bind(this))
+
+                .then(function () {
+                    serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next]);
+                }.bind(this))
+
+                // error catchall
+                .then(null, function (err) {
+                    this.requestUtil.errorResponse(res, err, 400);
+                }.bind(this));
+
         } else {
             this.requestUtil.errorResponse(res, "user does not have permission");
         }

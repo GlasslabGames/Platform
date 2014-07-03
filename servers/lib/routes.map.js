@@ -211,14 +211,21 @@ module.exports = {
         },
         {
             requireAuth: true,
-            // id -> courseId
-            api: "/api/v2/lms/course/:id",
+            api: "/api/v2/lms/course/:courseId/info",
             service: "lms",
             controller: "course",
             method: {
                 get: "getCourse",
-                post: "updateCourse",
-                "delete": "deleteCourse"
+                post: "updateCourseInfo"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/lms/course/:courseId/games",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "updateGamesInCourse"
             }
         },
         // ---------------------------------------------------

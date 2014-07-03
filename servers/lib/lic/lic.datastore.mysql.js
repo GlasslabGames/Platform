@@ -74,17 +74,17 @@ return when.promise(function(resolve, reject) {
         " UNIQUE INDEX `uq_user_lic_inst` (`user_id` ASC, `license_id` ASC, `institution_id` ASC)," +
         " CONSTRAINT `fk_user_id`" +
         "   FOREIGN KEY (`user_id`)" +
-        "   REFERENCES `glasslab_dev`.`GL_USER` (`id`)" +
+        "   REFERENCES `GL_USER` (`id`)" +
         "   ON DELETE NO ACTION" +
         "   ON UPDATE NO ACTION," +
         " CONSTRAINT `fk_license_id`" +
         "   FOREIGN KEY (`license_id`)" +
-        "   REFERENCES `glasslab_dev`.`GL_LICENSE` (`ID`)" +
+        "   REFERENCES `GL_LICENSE` (`ID`)" +
         "   ON DELETE NO ACTION" +
         "   ON UPDATE NO ACTION," +
         "   CONSTRAINT `fk_institution_id`" +
         "   FOREIGN KEY (`institution_id`)" +
-        "   REFERENCES `glasslab_dev`.`GL_INSTITUTION` (`ID`)" +
+        "   REFERENCES `GL_INSTITUTION` (`ID`)" +
         "   ON DELETE NO ACTION" +
         "   ON UPDATE NO ACTION)";
 

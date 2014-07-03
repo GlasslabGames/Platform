@@ -3,8 +3,6 @@
     "enabled": true,
     "shortName": "SimCity Edu",
     "longName": "SimCityEdu",
-    "shortDescription": "",
-    "longDescription": "",
     "settings" : {
         "missionProgressLock": true
     },
@@ -13,7 +11,7 @@
         "valid": true
     },
     "reports": {
-        "sowo" : {},
+        "sowo": {},
         "competency": {
             "numLevels": 3,
             "levels": [
@@ -23,5 +21,24 @@
         "mission-progress" : {},
         "learning-progress" : {},
         "diagram-view" : {}
+    },
+    "details": {
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab"
+        },
+        "release": "live",
+        "shortDescription": "",
+        "longDescription": "",
+        "price": "Free",
+        "releaseDate": "Nov. 2, 2013",
+        "type": "Client Download",
+        "platform": "PC & Mac",
+        "subject": "21st Century Skills, ELA",
+        "grades": "6 - 8",
+        "productDescription": "",
+        "standards": "",
+        "lessonPlans": "",
+        "research": ""
     }
 }
