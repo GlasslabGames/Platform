@@ -279,6 +279,7 @@ return when.promise(function(resolve, reject) {
         "first_name as firstName, " +
         "last_name as lastName, " +
         "system_role as role, " +
+        "password," +
         "institution_id as institutionId " +
         "FROM GL_USER WHERE id="+this.ds.escape(id);
     this.ds.query(Q)
@@ -349,7 +350,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-Glasslab_Strategy.prototype.updateUserData = function(userData){
+Glasslab_Strategy.prototype.updateUserDBData = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -664,6 +665,10 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var dbUserData;
     var sessionDataChanged = false;
+    // if logged in user session data is nothing then is ALWAYS self
+    if(!loginUserSessionData) {
+        loginUserSessionData = { id: userData.id };
+    }
     var isSelf = (loginUserSessionData.id == userData.id);
 
     // get/validate user by Id
@@ -717,16 +722,22 @@ return when.promise(function(resolve, reject) {
         // verify password if needed
         .then(function(){
             if(userData.password) {
-                // passing old password to salt new password to validate
-                return this._comparePassword(userData.password, dbUserData.PASSWORD);
+                if (!this._isEncrypted(userData.password)) {
+                    // passing old password to salt new password to validate
+                    return this._comparePassword(userData.password, dbUserData.password);
+                } else {
+                    return userData.password;
+                }
             }
         }.bind(this))
 
         // if password changed update
         .then(function(password){
             // password changed
-            if(password && dbUserData.PASSWORD != password) {
+            if(password && dbUserData.password != password) {
                 userData.resetCode = "NULL";
+                userData.resetCodeExpiration = "NULL";
+                userData.resetCodeStatus = "NULL";
             }
             // set password to encrypted version
             userData.password = password;
@@ -748,7 +759,7 @@ return when.promise(function(resolve, reject) {
                 }
             }
 
-            return this.updateUserData(userData);
+            return this.updateUserDBData(userData);
         }.bind(this))
 
         // all ok
@@ -769,6 +780,19 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Glasslab_Strategy.prototype._isEncrypted = function(password) {
+    var eType      = aConst.encrypt.type.pdkdf2;
+    var eAlgo      = aConst.encrypt.algo.hmacsha1;
+
+    var parts = password.split(":");
+    if( (parts[0] == eType) ||
+        (parts[1] == eAlgo)
+      ){
+        return true;
+    } else {
+        return false;
+    }
+};
 
 Glasslab_Strategy.prototype.checkUserPerminsToUserData = function(userData, loginUserData){
 // add promise wrapper
