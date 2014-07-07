@@ -211,6 +211,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/lms/course/unenroll-user",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "unenrollUserFromCourse"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/lms/course/:courseId/info",
             service: "lms",
             controller: "course",
@@ -274,15 +283,24 @@ module.exports = {
                 post: "registerUserV2"
             }
         },
+
         {
             requireAuth: true,
-            // id -> userId
-            api: "/api/v2/auth/user/:id",
+            api: "/api/v2/auth/user/:userId",
             service: "auth",
             controller: "user",
             method: {
-                get: "showUser",
-                post: "updateUser"
+                get: "getUserDataById",
+                post: "updateUserData"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/user/profile",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserProfileData"
             }
         },
         {
@@ -361,112 +379,6 @@ module.exports = {
             controller: "config",
             method: {
                 get: "index"
-            }
-        },
-        {
-            api: "/api/user/login",
-            service: "auth",
-            controller: "login",
-            method: {
-                post: "glassLabLogin"
-            }
-        },
-        {
-            api: "/api/user/logout",
-            service: "auth",
-            controller: "login",
-            method: {
-                post: "logout"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/user/profile",
-            service: "auth",
-            controller: "user",
-            method: {
-                get: "getUserProfileData"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/user/:userId",
-            service: "auth",
-            controller: "user",
-            method: {
-                get:  "getUserDataById",
-                post: "updateUserData"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/course",
-            service: "lms",
-            controller: "course",
-            method: {
-                get: "getEnrolledCourses"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/course/create",
-            service: "lms",
-            controller: "course",
-            method: {
-                post: "createCourse"
-            }
-        },
-        {
-            requireAuth: true,
-            // id -> courseId
-            api: "/api/course/:id",
-            service: "lms",
-            controller: "course",
-            method: {
-                get: "getCourse"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/course/update",
-            service: "lms",
-            controller: "course",
-            method: {
-                post: "updateCourse"
-            }
-        },
-        {
-            requireAuth: true,
-            // id -> courseId
-            api: "/api/course/unenroll/:id",
-            service: "lms",
-            controller: "course",
-            method: {
-                post: "unenrollUserFromCourse"
-            }
-        },
-        {
-            api: "/api/user/resetpassword/send",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "resetPasswordSend"
-            }
-        },
-        {
-            api: "/api/user/resetpassword/verify/:code",
-            service: "auth",
-            controller: "user",
-            method: {
-                get: "resetPasswordVerify"
-            }
-        },
-        {
-            api: "/api/user/resetpassword/update",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "resetPasswordUpdate"
             }
         }
     ]

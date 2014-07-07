@@ -49,3 +49,15 @@ GlasslabAccount.prototype.checkUserPerminsToUserData = function(userData, loginU
 GlasslabAccount.prototype.updateUserData = function(userData, loginUserSessionData) {
     return this.strategy.updateUserData(userData, loginUserSessionData);
 };
+
+GlasslabAccount.prototype.getUserByEmail = function(email) {
+    return this.strategy.getUserByEmail(email);
+};
+
+GlasslabAccount.prototype.findUser = function(type, value) {
+    return this.strategy.findUser(type, value);
+};
+
+GlasslabAccount.prototype.encryptPassword = function(password, passwordScheme) {
+    return this.strategy.encryptPassword(password, passwordScheme);
+};

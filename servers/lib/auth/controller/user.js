@@ -269,17 +269,17 @@ function registerManager(req, res, next) {
  function updateUserData(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Update.User");
     //console.log("Auth updateUserRoute - body:", req.body);
-    if( !(req.body.id) )
+    if( !(req.body.userId) )
     {
         this.stats.increment("error", "Route.Update.User.MissingId");
-        this.requestUtil.errorResponse(res, "missing the id", 400);
+        this.requestUtil.errorResponse(res, "missing the userId", 400);
         return;
     }
 
     var loginUserSessionData = req.session.passport.user;
 
     var userData = {
-        id:            req.body.id,
+        id:            req.body.userId,
         loginType:     aConst.login.type.glassLabV2  // TODO add login type to user data on client
     };
     if(req.body.username) {
