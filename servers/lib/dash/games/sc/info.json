@@ -39,6 +39,16 @@
         "productDescription": "",
         "standards": "",
         "lessonPlans": "",
-        "research": ""
+        "research": "",
+        "banners": {
+            "product": "http://s3...",
+            "reports": "http://s3..."
+        },
+        "slideshow": [
+            {
+                "type": "image",
+                "url": "http://s3..."
+            }
+        ]
     }
 }

@@ -184,8 +184,8 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-exampleOut.validateLicense = true; // boolean true or false
-Lic_MySQL.prototype.validateLicense = function(licenseKey) {
+exampleOut.verifyLicense = true; // boolean true or false
+Lic_MySQL.prototype.verifyLicense = function(licenseKey) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------

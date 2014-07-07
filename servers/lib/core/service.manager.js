@@ -63,7 +63,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
-    var MemoryStore    = express.session.MemoryStore;
+    //var MemoryStore    = express.session.MemoryStore;
 
     // express session store
     this.exsStore = new CouchbaseStore(this.options.services.session.store);
@@ -106,7 +106,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-}
+};
 
 ServiceManager.prototype.add = function(lib) {
     if(lib.ServiceName) {
@@ -119,7 +119,7 @@ ServiceManager.prototype.add = function(lib) {
             console.warn("ServiceManager: Service", lib.ServiceName, "Already added");
         }
     }
-}
+};
 
 ServiceManager.prototype.get = function(name) {
     if( this.services.hasOwnProperty(name) ) {
@@ -127,7 +127,7 @@ ServiceManager.prototype.get = function(name) {
     } else {
         return undefined;
     }
-}
+};
 
 ServiceManager.prototype.setupRoutes = function() {
 
@@ -142,14 +142,14 @@ ServiceManager.prototype.setupRoutes = function() {
 
     // final default routes
     this.setupDefaultRoutes();
-}
+};
 
 ServiceManager.prototype.setupWebAppRoutes = function() {
     var fullPath = path.resolve(this.options.webapp.staticContentPath);
 
     console.log("Static Dir Content -", fullPath);
     this.app.use( express.static(fullPath) );
-}
+};
 
 
 ServiceManager.prototype.setupDefaultRoutes = function() {
@@ -220,7 +220,7 @@ ServiceManager.prototype.setupStaticRoutes = function() {
         }.bind(this));
 
     }.bind(this));
-}
+};
 
 
 ServiceManager.prototype.setupApiRoutes = function() {
@@ -312,7 +312,7 @@ ServiceManager.prototype.setupApiRoutes = function() {
             }.bind(this));
         }
     }.bind(this));
-}
+};
 
 ServiceManager.prototype.initServices = function() {
 // add promise wrapper
@@ -335,7 +335,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-}
+};
 
 ServiceManager.prototype.start = function(port) {
 
@@ -392,7 +392,7 @@ ServiceManager.prototype.start = function(port) {
         .then(null, function(err){
             console.error("ServiceManager: Start Error -", err);
         }.bind(this));
-}
+};
 
 ServiceManager.prototype.updateUserDataInSession = function(session){
 // add promise wrapper

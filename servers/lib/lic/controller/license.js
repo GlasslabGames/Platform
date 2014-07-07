@@ -6,9 +6,9 @@ var Util   = require('../../core/util.js');
 var lConst = require('../lic.const.js');
 
 module.exports = {
-    validateLicense:        validateLicense,
-    registerLicense:        registerLicense,
-    getLicenses:            getLicenses
+    verifyLicense:   verifyLicense,
+    registerLicense: registerLicense,
+    getLicenses:     getLicenses
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -17,17 +17,17 @@ var exampleOut = {}, exampleIn = {};
 /*
  http://localhost:8001/api/v2/license/validate/ZQRD-NC7F4-W7LR
  */
-exampleOut.validateLicense =
+exampleOut.verifyLicense =
 {
     licenseKey: "ABCD-12345-EF67"
 };
-function validateLicense(req, res, next) {
+function verifyLicense(req, res, next) {
 
     if( req.params &&
         req.params.licenseKey) {
         var licenseKey = req.params.licenseKey;
 
-        this.myds.validateLicense(licenseKey)
+        this.myds.verifyLicense(licenseKey)
 
             .then(function(validLicense) {
                 if(validLicense.length > 0) {
@@ -38,7 +38,7 @@ function validateLicense(req, res, next) {
             }.bind(this))
 
             .then(null, function(err) {
-                console.error("LicService - validateLicense:", err);
+                console.error("LicService - verifyLicense:", err);
                 this.requestUtil.errorResponse(res, {error:"server error", key:"server.error"}, 500);
             }.bind(this));
 
@@ -62,7 +62,7 @@ function validateLicense(req, res, next) {
         get # of teachers using license
         status (still valid or expired?) (need to cron job to expire old lic)
  */
-exampleOut.validateLicense =
+exampleOut.getLicenses =
 [
     {
         gameId: "SC",
@@ -145,7 +145,7 @@ function registerLicense(req, res, next) {
         var licenseKey = req.body.key;
         var userData = req.session.passport.user;
 
-        this.myds.validateLicense(licenseKey)
+        this.myds.verifyLicense(licenseKey)
 
             .then(function(validLicense) {
                 if(validLicense.length > 0) {

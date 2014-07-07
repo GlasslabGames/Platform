@@ -176,19 +176,11 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/lms/course/code/valid",
+            api: "/api/v2/lms/course/code/:code/verify",
             service: "lms",
             controller: "course",
             method: {
-                post: "validCode"
-            }
-        },
-        {
-            api: "/api/v2/lms/course/code/newcode",
-            service: "lms",
-            controller: "course",
-            method: {
-                post: "newCode"
+                get: "verifyCode"
             }
         },
         {
@@ -240,11 +232,11 @@ module.exports = {
         // ---------------------------------------------------
         {
             requireAuth: true,
-            api: "/api/v2/license/validate/:licenseKey",
+            api: "/api/v2/license/:licenseKey/verify",
             service: "lic",
             controller: "license",
             method: {
-                get: "validateLicense"
+                get: "verifyLicense"
             }
         },
         {
@@ -283,7 +275,15 @@ module.exports = {
                 post: "registerUserV2"
             }
         },
-
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/user/profile",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserProfileData"
+            }
+        },
         {
             requireAuth: true,
             api: "/api/v2/auth/user/:userId",
@@ -292,15 +292,6 @@ module.exports = {
             method: {
                 get: "getUserDataById",
                 post: "updateUserData"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/auth/user/profile",
-            service: "auth",
-            controller: "user",
-            method: {
-                get: "getUserProfileData"
             }
         },
         {
@@ -339,7 +330,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/auth/resetpassword/send",
+            api: "/api/v2/auth/password-reset/send",
             service: "auth",
             controller: "user",
             method: {
@@ -347,19 +338,19 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/auth/resetpassword/verify/:code",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "resetPasswordVerify"
-            }
-        },
-        {
-            api: "/api/v2/auth/resetpassword/update",
+            api: "/api/v2/auth/password-reset/update",
             service: "auth",
             controller: "user",
             method: {
                 post: "resetPasswordUpdate"
+            }
+        },
+        {
+            api: "/api/v2/auth/password-reset/:code/verify",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "resetPasswordVerify"
             }
         },
         {

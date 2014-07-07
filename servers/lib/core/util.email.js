@@ -163,7 +163,7 @@ return when.promise(function(resolve, reject) {
                     console.error("Email: Error sending email -", err);
 
                     if(process.env.HYDRA_ENV == "dev") {
-                        // dev env it's ok if email does not work
+                        // if dev env it's ok if email does not work
                         resolve(200);
                     } else {
                         reject({error: "internal error, try again later"});

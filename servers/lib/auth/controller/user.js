@@ -466,7 +466,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
                     promise
                         .then(function(){
-                            return sendRegisterEmail.call(this, this.options.auth.email, regData, req.headers.host);
+                            return sendRegisterEmail.call(this, this.options.auth.email, regData, req.protocol, req.headers.host);
                         }.bind(this))
                         // all ok
                         .then(function(){
@@ -518,7 +518,7 @@ function registerUserV2(req, res, next, serviceManager) {
 }
 
 
-function sendRegisterEmail(emailOptions, regData, host){
+function sendRegisterEmail(emailOptions, regData, protocol, host){
     var verifyCode = Util.CreateUUID();
     // store code
     // 1) store code
@@ -532,10 +532,10 @@ function sendRegisterEmail(emailOptions, regData, host){
     // instructor, manager or admin (all require email)
     // 2) send email
     var emailData = {
-        subject: "Welcome to Argubot Academy!",
+        subject: "Welcome to Playfully.org!",
         to:   regData.email,
         user: regData,
-        host: this.options.webapp.protocol+"//"+host
+        host: protocol+"://"+host
     };
     var email = new Util.Email(
         emailOptions,
@@ -634,11 +634,11 @@ function resetPasswordSend(req, res, next) {
                         //
                         // 2) send email
                         var emailData = {
-                            subject: "Your Mars Generation One Password",
+                            subject: "Your Playfully.org Password",
                             to:   userData.email,
                             user: userData,
                             code: resetCode,
-                            host: this.options.webapp.protocol+"//"+req.headers.host
+                            host: req.protocol+"://"+req.headers.host
                         };
 
                         var email = new Util.Email(
@@ -687,6 +687,10 @@ function resetPasswordVerify(req, res, next) {
                     if(userData.resetCodeStatus == aConst.passwordReset.status.sent) {
                         // update status
                         userData.resetCodeStatus = aConst.passwordReset.status.inProgress;
+
+                        // remove password as this is not changing, so password is not updated
+                        delete userData.password;
+
                         return this.glassLabStrategy.updateUserData(userData)
                             .then(function() {
                                 this.requestUtil.jsonResponse(res, {});
@@ -765,7 +769,7 @@ function renderEmailTemplate(req, res, next) {
             firstName: "First",
             lastName: "Last Name"
         },
-        host: this.options.webapp.protocol+"//"+req.headers.host
+        host: req.protocol+"://"+req.headers.host
     };
     var email = new Util.Email(
         this.options.auth.email,

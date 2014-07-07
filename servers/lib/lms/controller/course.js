@@ -12,7 +12,8 @@ module.exports = {
     createCourse:           createCourse,
     getCourse:              getCourse,
     updateCourseInfo:       updateCourseInfo,
-    updateGamesInCourse:    updateGamesInCourse
+    updateGamesInCourse:    updateGamesInCourse,
+    verifyCode:             verifyCode
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -689,4 +690,23 @@ function updateGamesInCourse(req, res, next, serviceManager)
     } else {
         this.requestUtil.errorResponse(res, "missing arguments or invalid");
     }
+}
+
+function verifyCode(req, res, next) {
+
+    if (!req.params ||
+        !req.params.hasOwnProperty("code")) {
+        this.requestUtil.errorResponse(res, "missing code");
+        return;
+    }
+    var code = req.params.code;
+
+    this.myds.getCourseIdFromCourseCode(code)
+        .then(function(courseId){
+            if(courseId) {
+                this.requestUtil.jsonResponse(res, {status: "code valid", key:"code.valid"});
+            } else {
+                this.requestUtil.jsonResponse(res, {status: "code invalid", key:"code.invalid"});
+            }
+        }.bind(this))
 }
