@@ -75,7 +75,6 @@ function Strategy(options, verify) {
  */
 util.inherits(Strategy, OAuthStrategy);
 
-
 /**
  * Retrieve user profile from ICivics.
  *
@@ -93,11 +92,12 @@ util.inherits(Strategy, OAuthStrategy);
 
 Strategy.prototype.userProfile = function(token, tokenSecret, params, done) {
     console.log("ICivics - token:", token, ", tokenSecret:", tokenSecret, ", params:", params);
-    this._getUserProfile(this._baseURL+ '/services/rest/service_system/connect.json', token, tokenSecret, done);
+
+    var url = this._baseURL+ '/services/rest/service_system/connect.json';
+    this._getUserProfile(url, token, tokenSecret, null, done);
 };
 
-Strategy.prototype._getUserProfile = function(url, token, tokenSecret, done) {
-    var data = null;//{ "oauth_token": token, "oauth_token_secret": tokenSecret};
+Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, done) {
     this._oauth.post(url, token, tokenSecret, data, function (err, body, res) {
         if (err) { return done(new InternalOAuthError('failed to fetch user profile', err)); }
 
@@ -108,9 +108,10 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, done) {
             this._getUserProfile(res.headers.location, token, tokenSecret, done);
         } else {
             try {
-                console.log("ICivics - body:", body);
+                //console.log("ICivics - _getUserProfile url:", url);
+                //console.log("ICivics - _getUserProfile body:", body);
                 var json = JSON.parse(body);
-                console.log("ICivics - json:", json);
+                //console.log("ICivics - _getUserProfile json:", json);
 
                 var profile = {
                     loginType: aConst.login.type.icivics
@@ -118,21 +119,27 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, done) {
                 profile._raw      = body;
                 profile._json     = json;
 
-                // TODO: fix role using real data
-                profile.role = lConst.role.instructor;
-                /*
-                if(json.user.role == "teacher") {
-                    profile.role = lConst.role.instructor;
-                } else {
+                for(var r in json.user.roles) {
+                    if(json.user.roles[r] == "teacher") {
+                        profile.role = lConst.role.instructor;
+                        break;
+                    }
+                    else if(json.user.roles[r] == "student") {
+                        profile.role = lConst.role.student;
+                        break;
+                    }
+                }
+                if(!profile.role) {
                     profile.role = lConst.role.student;
                 }
-                */
 
-                // TODO: add real firstName and lastName
                 profile.username  = "icivics."+json.user.uid;
-                profile.firstName = json.user.firstName || "Joe";
-                profile.lastName  = json.user.lastName || "Bob";
-                profile.email     = json.user.email || "";
+                if(json.user.name) {
+                    profile.username += "."+json.user.name;
+                }
+                profile.firstName = json.user.first_name || "";
+                profile.lastName  = json.user.last_name || "";
+                profile.email     = json.user.mail || "";
                 profile.password  = body;
 
                 done(null, profile);

@@ -13,7 +13,43 @@
     "reports": {
         "sowo": {},
         "competency": {
-            "numLevels": 3,
+            "groups": [
+                {
+                    "name": "Gameplay",
+                    "list": [
+                        {
+                            "name": "Mission 4",
+                            "id": "4"
+                        },
+                        {
+                            "name": "Mission 6",
+                            "id": "6"
+                        }
+                    ]
+                },
+                {
+                    "name": "Systems Maps Challenges",
+                    "list": [
+                        {
+                            "name": "Mission 1",
+                            "id": "4"
+                        },
+                        {
+                            "name": "Mission 2",
+                            "id": "6"
+                        },
+                        {
+                            "name": "Mission 3",
+                            "id": "6"
+                        },
+                        {
+                            "name": "Mission 5",
+                            "id": "6"
+                        }
+                    ]
+                }
+            ],
+            "maxLevels": 3,
             "levels": [
                 "Prelim"
             ]
@@ -27,6 +63,12 @@
             "id": "GL",
             "name": "GlassLab"
         },
+        "download": {
+            "link": ""
+        },
+        "play": {
+            "link": ""
+        },
         "release": "live",
         "shortDescription": "",
         "longDescription": "",
@@ -36,19 +78,112 @@
         "platform": "PC & Mac",
         "subject": "21st Century Skills, ELA",
         "grades": "6 - 8",
-        "productDescription": "",
-        "standards": "",
-        "lessonPlans": "",
-        "research": "",
+        "pages": {
+            "product": {
+                "about": "With SimCityEDU, educators have more...",
+                "curriculum": [
+                    "SimCityEDU: Pollution Challenge! is made of six..."
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "http://s3..."
+                    }
+                ]
+            },
+            "standards": [
+                {
+                    "category": "ELA Common Core",
+                    "list": [
+                        {
+                            "name": "CCS.ELA-Literacy.RST.6-8.1",
+                            "link": "http://...",
+                            "description": "Cite specific textual evidence to support conclusions."
+                        }
+                    ]
+                },
+                {
+                    "category": "Next Generation Science",
+                    "list": [
+                        {
+                            "name": "ESS3.C",
+                            "link": "http://...",
+                            "description": "Human Impact on Earth Systems."
+                        }
+                    ]
+                }
+            ],
+            "lessonPlans": [
+                {
+                    "category": "Lesson Plans",
+                    "list": [
+                        {
+                            "name": "Routine 1",
+                            "link": "http://..."
+                        },
+                        {
+                            "name": "Routine 2",
+                            "link": "http://..."
+                        }
+                    ]
+                },
+                {
+                    "category": "Videos",
+                    "list": [
+                        {
+                            "name": "Walkthrough",
+                            "link": "http://..."
+                        },
+                        {
+                            "name": "Mission",
+                            "link": "http://..."
+                        }
+                    ]
+                },
+                {
+                    "category": "Info Pack",
+                    "list": [
+                        {
+                            "name": "One Page Game Description",
+                            "link": "http://..."
+                        }
+                    ]
+                }
+            ],
+            "research": [
+                {
+                    "category": "SRI",
+                    "list": [
+                        {
+                            "name": "Digital Games for Learning: A Systems Review...",
+                            "link": "http://..."
+                        }
+                    ]
+                }
+            ],
+            "reviews": [
+                {
+                    "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florda",
+                    "review": "GlassLab Team, you're outdone yourselves..."
+                }
+            ]
+        },
         "banners": {
             "product": "http://s3...",
             "reports": "http://s3..."
         },
-        "slideshow": [
-            {
-                "type": "image",
-                "url": "http://s3..."
-            }
-        ]
+        "publisherLogo": {
+            "small": "http://s3...",
+            "large": "http://s3..."
+        },
+        "gameLogo": {
+            "small": "http://s3...",
+            "large": "http://s3..."
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "http://plus.google.com/glasslabgames"
+        }
     }
 }
