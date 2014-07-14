@@ -5,27 +5,20 @@ var when      = require('when');
 var Util      = require('../../core/util.js');
 
 module.exports = {
-    getGamesMinInfo: getGamesMinInfo,
-    getGamesAllInfo: getGamesAllInfo
+    getGamesBasicInfo: getGamesBasicInfo
 };
 
 var exampleIn = {};
 
 // no input
-function getGamesMinInfo(req, res){
+function getGamesBasicInfo(req, res){
     try {
         var games = [];
         for(var game in this.games) {
-            if(this.games[game].hasOwnProperty("info")) {
-                var info = _.cloneDeep(this.games[game]["info"]);
-
-                for(var key in info) {
-                    // if found then remove from object
-                    if(key.indexOf("long") === 0) {
-                        delete info[key];
-                    }
-                }
-
+            if( this.games[game].hasOwnProperty("info") &&
+                this.games[game]["info"].hasOwnProperty("basic")
+                ) {
+                var info = _.cloneDeep(this.games[game]["info"].basic);
                 games.push( info );
             }
         }
@@ -33,8 +26,8 @@ function getGamesMinInfo(req, res){
         this.requestUtil.jsonResponse(res, games);
 
     } catch(err) {
-        console.trace("Reports: Get Achievements Error -", err);
-        this.stats.increment("error", "GetAchievements.Catch");
+        console.trace("Reports: Get Game Basic Info Error -", err);
+        this.stats.increment("error", "GetGameBasicInfo.Catch");
     }
 }
 

@@ -77,10 +77,12 @@ Installation
    1. Download: http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.zip
    2. Extract and Install App
    3. Login into admin console [http://localhost:8091](http://localhost:8091)
-   4. Create user (remember the username/password this is your admin account)
-   5. For the default bucket choose the 100MB (minimal size) for ram
+   4. Create user (remember the username/password this is your admin account) 
+   5. Create Server (use default settings with a minimum of 512MB for the servers memory)
+     * Note you can NOT edit the mem usage later, so it's recommended to leave it at default or all memory. The memory is a cap for all the buckets caps, it will not pre-allocat this memory so it's safe to put a high cap here.
+   6. For the default bucket choose the 100MB (minimal size) for ram
      * You can delete this bucket later it's not used
-   6. Add the required buckets
+   7. Add the required buckets
      * Select "Data Buckets" from the admin console
         * Create two data buckets
            1. Click "Create New Data Bucket"

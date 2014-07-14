@@ -6,7 +6,7 @@ var Util      = require('../../core/util.js');
 
 module.exports = {
     getGameAchievements: getGameAchievements,
-    getGameInfo: getGameInfo
+    getGameDetails: getGameDetails
 };
 
 var exampleIn = {};
@@ -52,7 +52,7 @@ function getGameAchievements(req, res){
 exampleIn.getGameInfo = {
     id: 'AA-1'
 }
-function getGameInfo(req, res){
+function getGameDetails(req, res){
     try {
 
         // check input
@@ -73,8 +73,10 @@ function getGameInfo(req, res){
         }
 
         var game = this.games[gameId];
-        if(game.hasOwnProperty('info')) {
-            this.requestUtil.jsonResponse(res, game['info']);
+        if( game.hasOwnProperty('info') &&
+            game['info'].hasOwnProperty('details')
+          ) {
+            this.requestUtil.jsonResponse(res, game['info'].details);
         } else {
             this.requestUtil.jsonResponse(res, {});
         }
