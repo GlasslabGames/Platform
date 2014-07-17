@@ -17,6 +17,8 @@ var tConst, Util;
 
 module.exports = TelemDS_Couchbase;
 
+var exampleIn = {};
+
 function TelemDS_Couchbase(options){
     // Glasslab libs
     Util   = require('../core/util.js');
@@ -88,6 +90,40 @@ var temp = function (doc, meta)
     }
 };
 
+
+// ------------------------------------
+// TODO: remove
+var gdv_getEventsByServerTimeStamp = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'e') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('serverTimeStamp')
+      )
+    {
+        emit( dateToArray( new Date(doc.serverTimeStamp * 1000) ) );
+    }
+};
+
+
+// Research
+var gdv_getEventsByGameId_ServerTimeStamp = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'e') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('gameId')
+      )
+    {
+        var a = dateToArray( new Date(doc.serverTimeStamp * 1000) );
+        a.unshift( doc.gameId.toLowerCase() );
+        emit( a );
+    }
+};
+
+// Assessment
 var gdv_getEventsByGameSessionId = function (doc, meta)
 {
     var values = meta.id.split(':');
@@ -100,19 +136,28 @@ var gdv_getEventsByGameSessionId = function (doc, meta)
     }
 };
 
-var gdv_getEventsByServerTimeStamp = function (doc, meta)
+
+var gdv_getCompletedSessionsByUserId = function (doc, meta)
 {
     var values = meta.id.split(':');
     if( (values[0] == 'gd') &&
-        (values[1] == 'e') &&
+        (values[1] == 'gs') &&
         (meta.type == 'json') &&
-        doc.hasOwnProperty('serverTimeStamp') )
+        doc.hasOwnProperty('state') &&
+        doc.hasOwnProperty('userId') &&
+        (doc['state'] == 'ended') &&
+        doc.hasOwnProperty('gameId') &&
+        doc.hasOwnProperty('gameSessionId')
+      )
     {
-        var td = new Date(doc.serverTimeStamp * 1000);
-        emit( dateToArray( td ) );
+        emit( [
+            doc.gameId.toLowerCase(),
+            doc.userId
+        ], doc.gameSessionId );
     }
 };
 
+// For new session check, cleanup
 var gdv_getStartedSessionsByDeviceId = function (doc, meta)
 {
     var values = meta.id.split(':');
@@ -127,6 +172,7 @@ var gdv_getStartedSessionsByDeviceId = function (doc, meta)
     }
 };
 
+// For cleanup
 var gdv_getAllStartedSessions = function (doc, meta)
 {
     var values = meta.id.split(':');
@@ -140,20 +186,7 @@ var gdv_getAllStartedSessions = function (doc, meta)
         emit( dateToArray( td ) );
     }
 };
-
-var gdv_getAllAchievementsByDeviceId = function (doc, meta)
-{
-    var values = meta.id.split(':');
-    if( (values[0] == 'gd') &&
-        (values[1] == 'e') &&
-        (meta.type == 'json') &&
-        doc.hasOwnProperty('deviceId') &&
-        doc.hasOwnProperty('eventName') &&
-        doc['eventName'] == '$Achievement' )
-    {
-        emit( doc['deviceId'] );
-    }
-};
+// ------------------------------------
 
     this.telemDDoc = {
         views: {
@@ -163,14 +196,17 @@ var gdv_getAllAchievementsByDeviceId = function (doc, meta)
             getEventsByServerTimeStamp : {
                 map: gdv_getEventsByServerTimeStamp
             },
+            getEventsByGameId_ServerTimeStamp : {
+                map: gdv_getEventsByGameId_ServerTimeStamp
+            },
             getStartedSessionsByDeviceId : {
                 map: gdv_getStartedSessionsByDeviceId
             },
             getAllStartedSessions : {
                 map: gdv_getAllStartedSessions
             },
-            getAllAchievementsByDeviceId: {
-                map: gdv_getAllAchievementsByDeviceId
+            getCompletedSessionsByUserId: {
+                map: gdv_getCompletedSessionsByUserId
             }
         }
     };
@@ -637,6 +673,7 @@ return when.promise(function(resolve, reject) {
             clientStartTimeStamp: Util.GetTimeStamp(),
         serverEndTimeStamp:   0,
         clientEndTimeStamp:   0,
+        gameId:    'SC',
         userId:    userId,
         deviceId:  userId, // old version deviceId and userId are the same
         gameLevel: gameLevel,
@@ -1007,57 +1044,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-}
-
-
-
-TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-        this.client.view("telemetry", "getAllAchievementsByDeviceId").query({
-                keys: deviceIds,
-                stale: false
-            },
-            function(err, results){
-                if(err){
-                    console.error("CouchBase TelemetryStore: Get Achievements View Error -", err);
-                    reject(err);
-                    return;
-                }
-
-                if(results.length == 0) {
-                    resolve({});
-                    return;
-                }
-
-                var keys = [];
-                for (var i = 0; i < results.length; ++i) {
-                    keys.push(results[i].id);
-                }
-
-                //console.log("CouchBase TelemetryStore: keys", keys);
-                this.client.getMulti(keys, {},
-                    function(err, results){
-                        if(err){
-                            console.error("CouchBase TelemetryStore: Multi Get Achievements Error -", err);
-                            reject(err);
-                            return;
-                        }
-
-                        var out = _.pluck(results, 'value');
-                        //console.log("getAchievements out:", out);
-                        resolve(out);
-                    }.bind(this));
-
-            }.bind(this));
-
-// ------------------------------------------------
-    }.bind(this));
-// end promise wrapper
 };
-
 
 TelemDS_Couchbase.prototype.saveGameData = function(userId, gameId, data){
 // add promise wrapper
@@ -1260,7 +1247,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
-                console.error("CouchBase DataStore: Error -", err);
+                console.error("CouchBase DataStore: getMultiUserSavedGames Error -", err);
                 reject(err);
                 return;
             }
@@ -1271,7 +1258,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
                 userIdGameDataMap[ userIds[i] ] = {};
             }
 
-            var failed;
+            var failed = null;
             _.forEach(data, function(gamedata, key) {
 
                 // check if errors
@@ -1279,7 +1266,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(gamedata.error.code != 13) {
-                        console.error("CouchBase DataStore: Error -", gamedata.error);
+                        console.error("CouchBase DataStore: getMultiUserSavedGames Error -", gamedata.error);
                         failed = gamedata.error;
                         return;
                     }
@@ -1336,36 +1323,101 @@ TelemDS_Couchbase.prototype.getUserSavedGame = function(userId, gameId) {
 
 TelemDS_Couchbase.prototype.getGamePlayInfo = function(userId, gameId){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
+    var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
 
-        // get user game pref
-        this.client.get(key,
-            function(err, data){
-                var playInfo = playInfo = {
-                    totalTimePlayed: 0,
-                    achievement: { "groups": {} }
-                };
-                if(err){
-                    // NOT "No such key"
-                    if(err.code != 13) {
-                        console.error("CouchBase TelemetryStore: Get User Pref Data Error -", err);
-                        reject(err);
-                        return;
-                    }
-                } else {
-                    playInfo = _.merge(playInfo, data.value);
+    // get user game pref
+    this.client.get(key,
+        function(err, data){
+            var playInfo = playInfo = {
+                totalTimePlayed: 0,
+                achievement: { "groups": {} }
+            };
+            if(err){
+                // NOT "No such key"
+                if(err.code != 13) {
+                    console.error("CouchBase TelemetryStore: Get User Pref Data Error -", err);
+                    reject(err);
+                    return;
                 }
+            } else {
+                playInfo = _.merge(playInfo, data.value);
+            }
 
-                resolve(playInfo);
-            }.bind(this));
+            resolve(playInfo);
+        }.bind(this));
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype.getMultiGamePlayInfo = function(userIds, gameId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var keys = [];
+    for(var i = 0; i < userIds.length; i++) {
+        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId[i];
+        keys.push(key);
+    }
+
+    // get user game pref
+    this.client.getMulti(keys, {},
+        function(err, data){
+            // it's ok if one fails, need to check them all for errors
+            if( err &&
+                !err.code == 4101) {
+                console.error("CouchBase DataStore: getMultiGamePlayInfo Error -", err);
+                reject(err);
+                return;
+            }
+
+            var userIdGameDataMap = {};
+            // re-set all users map values
+            for(var i = 0; i < userIds.length; i++) {
+                userIdGameDataMap[ userIds[i] ] = {};
+            }
+
+            var failed = null;
+            _.forEach(data, function(gamedata, key) {
+
+                // check if errors
+                if(gamedata.error) {
+                    // it's ok if no device in list for a user
+                    // otherwise fail
+                    if(gamedata.error.code != 13) {
+                        console.error("CouchBase DataStore: getMultiGamePlayInfo Error -", gamedata.error);
+                        failed = gamedata.error;
+                        return;
+                    }
+                }
+
+                // split to get user id
+                var parts = key.split(':');
+                if( gamedata &&
+                    gamedata.value ) {
+                    userIdGameDataMap[ parts[3] ] = gamedata.value;
+                }
+            });
+
+            if(!failed) {
+                if( Object.keys(userIdGameDataMap).length > 0 ) {
+                    resolve(userIdGameDataMap);
+                } else {
+                    resolve();
+                }
+            } else {
+                reject(failed);
+            }
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
 
 TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, timeDiff, totalTimePlayed) {
 // add promise wrapper
@@ -1417,7 +1469,6 @@ TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, 
 // end promise wrapper
 };
 
-var exampleIn = {};
 exampleIn.postGameAchievement_achievement = {
     group:    "CCSS.ELA-Literacy.WHST.6-8.1",
     subGroup: "b",
@@ -1425,55 +1476,55 @@ exampleIn.postGameAchievement_achievement = {
 };
 TelemDS_Couchbase.prototype.postGameAchievement = function(userId, gameId, achievement) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
-        this.client.get(key, function(err, data){
-            var playInfo = {
-                    totalTimePlayed: 0,
-                    achievement: { "groups": {} }
-            };
-            if(err) {
-                // "NO - No such key"
-                if(err.code != 13) {
-                    console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
+    var key = tConst.game.dataKey+":"+tConst.game.playInfoKey+":"+gameId+":"+userId;
+    this.client.get(key, function(err, data){
+        var playInfo = {
+                totalTimePlayed: 0,
+                achievement: { "groups": {} }
+        };
+        if(err) {
+            // "NO - No such key"
+            if(err.code != 13) {
+                console.error("CouchBase DataStore: postGameAchievement Error -", err);
+                reject(err);
+                return;
+            }
+        } else {
+            playInfo = _.merge(playInfo, data.value);
+        }
+
+        // create object tree
+        if(!playInfo.achievement.groups.hasOwnProperty( achievement.group )) {
+            playInfo.achievement.groups [achievement.group] = { "subGroups": {} };
+        }
+        if(!playInfo.achievement.groups[achievement.group].subGroups.hasOwnProperty( achievement.subGroup )) {
+            playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup] = { "items": {} };
+        }
+        if(!playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items.hasOwnProperty( achievement.item )) {
+            playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items[achievement.item] = { "won": false };
+        }
+
+        // update info
+        playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items[achievement.item].won = true;
+
+        // update data
+        this.client.set(key, playInfo,
+            function(err, data) {
+                if(err) {
+                    console.error("CouchBase DataStore: postGameAchievement Error -", err);
                     reject(err);
                     return;
                 }
-            } else {
-                playInfo = _.merge(playInfo, data.value);
-            }
 
-            // create object tree
-            if(!playInfo.achievement.groups.hasOwnProperty( achievement.group )) {
-                playInfo.achievement.groups [achievement.group] = { "subGroups": {} };
-            }
-            if(!playInfo.achievement.groups[achievement.group].subGroups.hasOwnProperty( achievement.subGroup )) {
-                playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup] = { "items": {} };
-            }
-            if(!playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items.hasOwnProperty( achievement.item )) {
-                playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items[achievement.item] = { "won": false };
-            }
+                resolve(data);
+            }.bind(this));
 
-            // update info
-            playInfo.achievement.groups[achievement.group].subGroups[achievement.subGroup].items[achievement.item].won = true;
-
-            // update data
-            this.client.set(key, playInfo,
-                function(err, data) {
-                    if(err) {
-                        console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
-                        reject(err);
-                        return;
-                    }
-
-                    resolve(data);
-                }.bind(this));
-
-        }.bind(this));
+    }.bind(this));
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
