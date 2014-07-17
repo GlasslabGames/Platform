@@ -117,6 +117,24 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
+            api: "/api/v2/dash/reports/sowo",
+            service: "dash",
+            controller: "reports",
+            method: {
+                get: "getSOWO"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/reports/competency",
+            service: "dash",
+            controller: "reports",
+            method: {
+                get: "getCompetency"
+            }
+        },
+        {
             api: "/api/v2/dash/reports/totalTimePlayed",
             service: "dash",
             controller: "reports",
@@ -130,6 +148,22 @@ module.exports = {
             controller: "game",
             method: {
                 get: "getGameAchievements"
+            }
+        },
+        {
+            api: "/api/v2/dash/game/:gameId/reports",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getGameReports"
+            }
+        },
+        {
+            api: "/api/v2/dash/game/:gameId/missions",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getGameMissions"
             }
         },
         {
