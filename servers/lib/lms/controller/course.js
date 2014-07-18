@@ -126,7 +126,7 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
                             .then(function() {
 
                                 req.query.showMembers = req.body.showMembers;
-                                req.params.id = courseId;
+                                req.params.courseId = courseId;
                                 // get and respond with course
                                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next]);
 
