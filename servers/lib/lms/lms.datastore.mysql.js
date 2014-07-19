@@ -237,7 +237,6 @@ return when.promise(function(resolve, reject) {
                 for(var i = 0; i < results.length; i++) {
                     results[i].archived = results[i].archived ? true : false;
                     results[i].lockedRegistration = results[i].lockedRegistration   ? true : false;
-                    //results[i].freePlay = results[i].freePlay ? true : false;
                 }
 
                 resolve(results);
@@ -265,7 +264,6 @@ return when.promise(function(resolve, reject) {
             c.grade,    \
             c.locked > 0 as locked,      \
             c.archived > 0 as archived,  \
-            c.free_Play > 0 as freePlay, \
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
@@ -278,7 +276,6 @@ return when.promise(function(resolve, reject) {
             if(results.length > 0) {
                 results = results[0];
                 results.archived = results.archived ? true : false;
-                results.freePlay = results.freePlay ? true : false;
                 results.locked   = results.locked   ? true : false;
 
                 resolve(results);
@@ -371,6 +368,44 @@ return when.promise(function(resolve, reject) {
 
 // ------------------------------------------------
 }.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q =
+            "SELECT         \
+                c.title,    \
+                c.grade,    \
+                c.locked > 0 as locked,      \
+                c.archived > 0 as archived,  \
+                c.archived_Date as archivedDate,    \
+                c.institution_id as institution     \
+            FROM GL_CODE co JOIN GL_COURSE c on co.course_id=c.id \
+            WHERE co.code="+ this.ds.escape(courseCode);
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results.length > 0) {
+                    results = results[0];
+                    results.archived = results.archived ? true : false;
+                    results.locked   = results.locked   ? true : false;
+
+                    resolve(results);
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+    }.bind(this));
 // end promise wrapper
 };
 
@@ -783,10 +818,11 @@ LMS_MySQL.prototype.isEnrolledInCourse = function(userId, courseId) {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var Q = "SELECT * FROM GL_MEMBERSHIP " +
-        "WHERE user_Id="+this.ds.escape(userId) +
-        "AND course_Id="+this.ds.escape(courseId);
+    var Q = "SELECT * FROM GL_MEMBERSHIP" +
+        " WHERE user_Id="+this.ds.escape(userId) +
+        " AND course_Id="+this.ds.escape(courseId);
 
+    //console.log("Q:", Q);
     this.ds.query(Q)
         .then(function(results) {
                 if(results.length > 0) {

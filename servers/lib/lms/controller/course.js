@@ -49,11 +49,11 @@ function enrollInCourse(req, res, next) {
                                 }
                             }.bind(this))
                     } else {
-                        this.requestUtil.errorResponse(res, {error:"invalid courseCode", key:"code.invalid"}, 400);
+                        this.requestUtil.errorResponse(res, {error:"invalid courseCode", key:"code.invalid"}, 404);
                     }
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, {error:"missing courseCode", key:"code.missing"}, 401);
+            this.requestUtil.errorResponse(res, {error:"missing courseCode", key:"code.missing"}, 404);
         }
     } else {
         this.requestUtil.errorResponse(res, "not logged in");
@@ -98,7 +98,7 @@ function unenrollFromCourse(req, res, next) {
 exampleOut.unenrollUserFromCourse =
 {
     course: 8,
-    showMembers: 1,
+    showMembers: true,
     user: 176
 };
 function unenrollUserFromCourse(req, res, next, serviceManager) {
@@ -164,7 +164,8 @@ exampleOut.getEnrolledCourses =
     ];
 
 /*
- /api/v2/lms/courses?showMembers=true
+ GET
+ http://localhost:8001/api/v2/lms/courses?showMembers=1
  */
 exampleOut.getEnrolledCourses_WithMembers =[
     {
@@ -223,11 +224,20 @@ function getEnrolledCourses(req, res, next) {
         this.myds.getEnrolledCourses(userData.id)
             .then(function(courses){
 
-                var getCourses = _getCourses.bind(this)
-
+                var getCourses  = _getCourses.bind(this);
                 var showMembers = false;
-                if( req.query.hasOwnProperty("showMembers") ) {
-                    showMembers = parseInt(req.query.showMembers);
+
+                if( userData.role == lConst.role.instructor ||
+                    userData.role == lConst.role.manager ||
+                    userData.role == lConst.role.admin
+                  ) {
+                    if( req.query.hasOwnProperty("showMembers") ) {
+                        showMembers = parseInt(req.query.showMembers);
+                        // in case showMembers is a string "true"
+                        if(_.isNaN(showMembers)) {
+                            showMembers = (req.query.showMembers === "true") ? true : false;
+                        }
+                    }
                 }
 
                 getCourses(courses, showMembers)
@@ -275,7 +285,6 @@ exampleOut.createCourse = {
     "institution": 10,
     "code": "VMZ2P",
     "studentCount": 0,
-    "freePlay": false,
     "games": [
         { "id": "SC",   "settings": { "missionProgressLock": false } },
         { "id": "AA-1", "settings": {} }
@@ -290,7 +299,7 @@ function createCourse(req, res, next, serviceManager)
 
         if(!req.body.games ||
            !_.isArray(req.body.games) ) {
-            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"gameids.invalid"});
+            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"gameids.invalid"}, 404);
             return;
         }
 
@@ -328,7 +337,7 @@ function createCourse(req, res, next, serviceManager)
                 }
 
                 if(!found) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.gameIds[i]+"' is not valid", key:"gameid.invalid"});
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.gameIds[i]+"' is not valid", key:"gameid.invalid"}, 404);
                     return; // exit function
                 }
             }
@@ -367,7 +376,8 @@ function createCourse(req, res, next, serviceManager)
 }
 
 /*
- GET http://localhost:8001/api/v2/lms/course/107/info?showMembers=1
+ GET
+ http://localhost:8001/api/v2/lms/course/107/info?showMembers=1
 */
 exampleOut.getCourse = {
     "id": 16,
@@ -392,7 +402,7 @@ function getCourse(req, res, next) {
 
         if( req.params &&
             req.params.hasOwnProperty("courseId") ) {
-            var courseId = req.params.courseId;
+            var courseId = parseInt(req.params.courseId);
 
             // check if enrolled in course
             var showMembers = false;
@@ -403,6 +413,11 @@ function getCourse(req, res, next) {
                 // only show members if not student
                 if( req.query.hasOwnProperty("showMembers") ) {
                     showMembers = parseInt(req.query.showMembers);
+
+                    // in case showMembers is a string "true"
+                    if(_.isNaN(showMembers)) {
+                        showMembers = (req.query.showMembers === "true") ? true : false;
+                    }
                 }
 
                 // do nothing promise
@@ -425,9 +440,6 @@ function getCourse(req, res, next) {
 
                     var courses    = [];
                     courses.push(course); // add course
-
-                    // TODO: remove free_play from the DB, game settings are now stored in the game table
-                    delete course.freePlay;
 
                     var getCourses = _getCourses.bind(this)
                     getCourses(courses, showMembers)
@@ -473,7 +485,7 @@ return when.promise(function(resolve, reject) {
 
                 // convert showMembers to int and then check it's value
                 var p;
-                if(showMembers) {
+                if( showMembers ) {
                     // init user
                     course.users = [];
 
@@ -614,7 +626,7 @@ function updateGamesInCourse(req, res, next, serviceManager)
                 }
 
                 if(!found) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+updateGameIds[i]+"' is not valid", key:"gameid.invalid"});
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+updateGameIds[i]+"' is not valid", key:"gameid.invalid"}, 404);
                     return; // exit function
                 }
             }
@@ -692,6 +704,7 @@ function updateGamesInCourse(req, res, next, serviceManager)
     }
 }
 
+
 function verifyCode(req, res, next) {
 
     if (!req.params ||
@@ -701,12 +714,16 @@ function verifyCode(req, res, next) {
     }
     var code = req.params.code;
 
-    this.myds.getCourseIdFromCourseCode(code)
-        .then(function(courseId){
-            if(courseId) {
-                this.requestUtil.jsonResponse(res, {status: "code valid", key:"code.valid"});
+    this.myds.getCourseInfoFromCourseCode(code)
+        .then(function(courseInfo){
+            if(courseInfo) {
+                courseInfo = _.merge(
+                    {status: "code valid", key:"code.valid"},
+                    courseInfo
+                );
+                this.requestUtil.jsonResponse(res, courseInfo);
             } else {
-                this.requestUtil.jsonResponse(res, {status: "code invalid", key:"code.invalid"});
+                this.requestUtil.jsonResponse(res, {status: "code invalid", key:"code.invalid"}, 404);
             }
         }.bind(this))
 }
