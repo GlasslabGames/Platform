@@ -13,6 +13,8 @@ var MySQL, waConst, lConst;
 
 module.exports = WebStore_MySQL;
 
+var exampleIn = {}, exampleOut = {};
+
 function WebStore_MySQL(options){
     // Glasslab libs
     MySQL   = require('../core/datastore.mysql.js');
@@ -236,6 +238,124 @@ return when.promise(function(resolve, reject) {
         "  game_session_id="+this.ds.escape(gameSessionId);
 
     this.ds.query(Q).then(resolve, reject);
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+exampleOut.getLicensedGameIdsFromUserId = {
+    "sc": true
+};
+WebStore_MySQL.prototype.getLicensedGameIdsFromUserId = function(userId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q = "SELECT DISTINCT(game_id) as gameId \
+                 FROM GL_LICENSE l  \
+                 JOIN GL_LICENSE_MAP lm on lm.license_id=l.id \
+                 WHERE user_id \
+                   IN (SELECT DISTINCT(user_id) as userId \
+                      FROM GL_MEMBERSHIP \
+                      WHERE course_id \
+                        IN (SELECT course_id \
+                            FROM GL_MEMBERSHIP \
+                            WHERE user_id="+this.ds.escape(userId);
+            Q += ") AND role='instructor')";
+
+        //console.log("Q:", Q);
+        this.ds.query(Q).then(function(results) {
+                if(results.length > 0) {
+                    var gameIds = {};
+                    for(var i = 0; i < results.length; i++) {
+                        // gameId is not case sensitive, always lowercase
+                        gameIds[ results[i].gameId.toLowerCase() ] = true;
+                    }
+
+                    resolve( gameIds );
+                } else {
+                    resolve({});
+                }
+            }.bind(this)
+            , reject);
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+exampleOut.getLicensedGameIdsFromUserId = {
+    "sc": { "missionProgressLock": true },
+    "aa-1": {},
+    "aw-1": {}
+};
+WebStore_MySQL.prototype.getGameSettingsFromCourseId = function(courseId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT game_id as gameId, game_settings as gameSettings" +
+        " FROM GL_COURSE_GAME_MAP" +
+        " WHERE course_id="+this.ds.escape(courseId);
+
+    //console.log("Q:", Q);
+    this.ds.query(Q).then(function(results) {
+            if(results.length > 0) {
+                var gameSettings = {};
+                for(var i = 0; i < results.length; i++) {
+                    try {
+                        // gameId is not case sensitive, always lowercase
+                        gameSettings[ results[i].gameId.toLowerCase() ] = JSON.parse(results[i].gameSettings);
+                    } catch(err) {
+                        // invalid json
+                        console.error("WebStore_MySQL getGameSettingsFromCourseId: Error -", err);
+                        gameSettings[ results[i].gameId.toLowerCase() ] = {};
+                    }
+                }
+
+                resolve( gameSettings );
+            } else {
+                resolve([]);
+            }
+        }.bind(this)
+        , reject);
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+// TODO: use a new table with gameId column
+// return missions map with "missionId" as key and "endTime" value
+WebStore_MySQL.prototype.getCompletedMissions = function(userId, courseId, gameId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT activity_id as mission, end_time as endTime" +
+        " FROM GL_ACTIVITY_RESULTS" +
+        " WHERE status='live'" +
+        " AND score > 0" +
+        " AND user_id=" + this.ds.escape(userId) +
+        " AND course_id=" + this.ds.escape(courseId) +
+        " ORDER BY end_time";
+
+    //console.log("Q:", Q);
+    this.ds.query(Q).then(function(results) {
+            if(results.length > 0) {
+                var missions = {};
+                for(var i = 0; i < results.length; i++) {
+                    missions[ results[i].mission ] = results[i].endTime;
+                }
+                resolve( missions );
+            } else {
+                resolve([]);
+            }
+        }.bind(this)
+        , reject);
 
 // ------------------------------------------------
 }.bind(this));

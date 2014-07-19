@@ -13,7 +13,7 @@
         },
         "license": {
             "type":  "tier",
-            "valid": true
+            "valid": false
         },
         "thumbnail": {
             "small": "assets/thumb-game-SC.png",
@@ -280,14 +280,14 @@
             "google": "http://plus.google.com/glasslabgames"
         }
     },
-    "missions": [
+    "missionGroups": [
         {
             "id": "1234",
             "title": "Mission 1 - School Is In",
             "locked": false,
             "completed": false,
             "completedDate": null,
-            "submissions": [
+            "missions": [
                 {
                     "id": "MedusaA1School01",
                     "title": "Parktown",
@@ -314,7 +314,7 @@
             "locked": true,
             "completed": false,
             "completedDate": null,
-            "submissions": [
+            "missions": [
                 {
                     "id": "12b38320-fee0-11e2-ab09-1f14110c1a8d",
                     "title": "Systems Map Tutorial 2",
@@ -350,7 +350,7 @@
             "locked": true,
             "completed": false,
             "completedDate": null,
-            "submissions": [
+            "missions": [
                 {
                     "id": "95347e00-0b63-11e3-8ffd-0800200c9a66",
                     "title": "Reading Diagrams Tutorial",
@@ -404,7 +404,7 @@
             "locked": true,
             "completed": false,
             "completedDate": null,
-            "submissions": [
+            "missions": [
                 {
                     "id": "063cf110-e0f6-11e2-a9b1-fbf5ea959a8c",
                     "title": "Pre-Game Systems Map",
@@ -440,7 +440,7 @@
             "locked": true,
             "completed": false,
             "completedDate": null,
-            "submissions": [
+            "missions": [
                 {
                     "id": "534cd7f0-0495-11e3-8ffd-0800200c9a66",
                     "title": "Evidence Challenge Tutorial",
@@ -494,7 +494,7 @@
             "locked": true,
             "completed": false,
             "completedDate": null,
-            "submissions": [
+            "missions": [
                 {
                     "id": "b71d8d00-e0f6-11e2-a9b1-fbf5ea959a8c",
                     "title": "Pre-Game Systems Map",

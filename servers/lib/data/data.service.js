@@ -25,6 +25,7 @@ function DataService(options){
         // Glasslab libs
         Assessment = require('../aeng/assessment.js');
         aConst     = require('../auth/auth.js').Const;
+        // TODO: rename WebStore to DashStore
         WebStore   = require('../dash/dash.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         Telemetry  = require('./data.js');
