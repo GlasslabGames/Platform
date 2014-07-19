@@ -33,7 +33,7 @@ function verifyLicense(req, res, next) {
                 if(validLicense.length > 0) {
                     this.requestUtil.jsonResponse(res, {status:"valid license", key:"license.valid"});
                 } else {
-                    this.requestUtil.errorResponse(res, {error:"invalid license", key:"license.invalid"}, 400);
+                    this.requestUtil.errorResponse(res, {error:"invalid license", key:"license.invalid"}, 404);
                 }
             }.bind(this))
 
@@ -43,7 +43,7 @@ function verifyLicense(req, res, next) {
             }.bind(this));
 
     } else {
-        this.requestUtil.errorResponse(res, {error:"missing license", key:"license.missing"}, 401);
+        this.requestUtil.errorResponse(res, {error:"missing license", key:"license.missing"}, 404);
     }
 }
 
@@ -122,7 +122,7 @@ function getLicenses(req, res, next) {
 
                     this.requestUtil.jsonResponse(res, out);
                 } else {
-                    this.requestUtil.errorResponse(res, {error:"no license", key:"license.invalid"}, 400);
+                    this.requestUtil.errorResponse(res, {error:"no license", key:"license.invalid"}, 404);
                 }
             }.bind(this));
     } else {
@@ -161,7 +161,7 @@ function registerLicense(req, res, next) {
                             }
                         }.bind(this));
                 } else {
-                    this.requestUtil.errorResponse(res, {error:"invalid license", key:"license.invalid"}, 400);
+                    this.requestUtil.errorResponse(res, {error:"invalid license", key:"license.invalid"}, 404);
                 }
             }.bind(this))
 
@@ -178,6 +178,6 @@ function registerLicense(req, res, next) {
             }.bind(this));
 
     } else {
-        this.requestUtil.errorResponse(res, {error:"missing license", key:"license.missing"}, 401);
+        this.requestUtil.errorResponse(res, {error:"missing license", key:"license.missing"}, 404);
     }
 }

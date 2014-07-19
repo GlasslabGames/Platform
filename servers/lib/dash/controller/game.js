@@ -128,10 +128,12 @@ function getGameReports(req, res){
     }
 }
 
-
-// game AA, episode 1
+/*
+ GET
+ http://localhost:8001/api/v2/dash/course/8/game/SC/missions
+*/
 exampleIn.getGameMissions = {
-    gameId: 'AA-1',
+    gameId: 'SC',
     courseId: 1
 };
 function getGameMissions(req, res){
@@ -139,84 +141,116 @@ function getGameMissions(req, res){
         // check input
         if( !( req.params &&
             req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+            this.requestUtil.errorResponse(res, {error: "invalid game id"}, 404);
             return;
         }
-
         var gameId = req.params.gameId;
         // gameIds are not case sensitive
         gameId = gameId.toLowerCase();
 
         // check gameId exists
         if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+            this.requestUtil.errorResponse(res, {error: "invalid game id"}, 404);
             return;
         }
 
+        if( !( req.params &&
+            req.params.hasOwnProperty("courseId") ) ) {
+            this.requestUtil.errorResponse(res, {error: "invalid course id"}, 404);
+            return;
+        }
+        var courseId = req.params.courseId;
+
+        var userData = req.session.passport.user;
+
         var game = this.games[gameId];
         if( game.hasOwnProperty('info') &&
-            game['info'].hasOwnProperty('missions')
+            game['info'].hasOwnProperty('missionGroups')
             ) {
-            var missions = _.cloneDeep(game['info'].missions);
+
+            var missionGroups = _.cloneDeep(game['info'].missionGroups);
             var missionProgressLock = true;
 
-            // TODO: get missionProgressLock for game and user
-            // TODO: get list of all completed missions
+            this.dashStore.getGameSettingsFromCourseId(courseId)
+                .then(function(gameSettings){
 
-            for(var i = 0; i < missions.length; i++) {
-                if(missionProgressLock) {
-                    // ensure first mission is unlocked
-                    if(i == 0) {
-                        missions[i].locked = false;
+                    // get missionProgressLock for game and user
+                    if( gameSettings.hasOwnProperty(gameId) &&
+                        gameSettings[gameId].hasOwnProperty('missionProgressLock') ) {
+                        missionProgressLock = gameSettings[gameId].missionProgressLock;
                     }
-                }
 
-                var submissions = missions[i].submissions;
-                var numCompletedSubMissions = 0;
-                var lastCompletedDate = null;
-                for(var j = 0; j < submissions.length; j++) {
-                    if(missionProgressLock) {
-                        // if mission unlocked, make sure first submission is unlocked
-                        if( j == 0 &&
-                            !missions[i+1].locked ) {
-                            submissions[j].locked = false;
+                    return this.dashStore.getCompletedMissions(userData.id, courseId, gameId);
+                }.bind(this))
+                .then(function(completedMissions){
+
+                    for(var i = 0; i < missionGroups.length; i++) {
+                        if (missionProgressLock) {
+                            // ensure first mission is unlocked
+                            if (i == 0) {
+                                missionGroups[i].locked = false;
+                            }
+                        } else {
+                            // if not locked all mission groups unlocked
+                            missionGroups[i].locked = false;
+                        }
+
+                        var missions = missionGroups[i].missions;
+                        var numCompletedSubMissions = 0;
+                        var lastCompletedDate = null;
+                        for (var j = 0; j < missions.length; j++) {
+                            if (missionProgressLock) {
+                                // if mission unlocked, make sure first submission is unlocked
+                                if (j == 0 && !missionGroups[i + 1].locked) {
+                                    missions[j].locked = false;
+                                }
+                            } else {
+                                // if not locked all missions unlocked
+                                missions[j].locked = false;
+                            }
+
+                            if( completedMissions.hasOwnProperty(missions[j].id) ) {
+                                missions[j].completed = true;
+                                missions[j].completedDate = completedMissions[ missions[j].id ];
+                            }
+
+                            // count number of completed missions
+                            if (missions[j].completed) {
+                                numCompletedSubMissions++;
+
+                                // if progress, unlock next submission
+                                if (missionProgressLock &&
+                                    missions[j + 1]) {
+                                    missions[j + 1].locked = false;
+                                }
+                            }
+
+                            // keep track of last complted date
+                            if (missions[j].completedDate > lastCompletedDate) {
+                                lastCompletedDate = missions[j].completedDate;
+                            }
+                        }
+
+                        if (numCompletedSubMissions == missions.length) {
+                            missionGroups[i].completed = true;
+                            missionGroups[i].completedDate = lastCompletedDate;
+
+                            // if progress, unlock next mission
+                            if (missionProgressLock &&
+                                missionGroups[i + 1]) {
+                                missionGroups[i + 1].locked = false;
+                            }
                         }
                     }
 
-                    // TODO: check if mission is completed in DB
-                    //  completed
-                    //  completedDate
+                    this.requestUtil.jsonResponse(res, missionGroups);
+                }.bind(this))
 
-                    // count number of completed missions
-                    if(submissions[j].completed) {
-                        numCompletedSubMissions++;
-
-                        // if progress, unlock next submission
-                        if( missionProgressLock &&
-                            submissions[j+1]) {
-                            submissions[j+1].locked = false;
-                        }
-                    }
-
-                    // keep track of last complted date
-                    if(submissions[j].completedDate > lastCompletedDate) {
-                        lastCompletedDate = submissions[j].completedDate;
-                    }
-                }
-
-                if(numCompletedSubMissions == submissions.length) {
-                    missions[i].completed = true;
-                    missions[i].completedDate = lastCompletedDate;
-
-                    // if progress, unlock next mission
-                    if( missionProgressLock &&
-                        missions[i+1]) {
-                        missions[i+1].locked = false;
-                    }
-                }
-            }
-
-            this.requestUtil.jsonResponse(res, missions);
+                // catch all errors
+                .then(null, function(err){
+                    console.error("getGameMissions Error:", err);
+                    this.requestUtil.errorResponse(res, "Get Missions Error");
+                }.bind(this));
         } else {
             this.requestUtil.jsonResponse(res, []);
         }
@@ -224,6 +258,7 @@ function getGameMissions(req, res){
     } catch(err) {
         console.trace("Reports: Get Game Missions Error -", err);
         this.stats.increment("error", "GetGameInfo.Catch");
+        this.requestUtil.errorResponse(res, "Server Error");
     }
 }
 

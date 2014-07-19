@@ -675,6 +675,18 @@ return when.promise(function(resolve, reject) {
     this.getUserById(userData.id)
         .then(function(data){
             dbUserData = data[0];
+
+            // role can not be changed
+            userData.role = dbUserData.role;
+
+            // remove password so it's not added to userData
+            var password = dbUserData.password;
+            delete dbUserData.password;
+            // merge the db userData into userData (fill in missing data)
+            userData = _.merge(_.cloneDeep(dbUserData), userData);
+            // add password back
+            dbUserData.password = password;
+
             return this.checkUserPerminsToUserData(userData, loginUserSessionData);
         }.bind(this))
 
@@ -728,10 +740,13 @@ return when.promise(function(resolve, reject) {
                 } else {
                     return userData.password;
                 }
+            } else {
+                return dbUserData.password;
             }
         }.bind(this))
 
         // if password changed update
+        // if other changes update, flag for sessions update
         .then(function(password){
             // password changed
             if(password && dbUserData.password != password) {
@@ -741,6 +756,7 @@ return when.promise(function(resolve, reject) {
             }
             // set password to encrypted version
             userData.password = password;
+
 
             if(userData.firstName != dbUserData.firstName) {
                 // if self, update session data
@@ -767,6 +783,7 @@ return when.promise(function(resolve, reject) {
             // remove resetCode, password before sending back
             delete userData.resetCode;
             delete userData.password;
+            delete userData.id;
             resolve({changed: sessionDataChanged, user: userData});
         }.bind(this))
 

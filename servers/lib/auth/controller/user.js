@@ -266,7 +266,15 @@ function registerManager(req, res, next) {
      */
 };
 
- function updateUserData(req, res, next, serviceManager) {
+exampleIn.updateUserData = {
+    "userId":        25,
+    "username":      "test2",
+    "firstName":     "test",
+    "lastName":      "2",
+    "email":         "test2@email.com",
+    "password":      "test"
+};
+function updateUserData(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Update.User");
     //console.log("Auth updateUserRoute - body:", req.body);
     if( !(req.body.userId) )
@@ -280,30 +288,14 @@ function registerManager(req, res, next) {
 
     var userData = {
         id:            req.body.userId,
-        loginType:     aConst.login.type.glassLabV2  // TODO add login type to user data on client
+        loginType:     aConst.login.type.glassLabV2
     };
-    if(req.body.username) {
-        userData.username = req.body.username;
-    }
-    if(req.body.firstName) {
-        userData.firstName = req.body.firstName;
-    }
-    if(req.body.lastName) {
-        userData.lastName = req.body.lastName;
-    } else {
-        userData.lastName = '';
-    }
-    if(req.body.email) {
-        userData.email = req.body.email;
-    }
-    if(req.body.role) {
-        userData.role = req.body.role;
-    }
+    // add body data to userData
+    userData = _.merge(userData, req.body);
+
+    // legacy
     if(req.body.institutionId || req.body.institution) {
         userData.institutionId = req.body.institutionId || req.body.institution;
-    }
-    if(req.body.password) {
-        userData.password = req.body.password;
     }
 
     // wrap getSession in promise
@@ -386,7 +378,6 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.password   = Util.ConvertToString(req.body.password);
         regData.firstName  = Util.ConvertToString(req.body.firstName);
         regData.lastName   = Util.ConvertToString(req.body.lastName);
-
         regData.email      = Util.ConvertToString(req.body.email);
 
         if(!regData.username) {
@@ -504,7 +495,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         register(regData, courseId);
                     } else {
                         this.stats.increment("error", "Route.Register.User.InvalidInstitution");
-                        registerErr({"error": "registration course code not found", key:"code.invalid"});
+                        registerErr({"error": "registration course code not found", key:"code.invalid"}, 404);
                     }
                 }.bind(this))
                 // catch all errors

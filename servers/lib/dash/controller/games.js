@@ -13,17 +13,35 @@ var exampleIn = {};
 // no input
 function getGamesBasicInfo(req, res){
     try {
-        var games = [];
-        for(var game in this.games) {
-            if( this.games[game].hasOwnProperty("info") &&
-                this.games[game]["info"].hasOwnProperty("basic")
-                ) {
-                var info = _.cloneDeep(this.games[game]["info"].basic);
-                games.push( info );
-            }
-        }
+        var userData = req.session.passport.user;
 
-        this.requestUtil.jsonResponse(res, games);
+        this.dashStore.getLicensedGameIdsFromUserId(userData.id)
+            .then(function(licenseGameIds){
+                var outGames = [];
+
+                for(var game in this.games) {
+                    // gameId is not case sensitive, always lowercase
+                    game = game.toLowerCase();
+
+                    if( this.games[game].hasOwnProperty("info") &&
+                        this.games[game]["info"].hasOwnProperty("basic")
+                      ) {
+                        var info = _.cloneDeep(this.games[game]["info"].basic);
+                        if(info.license.type == "free") {
+                            info.license.valid = true;
+                        } else {
+                            // check license
+                            info.license.valid = licenseGameIds.hasOwnProperty(game);
+                        }
+
+                        outGames.push( info );
+                    }
+
+                }
+
+                this.requestUtil.jsonResponse(res, outGames);
+            }.bind(this));
+
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
