@@ -783,7 +783,6 @@ return when.promise(function(resolve, reject) {
             // remove resetCode, password before sending back
             delete userData.resetCode;
             delete userData.password;
-            delete userData.id;
             resolve({changed: sessionDataChanged, user: userData});
         }.bind(this))
 
