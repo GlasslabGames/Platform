@@ -143,11 +143,19 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/game/:gameId/achievements",
+            api: "/api/v2/dash/game/:gameId/achievements/all",
             service: "dash",
             controller: "game",
             method: {
-                get: "getGameAchievements"
+                get: "getAllGameAchievements"
+            }
+        },
+        {
+            api: "/api/v2/dash/game/:gameId/achievements/user",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getUserGameAchievements"
             }
         },
         {

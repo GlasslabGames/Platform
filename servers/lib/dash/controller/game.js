@@ -5,7 +5,8 @@ var when      = require('when');
 var Util      = require('../../core/util.js');
 
 module.exports = {
-    getGameAchievements: getGameAchievements,
+    getAllGameAchievements:  getAllGameAchievements,
+    getUserGameAchievements: getUserGameAchievements,
     getGameDetails:      getGameDetails,
     getGameReports:      getGameReports,
     getGameMissions:     getGameMissions
@@ -14,10 +15,10 @@ module.exports = {
 var exampleIn = {};
 
 // game AA, episode 1
-exampleIn.getGameAchievements = {
+exampleIn.getAllGameAchievements = {
     gameId: 'AA-1'
 };
-function getGameAchievements(req, res){
+function getAllGameAchievements(req, res){
     try {
 
         // check input
@@ -49,6 +50,49 @@ function getGameAchievements(req, res){
         this.stats.increment("error", "GetAchievements.Catch");
     }
 }
+
+// game AA, episode 1
+exampleIn.getUserGameAchievements = {
+    gameId: 'AA-1'
+};
+function getUserGameAchievements(req, res){
+    try {
+
+        // check input
+        if( !( req.params &&
+            req.params.hasOwnProperty("gameId") ) ) {
+            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+            return;
+        }
+
+        var gameId = req.params.gameId;
+        // gameIds are not case sensitive
+        gameId = gameId.toLowerCase();
+
+        // check gameId exists
+        if( !this.games.hasOwnProperty(gameId) ) {
+            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+            return;
+        }
+        var userData = req.session.passport.user;
+
+        this.telmStore.getGamePlayInfo(userData.id, gameId)
+            .then(function(info){
+                // if achievement exist then return them otherwise sent empty object
+                this.requestUtil.jsonResponse(res, info.achievement || {} );
+            }.bind(this))
+            // catch all
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+
+
+    } catch(err) {
+        console.trace("Reports: Get Achievements Error -", err);
+        this.stats.increment("error", "GetAchievements.Catch");
+    }
+}
+
 
 // game AA, episode 1
 exampleIn.getGameInfo = {
