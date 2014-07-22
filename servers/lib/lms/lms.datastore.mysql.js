@@ -324,6 +324,40 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+LMS_MySQL.prototype.getTeacherOfCourse = function(courseId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q =
+            "SELECT     \
+                u.id,   \
+                u.first_name as firstName,  \
+                u.last_name as lastName     \
+            FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
+            WHERE m.role='instructor' AND  \
+            m.course_id="+ this.ds.escape(courseId);
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results && results.length > 0){
+                    resolve(results[0]);
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
+
 
 LMS_MySQL.prototype.removeUserFromCourse = function(userId, courseId) {
 // add promise wrapper

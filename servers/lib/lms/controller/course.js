@@ -226,6 +226,7 @@ function getEnrolledCourses(req, res, next) {
 
                 var getCourses  = _getCourses.bind(this);
                 var showMembers = false;
+                var showTeacher = false;
 
                 if( userData.role == lConst.role.instructor ||
                     userData.role == lConst.role.manager ||
@@ -238,9 +239,11 @@ function getEnrolledCourses(req, res, next) {
                             showMembers = (req.query.showMembers === "true") ? true : false;
                         }
                     }
+                } else {
+                    showTeacher = true;
                 }
 
-                getCourses(courses, showMembers)
+                getCourses(courses, showMembers, showTeacher)
                     .then(function(courses){
                             this.requestUtil.jsonResponse(res, courses);
                         }.bind(this),
@@ -411,6 +414,7 @@ function getCourse(req, res, next) {
 
             // check if enrolled in course
             var showMembers = false;
+            var showTeacher = false;
             var promise;
             if( userData.role == lConst.role.instructor ||
                 userData.role == lConst.role.manager ||
@@ -428,6 +432,7 @@ function getCourse(req, res, next) {
                 // do nothing promise
                 promise = when.promise(function(resolve){resolve(1)}.bind(this));
             } else {
+                showTeacher = true;
                 // check if enrolled
                 promise = this.myds.isEnrolledInCourse(userData.id, courseId);
             }
@@ -447,7 +452,7 @@ function getCourse(req, res, next) {
                     courses.push(course); // add course
 
                     var getCourses = _getCourses.bind(this)
-                    getCourses(courses, showMembers)
+                    getCourses(courses, showMembers, showTeacher)
                         .then(function(courses){
                             if( courses &&
                                 courses.length > 0) {
@@ -474,7 +479,7 @@ function getCourse(req, res, next) {
 }
 
 
-function _getCourses(courses, showMembers){
+function _getCourses(courses, showMembers, showTeacher){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -499,7 +504,15 @@ return when.promise(function(resolve, reject) {
                             course.users = _.clone(studentList);
                             return this.myds.getGamesForCourse(course.id);
                         }.bind(this));
-                } else {
+                }
+                else if( showTeacher ) {
+                    p = this.myds.getTeacherOfCourse(course.id)
+                        .then(function(teacherInfo) {
+                            course.teacher = _.clone(teacherInfo);
+                            return this.myds.getGamesForCourse(course.id);
+                        }.bind(this));
+                }
+                else {
                     p = this.myds.getGamesForCourse(course.id);
                 }
 
