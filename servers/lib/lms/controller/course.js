@@ -325,12 +325,17 @@ function createCourse(req, res, next, serviceManager)
             // validate gameId's
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
+            // TODO: replace this with DB lookup, return promise
             var gameIds = dash.getListOfGameIds();
+
             for(var i = 0; i < courseData.games.length; i++){
                 var found = false;
                 // check if gameId is in the course
                 for(var j = 0; j < gameIds.length; j++) {
-                    if(courseData.games[i].id == gameIds[j]) {
+                    // game Id is not case sensitive, so lowercase check
+                    if( courseData.games[i].id &&
+                        (courseData.games[i].id.toLowerCase() == gameIds[j])
+                      ) {
                         found = true;
                         break;
                     }
@@ -614,19 +619,24 @@ function updateGamesInCourse(req, res, next, serviceManager)
             // validate gameId's
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
+            // TODO: replace this with DB lookup, return promise
             var gameIds = dash.getListOfGameIds();
+
             for(var i = 0; i < userInputGames.length; i++){
                 var found = false;
                 // check if gameId is in the course
                 for(var j = 0; j < gameIds.length; j++) {
-                    if(userInputGames[i].id == gameIds[j]) {
+                    // game Id is not case sensitive, so lowercase check
+                    if( userInputGames[i].id &&
+                        (userInputGames[i].id.toLowerCase() == gameIds[j])
+                      ) {
                         found = true;
                         break;
                     }
                 }
 
                 if(!found) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+updateGameIds[i]+"' is not valid", key:"gameid.invalid"}, 404);
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+userInputGames[i]+"' is not valid", key:"gameid.invalid"}, 404);
                     return; // exit function
                 }
             }

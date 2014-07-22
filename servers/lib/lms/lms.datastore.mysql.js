@@ -141,8 +141,10 @@ return when.promise(function(resolve, reject) {
 
                 //console.log("updateLicenseTable all license:", results);
                 var gameIds = [];
-                var games = serviceManager.get("dash").service.getGames();
+                var games = {};
+                // TODO: replace this with DB lookup, return promise
                 if(serviceManager) {
+                    games = serviceManager.get("dash").service.getGames();
                     gameIds = serviceManager.get("dash").service.getListOfGameIds();
                 }
 
@@ -150,7 +152,7 @@ return when.promise(function(resolve, reject) {
                 for(var i = 0; i < results.length; i++) {
                     for(var j = 0; j < gameIds.length; j++) {
                         var settings = {};
-                        var gameId = gameIds[j].toLowerCase();
+                        var gameId = gameIds[j];
                         if(gameId == "sc") {
                             settings = _.cloneDeep( games[ gameId ].info.settings );
                             // free_play is the opposite of missionProgressLock, thus the condition is flipped
