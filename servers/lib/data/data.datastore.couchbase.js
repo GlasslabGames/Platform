@@ -1528,3 +1528,33 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Couchbase.prototype.getEventCount = function(){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.game.dataKey+"::"+tConst.game.countKey;
+
+    // get user game pref
+    this.client.get(key,
+        function(err, data){
+            var count = 0;
+            if(err){
+                // NOT "No such key"
+                if(err.code != 13) {
+                    console.error("CouchBase TelemetryStore: Get Event Count Data Error -", err);
+                    reject(err);
+                    return;
+                }
+            } else {
+                count = data.value;
+            }
+
+            resolve(count);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};

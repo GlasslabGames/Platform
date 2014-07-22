@@ -6,7 +6,8 @@ var lConst = require('../../lms/lms.const.js');
 module.exports = {
     sendBatchTelemetryV2: sendBatchTelemetryV2,
     sendBatchTelemetryV1: sendBatchTelemetryV1,
-    getEventsByUserId:    getEventsByUserId
+    getEventsByUserId:    getEventsByUserId,
+    eventsCount:          eventsCount
 };
 
 /*
@@ -144,5 +145,27 @@ function getEventsByUserId(req, res, next){
         console.trace("Collector: Get User Data Error -", err);
         this.stats.increment("error", "GetUserData.Catch");
         this.requestUtil.errorResponse(res, {error: err});
+    }
+}
+
+
+function eventsCount(req, res, next){
+    try {
+        this.cbds.getEventCount()
+            .then(function(eventCount){
+                if(!eventCount) {
+                    eventCount = 0;
+                }
+                this.requestUtil.jsonResponse(res, {eventCount: eventCount});
+            }.bind(this))
+            //
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+
+
+    } catch(err) {
+        console.trace("Collector: Events Count Error -", err);
+        this.stats.increment("error", "EventsCount.Catch");
     }
 }
