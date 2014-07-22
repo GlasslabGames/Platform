@@ -141,8 +141,10 @@ return when.promise(function(resolve, reject) {
 
                 //console.log("updateLicenseTable all license:", results);
                 var gameIds = [];
-                var games = serviceManager.get("dash").service.getGames();
+                var games = {};
+                // TODO: replace this with DB lookup, return promise
                 if(serviceManager) {
+                    games = serviceManager.get("dash").service.getGames();
                     gameIds = serviceManager.get("dash").service.getListOfGameIds();
                 }
 
@@ -150,7 +152,7 @@ return when.promise(function(resolve, reject) {
                 for(var i = 0; i < results.length; i++) {
                     for(var j = 0; j < gameIds.length; j++) {
                         var settings = {};
-                        var gameId = gameIds[j].toLowerCase();
+                        var gameId = gameIds[j];
                         if(gameId == "sc") {
                             settings = _.cloneDeep( games[ gameId ].info.settings );
                             // free_play is the opposite of missionProgressLock, thus the condition is flipped
@@ -321,6 +323,40 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+LMS_MySQL.prototype.getTeacherOfCourse = function(courseId) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q =
+            "SELECT     \
+                u.id,   \
+                u.first_name as firstName,  \
+                u.last_name as lastName     \
+            FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
+            WHERE m.role='instructor' AND  \
+            m.course_id="+ this.ds.escape(courseId);
+
+        this.ds.query(Q)
+            .then(function(results) {
+                if(results && results.length > 0){
+                    resolve(results[0]);
+                } else {
+                    resolve();
+                }
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
 
 
 LMS_MySQL.prototype.removeUserFromCourse = function(userId, courseId) {

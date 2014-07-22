@@ -226,6 +226,7 @@ function getEnrolledCourses(req, res, next) {
 
                 var getCourses  = _getCourses.bind(this);
                 var showMembers = false;
+                var showTeacher = false;
 
                 if( userData.role == lConst.role.instructor ||
                     userData.role == lConst.role.manager ||
@@ -238,9 +239,11 @@ function getEnrolledCourses(req, res, next) {
                             showMembers = (req.query.showMembers === "true") ? true : false;
                         }
                     }
+                } else {
+                    showTeacher = true;
                 }
 
-                getCourses(courses, showMembers)
+                getCourses(courses, showMembers, showTeacher)
                     .then(function(courses){
                             this.requestUtil.jsonResponse(res, courses);
                         }.bind(this),
@@ -325,12 +328,17 @@ function createCourse(req, res, next, serviceManager)
             // validate gameId's
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
+            // TODO: replace this with DB lookup, return promise
             var gameIds = dash.getListOfGameIds();
+
             for(var i = 0; i < courseData.games.length; i++){
                 var found = false;
                 // check if gameId is in the course
                 for(var j = 0; j < gameIds.length; j++) {
-                    if(courseData.games[i].id == gameIds[j]) {
+                    // game Id is not case sensitive, so lowercase check
+                    if( courseData.games[i].id &&
+                        (courseData.games[i].id.toLowerCase() == gameIds[j])
+                      ) {
                         found = true;
                         break;
                     }
@@ -406,6 +414,7 @@ function getCourse(req, res, next) {
 
             // check if enrolled in course
             var showMembers = false;
+            var showTeacher = false;
             var promise;
             if( userData.role == lConst.role.instructor ||
                 userData.role == lConst.role.manager ||
@@ -423,6 +432,7 @@ function getCourse(req, res, next) {
                 // do nothing promise
                 promise = when.promise(function(resolve){resolve(1)}.bind(this));
             } else {
+                showTeacher = true;
                 // check if enrolled
                 promise = this.myds.isEnrolledInCourse(userData.id, courseId);
             }
@@ -442,7 +452,7 @@ function getCourse(req, res, next) {
                     courses.push(course); // add course
 
                     var getCourses = _getCourses.bind(this)
-                    getCourses(courses, showMembers)
+                    getCourses(courses, showMembers, showTeacher)
                         .then(function(courses){
                             if( courses &&
                                 courses.length > 0) {
@@ -469,7 +479,7 @@ function getCourse(req, res, next) {
 }
 
 
-function _getCourses(courses, showMembers){
+function _getCourses(courses, showMembers, showTeacher){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -494,7 +504,15 @@ return when.promise(function(resolve, reject) {
                             course.users = _.clone(studentList);
                             return this.myds.getGamesForCourse(course.id);
                         }.bind(this));
-                } else {
+                }
+                else if( showTeacher ) {
+                    p = this.myds.getTeacherOfCourse(course.id)
+                        .then(function(teacherInfo) {
+                            course.teacher = _.clone(teacherInfo);
+                            return this.myds.getGamesForCourse(course.id);
+                        }.bind(this));
+                }
+                else {
                     p = this.myds.getGamesForCourse(course.id);
                 }
 
@@ -614,19 +632,24 @@ function updateGamesInCourse(req, res, next, serviceManager)
             // validate gameId's
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
+            // TODO: replace this with DB lookup, return promise
             var gameIds = dash.getListOfGameIds();
+
             for(var i = 0; i < userInputGames.length; i++){
                 var found = false;
                 // check if gameId is in the course
                 for(var j = 0; j < gameIds.length; j++) {
-                    if(userInputGames[i].id == gameIds[j]) {
+                    // game Id is not case sensitive, so lowercase check
+                    if( userInputGames[i].id &&
+                        (userInputGames[i].id.toLowerCase() == gameIds[j])
+                      ) {
                         found = true;
                         break;
                     }
                 }
 
                 if(!found) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+updateGameIds[i]+"' is not valid", key:"gameid.invalid"}, 404);
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+userInputGames[i]+"' is not valid", key:"gameid.invalid"}, 404);
                     return; // exit function
                 }
             }

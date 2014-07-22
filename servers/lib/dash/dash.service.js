@@ -72,17 +72,26 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+// TODO: replace this with DB lookup, return promise
+// returns a lowercase list of all game Ids
 DashService.prototype.getListOfGameIds = function() {
     var gameIds = [];
     for(var g in this.games) {
-        gameIds.push(this.games[g].info.gameId);
+        if( this.games[g].info &&
+            this.games[g].info.basic &&
+            this.games[g].info.basic.gameId) {
+            gameIds.push( this.games[g].info.basic.gameId.toLowerCase() );
+        }
     }
     return gameIds;
 };
 
+// TODO: replace this with DB lookup, return promise
 DashService.prototype.getGames = function() {
     return this.games;
 };
+
+
 
 DashService.prototype._loadGameFiles = function() {
 // add promise wrapper
