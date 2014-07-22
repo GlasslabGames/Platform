@@ -271,7 +271,7 @@ function postGameAchievement(req, res, next) {
         // group required
         if( !(req.body &&
             req.body.group &&
-            _.isNumber(req.body.group) ) ) {
+            _.isString(req.body.group) ) ) {
             this.requestUtil.errorResponse(res, "missing group from data");
             return;
         }
@@ -280,7 +280,7 @@ function postGameAchievement(req, res, next) {
         // subGroup required
         if( !(req.body &&
             req.body.subGroup &&
-            _.isNumber(req.body.subGroup) ) ) {
+            _.isString(req.body.subGroup) ) ) {
             this.requestUtil.errorResponse(res, "missing subGroup from data");
             return;
         }
@@ -289,7 +289,7 @@ function postGameAchievement(req, res, next) {
         // item required
         if( !(req.body &&
             req.body.item &&
-            _.isNumber(req.body.item) ) ) {
+            _.isString(req.body.item) ) ) {
             this.requestUtil.errorResponse(res, "missing item from data");
             return;
         }
