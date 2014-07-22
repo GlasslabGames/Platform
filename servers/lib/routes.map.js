@@ -37,6 +37,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/data/eventsCount",
+            service: "data",
+            controller: "events",
+            method: {
+                get: "eventsCount"
+            }
+        },
+        {
             api: "/api/v2/data/session/start",
             service: "data",
             controller: "session",
