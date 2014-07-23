@@ -578,14 +578,30 @@ return when.promise(function(resolve, reject) {
                         event = {
                             timestamp: revent.clientTimeStamp,
                             name:      revent.eventName,
-                            eventData: revent.eventData
+
+                            gameSessionEventOrder: revent.gameSessionEventOrder,
+                            clientTimeStamp: revent.clientTimeStamp,
+                            serverTimeStamp: revent.serverTimeStamp,
+                            eventName: revent.eventName,
+                            eventData: revent.eventData,
+                            totalTimePlayed: revent.totalTimePlayed
                         };
 
+                        // pull root info (data that should all be the same for all events of a session event)
                         if(revent.userId) {
                             eventsData.userId = revent.userId;
                         }
+                        if( revent.gameType ) {
+                            eventsData.gameType = revent.gameType;
+                        }
                         if( revent.gameVersion) {
-                            eventsData.gameVersion = revent.clientVersion;
+                            eventsData.gameVersion = revent.gameVersion;
+                        }
+                        if( revent.clientVersion ) {
+                            eventsData.clientVersion = revent.clientVersion;
+                        }
+                        if( revent.deviceId ) {
+                            eventsData.deviceId = revent.deviceId;
                         }
 
                         eventsData.events.push(event);
@@ -770,6 +786,36 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+
+TelemDS_Couchbase.prototype.getSessionsByUserId = function(gameId, userId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        gameId = gameId.toLowerCase();
+        // tConst.game.session.started
+        this.client.view("telemetry", 'getCompletedSessionsByUserId').query(
+            {
+                key: [gameId, userId]
+            },
+            function(err, results) {
+                if(err){
+                    console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var gameSessionIds = _.pluck(results, 'value');
+                resolve(gameSessionIds);
+            }.bind(this)
+        );
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+
 TelemDS_Couchbase.prototype.getAllOldGameSessions = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -794,7 +840,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-}
+};
 
 TelemDS_Couchbase.prototype.cleanUpOldGameSessionsV2 = function(deviceId){
 // add promise wrapper

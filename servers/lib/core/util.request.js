@@ -85,7 +85,7 @@ RequestUtil.prototype.postRequest = function(url, headers, jdata, done){
         headers:  headers
     };
 
-    console.log("getRequest options:", options);
+    //console.log("getRequest options:", options);
     this.sendRequest(options, data, null, done);
 };
 
@@ -162,8 +162,6 @@ RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
     }.bind(this));
 
     if(data) {
-        sreq.write( data );
-
         if(_.isObject(data)) {
             // convert data to string
             data = JSON.stringify(data);

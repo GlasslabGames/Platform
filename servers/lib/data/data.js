@@ -11,7 +11,11 @@ module.exports = {
         session: require('./controller/session.js'),
         events:  require('./controller/events.js'),
         game:    require('./controller/game.js'),
-        user:    require('./controller/user.js')
+        user:    require('./controller/user.js'),
+        // internal route
+        _queueSession: require('./controller/_queueSession.js'),
+        _gameSession:  require('./controller/_gameSession.js'),
+        _events:       require('./controller/_events.js')
     },
     Service: require('./data.service.js'),
     Const:   require('./data.const.js'),

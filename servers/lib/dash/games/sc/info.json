@@ -20,9 +20,21 @@
             "large": "assets/thumb-game-SC.png"
         }
     },
+    "assessment": [
+        {
+            "id": "sowo",
+            "dataProcessScope": "all",
+            "engine": "r"
+        },
+        {
+            "id": "competency",
+            "dataProcessScope": "gameSession",
+            "engine": "weka"
+        }
+    ],
     "reports": [
         {
-            "id":   "sowo",
+            "id": "sowo",
             "enabled": true,
             "name": "Shout Out and Watch Out Report",
             "header": "Shout Out and Watch Out Report",

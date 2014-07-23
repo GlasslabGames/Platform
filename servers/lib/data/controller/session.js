@@ -144,7 +144,8 @@ function endSessionV2(req, outRes){
         //console.log("req.params:", req.params, ", req.body:", req.body);
 
         this.stats.increment("info", "Route.EndSession");
-        var gSessionId = undefined;
+        var gSessionId;
+        var userId;
 
         //console.log("endSession jdata:", jdata);
         // forward to webapp server
@@ -173,13 +174,14 @@ function endSessionV2(req, outRes){
 
                 // all done in parallel
                 .then(function (gSessionData) {
+                    userId = gSessionData.userId;
                     // when all done
                     // add end session in Datastore
                     return this.cbds.endGameSessionV2(gSessionId, clientTimeStamp)
                         // push job on queue
                         .then( function() {
                             //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
-                            return this.queue.pushJob(gSessionId, gSessionData.gameId);
+                            return this.queue.pushJob(userId, gSessionId, gSessionData.gameId);
                         }.bind(this) );
                 }.bind(this))
 
@@ -310,13 +312,15 @@ function endSessionV1(req, outRes){
             //console.log("endSession jdata:", jdata);
             // forward to webapp server
             if(jdata.gameSessionId) {
+                var userId;
 
                 // validate session
                 this.cbds.validateSession(jdata.gameSessionId)
 
                     // save events
                     .then(function(sdata) {
-                        return this._saveBatchV1(jdata.gameSessionId, sdata.userId, sdata.gameLevel, jdata)
+                        userId = sdata.userId;
+                        return this._saveBatchV1(jdata.gameSessionId, userId, sdata.gameLevel, jdata)
                     }.bind(this))
 
                     // all done in parallel
@@ -344,7 +348,7 @@ function endSessionV1(req, outRes){
                             // push job on queue
                             .then( function() {
                                 //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
-                                return this.queue.pushJob(jdata.gameSessionId);
+                                return this.queue.pushJob(userId, jdata.gameSessionId);
                             }.bind(this) );
 
                         return p;

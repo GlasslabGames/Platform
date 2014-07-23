@@ -38,7 +38,7 @@ function AE_Queue(options){
     }
 }
 
-AE_Queue.prototype.pushJob = function(gameSessionId, gameId){
+AE_Queue.prototype.pushJob = function(userId, gameSessionId, gameId){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -48,6 +48,7 @@ AE_Queue.prototype.pushJob = function(gameSessionId, gameId){
             JSON.stringify({
                 id: gameSessionId,
                 gameId: gameId || '',
+                userId: userId,
                 type: aeConst.queue.end
             }),
             function(err){

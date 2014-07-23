@@ -39,8 +39,9 @@ function getAllGameAchievements(req, res){
         }
 
         var game = this.games[gameId];
-        if(game.hasOwnProperty('achievements')) {
-            this.requestUtil.jsonResponse(res, game['achievements']);
+        if( game.info &&
+            game.info.hasOwnProperty('achievements') ) {
+            this.requestUtil.jsonResponse(res, game.info['achievements']);
         } else {
             this.requestUtil.jsonResponse(res, {});
         }
@@ -118,10 +119,9 @@ function getGameDetails(req, res){
         }
 
         var game = this.games[gameId];
-        if( game.hasOwnProperty('info') &&
-            game['info'].hasOwnProperty('details')
-          ) {
-            this.requestUtil.jsonResponse(res, game['info'].details);
+        if( game.info &&
+            game.info.hasOwnProperty('details') ) {
+            this.requestUtil.jsonResponse(res, game.info.details);
         } else {
             this.requestUtil.jsonResponse(res, {});
         }
@@ -159,9 +159,8 @@ function getGameReports(req, res){
 
         var game = this.games[gameId];
         if( game.hasOwnProperty('info') &&
-            game['info'].hasOwnProperty('reports')
-            ) {
-            this.requestUtil.jsonResponse(res, game['info'].reports);
+            game.info.hasOwnProperty('reports') ) {
+            this.requestUtil.jsonResponse(res, game.info.reports);
         } else {
             this.requestUtil.jsonResponse(res, []);
         }
@@ -208,11 +207,10 @@ function getGameMissions(req, res){
         var userData = req.session.passport.user;
 
         var game = this.games[gameId];
-        if( game.hasOwnProperty('info') &&
-            game['info'].hasOwnProperty('missionGroups')
-            ) {
+        if( game.info &&
+            game.info.hasOwnProperty('missionGroups') ) {
 
-            var missionGroups = _.cloneDeep(game['info'].missionGroups);
+            var missionGroups = _.cloneDeep(game.info.missionGroups);
             var missionProgressLock = true;
 
             this.dashStore.getGameSettingsFromCourseId(courseId)
