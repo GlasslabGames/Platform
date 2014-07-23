@@ -3,13 +3,21 @@ GlassLab Game Service Platform (Hydra)
 This is the Glasslab game service platform server.
 It is a nodeJS web server. nodeJS servers is used for producing REST endpoints. Angular is used for frontend rendering and navigation.
 
-
-Requirments
+Dependencies
 ------------
-OSX with 8GB or ram
+1. **Node.js**
+2. **Forever** process manager
+    * Use NPM to install forever process manager globally
+    ```sh
+    $ sudo npm install forever -g
+    ```
+3. **Redis** - Local or remote instance
+    * Redis is the Job Q, so the platform and the assessment engine should use the same redis instance)
+4. **MySQL** - Stage/Prod uses RDS
+5. **Couchbase** - Stage/Prod uses separate instances
 
 
-Installation
+OSX Installation
 ------------
 1. Install **Brew**
    * http://brew.sh/
@@ -98,6 +106,7 @@ Installation
                4. Replicas: uncheck "Enable"
                5. Click Create button at bottom of modal.
 7. Installation Complete
+
 
 Running the app
 ---------------
