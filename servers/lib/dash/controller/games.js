@@ -21,7 +21,7 @@ function getGamesBasicInfo(req, res){
 
                 for(var game in this.games) {
                     // gameId is not case sensitive, always lowercase
-                    game = game.toLowerCase();
+                    game = game.toUpperCase();
 
                     if( this.games[game].hasOwnProperty("info") &&
                         this.games[game]["info"].hasOwnProperty("basic")

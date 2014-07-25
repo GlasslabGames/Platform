@@ -25,7 +25,7 @@ function getAssessmentDefinitions(req, res){
         }
         var gameId = req.params.gameId;
         // gameIds are not case sensitive
-        gameId = gameId.toLowerCase();
+        gameId = gameId.toUpperCase();
 
         // check gameId exists
         if( !this.games.hasOwnProperty(gameId) ) {

@@ -27,6 +27,7 @@ module.exports = {
         countKey: 'count',
         gameSessionKey: 'gs',
         eventKey: 'e',
+        dsInfoKey: 'dataSchemaInfo',
         eventsKey: 'events',
         scoreKey: 'GL_Scenario_Score',
         versions: require('./data.const.game_versions')

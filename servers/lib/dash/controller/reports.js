@@ -38,26 +38,32 @@ function getCompetency(req, res) {
 }
 
 
-// TODO: change this to list user with totalTimePlayed
+// http://localhost:8001/api/v2/dash/reports/achievements?gameId=AA-1&courseId=93
 exampleIn.getAchievements = {
     gameId: "AA-1",
-    userIds: [1, 2]
+    courseId: 93
 };
-exampleOut.getAchievements = {
-    header: [
-        {
-        }
-    ],
-    users: [
-        {
-            userId: 3,
-            columns: [
-
-            ]
-        }
-    ]
-};
-function getAchievements(req, res){
+exampleOut.getAchievements = [
+    {
+        "userId": 25,
+        "achievements": [
+            {
+                "group":    "21st.Century.Skills",
+                "subGroup": "a",
+                "item":     "Bold",
+                "won":      true
+            },
+            {
+                "group":    "21st.Century.Skills",
+                "subGroup": "a",
+                "item":     "Persistent",
+                "won":      false
+            }
+        ],
+        "totalTimePlayed": 123456789
+    }
+];
+function getAchievements(req, res) {
     try {
         if( !(req.session &&
               req.session.passport &&
@@ -73,7 +79,7 @@ function getAchievements(req, res){
             return;
         }
 
-        if(!req.query.userIds) {
+        if(!req.query.courseId) {
             this.requestUtil.errorResponse(res, {error: "missing userIds"});
             return;
         }
@@ -82,24 +88,25 @@ function getAchievements(req, res){
             return;
         }
 
-        var userIds = req.query.userIds;
+        var courseId = parseInt(req.query.courseId);
         var gameId = req.query.gameId;
-
-        // make sure userId is array
-        if(!_.isArray(userIds)) {
-            var id = parseInt(userIds);
-            if(_.isNaN(id)) {
-                this.requestUtil.errorResponse(res, {error: "invalid parameter"});
-                return;
-            }
-            userIds = [ id ];
-        }
+        // gameId is not case sensitive
+        gameId = gameId.toUpperCase();
 
         //console.log("userIds:", userIds);
         // validate users in teachers class
-        this.lmsStore.isMultiUsersInInstructorCourse(userIds, loginUserSessionData.id)
+        this.lmsStore.isUserInCourse(loginUserSessionData.id, courseId)
             .then(function(verified) {
                 if(verified) {
+                    return this.lmsStore.getStudentsOfCourse(courseId);
+                } else {
+                    this.requestUtil.errorResponse(res, {error: "invalid access"});
+                }
+            }.bind(this))
+
+            .then(function(userInfo) {
+                if(userInfo) {
+                    var userIds = _.pluck(userInfo, "id");
                     return this.telmStore.getMultiGamePlayInfo(userIds, gameId);
                 } else {
                     this.requestUtil.errorResponse(res, {error: "invalid access"});
@@ -107,161 +114,23 @@ function getAchievements(req, res){
             }.bind(this))
 
             .then(function(playerInfoList) {
-                // TODO: transform achivements to list format for frontend
-                console.log("playerInfoList:", playerInfoList);
+                var achievements = [];
+                //console.log("playerInfoList:", playerInfoList);
 
-                /*
-                var out = { }, e, ed, tevent, userId;
-
-                // re-set all users map values
-                for(var i = 0; i < userIds.length; i++) {
-                    out[ userIds[i] ] = { groups:{}, won: 0 };
-                }
-
-                // if no events skip to next
-                if(!events) {
-                    this.requestUtil.jsonResponse(res, out);
-                    return;
-                }
-
-                for(var i in events) {
-                    e = events[i];
-                    ed = e.eventData;
-                    tevent = {
-                        timestamp: e.serverTimeStamp,
-                        timestamp: e.serverTimeStamp,
-                        gameSessionId: e.gameSessionId
-                    };
-                    // get user id from use device map
-                    userId = deviceUserIdMap[ e.deviceId ];
-
-                    // if user id not in list, then init object
-                    if( !out.hasOwnProperty(userId) ) {
-                        out[userId] = { groups:{}, won: 0 };
-                    }
-
-                    //
-                    o = out[userId];
-                    if( !o.groups.hasOwnProperty(ed.group) ) {
-                        o.groups[ed.group] = { subGroups:{}, won: 0 };
-                    }
-                    if( !o.groups[ed.group].subGroups.hasOwnProperty(ed.subGroup) ) {
-                        o.groups[ed.group].subGroups[ed.subGroup] = { items:{}, won: 0 };
-                    }
-                    if( !o.groups[ed.group].subGroups[ed.subGroup].items.hasOwnProperty(ed.item) ) {
-                        o.groups[ed.group].subGroups[ed.subGroup].items[ed.item] = {};
-                    }
-                    // new item, update total in tree
-                    if( !o.groups[ed.group].subGroups[ed.subGroup].items[ed.item].hasOwnProperty('events') ) {
-                        // add events list
-                        o.groups[ed.group].subGroups[ed.subGroup].items[ed.item].events = [];
-
-                        o.won++;
-                        o.groups[ed.group].won++;
-                        o.groups[ed.group].subGroups[ed.subGroup].won++;
-                    }
-
-                    o.groups[ed.group].subGroups[ed.subGroup].items[ed.item].events.push(tevent);
-                }
-                */
-
-                /*
-                 {
-                 "deviceId": "cheese",
-                 "clientTimeStamp": 1397607228,
-                 "gameId": "SC-1",
-                 "clientVersion": "1.2.4156",
-                 "eventName": "$Achievement",
-                 "eventData": {
-                 "group": "CCSS.ELA-Literacy.WHST.6-8.1b",
-                 "item": "Battle Hungry",
-                 "subGroup": "CCSS.ELA-Literacy.WHST.6-8.1b-b"
-                 },
-                 "gameSessionId": "fb86aeb0-c4fb-11e3-8a1d-df7e0ec67e6c",
-                 "serverTimeStamp": 1397607230
-                 }
-                 */
-                /*
-                // with totals
-                var out = { }, e, ed, tevent, userId;
-                for(var i in events) {
-                    e = events[i];
-                    userId = deviceUserIdMap[ e.deviceId ];
-
-                    // if user id not in list, then init object
-                    if( !out.hasOwnProperty(userId) ) {
-                        out[userId] = {};
-                    }
-
-                    // per client Id (aka game Id)
-                    if( !out[userId].hasOwnProperty(e.gameId) ) {
-                        if( this.gameInfo.hasOwnProperty(e.gameId) &&
-                            this.gameInfo[e.gameId].hasOwnProperty('$Achievements') ) {
-                            out[userId][e.gameId] = _.cloneDeep( this.gameInfo[e.gameId]['$Achievements'] );
-                        } else {
-                            // skip this event because it's not in client list
-                            continue;
-                        }
-                    }
-                    //
-                    o = out[userId][e.gameId];
-
-                    ed = e.eventData;
-                    tevent = {
-                        timestamp: e.serverTimeStamp,
-                        gameSessionId: e.gameSessionId
+                for(var userId in playerInfoList) {
+                    var info = playerInfoList[userId];
+                    var userAchievements = {
+                        userId: userId,
+                        achievements: [],
+                        totalTimePlayed: info.totalTimePlayed
                     };
 
-                    if( !o.hasOwnProperty('total') ) {
-                        o.won = 0;
-                        o.total = 0;
-                    }
-                    if( !o.groups[ed.group].hasOwnProperty('total') ) {
-                        o.groups[ed.group].won = 0;
-                        o.groups[ed.group].total = 0;
-                    }
-                    if( !o.groups[ed.group].subGroups[ed.subGroup].hasOwnProperty('total') ) {
-                        o.groups[ed.group].subGroups[ed.subGroup].won = 0;
-                        o.groups[ed.group].subGroups[ed.subGroup].total = 0;
-                    }
-
-                    // new item, update total in tree
-                    if( !o.groups[ed.group].subGroups[ed.subGroup].items[ed.item].hasOwnProperty('events') ) {
-                        // add events list
-                        o.groups[ed.group].subGroups[ed.subGroup].items[ed.item].events = [];
-                        o.won++;
-                        o.groups[ed.group].won++;
-                        o.groups[ed.group].subGroups[ed.subGroup].won++;
-
-                        o.total++;
-                        o.groups[ed.group].total++;
-                        o.groups[ed.group].subGroups[ed.subGroup].total++;
-                    }
-
-                    o.groups[ed.group].subGroups[ed.subGroup].items[ed.item].events.push(tevent);
+                    userAchievements.achievements = this.getListOfAchievements(gameId, info.achievement);
+                    achievements.push(userAchievements);
                 }
 
-                // TODO: replace this with the totals in the game info
-                // add in missing totals
-                for(var u in out) {
-                    for(var c in out[u]) {
-                        for(var g in out[u][c].groups) {
-                            for(var sg in out[u][c].groups[g].subGroups) {
-                                for(var i in out[u][c].groups[g].subGroups[sg].items) {
-                                    if( !out[u][c].groups[g].subGroups[sg].items[i].hasOwnProperty('events') ) {
-                                        out[u][c].total++;
-                                        out[u][c].groups[g].total++;
-                                        out[u][c].groups[g].subGroups[sg].total++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                */
-
-                //console.log("getAchievements out:", out);
-                this.requestUtil.jsonResponse(res, out);
+                //console.log("getAchievements:", achievements);
+                this.requestUtil.jsonResponse(res, achievements);
             }.bind(this))
 
             // error

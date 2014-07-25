@@ -81,10 +81,7 @@ return when.promise(function(resolve, reject) {
 
         // Migrate Old DB Events Done
         .then(function(){
-            return this.cbds.migrateEventsFromMysql(this.stats, this.myds, this.options.telemetry.migrateCount);
-        }.bind(this))
-        .then(function() {
-            console.log("DataService: Migrate Old DB Events Done!");
+            return this.cbds.migrateData(this);
         }.bind(this))
 
         .then(resolve, reject);

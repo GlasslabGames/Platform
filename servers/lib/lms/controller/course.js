@@ -337,7 +337,7 @@ function createCourse(req, res, next, serviceManager)
                 for(var j = 0; j < gameIds.length; j++) {
                     // game Id is not case sensitive, so lowercase check
                     if( courseData.games[i].id &&
-                        (courseData.games[i].id.toLowerCase() == gameIds[j])
+                        (courseData.games[i].id.toUpperCase() == gameIds[j])
                       ) {
                         found = true;
                         break;
@@ -641,7 +641,7 @@ function updateGamesInCourse(req, res, next, serviceManager)
                 for(var j = 0; j < gameIds.length; j++) {
                     // game Id is not case sensitive, so lowercase check
                     if( userInputGames[i].id &&
-                        (userInputGames[i].id.toLowerCase() == gameIds[j])
+                        (userInputGames[i].id.toUpperCase() == gameIds[j])
                       ) {
                         found = true;
                         break;

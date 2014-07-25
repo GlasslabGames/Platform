@@ -153,7 +153,7 @@ return when.promise(function(resolve, reject) {
                     for(var j = 0; j < gameIds.length; j++) {
                         var settings = {};
                         var gameId = gameIds[j];
-                        if(gameId == "sc") {
+                        if(gameId == "SC") {
                             settings = _.cloneDeep( games[ gameId ].info.settings );
                             // free_play is the opposite of missionProgressLock, thus the condition is flipped
                             settings.missionProgressLock = (results[i].free_play[0] == 0);
@@ -1011,10 +1011,13 @@ LMS_MySQL.prototype.updateGamesInCourse = function(courseId, games) {
         var promiseList = [];
         var Q;
         for(var i = 0; i < games.length; i++) {
+            // game Id is not case sensitive
+            var gameId = games[i].id.toUpperCase();
+
             Q = "UPDATE GL_COURSE_GAME_MAP" +
                 " SET game_settings="+this.ds.escape(JSON.stringify(games[i].settings))+
                 " WHERE course_id="+this.ds.escape(courseId)+
-                " AND game_id="+this.ds.escape(games[i].id);
+                " AND game_id="+this.ds.escape(gameId);
             //console.log("updateGamesInCourse Q:", Q);
             promiseList.push(this.ds.query(Q));
         }
