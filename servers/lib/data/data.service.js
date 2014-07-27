@@ -20,10 +20,9 @@ module.exports = DataService;
 
 function DataService(options){
     try{
-        var Assessment, Telemetry, WebStore;
+        var Telemetry, WebStore;
 
         // Glasslab libs
-        Assessment = require('../aeng/assessment.js');
         aConst     = require('../auth/auth.js').Const;
         // TODO: rename WebStore to DashStore
         WebStore   = require('../dash/dash.js').Datastore.MySQL;
@@ -42,7 +41,6 @@ function DataService(options){
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
         this.myds        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
         this.cbds        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
-        this.queue       = new Assessment.Queue.Redis(this.options.assessment.queue);
         this.stats       = new Util.Stats(this.options, "Data");
 
     } catch(err) {

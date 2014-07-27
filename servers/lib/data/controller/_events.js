@@ -1,5 +1,6 @@
 
 var when   = require('when');
+var guard  = require('when/guard');
 var Util   = require('../../core/util.js');
 var lConst = require('../../lms/lms.const.js');
 
@@ -32,8 +33,9 @@ function getUserEvents(req, res, next){
                     return;
                 }
 
-                when.reduce(sessionList, function(currentResult, sessionId, index) {
-
+                // guard, async so it runs each one at a time, to prevent spaming the server for events
+                var guardedAsyncOperation = guard(guard.n(1),
+                    function(currentResult, sessionId, index) {
                         if(sessionId.length > 0) {
                             return this.cbds.getEvents(sessionId)
                                 .then( function (results) {
@@ -43,8 +45,9 @@ function getUserEvents(req, res, next){
                         } else {
                             return currentResult;
                         }
-                    }.bind(this), [])
+                }.bind(this));
 
+                when.reduce(sessionList, guardedAsyncOperation, [])
                     // done
                     .then(function(result){
                         // output in pretty format
@@ -54,8 +57,7 @@ function getUserEvents(req, res, next){
                     // error
                     .then(null, function(err){
                         console.error("err:", err);
-                    }.bind(this))
-
+                    }.bind(this));
 
             }.bind(this));
 

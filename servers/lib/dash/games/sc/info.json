@@ -22,19 +22,28 @@
     },
     "assessment": [
         {
+            "enabled": false,
             "id": "sowo",
             "dataProcessScope": "all",
-            "engine": "r"
+            "engine": "javascript",
+            "frequency": {
+                "type": "endSession"
+            }
         },
         {
+            "enabled": true,
             "id": "competency",
             "dataProcessScope": "gameSession",
-            "engine": "weka"
+            "engine": "weka",
+            "frequency": {
+                "type": "endSession"
+            }
         }
     ],
     "reports": [
         {
             "id": "sowo",
+            "assessmentId": "sowo",
             "enabled": true,
             "name": "Shout Out and Watch Out Report",
             "header": "Shout Out and Watch Out Report",
@@ -42,6 +51,7 @@
         },
         {
             "id": "competency",
+            "assessmentId": "competency",
             "enabled": true,
             "name": "Competency Levels: Complex Problem Solving",
             "header": "Competency Levels: Complex Problem Solving",

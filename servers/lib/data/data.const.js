@@ -13,6 +13,10 @@ module.exports = {
             session: '/api/session/validate'
         }
     },
+    aeng: {
+        key: "ae",
+        resultsKey: "r"
+    },
     game: {
         session: {
             started: 'started',

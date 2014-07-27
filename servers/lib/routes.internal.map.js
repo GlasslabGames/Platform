@@ -28,14 +28,6 @@ module.exports = {
             }
         },
         {
-            api: "/int/v1/data/session/:gameSessionId/info",
-            service: "data",
-            controller: "_gameSession",
-            method: {
-                get: "getGameSessionInfo"
-            }
-        },
-        {
             api: "/int/v1/data/game/:gameId/user/:userId/events",
             service: "data",
             controller: "_events",
@@ -52,11 +44,11 @@ module.exports = {
             }
         },
         {
-            api: "/int/v1/dash/reports/competency/results",
+            api: "/int/v1/dash/game/:gameId/assessment/results",
             service: "dash",
-            controller: "_reports",
+            controller: "_game",
             method: {
-                get: "saveCompetencyResults"
+                post: "saveAssessmentResults"
             }
         }
     ]

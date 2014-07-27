@@ -1054,6 +1054,7 @@ TelemDS_Couchbase.prototype.getSessionsByUserId = function(gameId, userId){
 
         gameId = gameId.toUpperCase();
         // tConst.game.session.started
+
         this.client.view("telemetry", 'getCompletedSessionsByUserId').query(
             {
                 key: [gameId, userId]
@@ -1868,6 +1869,30 @@ return when.promise(function(resolve, reject) {
             }
 
             resolve(count);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Couchbase.prototype.saveAssessmentResults = function(gameId, userId, assessmentId, data){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.aeng.key+":"+tConst.aeng.resultsKey+":"+gameId+":"+assessmentId+":"+userId;
+
+    // get user game pref
+    this.client.set(key, data,
+        function(err, data) {
+            if(err) {
+                console.error("CouchBase TelemetryStore: Save Assessment Results Error -", err);
+                reject(err);
+                return;
+            }
+
+            resolve(data);
         }.bind(this));
 
 // ------------------------------------------------
