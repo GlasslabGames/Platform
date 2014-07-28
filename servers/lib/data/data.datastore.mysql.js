@@ -565,8 +565,8 @@ TelemDS_Mysql.prototype.getSessionInfo = function(gameSessionId){
 // end promise wrapper
 };
 
-
-TelemDS_Mysql.prototype.saveCompetencyResults = function(sessionInfo, compData){
+// TODO: replace GL_COMPETENCY_RESULTS with a new table
+TelemDS_Mysql.prototype.saveCompetencyResults = function(courseId, userId, compData){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -576,7 +576,7 @@ TelemDS_Mysql.prototype.saveCompetencyResults = function(sessionInfo, compData){
             "NULL",
             0,
             parseInt(compData.numAttempts), // numAttempts
-            parseInt(sessionInfo.courseId),
+            parseInt(courseId),
             this.ds.escape("POINTID"),
             this.ds.escape(compData.competencyType), // competency type
             "NOW()",
@@ -586,7 +586,7 @@ TelemDS_Mysql.prototype.saveCompetencyResults = function(sessionInfo, compData){
             this.ds.escape(compData.studentFeedbackCode), // student feedback
             this.ds.escape(compData.teacherFeedbackCode), // teacher feedback
             this.ds.escape(compData.timeSpentSec), // time spent secs
-            this.ds.escape(sessionInfo.userId)
+            this.ds.escape(userId)
         ];
         values = values.join(',');
 

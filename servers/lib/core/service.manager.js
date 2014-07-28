@@ -50,12 +50,25 @@ function ServiceManager(configFiles){
 
     global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = global.ENV;
+    this.stats            = new Util.Stats(this.options, "ServiceManager");
 
-    this.stats     = new Util.Stats(this.options, "ServiceManager");
-    this.routesMap = require('../routes.map.js');
+    try{
+        this.routesMap = require('../routes.map.js');
+    } catch(err){
+        console.log("ServiceManager: Could not find default routes map.");
+    }
+
     this.services  = {};
     this.routeList = {};
 }
+
+ServiceManager.prototype.setRouteMap = function(str) {
+    this.routesMap = require(str);
+};
+
+ServiceManager.prototype.setPort = function(port) {
+    this.options.services.port = port;
+};
 
 ServiceManager.prototype.initExpress = function() {
 // add promise wrapper
@@ -145,12 +158,15 @@ ServiceManager.prototype.setupRoutes = function() {
 };
 
 ServiceManager.prototype.setupWebAppRoutes = function() {
-    var fullPath = path.resolve(this.options.webapp.staticContentPath);
+    if( this.options &&
+        this.options.webapp &&
+        this.options.webapp.staticContentPath ) {
+        var fullPath = path.resolve(this.options.webapp.staticContentPath);
 
-    console.log("Static Dir Content -", fullPath);
-    this.app.use( express.static(fullPath) );
+        console.log("Static Dir Content -", fullPath);
+        this.app.use( express.static(fullPath) );
+    }
 };
-
 
 ServiceManager.prototype.setupDefaultRoutes = function() {
 
@@ -308,8 +324,12 @@ ServiceManager.prototype.setupApiRoutes = function() {
                             func.call(service, req, res, next, this);
                         }.bind(this));
                     }
+                } else {
+                    console.warn("Function \""+funcName+"\" not found in controller \""+a.controller+"\".");
                 }
             }.bind(this));
+        } else {
+            console.warn("Service \""+a.service+"\" not found in services.");
         }
     }.bind(this));
 };

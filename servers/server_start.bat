@@ -1,2 +1,3 @@
 call npm install
-call node app.js
+call node app-external.js
+call node app-internal.js

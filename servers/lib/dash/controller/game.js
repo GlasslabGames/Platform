@@ -14,7 +14,7 @@ module.exports = {
 
 var exampleIn = {};
 
-// game AA, episode 1
+// http://localhost:8001/api/v2/dash/game/AA-1/achievements/all
 exampleIn.getAllGameAchievements = {
     gameId: 'AA-1'
 };
@@ -30,7 +30,7 @@ function getAllGameAchievements(req, res){
 
         var gameId = req.params.gameId;
         // gameIds are not case sensitive
-        gameId = gameId.toLowerCase();
+        gameId = gameId.toUpperCase();
 
         // check gameId exists
         if( !this.games.hasOwnProperty(gameId) ) {
@@ -39,8 +39,8 @@ function getAllGameAchievements(req, res){
         }
 
         var game = this.games[gameId];
-        if(game.hasOwnProperty('achievements')) {
-            this.requestUtil.jsonResponse(res, game['achievements']);
+        if( game.achievements ) {
+            this.requestUtil.jsonResponse(res, game.achievements);
         } else {
             this.requestUtil.jsonResponse(res, {});
         }
@@ -51,7 +51,7 @@ function getAllGameAchievements(req, res){
     }
 }
 
-// game AA, episode 1
+// http://localhost:8001/api/v2/dash/game/AA-1/achievements/user
 exampleIn.getUserGameAchievements = {
     gameId: 'AA-1'
 };
@@ -67,7 +67,7 @@ function getUserGameAchievements(req, res){
 
         var gameId = req.params.gameId;
         // gameIds are not case sensitive
-        gameId = gameId.toLowerCase();
+        gameId = gameId.toUpperCase();
 
         // check gameId exists
         if( !this.games.hasOwnProperty(gameId) ) {
@@ -79,7 +79,7 @@ function getUserGameAchievements(req, res){
         this.telmStore.getGamePlayInfo(userData.id, gameId)
             .then(function(info){
                 // if achievement exist then return them otherwise sent empty object
-                this.requestUtil.jsonResponse(res, info.achievement || {} );
+                this.requestUtil.jsonResponse(res, this.getListOfAchievements(gameId, info.achievement) );
             }.bind(this))
             // catch all
             .then(null, function(err){
@@ -109,7 +109,7 @@ function getGameDetails(req, res){
 
         var gameId = req.params.gameId;
         // gameIds are not case sensitive
-        gameId = gameId.toLowerCase();
+        gameId = gameId.toUpperCase();
 
         // check gameId exists
         if( !this.games.hasOwnProperty(gameId) ) {
@@ -118,10 +118,9 @@ function getGameDetails(req, res){
         }
 
         var game = this.games[gameId];
-        if( game.hasOwnProperty('info') &&
-            game['info'].hasOwnProperty('details')
-          ) {
-            this.requestUtil.jsonResponse(res, game['info'].details);
+        if( game.info &&
+            game.info.hasOwnProperty('details') ) {
+            this.requestUtil.jsonResponse(res, game.info.details);
         } else {
             this.requestUtil.jsonResponse(res, {});
         }
@@ -149,7 +148,7 @@ function getGameReports(req, res){
 
         var gameId = req.params.gameId;
         // gameIds are not case sensitive
-        gameId = gameId.toLowerCase();
+        gameId = gameId.toUpperCase();
 
         // check gameId exists
         if( !this.games.hasOwnProperty(gameId) ) {
@@ -159,9 +158,8 @@ function getGameReports(req, res){
 
         var game = this.games[gameId];
         if( game.hasOwnProperty('info') &&
-            game['info'].hasOwnProperty('reports')
-            ) {
-            this.requestUtil.jsonResponse(res, game['info'].reports);
+            game.info.hasOwnProperty('reports') ) {
+            this.requestUtil.jsonResponse(res, game.info.reports);
         } else {
             this.requestUtil.jsonResponse(res, []);
         }
@@ -190,7 +188,7 @@ function getGameMissions(req, res){
         }
         var gameId = req.params.gameId;
         // gameIds are not case sensitive
-        gameId = gameId.toLowerCase();
+        gameId = gameId.toUpperCase();
 
         // check gameId exists
         if( !this.games.hasOwnProperty(gameId) ) {
@@ -208,11 +206,10 @@ function getGameMissions(req, res){
         var userData = req.session.passport.user;
 
         var game = this.games[gameId];
-        if( game.hasOwnProperty('info') &&
-            game['info'].hasOwnProperty('missionGroups')
-            ) {
+        if( game.info &&
+            game.info.hasOwnProperty('missionGroups') ) {
 
-            var missionGroups = _.cloneDeep(game['info'].missionGroups);
+            var missionGroups = _.cloneDeep(game.info.missionGroups);
             var missionProgressLock = true;
 
             this.dashStore.getGameSettingsFromCourseId(courseId)

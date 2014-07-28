@@ -80,7 +80,7 @@ DashService.prototype.getListOfGameIds = function() {
         if( this.games[g].info &&
             this.games[g].info.basic &&
             this.games[g].info.basic.gameId) {
-            gameIds.push( this.games[g].info.basic.gameId.toLowerCase() );
+            gameIds.push( this.games[g].info.basic.gameId.toUpperCase() );
         }
     }
     return gameIds;
@@ -104,7 +104,10 @@ return when.promise(function(resolve, reject) {
         files.forEach(function(gameName){
             // skip dot files
             if(gameName.charAt(0) != '.') {
-                this.games[gameName] = {};
+                var gameId = gameName.toUpperCase();
+
+                // gameName is not case sensitive
+                this.games[ gameId ] = {};
 
                 var gameFiles = fs.readdirSync( path.join(dir, gameName) );
 
@@ -112,7 +115,7 @@ return when.promise(function(resolve, reject) {
                     if(file.charAt(0) != '.') {
                         var name = path.basename(file, path.extname(file));
                         var filePath = path.join(dir, gameName, file);
-                        this.games[gameName][name] = require(filePath);
+                        this.games[gameId][name] = require(filePath);
                     }
                 }.bind(this));
             }
@@ -126,4 +129,42 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+
+DashService.prototype.getListOfAchievements = function(gameId, playerAchievement) {
+    // if no player achievements then default to none
+    if(!playerAchievement) {
+        playerAchievement = {};
+    }
+
+    // if not game Id in games, then return empty object
+    if(!this.games.hasOwnProperty(gameId)) {
+        return [];
+    }
+
+    var achievementsList = [];
+    var a = _.merge(_.cloneDeep(this.games[gameId].achievements), playerAchievement);
+    //console.log("a:", a);
+
+    for(var groupId in a.groups) {
+        for(var subGroupId in a.groups[groupId].subGroups) {
+            for(var itemId in a.groups[groupId].subGroups[subGroupId].items) {
+                var achievement = {
+                    "group":    groupId,
+                    "subGroup": subGroupId,
+                    "item":     itemId,
+                    "won":      false
+                };
+
+                if(a.groups[groupId].subGroups[subGroupId].items[itemId].won) {
+                    achievement.won = true;
+                }
+
+                achievementsList.push(achievement);
+            }
+        }
+    }
+
+    return achievementsList;
 };

@@ -246,51 +246,51 @@ return when.promise(function(resolve, reject) {
 
 
 exampleOut.getLicensedGameIdsFromUserId = {
-    "sc": true
+    "SC": true
 };
 WebStore_MySQL.prototype.getLicensedGameIdsFromUserId = function(userId) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var Q = "SELECT DISTINCT(game_id) as gameId \
-                 FROM GL_LICENSE l  \
-                 JOIN GL_LICENSE_MAP lm on lm.license_id=l.id \
-                 WHERE user_id \
-                   IN (SELECT DISTINCT(user_id) as userId \
-                      FROM GL_MEMBERSHIP \
-                      WHERE course_id \
-                        IN (SELECT course_id \
-                            FROM GL_MEMBERSHIP \
-                            WHERE user_id="+this.ds.escape(userId);
-            Q += ") AND role='instructor')";
+    var Q = "SELECT DISTINCT(game_id) as gameId \
+             FROM GL_LICENSE l  \
+             JOIN GL_LICENSE_MAP lm on lm.license_id=l.id \
+             WHERE user_id \
+               IN (SELECT DISTINCT(user_id) as userId \
+                  FROM GL_MEMBERSHIP \
+                  WHERE course_id \
+                    IN (SELECT course_id \
+                        FROM GL_MEMBERSHIP \
+                        WHERE user_id="+this.ds.escape(userId);
+        Q += ") AND role='instructor')";
 
-        //console.log("Q:", Q);
-        this.ds.query(Q).then(function(results) {
-                if(results.length > 0) {
-                    var gameIds = {};
-                    for(var i = 0; i < results.length; i++) {
-                        // gameId is not case sensitive, always lowercase
-                        gameIds[ results[i].gameId.toLowerCase() ] = true;
-                    }
-
-                    resolve( gameIds );
-                } else {
-                    resolve({});
+    //console.log("Q:", Q);
+    this.ds.query(Q).then(function(results) {
+            if(results.length > 0) {
+                var gameIds = {};
+                for(var i = 0; i < results.length; i++) {
+                    // gameId is not case sensitive, always lowercase
+                    gameIds[ results[i].gameId.toUpperCase() ] = true;
                 }
-            }.bind(this)
-            , reject);
+
+                resolve( gameIds );
+            } else {
+                resolve({});
+            }
+        }.bind(this)
+        , reject);
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
 
-exampleOut.getLicensedGameIdsFromUserId = {
-    "sc": { "missionProgressLock": true },
-    "aa-1": {},
-    "aw-1": {}
+exampleOut.getGameSettingsFromCourseId = {
+    "SC": { "missionProgressLock": true },
+    "AA-1": {},
+    "AW-1": {}
 };
 WebStore_MySQL.prototype.getGameSettingsFromCourseId = function(courseId) {
 // add promise wrapper
@@ -308,11 +308,11 @@ return when.promise(function(resolve, reject) {
                 for(var i = 0; i < results.length; i++) {
                     try {
                         // gameId is not case sensitive, always lowercase
-                        gameSettings[ results[i].gameId.toLowerCase() ] = JSON.parse(results[i].gameSettings);
+                        gameSettings[ results[i].gameId.toUpperCase() ] = JSON.parse(results[i].gameSettings);
                     } catch(err) {
                         // invalid json
                         console.error("WebStore_MySQL getGameSettingsFromCourseId: Error -", err);
-                        gameSettings[ results[i].gameId.toLowerCase() ] = {};
+                        gameSettings[ results[i].gameId.toUpperCase() ] = {};
                     }
                 }
 

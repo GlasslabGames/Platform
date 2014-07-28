@@ -10,6 +10,7 @@ var urlParser  = require('url');
 var path       = require('path');
 // Third-party libs
 var _          = require('lodash');
+var when       = require('when');
 
 module.exports = RequestUtil;
 
@@ -70,7 +71,7 @@ RequestUtil.prototype.getRequest = function(url, headers, done){
 
     //console.log("getRequest options:", options);
     this.sendRequest(options, null, null, done);
-}
+};
 
 RequestUtil.prototype.postRequest = function(url, headers, jdata, done){
     var purl = urlParser.parse(url);
@@ -85,7 +86,7 @@ RequestUtil.prototype.postRequest = function(url, headers, jdata, done){
         headers:  headers
     };
 
-    console.log("getRequest options:", options);
+    //console.log("getRequest options:", options);
     this.sendRequest(options, data, null, done);
 };
 
@@ -162,8 +163,6 @@ RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
     }.bind(this));
 
     if(data) {
-        sreq.write( data );
-
         if(_.isObject(data)) {
             // convert data to string
             data = JSON.stringify(data);
@@ -175,4 +174,70 @@ RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
     }
 
     sreq.end();
+};
+
+
+// promisify request
+RequestUtil.prototype.request = function(url, data, rmethod, headers) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        // default headers to empty object
+        if(!headers) {
+            headers = {};
+        }
+
+        // default get
+        var method = "get";
+
+        // if data then post
+        if(data) {
+            method = "post";
+        }
+        // if type set then use it
+        if(rmethod) {
+            method = rmethod;
+        }
+
+        if (_.isObject(data)) {
+            // if object convert to string
+            data = JSON.stringify(data);
+            headers = {
+                "Content-Type": "application/json"
+            }
+        }
+
+        var callback = function (err, res, rdata) {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            if (res.statusCode != 200) {
+                reject(rdata);
+            } else {
+                try {
+                    var jdata = JSON.parse(rdata);
+                    resolve(jdata);
+                } catch (err) {
+                    // invalid JSON
+                    reject(err);
+                }
+            }
+        }.bind(this);
+
+        var purl = urlParser.parse(url);
+        var options = {
+            protocol: purl.protocol || "http:",
+            hostname: purl.hostname || "localhost",
+            port:     purl.port,
+            path:     purl.path,
+            method:   method,
+            headers:  headers
+        };
+
+        this.sendRequest(options, data, null, callback);
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
 };

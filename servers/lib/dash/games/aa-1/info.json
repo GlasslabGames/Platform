@@ -15,16 +15,33 @@
             "large": "assets/thumb-game-AA-1.png"
         }
     },
+    "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "all",
+            "engine": "javascript",
+            "frequency": {
+                "type": "interval",
+                "secs": 3600, "//": "every min"
+            }
+        }
+    ],
     "reports": [
         {
             "id":   "sowo",
+            "assessmentId": "sowo",
             "enabled": true,
             "name": "Shout Out and Watch Out Report",
-            "header": "Shout Out and Watch Out Report",
+            "header": {
+                "text": "Shout Out and Watch Out Report",
+                "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
+            },
             "description": "This report shows..."
         },
         {
             "id":   "achievements",
+            "assessmentId": "none",
             "enabled": true,
             "name": "Game Achievements & Time Played",
             "header": "Game Achievements & Time Played",

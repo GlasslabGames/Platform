@@ -83,7 +83,7 @@ function startSessionV2(req, outRes){
             // this is ok
         }
         var gameLevel        = req.body.gameLevel;
-        var gSessionId       = undefined;
+        var gameSessionId       = undefined;
 
         // clean up old game session
         this.cbds.cleanUpOldGameSessionsV2(deviceId)
@@ -94,8 +94,8 @@ function startSessionV2(req, outRes){
             }.bind(this))
 
             // get config settings
-            .then(function (gameSessionId) {
-                gSessionId = gameSessionId;
+            .then(function (gSessionId) {
+                gameSessionId = gSessionId;
                 return this.myds.getConfigs();
             }.bind(this))
 
@@ -107,7 +107,7 @@ function startSessionV2(req, outRes){
                 }
 
                 var outData = {
-                    gameSessionId:     gSessionId,
+                    gameSessionId:     gameSessionId,
                     eventsMaxSize:     configs.eventsMaxSize,
                     eventsMinSize:     configs.eventsMinSize,
                     eventsPeriodSecs:  configs.eventsPeriodSecs,
@@ -121,14 +121,14 @@ function startSessionV2(req, outRes){
 
             // catch all errors
             .then(null,  function(err) {
-                console.error("Collector Start Session Error:", err);
+                console.error("Start Session Error:", err);
                 this.stats.increment("error", "StartSession.General");
                 this.requestUtil.errorResponse(outRes, err, 500);
             }.bind(this) );
 
 
     } catch(err) {
-        console.trace("Collector: Start Session Error -", err);
+        console.trace("Start Session Error -", err);
         this.stats.increment("error", "StartSession.Catch");
     }
 };
@@ -144,12 +144,14 @@ function endSessionV2(req, outRes){
         //console.log("req.params:", req.params, ", req.body:", req.body);
 
         this.stats.increment("info", "Route.EndSession");
-        var gSessionId = undefined;
+        var gameSessionId;
+        var userId;
+        var gameId;
 
         //console.log("endSession jdata:", jdata);
         // forward to webapp server
         if(req.body.gameSessionId) {
-            gSessionId = req.body.gameSessionId;
+            gameSessionId = req.body.gameSessionId;
 
             // required
             var clientTimeStamp = Util.GetTimeStamp();
@@ -169,17 +171,19 @@ function endSessionV2(req, outRes){
             }
 
             // validate session
-            this.cbds.validateSession(gSessionId)
+            this.cbds.validateSession(gameSessionId)
 
                 // all done in parallel
                 .then(function (gSessionData) {
+                    userId = gSessionData.userId;
+                    gameId = gSessionData.gameId;
                     // when all done
                     // add end session in Datastore
-                    return this.cbds.endGameSessionV2(gSessionId, clientTimeStamp)
+                    return this.cbds.endGameSessionV2(gameSessionId, clientTimeStamp)
                         // push job on queue
                         .then( function() {
-                            //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
-                            return this.queue.pushJob(gSessionId, gSessionData.gameId);
+                            //console.log("PushJob gameSessionId:", gameSessionId);
+                            return pushJob.call(this, userId, gameSessionId, gameId);
                         }.bind(this) );
                 }.bind(this))
 
@@ -192,7 +196,7 @@ function endSessionV2(req, outRes){
 
                 // catch all errors
                 .then(null, function(err) {
-                    console.error("Collector End Session Error:", err);
+                    console.error("End Session Error:", err);
                     this.stats.increment("error", "Route.EndSession.CatchAll");
                     this.requestUtil.errorResponse(outRes, err, 500);
                 }.bind(this) );
@@ -205,7 +209,7 @@ function endSessionV2(req, outRes){
         }
 
     } catch(err) {
-        console.trace("Collector: End Session Error -", err);
+        console.trace("End Session Error -", err);
         this.stats.increment("error", "Route.EndSession.Catch");
         this.requestUtil.errorResponse(outRes, "End Session Error", 500);
     }
@@ -229,7 +233,7 @@ function startSessionV1(req, outRes){
         //console.log("req.params:", req.params, ", req.body:", req.body);
         var gameLevel        = req.body.gameType;
         var courseId         = parseInt(req.body.courseId);
-        var gSessionId       = null;
+        var gameSessionId    = null;
         var isVersionValid   = false;
 
         // only if game
@@ -247,15 +251,15 @@ function startSessionV1(req, outRes){
             }.bind(this))
 
             // start queue session
-            .then(function (gameSessionId) {
+            .then(function (gSessionId) {
                 // save for later
-                gSessionId = gameSessionId;
+                gameSessionId = gSessionId;
                 return this.cbds.startGameSession(userData.id, courseId, gameLevel, gameSessionId);
             }.bind(this))
 
             // start activity session
             .then(function () {
-                return this.webstore.createActivityResults(gSessionId, userData.id, courseId, gameLevel);
+                return this.webstore.createActivityResults(gameSessionId, userData.id, courseId, gameLevel);
             }.bind(this))
 
             // get config settings
@@ -272,7 +276,7 @@ function startSessionV1(req, outRes){
 
                 var outData = {
                     versionValid:      isVersionValid,
-                    gameSessionId:     gSessionId,
+                    gameSessionId:     gameSessionId,
                     eventsMaxSize:     configs.eventsMaxSize,
                     eventsMinSize:     configs.eventsMinSize,
                     eventsPeriodSecs:  configs.eventsPeriodSecs,
@@ -286,14 +290,14 @@ function startSessionV1(req, outRes){
 
             // catch all errors
             .then(null,  function(err) {
-                console.error("Collector end Session Error:", err);
+                console.error("End Session Error:", err);
                 this.stats.increment("error", "StartSession.General");
                 this.requestUtil.errorResponse(outRes, err, 500);
             }.bind(this) );
 
 
     } catch(err) {
-        console.trace("Collector: Start Session Error -", err);
+        console.trace("Start Session Error -", err);
         this.stats.increment("error", "StartSession.Catch");
     }
 };
@@ -304,19 +308,23 @@ function endSessionV1(req, outRes){
         // TODO: validate all inputs
         //console.log("req.params:", req.params, ", req.body:", req.body);
 
+        // V1 is always simcity(SC) gameId
+        var gameId = "SC";
         this.stats.increment("info", "Route.EndSession");
 
         var done = function(jdata) {
             //console.log("endSession jdata:", jdata);
             // forward to webapp server
             if(jdata.gameSessionId) {
+                var userId;
 
                 // validate session
                 this.cbds.validateSession(jdata.gameSessionId)
 
                     // save events
                     .then(function(sdata) {
-                        return this._saveBatchV1(jdata.gameSessionId, sdata.userId, sdata.gameLevel, jdata)
+                        userId = sdata.userId;
+                        return this._saveBatchV1(jdata.gameSessionId, userId, sdata.gameLevel, jdata)
                     }.bind(this))
 
                     // all done in parallel
@@ -338,13 +346,13 @@ function endSessionV1(req, outRes){
                             // when all done
                             // add end session in Datastore
                             .then( function() {
-                                //console.log("Collector: endSession gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                //console.log("EndSession gameSessionId:", jdata.gameSessionId, ", score:", score);
                                 return this.cbds.endGameSession(jdata.gameSessionId);
                             }.bind(this) )
                             // push job on queue
                             .then( function() {
-                                //console.log("Collector: pushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
-                                return this.queue.pushJob(jdata.gameSessionId);
+                                //console.log("PushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
+                                return pushJob.call(this, userId, jdata.gameSessionId, gameId);
                             }.bind(this) );
 
                         return p;
@@ -359,7 +367,7 @@ function endSessionV1(req, outRes){
 
                     // catch all errors
                     .then(null, function(err) {
-                        console.error("Collector end Session Error:", err);
+                        console.error("End Session Error:", err);
                         this.stats.increment("error", "Route.EndSession.CatchAll");
                         this.requestUtil.errorResponse(outRes, err, 500);
                     }.bind(this) );
@@ -396,9 +404,24 @@ function endSessionV1(req, outRes){
             done(req.body);
         }
     } catch(err) {
-        console.trace("Collector: End Session Error -", err);
+        console.trace("End Session Error -", err);
         this.stats.increment("error", "Route.EndSession.Catch");
         this.requestUtil.errorResponse(outRes, "End Session Error", 500);
     }
 };
 // ---------------------------------------
+
+function pushJob(userId, gameSessionId, gameId) {
+    // TODO: move this to core service routing
+    var protocal = this.options.assessment.protocal || 'http:';
+    var host = this.options.assessment.host || 'localhost';
+    var port = this.options.assessment.port || 8003;
+    var url = protocal + "//" + host + ":" + port + "/int/v1/aeng/queue";
+
+    return this.requestUtil.request(url, {
+        jobType: "sessionEnd",
+        userId:  userId,
+        gameId:  gameId,
+        gameSessionId: gameSessionId
+    });
+}
