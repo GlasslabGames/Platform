@@ -20,7 +20,7 @@
         }
     },
     "webapp": {
-        "staticContentPath": "../../OurGlass/app",
+        "staticContentPath": "../../Playfully.org/dist",
         "datastore": {
             "mysql": {
                 "host"    : "localhost",
