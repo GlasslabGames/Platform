@@ -6,6 +6,8 @@
  *  express    - https://github.com/visionmedia/express
  *  passport-google-oauth - https://github.com/jaredhanson/passport-google-oauth
  *
+ * TODO: user two different API end points to switch between student and teacher
+ *
  */
 // Third-party libs
 var _          = require('lodash');

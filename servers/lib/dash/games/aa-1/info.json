@@ -77,18 +77,19 @@
                 "name": "Download",
                 "links": [
                     {
-                        "name": "PC (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.msi"
-                    },
-                    {
-                        "name": "Mac (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.dmg"
+                        "name": "iOS",
+                        "link": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8"
                     }
                 ]
             },
             {
                 "name": "Play Game",
-                "link": "/game/play/SC"
+                "link": [
+                    {
+                        "name": "Play Game",
+                        "link": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8"
+                    }
+                ]
             }
         ],
         "pages": {
