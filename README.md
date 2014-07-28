@@ -23,8 +23,15 @@ Dependencies
 * The platform depends on the following other depos:
     1. [Playfully.org](https://github.com/GlasslabGames/Playfully.org)
     2. [Assessment](https://github.com/GlasslabGames/Assessment)
-
+        * The platform will send requests to the Assessment server on port 8003
+        * The Assessment server will send requests to the Platform server on port 8002
+        * The both ports should not be exposed to outside 
 
 Setup/Install
 ========
 See [servers](servers/README.md) docs
+
+Custom Configs
+========
+See Configs in [servers](servers/README.md#Configs) docs
+
