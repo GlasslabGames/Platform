@@ -96,6 +96,7 @@ return when.promise(function(resolve, reject) {
                 userData.id = userId;
                 return this.ds.updateUserData(userData);
             } else {
+                userData.newUser = true;
                 return this.ds.addUser(userData);
             }
         }.bind(this))
