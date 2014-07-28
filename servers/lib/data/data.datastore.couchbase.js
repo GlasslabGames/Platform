@@ -463,9 +463,9 @@ return when.promise(function(resolve, reject) {
             key: gameId,
             stale: false
         },
-        function(err, results){
+        function(err, results) {
             if(err){
-                console.error("CouchBase TelemetryStore: Get Achievements View Error -", err);
+                console.error("CouchBase TelemetryStore: Get Last DeviceId By GameId View Error -", err);
                 reject(err);
                 return;
             }
@@ -490,6 +490,11 @@ TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+
+    // ensure deviceIds is array
+    if(!_.isArray(deviceIds)) {
+        deviceIds = [deviceIds];
+    }
 
     this.client.view("telemetry", "getAllAchievementsByDeviceId").query({
             keys: deviceIds,
