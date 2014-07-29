@@ -20,7 +20,7 @@
         }
     },
     "webapp": {
-        "staticContentPath": "../../Playfully.org/dist",
+        "staticContentPath": "../../Playfully.org/build",
         "datastore": {
             "mysql": {
                 "host"    : "localhost",
