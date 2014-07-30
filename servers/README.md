@@ -105,6 +105,14 @@ OSX Installation
                3. Access Control: Standard port password "glasslab"
                4. Replicas: uncheck "Enable"
                5. Click Create button at bottom of modal.
+               6. 
+    8.  Open the Node to Client ports (Refer to http://docs.couchbase.com/couchbase-manual-2.2/#network-ports)
+
+           1. 8091    Web Administration Port
+           2. 8092    Couchbase API Port
+           3. 11210   Internal/External Bucket Port
+           4. 11211   Client interface (proxy)
+           
 7. Installation Complete
 
 
