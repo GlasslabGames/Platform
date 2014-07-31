@@ -36,6 +36,22 @@ module.exports = {
             }
         },
         {
+            api: "/admin/data/user/setAllActive",
+            service: "data",
+            controller: "_events",
+            method: {
+                get: "setAllUsersActive"
+            }
+        },
+        {
+            api: "/admin/data/runMigration",
+            service: "data",
+            controller: "_events",
+            method: {
+                get: "runDataMigration"
+            }
+        },
+        {
             api: "/int/v1/dash/game/:gameId/assessment/definitions",
             service: "dash",
             controller: "_game",

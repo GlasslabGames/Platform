@@ -38,6 +38,7 @@ LMS_MySQL.prototype.connect = function(serviceManager){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
+    // migrate/update table
     this.updateCourseTable()
         .then(function(updated){
             if(updated) {
@@ -64,43 +65,43 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.updateCourseTable = function() {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var Q = "DESCRIBE GL_COURSE";
-    this.ds.query(Q)
-        .then(function(results) {
-            var updating = false;
-            for(var i = 0; i < results.length; i++) {
-                if( (results[i]['Field'] == 'institution_id') &&
-                    (results[i]['Null'] == 'NO') ) {
+var Q = "DESCRIBE GL_COURSE";
+this.ds.query(Q)
+    .then(function(results) {
+        var updating = false;
+        for(var i = 0; i < results.length; i++) {
+            if( (results[i]['Field'] == 'institution_id') &&
+                (results[i]['Null'] == 'NO') ) {
 
-                    updating = true;
-                    // need to update
-                    var Q = "ALTER TABLE `GL_COURSE` CHANGE COLUMN `institution_id` `institution_id` BIGINT(20) NULL";
-                    this.ds.query(Q)
-                        .then(function(results) {
-                            //console.log(results);
-                            resolve(true);
-                        }.bind(this),
-                        function(err) {
-                            reject({"error": "failure", "exception": err}, 500);
-                        }.bind(this)
-                    );
-                }
+                updating = true;
+                // need to update
+                var Q = "ALTER TABLE `GL_COURSE` CHANGE COLUMN `institution_id` `institution_id` BIGINT(20) NULL";
+                this.ds.query(Q)
+                    .then(function(results) {
+                        //console.log(results);
+                        resolve(true);
+                    }.bind(this),
+                    function(err) {
+                        reject({"error": "failure", "exception": err}, 500);
+                    }.bind(this)
+                );
             }
+        }
 
-            if(!updating) {
-                resolve(false);
-            }
-        }.bind(this),
-        function(err) {
-            reject({"error": "failure", "exception": err}, 500);
-        }.bind(this)
-    );
+        if(!updating) {
+            resolve(false);
+        }
+    }.bind(this),
+    function(err) {
+        reject({"error": "failure", "exception": err}, 500);
+    }.bind(this)
+);
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
@@ -604,11 +605,11 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.getUserCourses = function(id) {
+LMS_MySQL.prototype.getUserCourses = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    if(!id) {
+    if(!userId) {
         reject({"error": "failure", "exception": "invalid userId"}, 500);
         return;
     }
@@ -625,7 +626,7 @@ return when.promise(function(resolve, reject) {
             GL_MEMBERSHIP m \
             INNER JOIN GL_COURSE as c ON m.course_id=c.id \
         WHERE \
-            user_id=" + this.ds.escape(id);
+            user_id=" + this.ds.escape(userId);
 
     this.ds.query(Q)
         .then(resolve,
@@ -1005,31 +1006,32 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.updateGamesInCourse = function(courseId, games) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var promiseList = [];
-        var Q;
-        for(var i = 0; i < games.length; i++) {
-            // game Id is not case sensitive
-            var gameId = games[i].id.toUpperCase();
+    var promiseList = [];
+    var Q;
+    for(var i = 0; i < games.length; i++) {
+        // game Id is not case sensitive
+        var gameId = games[i].id.toUpperCase();
 
-            Q = "UPDATE GL_COURSE_GAME_MAP" +
-                " SET game_settings="+this.ds.escape(JSON.stringify(games[i].settings))+
-                " WHERE course_id="+this.ds.escape(courseId)+
-                " AND game_id="+this.ds.escape(gameId);
-            //console.log("updateGamesInCourse Q:", Q);
-            promiseList.push(this.ds.query(Q));
-        }
+        Q = "UPDATE GL_COURSE_GAME_MAP" +
+            " SET game_settings="+this.ds.escape(JSON.stringify(games[i].settings))+
+            " WHERE course_id="+this.ds.escape(courseId)+
+            " AND game_id="+this.ds.escape(gameId);
+        //console.log("updateGamesInCourse Q:", Q);
+        promiseList.push(this.ds.query(Q));
+    }
 
-        when.all(promiseList)
-            .done(function(results){
-                resolve(results);
-            }.bind(this),
-            function(err) {
-                reject({"error": "failure", "exception": err}, 500);
-            }.bind(this));
+    when.all(promiseList)
+        .done(function(results){
+            resolve(results);
+        }.bind(this),
+        function(err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this));
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
+

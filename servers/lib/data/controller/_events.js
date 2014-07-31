@@ -5,7 +5,9 @@ var Util   = require('../../core/util.js');
 var lConst = require('../../lms/lms.const.js');
 
 module.exports = {
-    getUserEvents: getUserEvents
+    getUserEvents:     getUserEvents,
+    setAllUsersActive: setAllUsersActive,
+    runDataMigration:  runDataMigration
 };
 
 /*
@@ -66,4 +68,77 @@ function getUserEvents(req, res, next){
         this.stats.increment("error", "GetUserData.Catch");
         this.requestUtil.errorResponse(res, {error: err});
     }
+}
+
+/*
+ http://localhost:8002/int/v1/data/user/all/active
+ */
+function setAllUsersActive(req, res, next) {
+
+    // get user sessions from MySQL
+    this.myds.getAllUserSessions()
+        // send as activity
+        .then(function(gameSessions){
+            // shortcut if no session list
+            if(!gameSessions) gameSessions = [];
+
+            return this.cbds.getAllGameSessions()
+                .then(function(gameSessions2){
+                    // combine mysql sessions and couchbase sessions
+                    return gameSessions.concat(gameSessions2);
+                }.bind(this));
+        }.bind(this))
+
+        // send as activity
+        .then(function(gameSessions) {
+            // shortcut if no session list
+            if(!gameSessions) return;
+
+            var guardedAsyncOperation = guard(guard.n(1), function(info, i){
+                return addActivity.call(this, info.userId, info.gameId, info.gameSessionId);
+            }.bind(this));
+            return when.map(gameSessions, guardedAsyncOperation);
+        }.bind(this))
+
+        // all done
+        .then(function(){
+            this.requestUtil.jsonResponse(res, {status:"complete"});
+        }.bind(this))
+
+        // catch all error
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+
+}
+
+function addActivity(userId, gameId, gameSessionId) {
+    // TODO: move this to core service routing
+    var protocal = this.options.assessment.protocal || 'http:';
+    var host = this.options.assessment.host || 'localhost';
+    var port = this.options.assessment.port || 8003;
+    var url = protocal + "//" + host + ":" + port + "/int/v1/aeng/activity";
+
+    return this.requestUtil.request(url, {
+        userId:  userId,
+        gameId:  gameId,
+        gameSessionId: gameSessionId
+    });
+}
+
+
+/*
+ http://localhost:8002/admin/data/runMigration
+ */
+function runDataMigration(req, res, next) {
+    // Migrate Old DB Events
+    this.cbds.migrateData()
+        .then(function(){
+            this.requestUtil.jsonResponse(res, {status:"complete"});
+        }.bind(this))
+
+        // catch all error
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }

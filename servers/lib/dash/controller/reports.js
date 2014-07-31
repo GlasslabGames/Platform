@@ -5,27 +5,133 @@ var lConst    = require('../../lms/lms.const.js');
 //
 
 module.exports = {
-    getAchievements: getAchievements,
-    getSOWO: getSOWO,
-    getCompetency: getCompetency,
+    getAchievements:    getAchievements,
+    getSOWO:            getSOWO,
+    getCompetency:      getCompetency,
     getTotalTimePlayed: getTotalTimePlayed
 };
 
 var exampleIn = {}, exampleOut = {};
 
+// http://localhost:8001/api/v2/dash/reports/sowo?gameId=AA-1&courseId=93&limit=10
 exampleIn.getSOWO = {
     gameId: "AA-1",
-    courseId: 1
+    courseId: 1,
+    limit: 10
 };
+exampleOut.getSOWO = [
+
+];
 function getSOWO(req, res) {
-    // TODO: make this a general function
-    // get user list
-        // check user permission to see course
+    if(!req.query.courseId) {
+        this.requestUtil.errorResponse(res, {error: "missing userIds"});
+        return;
+    }
+    var courseId = req.query.courseId;
+    if(!req.query.gameId) {
+        this.requestUtil.errorResponse(res, {error: "missing gameId"});
+        return;
+    }
+    var gameId = req.query.gameId;
+    var limit = req.query.limit;
 
-    // get SOWO data per game per user
+    var assessmentId = "sowo";
+
+    // get user list in class
+    // TODO: use service route
+    this.lmsStore.getStudentsOfCourse(courseId)
+        .then(function(users){
+            // shortcut no users
+            if(!users) return;
+
+            var outList = [];
+            var userMap = {};
+            var promistList = [];
+
+            //console.log("users:", users);
+
+            // get SOWO data per game per user
+            users.forEach(function(user){
+                var userId = user.id;
+
+                 //console.log("getAssessmentResults gameId:", gameId, ", userId:", userId, ", assessmentId:", assessmentId);
+                 var p = this.telmStore.getAssessmentResults(gameId, userId, assessmentId)
+                    .then(function(assessmentData){
+                         // shortcut invalid assessmentData
+                         if(!assessmentData || !assessmentData.results) return;
+
+                         // find assessment by ID
+                         var assessment = this.getGameAssessmentInfo(gameId);
+
+                         for(var i = 0; i < assessment.length; i++) {
+                             if(assessment[i].id == assessmentId) {
+                                 // merge in sowo info from game assessment info
+
+                                 // watchout rules
+                                 for(var j = 0; j < assessmentData.results.shoutout.length; j++) {
+                                     var so = assessmentData.results.shoutout[j];
+                                     assessmentData.results.shoutout[j] = _.merge(
+                                         so,
+                                         assessment[i].rules[ so.id ] );
+
+                                    //console.log("shoutout:", assessmentData.results.shoutout[j]);
+                                 }
+
+                                 // shoutout rules
+                                 for(var j = 0; j < assessmentData.results.watchout.length; j++) {
+                                     var wo = assessmentData.results.watchout[j];
+                                     assessmentData.results.watchout[j] = _.merge(
+                                         wo,
+                                         assessment[i].rules[ wo.id ] );
+
+                                     //console.log("shoutout:", assessmentData.results.watchout[j]);
+                                 }
+
+                                 // done!
+                                 break;
+                             }
+                         }
+
+                         //console.log("getAssessmentResults assessmentData:", assessmentData.results);
+                         // only add assessmentData that has shoutout and/or watchout
+                         if( (assessmentData.results.shoutout && assessmentData.results.shoutout.length) ||
+                             (assessmentData.results.watchout && assessmentData.results.watchout.length) )
+                         {
+                             var size = (!assessmentData.results.shoutout) ? 0 : assessmentData.results.shoutout.length;
+                             size    += (!assessmentData.results.watchout) ? 0 : assessmentData.results.watchout.length;
+
+                             userMap[userId] = {
+                                 size: size,
+                                 data: assessmentData
+                             };
+                         }
+
+                    }.bind(this));
+
+                promistList.push(p);
+            }.bind(this));
 
 
-    this.requestUtil.jsonResponse(res, {});
+            when.all(promistList)
+                .then(function(){
+                    var sortList = _.sortBy(userMap, ['size']);
+
+                    // if not limit set then use max
+                    if(!limit) {
+                        limit = sortList.length;
+                    }
+
+                    // pluck and limit outputList length;
+                    for(var i = 0; i < sortList.length; i++) {
+                        // fit limit
+                        if(outList.length >= limit) break;
+
+                        outList.push(sortList[i].data);
+                    }
+
+                    this.requestUtil.jsonResponse(res, outList);
+                }.bind(this));
+        }.bind(this));
 }
 
 

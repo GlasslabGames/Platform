@@ -77,11 +77,6 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "Couchbase.Connect");
             }.bind(this))
 
-        // Migrate Old DB Events Done
-        .then(function(){
-            return this.cbds.migrateData(this);
-        }.bind(this))
-
         .then(resolve, reject);
 // ------------------------------------------------
 }.bind(this));
@@ -261,6 +256,7 @@ return when.promise(function(resolve, reject) {
             //console.log("DataService: gameVersion", data.gameVersion);
 
             // find score if it exists
+            var gameId = 'SC';
             var event;
             var events = [];
             for(var i = 0; i < eventList.events.length; i++) {
@@ -295,18 +291,24 @@ return when.promise(function(resolve, reject) {
 
                 var gameParts = eventList.gameVersion.split("_");
                 var clientVersion;
-                var gameId;
+                var _gameId;
                 if(gameParts.length > 2) {
                     clientVersion = gameParts.pop();
-                    gameId        = gameParts.join("_");
+                    _gameId        = gameParts.join("_");
                 } else if(gameParts.length == 2) {
                     clientVersion = gameParts[1];
-                    gameId        = gameParts[0];
+                    _gameId        = gameParts[0];
                 } else if(gameParts.length == 1) {
                     clientVersion = gameParts[0];
-                    gameId        = gameParts[0];
+                    _gameId        = gameParts[0];
                 }
-                event.gameId = gameId
+
+                // set gameId for all events
+                if(_gameId) {
+                    gameId = _gameId;
+                }
+                event.gameId = _gameId;
+
                 event.clientVersion = clientVersion;
 
                 // add data
@@ -335,7 +337,7 @@ return when.promise(function(resolve, reject) {
                 events.push(event);
             }
 
-            this.cbds.saveEvents(events)
+            this.cbds.saveEvents(gameId, events)
                 .then(
                     function(){
                         this.stats.increment("info", "SaveBatch.Done");
@@ -418,6 +420,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
         // verify all required values are set
+        var gameId = 'SC';
 
         // eventList is object but not array
         if(  _.isObject(eventList) &&
@@ -575,13 +578,18 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
                 // add server TimeStamp
                 data.serverTimeStamp = Util.GetTimeStamp();
 
+                // set gameId for all events
+                if(data.gameId) {
+                    gameId = data.gameId;
+                }
+
                 // added saved data to list
                 //console.log("data:", data);
                 processedEvents.push(data);
             }
 
             // adds the promise to the list
-            this.cbds.saveEvents(processedEvents)
+            this.cbds.saveEvents(gameId, processedEvents)
                 .then(
                     function(){
                         if(errList.length > 0){

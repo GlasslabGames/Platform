@@ -183,7 +183,7 @@ function endSessionV2(req, outRes){
                         // push job on queue
                         .then( function() {
                             //console.log("PushJob gameSessionId:", gameSessionId);
-                            return pushJob.call(this, userId, gameSessionId, gameId);
+                            return pushJob.call(this, userId, gameId, gameSessionId);
                         }.bind(this) );
                 }.bind(this))
 
@@ -352,7 +352,7 @@ function endSessionV1(req, outRes){
                             // push job on queue
                             .then( function() {
                                 //console.log("PushJob gameSessionId:", jdata.gameSessionId, ", score:", score);
-                                return pushJob.call(this, userId, jdata.gameSessionId, gameId);
+                                return pushJob.call(this, userId, gameId, jdata.gameSessionId);
                             }.bind(this) );
 
                         return p;
@@ -411,7 +411,7 @@ function endSessionV1(req, outRes){
 };
 // ---------------------------------------
 
-function pushJob(userId, gameSessionId, gameId) {
+function pushJob(userId, gameId, gameSessionId) {
     // TODO: move this to core service routing
     var protocal = this.options.assessment.protocal || 'http:';
     var host = this.options.assessment.host || 'localhost';

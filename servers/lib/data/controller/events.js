@@ -78,10 +78,18 @@ function sendBatchTelemetryV1(req, outRes){
     }
 }
 
-
-function eventsCount(req, res, next){
+// http://localhost:8001/api/v2/data/eventsCount
+function eventsCount(req, res, next, serviceManager){
     try {
-        this.cbds.getEventCount()
+        // TODO: replace this with DB lookup, return promise
+        var gameIds = serviceManager.get("dash").service.getListOfGameIds();
+
+        when.reduce(gameIds, function(eventCount, gameId) {
+            return this.cbds.getEventCount(gameId)
+                .then(function(count){
+                    return eventCount + count;
+                }.bind(this))
+        }.bind(this), 0)
             .then(function(eventCount){
                 if(!eventCount) {
                     eventCount = 0;
@@ -92,7 +100,6 @@ function eventsCount(req, res, next){
             .then(null, function(err){
                 this.requestUtil.errorResponse(res, err);
             }.bind(this))
-
 
     } catch(err) {
         console.trace("Collector: Events Count Error -", err);
