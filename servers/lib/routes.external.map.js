@@ -301,15 +301,6 @@ module.exports = {
         },
         // ---------------------------------------------------
         {
-            // used for testing templates
-            api: "/api/v2/auth/user/email-template",
-            service: "auth",
-            controller: "user",
-            method: {
-                get: "renderEmailTemplate"
-            }
-        },
-        {
             api: "/api/v2/auth/user/register",
             service: "auth",
             controller: "user",
