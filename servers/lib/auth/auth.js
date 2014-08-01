@@ -9,7 +9,9 @@ module.exports = {
     ServiceName: "auth",
     Controller: {
         user:  require('./controller/user.js'),
-        login: require('./controller/login.js')
+        login: require('./controller/login.js'),
+
+        _user:  require('./controller/_user.js')
     },
     Const:     require('./auth.const.js'),
     Service:    require('./auth.service.js'),

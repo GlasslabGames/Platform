@@ -16,8 +16,7 @@ module.exports = {
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
-    resetPasswordUpdate: resetPasswordUpdate,
-    renderEmailTemplate: renderEmailTemplate
+    resetPasswordUpdate: resetPasswordUpdate
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -765,34 +764,4 @@ function resetPasswordUpdate(req, res, next) {
     } else {
         this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.missing"}, 401);
     }
-}
-
-function renderEmailTemplate(req, res, next) {
-
-    var emailData = {
-        subject: "This is a test",
-        to:   "test@test.com",
-        user: {
-            firstName: "First",
-            lastName: "Last Name"
-        },
-        host: req.protocol+"://"+req.headers.host
-    };
-    var email = new Util.Email(
-        this.options.auth.email,
-        path.join(__dirname, "../email-templates"),
-        this.stats);
-
-    email.test('register-welcome', emailData)
-        .then(function(data){
-            res.writeHead(200, {
-                "Content-Type": "text/html"
-            });
-            res.end( data );
-        }.bind(this))
-
-        // catch all errors
-        .then(null, function(err){
-            this.requestUtil.errorResponse(res, err);
-        }.bind(this));
 }
