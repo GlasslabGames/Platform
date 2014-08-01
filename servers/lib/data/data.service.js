@@ -418,206 +418,233 @@ return when.promise(function(resolve, reject) {
  */
 DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, eventList) {
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        // verify all required values are set
-        var gameId = 'SC';
+    // verify all required values are set
+    var gameId = 'SC';
 
-        // eventList is object but not array
-        if(  _.isObject(eventList) &&
-            !_.isArray(eventList)) {
-            // convert to array
-            eventList = [eventList];
+    // eventList is object but not array
+    if(  _.isObject(eventList) &&
+        !_.isArray(eventList)) {
+        // convert to array
+        eventList = [eventList];
+    }
+
+    // eventList needs to be an array
+    if(_.isArray(eventList)) {
+        // empty list, just return
+        if(!eventList.length) {
+            resolve();
+            return;
         }
 
-        // eventList needs to be an array
-        if(_.isArray(eventList)) {
-            // empty list, just return
-            if(!eventList.length) {
-                resolve();
-                return;
+        var processedEvents = [];
+        var errList = [];
+        for(var i = 0; i < eventList.length; i++)
+        {
+            var data = eventList[i];
+
+            if( !_.isObject(data) ){
+                errList.push(new Error("event is not an object"));
+                continue; // skip to next item in list
             }
 
-            var processedEvents = [];
-            var errList = [];
-            for(var i = 0; i < eventList.length; i++)
-            {
-                var data = eventList[i];
+            // userId: String or Integer (Optional)
+            // add userId to all events
+            if(userId) {
+                data.userId = userId;
+            }
 
-                if( !_.isObject(data) ){
-                    errList.push(new Error("event is not an object"));
+            // deviceId: String (Optional)
+            if( !data.hasOwnProperty("deviceId") ) {
+                // no deviceId is ok
+            } else {
+                if( !_.isString(data.deviceId) ) {
+                    errList.push(new Error("deviceId invalid type"));
+                    delete data.deviceId;
+                }
+                else if(data.deviceId.length == 0) {
+                    errList.push(new Error("deviceId can not be empty"));
+                    delete data.deviceId;
+                }
+            }
+
+            // clientTimeStamp: Integer (Required)
+            if( !data.hasOwnProperty("clientTimeStamp") ) {
+                errList.push(new Error("clientTimeStamp missing"));
+                continue; // skip to next item in list
+            } else {
+                if( !_.isNumber(data.clientTimeStamp) ) {
+                    errList.push(new Error("clientTimeStamp invalid type"));
                     continue; // skip to next item in list
                 }
+            }
 
-                // userId: String or Integer (Optional)
-                // add userId to all events
-                if(userId) {
-                    data.userId = userId;
-                }
-
-                // deviceId: String (Optional)
-                if( !data.hasOwnProperty("deviceId") ) {
-                    // no deviceId is ok
-                } else {
-                    if( !_.isString(data.deviceId) ) {
-                        errList.push(new Error("deviceId invalid type"));
-                        delete data.deviceId;
-                    }
-                    else if(data.deviceId.length == 0) {
-                        errList.push(new Error("deviceId can not be empty"));
-                        delete data.deviceId;
-                    }
-                }
-
-                // clientTimeStamp: Integer (Required)
-                if( !data.hasOwnProperty("clientTimeStamp") ) {
-                    errList.push(new Error("clientTimeStamp missing"));
+            // gameId required
+            if( !data.hasOwnProperty("gameId") ) {
+                errList.push(new Error("gameId missing"));
+                continue; // skip to next item in list
+            } else {
+                if( !_.isString(data.gameId) ) {
+                    errList.push(new Error("gameId invalid type"));
                     continue; // skip to next item in list
-                } else {
-                    if( !_.isNumber(data.clientTimeStamp) ) {
-                        errList.push(new Error("clientTimeStamp invalid type"));
-                        continue; // skip to next item in list
-                    }
                 }
-
-                // gameId required
-                if( !data.hasOwnProperty("gameId") ) {
-                    errList.push(new Error("gameId missing"));
+                else if(data.gameId.length == 0) {
+                    errList.push(new Error("gameId can not be empty"));
                     continue; // skip to next item in list
-                } else {
-                    if( !_.isString(data.gameId) ) {
-                        errList.push(new Error("gameId invalid type"));
-                        continue; // skip to next item in list
-                    }
-                    else if(data.gameId.length == 0) {
-                        errList.push(new Error("gameId can not be empty"));
-                        continue; // skip to next item in list
-                    }
-                    // TODO: add validate of gameId using DB
-                    // else if( this._eventValidateGameId(data.gameId) ){...}
                 }
+                // TODO: add validate of gameId using DB
+                // else if( this._eventValidateGameId(data.gameId) ){...}
+            }
 
-                // clientVersion NOT required
-                if( !data.hasOwnProperty("clientVersion") ) {
-                    // no clientVersion is ok
-                } else {
-                    if( !_.isString(data.clientVersion) ) {
-                        errList.push(new Error("clientVersion invalid type"));
-                        delete data.clientVersion;
-                    }
-                    else if(data.clientVersion.length == 0) {
-                        errList.push(new Error("clientVersion can not be empty"));
-                        delete data.clientVersion;
-                    }
-                    // TODO: add validate of clientVersion using DB
-                    // else if( this._eventValidateClientVersion(data.gameId, data.clientVersion) ){...}
+            // clientVersion NOT required
+            if( !data.hasOwnProperty("clientVersion") ) {
+                // no clientVersion is ok
+            } else {
+                if( !_.isString(data.clientVersion) ) {
+                    errList.push(new Error("clientVersion invalid type"));
+                    delete data.clientVersion;
                 }
-
-                // gameLevel NOT required
-                if( !data.hasOwnProperty("gameLevel") ) {
-                    // no gameType is ok
-                } else {
-                    if( !_.isString(data.gameLevel) ) {
-                        errList.push(new Error("gameLevel invalid type"));
-                        delete data.gameLevel;
-                    }
-                    else if(data.gameLevel.length == 0) {
-                        errList.push(new Error("gameLevel can not be empty"));
-                        delete data.gameLevel;
-                    }
-                    // TODO: ??? add validation of gameLevel using DB ???
-                    // else if( this._eventValidateGameLevel(data.gameId, data.gameLevel) ){...}
+                else if(data.clientVersion.length == 0) {
+                    errList.push(new Error("clientVersion can not be empty"));
+                    delete data.clientVersion;
                 }
+                // TODO: add validate of clientVersion using DB
+                // else if( this._eventValidateClientVersion(data.gameId, data.clientVersion) ){...}
+            }
 
-                // eventName required
-                if( !data.hasOwnProperty("eventName") ) {
-                    errList.push(new Error("eventName missing"));
+            // gameLevel NOT required
+            if( !data.hasOwnProperty("gameLevel") ) {
+                // no gameType is ok
+            } else {
+                if( !_.isString(data.gameLevel) ) {
+                    errList.push(new Error("gameLevel invalid type"));
+                    delete data.gameLevel;
+                }
+                else if(data.gameLevel.length == 0) {
+                    errList.push(new Error("gameLevel can not be empty"));
+                    delete data.gameLevel;
+                }
+                // TODO: ??? add validation of gameLevel using DB ???
+                // else if( this._eventValidateGameLevel(data.gameId, data.gameLevel) ){...}
+            }
+
+            // eventName required
+            if( !data.hasOwnProperty("eventName") ) {
+                errList.push(new Error("eventName missing"));
+                continue; // skip to next item in list
+            } else {
+                if( !_.isString(data.eventName) ) {
+                    errList.push(new Error("eventName invalid type"));
                     continue; // skip to next item in list
+                }
+                else if(data.eventName.length == 0) {
+                    errList.push(new Error("name can not be empty"));
+                    continue; // skip to next item in list
+                }
+                // try parse/analyze name
+                try {
+                    // convert + save
+                    // TODO: use convertEventName
+                    //data.eventName = this._convertEventName(data.eventName, data.gameId);
+                }
+                catch(err) {
+                    errList.push(err);
+                    continue; // skip to next item in list
+                }
+            }
+
+            // eventData NOT required
+            if( !data.hasOwnProperty("eventData") ) {
+                // no eventData is ok
+            } else {
+                if( !_.isObject(data.eventData) ) {
+                    errList.push(new Error("invalid eventData type, should be an object"));
+                    eventErr = true;
                 } else {
-                    if( !_.isString(data.eventName) ) {
-                        errList.push(new Error("eventName invalid type"));
-                        continue; // skip to next item in list
-                    }
-                    else if(data.eventName.length == 0) {
-                        errList.push(new Error("name can not be empty"));
-                        continue; // skip to next item in list
-                    }
-                    // try parse/analyze name
                     try {
-                        // convert + save
-                        // TODO: use convertEventName
-                        //data.eventName = this._convertEventName(data.eventName, data.gameId);
+                        // TODO: validate eventData based on eventName
+                        this._validateEventData(data.eventName, data.eventData);
                     }
                     catch(err) {
                         errList.push(err);
                         continue; // skip to next item in list
                     }
                 }
-
-                // eventData NOT required
-                if( !data.hasOwnProperty("eventData") ) {
-                    // no eventData is ok
-                } else {
-                    if( !_.isObject(data.eventData) ) {
-                        errList.push(new Error("invalid eventData type, should be an object"));
-                        eventErr = true;
-                    } else {
-                        try {
-                            // TODO: validate eventData based on eventName
-                            this._validateEventData(data.eventName, data.eventData);
-                        }
-                        catch(err) {
-                            errList.push(err);
-                            continue; // skip to next item in list
-                        }
-                    }
-                }
-
-                // add gameSessionId
-                data.gameSessionId = gameSessionId;
-
-                // add server TimeStamp
-                data.serverTimeStamp = Util.GetTimeStamp();
-
-                // set gameId for all events
-                if(data.gameId) {
-                    gameId = data.gameId;
-                }
-
-                // added saved data to list
-                //console.log("data:", data);
-                processedEvents.push(data);
             }
 
-            // adds the promise to the list
-            this.cbds.saveEvents(gameId, processedEvents)
-                .then(
-                    function(){
-                        if(errList.length > 0){
-                            // some errors occurred
-                            this.stats.increment("error", "SaveBatch2");
-                            reject(errList);
-                        } else {
-                            this.stats.increment("info", "SaveBatch2.Done");
-                            resolve();
-                        }
-                    }.bind(this),
-                    function(err){
-                        this.stats.increment("error", "SaveBatch2");
-                        errList.push(err);
-                        reject(errList);
-                    }.bind(this)
-                );
-        } else {
-            console.error("DataService: Error - invalid data type");
-            this.stats.increment("error", "SaveBatch2.Invalid.DataType");
-            reject(new Error("invalid data type"));
-            return;
+            // add gameSessionId
+            data.gameSessionId = gameSessionId;
+
+            // add server TimeStamp
+            data.serverTimeStamp = Util.GetTimeStamp();
+
+            // set gameId for all events
+            if(data.gameId) {
+                gameId = data.gameId;
+            }
+
+            // added saved data to list
+            //console.log("data:", data);
+            processedEvents.push(data);
         }
 
+        // adds the promise to the list
+        this.cbds.saveEvents(gameId, processedEvents)
+            .then(
+                function(){
+                    if(errList.length > 0){
+                        // some errors occurred
+                        this.stats.increment("error", "SaveBatch2");
+                        reject(errList);
+                    } else {
+                        this.stats.increment("info", "SaveBatch2.Done");
+
+                        this.addActivity(userId, gameId, gameSessionId)
+                            .then(null, function(err){
+                                console.error("DataService: addActivity Error -", err);
+                            }.bind(this));
+
+                        resolve();
+                    }
+                }.bind(this),
+                function(err){
+                    this.stats.increment("error", "SaveBatch2");
+                    errList.push(err);
+                    reject(errList);
+                }.bind(this)
+            );
+    } else {
+        console.error("DataService: Error - invalid data type");
+        this.stats.increment("error", "SaveBatch2.Invalid.DataType");
+        reject(new Error("invalid data type"));
+        return;
+    }
+
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
+};
+
+DataService.prototype.addActivity = function(userId, gameId, gameSessionId) {
+    // TODO: move this to core service routing
+    var protocal = this.options.assessment.protocal || 'http:';
+    var host = this.options.assessment.host || 'localhost';
+    var port = this.options.assessment.port || 8003;
+    var url = protocal + "//" + host + ":" + port + "/int/v1/aeng/activity";
+
+    return this.requestUtil.request(url,
+        {
+            userId:  userId,
+            gameId:  gameId,
+            gameSessionId: gameSessionId
+        })
+        .then(null, function(err){
+            if(err.code == 'ECONNREFUSED') {
+                console.error("Can not connect to Assessment Server, check if the server is running");
+            }
+            return err;
+        }.bind(this));
 }
 
 // throw errors
@@ -641,9 +668,9 @@ DataService.prototype._convertEventName = function(rawName, gameId) {
     else {
         return gameId + "_" + rawName;
     }
-}
+};
 
 // throw errors
 DataService.prototype._validateEventData = function(eventName, eventData) {
 
-}
+};

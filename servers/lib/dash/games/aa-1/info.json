@@ -21,10 +21,7 @@
             "id": "sowo",
             "dataProcessScope": "all",
             "engine": "javascript",
-            "frequency": {
-                "type": "interval",
-                "secs": 3600, "//": "every min"
-            },
+            "trigger": "activity",
             "rules": {
                 "wo1": {
                     "name": "Contradictory Mechanic",
