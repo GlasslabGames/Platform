@@ -58,11 +58,11 @@ return when.promise(function(resolve, reject) {
                 return this.telmStore.connect();
             }.bind(this))
         .then(function(){
-                console.log("DashService: Telemetry DS Connected");
+                console.log("DashService: Data DS Connected");
                 this.stats.increment("info", "TelemetryDS.Connect");
             }.bind(this),
             function(err){
-                console.trace("DashService: Telemetry DS Error -", err);
+                console.trace("DashService: Data DS Error -", err);
                 this.stats.increment("error", "TelemetryDS.Connect");
             }.bind(this))
 
@@ -73,7 +73,7 @@ return when.promise(function(resolve, reject) {
 };
 
 // TODO: replace this with DB lookup, return promise
-// returns a lowercase list of all game Ids
+// returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
 DashService.prototype.getListOfGameIds = function() {
     var gameIds = [];
     for(var g in this.games) {
@@ -91,6 +91,11 @@ DashService.prototype.getGames = function() {
     return this.games;
 };
 
+
+// TODO: replace this with DB lookup, return promise
+DashService.prototype.getGameAssessmentInfo = function(gameId) {
+    return this.games[gameId].info.assessment;
+};
 
 
 DashService.prototype._loadGameFiles = function() {

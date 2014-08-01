@@ -40,95 +40,105 @@
             }
         }
     ],
-    "reports": [
-        {
-            "id": "sowo",
-            "assessmentId": "sowo",
-            "enabled": true,
-            "name": "Shout Out and Watch Out Report",
-            "header": "Shout Out and Watch Out Report",
-            "description": "This report shows..."
-        },
-        {
-            "id": "competency",
-            "assessmentId": "competency",
-            "enabled": true,
-            "name": "Competency Levels: Complex Problem Solving",
-            "header": "Competency Levels: Complex Problem Solving",
-            "description": "This report shows...",
-            "icons": {
-                "small": "assets/icon-plus-green.png",
-                "large": "assets/icon-plus-green@2x.png"
-            },
-            "levels": {
-                "max":  3,
-                "description": [
-                    "Level 1 - The player understands...",
-                    "Level 2 - The player demonstrates...",
-                    "Level 3 - The player demonstrates..."
-                ]
-            },
-            "groups": [
-                {
-                    "name": "Gameplay",
-                    "list": [
-                        {
-                            "id": "cps_m3",
-                            "title": "Mission 4",
-                            "description": "Pollution Problems - Sierra Madre"
-                        },
-                        {
-                            "id": "cps_m5",
-                            "title": "Mission 6",
-                            "description": "It's Complicated - Jackson City"
-                        }
-                    ]
-                },
-                {
-                    "name": "Systems Maps Challenges",
-                    "list": [
-                        {
-                            "id": "lewt_m3",
-                            "title": "Mission 4",
-                            "description": "Pollution Problems - Pre-Game Systems Map"
-                        },
-                        {
-                            "id": "lewt_m3",
-                            "title": "Mission 4",
-                            "description": "Pollution Problems - Post-Game Systems Map"
-                        },
-                        {
-                            "id": "lewt_m5",
-                            "title": "Mission 4",
-                            "description": "Pollution Problems - Sierra Madre"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "id": "mission-progress",
-            "enabled": false,
-            "icons": {
-                "complete": {
-                    "small": "assets/add-blue.png",
-                    "large": "assets/add-blue@2x.png"
-                },
-                "not-complete": {
-                    "small": "assets/add-grey-square.png",
-                    "large": "assets/add-grey-square@2x.png"
-                }
+    "reports": {
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab",
+            "logo": {
+                "small": "http://argubotacademy.org/images/glasslab_logo.png",
+                "large": "http://argubotacademy.org/images/glasslab_logo.png"
             }
         },
-        {
-            "id": "learning-progress",
-            "enabled": false
-        },
-        {
-            "id": "diagram-view",
-            "enabled": false
-        }
-    ],
+        "list": [
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": "Shout Out and Watch Out Report",
+                "description": "This report shows..."
+            },
+            {
+                "id": "competency",
+                "assessmentId": "competency",
+                "enabled": true,
+                "name": "Competency Levels: Complex Problem Solving",
+                "header": "Competency Levels: Complex Problem Solving",
+                "description": "This report shows...",
+                "icons": {
+                    "small": "assets/icon-plus-green.png",
+                    "large": "assets/icon-plus-green@2x.png"
+                },
+                "levels": {
+                    "max":  3,
+                    "description": [
+                        "Level 1 - The player understands...",
+                        "Level 2 - The player demonstrates...",
+                        "Level 3 - The player demonstrates..."
+                    ]
+                },
+                "groups": [
+                    {
+                        "name": "Gameplay",
+                        "list": [
+                            {
+                                "id": "cps_m3",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Sierra Madre"
+                            },
+                            {
+                                "id": "cps_m5",
+                                "title": "Mission 6",
+                                "description": "It's Complicated - Jackson City"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Systems Maps Challenges",
+                        "list": [
+                            {
+                                "id": "lewt_m3",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Pre-Game Systems Map"
+                            },
+                            {
+                                "id": "lewt_m3",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Post-Game Systems Map"
+                            },
+                            {
+                                "id": "lewt_m5",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Sierra Madre"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "mission-progress",
+                "enabled": false,
+                "icons": {
+                    "complete": {
+                        "small": "assets/add-blue.png",
+                        "large": "assets/add-blue@2x.png"
+                    },
+                    "not-complete": {
+                        "small": "assets/add-grey-square.png",
+                        "large": "assets/add-grey-square@2x.png"
+                    }
+                }
+            },
+            {
+                "id": "learning-progress",
+                "enabled": false
+            },
+            {
+                "id": "diagram-view",
+                "enabled": false
+            }
+        ]
+    },
     "details": {
         "developer": {
             "id": "GL",

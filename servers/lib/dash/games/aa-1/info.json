@@ -24,38 +24,65 @@
             "frequency": {
                 "type": "interval",
                 "secs": 3600, "//": "every min"
+            },
+            "rules": {
+                "wo1": {
+                    "name": "Contradictory Mechanic",
+                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that contradicts their claim. More core construction practice is needed."
+                },
+                "wo3": {
+                    "name": "Straggler",
+                    "description": "Struggling with identifying strengths and weaknesses of claim-data pairs."
+                },
+                "so1": {
+                    "name": "Nailed It!",
+                    "description": "Outstanding performance at identifying weaknesses of claim-data pairs."
+                }
             }
         }
     ],
-    "reports": [
-        {
-            "id":   "sowo",
-            "assessmentId": "sowo",
-            "enabled": true,
-            "name": "Shout Out and Watch Out Report",
-            "header": {
-                "text": "Shout Out and Watch Out Report",
-                "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
-            },
-            "description": "This report shows..."
+    "reports": {
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab",
+            "logo": {
+                "small": "http://argubotacademy.org/images/glasslab_logo.png",
+                "large": "http://argubotacademy.org/images/glasslab_logo.png"
+            }
         },
-        {
-            "id":   "achievements",
-            "assessmentId": "none",
-            "enabled": true,
-            "name": "Game Achievements & Time Played",
-            "header": "Game Achievements & Time Played",
-            "description": "This report shows...",
-            "groups": [
-                {
-                    "name": "Common Core Standards Report"
+        "list": [
+            {
+                "id":   "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
                 },
-                {
-                    "name": "21st Century Skills"
-                }
-            ]
-        }
-    ],
+                "description": "This report shows..."
+            },
+            {
+                "id":   "achievements",
+                "assessmentId": "none",
+                "enabled": true,
+                "name": "Game Achievements & Time Played",
+                "header": {
+                    "text": "Game Achievements & Time Played",
+                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                },
+                "description": "This report shows...",
+                "groups": [
+                    {
+                        "name": "Common Core Standards Report"
+                    },
+                    {
+                        "name": "21st Century Skills"
+                    }
+                ]
+            }
+        ]
+    },
     "details": {
         "developer": {
             "id": "GL",

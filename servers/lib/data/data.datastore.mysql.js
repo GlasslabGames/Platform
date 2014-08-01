@@ -37,11 +37,69 @@ TelemDS_Mysql.prototype.connect = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    resolve();
+
+    // migrate/update table
+    this.updateSessionTable()
+        .then(function(updated){
+            if(updated) {
+                console.log("Data MySQL: Updated Session Table!");
+            }
+        }.bind(this))
+
+        .then(resolve, reject);
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Mysql.prototype.updateSessionTable = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "DESCRIBE GL_SESSION";
+    this.ds.query(Q)
+        .then(function(results) {
+            var updating = false;
+            var exist = false;
+            for(var i = 0; i < results.length; i++) {
+                if (results[i]['Field'] == 'game_id') {
+                    exist = true;
+                }
+            }
+
+            // game_id column not exist then add it with default 'SC'
+            if(!exist) {
+                updating = true;
+                // need to update
+                var Q = "ALTER TABLE `GL_SESSION` ADD COLUMN `game_id` VARCHAR(32) NOT NULL DEFAULT 'SC' AFTER `user_id`";
+                this.ds.query(Q)
+                    .then(function(results) {
+                        //console.log(results);
+                        resolve(true);
+                    }.bind(this),
+                    function(err) {
+                        reject({"error": "failure", "exception": err}, 500);
+                    }.bind(this)
+                );
+            }
+
+            if(!updating) {
+                resolve(false);
+            }
+        }.bind(this),
+        function(err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this)
+    );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
 
 TelemDS_Mysql.prototype.saveEvents = function(jdata){
 // add promise wrapper
@@ -117,30 +175,26 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Mysql.prototype.getAllGameSessions = function() {
+TelemDS_Mysql.prototype.getAllUserSessions = function() {
 // add promise wrapper
-return when.promise(function(resolve, reject) {
+    return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var Q =
-        "SELECT \
-            session_id as sessionId\
-        FROM \
-            GL_SESSION \
-        WHERE \
-            activity_id IS NOT NULL";
 
-    this.ds.query(Q)
-        .then(function(data){
-            // return just a list of session Id's
-            resolve( _.pluck(data, 'sessionId') );
-        }.bind(this),
-        function(err) {
-            reject({"error": "failure", "exception": err}, 500);
-        }.bind(this)
-    );
+        var Q = "SELECT s.user_id as userId, s.session_id as gameSessionId, s.game_id as gameId \
+                FROM GL_SESSION s \
+                WHERE s.ACTIVITY_ID IS NOT NULL";
 
+        this.ds.query(Q)
+            .then(
+            function(results){
+                resolve(results);
+            }.bind(this),
+            function(err) {
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this)
+        );
 // ------------------------------------------------
-}.bind(this));
+    }.bind(this));
 // end promise wrapper
 };
 
