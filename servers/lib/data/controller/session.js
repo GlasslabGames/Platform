@@ -418,10 +418,17 @@ function pushJob(userId, gameId, gameSessionId) {
     var port = this.options.assessment.port || 8003;
     var url = protocal + "//" + host + ":" + port + "/int/v1/aeng/queue";
 
-    return this.requestUtil.request(url, {
-        jobType: "sessionEnd",
-        userId:  userId,
-        gameId:  gameId,
-        gameSessionId: gameSessionId
-    });
+    return this.requestUtil.request(url,
+        {
+            jobType: "endSession",
+            userId:  userId,
+            gameId:  gameId,
+            gameSessionId: gameSessionId
+        })
+        .then(null, function(err){
+            if(err.code == 'ECONNREFUSED') {
+                console.error("Can not connect to Assessment Server, check if the server is running");
+            }
+            return err;
+        }.bind(this));
 }

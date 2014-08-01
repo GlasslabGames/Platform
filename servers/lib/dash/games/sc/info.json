@@ -24,20 +24,16 @@
         {
             "enabled": false,
             "id": "sowo",
-            "dataProcessScope": "all",
+            "dataProcessScope": "gameSession",
             "engine": "javascript",
-            "frequency": {
-                "type": "endSession"
-            }
+            "trigger": "endSession"
         },
         {
             "enabled": true,
             "id": "competency",
             "dataProcessScope": "gameSession",
             "engine": "weka",
-            "frequency": {
-                "type": "endSession"
-            }
+            "trigger": "endSession"
         }
     ],
     "reports": {
