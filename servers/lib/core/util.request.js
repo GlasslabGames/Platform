@@ -14,13 +14,15 @@ var when       = require('when');
 
 module.exports = RequestUtil;
 
-function RequestUtil(options){
+function RequestUtil(options, errors){
     this.options = _.merge(
         {
             request: { httpTimeout: 5000 }
         },
         options
     );
+
+    this.errors = errors || {};
 }
 
 RequestUtil.prototype.errorResponse = function(res, obj, code){
@@ -38,6 +40,13 @@ RequestUtil.prototype.errorResponse = function(res, obj, code){
     }
 
     if(_.isObject(obj)) {
+        // if has key then try to get error message using key from errors map
+        if(obj.key &&
+           this.errors.hasOwnProperty(obj.key)) {
+           obj.error = this.errors[obj.key];
+           obj.status = this.errors[obj.key];
+        }
+
         // if object does not contain error, then set error to object
         if(!obj.error) {
             obj = { error: obj };

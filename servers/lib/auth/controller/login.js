@@ -98,7 +98,7 @@ return when.promise(function(resolve, reject) {
     var auth = this.passport.authenticate('glasslab', function(err, user, info) {
         if(err) {
             this.stats.increment("error", "Route.Login.Auth");
-            reject({ message: { error:"try again later", key:"general" }, code:500 });
+            reject({ message: {key:"user.login.general"}, code: 500 });
             return;
         }
 
@@ -106,7 +106,7 @@ return when.promise(function(resolve, reject) {
             //req.session.messages =  [info];
             //res.redirect(rConst.api.user.login);
             this.stats.increment("error", "Route.Login.NoUser");
-            reject({ message: _.merge( { error:"invalid username or password", key:"invalid" }, info ), code: 401 });
+            reject({ message: _.merge( {key:"user.login.invalid"}, info ), code: 401 });
             return;
         }
 

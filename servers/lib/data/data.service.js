@@ -20,7 +20,7 @@ module.exports = DataService;
 
 function DataService(options){
     try{
-        var Telemetry, WebStore;
+        var Telemetry, WebStore, Errors;
 
         // Glasslab libs
         aConst     = require('../auth/auth.js').Const;
@@ -28,6 +28,7 @@ function DataService(options){
         WebStore   = require('../dash/dash.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         Telemetry  = require('./data.js');
+        Errors     = require('../errors.js');
         tConst     = Telemetry.Const;
 
         this.options = _.merge(
@@ -37,7 +38,7 @@ function DataService(options){
             options
         );
 
-        this.requestUtil = new Util.Request(this.options);
+        this.requestUtil = new Util.Request(this.options, Errors);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
         this.myds        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
         this.cbds        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);

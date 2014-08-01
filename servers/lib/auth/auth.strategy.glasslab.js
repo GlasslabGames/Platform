@@ -49,7 +49,7 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
     //console.log("authenticate body:", req.body);
 
     if (!username || !password) {
-        return this.fail({error: 'Missing credentials'});
+        return this.fail({key:"user.login.missing"});
     }
 
     this._verify(username, password)
@@ -62,7 +62,7 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
             }.bind(this),
             function (err) {
                 // respond with generic answer
-                this.fail({error: "invalid username or password", key:"invalid"});
+                this.fail({key:"user.login.invalid"});
             }.bind(this)
     );
 
@@ -194,7 +194,7 @@ return when.promise(function(resolve, reject) {
         .then(
             function(data){
                 if(data.length != 0) {
-                    reject({"error": "data validation", "key": "email.not.unique"});
+                    reject({"key": "user.notUnique.email"});
                 } else {
                     resolve();
                 }
@@ -217,7 +217,7 @@ return when.promise(function(resolve, reject) {
         .then(
             function(data){
                 if(data.length != 0) {
-                    reject({"error": "data validation", "key": "username.not.unique"});
+                    reject({"key": "user.notUnique.screenName"});
                 } else {
                     resolve();
                 }
@@ -424,7 +424,7 @@ return when.promise(function(resolve, reject) {
                 if(data.length > 0) {
                     resolve(data[0]);
                 } else {
-                    reject({"error": "data validation", "key": "code.not.valid"});
+                    reject({"key":"user.passwordReset.code.invalid"});
                 }
             }.bind(this),
             function(err) {
@@ -447,7 +447,7 @@ return when.promise(function(resolve, reject) {
             }.bind(this),
             function(err){
                 // not.unique == exists
-                if(err.key == "email.not.unique") {
+                if(err.key == "user.notUnique.email") {
                     resolve(true);
                 } else {
                     reject(err);

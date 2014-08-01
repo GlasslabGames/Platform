@@ -32,6 +32,7 @@ function enrollInCourse(req, res, next) {
             var userData = req.session.passport.user;
             var courseCode = req.body.courseCode;
 
+            // TODO: refactor this to not look like a tree
             this.myds.getCourseIdFromCourseCode(courseCode)
 
                 .then(function(courseId) {
@@ -45,18 +46,19 @@ function enrollInCourse(req, res, next) {
                                             this.requestUtil.jsonResponse(res, {});
                                         }.bind(this))
                                 } else {
-                                    this.requestUtil.errorResponse(res, {error:"already enrolled", key:"already.enrolled"}, 400);
+                                    this.requestUtil.errorResponse(res, {key:"user.enroll.code.used"}, 400);
                                 }
                             }.bind(this))
                     } else {
-                        this.requestUtil.errorResponse(res, {error:"invalid courseCode", key:"code.invalid"}, 404);
+                        this.requestUtil.errorResponse(res, {key:"user.enroll.code.invalid"}, 404);
                     }
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, {error:"missing courseCode", key:"code.missing"}, 404);
+            this.requestUtil.errorResponse(res, {key:"user.enroll.code.missing"}, 404);
         }
     } else {
-        this.requestUtil.errorResponse(res, "not logged in");
+        //this.requestUtil.errorResponse(res, "not logged in");
+        this.requestUtil.errorResponse(res, {key:"user.enroll.general"});
     }
 }
 
@@ -83,14 +85,17 @@ function unenrollFromCourse(req, res, next) {
                                 this.requestUtil.jsonResponse(res, {});
                             }.bind(this))
                     } else {
-                        this.requestUtil.errorResponse(res, "not enrolled in course");
+                        //this.requestUtil.errorResponse(res, "not enrolled in course");
+                        this.requestUtil.errorResponse(res, {key:"user.unenroll.notEnrolled"});
                     }
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, "missing courseId");
+            //this.requestUtil.errorResponse(res, "missing courseId");
+            this.requestUtil.errorResponse(res, {key:"user.unenroll.general"});
         }
     } else {
-        this.requestUtil.errorResponse(res, "not logged in");
+        //this.requestUtil.errorResponse(res, "not logged in");
+        this.requestUtil.errorResponse(res, {key:"user.unenroll.general"});
     }
 }
 
@@ -107,11 +112,13 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
 
         if( req.body) {
             if(!req.body.course){
-                this.requestUtil.errorResponse(res, "missing course id");
+                //this.requestUtil.errorResponse(res, "missing course id");
+                this.requestUtil.errorResponse(res, {key:"user.unenroll.general"});
                 return;
             }
             if(!req.body.user){
-                this.requestUtil.errorResponse(res, "missing user id");
+                //this.requestUtil.errorResponse(res, "missing user id");
+                this.requestUtil.errorResponse(res, {key:"user.unenroll.general"});
                 return;
             }
             var userId   = req.body.user;
@@ -132,14 +139,17 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
 
                             }.bind(this))
                     } else {
-                        this.requestUtil.errorResponse(res, "not enrolled in course");
+                        //this.requestUtil.errorResponse(res, "not enrolled in course");
+                        this.requestUtil.errorResponse(res, {key:"user.unenroll.notEnrolled"});
                     }
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, "missing arguments");
+            //this.requestUtil.errorResponse(res, "missing arguments");
+            this.requestUtil.errorResponse(res, {key:"user.unenroll.general"});
         }
     } else {
-        this.requestUtil.errorResponse(res, "not logged in");
+        //this.requestUtil.errorResponse(res, "not logged in");
+        this.requestUtil.errorResponse(res, {key:"user.unenroll.general"});
     }
 }
 
@@ -248,13 +258,15 @@ function getEnrolledCourses(req, res, next) {
                             this.requestUtil.jsonResponse(res, courses);
                         }.bind(this),
                         function(err){
-                            this.requestUtil.errorResponse(res, err);
+                            console.error("LMS Service: getEnrolledCourses Error -", err);
+                            this.requestUtil.errorResponse(res, {key:"course.general"});
                         }.bind(this)
                     );
 
             }.bind(this))
             .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
+                console.error("LMS Service: getEnrolledCourses Error -", err);
+                this.requestUtil.errorResponse(res, {key:"course.general"});
             }.bind(this))
     } else {
         this.requestUtil.errorResponse(res, "not logged in");
@@ -302,7 +314,7 @@ function createCourse(req, res, next, serviceManager)
 
         if(!req.body.games ||
            !_.isArray(req.body.games) ) {
-            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"gameids.invalid"}, 404);
+            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"course.create.invalid.gameids"}, 404);
             return;
         }
 
@@ -345,7 +357,7 @@ function createCourse(req, res, next, serviceManager)
                 }
 
                 if(!found) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.gameIds[i]+"' is not valid", key:"gameid.invalid"}, 404);
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.gameIds[i]+"' is not valid", key:"course.create.invalid.gameid"}, 404);
                     return; // exit function
                 }
             }
@@ -376,10 +388,11 @@ function createCourse(req, res, next, serviceManager)
                     this.requestUtil.errorResponse(res, err, 400);
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, "user does not have permission");
+            //this.requestUtil.errorResponse(res, "user does not have permission");
+            this.requestUtil.errorResponse(res, {key:"course.general"});
         }
     } else {
-        this.requestUtil.errorResponse(res, "missing arguments");
+        this.requestUtil.errorResponse(res, {key:"course.general"});
     }
 }
 
@@ -444,21 +457,23 @@ function getCourse(req, res, next) {
                 .then(function(course){
 
                     if( !course ){
-                        this.requestUtil.errorResponse(res, "invalid course id");
+                        //this.requestUtil.errorResponse(res, "invalid course id");
+                        this.requestUtil.errorResponse(res, {key:"course.general"});
                         return;
                     }
 
                     var courses    = [];
                     courses.push(course); // add course
 
-                    var getCourses = _getCourses.bind(this)
+                    var getCourses = _getCourses.bind(this);
                     getCourses(courses, showMembers, showTeacher)
                         .then(function(courses){
                             if( courses &&
                                 courses.length > 0) {
                                 this.requestUtil.jsonResponse(res, courses[0]);
                             } else {
-                                this.requestUtil.errorResponse(res, "missing course");
+                                //this.requestUtil.errorResponse(res, "missing course");
+                                this.requestUtil.errorResponse(res, {key:"course.general"});
                             }
                         }.bind(this),
                         function(err){
@@ -471,10 +486,12 @@ function getCourse(req, res, next) {
                     this.requestUtil.errorResponse(res, err);
                 }.bind(this))
         } else {
-            this.requestUtil.errorResponse(res, "missing course id");
+            //this.requestUtil.errorResponse(res, "missing course id");
+            this.requestUtil.errorResponse(res, {key:"course.general"});
         }
     } else {
-        this.requestUtil.errorResponse(res, "not logged in");
+        //this.requestUtil.errorResponse(res, "not logged in");
+        this.requestUtil.errorResponse(res, {key:"course.general"});
     }
 }
 
@@ -564,7 +581,8 @@ function updateCourseInfo(req, res, next, serviceManager)
 
         if( !req.params ||
             !req.params.hasOwnProperty("courseId") ) {
-            this.requestUtil.errorResponse(res, "missing course id");
+            //this.requestUtil.errorResponse(res, "missing course id");
+            this.requestUtil.errorResponse(res, {key:"course.general"});
             return;
         }
         var courseId = req.params.courseId;
@@ -596,10 +614,12 @@ function updateCourseInfo(req, res, next, serviceManager)
                     this.requestUtil.errorResponse(res, err, 400);
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, "user does not have permission");
+            //this.requestUtil.errorResponse(res, "user does not have permission");
+            this.requestUtil.errorResponse(res, {key:"course.general"});
         }
     } else {
-        this.requestUtil.errorResponse(res, "missing arguments or invalid");
+        //this.requestUtil.errorResponse(res, "missing arguments or invalid");
+        this.requestUtil.errorResponse(res, {key:"course.general"});
     }
 }
 
@@ -619,7 +639,8 @@ function updateGamesInCourse(req, res, next, serviceManager)
 
         if( !req.params ||
             !req.params.hasOwnProperty("courseId") ) {
-            this.requestUtil.errorResponse(res, "missing course id");
+            //this.requestUtil.errorResponse(res, "missing course id");
+            this.requestUtil.errorResponse(res, {key:"course.general"});
             return;
         }
         var courseId = req.params.courseId;
@@ -649,7 +670,7 @@ function updateGamesInCourse(req, res, next, serviceManager)
                 }
 
                 if(!found) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+userInputGames[i]+"' is not valid", key:"gameid.invalid"}, 404);
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+userInputGames[i]+"' is not valid", key:"course.create.invalid.gameid"}, 404);
                     return; // exit function
                 }
             }
@@ -720,10 +741,12 @@ function updateGamesInCourse(req, res, next, serviceManager)
                 }.bind(this));
 
         } else {
-            this.requestUtil.errorResponse(res, "user does not have permission");
+            //this.requestUtil.errorResponse(res, "user does not have permission");
+            this.requestUtil.errorResponse(res, {key:"course.general"});
         }
     } else {
-        this.requestUtil.errorResponse(res, "missing arguments or invalid");
+        //this.requestUtil.errorResponse(res, "missing arguments or invalid");
+        this.requestUtil.errorResponse(res, {key:"course.general"});
     }
 }
 
@@ -732,7 +755,8 @@ function verifyCode(req, res, next) {
 
     if (!req.params ||
         !req.params.hasOwnProperty("code")) {
-        this.requestUtil.errorResponse(res, "missing code");
+        //this.requestUtil.errorResponse(res, "missing code");
+        this.requestUtil.errorResponse(res, {key:"course.general"});
         return;
     }
     var code = req.params.code;
@@ -746,7 +770,7 @@ function verifyCode(req, res, next) {
                 );
                 this.requestUtil.jsonResponse(res, courseInfo);
             } else {
-                this.requestUtil.jsonResponse(res, {status: "code invalid", key:"code.invalid"}, 404);
+                this.requestUtil.errorResponse(res, {key:"user.enroll.code.invalid"}, 404);
             }
         }.bind(this))
 }
