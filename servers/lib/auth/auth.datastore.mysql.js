@@ -164,7 +164,7 @@ Auth_MySQL.prototype.checkUserEmailUnique = function(email){
             .then(
             function(data){
                 if(data.length != 0) {
-                    reject({"error": "data validation", "key": "email.not.unique"});
+                    reject({key: "user.notUnique.email"});
                 } else {
                     resolve();
                 }
@@ -190,7 +190,7 @@ Auth_MySQL.prototype.checkUserNameUnique = function(username, noErrorOnFound){
                     if(noErrorOnFound) {
                         resolve(data[0].id);
                     } else {
-                        reject({"error": "data validation", "key": "username.not.unique"});
+                        reject({key:"user.notUnique.screenName"});
                     }
                 } else {
                     resolve();

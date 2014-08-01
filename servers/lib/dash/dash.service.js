@@ -19,13 +19,14 @@ module.exports = DashService;
 
 function DashService(options){
     try{
-        var TelmStore, LmsStore, DashStore;
+        var TelmStore, LmsStore, DashStore, Errors;
 
         // Glasslab libs
         Util          = require('../core/util.js');
         TelmStore     = require('../data/data.js').Datastore.Couchbase;
         LmsStore      = require('../lms/lms.js').Datastore.MySQL;
         DashStore     = require('../dash/dash.js').Datastore.MySQL;
+        Errors        = require('../errors.js');
 
         this.options = _.merge(
             {
@@ -34,7 +35,7 @@ function DashService(options){
             options
         );
 
-        this.requestUtil = new Util.Request(this.options);
+        this.requestUtil = new Util.Request(this.options, Errors);
         this.stats       = new Util.Stats(this.options, "Dash");
 
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);

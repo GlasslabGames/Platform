@@ -30,7 +30,7 @@ module.exports = AuthService;
 
 function AuthService(options){
     try {
-        var Auth, Accounts, WebStore, LMSStore, AuthStore;
+        var Auth, Accounts, WebStore, LMSStore, AuthStore, Errors;
         this.options = _.merge(
             {
                 auth: { port: 8082 }
@@ -41,12 +41,13 @@ function AuthService(options){
         // Glasslab libs
         Util          = require('../core/util.js');
         Auth          = require('./auth.js');
+        Errors        = require('../errors.js');
         aConst        = Auth.Const;
         Accounts      = Auth.Accounts;
         AuthStore     = Auth.Datastore.MySQL;
 
         this.stats            = new Util.Stats(this.options, "Auth");
-        this.requestUtil      = new Util.Request(this.options);
+        this.requestUtil      = new Util.Request(this.options, Errors);
         this.authStore        = new AuthStore(this.options.auth.datastore.mysql);
         this.accountsManager  = new Accounts.Manager(this.options);
         this.glassLabStrategy = this.accountsManager.get("Glasslab");

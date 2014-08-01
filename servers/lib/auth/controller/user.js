@@ -280,7 +280,8 @@ function updateUserData(req, res, next, serviceManager) {
     if( !(req.body.userId) )
     {
         this.stats.increment("error", "Route.Update.User.MissingId");
-        this.requestUtil.errorResponse(res, "missing the userId", 400);
+        //this.requestUtil.errorResponse(res, "missing the userId", 400);
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
         return;
     }
 
@@ -323,9 +324,9 @@ function updateUserData(req, res, next, serviceManager) {
         .catch(function(err){
             this.stats.increment("error", "Route.Update.User");
             console.error("Auth - updateUserRoute error:", err);
-            this.requestUtil.errorResponse(res, err, 400);
-        }.bind(this)
-        );
+            //this.requestUtil.errorResponse(res, err, 400);
+            this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        }.bind(this) );
 };
 
 
@@ -359,15 +360,18 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.regCode    = Util.ConvertToString(req.body.regCode);
 
         if(!regData.username) {
-            this.requestUtil.errorResponse(res, "missing username", 400);
+            //this.requestUtil.errorResponse(res, "missing username", 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
             return;
         }
         if(!regData.password) {
-            this.requestUtil.errorResponse(res, "missing password", 400);
+            //this.requestUtil.errorResponse(res, "missing password", 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.password"}, 400);
             return;
         }
         if(!regData.firstName) {
-            this.requestUtil.errorResponse(res, "missing firstName", 400);
+            //this.requestUtil.errorResponse(res, "missing firstName", 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.firstName"}, 400);
             return;
         }
     }
@@ -381,23 +385,28 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.email      = Util.ConvertToString(req.body.email);
 
         if(!regData.username) {
-            this.requestUtil.errorResponse(res, "missing email", 400);
+            //this.requestUtil.errorResponse(res, "missing email", 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.email"}, 400);
             return;
         }
         if(!regData.password) {
-            this.requestUtil.errorResponse(res, "missing password", 400);
+            //this.requestUtil.errorResponse(res, "missing password", 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.password"}, 400);
             return;
         }
         if(!regData.firstName) {
-            this.requestUtil.errorResponse(res, "missing firstName", 400);
+            //this.requestUtil.errorResponse(res, "missing firstName", 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.firstName"}, 400);
             return;
         }
         if(!regData.email) {
-            this.requestUtil.errorResponse(res, "missing email", 400);
+            //this.requestUtil.errorResponse(res, "missing email", 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.email"}, 400);
             return;
         }
     } else {
-        this.requestUtil.errorResponse(res, "invalid role", 401);
+        //this.requestUtil.errorResponse(res, "invalid role", 401);
+        this.requestUtil.errorResponse(res, {key:"user.create.invalid.role"}, 401);
         return;
     }
 
@@ -406,7 +415,8 @@ function registerUserV2(req, res, next, serviceManager) {
 
         this.stats.increment("error", "Route.Register.User");
         //console.error("AuthServer registerUser Error:", err);
-        this.requestUtil.jsonResponse(res, err, code);
+        //this.requestUtil.jsonResponse(res, err, code);
+        this.requestUtil.errorResponse(res, {key:"user.create.general"}, code);
     }.bind(this);
 
 
@@ -448,7 +458,7 @@ function registerUserV2(req, res, next, serviceManager) {
                             .then(null, function(err){
                                 this.stats.increment("error", "Route.Register.User.SubscribeToNewsletter");
                                 console.error("Auth: RegisterUserV2 - Error", err);
-                                this.requestUtil.errorResponse(res, err, 500);
+                                this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
                             }.bind(this))
                     } else {
                         // do nothing api
@@ -466,7 +476,10 @@ function registerUserV2(req, res, next, serviceManager) {
                         }.bind(this))
                         // error
                         .then(null, function(err){
-                            this.requestUtil.errorResponse(res, err, 500);
+                            this.stats.increment("error", "Route.Register.User.sendRegisterEmail");
+                            console.error("Auth: RegisterUserV2 - Error", err);
+                            //this.requestUtil.errorResponse(res, err, 500);
+                            this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
                         }.bind(this))
 
                 }
@@ -495,7 +508,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         register(regData, courseId);
                     } else {
                         this.stats.increment("error", "Route.Register.User.InvalidInstitution");
-                        registerErr({"error": "registration course code not found", key:"code.invalid"}, 404);
+                        registerErr({key:"user.enroll.code.invalid"}, 404);
                     }
                 }.bind(this))
                 // catch all errors
@@ -653,14 +666,15 @@ function resetPasswordSend(req, res, next) {
             .then(null, function(err) {
                 if( err.error &&
                     err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {error: err.error, key:"email.no.exist"}, 400);
+                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.user.emailNotExist"}, 400);
                 } else {
-                    this.requestUtil.errorResponse(res, err, 400);
+                    console.error("AuthService: resetPasswordSend Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
                 }
             }.bind(this))
 
     } else {
-        this.requestUtil.errorResponse(res, "invalid or missing email", 401);
+        this.requestUtil.errorResponse(res, {key:"user.passwordReset.user.emailNotExist"}, 401);
     }
 }
 
@@ -673,7 +687,7 @@ function resetPasswordVerify(req, res, next) {
         this.glassLabStrategy.findUser("reset_code", req.params.code)
             .then(function(userData) {
                 if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
-                    this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                 } else {
                     if(userData.resetCodeStatus == aConst.passwordReset.status.sent) {
                         // update status
@@ -687,7 +701,7 @@ function resetPasswordVerify(req, res, next) {
                                 this.requestUtil.jsonResponse(res, {});
                             }.bind(this));
                     } else {
-                        this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                        this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                     }
                 }
             }.bind(this))
@@ -696,14 +710,15 @@ function resetPasswordVerify(req, res, next) {
             .then(null, function(err) {
                 if( err.error &&
                     err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                 } else {
-                    this.requestUtil.errorResponse(res, err, 400);
+                    console.error("AuthService: resetPasswordVerify Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
                 }
             }.bind(this));
 
     } else {
-        this.requestUtil.errorResponse(res, {error: "missing code", key:"missing.code.pass"}, 401);
+        this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.missing"}, 401);
     }
 }
 
@@ -723,7 +738,7 @@ function resetPasswordUpdate(req, res, next) {
         this.glassLabStrategy.findUser("reset_code", req.body.code)
             .then(function(userData) {
                 if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
-                    this.requestUtil.errorResponse(res, {error: "code expired", key:"code.expired"}, 400);
+                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                 } else if(userData.resetCodeStatus == aConst.passwordReset.status.inProgress) {
                     return this.glassLabStrategy.encryptPassword(req.body.password)
                         .then(function(password) {
@@ -743,11 +758,12 @@ function resetPasswordUpdate(req, res, next) {
 
             // catch all errors
             .then(null, function(err) {
-                this.requestUtil.errorResponse(res, err, 400);
+                console.error("AuthService: resetPasswordUpdate Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
             }.bind(this));
 
     } else {
-        this.requestUtil.errorResponse(res, {error: "missing code", key:"missing.code.pass"}, 401);
+        this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.missing"}, 401);
     }
 }
 

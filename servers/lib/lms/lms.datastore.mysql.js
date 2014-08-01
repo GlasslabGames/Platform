@@ -737,14 +737,14 @@ return when.promise(function(resolve, reject) {
         this.ds.query(Q)
             .then(function(data){
                     if(data.affectedRows == 0) {
-                        reject({"error":"data validation","key":"course.not.unique"}, 400);
+                        reject({key:"course.notUnique.name"}, 400);
                     } else {
                         resolve(data.insertId);
                     }
                 }.bind(this),
                 function(err) {
                     if(err.code == "ER_DUP_ENTRY") {
-                        reject({"error":"data validation","key":"course.not.unique"}, 400);
+                        reject({key:"course.notUnique.name"}, 400);
                     } else {
                         reject({"error": "failure", "exception": err}, 500);
                     }
@@ -794,7 +794,7 @@ return when.promise(function(resolve, reject) {
                 //console.log("updateCourse Q:", Q);
                 this.ds.query(Q).then(resolve);
             } else {
-                reject({"error":"data validation","key":"course.not.unique"}, 400);
+                reject({key:"course.notUnique.name"}, 400);
             }
         }.bind(this),
         reject

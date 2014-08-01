@@ -14,7 +14,7 @@ module.exports = LicService;
 
 function LicService(options){
     try{
-        var LicStore;
+        var LicStore, Errors;
 
         this.options = _.merge(
             {
@@ -26,8 +26,9 @@ function LicService(options){
         LicStore   = require('./lic.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         lConst     = require('./lic.js').Const;
+        Errors     = require('../errors.js');
 
-        this.requestUtil = new Util.Request(this.options);
+        this.requestUtil = new Util.Request(this.options, Errors);
         this.myds        = new LicStore(this.options.lms.datastore.mysql);
         this.stats       = new Util.Stats(this.options, "LMS");
 

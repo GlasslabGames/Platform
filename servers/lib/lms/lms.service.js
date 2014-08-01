@@ -14,7 +14,7 @@ module.exports = LMSService;
 
 function LMSService(options){
     try{
-        var WebStore, LMSStore;
+        var WebStore, LMSStore, Errors;
 
         this.options = _.merge(
             {
@@ -27,8 +27,9 @@ function LMSService(options){
         WebStore   = require('../dash/dash.js').Datastore.MySQL;
         Util       = require('../core/util.js');
         lConst     = require('./lms.js').Const;
+        Errors     = require('../errors.js');
 
-        this.requestUtil = new Util.Request(this.options);
+        this.requestUtil = new Util.Request(this.options, Errors);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
         this.myds        = new LMSStore(this.options.lms.datastore.mysql);
         this.stats       = new Util.Stats(this.options, "LMS");
