@@ -38,6 +38,7 @@ Lic_MySQL.prototype.connect = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+
     this.updateLicenseTable()
         .then(function(updated){
             if(updated) {
@@ -104,71 +105,68 @@ return when.promise(function(resolve, reject) {
         function(err) {
             if(err.code == "ER_TABLE_EXISTS_ERROR") {
                 // already crated, all ok no more migration needed
-
-                resolve(false);
+                //resolve(false);
             } else {
                 reject(err);
             }
         }.bind(this))
 
         .then(function(results) {
-            if(results) {
-                //console.log("updateLicenseTable all license:", results);
+            if(!results) return;
 
-                Q = [];
-                for(var i = 0; i < results.length; i++){
-                    Q.push(" ("+
-                        this.ds.escape(results[i].license_id)+", "+
-                        this.ds.escape(results[i].institution_id)+", "+
-                        this.ds.escape(results[i].user_id)+")");
-                }
+            //console.log("updateLicenseTable all license:", results);
 
-                Q = "INSERT INTO GL_LICENSE_MAP (`license_id`, `institution_id`, `user_id`) VALUES\n"+Q.join(",\n");
-                //console.log("updateLicenseTable Q:", Q);
-                return this.ds.query(Q);
+            Q = [];
+            for(var i = 0; i < results.length; i++){
+                Q.push(" ("+
+                    this.ds.escape(results[i].license_id)+", "+
+                    this.ds.escape(results[i].institution_id)+", "+
+                    this.ds.escape(results[i].user_id)+")");
             }
+
+            Q = "INSERT INTO GL_LICENSE_MAP (`license_id`, `institution_id`, `user_id`) VALUES\n"+Q.join(",\n");
+            //console.log("updateLicenseTable Q:", Q);
+            return this.ds.query(Q);
+        }.bind(this))
+
+        .then(function() {
+            //console.log("updateLicenseTable added to map:", results);
+
+            // check that GL_LICENSE has game_id
+            Q = "DESCRIBE GL_LICENSE";
+            return this.ds.query(Q);
         }.bind(this))
 
         .then(function(results) {
             if(results) {
-                //console.log("updateLicenseTable added to map:", results);
 
-                Q = "DESCRIBE GL_LICENSE";
-                return this.ds.query(Q);
-            }
-        }.bind(this))
-
-        .then(function(results) {
-            if(results) {
-                var updating = false;
+                var updating = true;
                 for(var i = 0; i < results.length; i++) {
-                    if( results[i]['Field'] == 'institution_id' ) {
-                        updating  = true;
-
-                        // need to update
-                        Q = "ALTER TABLE GL_LICENSE " +
-                            "ADD COLUMN `game_id` VARCHAR(255) NOT NULL DEFAULT 'SC' AFTER `SEATS`";
-                        this.ds.query(Q)
-                            .then(function(results) {
-                                if(results) {
-                                    //console.log("updateLicenseTable ALTER TABLE GL_LICENSE:", results);
-                                    resolve(true);
-                                } else {
-                                    resolve(false);
-                                }
-                            }.bind(this))
-
-                            // catch all errors
-                            .then(null, function(err) {
-                                reject({"error": "failure", "exception": err}, 500);
-                            }.bind(this));
-
-                        // done exit loop
+                    if (results[i]['Field'] == 'game_id') {
+                        updating = false;
                         break;
                     }
                 }
 
-                if(!updating) {
+                if(updating) {
+                    // need to update
+                    Q = "ALTER TABLE GL_LICENSE " +
+                        "ADD COLUMN `game_id` VARCHAR(255) NOT NULL DEFAULT 'SC' AFTER `SEATS`";
+                    this.ds.query(Q)
+                        .then(function(results) {
+                            if(results) {
+                                //console.log("updateLicenseTable ALTER TABLE GL_LICENSE:", results);
+                                resolve(true);
+                            } else {
+                                resolve(false);
+                            }
+                        }.bind(this))
+
+                        // catch all errors
+                        .then(null, function(err) {
+                            reject({"error": "failure", "exception": err}, 500);
+                        }.bind(this));
+                } else {
                     resolve(false);
                 }
             }

@@ -40,8 +40,12 @@ function getGamesBasicInfo(req, res){
                 }
 
                 this.requestUtil.jsonResponse(res, outGames);
-            }.bind(this));
+            }.bind(this))
 
+            // catch all errors
+            .then(null, function(err) {
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this));
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);

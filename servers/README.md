@@ -54,6 +54,12 @@ OSX Installation
         $ ./setup_db.sh
         ```
         * This will create a DB called **"glasslab_dev"** and a user named **"glasslab"** with password **"glasslab"**
+        * Note: If you did not set your root password run the following:
+         ```sh
+         $ mysqladmin -u root password glasslab
+         ```
+   4. Optional [Install MySQL Workbench](http://dev.mysql.com/downloads/workbench)
+
 5. Install **Redis**
    1. Use Brew to install redis
       ```sh
