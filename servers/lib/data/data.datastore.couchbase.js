@@ -9,9 +9,9 @@
 // Third-party libs
 var _         = require('lodash');
 var when      = require('when');
-var uuid      = require('node-uuid');
+var guard     = require('when/guard');
+var sequence  = require('when/sequence');
 var couchbase = require('couchbase');
-var moment    = require('moment');
 // load at runtime
 var tConst, Util;
 
@@ -318,37 +318,47 @@ return when.promise(function (resolve, reject) {
                 info.version = this.currentDBVersion;
             }
 
-            var promiseList = [];
-
+            // add a list of functions to be called
+            var tasks = [];
             if ( !info.migrated.achievements ) {
-                promiseList.push(
-                    this._migrateEventAchievements()
-                        .then(function(){
-                            info.migrated.achievements = true;
-                            return this.updateDataSchemaInfo(info);
-                        }.bind(this))
+                tasks.push(
+                    function(){
+                        return this._migrateEventAchievements()
+                            .then(function(){
+                                info.migrated.achievements = true;
+                                return this.updateDataSchemaInfo(info);
+                            }.bind(this))
+                    }.bind(this)
                 );
                 //this._migrateEventsFromMysql(parent.stats, parent.myds, parent.options.telemetry.migrateCount);
             }
             if ( !info.migrated.addGameId ) {
-                promiseList.push(
-                    this._migrateEvents_AddingGameId()
-                        .then(function(){
-                            info.migrated.addGameId = true;
-                            return this.updateDataSchemaInfo(info);
-                        }.bind(this))
+                tasks.push(
+                     function() {
+                         return this._migrateEvents_AddingGameId()
+                            .then(function () {
+                                info.migrated.addGameId = true;
+                                return this.updateDataSchemaInfo(info);
+                            }.bind(this))
+                    }.bind(this)
                 );
             }
 
-            // TODO: add gaurded
+            if(tasks.length) {
+                // create a gaurded Task function
+                var guardTask = guard.bind(null, guard.n(1));
+                // run each task using guardTask function
+                tasks = tasks.map(guardTask);
 
-            when.all(promiseList)
-                .then(function() {
-                    console.log("CouchBase TelemetryStore: DB Schema Up to date!");
-                    // nothing to do
-                    resolve();
-                    return;
-                }.bind(this));
+                // wait until all guardTasks have completed
+                return sequence(tasks)
+                    .then(function() {
+                        console.log("CouchBase TelemetryStore: DB Schema Up to date!");
+                        // nothing to do
+                        resolve();
+                        return;
+                    }.bind(this));
+            }
         }.bind(this))
 
         .then(function () {
@@ -479,52 +489,61 @@ return when.promise(function (resolve, reject) {
 
 
 TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
     // get all sessions
-    this.getAllGameSessions()
+    return this.getAllGameSessions()
 
         // get all events per session
         .then(function(gameSessions) {
             // if no deviceIds skip to next
             if(!gameSessions) return;
 
-            // for each gameSessionId
-            when.map(gameSessions, function(gameSession){
-
+            var guardedAsyncOperation = guard(guard.n(1), function(gameSession){
                 // get events
-                return this.getEvents(gameSession.gameSessionId)
-                    .then(function(eventsData) {
+                return this.getRawEvents(gameSession.gameSessionId)
+                    .then(function(events) {
+                        //console.log("events:", events);
                         // if no deviceIds skip to next
-                        if(!(eventsData &&
-                            eventsData.events &&
-                            eventsData && eventsData.events.length)) return;
+                        if(!(events && events.length)) return;
 
                         // extract+remove all ids
                         // create list of keys
                         var keys = [];
-                        for(var i = 0; i < eventsData.events.length; i++) {
-                            keys.push( eventsData.events[i].id );
-                            delete eventsData.events[i].id;
+                        var outEvents = [];
+                        var id;
+                        for(var i = 0; i < events.length; i++) {
+                            id = events[i].id;
+                            id = id.split(":");
+
+                            if(id.length == 3) {
+                                keys.push( events[i].id );
+                                delete events[i].id;
+                                outEvents.push(events[i]);
+                            }
                         }
 
-                        // migrate event to add gameId
-                        return this.saveEvents(eventsData.gameId, eventsData.events)
-                            .then(function() {
-                                return this._removeKeys(keys);
-                            }.bind(this));
+                        if(outEvents.length > 0) {
+                            // migrate event to add gameId
+                            return this.saveEvents(gameSession.gameId, outEvents)
+                                .then(function() {
+                                    return this._removeKeys(keys);
+                                }.bind(this));
+                        }
                     }.bind(this));
 
             }.bind(this));
-        }.bind(this));
-    //
 
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
+
+            // for each gameSessionId
+            return when.map(gameSessions, guardedAsyncOperation)
+                // when all done
+                .then(function() {
+                    var key = tConst.game.dataKey+"::"+tConst.game.countKey;
+                    return this._removeKeys([key]);
+                }.bind(this));
+        }.bind(this));
 };
+
+
 TelemDS_Couchbase.prototype._removeKeys = function(keys){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -533,9 +552,21 @@ return when.promise(function(resolve, reject) {
     this.client.removeMulti(keys, {},
         function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Remove Keys Error -", err);
-                reject(err);
-                return;
+                var errList = [];
+                for(var i in results) {
+                    if(results[i].error){
+                        if(results[i].error.code != 13) {
+                            errList.push(results[i].error);
+                        }
+                    }
+                }
+
+                // only if errors
+                if(errList.length) {
+                    console.error("CouchBase TelemetryStore: Remove Keys Error -", errList);
+                    reject(err);
+                    return;
+                }
             }
 
             resolve(results);
@@ -606,7 +637,6 @@ return when.promise(function(resolve, reject) {
             }
 
             var keys = _.pluck(results, 'id');
-
             //console.log("CouchBase TelemetryStore: keys", keys);
             this.client.getMulti(keys, {},
                 function(err, results){
@@ -798,7 +828,9 @@ TelemDS_Couchbase.prototype.saveEvents = function(gameId, events){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
+    //var key = tConst.game.dataKey+"::"+tConst.game.countKey;
     var key = tConst.game.dataKey+"::"+tConst.game.countKey+"::"+gameId;
+
     this.client.incr(key, {
             initial: events.length,
             offset: events.length
@@ -813,6 +845,8 @@ return when.promise(function(resolve, reject) {
             var kv = {}, key;
             var kIndex = data.value - events.length + 1;
             for(var i = 0; i < events.length; i++){
+
+                //key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+kIndex;
                 key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+gameId+":"+kIndex;
 
                 // convert to milliseconds from EPOCH
@@ -926,8 +960,7 @@ return when.promise(function(resolve, reject) {
                             serverTimeStamp: revent.serverTimeStamp,
                             eventName: revent.eventName,
                             eventData: revent.eventData,
-                            totalTimePlayed: revent.totalTimePlayed,
-                            id: i
+                            totalTimePlayed: revent.totalTimePlayed
                         };
 
                         // pull root info (data that should all be the same for all events of a session event)
@@ -997,7 +1030,14 @@ return when.promise(function(resolve, reject) {
                         return;
                     }
 
-                    var events = _.pluck(results, 'value');
+                    var events = [];
+                    for(var id in results) {
+                        var event = results[id].value;
+                        // add the key
+                        event.id = id;
+                        events.push(event);
+                    }
+
                     //console.log("getRawEvents events:", events);
                     resolve(events);
                 }.bind(this));
