@@ -163,7 +163,7 @@
                 "link": [
                     {
                         "name": "Play Game",
-                        "link": "/game/play/SC"
+                        "link": "/games/SC/missions"
                     }
                 ]
             }

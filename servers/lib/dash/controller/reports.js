@@ -322,7 +322,7 @@ function getTotalTimePlayed(req, res) {
                                 }
 
                                 // TODO: remove this!!! but will need to write a migrate script to pull old over to use user pref
-                                return this.telmStore.getUserSavedGame(userId, gameId)
+                                return this.telmStore.getUserGameData(userId, gameId)
                                     .then(function (gameData) {
                                         if (gameData) {
                                             // Look in save file for total TimePlayed
