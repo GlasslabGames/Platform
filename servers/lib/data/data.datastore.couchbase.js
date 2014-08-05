@@ -321,6 +321,14 @@ return when.promise(function (resolve, reject) {
                 info.version = this.currentDBVersion;
             }
 
+            // ensure there is a property migrated
+            if(!info.migrated) {
+                info.migrated = {
+                    achievements: false,
+                    addGameId:    false
+                };
+            }
+
             // add a list of functions to be called
             var tasks = [];
             if ( !info.migrated.achievements ) {
