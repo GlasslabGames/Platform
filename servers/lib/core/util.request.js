@@ -43,8 +43,8 @@ RequestUtil.prototype.errorResponse = function(res, obj, code){
         // if has key then try to get error message using key from errors map
         if(obj.key &&
            this.errors.hasOwnProperty(obj.key)) {
-           obj.error = this.errors[obj.key];
-           obj.status = this.errors[obj.key];
+           obj.error  = this.errors[obj.key];
+           obj.status = "error";
         }
 
         // if object does not contain error, then set error to object

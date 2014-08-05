@@ -25,27 +25,20 @@ exampleIn.saveGameData = {
 function saveGameData(req, res, next)
 {
     if( !req.body ) {
-        this.requestUtil.errorResponse(res, { status: "error", error: "Game data missing", key: "missing.data"});
+        this.requestUtil.errorResponse(res, { error: "Game data missing", key: "missing.data"}, 401);
         return;
     }
-
-    var userId;
-    if(req.session &&
-       req.session.passport &&
-       req.session.passport.user &&
-       req.session.passport.user.id) {
-        userId = req.session.passport.user.id;
-    } else {
-        this.requestUtil.errorResponse(res, { status: "error", error: "not logged in", key: "invalid.access"});
-        return;
-    }
+    // route requireAuth ensures "session.passport.user" exists
+    var userId = req.session.passport.user.id;
 
     if( !( req.params &&
         req.params.hasOwnProperty("gameId") ) ) {
-        this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
+        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId"});
         return
     }
     var gameId = req.params.gameId;
+
+    // TODO: check if gameId in DB
 
     var data = req.body;
     try{
@@ -63,6 +56,7 @@ function saveGameData(req, res, next)
         }.bind(this));
 }
 
+// http://localhost:8001/api/v2/data/game/AA-1
 // game AA, episode 1
 exampleIn.getGameData = {
     id: 'AA-1'
@@ -70,34 +64,33 @@ exampleIn.getGameData = {
 function getGameData(req, res, next)
 {
     if( !req.body ) {
-        this.requestUtil.errorResponse(res, { status: "error", error: "Game data missing", key: "missing.data"});
+        this.requestUtil.errorResponse(res, { error: "Game data missing", key: "missing.data"}, 401);
         return;
     }
 
-    var userId;
-    if(req.session &&
-        req.session.passport &&
-        req.session.passport.user &&
-        req.session.passport.user.id) {
-        userId = req.session.passport.user.id;
-    } else {
-        this.requestUtil.errorResponse(res, { status: "error", error: "not logged in", key: "invalid.access"});
-        return;
-    }
+    // route requireAuth ensures "session.passport.user" exists
+    var userId = req.session.passport.user.id;
 
     if( !( req.params &&
         req.params.hasOwnProperty("gameId") ) ) {
-        this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
+        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId"});
         return
     }
     var gameId = req.params.gameId;
+
+    // TODO: check if gameId in DB
 
     this.cbds.getUserGameData(userId, gameId)
         .then(function(data){
             this.requestUtil.jsonResponse(res, data);
         }.bind(this))
-        .then(null, function(err){
-            this.requestUtil.errorResponse(res, err);
+        .then(null, function(err) {
+            // missing
+            if(err.code == 13) {
+                this.requestUtil.errorResponse(res, { error: "no game data", key: "no.data"});
+            } else {
+                this.requestUtil.errorResponse(res, err);
+            }
         }.bind(this));
 }
 

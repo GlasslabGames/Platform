@@ -1509,9 +1509,11 @@ return when.promise(function(resolve, reject) {
     this.client.get(key, function(err, results){
         var data = null;
         // NOT "No such key"
-        if( err &&
-            err.code != 13) {
-            console.error("CouchBase DataStore: Error -", err);
+        if(err) {
+            if(err.code != 13) {
+                console.error("CouchBase DataStore: Error -", err);
+            }
+
             reject(err);
             return;
         }
