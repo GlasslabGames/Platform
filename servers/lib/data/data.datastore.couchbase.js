@@ -471,7 +471,9 @@ return when.promise(function (resolve, reject) {
 // ------------------------------------------------
 
     console.log("CouchBase TelemetryStore: Migrating Achievement Events...");
-    this.getLastDeviceIdByGameId("AA-1")
+    var gameId = 'AA-1';
+
+    this.getLastDeviceIdByGameId(gameId)
         // LastDeviceId
         .then(function(deviceIds) {
             // if no deviceIds skip to next
@@ -495,6 +497,9 @@ return when.promise(function (resolve, reject) {
                 }.bind(this), 0);
 
                 promistReduce.then(resolve, reject);
+            }
+            else {
+                resolve();
             }
 
         }.bind(this));
@@ -652,7 +657,7 @@ return when.promise(function(resolve, reject) {
             }
 
             if(results.length == 0) {
-                resolve({});
+                resolve([]);
                 return;
             }
 
