@@ -312,19 +312,32 @@ TelemDS_Couchbase.prototype.migrateData = function() {
 return when.promise(function (resolve, reject) {
 // ------------------------------------------------
 
+    console.log("CouchBase TelemetryStore: Getting Data Schema Info...");
     this.getDataSchemaInfo()
         .then(function (info) {
+            console.log("CouchBase TelemetryStore: Data Schema Info:", info);
+
             if( info.version != this.currentDBVersion ) {
                 info.version = this.currentDBVersion;
+            }
+
+            // ensure there is a property migrated
+            if(!info.migrated) {
+                info.migrated = {
+                    achievements: false,
+                    addGameId:    false
+                };
             }
 
             // add a list of functions to be called
             var tasks = [];
             if ( !info.migrated.achievements ) {
                 tasks.push(
-                    function(){
+                    function() {
+                        console.log("CouchBase TelemetryStore: Migrate Achievement Events...");
                         return this._migrateEventAchievements()
-                            .then(function(){
+                            .then(function() {
+                                console.log("CouchBase TelemetryStore: Migrate Achievement Events: Done!");
                                 info.migrated.achievements = true;
                                 return this.updateDataSchemaInfo(info);
                             }.bind(this))
@@ -335,8 +348,10 @@ return when.promise(function (resolve, reject) {
             if ( !info.migrated.addGameId ) {
                 tasks.push(
                      function() {
+                         console.log("CouchBase TelemetryStore: Migrate Events to Add GameId...");
                          return this._migrateEvents_AddingGameId()
                             .then(function () {
+                                 console.log("CouchBase TelemetryStore: Migrate Events to Add GameId: Done!");
                                 info.migrated.addGameId = true;
                                 return this.updateDataSchemaInfo(info);
                             }.bind(this))
@@ -471,6 +486,7 @@ return when.promise(function (resolve, reject) {
             // if no deviceIds skip to next
             if(!events) return;
 
+            console.log("CouchBase TelemetryStore: Migrating Achievement #", events.length, "Events");
             var promistReduce = when.reduce(events, function(currentResult, event, index){
                 // save achievements to player info
                 //console.log(index+":", event);
@@ -522,6 +538,8 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
                         }
 
                         if(outEvents.length > 0) {
+                            console.log("CouchBase TelemetryStore: Migrating Adding GameId to ", outEvents.length, "Events");
+
                             // migrate event to add gameId
                             return this.saveEvents(gameSession.gameId, outEvents)
                                 .then(function() {
@@ -532,13 +550,13 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
 
             }.bind(this));
 
-
             // for each gameSessionId
             return when.map(gameSessions, guardedAsyncOperation)
                 // when all done
                 .then(function() {
-                    var key = tConst.game.dataKey+"::"+tConst.game.countKey;
-                    return this._removeKeys([key]);
+                    // leave this key just in case
+                    // var key = tConst.game.dataKey+"::"+tConst.game.countKey;
+                    // return this._removeKeys([key]);
                 }.bind(this));
         }.bind(this));
 };

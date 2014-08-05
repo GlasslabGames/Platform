@@ -294,6 +294,11 @@ function getGameMissions(req, res){
                                         configDataUrl:    req.headers.host
                                     };
 
+                                    // encodeURIComponent all data inputs
+                                    for(var d in data) {
+                                        data[d] = encodeURIComponent(data[d]);
+                                    }
+
                                     var template = handlebars.compile( missions[j].links[k].link );
                                     missions[j].links[k].link = template(data);
 
