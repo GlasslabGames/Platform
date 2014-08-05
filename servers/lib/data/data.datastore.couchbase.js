@@ -514,13 +514,12 @@ return when.promise(function (resolve, reject) {
 TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
     // get all sessions
     return this.getAllGameSessions()
-
         // get all events per session
         .then(function(gameSessions) {
             // if no deviceIds skip to next
             if(!gameSessions) return;
 
-            console.log("CouchBase TelemetryStore: Migrating Adding GameId to ", gameSession.length, "Sessions");
+            console.log("CouchBase TelemetryStore: Migrating Adding GameId to ", gameSessions.length, "Sessions");
             var guardedAsyncOperation = guard(guard.n(1), function(gameSession){
                 // get events
                 return this.getRawEvents(gameSession.gameSessionId)
