@@ -245,8 +245,10 @@ function getGameMissions(req, res){
                         var lastCompletedDate = null;
                         for (var j = 0; j < missions.length; j++) {
                             if (missionProgressLock) {
-                                // if mission unlocked, make sure first submission is unlocked
-                                if (j == 0 && !missionGroups[i + 1].locked) {
+                                // if missionGroups unlocked, make sure first submission is unlocked
+                                if ( j == 0 &&
+                                     missionGroups[i] &&
+                                     !missionGroups[i].locked) {
                                     missions[j].locked = false;
                                 }
                             } else {
