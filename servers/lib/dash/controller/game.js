@@ -1,8 +1,9 @@
 
-var _         = require('lodash');
-var when      = require('when');
+var _          = require('lodash');
+var when       = require('when');
+var handlebars = require('handlebars');
 //
-var Util      = require('../../core/util.js');
+var Util       = require('../../core/util.js');
 
 module.exports = {
     getAllGameAchievements:  getAllGameAchievements,
@@ -207,9 +208,12 @@ function getGameMissions(req, res){
 
         var game = this.games[gameId];
         if( game.info &&
-            game.info.hasOwnProperty('missionGroups') ) {
+            game.info.hasOwnProperty('missions') &&
+            game.info.missions.hasOwnProperty('groups') ) {
 
-            var missionGroups = _.cloneDeep(game.info.missionGroups);
+            var missionGroups = _.cloneDeep(game.info.missions.groups);
+            var linkSchema    = game.info.missions.linkSchema;
+
             var missionProgressLock = true;
 
             this.dashStore.getGameSettingsFromCourseId(courseId)
@@ -270,6 +274,31 @@ function getGameMissions(req, res){
                             if (missions[j].completedDate > lastCompletedDate) {
                                 lastCompletedDate = missions[j].completedDate;
                             }
+
+                            // update links
+                            for (var k = 0; k < missions[j].links.length; k++) {
+
+                                // if has $linkSchemaId replace link with $linkSchemaId
+                                if(missions[j].links[k].hasOwnProperty("$linkSchemaId")) {
+                                    missions[j].links[k].link = linkSchema[ missions[j].links[k]["$linkSchemaId"] ];
+
+                                    // replace keys
+                                    var data = {
+                                        gameId:           gameId,
+                                        webSessionId:     req.session.id,
+                                        missionId:        missions[j].id,
+                                        courseId:         courseId,
+                                        configSessionUrl: req.headers.host,
+                                        configDataUrl:    req.headers.host
+                                    };
+
+                                    var template = handlebars.compile( missions[j].links[k].link );
+                                    missions[j].links[k].link = template(data);
+
+                                    // remove $linkSchemaId
+                                    delete missions[j].links[k]["$linkSchemaId"];
+                                }
+                            }
                         }
 
                         if (numCompletedSubMissions == missions.length) {
@@ -302,7 +331,6 @@ function getGameMissions(req, res){
         this.requestUtil.errorResponse(res, "Server Error");
     }
 }
-
 
 // recursivly removes all
 function removeSpecialMembers(data){
