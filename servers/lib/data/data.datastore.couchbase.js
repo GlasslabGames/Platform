@@ -575,7 +575,10 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
                         }
 
                         console.log("CouchBase TelemetryStore: Migrating Adding GameId - gameSessionId:", gameSession.gameSessionId, "with", outEvents.length, "Events");
-                        if(outEvents.length > 0) {
+                        // only add events if there are events to add and
+                        // gameId exists
+                        if( outEvents.length > 0 &&
+                            gameSession.gameId ) {
                             // migrate event to add gameId
                             return this.saveEvents(gameSession.gameId, outEvents)
                                 .then(function() {
