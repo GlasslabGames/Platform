@@ -1056,9 +1056,9 @@ return when.promise(function(resolve, reject) {
                                     errors.push( results[r].error );
                                 }
                             }
-                            console.error("CouchBase TelemetryStore: Multi Get Events Errors -", errors);
+                            console.error("CouchBase TelemetryStore: Multi Get RawEvents Errors -", errors);
                         } else {
-                            console.error("CouchBase TelemetryStore: Multi Get Events Error -", err);
+                            console.error("CouchBase TelemetryStore: Multi Get RawEvents Error -", err);
                             reject(err);
                             return;
                         }
@@ -1248,7 +1248,7 @@ return when.promise(function(resolve, reject) {
             this.client.getMulti(keys, {},
                 function(err, results){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Multi Get Events Error -", err);
+                        console.error("CouchBase TelemetryStore: Multi Get All GameSessions Error -", err);
                         reject(err);
                         return;
                     }
@@ -1305,7 +1305,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
             this.client.getMulti(keys, {},
                 function(err, results){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Multi Get Events Error -", err);
+                        console.error("CouchBase TelemetryStore: Multi Get CleanUp GameSessions Error -", err);
                         reject(err);
                         return;
                     }
@@ -1325,7 +1325,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
                     this.client.setMulti(datalist, {},
                         function(err){
                             if(err){
-                                console.error("CouchBase TelemetryStore: Multi Get Events Error -", err);
+                                console.error("CouchBase TelemetryStore: Multi Set CleanUp GameSessions Error -", err);
                                 reject(err);
                                 return;
                             }
