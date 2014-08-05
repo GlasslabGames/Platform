@@ -287,7 +287,7 @@ function getGameMissions(req, res){
                                     // replace keys
                                     var data = {
                                         gameId:           gameId,
-                                        webSessionId:     req.session.id,
+                                        webSessionId:     req.cookies["connect.sid"],
                                         missionId:        missions[j].id,
                                         courseId:         courseId,
                                         configSessionUrl: req.headers.host,
