@@ -486,8 +486,8 @@ return when.promise(function (resolve, reject) {
             // if no deviceIds skip to next
             if(!events) return;
 
-            if(event.eventData) {
-                console.log("CouchBase TelemetryStore: Migrating Achievement #", event.eventData.length, "Events");
+            console.log("CouchBase TelemetryStore: Migrating Achievement #", events.length, "Events");
+            if(events.length) {
                 var promistReduce = when.reduce(events, function(currentResult, event, index){
                     // save achievements to player info
                     //console.log(index+":", event);
