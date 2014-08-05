@@ -471,7 +471,9 @@ return when.promise(function (resolve, reject) {
 // ------------------------------------------------
 
     console.log("CouchBase TelemetryStore: Migrating Achievement Events...");
-    this.getLastDeviceIdByGameId("AA-1")
+    var gameId = 'AA-1';
+
+    this.getLastDeviceIdByGameId(gameId)
         // LastDeviceId
         .then(function(deviceIds) {
             // if no deviceIds skip to next
@@ -487,13 +489,18 @@ return when.promise(function (resolve, reject) {
             if(!events) return;
 
             console.log("CouchBase TelemetryStore: Migrating Achievement #", events.length, "Events");
-            var promistReduce = when.reduce(events, function(currentResult, event, index){
-                // save achievements to player info
-                //console.log(index+":", event);
-                return this.postGameAchievement(event.userId, event.gameId, event.eventData);
-            }.bind(this), 0);
+            if(events.length) {
+                var promistReduce = when.reduce(events, function(currentResult, event, index){
+                    // save achievements to player info
+                    //console.log(index+":", event);
+                    return this.postGameAchievement(event.userId, event.gameId, event.eventData);
+                }.bind(this), 0);
 
-            promistReduce.then(resolve, reject);
+                promistReduce.then(resolve, reject);
+            }
+            else {
+                resolve();
+            }
 
         }.bind(this));
 
@@ -507,12 +514,12 @@ return when.promise(function (resolve, reject) {
 TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
     // get all sessions
     return this.getAllGameSessions()
-
         // get all events per session
         .then(function(gameSessions) {
             // if no deviceIds skip to next
             if(!gameSessions) return;
 
+            console.log("CouchBase TelemetryStore: Migrating Adding GameId to ", gameSessions.length, "Sessions");
             var guardedAsyncOperation = guard(guard.n(1), function(gameSession){
                 // get events
                 return this.getRawEvents(gameSession.gameSessionId)
@@ -537,9 +544,8 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
                             }
                         }
 
+                        console.log("CouchBase TelemetryStore: Migrating Adding GameId - gameSessionId:", gameSession.gameSessionId, "with", outEvents.length, "Events");
                         if(outEvents.length > 0) {
-                            console.log("CouchBase TelemetryStore: Migrating Adding GameId to ", outEvents.length, "Events");
-
                             // migrate event to add gameId
                             return this.saveEvents(gameSession.gameId, outEvents)
                                 .then(function() {
@@ -650,7 +656,7 @@ return when.promise(function(resolve, reject) {
             }
 
             if(results.length == 0) {
-                resolve({});
+                resolve([]);
                 return;
             }
 
