@@ -87,7 +87,7 @@ function getGameData(req, res, next)
 
     if( !( req.params &&
         req.params.hasOwnProperty("gameId") ) ) {
-        this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
+        this.requestUtil.errorResponse(res, { status: "error", error: "missing client/game Id"});
         return
     }
     var gameId = req.params.gameId;
