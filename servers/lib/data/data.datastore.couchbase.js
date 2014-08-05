@@ -1515,7 +1515,7 @@ return when.promise(function(resolve, reject) {
             reject(err);
             return;
         }
-        data = results.values;
+        data = results.value;
 
         resolve(data);
     }.bind(this));
