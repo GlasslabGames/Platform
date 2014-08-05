@@ -139,10 +139,10 @@ function addActivity(userId, gameId, gameSessionId) {
  */
 function runDataMigration(req, res, next) {
     // Migrate Old DB Events
-    console.log("Starting Data Migration...");
+    console.log("CouchBase TelemetryStore: Starting Data Migration...");
     this.cbds.migrateData()
         .then(function(){
-            console.log("Completed Data Migration");
+            console.log("CouchBase TelemetryStore: Completed Data Migration");
             this.requestUtil.jsonResponse(res, {status:"complete"});
         }.bind(this))
 
