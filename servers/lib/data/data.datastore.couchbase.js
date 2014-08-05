@@ -312,8 +312,11 @@ TelemDS_Couchbase.prototype.migrateData = function() {
 return when.promise(function (resolve, reject) {
 // ------------------------------------------------
 
+    console.log("Getting Data Schema Info...");
     this.getDataSchemaInfo()
         .then(function (info) {
+            console.log("Data Schema Info:", info);
+
             if( info.version != this.currentDBVersion ) {
                 info.version = this.currentDBVersion;
             }
@@ -323,8 +326,10 @@ return when.promise(function (resolve, reject) {
             if ( !info.migrated.achievements ) {
                 tasks.push(
                     function(){
+                        console.log("Migrate Achievement Events...");
                         return this._migrateEventAchievements()
                             .then(function(){
+                                console.log("Migrate Achievement Events: Done!");
                                 info.migrated.achievements = true;
                                 return this.updateDataSchemaInfo(info);
                             }.bind(this))
@@ -335,8 +340,10 @@ return when.promise(function (resolve, reject) {
             if ( !info.migrated.addGameId ) {
                 tasks.push(
                      function() {
+                         console.log("Migrate Events to Add GameId...");
                          return this._migrateEvents_AddingGameId()
                             .then(function () {
+                                 console.log("Migrate Events to Add GameId: Done!");
                                 info.migrated.addGameId = true;
                                 return this.updateDataSchemaInfo(info);
                             }.bind(this))
