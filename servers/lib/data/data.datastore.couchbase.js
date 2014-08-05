@@ -29,7 +29,8 @@ function TelemDS_Couchbase(options){
             host:     "localhost:8091",
             bucket:   "default",
             password: "",
-            gameSessionExpire: 1*1*60 //24*60*60 // in seconds
+            gameSessionExpire: 1*1*60, //24*60*60 // in seconds
+            multiGetChunkSize: 2000
         },
         options
     );
@@ -68,6 +69,35 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Couchbase.prototype._multiChunkGet = function(keys, options, callback){
+    // create buckets of keys with each one having a max size of ChunckSize
+    var taskList = Util.Reshape(keys, this.options.multiGetChunkSize);
+
+    var guardedAsyncOperation = guard(guard.n(1), function (all, ckeys){
+        return when.promise(function(resolve, reject) {
+            this.client.getMulti(ckeys, options, function(err, results){
+                    if(err) {
+                        reject(err);
+                        return;
+                    }
+
+                    // merge two arrays
+                    all = _.merge(all, results);
+                    resolve(all);
+                });
+        }.bind(this));
+    }.bind(this));
+
+    when.reduce(taskList, guardedAsyncOperation, {})
+        .then(function(all){
+            callback(null, all);
+        }, function(err){
+            callback(err);
+        })
+};
+
 
 TelemDS_Couchbase.prototype.setupDocsAndViews = function(){
 // add promise wrapper
@@ -519,7 +549,7 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
             // if no deviceIds skip to next
             if(!gameSessions) return;
 
-            console.log("CouchBase TelemetryStore: Migrating Adding GameId to ", gameSessions.length, "Sessions");
+            console.log("CouchBase TelemetryStore: Migrating Adding GameId to", gameSessions.length, "Sessions");
             var guardedAsyncOperation = guard(guard.n(1), function(gameSession){
                 // get events
                 return this.getRawEvents(gameSession.gameSessionId)
@@ -1046,7 +1076,7 @@ return when.promise(function(resolve, reject) {
 
             var keys = _.pluck(results, 'id');
             //console.log("CouchBase TelemetryStore: keys", keys);
-            this.client.getMulti(keys, {},
+            this._multiChunkGet(keys, {},
                 function(err, results){
                     if(err){
                         if(err.code == 4101) {
@@ -1245,8 +1275,7 @@ return when.promise(function(resolve, reject) {
             }
 
             var keys = _.pluck(results, 'id');
-            this.client.getMulti(keys, {},
-                function(err, results){
+            this._multiChunkGet(keys, {}, function(err, results){
                     if(err) {
                         if(err.code == 4101) {
                             var errors = [];
@@ -1256,6 +1285,8 @@ return when.promise(function(resolve, reject) {
                                 }
                             }
                             console.error("CouchBase TelemetryStore: Multi Get All GameSessions Errors -", errors);
+                            reject(err);
+                            return;
                         } else {
                             console.error("CouchBase TelemetryStore: Multi Get All GameSessions Error -", err);
                             reject(err);
