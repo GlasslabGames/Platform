@@ -1247,10 +1247,20 @@ return when.promise(function(resolve, reject) {
             var keys = _.pluck(results, 'id');
             this.client.getMulti(keys, {},
                 function(err, results){
-                    if(err){
-                        console.error("CouchBase TelemetryStore: Multi Get All GameSessions Error -", err);
-                        reject(err);
-                        return;
+                    if(err) {
+                        if(err.code == 4101) {
+                            var errors = [];
+                            for(var r in results) {
+                                if(results[r].error) {
+                                    errors.push( results[r].error );
+                                }
+                            }
+                            console.error("CouchBase TelemetryStore: Multi Get All GameSessions Errors -", errors);
+                        } else {
+                            console.error("CouchBase TelemetryStore: Multi Get All GameSessions Error -", err);
+                            reject(err);
+                            return;
+                        }
                     }
 
                     var gameSessions = _.pluck(results, 'value');
