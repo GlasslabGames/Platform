@@ -160,10 +160,10 @@
             },
             {
                 "name": "Play Game",
-                "link": [
+                "links": [
                     {
                         "name": "Play Game",
-                        "link": "/game/play/SC"
+                        "link": "/games/SC/missions"
                     }
                 ]
             }
@@ -313,249 +313,402 @@
             "google": "http://plus.google.com/glasslabgames"
         }
     },
-    "missionGroups": [
-        {
-            "id": "1234",
-            "title": "Mission 1 - School Is In",
-            "locked": false,
-            "completed": false,
-            "completedDate": null,
-            "missions": [
-                {
-                    "id": "MedusaA1School01",
-                    "title": "Parktown",
-                    "description": "Can you get every kid to school?",
-                    "locked": false,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "f04804f0-fedf-11e2-ab09-1f14110c1a8d",
-                    "title": "Systems Map Tutorial 1",
-                    "description": "Create a map that explains how to enroll all Parktown kids in school.",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                }
-            ]
+    "missions": {
+        "linkSchema": {
+            "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-SessionURL={{configSessionUrl}}&-DataURL={{configDataUrl}}",
+            "diagram": "/assets/games/{{gameId}}/challenges?challengeId={{missionId}}&courseId={{courseId}}&sessionURL={{configSessionUrl}}&dataURL={{configDataUrl}}&type=play"
         },
-        {
-            "id": "5678",
-            "title": "Mission 2 - We Need Jobs!",
-            "locked": true,
-            "completed": false,
-            "completedDate": null,
-            "missions": [
-                {
-                    "id": "12b38320-fee0-11e2-ab09-1f14110c1a8d",
-                    "title": "Systems Map Tutorial 2",
-                    "description": "Create a map that explains what creates new jobs for the citizens.",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "MedusaA1Jobs01",
-                    "title": "Little Alexandria",
-                    "description": "Can you create new jobs for the citizens?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
-                    "title": "Systems Map Tutorial 3",
-                    "description": "Add more nodes to your map, and explain what else could create new jobs for the citizens.",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                }
-            ]
-        },
-        {
-            "id": "9123",
-            "title": "Mission 3 - Read All About It!",
-            "locked": true,
-            "completed": false,
-            "completedDate": null,
-            "missions": [
-                {
-                    "id": "95347e00-0b63-11e3-8ffd-0800200c9a66",
-                    "title": "Reading Diagrams Tutorial",
-                    "description": "How can coal power plants filter air pollution?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "2d2d2ec0-e01f-11e2-a7e8-3f4343712aaf",
-                    "title": "Solar Panels",
-                    "description": "Why are new solar panels more efficient than older ones?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "c9a942d0-e01e-11e2-a7e8-3f4343712aaf",
-                    "title": "Diesel Fuel",
-                    "description": "How to cut four hundred tons of pollution each year?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "212f0b70-0a8b-11e3-8ffd-0800200c9a66",
-                    "title": "Water Pollution",
-                    "description": "How do wastewater and sewage hurt animals living in the port's water?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "2bfb6dc0-e40a-11e2-9336-d1ab0cf51c41",
-                    "title": "Growing Business",
-                    "description": "Why is a larger port good for everyone in Regal City?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                }
-            ]
-        },
-        {
-            "id": "4567",
-            "title": "Mission 4 - Pollution Problems",
-            "locked": true,
-            "completed": false,
-            "completedDate": null,
-            "missions": [
-                {
-                    "id": "063cf110-e0f6-11e2-a9b1-fbf5ea959a8c",
-                    "title": "Pre-Game Systems Map",
-                    "description": "Create a map that explains what creates power and causes air pollution.",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "MedusaA1Power01",
-                    "title": "Sierra Madre",
-                    "description": "Find out how to keep the power level optimal and lower air pollution.",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "723dfa90-e0f5-11e2-a9b1-fbf5ea959a8c",
-                    "title": "Post-Game Systems Map",
-                    "description": "Have your ideas changed or stayed the same?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                }
-            ]
-        },
-        {
-            "id": "8912",
-            "title": "Mission 5 - Read It, Find It, Prove It!",
-            "locked": true,
-            "completed": false,
-            "completedDate": null,
-            "missions": [
-                {
-                    "id": "534cd7f0-0495-11e3-8ffd-0800200c9a66",
-                    "title": "Evidence Challenge Tutorial",
-                    "description": "What evidence supports the claim that special filters reduce air pollution?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "57a862b0-e01e-11e2-a7e8-3f4343712aaf",
-                    "title": "Solar Panels",
-                    "description": "What evidence supports the claim that new designs will lead to more efficient solar panels?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "47b0dc70-e01e-11e2-a7e8-3f4343712aaf",
-                    "title": "Diesel Fuel",
-                    "description": "What evidence supports the claim that cleaner fuel can lower air pollution?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "212f0b71-0a8b-11e3-8ffd-0800200c9a66",
-                    "title": "Water Pollution",
-                    "description": "What evidence supports the claim that algae blooms lower the amount of oxygen in the water?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "12252b50-e01f-11e2-a7e8-3f4343712aaf",
-                    "title": "Growing Business",
-                    "description": "What evidence supports the claim that a larger port with lead to more orders for local products?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                }
-            ]
-        },
-        {
-            "id": "3456",
-            "title": "Mission 6 - It's Complicated",
-            "locked": true,
-            "completed": false,
-            "completedDate": null,
-            "missions": [
-                {
-                    "id": "b71d8d00-e0f6-11e2-a9b1-fbf5ea959a8c",
-                    "title": "Pre-Game Systems Map",
-                    "description": "Create a map that explains what creates jobs and causes air pollution.",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "MedusaA1Pollution01",
-                    "title": "Jackson City",
-                    "description": "The city needs your skills to increase jobs and lower air pollution.",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                },
-                {
-                    "id": "249ed870-e0f7-11e2-a9b1-fbf5ea959a8c",
-                    "title": "Post-Game Systems Map",
-                    "description": "Have your ideas changed or stayed the same?",
-                    "locked": true,
-                    "icon": "",
-                    "completed": false,
-                    "completedDate": null
-                }
-            ]
-        }
-    ]
+        "groups": [
+            {
+                "id": "1234",
+                "title": "Mission 1 - School Is In",
+                "locked": false,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "id": "MedusaA1School01",
+                        "title": "Parktown",
+                        "description": "Can you get every kid to school?",
+                        "locked": false,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "f04804f0-fedf-11e2-ab09-1f14110c1a8d",
+                        "title": "Systems Map Tutorial 1",
+                        "description": "Create a map that explains how to enroll all Parktown kids in school.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "5678",
+                "title": "Mission 2 - We Need Jobs!",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "id": "12b38320-fee0-11e2-ab09-1f14110c1a8d",
+                        "title": "Systems Map Tutorial 2",
+                        "description": "Create a map that explains what creates new jobs for the citizens.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "MedusaA1Jobs01",
+                        "title": "Little Alexandria",
+                        "description": "Can you create new jobs for the citizens?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
+                        "title": "Systems Map Tutorial 3",
+                        "description": "Add more nodes to your map, and explain what else could create new jobs for the citizens.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "9123",
+                "title": "Mission 3 - Read All About It!",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "id": "95347e00-0b63-11e3-8ffd-0800200c9a66",
+                        "title": "Reading Diagrams Tutorial",
+                        "description": "How can coal power plants filter air pollution?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "2d2d2ec0-e01f-11e2-a7e8-3f4343712aaf",
+                        "title": "Solar Panels",
+                        "description": "Why are new solar panels more efficient than older ones?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c9a942d0-e01e-11e2-a7e8-3f4343712aaf",
+                        "title": "Diesel Fuel",
+                        "description": "How to cut four hundred tons of pollution each year?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "212f0b70-0a8b-11e3-8ffd-0800200c9a66",
+                        "title": "Water Pollution",
+                        "description": "How do wastewater and sewage hurt animals living in the port's water?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "2bfb6dc0-e40a-11e2-9336-d1ab0cf51c41",
+                        "title": "Growing Business",
+                        "description": "Why is a larger port good for everyone in Regal City?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "4567",
+                "title": "Mission 4 - Pollution Problems",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "id": "063cf110-e0f6-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Pre-Game Systems Map",
+                        "description": "Create a map that explains what creates power and causes air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "MedusaA1Power01",
+                        "title": "Sierra Madre",
+                        "description": "Find out how to keep the power level optimal and lower air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "723dfa90-e0f5-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Post-Game Systems Map",
+                        "description": "Have your ideas changed or stayed the same?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "8912",
+                "title": "Mission 5 - Read It, Find It, Prove It!",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "id": "534cd7f0-0495-11e3-8ffd-0800200c9a66",
+                        "title": "Evidence Challenge Tutorial",
+                        "description": "What evidence supports the claim that special filters reduce air pollution?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "57a862b0-e01e-11e2-a7e8-3f4343712aaf",
+                        "title": "Solar Panels",
+                        "description": "What evidence supports the claim that new designs will lead to more efficient solar panels?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "47b0dc70-e01e-11e2-a7e8-3f4343712aaf",
+                        "title": "Diesel Fuel",
+                        "description": "What evidence supports the claim that cleaner fuel can lower air pollution?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "212f0b71-0a8b-11e3-8ffd-0800200c9a66",
+                        "title": "Water Pollution",
+                        "description": "What evidence supports the claim that algae blooms lower the amount of oxygen in the water?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "12252b50-e01f-11e2-a7e8-3f4343712aaf",
+                        "title": "Growing Business",
+                        "description": "What evidence supports the claim that a larger port with lead to more orders for local products?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "3456",
+                "title": "Mission 6 - It's Complicated",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "id": "b71d8d00-e0f6-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Pre-Game Systems Map",
+                        "description": "Create a map that explains what creates jobs and causes air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "MedusaA1Pollution01",
+                        "title": "Jackson City",
+                        "description": "The city needs your skills to increase jobs and lower air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "249ed870-e0f7-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Post-Game Systems Map",
+                        "description": "Have your ideas changed or stayed the same?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
 }

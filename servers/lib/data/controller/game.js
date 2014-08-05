@@ -54,7 +54,7 @@ function saveGameData(req, res, next)
         // this is ok, data doesn't have to be json
     }
 
-    this.cbds.saveGameData(userId, gameId, data)
+    this.cbds.saveUserGameData(userId, gameId, data)
         .then(function(){
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
@@ -92,16 +92,9 @@ function getGameData(req, res, next)
     }
     var gameId = req.params.gameId;
 
-    var data = req.body;
-    try{
-        data = JSON.parse(data);
-    } catch(err){
-        // this is ok, data doesn't have to be json
-    }
-
-    this.cbds.getGameData(userId, gameId)
-        .then(function(){
-            this.requestUtil.jsonResponse(res, { status: "ok" });
+    this.cbds.getUserGameData(userId, gameId)
+        .then(function(data){
+            this.requestUtil.jsonResponse(res, data);
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);

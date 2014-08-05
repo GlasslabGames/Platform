@@ -24,7 +24,8 @@
         "ejs":            "1.0.x",
         "mailchimp":      "1.1.x",
         "csv":            "0.3.x",
-        "csv-stringify":  "0.0.x"
+        "csv-stringify":  "0.0.x",
+        "handlebars"   :  "*"
     },
     "optionalDependencies": {
         "hiredis":        "0.1.x"

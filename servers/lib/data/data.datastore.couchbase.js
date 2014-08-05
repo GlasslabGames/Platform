@@ -1477,17 +1477,66 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.saveGameData = function(userId, gameId, data){
+TelemDS_Couchbase.prototype.saveUserGameData = function(userId, gameId, data){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
+
+// set game data
+this.client.set(key, data,
+    function(err, data){
+        if(err){
+            console.error("CouchBase TelemetryStore: Save Game Data Error -", err);
+            reject(err);
+            return;
+        }
+
+        resolve(data);
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.getUserGameData = function(userId, gameId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
 
-    // set game data
+    this.client.get(key, function(err, results){
+        var data = null;
+        // NOT "No such key"
+        if( err &&
+            err.code != 13) {
+            console.error("CouchBase DataStore: Error -", err);
+            reject(err);
+            return;
+        }
+        data = results.values;
+
+        resolve(data);
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Couchbase.prototype.saveUserPref = function(userId, gameId, data){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.game.dataKey+":"+tConst.game.prefKey+":"+gameId+":"+userId;
+
+    // set user game pref
     this.client.set(key, data,
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: Save Game Data Error -", err);
+                console.error("CouchBase TelemetryStore: Save User Pref Data Error -", err);
                 reject(err);
                 return;
             }
@@ -1496,54 +1545,7 @@ TelemDS_Couchbase.prototype.saveGameData = function(userId, gameId, data){
         }.bind(this));
 
 // ------------------------------------------------
-    }.bind(this));
-// end promise wrapper
-};
-
-TelemDS_Couchbase.prototype.getGameData = function(userId, gameId){
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-        var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
-
-        // get game data
-        this.client.get(key,
-            function(err, data){
-                if(err){
-                    console.error("CouchBase TelemetryStore: Get Game Data Error -", err);
-                    reject(err);
-                    return;
-                }
-                resolve(data);
-            }.bind(this));
-
-// ------------------------------------------------
-    }.bind(this));
-// end promise wrapper
-};
-
-
-
-TelemDS_Couchbase.prototype.saveUserPref = function(userId, gameId, data){
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-        var key = tConst.game.dataKey+":"+tConst.game.prefKey+":"+gameId+":"+userId;
-
-        // set user game pref
-        this.client.set(key, data,
-            function(err, data){
-                if(err){
-                    console.error("CouchBase TelemetryStore: Save User Pref Data Error -", err);
-                    reject(err);
-                    return;
-                }
-
-                resolve(data);
-            }.bind(this));
-
-// ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
@@ -1728,29 +1730,6 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
 };
 
 
-
-TelemDS_Couchbase.prototype.getUserSavedGame = function(userId, gameId) {
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-        var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
-
-        this.client.get(key, function(err, data){
-            // NOT "No such key"
-            if( err &&
-                err.code != 13) {
-                console.error("CouchBase DataStore: Error -", err);
-                reject(err);
-                return;
-            }
-
-            resolve(data.value);
-        }.bind(this));
-
-// ------------------------------------------------
-    }.bind(this));
-// end promise wrapper
-};
 
 TelemDS_Couchbase.prototype.getGamePlayInfo = function(userId, gameId){
 // add promise wrapper
