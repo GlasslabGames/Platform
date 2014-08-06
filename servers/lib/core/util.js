@@ -156,6 +156,17 @@ function getExpressLogger(options, express, stats){
      */
 }
 
+// http://stackoverflow.com/questions/19178782/how-to-reshape-an-array-with-lodash
+// In:  array = [1, 2, 3, 4, 5, 6, ,7, 8], n = 3
+// Out: [[1, 2, 3], [4, 5, 6], [7, 8]]
+function reshape(array, n){
+    return _.compact(array.map(function(el, i){
+        if (i % n === 0) {
+            return array.slice(i, i + n);
+        }
+    }));
+}
+
 module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
@@ -168,5 +179,6 @@ module.exports = {
     CreateUUID:       createUUID,
     String: {
         capitalize: capitalize
-    }
+    },
+    Reshape: reshape
 };
