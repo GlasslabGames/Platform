@@ -1,0 +1,32 @@
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Scenario_Score","eventData":{"stars":"2","studentFeedback":"SFM1G1S20","teacherFeedback":"TFM1G1S20","text":"Enrollment: 224, Bus Stops: 6","scenarioTime":"06:18"},"timestamp":"63520680098"},{"name":"GL_Scenario_Summary","eventData":{"busStops":"6","enrollmentScore":"224","result":"","targetEnrollment":"200","scenarioTime":"06:18"},"timestamp":"63520680098"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.64","busStops":"6","scenarioTime":"06:18"},"timestamp":"63520680098"},{"name":"GL_Scenario_Submitted","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"06:18"},"timestamp":"63520680098"},{"name":"GL_Scenario_Ended","eventData":{"reason":"Player clicked All Done","scenarioTime":"06:20"},"timestamp":"63520680100"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Scenario_Score","eventData":{"stars":"2","studentFeedback":"SFM2G2S21","teacherFeedback":"TFM2G2S21","text":"Jobs: 990, Time: 06:31","scenarioTime":"03:43"},"timestamp":"63520680408"},{"name":"GL_Scenario_Summary","eventData":{"jobsScore":"990","result":"","targetJobs":"900","scenarioTime":"03:43"},"timestamp":"63520680408"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"990","population":"1826","simoleons":"1167","scenarioTime":"03:43"},"timestamp":"63520680408"},{"name":"GL_Scenario_Submitted","eventData":{"name":"Medusa A2 - Worker Shortage.txt","scenarioTime":"03:43"},"timestamp":"63520680408"},{"name":"GL_Scenario_Ended","eventData":{"reason":"Player clicked All Done","scenarioTime":"03:46"},"timestamp":"63520680411"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&

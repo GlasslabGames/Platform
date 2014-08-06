@@ -3,14 +3,24 @@
     "request": {
         "httpTimeout": 60000, "//": "1 min in milliseconds"
     },
-    "frontend": {
-        "port":     8000
+    "services": {
+        "port": 8001,
+        "session": {
+            "secret": "keyboard kitty",
+            "cookie": {
+                "path": "/",
+                "httpOnly": false
+            },
+            "store": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab",
+                "ttl": 86400, "//": "24 hours in seconds"
+            }
+        }
     },
     "webapp": {
-        "protocol": "http:",
-        "host":     "localhost",
-        "port":     8080,
-        "staticContentPath": "../../../Root/web-app",
+        "staticContentPath": "../../Playfully.org/build",
         "datastore": {
             "mysql": {
                 "host"    : "localhost",
@@ -25,19 +35,15 @@
             }
         }
     },
-    "queue": {
-        "host": "127.0.0.1",
-        "db": 0,
-        "port": 6379
-    },
-    "sessionstore": {
-        "host":     "localhost:8091",
-        "bucket":   "glasslab_webapp",
-        "password": "glasslab",
-        "ttl": 86400, "//": "24 hours in seconds"
-    },
-    "collector": {
-        "port": 8081
+    "lms": {
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            }
+        }
     },
     "telemetry": {
         "datastore": {
@@ -54,38 +60,55 @@
             }
         }
     },
-    "dispatcher": {
-        "telemetryGetMax": 20,
-        "telemetryPollDelay": 1000,     "//": "1 sec in milliseconds",
-        "assessmentDelay"   : 1000,     "//": "1 sec in milliseconds, default 5000",
-        "cleanupPollDelay"  : 3600000,  "//": "1 hours in milliseconds",
-        "sessionExpire"     : 14400000, "//": "4 hours in milliseconds"
-    },
     "auth": {
-        "protocol": "http:",
-        "host":     "localhost",
-        "port":     8082,
-        "secret":   "keyboard kitty"
-    },
-    "validate": {
-        "protocol": "http:",
-        "host":     "localhost",
-        "port":     8083
-    },
-    "assessment": {
-        "port":     8084,
+        "email": {
+            "mailChimp" : {
+                "apiKey": "da5ee9608f83677177482e05c1ed2d14-us2",
+                "mailListName": "GlassLab"
+            },
+            "from": "<accounts@glasslabgames.org>",
+            "transport": {
+                "service": "Gmail",
+                "auth": {
+                    "user": "--ReplaceInCustomConfig--",
+                    "pass": "--ReplaceInCustomConfig--"
+                }
+            }
+        },
         "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
             "couchbase": {
                 "host":     "localhost:8091",
-                "bucket":   "glasslab_assessment",
+                "bucket":   "glasslab_webapp",
                 "password": "glasslab"
             }
         },
-        "queue": {
-            "host": "127.0.0.1",
-            "db": 0,
-            "port": 6379,
-            "sessionExpire" : 14400000, "//": "4 hours in milliseconds"
+        "accounts" : {
+            "google": {
+                "clientID": "763558968513-trn6s9uff4vdork95290koq27t1uat5l.apps.googleusercontent.com",
+                "clientSecret": "3IwY-_gUyCN42YqP3N3BQOeD",
+                "callbackURL": "http://127.0.0.1:8001/auth/google/callback"
+            },
+            "edmodo": {
+                "clientID": "89a1f95422c621c85c623504bee5a69a1dd5804329749c0b7b9dbdf7a758892a",
+                "clientSecret": "41c06d364624552e26b7eb405eab502aa4fded5a0c1e9d63b20a4bbfa2bccb3c",
+                "callbackURL": "http://127.0.0.1:8001/auth/edmodo/callback"
+            },
+            "icivics": {
+                "baseURL":              "https://staging.icivics.org",
+                "consumerKey":          "fWAzCPbD9FTWmpYEEnTjZnvubWN8r2Y2",
+                "consumerSecret":       "bzw2NdSr8Jsfpg9feXv87LyUPgyzxj5j",
+                "callbackURL":          "http://127.0.0.1:8001/auth/icivics/callback"
+            }
         }
+    },
+    "assessment": {
+        "host": "localhost",
+        "port": 8003
     }
 }
