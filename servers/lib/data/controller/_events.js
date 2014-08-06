@@ -75,27 +75,22 @@ function getUserEvents(req, res, next){
  */
 function setAllUsersActive(req, res, next) {
 
-    // get user sessions from MySQL
-    this.myds.getAllUserSessions()
-        // send as activity
-        .then(function(gameSessions){
-            // shortcut if no session list
-            if(!gameSessions) gameSessions = [];
-
-            return this.cbds.getAllGameSessions()
-                .then(function(gameSessions2){
-                    // combine mysql sessions and couchbase sessions
-                    return gameSessions.concat(gameSessions2);
-                }.bind(this));
-        }.bind(this))
+    // get user sessions from Couch and MySQL
+    this.cbds.getAllGameSessions(this.myds)
 
         // send as activity
         .then(function(gameSessions) {
             // shortcut if no session list
             if(!gameSessions) return;
 
-            var guardedAsyncOperation = guard(guard.n(1), function(info, i){
-                return addActivity.call(this, info.userId, info.gameId, info.gameSessionId);
+            var guardedAsyncOperation = guard(guard.n(1), function(info, i) {
+                if( info.userId &&
+                    info.gameId &&
+                    info.gameSessionId ) {
+                    return addActivity.call(this, info.userId, info.gameId, info.gameSessionId);
+                } else {
+                    console.error("setAllUsersActive Info:", info);
+                }
             }.bind(this));
             return when.map(gameSessions, guardedAsyncOperation);
         }.bind(this))

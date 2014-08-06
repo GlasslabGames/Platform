@@ -29,8 +29,9 @@ function TelemDS_Couchbase(options){
             host:     "localhost:8091",
             bucket:   "default",
             password: "",
-            gameSessionExpire: 1*1*60, //24*60*60 // in seconds
-            multiGetChunkSize: 2000
+            gameSessionExpire:   1*1*60, //24*60*60 // in seconds
+            multiGetChunkSize:   2000,
+            multiGetParallelNum: 2
         },
         options
     );
@@ -75,7 +76,7 @@ TelemDS_Couchbase.prototype._multiChunkGet = function(keys, options, callback){
     // create buckets of keys with each one having a max size of ChunckSize
     var taskList = Util.Reshape(keys, this.options.multiGetChunkSize);
 
-    var guardedAsyncOperation = guard(guard.n(1), function (all, ckeys){
+    var guardedAsyncOperation = guard(guard.n(this.options.multiGetParallelNum), function (all, ckeys){
         return when.promise(function(resolve, reject) {
             this.client.getMulti(ckeys, options, function(err, results){
                     if(err) {
@@ -337,7 +338,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.migrateData = function() {
+TelemDS_Couchbase.prototype.migrateData = function(myds) {
 // add promise wrapper
 return when.promise(function (resolve, reject) {
 // ------------------------------------------------
@@ -379,7 +380,7 @@ return when.promise(function (resolve, reject) {
                 tasks.push(
                      function() {
                          console.log("CouchBase TelemetryStore: Migrate Events to Add GameId...");
-                         return this._migrateEvents_AddingGameId()
+                         return this._migrateEvents_AddingGameId(myds)
                             .then(function () {
                                  console.log("CouchBase TelemetryStore: Migrate Events to Add GameId: Done!");
                                 info.migrated.addGameId = true;
@@ -438,14 +439,14 @@ return when.promise(function(resolve, reject) {
                     }.bind(this))
 
                     // getGameSessionWithGameSection done
-                    .then(function(map){
+                    .then(function(map) {
                         sessionToGameLevelMap = map;
                         // migrate 5k at a time, as to no overload the DB
                         return myds.getArchiveEvents(migrateCount);
                     }.bind(this))
 
                     // getArchiveEvents done
-                    .then(function(data){
+                    .then(function(data) {
                         //console.log("events:", data.events);
                         if( data &&
                             data.events &&
@@ -541,9 +542,9 @@ return when.promise(function (resolve, reject) {
 
 
 
-TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
+TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function(myds) {
     // get all sessions
-    return this.getAllGameSessions()
+    return this.getAllGameSessions(myds)
         // get all events per session
         .then(function(gameSessions) {
             // if no deviceIds skip to next
@@ -563,21 +564,31 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function() {
                         var keys = [];
                         var outEvents = [];
                         var id;
+                        // if gameId not set then default to SimCity
+                        var gameId = "SC";
                         for(var i = 0; i < events.length; i++) {
                             id = events[i].id;
                             id = id.split(":");
 
                             if(id.length == 3) {
+                                if(events[i].gameId) {
+                                    gameId = events[i].gameId
+                                }
+                                if(events[i].clientId) {
+                                    gameId = events[i].clientId
+                                }
+
                                 keys.push( events[i].id );
                                 delete events[i].id;
                                 outEvents.push(events[i]);
                             }
                         }
 
-                        console.log("CouchBase TelemetryStore: Migrating Adding GameId - gameSessionId:", gameSession.gameSessionId, "with", outEvents.length, "Events");
-                        if(outEvents.length > 0) {
+                        console.log("CouchBase TelemetryStore: Migrating Adding GameId - gameId:", gameId, ", gameSessionId:", gameSession.gameSessionId, "with", outEvents.length, "Events");
+                        // only add events if there are events to add
+                        if( outEvents.length > 0 ) {
                             // migrate event to add gameId
-                            return this.saveEvents(gameSession.gameId, outEvents)
+                            return this.saveEvents(gameId, outEvents)
                                 .then(function() {
                                     return this._removeKeys(keys);
                                 }.bind(this));
@@ -1231,35 +1242,50 @@ return when.promise(function(resolve, reject) {
 
 TelemDS_Couchbase.prototype.getSessionsByUserId = function(gameId, userId){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        gameId = gameId.toUpperCase();
-        // tConst.game.session.started
+    gameId = gameId.toUpperCase();
+    // tConst.game.session.started
 
-        this.client.view("telemetry", 'getCompletedSessionsByUserId').query(
-            {
-                key: [gameId, userId]
-            },
-            function(err, results) {
-                if(err){
-                    console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
-                    reject(err);
-                    return;
-                }
+    this.client.view("telemetry", 'getCompletedSessionsByUserId').query(
+        {
+            key: [gameId, userId]
+        },
+        function(err, results) {
+            if(err){
+                console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
+                reject(err);
+                return;
+            }
 
-                var gameSessionIds = _.pluck(results, 'value');
-                resolve(gameSessionIds);
-            }.bind(this)
-        );
+            var gameSessionIds = _.pluck(results, 'value');
+            resolve(gameSessionIds);
+        }.bind(this)
+    );
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype.getAllGameSessions = function(myds){
+    return myds.getAllUserSessions()
+        // send as activity
+        .then(function(gameSessions){
+            // shortcut if no session list
+            if(!gameSessions) gameSessions = [];
 
-TelemDS_Couchbase.prototype.getAllGameSessions = function(){
+            return this._getAllCouchGameSessions()
+                .then(function(gameSessions2){
+                    // combine mysql sessions and couchbase sessions
+                    return gameSessions.concat(gameSessions2);
+                }.bind(this));
+        }.bind(this));
+};
+
+
+TelemDS_Couchbase.prototype._getAllCouchGameSessions = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
