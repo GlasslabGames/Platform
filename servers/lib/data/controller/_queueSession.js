@@ -18,7 +18,9 @@ function endQSession(req, res, next)
     if( !( req.body &&
            req.body.id )
       ) {
-        this.requestUtil.errorResponse(res, { status: "error", error: "Game session Q ID", key: "missing.data"});
+        var err = { status: "error", error: "Game session Q ID", key: "missing.data"};
+        console.error("endQSession Error:", err);
+        this.requestUtil.errorResponse(res, err);
         return;
     }
     var id = req.body.id;
@@ -28,6 +30,7 @@ function endQSession(req, res, next)
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
         .then(null, function(err){
+            console.error("endQSession Error:", err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -40,7 +43,9 @@ function cleanupQSession(req, res, next)
     if( !( req.body &&
         req.body.id )
         ) {
-        this.requestUtil.errorResponse(res, { status: "error", error: "Game session Q ID", key: "missing.data"});
+        var err = { status: "error", error: "Game session Q ID", key: "missing.data"};
+        console.error("cleanupQSession Error:", err);
+        this.requestUtil.errorResponse(res, err);
         return;
     }
     var id = req.body.id;
@@ -50,6 +55,7 @@ function cleanupQSession(req, res, next)
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
         .then(null, function(err){
+            console.error("cleanupQSession Error:", err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }

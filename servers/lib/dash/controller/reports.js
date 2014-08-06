@@ -225,10 +225,12 @@ function getAchievements(req, res) {
 
                 for(var userId in playerInfoList) {
                     var info = playerInfoList[userId];
+                    //console.log("info:", info);
+
                     var userAchievements = {
                         userId: userId,
                         achievements: [],
-                        totalTimePlayed: info.totalTimePlayed
+                        totalTimePlayed: info.totalTimePlayed || 0
                     };
 
                     userAchievements.achievements = this.getListOfAchievements(gameId, info.achievement);

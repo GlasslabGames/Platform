@@ -71,7 +71,12 @@
             },
             {
                 "name": "Play Game",
-                "link": "/game/play/SC"
+                "link": [
+                    {
+                        "name": "Play Game",
+                        "link": "/game/play/SC"
+                    }
+                ]
             }
         ],
         "pages": {

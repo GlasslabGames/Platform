@@ -15,15 +15,15 @@ module.exports = {
     "missing":              "user.login.missing",
     
     // new
-    "course.general":                       "We encountered an error occurred. Please try again.",
+    "course.general":                       "We encountered an error. Please try again.",
     "course.notUnique.name":                "Class names must be unique. Please choose a different class name.",
     "user.enroll.general":                  "There was an error with the information you entered.",
     "user.enroll.code.missing":             "The class code is missing.",
     "user.enroll.code.invalid":             "The class code is invalid.",
     "user.enroll.code.used":                "You have already enrolled for this class",
     "user.unenroll.general":                "There was an error with the information you entered.",
-    "user.unenroll.notEnrolled":            "You are not enrolled for this class",
-    "user.update.general":                  "We encountered an issue and can not update your information at this time.",
+    "user.unenroll.notEnrolled":            "You are not enrolled in this class",
+    "user.update.general":                  "We encountered an issue and cannot update your information at this time.",
     "user.create.general":                  "There was an error with the information you entered.",
     "user.create.input.missing.username":   "Missing Username",
     "user.create.input.missing.password":   "Missing Password",
@@ -39,6 +39,6 @@ module.exports = {
     "user.passwordReset.general":           "We encountered an error occurred. Please try again.",
     "user.passwordReset.code.missing":      "The code is invalid.",
     "user.passwordReset.code.expired":      "Oops, your code has expired. You'll need to go through the password reset process again.",
-    "user.passwordReset.code.invalid":      "The URL provided is not valid.",
+    "user.passwordReset.code.invalid":      "The URL provided is not valid. Please try cutting and pasting again from the email you received with password reset information.",
     "user.passwordReset.user.emailNotExist": "This email address does not exist in our system."
 };
