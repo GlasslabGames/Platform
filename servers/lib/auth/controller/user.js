@@ -412,10 +412,18 @@ function registerUserV2(req, res, next, serviceManager) {
     var registerErr = function(err, code){
         if(!code) code = 500;
 
+        if(err.statusCode) {
+            code = err.statusCode;
+        }
+
+        if(!err.key) {
+            err.key = "user.create.general";
+        }
+
         this.stats.increment("error", "Route.Register.User");
         //console.error("AuthServer registerUser Error:", err);
         //this.requestUtil.jsonResponse(res, err, code);
-        this.requestUtil.errorResponse(res, {key:"user.create.general"}, code);
+        this.requestUtil.errorResponse(res, err, code);
     }.bind(this);
 
 
