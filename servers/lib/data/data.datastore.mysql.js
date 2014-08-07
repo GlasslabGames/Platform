@@ -180,7 +180,7 @@ TelemDS_Mysql.prototype.getAllUserSessions = function() {
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var Q = "SELECT s.user_id as userId, s.session_id as gameSessionId, s.game_id as gameId \
+        var Q = "SELECT s.user_id as userId, s.session_id as gameSessionId, s.game_id as gameId, s.ACTIVITY_ID as gameLevel \
                 FROM GL_SESSION s \
                 WHERE s.ACTIVITY_ID IS NOT NULL";
 
