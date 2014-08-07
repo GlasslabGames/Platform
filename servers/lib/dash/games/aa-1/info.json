@@ -1,4 +1,4 @@
-{
+﻿{
     "basic" : {
         "gameId": "AA-1",
         "enabled": true,
@@ -118,10 +118,14 @@
         ],
         "pages": {
             "product": {
-                "header": "Let Your Students Go to Town!",
-                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<\/br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve, explain the relationships in complex systems, and read informational texts and diagrams.<\/br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
+                "header": "Put your powers of persuasion to the ultimate test, on a whole new planet!",
+                "about": " Mars Generation One: Argubot Academy is an argumentation adventure game for iOS tablets and coming soon to Android. Aligned to Common Core argumentation standards on Reasoning and Evidence, it lets players construct special robots called argubots and pit them against each other to resolve conflicts and make important decisions.  In its exciting first-city-on-Mars environment, the game setting presents inspirational STEM content that places the player in the fiction of a small community on the red planet.",
                 "curriculum": [
-                    "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
+                    "Addresses critical Common Core standards in persuasion and reasoned thinking – a cornerstone of the standards for English Language Arts",
+                    "Promotes interest in STEM content while developing the literacy and leadership skills that are essential for any 21st century career",
+                    "With input from experts in literacy at the National Writing Project, works well to introduce norms for classroom discussions, persuasive writing, and expository writing",
+                    "Brings games into the ELA classroom to support Common Core Reading and Writing so that educators can make the most of their tablet hardware"
+                    
                 ],
                 "slideshow": [
                     {
@@ -139,28 +143,28 @@
                     "category": "ELA Common Core",
                     "list": [
                         {
-                            "name": "CCSS.ELA-Literacy.RST.6-8.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
-                            "description": "Cite specific textual evidence to support conclusions"
+                            "name": "CCSS.ELA-Literacy.WHST.6-8.1a-e",
+                            "link": "http://www.corestandards.org/ELA-Literacy/WHST/6-8/1/ ",
+                            "description": "Write arguments focused on discipline-specific content."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RST.6-8.7",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
+                            "name": "CCSS.ELA-Literacy.W.6.1a-c",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
                             "description": "Integrate information from texts & diagrams"
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RI.7.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
+                            "name": "CCSS.ELA-Literacy.RH.6-8.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
                             "description": "Cite several pieces of textual evidence to support analysis"
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RI.6-8.10",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
+                            "name": "CCSS.ELA-Literacy.RST.6-8.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/8/",
                             "description": "Proficiently read and comprehend literary nonfiction"
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.CCRA.R.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
+                            "name": "CCSS.ELA-Literacy.W.7.1",
+                            "link": "http://www.corestandards.org/ELA-Literacy/W/7/",
                             "description": "Read and understand text and make logical inferences from it"
                         }
                     ]
