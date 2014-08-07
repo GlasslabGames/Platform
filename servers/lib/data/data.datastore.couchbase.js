@@ -204,9 +204,9 @@ var gdv_getAllGameSessionsByGameId = function (doc, meta)
     if( (values[0] == 'gd') &&
         (values[1] == 'gs') &&
         (meta.type == 'json') &&
-        (doc.hasOwnProperty('gameId') || doc.hasOwnProperty('clientId') ) )
+        doc.hasOwnProperty('gameId') )
     {
-        emit( doc.gameId || doc.clientId );
+        emit( doc.gameId );
     }
 };
 
