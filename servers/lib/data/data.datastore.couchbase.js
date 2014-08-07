@@ -564,23 +564,39 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function(myds) {
                         var keys = [];
                         var outEvents = [];
                         var id;
-                        // if gameId not set then default to SimCity
-                        var gameId = "SC";
+                        var gameId = "";
                         for(var i = 0; i < events.length; i++) {
                             id = events[i].id;
                             id = id.split(":");
 
+                            // old event types
                             if(id.length == 3) {
+                                var ok = true;
+                                // if clientId then SimCity
+                                if(events[i].clientId) {
+                                    // convert old clientIds
+                                    if( events[i].clientId == 'SC' ||
+                                        events[i].clientId == 'SD_LC' ||
+                                        events[i].clientId == 'ELA_LC') {
+                                        events[i].gameType = events[i].clientId;
+                                        events[i].gameId = "SC";
+
+                                        delete events[i].clientId;
+                                    } else {
+                                        console.error("Event clientId does not match possible!! Event:", events[i]);
+                                        ok = false;
+                                    }
+                                }
+
                                 if(events[i].gameId) {
                                     gameId = events[i].gameId
                                 }
-                                if(events[i].clientId) {
-                                    gameId = events[i].clientId
-                                }
 
-                                keys.push( events[i].id );
-                                delete events[i].id;
-                                outEvents.push(events[i]);
+                                if(ok) {
+                                    keys.push( events[i].id );
+                                    delete events[i].id;
+                                    outEvents.push(events[i]);
+                                }
                             }
                         }
 
