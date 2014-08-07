@@ -106,27 +106,8 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 // TODO: move this to it's own module
 
-// example map function
-var temp = function (doc, meta)
-{
-    var values = meta.id.split(':');
-    if( (values[0] == 'gd') &&
-        (values[1] == 'e') &&
-        (meta.type == "json") )
-    {
-        for(var i in doc.tags) {
-            epoc = parseInt(doc.timestamp);
-            td = new Date(epoc * 1000);
-            key  = [i.toLowerCase(), doc.tags[i]];
-            key  = key.concat( dateToArray( td ) );
-            emit(key);
-        }
-    }
-};
-
-
 // ------------------------------------
-// TODO: used by Pipeline server, remove at some point
+// TODO: remove at some point, used by Pipeline server
 var gdv_getEventsByServerTimeStamp = function (doc, meta)
 {
     var values = meta.id.split(':');
@@ -136,10 +117,16 @@ var gdv_getEventsByServerTimeStamp = function (doc, meta)
         doc.hasOwnProperty('serverTimeStamp')
       )
     {
-        emit( dateToArray( new Date(doc.serverTimeStamp * 1000) ) );
+        var st = doc.serverTimeStamp;
+        // convert to milliseconds from EPOCH
+        if(doc.serverTimeStamp < 10000000000) {
+            st *= 1000;
+        }
+
+        emit( dateToArray( new Date(st) ) );
     }
 };
-// Used by Research Server
+// TODO: remove at some point, Used by Research Server
 var gdv_getEventsByGameId_ServerTimeStamp = function (doc, meta)
 {
     var values = meta.id.split(':');
@@ -149,7 +136,13 @@ var gdv_getEventsByGameId_ServerTimeStamp = function (doc, meta)
         doc.hasOwnProperty('gameId')
       )
     {
-        var a = dateToArray( new Date(doc.serverTimeStamp * 1000) );
+        var st = doc.serverTimeStamp;
+        // convert to milliseconds from EPOCH
+        if(doc.serverTimeStamp < 10000000000) {
+            st *= 1000;
+        }
+
+        var a = dateToArray( new Date(st) );
         a.unshift( doc.gameId.toUpperCase() );
         emit( a );
     }
@@ -204,16 +197,16 @@ var gdv_getStartedSessionsByDeviceId = function (doc, meta)
     }
 };
 
-// used to process all sessions
+// used to process all sessions, migration
 var gdv_getAllGameSessionsByGameId = function (doc, meta)
 {
     var values = meta.id.split(':');
     if( (values[0] == 'gd') &&
         (values[1] == 'gs') &&
         (meta.type == 'json') &&
-        doc.hasOwnProperty('gameId') )
+        (doc.hasOwnProperty('gameId') || doc.hasOwnProperty('clientId') ) )
     {
-        emit( doc.gameId );
+        emit( doc.gameId || doc.clientId );
     }
 };
 
@@ -925,7 +918,7 @@ return when.promise(function(resolve, reject) {
 
             var kv = {}, key;
             var kIndex = data.value - events.length + 1;
-            for(var i = 0; i < events.length; i++){
+            for(var i = 0; i < events.length; i++) {
 
                 //key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+kIndex;
                 key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+gameId+":"+kIndex;
