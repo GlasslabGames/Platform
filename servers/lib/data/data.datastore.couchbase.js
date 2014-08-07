@@ -557,7 +557,8 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function(myds) {
                         var keys = [];
                         var outEvents = [];
                         var id;
-                        var gameId = gameSession.gameId;
+                        var gameId    = gameSession.gameId;
+                        var gameLevel = gameSession.gameLevel;
                         for(var i = 0; i < events.length; i++) {
                             id = events[i].id;
                             id = id.split(":");
@@ -571,7 +572,8 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function(myds) {
                                     if( events[i].clientId == 'SC' ||
                                         events[i].clientId == 'SD_LC' ||
                                         events[i].clientId == 'ELA_LC') {
-                                        events[i].gameType = events[i].clientId;
+
+                                        events[i].gameOldId = events[i].clientId;
                                         events[i].gameId = "SC";
 
                                         delete events[i].clientId;
@@ -579,6 +581,11 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function(myds) {
                                         console.error("Event clientId does not match possible!! Event:", events[i]);
                                         ok = false;
                                     }
+                                }
+
+                                // if not gameLevel add one from session info
+                                if(!events[i].gameLevel) {
+                                    events[i].gameLevel = gameLevel;
                                 }
 
                                 if(events[i].gameId) {
@@ -922,6 +929,12 @@ return when.promise(function(resolve, reject) {
 
                 //key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+kIndex;
                 key = tConst.game.dataKey+":"+tConst.game.eventKey+":"+gameId+":"+kIndex;
+
+                // convert old gameType to correct gameLevel
+                if(events[i].gameType) {
+                    events[i].gameLevel = events[i].gameType;
+                    delete events[i].gameType;
+                }
 
                 // convert to milliseconds from EPOCH
                 if(events[i].serverTimeStamp < 10000000000) {
