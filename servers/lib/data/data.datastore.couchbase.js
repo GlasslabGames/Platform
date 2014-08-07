@@ -564,7 +564,7 @@ TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function(myds) {
                         var keys = [];
                         var outEvents = [];
                         var id;
-                        var gameId = "";
+                        var gameId = gameSession.gameId;
                         for(var i = 0; i < events.length; i++) {
                             id = events[i].id;
                             id = id.split(":");
