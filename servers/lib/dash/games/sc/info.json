@@ -26,7 +26,44 @@
             "id": "sowo",
             "dataProcessScope": "gameSession",
             "engine": "javascript",
-            "trigger": "endSession"
+            "trigger": "endSession",
+            "rules": {
+                "park_wo1": {
+                    "name": "Parktown - Crazy Plopper",
+                    "description": "Places too many bus stops."
+                },
+                "park_so1": {
+                    "name": "Parktown - Housing Mogul",
+                    "description": "Zone residential areas to increase #students"
+                },
+
+                "alex_wo1": {
+                    "name": "Alexandria - NoZoner",
+                    "description": "Less than 15 zones (Commercial/Industrial) within a certain amount of time."
+                },
+                "alex_so1": {
+                    "name": "Alexandria - Industrial Champion",
+                    "description": "More commercial zones plopped than industrial"
+                },
+
+                "sierra_wo1": {
+                    "name": "Sierra - Brown Out",
+                    "description": ""
+                },
+                "sierra_so1": {
+                    "name": "Sierra - Smog Destroyer",
+                    "description": "Bulldoze the first coal plant AND no power outage/failure"
+                },
+
+                "jack_wo1": {
+                    "name": "Jackson City - Home Builder",
+                    "description": "Misunderstanding: zone residential to bring in more people for increased jobs"
+                },
+                "jack_so1": {
+                    "name": "Jackson City - Smog Destroyer",
+                    "description": "Bulldoze the first coal plant AND no power outage/failure"
+                }
+            }
         },
         {
             "enabled": false,

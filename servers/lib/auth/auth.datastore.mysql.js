@@ -164,13 +164,13 @@ Auth_MySQL.prototype.checkUserEmailUnique = function(email){
             .then(
             function(data){
                 if(data.length != 0) {
-                    reject({key: "user.notUnique.email"});
+                    reject({key: "user.notUnique.email", statusCode: 400});
                 } else {
                     resolve();
                 }
             }.bind(this),
             function(err) {
-                reject({"error": "failure", "exception": err}, 500);
+                reject({"error": "failure", "exception": err, statusCode: 500});
             }.bind(this)
         );
 // ------------------------------------------------
