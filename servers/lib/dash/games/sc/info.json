@@ -197,7 +197,7 @@
             },
             {
                 "name": "Play Game",
-                "link": [
+                "links": [
                     {
                         "name": "Play Game",
                         "link": "/games/SC/missions"
