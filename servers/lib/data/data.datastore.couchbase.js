@@ -1623,6 +1623,30 @@ this.client.set(key, data,
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype.removeUserGameData = function(userId, gameId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
+
+// set game data
+    this.client.remove(key, {},
+        function(err, data){
+            if(err){
+                console.error("CouchBase TelemetryStore: Remove Game Data Error -", err);
+                reject(err);
+                return;
+            }
+
+            resolve(data);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
 TelemDS_Couchbase.prototype.getUserGameData = function(userId, gameId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {

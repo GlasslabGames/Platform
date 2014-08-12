@@ -111,7 +111,8 @@ module.exports = {
             controller: "game",
             method: {
                 post: "saveGameData",
-                get: "getGameData"
+                get: "getGameData",
+                "delete": "deleteGameData"
             }
         },
         // ---------------------------------------------------

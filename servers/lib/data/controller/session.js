@@ -31,12 +31,12 @@ function startSessionV2(req, outRes){
             return;
         }
 
-        // optional gameId
-        // TODO: in future make required
-        var gameId = '';
-        if(req.body.gameId) {
-            gameId = req.body.gameId;
+        if(!req.body.gameId) {
+            this.stats.increment("error", "StartSession.GameId.Missing");
+            this.requestUtil.errorResponse(outRes, "GameId Missing", 404);
+            return;
         }
+        var gameId = req.body.gameId;
 
         //console.log("req:", req);
         //console.log("getSession url:", url);
@@ -44,7 +44,7 @@ function startSessionV2(req, outRes){
         var userData = {
             id: null,
             collectTelemetry: true
-        }
+        };
         if( req.session &&
             req.session.passport &&
             req.session.passport.user) {
