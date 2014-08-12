@@ -9,7 +9,7 @@
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
         "settings" : {
-            "missionProgressLock": true
+            "missionProgressLock": false
         },
         "license": {
             "type":  "tier",

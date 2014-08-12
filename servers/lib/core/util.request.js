@@ -47,13 +47,17 @@ RequestUtil.prototype.errorResponse = function(res, obj, code){
            obj.status = "error";
         }
 
+        if(!obj.statusCode) {
+            obj.statusCode = code;
+        }
+
         // if object does not contain error, then set error to object
         if(!obj.error) {
             obj = { error: obj };
         }
     }
 
-    this.jsonResponse(res, obj, code);
+    this.jsonResponse(res, obj, obj.statusCode);
 };
 
 RequestUtil.prototype.jsonResponse = function(res, obj, code){
