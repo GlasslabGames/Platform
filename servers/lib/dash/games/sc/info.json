@@ -9,7 +9,7 @@
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
         "settings" : {
-            "missionProgressLock": true
+            "missionProgressLock": false
         },
         "license": {
             "type":  "tier",
@@ -175,7 +175,7 @@
     "details": {
         "developer": {
             "id": "GL",
-            "name": "GlassLab",
+            "name": "GlassLab, Inc.",
             "logo": {
                 "small": "http://argubotacademy.org/images/glasslab_logo.png",
                 "large": "http://argubotacademy.org/images/glasslab_logo.png"

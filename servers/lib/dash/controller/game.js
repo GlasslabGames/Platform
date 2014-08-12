@@ -214,7 +214,7 @@ function getGameMissions(req, res){
             var missionGroups = _.cloneDeep(game.info.missions.groups);
             var linkSchema    = game.info.missions.linkSchema;
 
-            var missionProgressLock = true;
+            var missionProgressLock = false;
 
             this.dashStore.getGameSettingsFromCourseId(courseId)
                 .then(function(gameSettings){
@@ -223,6 +223,9 @@ function getGameMissions(req, res){
                     if( gameSettings.hasOwnProperty(gameId) &&
                         gameSettings[gameId].hasOwnProperty('missionProgressLock') ) {
                         missionProgressLock = gameSettings[gameId].missionProgressLock;
+
+                        // TODO: remove this after adding challenges to simcity
+                        missionProgressLock = false;
                     }
 
                     return this.dashStore.getCompletedMissions(userData.id, courseId, gameId);

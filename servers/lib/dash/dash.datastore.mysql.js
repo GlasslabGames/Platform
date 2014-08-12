@@ -288,7 +288,7 @@ return when.promise(function(resolve, reject) {
 
 
 exampleOut.getGameSettingsFromCourseId = {
-    "SC": { "missionProgressLock": true },
+    "SC": { "missionProgressLock": false },
     "AA-1": {},
     "AW-1": {}
 };

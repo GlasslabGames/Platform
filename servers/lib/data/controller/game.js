@@ -23,18 +23,28 @@ var exampleOut = {};
 exampleIn.saveGameData = {
     id: 'AA-1'
 };
+/*
+ {
+ "a": 456,
+ "b": 4.31,
+ "c": "test"
+ }
+ */
 function saveGameData(req, res, next)
 {
-    if( !req.body ) {
-        this.requestUtil.errorResponse(res, { error: "Game data missing", key: "missing.data"}, 401);
-        return;
-    }
     // route requireAuth ensures "session.passport.user" exists
     var userId = req.session.passport.user.id;
 
+    if( !req.body ||
+        ( _.isObject(req.body) &&
+          !Object.keys(req.body).length ) ) {
+        this.requestUtil.errorResponse(res, { error: "Game data missing", key: "missing.data", statusCode: 401});
+        return;
+    }
+
     if( !( req.params &&
         req.params.hasOwnProperty("gameId") ) ) {
-        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId"});
+        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId", statusCode: 401});
         return
     }
     var gameId = req.params.gameId;
@@ -42,12 +52,6 @@ function saveGameData(req, res, next)
     // TODO: check if gameId in DB
 
     var data = req.body;
-    try{
-        data = JSON.parse(data);
-    } catch(err){
-        // this is ok, data doesn't have to be json
-    }
-
     this.cbds.saveUserGameData(userId, gameId, data)
         .then(function(){
             this.requestUtil.jsonResponse(res, { status: "ok" });
@@ -64,11 +68,6 @@ exampleIn.getGameData = {
 };
 function getGameData(req, res, next)
 {
-    if( !req.body ) {
-        this.requestUtil.errorResponse(res, { error: "Game data missing", key: "missing.data"}, 401);
-        return;
-    }
-
     // route requireAuth ensures "session.passport.user" exists
     var userId = req.session.passport.user.id;
 
@@ -88,7 +87,7 @@ function getGameData(req, res, next)
         .then(null, function(err) {
             // missing
             if(err.code == 13) {
-                this.requestUtil.errorResponse(res, { error: "no game data", key: "no.data"});
+                this.requestUtil.errorResponse(res, { error: "no game data", key: "no.data", statusCode: 404});
             } else {
                 this.requestUtil.errorResponse(res, err);
             }
@@ -120,7 +119,13 @@ function deleteGameData(req, res, next)
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
         .then(null, function(err) {
-            this.requestUtil.errorResponse(res, err);
+            // missing
+            if(err.code == 13) {
+                // this is ok
+                this.requestUtil.errorResponse(res, { status: "ok" });
+            } else {
+                this.requestUtil.errorResponse(res, err);
+            }
         }.bind(this));
 }
 
