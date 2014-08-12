@@ -8,6 +8,7 @@ var Util      = require('../../core/util.js');
 module.exports = {
     saveGameData: saveGameData,
     getGameData:  getGameData,
+    deleteGameData: deleteGameData,
     updateDevice: updateDevice,
     getGamePlayInfo: getGamePlayInfo,
     postTotalTimePlayed: postTotalTimePlayed,
@@ -91,6 +92,35 @@ function getGameData(req, res, next)
             } else {
                 this.requestUtil.errorResponse(res, err);
             }
+        }.bind(this));
+}
+
+
+// http://localhost:8001/api/v2/data/game/AA-1
+// game AA, episode 1
+exampleIn.getGameData = {
+    id: 'AA-1'
+};
+function deleteGameData(req, res, next)
+{
+    // route requireAuth ensures "session.passport.user" exists
+    var userId = req.session.passport.user.id;
+
+    if( !( req.params &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId"});
+        return
+    }
+    var gameId = req.params.gameId;
+
+    // TODO: check if gameId in DB
+
+    this.cbds.removeUserGameData(userId, gameId)
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err) {
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
 
