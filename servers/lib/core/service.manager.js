@@ -122,6 +122,12 @@ return when.promise(function(resolve, reject) {
                     store:  this.exsStore
                 }));
 
+                this.app.use(function(req, res, next) {
+                    res.header("Access-Control-Allow-Origin", "*");
+                    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+                    next();
+                });
+
                 resolve();
             }.bind(this))
         }.bind(this))

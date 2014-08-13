@@ -74,7 +74,7 @@ function getUserEvents(req, res, next){
 }
 
 /*
- http://localhost:8002/int/v1/data/user/all/active
+ http://localhost:8002/admin/data/user/setAllActive
  */
 function setAllUsersActive(req, res, next) {
 
@@ -92,7 +92,7 @@ function setAllUsersActive(req, res, next) {
                     info.gameSessionId ) {
                     return addActivity.call(this, info.userId, info.gameId, info.gameSessionId);
                 } else {
-                    console.error("setAllUsersActive Info:", info);
+                    //console.error("setAllUsersActive Info:", info);
                 }
             }.bind(this));
             return when.map(gameSessions, guardedAsyncOperation);
