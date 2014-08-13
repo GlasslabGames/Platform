@@ -1,4 +1,12 @@
 ﻿{
+    "developer": {
+        "id": "GL",
+        "name": "GlassLab, Inc.",
+        "logo": {
+            "small": "assets/glasslab-logo.png",
+            "large": "assets/glasslab-logo-2x.png"
+        }
+    },
     "basic" : {
         "gameId": "AA-1",
         "enabled": true,
@@ -39,14 +47,6 @@
         }
     ],
     "reports": {
-        "developer": {
-            "id": "GL",
-            "name": "GlassLab, Inc.",
-            "logo": {
-                "small": "assets/glasslab-logo.png",
-                "large": "assets/glasslab-logo-2x.png"
-            }
-        },
         "list": [
             {
                 "id":   "sowo",
@@ -81,14 +81,6 @@
         ]
     },
     "details": {
-        "developer": {
-            "id": "GL",
-            "name": "GlassLab",
-            "logo": {
-                "small": "http://argubotacademy.org/images/glasslab_logo.png",
-                "large": "http://argubotacademy.org/images/glasslab_logo.png"
-            }
-        },
         "release": "beta",
         "price": "Free",
         "releaseDate": "April 22, 2014",
@@ -98,20 +90,12 @@
         "grades": "6 - 8",
         "buttons": [
             {
-                "name": "Download",
+                "name": "Play Game",
                 "links": [
                     {
-                        "name": "iOS",
-                        "link": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8"
-                    }
-                ]
-            },
-            {
-                "name": "Play Game",
-                "link": [
-                    {
                         "name": "Play Game",
-                        "link": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8"
+                        "link": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8",
+                        "target": "_blank"
                     }
                 ]
             }

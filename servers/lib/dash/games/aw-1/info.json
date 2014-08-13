@@ -1,4 +1,12 @@
 {
+    "developer": {
+        "id": "IC",
+        "name": "iCivics",
+        "logo": {
+            "small": "http://argubotacademy.org/images/glasslab_logo.png",
+            "large": "http://argubotacademy.org/images/glasslab_logo.png"
+        }
+    },
     "basic": {
         "gameId": "AW-1",
         "enabled": false,
@@ -15,39 +23,33 @@
             "large": "assets/thumb-game-AA-1.png"
         }
     },
-    "reports": [
-        {
-            "id":   "sowo",
-            "enabled": true,
-            "name": "Shout Out and Watch Out Report",
-            "header": "Shout Out and Watch Out Report",
-            "description": "This report shows..."
-        },
-        {
-            "id":   "achievements",
-            "enabled": true,
-            "name": "Game Achievements & Time Played",
-            "header": "Game Achievements & Time Played",
-            "description": "This report shows...",
-            "groups": [
-                {
-                    "name": "Common Core Standards Report"
-                },
-                {
-                    "name": "21st Century Skills"
-                }
-            ]
-        }
-    ],
-    "details": {
-        "developer": {
-            "id": "IC",
-            "name": "iCivics",
-            "logo": {
-                "small": "http://argubotacademy.org/images/glasslab_logo.png",
-                "large": "http://argubotacademy.org/images/glasslab_logo.png"
+    "reports": {
+        "list": [
+            {
+                "id": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": "Shout Out and Watch Out Report",
+                "description": "This report shows..."
+            },
+            {
+                "id": "achievements",
+                "enabled": true,
+                "name": "Game Achievements & Time Played",
+                "header": "Game Achievements & Time Played",
+                "description": "This report shows...",
+                "groups": [
+                    {
+                        "name": "Common Core Standards Report"
+                    },
+                    {
+                        "name": "21st Century Skills"
+                    }
+                ]
             }
-        },
+        ]
+    },
+    "details": {
         "release": "alpha",
         "price": "Free",
         "releaseDate": "TBA",

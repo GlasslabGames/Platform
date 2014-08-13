@@ -56,6 +56,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     this._loadGameFiles()
         .then(function(){
+                // test connection to telemetry store
                 return this.telmStore.connect();
             }.bind(this))
         .then(function(){
@@ -98,7 +99,7 @@ DashService.prototype.getGameAssessmentInfo = function(gameId) {
     return this.games[gameId].info.assessment;
 };
 
-
+// TODO: replace this with DB lookup
 DashService.prototype._loadGameFiles = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -124,6 +125,24 @@ return when.promise(function(resolve, reject) {
                         this.games[gameId][name] = require(filePath);
                     }
                 }.bind(this));
+
+                // add developer to game details and reports
+                if( this.games[gameId].info &&
+                    this.games[gameId].info.developer &&
+                    this.games[gameId].info.details &&
+                    this.games[gameId].info.reports ) {
+                    this.games[gameId].info.details.developer = this.games[gameId].info.developer;
+                    this.games[gameId].info.reports.developer = this.games[gameId].info.developer;
+                }
+
+                // add game info(basic) to game details and reports
+                if( this.games[gameId].info &&
+                    this.games[gameId].info.basic &&
+                    this.games[gameId].info.details &&
+                    this.games[gameId].info.reports ) {
+                    this.games[gameId].info.details.basic = this.games[gameId].info.basic;
+                    this.games[gameId].info.reports.basic = this.games[gameId].info.basic;
+                }
             }
         }.bind(this));
     } catch(err) {
