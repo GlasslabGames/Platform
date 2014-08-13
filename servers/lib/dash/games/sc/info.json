@@ -1,4 +1,12 @@
 {
+    "developer": {
+        "id": "GL",
+        "name": "GlassLab, Inc.",
+        "logo": {
+            "small": "http://argubotacademy.org/images/glasslab_logo.png",
+            "large": "http://argubotacademy.org/images/glasslab_logo.png"
+        }
+    },
     "basic": {
         "gameId": "SC",
         "enabled": true,
@@ -74,14 +82,6 @@
         }
     ],
     "reports": {
-        "developer": {
-            "id": "GL",
-            "name": "GlassLab",
-            "logo": {
-                "small": "http://argubotacademy.org/images/glasslab_logo.png",
-                "large": "http://argubotacademy.org/images/glasslab_logo.png"
-            }
-        },
         "list": [
             {
                 "id": "sowo",
@@ -173,14 +173,6 @@
         ]
     },
     "details": {
-        "developer": {
-            "id": "GL",
-            "name": "GlassLab, Inc.",
-            "logo": {
-                "small": "http://argubotacademy.org/images/glasslab_logo.png",
-                "large": "http://argubotacademy.org/images/glasslab_logo.png"
-            }
-        },
         "buttons": [
             {
                 "name": "Download",
