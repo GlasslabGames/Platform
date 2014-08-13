@@ -117,7 +117,8 @@ var gdv_getEventsByServerTimeStamp = function (doc, meta)
         doc.hasOwnProperty('serverTimeStamp')
       )
     {
-        var st = Util.CheckTimeStamp(doc.serverTimeStamp);
+        var st = doc.serverTimeStamp;
+        if(st < 10000000000) st *= 1000;
 
         emit( dateToArray( new Date(st) ) );
     }
@@ -132,7 +133,8 @@ var gdv_getEventsByGameId_ServerTimeStamp = function (doc, meta)
         doc.hasOwnProperty('gameId')
       )
     {
-        var st = Util.CheckTimeStamp(doc.serverTimeStamp);
+        var st = doc.serverTimeStamp;
+        if(st < 10000000000) st *= 1000;
 
         var a = dateToArray( new Date(st) );
         a.unshift( doc.gameId.toUpperCase() );
