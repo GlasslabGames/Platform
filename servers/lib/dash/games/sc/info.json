@@ -30,7 +30,7 @@
     },
     "assessment": [
         {
-            "enabled": false,
+            "enabled": true,
             "id": "sowo",
             "dataProcessScope": "gameSession",
             "engine": "javascript",
@@ -94,7 +94,7 @@
             {
                 "id": "competency",
                 "assessmentId": "competency",
-                "enabled": true,
+                "enabled": false,
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": "Competency Levels: Complex Problem Solving",
                 "description": "This report shows...",

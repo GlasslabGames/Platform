@@ -46,6 +46,7 @@ function getGameSessionsInfo(req, res, next)
         return;
     }
     var userId = req.params.userId;
+    userId = parseInt(userId);
 
     if( !(req.params &&
         req.params.gameId)
