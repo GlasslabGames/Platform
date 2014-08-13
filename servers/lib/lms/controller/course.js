@@ -750,7 +750,22 @@ function updateGamesInCourse(req, res, next, serviceManager)
     }
 }
 
-
+/*
+ GET http://localhost:8001/api/v2/lms/course/code/ZDYJU/verify
+ */
+exampleIn.verifyCode = {
+    codeId: "ZDYJU"
+};
+exampleOut.verifyCode = {
+    status: "code valid",
+    key: "code.valid",
+    title: "test7",
+    grade: "7",
+    locked: false,
+    archived: false,
+    archivedDate: null,
+    institution: 1
+};
 function verifyCode(req, res, next) {
 
     if (!req.params ||

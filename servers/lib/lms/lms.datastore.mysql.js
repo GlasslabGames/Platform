@@ -419,9 +419,14 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
                 c.grade,    \
                 c.locked > 0 as locked,      \
                 c.archived > 0 as archived,  \
-                c.archived_Date as archivedDate,    \
-                c.institution_id as institution     \
-            FROM GL_CODE co JOIN GL_COURSE c on co.course_id=c.id \
+                c.archived_Date as archivedDate, \
+                c.institution_id as institution, \
+                u.first_name as firstName, \
+                u.last_name as lastName \
+            FROM GL_CODE co \
+            JOIN GL_COURSE c on co.course_id=c.id \
+            JOIN GL_MEMBERSHIP m on m.course_id=c.id AND m.role=\"instructor\" \
+            JOIN GL_USER u on u.id=m.user_id \
             WHERE co.code="+ this.ds.escape(courseCode);
 
         this.ds.query(Q)
@@ -430,6 +435,14 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
                     results = results[0];
                     results.archived = results.archived ? true : false;
                     results.locked   = results.locked   ? true : false;
+
+                    // move teacher info inside object
+                    results.teacher = {
+                        firstName: results.firstName,
+                        lastName: results.lastName
+                    };
+                    delete results.firstName;
+                    delete results.lastName;
 
                     resolve(results);
                 } else {
