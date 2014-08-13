@@ -5,8 +5,8 @@ var when      = require('when');
 var Util      = require('../../core/util.js');
 
 module.exports = {
-    getAssessmentDefinitions:  getAssessmentDefinitions,
-    saveAssessmentResults: saveAssessmentResults
+    getAssessmentDefinitions: getAssessmentDefinitions,
+    saveAssessmentResults:    saveAssessmentResults
 };
 
 var exampleIn = {};
@@ -70,27 +70,54 @@ function saveAssessmentResults(req, res){
             return;
         }
 
+        if( !req.params.userId ) {
+            this.requestUtil.errorResponse(res, {error: "missing userId"});
+            return;
+        }
+        var userId = req.params.userId;
+
+        if( !req.params.assessmentId ) {
+            this.requestUtil.errorResponse(res, {error: "missing assessmentId"});
+            return;
+        }
+        var assessmentId = req.params.assessmentId;
+
         // userId, assessmentId, data
         if( !req.body ) {
             this.requestUtil.errorResponse(res, {error: "missing body"});
             return;
         }
         var data = req.body;
-        data.gameId = gameId;
 
-        if( !req.body.userId ) {
-            this.requestUtil.errorResponse(res, {error: "missing userId"});
-            return;
-        }
-        var userId = req.body.userId;
+        // merge in current assessment
+        this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+            .then(function(aeResults){
 
-        if( !req.body.assessmentId ) {
-            this.requestUtil.errorResponse(res, {error: "missing assessmentId"});
-            return;
-        }
-        var assessmentId = req.body.assessmentId;
+                var out = _.cloneDeep(aeResults);
+                out.gameId = gameId;
+                out.userId = userId;
+                out.assessmentId = assessmentId;
 
-        this.telmStore.saveAssessmentResults(gameId, userId, assessmentId, data)
+                // merge results if they exist
+                if( !out.results &&
+                    !_.isObject(out.results) ) {
+                    out.results = {};
+                }
+
+                // remove old data
+                if( _.isArray(out.results.watchout) ||
+                    _.isArray(out.results.shoutout) ) {
+                    delete out.results.watchout;
+                    delete out.results.shoutout;
+                }
+                // merge results
+                out.results = _.merge( out.results, data.results );
+
+                console.log("out:", out);
+                return this.telmStore.saveAssessmentResults(userId, gameId, assessmentId, out);
+            }.bind(this) )
+
+
             .then(function(){
                 this.requestUtil.jsonResponse(res, {});
             }.bind(this) )
@@ -100,7 +127,7 @@ function saveAssessmentResults(req, res){
             }.bind(this) );
 
     } catch(err) {
-        console.trace("Reports: Get Assessment Error -", err);
-        this.stats.increment("error", "GetAchievements.Catch");
+        console.trace("Reports: Save Assessment Error -", err);
+        this.stats.increment("error", "SaveAssessment.Catch");
     }
 }

@@ -27,22 +27,25 @@ function getUserEvents(req, res, next){
         }
         var gameId = req.params.gameId;
 
-        this.cbds.getSessionsByUserId(gameId, userId)
+        this.cbds.getGameSessionIdsByUserId(gameId, userId)
             .then(function(sessionList) {
-
                 if(!sessionList || (sessionList.length == 0)) {
                     this.requestUtil.jsonResponse(res, []);
                     return;
                 }
 
+                //console.log("sessionList:", sessionList);
                 // guard, async so it runs each one at a time, to prevent spaming the server for events
                 var guardedAsyncOperation = guard(guard.n(1),
-                    function(currentResult, sessionId, index) {
-                        if(sessionId.length > 0) {
-                            return this.cbds.getEvents(sessionId)
+                    function(currentResult, gameSessionId, index) {
+                        if(gameSessionId.length > 0) {
+                            return this.cbds.getEvents(gameSessionId)
                                 .then( function (results) {
-                                    //if(results.length > 0) console.log("getRawEvents length:", results.length);
-                                    return currentResult.concat(results);
+                                    if(results.events.length) {
+                                        //console.log("getRawEvents length:", results.length);
+                                        return currentResult.concat(results);
+                                    }
+                                    return currentResult;
                                 }.bind(this));
                         } else {
                             return currentResult;
