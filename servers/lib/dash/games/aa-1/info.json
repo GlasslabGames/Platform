@@ -43,8 +43,8 @@
             "id": "GL",
             "name": "GlassLab, Inc.",
             "logo": {
-                "small": "http://argubotacademy.org/images/glasslab_logo.png",
-                "large": "http://argubotacademy.org/images/glasslab_logo.png"
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
             }
         },
         "list": [
@@ -108,7 +108,7 @@
             },
             {
                 "name": "Play Game",
-                "links": [
+                "link": [
                     {
                         "name": "Play Game",
                         "link": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8"
@@ -194,12 +194,24 @@
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Routine 1",
-                            "link": "http://glasslabgames.org"
+                            "name": "Pre-Game Introduction I",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+I.pdf"
                         },
                         {
-                            "name": "Routine 2",
-                            "link": "http://glasslabgames.org"
+                            "name": "Pre-Game Introduction II",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Pre-Game+Intro+II.pdf"
+                        },
+                        {
+                            "name": "MGO Core Lesson Plan I.pdf",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+I.pdf"
+                        },
+                        {
+                            "name": "MGO Core Lesson Plan II.pdf",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+II.pdf"
+                        },
+                        {
+                            "name": "MGO Core Lesson Plan III.pdf",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+III.pdf"
                         }
                     ]
                 },
