@@ -13,11 +13,10 @@ module.exports = {
 
 var exampleIn = {}, exampleOut = {};
 
-// http://localhost:8001/api/v2/dash/reports/sowo?gameId=AA-1&courseId=93&limit=10
+// http://localhost:8001/api/v2/dash/reports/sowo?gameId=AA-1&courseId=93
 exampleIn.getSOWO = {
     gameId: "AA-1",
-    courseId: 1,
-    limit: 10
+    courseId: 1
 };
 exampleOut.getSOWO = [
 
@@ -33,8 +32,6 @@ function getSOWO(req, res) {
         return;
     }
     var gameId = req.query.gameId;
-    var limit = req.query.limit;
-
     var assessmentId = "sowo";
 
     // get user list in class
@@ -55,11 +52,15 @@ function getSOWO(req, res) {
                 var userId = user.id;
 
                  //console.log("getAssessmentResults gameId:", gameId, ", userId:", userId, ", assessmentId:", assessmentId);
-                 var p = this.telmStore.getAssessmentResults(gameId, userId, assessmentId)
+                 var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData){
                          // shortcut invalid assessmentData
                          if(!assessmentData || !assessmentData.results) return;
 
+                         // create copy of data for output
+                         var outAssessmentData = _.cloneDeep(assessmentData);
+
+                         // TODO: replace this with promise
                          // find assessment by ID
                          var assessment = this.getGameAssessmentInfo(gameId);
 
@@ -67,22 +68,33 @@ function getSOWO(req, res) {
                              if(assessment[i].id == assessmentId) {
                                  // merge in sowo info from game assessment info
 
-                                 // watchout rules
-                                 for(var j = 0; j < assessmentData.results.shoutout.length; j++) {
+                                 // output is array not object
+                                 outAssessmentData.results.shoutout = [];
+                                 // shoutout rules
+                                 for(var j in assessmentData.results.shoutout) {
                                      var so = assessmentData.results.shoutout[j];
-                                     assessmentData.results.shoutout[j] = _.merge(
-                                         so,
-                                         assessment[i].rules[ so.id ] );
+                                     // don't need to expose the gameSessionId
+                                     delete so.gameSessionId;
 
+                                     outAssessmentData.results.shoutout.push( _.merge(
+                                         so,
+                                         assessment[i].rules[ j ] )
+                                     );
                                     //console.log("shoutout:", assessmentData.results.shoutout[j]);
                                  }
 
-                                 // shoutout rules
-                                 for(var j = 0; j < assessmentData.results.watchout.length; j++) {
+                                 // output is array not object
+                                 outAssessmentData.results.watchout = [];
+                                 // watchout rules
+                                 for(var j in assessmentData.results.watchout) {
                                      var wo = assessmentData.results.watchout[j];
-                                     assessmentData.results.watchout[j] = _.merge(
+                                     // don't need to expose the gameSessionId
+                                     delete wo.gameSessionId;
+
+                                     outAssessmentData.results.watchout.push( _.merge(
                                          wo,
-                                         assessment[i].rules[ wo.id ] );
+                                         assessment[i].rules[ j ] )
+                                     );
 
                                      //console.log("shoutout:", assessmentData.results.watchout[j]);
                                  }
@@ -92,20 +104,7 @@ function getSOWO(req, res) {
                              }
                          }
 
-                         //console.log("getAssessmentResults assessmentData:", assessmentData.results);
-                         // only add assessmentData that has shoutout and/or watchout
-                         if( (assessmentData.results.shoutout && assessmentData.results.shoutout.length) ||
-                             (assessmentData.results.watchout && assessmentData.results.watchout.length) )
-                         {
-                             var size = (!assessmentData.results.shoutout) ? 0 : assessmentData.results.shoutout.length;
-                             size    += (!assessmentData.results.watchout) ? 0 : assessmentData.results.watchout.length;
-
-                             userMap[userId] = {
-                                 size: size,
-                                 data: assessmentData
-                             };
-                         }
-
+                         outList.push(outAssessmentData);
                     }.bind(this));
 
                 promistList.push(p);
@@ -114,21 +113,7 @@ function getSOWO(req, res) {
 
             when.all(promistList)
                 .then(function(){
-                    var sortList = _.sortBy(userMap, ['size']);
-
-                    // if not limit set then use max
-                    if(!limit) {
-                        limit = sortList.length;
-                    }
-
-                    // pluck and limit outputList length;
-                    for(var i = 0; i < sortList.length; i++) {
-                        // fit limit
-                        if(outList.length >= limit) break;
-
-                        outList.push(sortList[i].data);
-                    }
-
+                    // all done
                     this.requestUtil.jsonResponse(res, outList);
                 }.bind(this));
         }.bind(this));

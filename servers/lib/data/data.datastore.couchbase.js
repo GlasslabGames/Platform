@@ -117,11 +117,7 @@ var gdv_getEventsByServerTimeStamp = function (doc, meta)
         doc.hasOwnProperty('serverTimeStamp')
       )
     {
-        var st = doc.serverTimeStamp;
-        // convert to milliseconds from EPOCH
-        if(doc.serverTimeStamp < 10000000000) {
-            st *= 1000;
-        }
+        var st = Util.CheckTimeStamp(doc.serverTimeStamp);
 
         emit( dateToArray( new Date(st) ) );
     }
@@ -136,11 +132,7 @@ var gdv_getEventsByGameId_ServerTimeStamp = function (doc, meta)
         doc.hasOwnProperty('gameId')
       )
     {
-        var st = doc.serverTimeStamp;
-        // convert to milliseconds from EPOCH
-        if(doc.serverTimeStamp < 10000000000) {
-            st *= 1000;
-        }
+        var st = Util.CheckTimeStamp(doc.serverTimeStamp);
 
         var a = dateToArray( new Date(st) );
         a.unshift( doc.gameId.toUpperCase() );
@@ -161,16 +153,14 @@ var gdv_getEventsByGameSessionId = function (doc, meta)
     }
 };
 
-
-var gdv_getCompletedSessionsByUserId = function (doc, meta)
+//
+var gdv_getGameSessionsByUserId = function (doc, meta)
 {
     var values = meta.id.split(':');
     if( (values[0] == 'gd') &&
         (values[1] == 'gs') &&
         (meta.type == 'json') &&
-        doc.hasOwnProperty('state') &&
         doc.hasOwnProperty('userId') &&
-        (doc['state'] == 'ended') &&
         doc.hasOwnProperty('gameId') &&
         doc.hasOwnProperty('gameSessionId')
       )
@@ -178,7 +168,7 @@ var gdv_getCompletedSessionsByUserId = function (doc, meta)
         emit( [
             doc.gameId.toUpperCase(),
             doc.userId
-        ], doc.gameSessionId );
+        ] );
     }
 };
 
@@ -257,8 +247,8 @@ var gdv_getLastDeviceIdByGameId = function (doc, meta)
             getAllGameSessionsByGameId : {
                 map: gdv_getAllGameSessionsByGameId
             },
-            getCompletedSessionsByUserId: {
-                map: gdv_getCompletedSessionsByUserId
+            getGameSessionsByUserId: {
+                map: gdv_getGameSessionsByUserId
             },
             getAllAchievementsByDeviceId: {
                 map: gdv_getAllAchievementsByDeviceId
@@ -936,13 +926,9 @@ return when.promise(function(resolve, reject) {
                     delete events[i].gameType;
                 }
 
-                // convert to milliseconds from EPOCH
-                if(events[i].serverTimeStamp < 10000000000) {
-                    events[i].serverTimeStamp *= 1000;
-                }
-                if(events[i].clientTimeStamp < 10000000000) {
-                    events[i].clientTimeStamp *= 1000;
-                }
+                events[i].serverTimeStamp = Util.CheckTimeStamp(events[i].serverTimeStamp);
+                events[i].clientTimeStamp = Util.CheckTimeStamp(events[i].clientTimeStamp);
+
                 kv[key] = { value: _.cloneDeep(events[i]) };
 
                 kIndex++;
@@ -1146,6 +1132,29 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype.getNumEvents = function(gameSessionId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    this.client.view("telemetry", "getEventsByGameSessionId").query({
+            key: gameSessionId
+        },
+        function(err, results){
+            if(err){
+                console.error("CouchBase TelemetryStore: Get Events View Error -", err);
+                reject(err);
+                return;
+            }
+
+            resolve(results.length);
+
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
 
 
 TelemDS_Couchbase.prototype.startGameSession = function(userId, courseId, gameLevel, gameSessionId){
@@ -1161,7 +1170,7 @@ return when.promise(function(resolve, reject) {
 
     var gameSessionData = {
         serverStartTimeStamp: Util.GetTimeStamp(),
-            clientStartTimeStamp: Util.GetTimeStamp(),
+        clientStartTimeStamp: Util.GetTimeStamp(),
         serverEndTimeStamp:   0,
         clientEndTimeStamp:   0,
         gameId:    'SC',
@@ -1261,8 +1270,8 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-
-TelemDS_Couchbase.prototype.getSessionsByUserId = function(gameId, userId){
+// getGameSessionsInfoByUserId(gameId, userId)
+TelemDS_Couchbase.prototype.getGameSessionsInfoByUserId = function(gameId, userId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -1270,7 +1279,7 @@ return when.promise(function(resolve, reject) {
     gameId = gameId.toUpperCase();
     // tConst.game.session.started
 
-    this.client.view("telemetry", 'getCompletedSessionsByUserId').query(
+    this.client.view("telemetry", 'getGameSessionsByUserId').query(
         {
             key: [gameId, userId]
         },
@@ -1281,7 +1290,78 @@ return when.promise(function(resolve, reject) {
                 return;
             }
 
-            var gameSessionIds = _.pluck(results, 'value');
+            var keys = _.pluck(results, 'id');
+            var promiseList = [];
+
+            // TODO: gaurded
+            keys.forEach( function(key) {
+                var kparts = key.split(":");
+                var gameSessionId = kparts[2];
+
+                // get session info
+                var p = this.getGameSession(gameSessionId)
+                    .then(function(gameSessionInfo){
+                        // get of each session event key count
+                        return this.getNumEvents(gameSessionId)
+                            .then(function(numEvents){
+                                var st = Util.CheckTimeStamp(gameSessionInfo.serverStartTimeStamp);
+                                var et = Util.CheckTimeStamp(gameSessionInfo.serverEndTimeStamp);
+
+                                return {
+                                    timeDiff: et - st,
+                                    gameSessionId: gameSessionId,
+                                    gameLevel: gameSessionInfo.gameLevel,
+                                    numEvents: numEvents,
+                                    state: gameSessionInfo.state
+                                };
+                            }.bind(this))
+                    }.bind(this));
+
+                promiseList.push(p);
+
+            }.bind(this) );
+
+            when.reduce(promiseList, function(sum, info){
+                sum.push(info);
+                return sum;
+            }.bind(this), [])
+                .then(function(infolist){
+                    resolve(infolist);
+                }.bind(this))
+        }.bind(this)
+    );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+TelemDS_Couchbase.prototype.getGameSessionIdsByUserId = function(gameId, userId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    gameId = gameId.toUpperCase();
+    // tConst.game.session.started
+
+    this.client.view("telemetry", 'getGameSessionsByUserId').query(
+        {
+            key: [gameId, userId]
+        },
+        function(err, results) {
+            if(err){
+                console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
+                reject(err);
+                return;
+            }
+
+            var gameSessionIds = [];
+            for(var i = 0; i < results.length; i++ ) {
+                var kparts = results[i].id.split(":");
+                gameSessionIds.push( kparts[2] );
+            }
+
             resolve(gameSessionIds);
         }.bind(this)
     );
@@ -1352,6 +1432,31 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Couchbase.prototype.getGameSession = function(gameSessionId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
+
+    // get data
+    this.client.get(key,
+        function(err, results){
+            if(err){
+                console.error("CouchBase TelemetryStore: Get Game Session Error -", err);
+                reject(err);
+                return;
+            }
+
+            resolve(results.value);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
 
 TelemDS_Couchbase.prototype.cleanUpOldGameSessionsV2 = function(deviceId){
 // add promise wrapper
@@ -1455,7 +1560,6 @@ return when.promise(function(resolve, reject) {
         deviceId:             deviceId,
         gameSessionId:        gameSessionId,
         state:                tConst.game.session.started,
-        attempt:              1, // TODO: inc this from last session
         qstate:               '' // TODO: remove with assessment Q
     };
     // optional
@@ -1486,39 +1590,39 @@ return when.promise(function(resolve, reject) {
 
 TelemDS_Couchbase.prototype.endGameSessionV2 = function(gameSessionId, clientTimeStamp){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
+    var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
 
-        // get data
-        this.client.get(key,
-            function(err, data){
-                if(err){
-                    console.error("CouchBase TelemetryStore: End Game Session V2 Error -", err);
-                    reject(err);
-                    return;
-                }
+    // get data
+    this.client.get(key,
+        function(err, data){
+            if(err){
+                console.error("CouchBase TelemetryStore: End Game Session V2 Error -", err);
+                reject(err);
+                return;
+            }
 
-                var gameSessionData = data.value;
-                gameSessionData.serverEndTimeStamp = Util.GetTimeStamp();
-                gameSessionData.clientEndTimeStamp = clientTimeStamp;
-                gameSessionData.state = tConst.game.session.ended;
+            var gameSessionData = data.value;
+            gameSessionData.serverEndTimeStamp = Util.GetTimeStamp();
+            gameSessionData.clientEndTimeStamp = clientTimeStamp;
+            gameSessionData.state = tConst.game.session.ended;
 
-                // replace with updated
-                this.client.replace(key, gameSessionData,
-                    function(err, data){
-                        if(err){
-                            console.error("CouchBase TelemetryStore: Start Game Session Error -", err);
-                            reject(err);
-                            return;
-                        }
+            // replace with updated
+            this.client.replace(key, gameSessionData,
+                function(err, data){
+                    if(err){
+                        console.error("CouchBase TelemetryStore: Start Game Session Error -", err);
+                        reject(err);
+                        return;
+                    }
 
-                        resolve(data);
-                    }.bind(this));
-            }.bind(this));
+                    resolve(data);
+                }.bind(this));
+        }.bind(this));
 
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
 
@@ -2129,7 +2233,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-TelemDS_Couchbase.prototype.saveAssessmentResults = function(gameId, userId, assessmentId, data){
+TelemDS_Couchbase.prototype.saveAssessmentResults = function(userId, gameId, assessmentId, data){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -2153,7 +2257,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-TelemDS_Couchbase.prototype.getAssessmentResults = function(gameId, userId, assessmentId){
+TelemDS_Couchbase.prototype.getAssessmentResults = function(userId, gameId, assessmentId){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------

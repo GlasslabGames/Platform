@@ -74,7 +74,12 @@ function getTimeStamp(dt){
         dt = moment.utc(dt);
     }
 
-    return dt.unix();
+    return dt.valueOf();
+}
+
+// if time less then 10000000000 then return time in milliseconds, otherwise time is ok
+function checkTimeStamp(time) {
+    return (time < 10000000000) ? time * 1000 : time;
 }
 
 function getExpressLogger(options, express, stats){
@@ -175,6 +180,7 @@ module.exports = {
     PromiseContinue:  promiseContinue,
     GetExpressLogger: getExpressLogger,
     GetTimeStamp:     getTimeStamp,
+    CheckTimeStamp:   checkTimeStamp,
     BuildURI:         buildUri,
     CreateUUID:       createUUID,
     String: {

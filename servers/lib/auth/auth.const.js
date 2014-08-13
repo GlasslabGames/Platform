@@ -34,7 +34,7 @@ module.exports = {
         }
     },
     passwordReset: {
-        expirationInterval: 10800, // 3 hours in seconds
+        expirationInterval: 10800000, // 3 hours in milliseconds
         status: {
             sent:       "sent",
             inProgress: "in progress"

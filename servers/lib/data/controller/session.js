@@ -83,7 +83,7 @@ function startSessionV2(req, outRes){
             // this is ok
         }
         var gameLevel        = req.body.gameLevel;
-        var gameSessionId       = undefined;
+        var gameSessionId    = undefined;
 
         // clean up old game session
         this.cbds.cleanUpOldGameSessionsV2(deviceId)
