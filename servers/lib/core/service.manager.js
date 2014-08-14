@@ -112,6 +112,10 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
 
+                if(this.options.env == "dev" || this.options.env == "stage") {
+                    this.options.services.session.cookie.domain = "*";
+                }
+
                 this.app.use(express.session({
                     secret: this.options.services.session.secret || "keyboard kitty",
                     cookie: _.merge({
