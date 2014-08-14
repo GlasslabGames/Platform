@@ -112,10 +112,6 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
 
-                if(this.options.env == "stage") {
-                    this.options.services.session.cookie.domain = "*";
-                }
-
                 this.app.use(express.session({
                     secret: this.options.services.session.secret || "keyboard kitty",
                     cookie: _.merge({
@@ -128,13 +124,15 @@ return when.promise(function(resolve, reject) {
 
                 if(this.options.env == "stage") {
                     this.app.use(function(req, res, next) {
-                        if(req.headers.host == "localhost:8001") {
-                            res.header("Access-Control-Allow-Origin",  "http://"+req.headers.host);
-                            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-                            res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
-                            res.header("Access-Control-Allow-Credentials", true);
+                        res.header("Access-Control-Allow-Origin",  "*");
+                        res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+                        res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+                        if('OPTIONS' == req.method) {
+                            res.send(200);
+                        } else {
+                            next();
                         }
-                        next();
                     });
                 }
 
