@@ -11,12 +11,12 @@
 var fs         = require('fs');
 var http       = require('http');
 var path       = require('path');
+var url        = require('url');
 // Third-party libs
 var _          = require('lodash');
 var when       = require('when');
 var express    = require('express');
 var couchbase  = require('couchbase');
-var cors       = require('cors');
 
 // load at runtime
 var Util;
@@ -123,8 +123,30 @@ return when.promise(function(resolve, reject) {
                     store:  this.exsStore
                 }));
 
-                if(this.options.env == "stage") {
-                    this.app.use(cors());
+                if(this.options.env == "dev" || this.options.env == "stage") {
+                    this.app.use(function(req, res, next) {
+                        var isNext = true;
+
+                        if( req.headers.origin ) {
+                            var parts = url.parse(req.headers.origin);
+
+                            if(parts.host != req.headers.host) {
+                                res.header("Access-Control-Allow-Origin",      req.headers.origin);
+                                res.header("Access-Control-Allow-Credentials", true);
+
+                                if('OPTIONS' == req.method) {
+                                    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
+                                    res.header("Access-Control-Allow-Headers", "X-Requested-With, X-Prototype-Version, Content-Type, Origin, Allow, Authorization");
+                                    res.send(204);
+                                    isNext = false;
+                                }
+                            }
+                        }
+
+                        if(isNext) {
+                            next();
+                        }
+                    });
                 }
 
                 resolve();

@@ -25,8 +25,7 @@
         "mailchimp":      "1.1.x",
         "csv":            "0.3.x",
         "csv-stringify":  "0.0.x",
-        "handlebars"   :  "2.0.x",
-        "cors":           "2.4.x"
+        "handlebars"   :  "2.0.x"
     },
     "optionalDependencies": {
         "hiredis":        "0.1.x"
