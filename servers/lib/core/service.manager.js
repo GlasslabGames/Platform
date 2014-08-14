@@ -112,7 +112,7 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
 
-                if(this.options.env == "dev" || this.options.env == "stage") {
+                if(this.options.env == "stage") {
                     this.options.services.session.cookie.domain = "*";
                 }
 
@@ -126,11 +126,14 @@ return when.promise(function(resolve, reject) {
                     store:  this.exsStore
                 }));
 
-                if(this.options.env == "dev" || this.options.env == "stage") {
+                if(this.options.env == "stage") {
                     this.app.use(function(req, res, next) {
-                        res.header("Access-Control-Allow-Origin", "*");
-                        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-                        res.header("Access-Control-Allow-Credentials", true);
+                        if(req.headers.host == "localhost:8001") {
+                            res.header("Access-Control-Allow-Origin",  "http://"+req.headers.host);
+                            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                            res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");
+                            res.header("Access-Control-Allow-Credentials", true);
+                        }
                         next();
                     });
                 }
