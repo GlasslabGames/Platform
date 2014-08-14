@@ -75,6 +75,7 @@ function getSOWO(req, res) {
                                      var so = assessmentData.results.shoutout[j];
                                      // don't need to expose the gameSessionId
                                      delete so.gameSessionId;
+                                     so.id = j;
 
                                      outAssessmentData.results.shoutout.push( _.merge(
                                          so,
@@ -90,6 +91,7 @@ function getSOWO(req, res) {
                                      var wo = assessmentData.results.watchout[j];
                                      // don't need to expose the gameSessionId
                                      delete wo.gameSessionId;
+                                     wo.id = j;
 
                                      outAssessmentData.results.watchout.push( _.merge(
                                          wo,
