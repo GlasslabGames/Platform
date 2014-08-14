@@ -1033,9 +1033,10 @@ return when.promise(function(resolve, reject) {
                             gameSessionEventOrder: revent.gameSessionEventOrder,
                             clientTimeStamp: revent.clientTimeStamp,
                             serverTimeStamp: revent.serverTimeStamp,
-                            eventName: revent.eventName,
-                            eventData: revent.eventData,
-                            totalTimePlayed: revent.totalTimePlayed
+                            eventName:       revent.eventName,
+                            eventData:       revent.eventData,
+                            totalTimePlayed: revent.totalTimePlayed,
+                            gameLevel:       revent.gameLevel
                         };
 
                         // pull root info (data that should all be the same for all events of a session event)
