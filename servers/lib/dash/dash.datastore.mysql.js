@@ -361,3 +361,35 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+
+WebStore_MySQL.prototype.getDistinctGames = function(userId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT DISTINCT(gm.game_id) as gameId FROM \
+            GL_COURSE_GAME_MAP gm \
+            JOIN (SELECT * FROM GL_MEMBERSHIP \
+                WHERE role=\"instructor\" AND user_id="+this.ds.escape(userId)+" \
+            ) m on m.course_id=gm.course_id";
+
+    //console.log("Q:", Q);
+    this.ds.query(Q).then(function(results) {
+            if(results.length > 0) {
+                var gameIdList = [];
+                for(var i = 0; i < results.length; i++) {
+                    gameIdList.push( results[i].gameId.toUpperCase() );
+                }
+
+                resolve( gameIdList );
+            } else {
+                resolve([]);
+            }
+        }.bind(this)
+        , reject);
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};

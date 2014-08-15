@@ -123,32 +123,6 @@ return when.promise(function(resolve, reject) {
                     store:  this.exsStore
                 }));
 
-                if(this.options.env == "dev" || this.options.env == "stage") {
-                    this.app.use(function(req, res, next) {
-                        var isNext = true;
-
-                        if( req.headers.origin ) {
-                            var parts = url.parse(req.headers.origin);
-
-                            if(parts.host != req.headers.host) {
-                                res.header("Access-Control-Allow-Origin",      req.headers.origin);
-                                res.header("Access-Control-Allow-Credentials", true);
-
-                                if('OPTIONS' == req.method) {
-                                    res.header("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE");
-                                    res.header("Access-Control-Allow-Headers", "X-Requested-With, X-Prototype-Version, Content-Type, Origin, Allow, Authorization");
-                                    res.send(204);
-                                    isNext = false;
-                                }
-                            }
-                        }
-
-                        if(isNext) {
-                            next();
-                        }
-                    });
-                }
-
                 resolve();
             }.bind(this))
         }.bind(this))
