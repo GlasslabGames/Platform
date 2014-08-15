@@ -31,6 +31,12 @@ function promiseContinue(val){
     });
 }
 
+function promiseError(err){
+    return when.promise( function(resolve, reject){
+        reject(err);
+    });
+}
+
 function createUUID() {
     return uuid.v1();
 }
@@ -178,6 +184,7 @@ module.exports = {
     Email:   require('./util.email.js'),
     ConvertToString:  convertToString,
     PromiseContinue:  promiseContinue,
+    PromiseError:     promiseError,
     GetExpressLogger: getExpressLogger,
     GetTimeStamp:     getTimeStamp,
     CheckTimeStamp:   checkTimeStamp,
