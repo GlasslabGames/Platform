@@ -37,22 +37,38 @@ function enrollInCourse(req, res, next) {
 
                 .then(function(courseId) {
                     if(courseId) {
-                        return this.myds.isUserInCourse(userData.id, courseId)
-                            .then(function(inCourse) {
-                                // only if they are NOT in the class
-                                if(!inCourse) {
-                                    this.myds.addUserToCourse(userData.id, courseId, lConst.role.student)
-                                        .then(function() {
-                                            this.requestUtil.jsonResponse(res, {});
-                                        }.bind(this))
-                                } else {
-                                    this.requestUtil.errorResponse(res, {key:"user.enroll.code.used"}, 400);
-                                }
-                            }.bind(this))
+                        return this.myds.getCourse(courseId)
                     } else {
                         this.requestUtil.errorResponse(res, {key:"user.enroll.code.invalid"}, 404);
                     }
-                }.bind(this));
+                }.bind(this))
+                //
+                .then(function(courseInfo) {
+                    if(!courseInfo) return;
+
+                    if(!courseInfo.locked) {
+                        return this.myds.isUserInCourse(userData.id, courseInfo.id);
+                    } else {
+                        this.requestUtil.errorResponse(res, {key:"course.locked"}, 400);
+                        return null;
+                    }
+                }.bind(this))
+                //
+                .then(function(inCourse) {
+                    // skip if no inCourse
+                    if(inCourse === null) return;
+
+                    // only if they are NOT in the class
+                    if(inCourse === false) {
+                        this.myds.addUserToCourse(userData.id, courseId, lConst.role.student)
+                            .then(function() {
+                                this.requestUtil.jsonResponse(res, {});
+                            }.bind(this))
+                    } else {
+                        this.requestUtil.errorResponse(res, {key:"user.enroll.code.used"}, 400);
+                    }
+                }.bind(this))
+
         } else {
             this.requestUtil.errorResponse(res, {key:"user.enroll.code.missing"}, 404);
         }
@@ -597,7 +613,8 @@ function updateCourseInfo(req, res, next, serviceManager)
                 title:         req.body.title,
                 grade:         req.body.grade,
                 institutionId: req.body.institution,
-                archived:      req.body.archived
+                archived:      req.body.archived,
+                locked:        req.body.lockedRegistration || req.body.locked
             };
 
             if(courseData.archived) {
@@ -778,14 +795,19 @@ function verifyCode(req, res, next) {
 
     this.myds.getCourseInfoFromCourseCode(code)
         .then(function(courseInfo){
-            if(courseInfo) {
+            if( courseInfo &&
+                courseInfo.locked) {
+                this.requestUtil.errorResponse(res, {key:"course.locked", statusCode:400});
+            }
+            else if(courseInfo) {
                 courseInfo = _.merge(
                     {status: "code valid", key:"code.valid"},
                     courseInfo
                 );
                 this.requestUtil.jsonResponse(res, courseInfo);
-            } else {
-                this.requestUtil.errorResponse(res, {key:"user.enroll.code.invalid"}, 404);
+            }
+            else {
+                this.requestUtil.errorResponse(res, {key:"user.enroll.code.invalid", statusCode:404});
             }
         }.bind(this))
 }

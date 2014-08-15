@@ -88,6 +88,7 @@
         "platform": "iPad",
         "subject": "ELA",
         "grades": "6 - 8",
+        "applink": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8",
         "buttons": [
             {
                 "name": "Play Game",

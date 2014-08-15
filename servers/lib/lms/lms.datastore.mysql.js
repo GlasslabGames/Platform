@@ -502,7 +502,7 @@ return when.promise(function(resolve, reject) {
     this.ds.query(Q)
         .then(function(results) {
                 if(results){
-                    resolve(results.length > 0);
+                    resolve( (results.length > 0) ? true :  false);
                 } else {
                     reject({"error": "failure", "exception": err}, 500);
                 }
@@ -570,7 +570,7 @@ LMS_MySQL.prototype.isMultiUsersInInstructorCourse = function(userIds, instructo
 // end promise wrapper
 };
 
-
+// Enroll
 LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, role) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -776,36 +776,43 @@ return when.promise(function(resolve, reject) {
 
     var title = this.ds.escape(courseData.title);
 
-    var promise;
     if(!courseData.institutionId) {
         courseData.institutionId = "NULL";
-
-        var Q = "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
-        Q += "c.id!="+courseData.id+" AND c.title="+title+" AND m.user_id="+parseInt(userId);
-
-        //console.log("getCourses Q:", Q);
-        promise = this.ds.query(Q);
     } else {
         courseData.institutionId = parseInt(courseData.institutionId);
-        promise = this.Utils.PromiseContinue();
     }
 
-    promise.then(function(data){
-            if(data.length == 0) {
+    if(_.isArray(courseData.grade)) {
+        courseData.grade = courseData.grade.join(",");
+    }
+
+    // verify userId is instructor of course
+    var Q = "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
+    Q += "c.id="+courseData.id+" AND c.title="+title+" AND m.user_id="+parseInt(userId);
+    //console.log("getCourses Q:", Q);
+    this.ds.query(Q).then(function(data){
+            if(data.length) {
                 var Q = "UPDATE GL_COURSE " +
                     "SET last_updated=NOW(), " +
                     "title="+title+", "+
                     "grade="+this.ds.escape(courseData.grade)+", ";
+
                 if(courseData.archived) {
                     Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
                 } else {
                     Q += "archived=false, archived_date=NULL, ";
                 }
+                if(courseData.hasOwnProperty('locked')) {
+                    // convert bool to int
+                    courseData.locked = (courseData.locked) ? 1 : 0;
+                    Q += "locked="+this.ds.escape(courseData.locked)+", ";
+                }
+
                 Q += "institution_Id="+courseData.institutionId+" "+
                     "WHERE id="+courseData.id;
 
                 //console.log("updateCourse Q:", Q);
-                this.ds.query(Q).then(resolve);
+                this.ds.query(Q).then(resolve, reject);
             } else {
                 reject({key:"course.notUnique.name"}, 400);
             }
@@ -1047,4 +1054,3 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
-
