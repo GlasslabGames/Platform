@@ -129,10 +129,10 @@ return when.promise(function(resolve, reject) {
                 // add developer to game details and reports
                 if( this.games[gameId].info &&
                     this.games[gameId].info.developer &&
+                    this.games[gameId].info.basic &&
                     this.games[gameId].info.details &&
                     this.games[gameId].info.reports ) {
-                    this.games[gameId].info.details.developer = this.games[gameId].info.developer;
-                    this.games[gameId].info.reports.developer = this.games[gameId].info.developer;
+                    this.games[gameId].info.basic.developer = this.games[gameId].info.developer;
                 }
 
                 // add game info(basic) to game details and reports
@@ -140,8 +140,8 @@ return when.promise(function(resolve, reject) {
                     this.games[gameId].info.basic &&
                     this.games[gameId].info.details &&
                     this.games[gameId].info.reports ) {
-                    this.games[gameId].info.details.basic = this.games[gameId].info.basic;
-                    this.games[gameId].info.reports.basic = this.games[gameId].info.basic;
+                    this.games[gameId].info.details = _.merge(this.games[gameId].info.details, this.games[gameId].info.basic);
+                    this.games[gameId].info.reports = _.merge(this.games[gameId].info.reports, this.games[gameId].info.basic);
                 }
             }
         }.bind(this));

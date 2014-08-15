@@ -5,7 +5,8 @@ var when      = require('when');
 var Util      = require('../../core/util.js');
 
 module.exports = {
-    getGamesBasicInfo: getGamesBasicInfo
+    getGamesBasicInfo: getGamesBasicInfo,
+    getMyGames:        getMyGames
 };
 
 var exampleIn = {};
@@ -68,5 +69,35 @@ function getGamesAllInfo(req, res){
     } catch(err) {
         console.trace("Reports: Get Achievements Error -", err);
         this.stats.increment("error", "GetAchievements.Catch");
+    }
+}
+
+
+function getMyGames(req, res, next) {
+    try {
+        var userData = req.session.passport.user;
+
+        this.dashStore.getDistinctGames(userData.id)
+            .then(function(gameIdList) {
+
+                // TODO: replace with promise
+                var games = this.getGames();
+
+                for(var i = 0; i < gameIdList.length; i++) {
+                    var gameId = gameIdList[i];
+                    gameIdList[i] = games[gameId].info.basic;
+                }
+
+                this.requestUtil.jsonResponse(res, gameIdList);
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err) {
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this));
+
+    } catch(err) {
+        console.trace("Reports: Get MyGames Error -", err);
+        this.stats.increment("error", "GetMyGames.Catch");
     }
 }
