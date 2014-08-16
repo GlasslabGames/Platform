@@ -9,10 +9,10 @@
     },
     "basic": {
         "gameId": "SC",
-        "enabled": false,
-        "maintenance": {
-            "on": false,
-            "message": "Back soon!"
+        "enabled": true,
+        "maintenance":
+        {
+            "message": "Coming Soon!"
         },
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
