@@ -199,6 +199,14 @@ module.exports = {
                 get: "getGamesBasicInfo"
             }
         },
+        {
+            api: "/api/v2/dash/myGames",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getMyGames"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,

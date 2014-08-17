@@ -10,12 +10,13 @@
     "basic": {
         "gameId": "SC",
         "enabled": true,
-        "maintenance": {
-            "on": false,
-            "message": "Back soon!"
+        "maintenance":
+        {
+            "message": "Coming Soon!"
         },
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
+        "description": "SimCityEDU: Pollution Challenge!",
         "settings" : {
             "missionProgressLock": false
         },

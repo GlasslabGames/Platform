@@ -9,7 +9,11 @@
     },
     "basic": {
         "gameId": "AW-1",
-        "enabled": false,
+        "enabled": true,
+        "maintenance":
+        {
+            "message": "Coming Soon!"
+        },
         "shortName": "Argument Wars",
         "longName": "Argument Wars",
         "settings": {
