@@ -4,11 +4,11 @@ var fs = require('fs'),
     httpProxy = require('http-proxy');
 
 var serverPort = 9080
-//var hostname = "localhost";
-//var port = 8081
-var hostname = "stage.glgames.org";
+var hostname = "localhost";
+var port = 8001
+//var hostname = "stage.glgames.org";s
 //var hostname = "10.14.13.44";
-var port = 80
+//var port = 80
 
 var basePath = "." + path.sep + "proxy_capture" + path.sep;
 // create dirs if they don't exist

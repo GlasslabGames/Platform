@@ -6,11 +6,15 @@ from random import randint
 #baseLoadTestDateDir = "./loadtest_apis.local"
 baseLoadTestDateDir = "./loadtest_apis.mgoaa.stage5"
 #username = "jstudent"
-username = "jlt_test1_"
-password = username
+#username = "jlt_test1_"
+username = "build+teach@glasslabgames.org"
+password = "glasslab123"
 
 gameId = "AA-1"
-hostname = "stage.argubotacademy.org"
+
+port = 8001
+hostname = "localhost:" + str(port)
+#hostname = "stage.argubotacademy.org"
 
 #maxLoopSeconds = 10
 maxLoopSeconds = 10*60
@@ -22,7 +26,9 @@ userId = 0
 minWaitTime = 1000
 maxWaitTime = 1000
 
-API_POST_LOGIN         = "/api/user/login"
+
+API_POST_LOGIN         = "/api/v2/auth/login/glasslab"
+#	"/api/v2/auth/login"
 API_POST_SESSION_START = "/api/v2/data/session/start"
 API_POST_SESSION_END   = "/api/v2/data/session/end"
 API_POST_EVENTS        = "/api/v2/data/events"
@@ -137,7 +143,8 @@ class MainTaskSet(TaskSet):
         while True:
             self.client.headers = {"content-type": "application/json"}
 #            r = self.client.post("/api/user/login", '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
-            loginStr = '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}'
+#            loginStr = '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}'
+            loginStr = '{"username":"'+ username + '","password":"'+ password +'"}'
             self.deviceId = str(self.c_id)+'-'+''.join(random.choice(string.lowercase) for x in range(5))
             
             if displayInfo:
