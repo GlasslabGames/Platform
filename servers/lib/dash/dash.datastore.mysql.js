@@ -45,7 +45,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-
+// TODO: move this to auth
 var exampleOutput = {};
 exampleOutput.getUserInfo = {
     "id": 175,
