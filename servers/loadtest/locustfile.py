@@ -399,7 +399,8 @@ class MainTaskSet(TaskSet):
     def task_postGameTelemetry(self):       
         info = self.startGameSession()
         if info:
-            maxInterations = max(2, int( float(maxLoopSeconds)/float(info['eventsPeriodSecs']) ) )
+            print(info) # Fixme
+            maxInterations = max(2, int( float(maxLoopSeconds)/float(info['eventsPeriodSecs']) ) )  # fixme <-- bad key
             numInterations = randint(2, maxInterations)
             #if displayInfo:
             #    print "maxInterations: " + str(maxInterations)
