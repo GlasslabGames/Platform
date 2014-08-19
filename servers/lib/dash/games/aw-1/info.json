@@ -67,10 +67,12 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
+                        "type": "default",
                         "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
+                        "type": "default",
                         "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.dmg"
                     }
                 ]
@@ -80,6 +82,7 @@
                 "links": [
                     {
                         "name": "Play Game",
+                        "type": "default",
                         "link": "/game/play/SC"
                     }
                 ]
