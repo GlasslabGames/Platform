@@ -19,7 +19,7 @@ module.exports = TelemDS_Couchbase;
 
 var exampleIn = {};
 
-function TelemDS_Couchbase(options){
+function TelemDS_Couchbase(options,serviceManager){
     // Glasslab libs
     Util   = require('../core/util.js');
     tConst = require('./data.const.js');
@@ -35,7 +35,7 @@ function TelemDS_Couchbase(options){
         },
         options
     );
-
+    this.serviceManager = serviceManager;
     this.currentDBVersion = 0.7;
 }
 
@@ -341,7 +341,8 @@ return when.promise(function (resolve, reject) {
             if(!info.migrated) {
                 info.migrated = {
                     achievements: false,
-                    addGameId:    false
+                    addGameId:    false,
+                    addGameConfig: false
                 };
             }
 
@@ -378,13 +379,11 @@ return when.promise(function (resolve, reject) {
                 tasks.push(
                     function() {
                         console.log("CouchBase TelemetryStore: Migrate GameConfig from MySQL")
-                        return this._migrateGameConfigFromMysql(myds)
-                            .then(function (gameConfig) {
+                        return this._migrateGameConfigFromMySql(myds)
+                            .then(function () {
                                 console.log("CouchBase TelemetryStore: Update GameConfig in CouchDB");
-                                // assume gameId is SC because only SC has gameConfig at the moment
-                                var gameId = 'SC';
                                 info.migrated.addGameConfig = true;
-                                return this.updateConfigs(gameId,gameConfig);
+                                return this.updateDataSchemaInfo(info);
                             }.bind(this))
                     }.bind(this)
                 );
@@ -421,13 +420,35 @@ return when.promise(function (resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype._migrateGameConfigFromMysql = function(myds) {
+TelemDS_Couchbase.prototype._migrateGameConfigFromMySql = function(myds) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
     // get game config from SQL
+    var promises = [];
+    var gameConfigs;
     myds.getConfigs()
         .then(function(gameConfigs) {
-            resolve(gameConfigs);
+            gameConfigs = gameConfigs;
+            when.promise(function(resolve,reject) {
+                resolve(this.serviceManager.get("dash").service.getListOfGameIds());
+            }.bind(this))
+                .then(function(gameIds) {
+
+                    // populate all games with SC game config
+                    for (var i = 0; i < gameIds.length; i++) {
+                        promises.push(this.updateConfigs(gameIds[i], gameConfigs));
+                    }
+
+                    // wait until all games configs have been updated
+                    when.all(promises).then(function() {
+                        console.log('promises', promises);
+                        resolve({});
+                    }.bind(this));
+                }.bind(this));
+
+
+
+
         }.bind(this))
 }.bind(this));
 // end promise wrapper

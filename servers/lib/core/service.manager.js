@@ -352,7 +352,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     for(var s in this.services) {
-        var service = new this.services[s].lib.Service(this.options);
+        var service = new this.services[s].lib.Service(this.options,this);
         // save service
         this.services[s].service = service;
 
