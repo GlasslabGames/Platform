@@ -13,6 +13,7 @@ module.exports = {
         game:    require('./controller/game.js'),
         user:    require('./controller/user.js'),
         // internal route
+        _config:       require('./controller/_config.js'),
         _queueSession: require('./controller/_queueSession.js'),
         _gameSession:  require('./controller/_gameSession.js'),
         _events:       require('./controller/_events.js')

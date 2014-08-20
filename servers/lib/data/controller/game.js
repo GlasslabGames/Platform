@@ -38,7 +38,7 @@ function saveGameData(req, res, next)
     if( !req.body ||
         ( _.isObject(req.body) &&
           !Object.keys(req.body).length ) ) {
-        this.requestUtil.errorResponse(res, { error: "Game data missing", key: "missing.data", statusCode: 401});
+        this.requestUtil.errorResponse(res, {key: "missing.data", statusCode: 401});
         return;
     }
 

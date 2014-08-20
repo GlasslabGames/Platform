@@ -374,6 +374,20 @@ return when.promise(function (resolve, reject) {
                     }.bind(this)
                 );
             }
+            if ( !info.migrated.addGameConfig ) {
+                tasks.push(
+                    function() {
+                        console.log("CouchBase TelemetryStore: Migrate Events to Add GameConfig...");
+                        return this._migrateEvents_AddingGameId(myds)
+                            .then(function () {
+                                console.log("CouchBase TelemetryStore: Migrate Events to Add GameId: Done!");
+                                info.migrated.addGameId = true;
+                                return this.updateDataSchemaInfo(info);
+                            }.bind(this))
+                    }.bind(this)
+                );
+            }
+
 
             if(tasks.length) {
                 // create a gaurded Task function
@@ -2264,6 +2278,8 @@ TelemDS_Couchbase.prototype.getAssessmentResults = function(userId, gameId, asse
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+        gameId = gameId.toUpperCase();
+
         var key = tConst.aeng.key+":"+tConst.aeng.resultsKey+":"+gameId+":"+assessmentId+":"+userId;
 
         // get user game pref
@@ -2288,3 +2304,59 @@ TelemDS_Couchbase.prototype.getAssessmentResults = function(userId, gameId, asse
     }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Couchbase.prototype.getConfigs = function(gameId){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        gameId = gameId.toUpperCase();
+
+        var key = tConst.game.configKey+":"+gameId;
+
+         // get game config
+        this.client.get(key, function(err, data) {
+            if(err) {
+                // NOT "No such key"
+                if(err.code != 13) {
+                    console.error("CouchBase TelemetryStore: Get Config Error -", err);
+                    reject(err);
+                    return;
+                }
+                else {
+                    reject(err);
+                    return;
+                }
+            }
+            resolve(data.value)
+        }.bind(this));
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.updateConfigs = function(gameId,data){
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        gameId = gameId.toUpperCase();
+
+        var key = tConst.game.configKey+":"+gameId;
+
+        // get game config
+        this.client.set(key, data,
+            function(err, data) {
+                if(err) {
+                    console.err("CouchBase TelemetryStore: Set Config Error - ", err);
+                    reject(err);
+                    return;
+                }
+
+                resolve(data);
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
