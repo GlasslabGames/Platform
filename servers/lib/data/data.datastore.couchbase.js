@@ -383,6 +383,7 @@ return when.promise(function (resolve, reject) {
                                 console.log("CouchBase TelemetryStore: Update GameConfig in CouchDB");
                                 // assume gameId is SC because only SC has gameConfig at the moment
                                 var gameId = 'SC';
+                                info.migrated.addGameConfig = true;
                                 return this.updateConfigs(gameId,gameConfig);
                             }.bind(this))
                     }.bind(this)
