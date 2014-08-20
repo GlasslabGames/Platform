@@ -8,10 +8,10 @@ module.exports = {
 
 function updateGameConfigs(req, res, next, serviceManager)
 {
+
     var data = req.body;
     var gameId = req.params.gameId.toUpperCase();
     var gameIds = serviceManager.get("dash").service.getListOfGameIds();
-    console.log(gameIds);
 
     // check if gameId exists in list of gameIds
     if (_.contains(gameIds, gameId)) {

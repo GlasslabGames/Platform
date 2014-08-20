@@ -377,12 +377,13 @@ return when.promise(function (resolve, reject) {
             if ( !info.migrated.addGameConfig ) {
                 tasks.push(
                     function() {
-                        console.log("CouchBase TelemetryStore: Migrate Events to Add GameConfig...");
-                        return this._migrateEvents_AddingGameId(myds)
-                            .then(function () {
-                                console.log("CouchBase TelemetryStore: Migrate Events to Add GameId: Done!");
-                                info.migrated.addGameId = true;
-                                return this.updateDataSchemaInfo(info);
+                        console.log("CouchBase TelemetryStore: Migrate GameConfig from MySQL")
+                        return this._migrateGameConfigFromMysql(myds)
+                            .then(function (gameConfig) {
+                                console.log("CouchBase TelemetryStore: Update GameConfig in CouchDB");
+                                // assume gameId is SC because only SC has gameConfig at the moment
+                                var gameId = 'SC';
+                                return this.updateConfigs(gameId,gameConfig);
                             }.bind(this))
                     }.bind(this)
                 );
@@ -390,7 +391,7 @@ return when.promise(function (resolve, reject) {
 
 
             if(tasks.length) {
-                // create a gaurded Task function
+                // create a guarded Task function
                 var guardTask = guard.bind(null, guard.n(1));
                 // run each task using guardTask function
                 tasks = tasks.map(guardTask);
@@ -419,6 +420,17 @@ return when.promise(function (resolve, reject) {
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype._migrateGameConfigFromMysql = function(myds) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+    // get game config from SQL
+    myds.getConfigs()
+        .then(function(gameConfigs) {
+            resolve(gameConfigs);
+        }.bind(this))
+}.bind(this));
+// end promise wrapper
+}
 
 TelemDS_Couchbase.prototype._migrateEventsFromMysql = function(stats, myds, migrateCount) {
 // add promise wrapper
