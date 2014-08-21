@@ -395,6 +395,17 @@ module.exports = {
             method: {
                 get: "index"
             }
+        },
+        // ---------------------------------------------------
+        // SDK
+        // ---------------------------------------------------
+        {
+            api: "/sdk/connect",
+            service: "data",
+            controller: "config",
+            method: {
+                get: "connect"
+            }
         }
     ]
 

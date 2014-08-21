@@ -3,7 +3,8 @@ var Util = require('../../core/util.js');
 var _    = require('lodash');
 
 module.exports = {
-    index: index
+    index: index,
+    connect: connect
 };
 
 function index(req, res, next)
@@ -32,6 +33,7 @@ function index(req, res, next)
         }.bind(this));
 }
 
-
-
-
+function connect(req, res, next)
+{
+    res.send(req.headers.host);
+}
