@@ -20,24 +20,19 @@ function getGamesBasicInfo(req, res){
             .then(function(licenseGameIds){
                 var outGames = [];
 
-                for(var game in this.games) {
-                    // gameId is not case sensitive, always lowercase
-                    game = game.toUpperCase();
+                // TODO: replace with promise
+                var games = this.getListOfGameIds();
+                for(var i = 0; i < games.length; i++) {
+                    var gameId = games[i];
 
-                    if( this.games[game].hasOwnProperty("info") &&
-                        this.games[game]["info"].hasOwnProperty("basic")
-                      ) {
-                        var info = _.cloneDeep(this.games[game]["info"].basic);
-                        if(info.license.type == "free") {
-                            info.license.valid = true;
-                        } else {
-                            // check license
-                            info.license.valid = licenseGameIds.hasOwnProperty(game);
-                        }
-
-                        outGames.push( info );
+                    var info = _.cloneDeep(this.getGameBasicInfo(gameId));
+                    if(info.license.type == "free") {
+                        info.license.valid = true;
+                    } else {
+                        // check license
+                        info.license.valid = licenseGameIds.hasOwnProperty(gameId);
                     }
-
+                    outGames.push( info );
                 }
 
                 this.requestUtil.jsonResponse(res, outGames);
@@ -54,25 +49,6 @@ function getGamesBasicInfo(req, res){
     }
 }
 
-// no input
-function getGamesAllInfo(req, res){
-    try {
-        var games = [];
-        for(var game in this.games) {
-            if(this.games[game].hasOwnProperty("info")) {
-                games.push( this.games[game]["info"] );
-            }
-        }
-
-        this.requestUtil.jsonResponse(res, games);
-
-    } catch(err) {
-        console.trace("Reports: Get Achievements Error -", err);
-        this.stats.increment("error", "GetAchievements.Catch");
-    }
-}
-
-
 function getMyGames(req, res, next) {
     try {
         var userData = req.session.passport.user;
@@ -80,12 +56,11 @@ function getMyGames(req, res, next) {
         this.dashStore.getDistinctGames(userData.id)
             .then(function(gameIdList) {
 
-                // TODO: replace with promise
-                var games = this.getGames();
-
                 for(var i = 0; i < gameIdList.length; i++) {
                     var gameId = gameIdList[i];
-                    gameIdList[i] = games[gameId].info.basic;
+
+                    // TODO: replace with promise
+                    gameIdList[i] = this.getGameBasicInfo(gameId);
                 }
 
                 this.requestUtil.jsonResponse(res, gameIdList);
