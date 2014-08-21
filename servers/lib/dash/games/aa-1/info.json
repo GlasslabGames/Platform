@@ -50,17 +50,6 @@
     "reports": {
         "list": [
             {
-                "id":   "sowo",
-                "assessmentId": "sowo",
-                "enabled": true,
-                "name": "Shout Out and Watch Out Report",
-                "header": {
-                    "text": "Shout Out and Watch Out Report",
-                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
-                },
-                "description": "This report shows..."
-            },
-            {
                 "id":   "achievements",
                 "assessmentId": "none",
                 "enabled": true,
@@ -70,14 +59,18 @@
                     "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
                 },
                 "description": "This report shows...",
-                "groups": [
-                    {
-                        "name": "Common Core Standards Report"
-                    },
-                    {
-                        "name": "21st Century Skills"
-                    }
-                ]
+                "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
+            },
+            {
+                "id":   "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                },
+                "description": "This report shows..."
             }
         ]
     },
