@@ -8,19 +8,27 @@ module.exports = {
 
 function index(req, res, next)
 {
+    // default simcity
+    var gameId = 'SC';
     if( req.params &&
         req.params.hasOwnProperty("gameId") ) {
-        // TODO: config for game
+        gameId = req.params.gameId;
     }
 
-    var gameId = req.params.gameId;
-
     this.cbds.getConfigs(gameId)
-        .then(function(data){
-            this.requestUtil.jsonResponse(res, data);
+        .then(function(config){
+            this.requestUtil.jsonResponse(res, config);
         }.bind(this))
         .then(null, function(err){
-            this.requestUtil.errorResponse(res, {key: "data.gameId.missing", statusCode: 401});
+            if(err.code == 13) {
+                this.myds.getConfigs()
+                    .then(function(config) {
+                        this.requestUtil.jsonResponse(res, config);
+                    }.bind(this));
+            } else {
+                console.error("Data Service: Get Config Error -", err);
+                this.requestUtil.errorResponse(res, {key: "data.config.error", statusCode: 500});
+            }
         }.bind(this));
 }
 

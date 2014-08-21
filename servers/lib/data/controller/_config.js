@@ -8,8 +8,9 @@ module.exports = {
 
 function updateGameConfigs(req, res, next, serviceManager)
 {
-
+    // TODO: check input
     var data = req.body;
+    // TODO: check if gameId exists in req.params otherwise this will error
     var gameId = req.params.gameId.toUpperCase();
     var gameIds = serviceManager.get("dash").service.getListOfGameIds();
 
