@@ -441,8 +441,7 @@ return when.promise(function(resolve, reject) {
 
                     // wait until all games configs have been updated
                     when.all(promises).then(function() {
-                        console.log('promises', promises);
-                        resolve({});
+                        resolve();
                     }.bind(this));
                 }.bind(this));
 
