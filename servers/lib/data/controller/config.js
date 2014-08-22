@@ -35,5 +35,6 @@ function index(req, res, next)
 
 function connect(req, res, next)
 {
-    res.send(req.headers.host);
+    var host = req.headers.host;
+    res.send("http://"+host);
 }
