@@ -63,8 +63,8 @@
     "auth": {
         "email": {
             "mailChimp" : {
-                "apiKey": "da5ee9608f83677177482e05c1ed2d14-us2",
-                "mailListName": "GlassLab"
+                "apiKey": "0919cea5366647bf6dba467244c5a330-us8",
+                "mailListName": "GlassLabGames"
             },
             "from": "<accounts@glasslabgames.org>",
             "transport": {
