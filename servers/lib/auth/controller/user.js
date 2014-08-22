@@ -347,9 +347,20 @@ function updateUserData(req, res, next, serviceManager) {
  * 2. create the new user
  * 3. if student, enroll them in the course
  */
+
+//var example = {};
+//var example.input  = {
+//    "username":      "charosez",
+//    "firstName":     "charles",
+//    "lastName":      "tai",
+//    "password":      "bubbles",
+//    "email":         "charles@glasslabgames.org",
+//    "role":          "instructor",
+//    "loginType":     "glasslabv2"
+//}
+
 function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User");
-    //console.log("Auth registerUserRoute - body:", req.body);
 
     var regData = {
         username:      "",
@@ -394,6 +405,8 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.firstName  = Util.ConvertToString(req.body.firstName);
         regData.lastName   = Util.ConvertToString(req.body.lastName);
         regData.email      = Util.ConvertToString(req.body.email);
+        // only instructors have verification code:
+        regData.verify_code = Util.CreateUUID();
 
         if(!regData.username) {
             //this.requestUtil.errorResponse(res, "missing email", 400);
@@ -467,6 +480,7 @@ function registerUserV2(req, res, next, serviceManager) {
                 else if( regData.role == lConst.role.instructor ||
                          regData.role == lConst.role.manager)
                 {
+                    console.log("I am an instructor");
                     var promise;
                     if(req.body.newsletter) {
                         promise = subscribeToNewsletter(
@@ -539,6 +553,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
 }
+
 
 
 function sendRegisterEmail(emailOptions, regData, protocol, host){

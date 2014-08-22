@@ -308,7 +308,7 @@ Glasslab_Strategy.prototype.addUser = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-
+    console.log("VERIFY CODE:", userData.verify_code);
     var data = {
         id:             "NULL",
         version:        0,
@@ -327,7 +327,10 @@ return when.promise(function(resolve, reject) {
         user_type:      "NULL",
         username:       this.ds.escape(userData.username),
         collect_telemetry:      0,
-        login_type:     this.ds.escape(userData.loginType)
+        login_type:     this.ds.escape(userData.loginType),
+        verify_code:    this.ds.escape(userData.verify_code),
+        verify_code_expiration: "NULL",
+        verify_code_status: "NULL"
     };
 
     var keys   = _.keys(data);

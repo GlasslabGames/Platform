@@ -30,7 +30,6 @@ function MySQL(options){
 
     this.pool = mysql.createPool(this.options);
 }
-
 MySQL.prototype.escape = mysql.escape;
 
 MySQL.prototype.query = function(query) {
