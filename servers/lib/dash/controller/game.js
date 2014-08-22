@@ -6,7 +6,6 @@ var handlebars = require('handlebars');
 var Util       = require('../../core/util.js');
 
 module.exports = {
-    getAllGameAchievements:  getAllGameAchievements,
     getUserGameAchievements: getUserGameAchievements,
     getGameDetails:      getGameDetails,
     getGameReports:      getGameReports,
@@ -15,42 +14,6 @@ module.exports = {
 
 var exampleIn = {};
 
-// http://localhost:8001/api/v2/dash/game/AA-1/achievements/all
-exampleIn.getAllGameAchievements = {
-    gameId: 'AA-1'
-};
-function getAllGameAchievements(req, res){
-    try {
-
-        // check input
-        if( !( req.params &&
-               req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
-            return;
-        }
-
-        var gameId = req.params.gameId;
-        // gameIds are not case sensitive
-        gameId = gameId.toUpperCase();
-
-        // check gameId exists
-        if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
-            return;
-        }
-
-        var game = this.games[gameId];
-        if( game.achievements ) {
-            this.requestUtil.jsonResponse(res, game.achievements);
-        } else {
-            this.requestUtil.jsonResponse(res, {});
-        }
-
-    } catch(err) {
-        console.trace("Reports: Get Achievements Error -", err);
-        this.stats.increment("error", "GetAchievements.Catch");
-    }
-}
 
 // http://localhost:8001/api/v2/dash/game/AA-1/achievements/user
 exampleIn.getUserGameAchievements = {
@@ -66,16 +29,15 @@ function getUserGameAchievements(req, res){
             return;
         }
 
-        var gameId = req.params.gameId;
         // gameIds are not case sensitive
-        gameId = gameId.toUpperCase();
+        var gameId = req.params.gameId.toUpperCase();
+        var userData = req.session.passport.user;
 
         // check gameId exists
-        if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+        if( !this.isValidGameId(gameId) ) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
             return;
         }
-        var userData = req.session.passport.user;
 
         this.telmStore.getGamePlayInfo(userData.id, gameId)
             .then(function(info){
@@ -113,19 +75,12 @@ function getGameDetails(req, res){
         gameId = gameId.toUpperCase();
 
         // check gameId exists
-        if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+        if( !this.isValidGameId(gameId) ) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
             return;
         }
 
-        var game = this.games[gameId];
-        if( game.info &&
-            game.info.hasOwnProperty('details') ) {
-            this.requestUtil.jsonResponse(res, game.info.details);
-        } else {
-            this.requestUtil.jsonResponse(res, {});
-        }
-
+        this.requestUtil.jsonResponse(res, this.getGameDetails(gameId));
     } catch(err) {
         console.trace("Reports: Get Game Info Error -", err);
         this.stats.increment("error", "GetGameInfo.Catch");
@@ -143,7 +98,7 @@ function getGameReports(req, res){
         // check input
         if( !( req.params &&
             req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
             return;
         }
 
@@ -152,19 +107,12 @@ function getGameReports(req, res){
         gameId = gameId.toUpperCase();
 
         // check gameId exists
-        if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+        if( !this.isValidGameId(gameId) ) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
             return;
         }
 
-        var game = this.games[gameId];
-        if( game.hasOwnProperty('info') &&
-            game.info.hasOwnProperty('reports') ) {
-            this.requestUtil.jsonResponse(res, game.info.reports);
-        } else {
-            this.requestUtil.jsonResponse(res, []);
-        }
-
+        this.requestUtil.jsonResponse(res, this.getGameReports(gameId));
     } catch(err) {
         console.trace("Reports: Get Game Reports Error -", err);
         this.stats.increment("error", "GetGameReports.Catch");
@@ -192,8 +140,8 @@ function getGameMissions(req, res){
         gameId = gameId.toUpperCase();
 
         // check gameId exists
-        if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"}, 404);
+        if( !this.isValidGameId(gameId) ) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
             return;
         }
 
@@ -206,13 +154,11 @@ function getGameMissions(req, res){
 
         var userData = req.session.passport.user;
 
-        var game = this.games[gameId];
-        if( game.info &&
-            game.info.hasOwnProperty('missions') &&
-            game.info.missions.hasOwnProperty('groups') ) {
+        var missions = _.cloneDeep(this.getGameMissionGroups(gameId));
+        if( missions ) {
 
-            var missionGroups = _.cloneDeep(game.info.missions.groups);
-            var linkSchema    = game.info.missions.linkSchema;
+            var missionGroups = _.cloneDeep(missions.groups);
+            var linkSchema    = missions.linkSchema;
 
             var missionProgressLock = false;
 
@@ -339,16 +285,5 @@ function getGameMissions(req, res){
         console.trace("Reports: Get Game Missions Error -", err);
         this.stats.increment("error", "GetGameInfo.Catch");
         this.requestUtil.errorResponse(res, "Server Error");
-    }
-}
-
-// recursivly removes all
-function removeSpecialMembers(data){
-    for(var key in data) {
-        if(key.charAt(0) == '$') {
-            delete data[key];
-        } else if(_.isObject( data[key] )) {
-            removeSpecialMembers(data[key]);
-        }
     }
 }

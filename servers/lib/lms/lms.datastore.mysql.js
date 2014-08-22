@@ -240,6 +240,9 @@ return when.promise(function(resolve, reject) {
                 for(var i = 0; i < results.length; i++) {
                     results[i].archived = results[i].archived ? true : false;
                     results[i].lockedRegistration = results[i].lockedRegistration   ? true : false;
+
+                    // convert string to array
+                    results[i].grade = this._splitGrade(results[i].grade);
                 }
 
                 resolve(results);
@@ -280,6 +283,9 @@ return when.promise(function(resolve, reject) {
                 results = results[0];
                 results.archived = results.archived ? true : false;
                 results.locked   = results.locked   ? true : false;
+
+                // convert string to array
+                results.grade = this._splitGrade(results.grade);
 
                 resolve(results);
             } else {
@@ -444,6 +450,9 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
                     delete results.firstName;
                     delete results.lastName;
 
+                    // convert string to array
+                    results.grade = this._splitGrade(results.grade);
+
                     resolve(results);
                 } else {
                     resolve();
@@ -457,6 +466,16 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
 // ------------------------------------------------
     }.bind(this));
 // end promise wrapper
+};
+
+// convert grades delim string to array
+LMS_MySQL.prototype._splitGrade = function(grade) {
+    // remove all space
+    grade = grade.replace(/\s+/g, '');
+    // auto split grade into array
+    grade = grade.split(",");
+
+    return grade;
 };
 
 
@@ -699,6 +718,10 @@ return when.promise(function(resolve, reject) {
             institutionId = "NULL";
         } else {
             institutionId = parseInt(institutionId);
+        }
+
+        if(_.isArray(grade)) {
+            grade = grade.join(',');
         }
 
         title = this.ds.escape(title);

@@ -84,6 +84,23 @@ module.exports = {
             method: {
                 get: "setAllUsersActive"
             }
+        },
+        {
+            api: "/api/v2/data/config/:gameId",
+            service: "data",
+            controller: "_config",
+            method: {
+                post: "updateGameConfigs"
+            }
+        },
+        {
+            api: "/api/v2/data/config/:gameId",
+            service: "data",
+            controller: "config",
+            method: {
+                get: "index"
+            }
         }
+
     ]
 };

@@ -13,6 +13,7 @@ module.exports = {
     "institution.exists":   "user.notUnique.institution",
     "invalid.hash":         "user.passwordReset.code.invalid",
     "missing":              "user.login.missing",
+    "missing.data":         "Game data missing",
     
     // new
     "course.general":                       "We encountered an error. Please try again.",
@@ -41,5 +42,8 @@ module.exports = {
     "user.passwordReset.code.missing":      "The code is invalid.",
     "user.passwordReset.code.expired":      "Oops, your code has expired. You'll need to go through the password reset process again.",
     "user.passwordReset.code.invalid":      "The URL provided is not valid. Please try cutting and pasting again from the email you received with password reset information.",
-    "user.passwordReset.user.emailNotExist": "This email address does not exist in our system."
+    "user.passwordReset.user.emailNotExist":"This email address does not exist in our system.",
+    // config
+    "data.gameId.missing":                       "This game Id does not exist in our system",
+    "data.gameId.invalid":                       "This game Id is not in our list of valid games"
 };

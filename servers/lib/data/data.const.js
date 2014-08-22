@@ -23,6 +23,7 @@ module.exports = {
             ended: 'ended',
             cleanup: 'cleanup'
         },
+        configKey: 'c',
         dataKey: 'gd',
         deviceKey: 'd',
         saveKey: 'save',

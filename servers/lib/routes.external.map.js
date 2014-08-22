@@ -118,29 +118,19 @@ module.exports = {
         // ---------------------------------------------------
         {
             requireAuth: true,
-            api: "/api/v2/dash/reports/achievements",
+            api: "/api/v2/dash/reports/:reportId/game/:gameId/course/:courseId",
             service: "dash",
             controller: "reports",
             method: {
-                get: "getAchievements"
+                get: "getReport"
             }
         },
         {
-            requireAuth: true,
-            api: "/api/v2/dash/reports/sowo",
+            api: "/api/v2/dash/reports/:reportId/game/:gameId/info",
             service: "dash",
             controller: "reports",
             method: {
-                get: "getSOWO"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/dash/reports/competency",
-            service: "dash",
-            controller: "reports",
-            method: {
-                get: "getCompetency"
+                get: "getReportInfo"
             }
         },
         {
@@ -152,14 +142,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/game/:gameId/achievements/all",
-            service: "dash",
-            controller: "game",
-            method: {
-                get: "getAllGameAchievements"
-            }
-        },
-        {
             api: "/api/v2/dash/game/:gameId/achievements/user",
             service: "dash",
             controller: "game",
@@ -168,7 +150,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/game/:gameId/reports",
+            api: "/api/v2/dash/game/:gameId/reports/all",
             service: "dash",
             controller: "game",
             method: {
@@ -412,6 +394,17 @@ module.exports = {
             controller: "config",
             method: {
                 get: "index"
+            }
+        },
+        // ---------------------------------------------------
+        // SDK
+        // ---------------------------------------------------
+        {
+            api: "/sdk/connect",
+            service: "data",
+            controller: "config",
+            method: {
+                get: "connect"
             }
         }
     ]

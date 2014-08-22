@@ -18,7 +18,7 @@ var aConst, tConst, Util;
 
 module.exports = DataService;
 
-function DataService(options){
+function DataService(options, serviceManager){
     try{
         var Telemetry, WebStore, Errors;
 
@@ -41,7 +41,7 @@ function DataService(options){
         this.requestUtil = new Util.Request(this.options, Errors);
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
         this.myds        = new Telemetry.Datastore.MySQL(this.options.telemetry.datastore.mysql);
-        this.cbds        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase);
+        this.cbds        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase, serviceManager);
         this.stats       = new Util.Stats(this.options, "Data");
 
     } catch(err) {
