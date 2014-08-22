@@ -106,7 +106,7 @@ function saveAssessmentResults(req, res){
                 // merge results
                 out.results = _.merge( out.results, data.results );
 
-                console.log("out:", out);
+                //console.log("out:", out);
                 return this.telmStore.saveAssessmentResults(userId, gameId, assessmentId, out);
             }.bind(this) )
 
