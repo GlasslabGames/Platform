@@ -14,7 +14,7 @@ module.exports = {
     "invalid.hash":         "user.passwordReset.code.invalid",
     "missing":              "user.login.missing",
     "missing.data":         "Game data missing",
-    
+
     // new
     "course.general":                       "We encountered an error. Please try again.",
     "course.locked":                        "Course Registration is Locked at the moment. Please try again later.",
@@ -44,6 +44,8 @@ module.exports = {
     "user.passwordReset.code.invalid":      "The URL provided is not valid. Please try cutting and pasting again from the email you received with password reset information.",
     "user.passwordReset.user.emailNotExist":"This email address does not exist in our system.",
     // config
-    "data.gameId.missing":                       "This game Id does not exist in our system",
-    "data.gameId.invalid":                       "This game Id is not in our list of valid games"
+    "data.gameId.general":                  "We encountered an error. Please try again.",
+    "data.gameId.missing":                  "This game Id does not exist in our system",
+    "data.gameId.invalid":                  "This game Id is not in our list of valid games",
+    "data.gameConfig.missing":              "You did not input game config"
 };

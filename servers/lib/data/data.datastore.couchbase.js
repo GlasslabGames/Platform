@@ -378,7 +378,7 @@ return when.promise(function (resolve, reject) {
             if ( !info.migrated.addGameConfig ) {
                 tasks.push(
                     function() {
-                        console.log("CouchBase TelemetryStore: Migrate GameConfig from MySQL")
+                        console.log("CouchBase TelemetryStore: Migrate GameConfig from MySQL");
                         return this._migrateGameConfigFromMySql(myds)
                             .then(function () {
                                 console.log("CouchBase TelemetryStore: Update GameConfig in CouchDB");

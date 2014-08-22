@@ -9,13 +9,18 @@ module.exports = {
 function updateGameConfigs(req, res, next, serviceManager)
 {
 
-    var data = req.body;
+    if (Object.keys(req.body).length < 1) {
+        this.requestUtil.errorResponse(res, {key: "data.gameConfig.missing", statsCode: 400});
+        return;
+    }
+
     var gameId = req.params.gameId.toUpperCase();
+    var config = req.body;
     var gameIds = serviceManager.get("dash").service.getListOfGameIds();
 
     // check if gameId exists in list of gameIds
     if (_.contains(gameIds, gameId)) {
-        this.cbds.updateConfigs(gameId, data)
+        this.cbds.updateConfigs(gameId, config)
             .then(function(){
                 this.requestUtil.jsonResponse(res, { status: "ok" });
             }.bind(this))
@@ -25,7 +30,6 @@ function updateGameConfigs(req, res, next, serviceManager)
     } else {
         this.requestUtil.errorResponse(res, {key: "data.gameId.invalid", statusCode: 401});
     }
-
 
 }
 

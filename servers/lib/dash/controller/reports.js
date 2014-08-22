@@ -5,13 +5,64 @@ var lConst    = require('../../lms/lms.const.js');
 //
 
 module.exports = {
-    getAchievements:    getAchievements,
-    getSOWO:            getSOWO,
-    getCompetency:      getCompetency,
+    getReport:          getReport,
+    getReportInfo:      getReportInfo,
     getTotalTimePlayed: getTotalTimePlayed
 };
 
 var exampleIn = {}, exampleOut = {};
+
+// http://localhost:8001/api/v2/dash/reports/sowo/game/AA-1/course/93
+// http://localhost:8001/api/v2/dash/reports/sowo?gameId=AA-1&courseId=93
+exampleIn.getSOWO = {
+    gameId: "AA-1",
+    courseId: 1
+};
+exampleOut.getSOWO = [
+
+];
+function getReport(req, res, next) {
+    try {
+        if (!req.params.reportId) {
+            this.requestUtil.errorResponse(res, {key:"report.reportId.missing", error: "missing reportId"});
+            return;
+        }
+        if (!req.params.gameId) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+            return;
+        }
+        if (!req.params.courseId) {
+            this.requestUtil.errorResponse(res, {key:"report.courseId.missing", error: "missing courseId"});
+            return;
+        }
+
+        var reportId = req.params.reportId.toLowerCase();
+        var courseId = parseInt(req.params.courseId);
+        // gameId is not case sensitive
+        var gameId = req.params.gameId.toUpperCase();
+
+        // TODO: change to promise
+        // check if valid gameId
+        if(!this.isValidGameId(gameId)) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+            return;
+        }
+
+        if(reportId == 'sowo') {
+            _getSOWO.call(this, req, res, reportId, gameId, courseId);
+        }
+        else if(reportId == 'achievements') {
+            _getAchievements.call(this, req, res, reportId, gameId, courseId);
+        }
+        else {
+            this.requestUtil.errorResponse(res, {key:"report.reportId.invalid", error: "invalid reportId"});
+        }
+    } catch(err) {
+        console.trace("Reports: Get Reports Error -", err);
+        this.stats.increment("error", "getReport.Catch");
+    }
+}
+
 
 // http://localhost:8001/api/v2/dash/reports/sowo?gameId=AA-1&courseId=93
 exampleIn.getSOWO = {
@@ -21,18 +72,8 @@ exampleIn.getSOWO = {
 exampleOut.getSOWO = [
 
 ];
-function getSOWO(req, res) {
-    if(!req.query.courseId) {
-        this.requestUtil.errorResponse(res, {error: "missing userIds"});
-        return;
-    }
-    var courseId = req.query.courseId;
-    if(!req.query.gameId) {
-        this.requestUtil.errorResponse(res, {error: "missing gameId"});
-        return;
-    }
-    var gameId = req.query.gameId;
-    var assessmentId = "sowo";
+function _getSOWO(req, res, reportId, gameId, courseId) {
+    var assessmentId = reportId;
 
     // get user list in class
     // TODO: use service route
@@ -122,21 +163,12 @@ function getSOWO(req, res) {
 }
 
 
-exampleIn.getCompetency = {
-    gameId: "AA-1",
-    courseId: 1
-};
-function getCompetency(req, res) {
-    this.requestUtil.jsonResponse(res, {});
-}
-
-
 // http://localhost:8001/api/v2/dash/reports/achievements?gameId=AA-1&courseId=93
-exampleIn.getAchievements = {
+exampleIn._getAchievements = {
     gameId: "AA-1",
     courseId: 93
 };
-exampleOut.getAchievements = [
+exampleOut._getAchievements = [
     {
         "userId": 25,
         "achievements": [
@@ -156,92 +188,65 @@ exampleOut.getAchievements = [
         "totalTimePlayed": 123456789
     }
 ];
-function getAchievements(req, res) {
-    try {
-        if( !(req.session &&
-              req.session.passport &&
-              req.session.passport.user &&
-              req.session.passport.user.id ) ) {
-            this.requestUtil.errorResponse(res, {error: "not logged in"});
-            return;
-        }
+function _getAchievements(req, res, reportId, gameId, courseId) {
 
-        var loginUserSessionData = req.session.passport.user;
-        if(loginUserSessionData.role == lConst.role.student) {
-            this.requestUtil.errorResponse(res, {error: "invalid access"});
-            return;
-        }
-
-        if(!req.query.courseId) {
-            this.requestUtil.errorResponse(res, {error: "missing userIds"});
-            return;
-        }
-        if(!req.query.gameId) {
-            this.requestUtil.errorResponse(res, {error: "missing gameId"});
-            return;
-        }
-
-        var courseId = parseInt(req.query.courseId);
-        var gameId = req.query.gameId;
-        // gameId is not case sensitive
-        gameId = gameId.toUpperCase();
-
-        //console.log("userIds:", userIds);
-        // validate users in teachers class
-        this.lmsStore.isUserInCourse(loginUserSessionData.id, courseId)
-            .then(function(verified) {
-                if(verified) {
-                    return this.lmsStore.getStudentsOfCourse(courseId);
-                } else {
-                    this.requestUtil.errorResponse(res, {error: "invalid access"});
-                }
-            }.bind(this))
-
-            .then(function(userInfo) {
-                if(userInfo) {
-                    var userIds = _.pluck(userInfo, "id");
-                    return this.telmStore.getMultiGamePlayInfo(userIds, gameId);
-                } else {
-                    this.requestUtil.errorResponse(res, {error: "invalid access"});
-                }
-            }.bind(this))
-
-            .then(function(playerInfoList) {
-                var achievements = [];
-                //console.log("playerInfoList:", playerInfoList);
-
-                for(var userId in playerInfoList) {
-                    var info = playerInfoList[userId];
-                    //console.log("info:", info);
-
-                    var userAchievements = {
-                        userId: userId,
-                        achievements: [],
-                        totalTimePlayed: info.totalTimePlayed || 0
-                    };
-
-                    userAchievements.achievements = this.getListOfAchievements(gameId, info.achievement);
-                    achievements.push(userAchievements);
-                }
-
-                //console.log("getAchievements:", achievements);
-                this.requestUtil.jsonResponse(res, achievements);
-            }.bind(this))
-
-            // error
-            .then(null, function(err){
-                if(err == 'none found') {
-                    // empty list
-                    this.requestUtil.jsonResponse(res, {});
-                } else {
-                    this.requestUtil.errorResponse(res, err);
-                }
-            }.bind(this));
-
-    } catch(err) {
-        console.trace("Reports: Get Achievements Error -", err);
-        this.stats.increment("error", "GetAchievements.Catch");
+    var loginUserSessionData = req.session.passport.user;
+    if(loginUserSessionData.role == lConst.role.student) {
+        this.requestUtil.errorResponse(res, {error: "invalid access"});
+        return;
     }
+
+    //console.log("userIds:", userIds);
+    // validate users in teachers class
+    this.lmsStore.isUserInCourse(loginUserSessionData.id, courseId)
+        .then(function(verified) {
+            if(verified) {
+                return this.lmsStore.getStudentsOfCourse(courseId);
+            } else {
+                this.requestUtil.errorResponse(res, {error: "invalid access"});
+            }
+        }.bind(this))
+
+        .then(function(userInfo) {
+            if(userInfo) {
+                var userIds = _.pluck(userInfo, "id");
+                return this.telmStore.getMultiGamePlayInfo(userIds, gameId);
+            } else {
+                this.requestUtil.errorResponse(res, {error: "invalid access"});
+            }
+        }.bind(this))
+
+        .then(function(playerInfoList) {
+            var achievements = [];
+            //console.log("playerInfoList:", playerInfoList);
+
+            for(var userId in playerInfoList) {
+                var info = playerInfoList[userId];
+                //console.log("info:", info);
+
+                var userAchievements = {
+                    userId: userId,
+                    achievements: [],
+                    totalTimePlayed: info.totalTimePlayed || 0
+                };
+
+                userAchievements.achievements = this.getListOfAchievements(gameId, info.achievement);
+                achievements.push(userAchievements);
+            }
+
+            //console.log("getAchievements:", achievements);
+            this.requestUtil.jsonResponse(res, achievements);
+        }.bind(this))
+
+        // error
+        .then(null, function(err){
+            if(err == 'none found') {
+                // empty list
+                this.requestUtil.jsonResponse(res, {});
+            } else {
+                this.requestUtil.errorResponse(res, err);
+            }
+        }.bind(this));
 }
 
 exampleIn.getTotalTimePlayed = {
@@ -365,4 +370,28 @@ function getTotalTimePlayed(req, res) {
         console.trace("Reports: Get Achievements Error -", err);
         this.stats.increment("error", "GetAchievements.Catch");
     }
+}
+
+function getReportInfo(req, res){
+    if (!req.params.reportId) {
+        this.requestUtil.errorResponse(res, {key:"report.reportId.missing", error: "missing reportId"});
+        return;
+    }
+    if (!req.params.gameId) {
+        this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+        return;
+    }
+
+    var reportId = req.params.reportId.toLowerCase();
+    // gameId is not case sensitive
+    var gameId = req.params.gameId.toUpperCase();
+
+    // TODO: change to promise
+    // check if valid gameId
+    if(!this.isValidGameId(gameId)) {
+        this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+        return;
+    }
+
+    this.requestUtil.jsonResponse(res, this.getGameReportInfo(gameId, reportId) );
 }
