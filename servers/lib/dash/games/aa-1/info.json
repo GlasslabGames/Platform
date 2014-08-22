@@ -56,9 +56,9 @@
                 "name": "Game Achievements & Time Played",
                 "header": {
                     "text": "Game Achievements & Time Played",
-                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                    "image": "assets/game-banner-AA-1.png"
                 },
-                "description": "This report shows...",
+                "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
             },
             {
@@ -68,9 +68,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                    "image": "assets/game-banner-AA-1.png"
                 },
-                "description": "This report shows..."
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             }
         ]
     },
@@ -110,11 +110,11 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                        "url": "assets/3v3battle.png"
                     },
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/map.png"
+                        "url": "assets/map.png"
                     }
                 ]
             },
@@ -269,8 +269,8 @@
             ]
         },
         "banners": {
-            "product": "http://argubotacademy.org/images/banner_mars1.jpg",
-            "reports": "http://argubotacademy.org/images/banner_mars1.jpg"
+            "product": "assets/game-banner-AA-1.jpg",
+            "reports": "assets/game-banner-AA-1.jpg"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
