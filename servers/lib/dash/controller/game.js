@@ -154,7 +154,7 @@ function getGameMissions(req, res){
 
         var userData = req.session.passport.user;
 
-        var missions = _.cloneDeep(this.getGameMissionGroups(gameId));
+        var missions = _.cloneDeep(this.getGameMissions(gameId));
         if( missions ) {
 
             var missionGroups = _.cloneDeep(missions.groups);
