@@ -43,9 +43,15 @@ module.exports = {
     "user.passwordReset.code.expired":      "Oops, your code has expired. You'll need to go through the password reset process again.",
     "user.passwordReset.code.invalid":      "The URL provided is not valid. Please try cutting and pasting again from the email you received with password reset information.",
     "user.passwordReset.user.emailNotExist":"This email address does not exist in our system.",
+    "user.verifyEmail.general":             "We encountered an error occurred. Please try again.",
+    "user.verifyEmail.code.missing":        "The code is invalid.",
+    "user.verifyEmail.code.expired":        "Oops, your code has expired. You'll need another verification code.",
+    "user.verifyEmail.code.invalid":        "The URL provided is not valid. Please try cutting and pasting again from the email you received with verification information.",
+    "user.verifyEmail.user.emailNotExist":  "This email address does not exist in our system.",
     // config
     "data.gameId.general":                  "We encountered an error. Please try again.",
     "data.gameId.missing":                  "This game Id does not exist in our system",
     "data.gameId.invalid":                  "This game Id is not in our list of valid games",
     "data.gameConfig.missing":              "You did not input game config"
+
 };

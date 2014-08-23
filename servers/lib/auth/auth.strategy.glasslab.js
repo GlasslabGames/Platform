@@ -141,7 +141,10 @@ return when.promise(function(resolve, reject) {
             collect_Telemetry as collectTelemetry, \
             reset_Code as resetCode, \
             reset_Code_Expiration as resetCodeExpiration, \
-            reset_Code_Status as resetCodeStatus \
+            reset_Code_Status as resetCodeStatus, \
+            verify_code as verifyCode, \
+            verify_code_expiration as verifyCodeExpiration, \
+            verify_code_status as verifyCodeStatus \
         FROM \
             GL_USER \
         WHERE \
@@ -328,7 +331,7 @@ return when.promise(function(resolve, reject) {
         username:       this.ds.escape(userData.username),
         collect_telemetry:      0,
         login_type:     this.ds.escape(userData.loginType),
-        verify_code:    this.ds.escape(userData.verify_code),
+        verify_code:    "NULL",
         verify_code_expiration: "NULL",
         verify_code_status: "NULL"
     };
@@ -382,16 +385,42 @@ return when.promise(function(resolve, reject) {
     }
     if(userData.resetCodeExpiration) {
         if(userData.resetCodeExpiration == "NULL") {
-            data.reset_Code_Expiration = "NULL";
+            data.reset_code_expiration = "NULL";
         } else {
-            data.reset_Code_Expiration = this.ds.escape(userData.resetCodeExpiration);
+            data.reset_code_expiration = this.ds.escape(userData.resetCodeExpiration);
         }
     }
     if(userData.resetCodeStatus) {
         if(userData.resetCodeStatus == "NULL") {
-            data.reset_Code_Status = "NULL";
+            data.reset_code_status = "NULL";
         } else {
-            data.reset_Code_Status = this.ds.escape(userData.resetCodeStatus);
+            data.reset_code_status = this.ds.escape(userData.resetCodeStatus);
+        }
+    }
+
+    if(userData.verify_code) {
+        userData.verifyCode = userData.verify_code;
+    }
+    if(userData.verifyCode) {
+        if(userData.verifyCode == "NULL") {
+            data.verify_code = "NULL";
+        } else {
+            data.verify_code = this.ds.escape(userData.verifyCode);
+        }
+    }
+    if(userData.verifyCodeExpiration) {
+        if(userData.verifyCodeExpiration == "NULL") {
+            data.verify_code_expiration = "NULL";
+        } else {
+            data.verify_code_expiration = this.ds.escape(userData.verifyCodeExpiration);
+        }
+    }
+    console.log('status:', userData.verifyCodeStatus);
+    if(userData.verifyCodeStatus) {
+        if(userData.verifyCodeStatus == "NULL") {
+            data.verify_code_status = "NULL";
+        } else {
+            data.verify_code_status = this.ds.escape(userData.verifyCodeStatus);
         }
     }
 
