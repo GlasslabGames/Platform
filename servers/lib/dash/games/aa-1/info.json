@@ -185,25 +185,18 @@
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Pre-Game Introduction I",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+I.pdf"
+                            "name": "Argubot Academy: Lesson 1",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Lesson_1.zip"
                         },
                         {
-                            "name": "Pre-Game Introduction II",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Pre-Game+Intro+II.pdf"
+                            "name": "Argubot Academy: Lesson 2",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Lesson_2.zip"
                         },
                         {
-                            "name": "MGO Core Lesson Plan I.pdf",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+I.pdf"
+                            "name": "Argubot Academy Routines - Coming Soon!",
+                            "link": ""
                         },
-                        {
-                            "name": "MGO Core Lesson Plan II.pdf",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+II.pdf"
-                        },
-                        {
-                            "name": "MGO Core Lesson Plan III.pdf",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+III.pdf"
-                        }
+
                     ]
                 },
                 {
@@ -220,8 +213,8 @@
                     "category": "Info Pack",
                     "list": [
                         {
-                            "name": "One Page Game Description",
-                            "link": "http://glasslabgames.org"
+                            "name": "Game Description",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+brochure_final.pdf"
                         }
                     ]
                 }
