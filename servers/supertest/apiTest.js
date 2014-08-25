@@ -131,8 +131,6 @@ describe("API v2 testing", function(done) {
     
     it("#returns reports - SOWO", function(done) {
         
-        console.log(srvAddr + routes.reports.sowo.path);
-        
         agent
 					.get(srvAddr + routes.reports.sowo.path)
           .type('application/json')
