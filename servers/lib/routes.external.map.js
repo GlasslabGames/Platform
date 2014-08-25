@@ -182,6 +182,7 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
             api: "/api/v2/dash/myGames",
             service: "dash",
             controller: "games",
