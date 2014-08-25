@@ -12,7 +12,7 @@ var data      = require('./lib/testData.js').stage,
 var testENV = "stage",
     srvAddr = data.serverAddress;
 
-var newClassId = 0;
+var newClassId, classData;
 var agent = request.agent();
 
 //////////////////////

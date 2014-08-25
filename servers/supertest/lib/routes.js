@@ -5,7 +5,6 @@
 var testData = require('./testData').stage;     // NOTE - Set to stage here
 var teacher  = testData.teacher,
     student  = testData.student;
-
 ////////////////
 
 //// ROUTES ////
@@ -57,5 +56,4 @@ module.exports = {
         path: "/api/v2/auth/logout",
         post: {}
     }
-
 }
