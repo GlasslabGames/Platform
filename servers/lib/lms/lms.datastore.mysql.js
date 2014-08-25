@@ -12,13 +12,14 @@ var when   = require('when');
 var lConst = require('./lms.const.js');
 
 // load at runtime
-var MySQL;
+var MySQL, Util;
 
 module.exports = LMS_MySQL;
 
 function LMS_MySQL(options){
     // Glasslab libs
-    MySQL   = require('../core/datastore.mysql.js');
+    MySQL  = require('../core/datastore.mysql.js');
+    Util   = require('../core/util.js');
 
     this.options = _.merge(
         {
@@ -151,6 +152,9 @@ return when.promise(function(resolve, reject) {
 
                     // convert string to array
                     results[i].grade = this._splitGrade(results[i].grade);
+
+                    // normalize archive dates
+                    results[i].archivedDate = Util.GetTimeStamp(results[i].archivedDate);
                 }
 
                 resolve(results);
@@ -194,6 +198,9 @@ return when.promise(function(resolve, reject) {
 
                 // convert string to array
                 results.grade = this._splitGrade(results.grade);
+
+                // normalize archive dates
+                results.archivedDate = Util.GetTimeStamp(results.archivedDate);
 
                 resolve(results);
             } else {
@@ -360,6 +367,9 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
 
                     // convert string to array
                     results.grade = this._splitGrade(results.grade);
+
+                    // normalize archive dates
+                    results.archivedDate = Util.GetTimeStamp(results.archivedDate);
 
                     resolve(results);
                 } else {
@@ -705,7 +715,7 @@ LMS_MySQL.prototype.updateCourseInfo = function(userId, courseData) {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var title = this.ds.escape(courseData.title);
+    courseData.id = parseInt(courseData.id);
 
     if(!courseData.institutionId) {
         courseData.institutionId = "NULL";
@@ -717,19 +727,23 @@ return when.promise(function(resolve, reject) {
         courseData.grade = courseData.grade.join(",");
     }
 
+    // normalize archive dates
+    courseData.archivedDate = parseInt(courseData.archivedDate);
+    courseData.archivedDate = Util.GetTimeStamp(courseData.archivedDate);
+
     // verify userId is instructor of course
     var Q = "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
-    Q += "c.id="+courseData.id+" AND c.title="+title+" AND m.user_id="+parseInt(userId);
+    Q += "c.id="+courseData.id+" AND m.user_id="+parseInt(userId);
     //console.log("getCourses Q:", Q);
     this.ds.query(Q).then(function(data){
             if(data.length) {
                 var Q = "UPDATE GL_COURSE " +
                     "SET last_updated=NOW(), " +
-                    "title="+title+", "+
+                    "title="+this.ds.escape(courseData.title)+", "+
                     "grade="+this.ds.escape(courseData.grade)+", ";
 
                 if(courseData.archived) {
-                    Q += "archived=true, archived_date="+parseInt(courseData.archivedDate)+", ";
+                    Q += "archived=true, archived_date="+courseData.archivedDate+", ";
                 } else {
                     Q += "archived=false, archived_date=NULL, ";
                 }
