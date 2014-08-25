@@ -17,6 +17,11 @@ module.exports = {
         key: "ae",
         resultsKey: "r"
     },
+    lms: {
+        key:       "lms",
+        courseKey: "c",
+        gameKey:   "game"
+    },
     game: {
         session: {
             started: 'started',

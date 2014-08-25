@@ -286,48 +286,6 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-
-exampleOut.getGameSettingsFromCourseId = {
-    "SC": { "missionProgressLock": false },
-    "AA-1": {},
-    "AW-1": {}
-};
-WebStore_MySQL.prototype.getGameSettingsFromCourseId = function(courseId) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    var Q = "SELECT game_id as gameId, game_settings as gameSettings" +
-        " FROM GL_COURSE_GAME_MAP" +
-        " WHERE course_id="+this.ds.escape(courseId);
-
-    //console.log("Q:", Q);
-    this.ds.query(Q).then(function(results) {
-            if(results.length > 0) {
-                var gameSettings = {};
-                for(var i = 0; i < results.length; i++) {
-                    try {
-                        // gameId is not case sensitive, always lowercase
-                        gameSettings[ results[i].gameId.toUpperCase() ] = JSON.parse(results[i].gameSettings);
-                    } catch(err) {
-                        // invalid json
-                        console.error("WebStore_MySQL getGameSettingsFromCourseId: Error -", err);
-                        gameSettings[ results[i].gameId.toUpperCase() ] = {};
-                    }
-                }
-
-                resolve( gameSettings );
-            } else {
-                resolve([]);
-            }
-        }.bind(this)
-        , reject);
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
 // TODO: use a new table with gameId column
 // return missions map with "missionId" as key and "endTime" value
 WebStore_MySQL.prototype.getCompletedMissions = function(userId, courseId, gameId) {
@@ -351,38 +309,6 @@ return when.promise(function(resolve, reject) {
                     missions[ results[i].mission ] = results[i].endTime;
                 }
                 resolve( missions );
-            } else {
-                resolve([]);
-            }
-        }.bind(this)
-        , reject);
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-
-WebStore_MySQL.prototype.getDistinctGames = function(userId) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    var Q = "SELECT DISTINCT(gm.game_id) as gameId FROM \
-            GL_COURSE_GAME_MAP gm \
-            JOIN (SELECT * FROM GL_MEMBERSHIP \
-                WHERE role=\"instructor\" AND user_id="+this.ds.escape(userId)+" \
-            ) m on m.course_id=gm.course_id";
-
-    //console.log("Q:", Q);
-    this.ds.query(Q).then(function(results) {
-            if(results.length > 0) {
-                var gameIdList = [];
-                for(var i = 0; i < results.length; i++) {
-                    gameIdList.push( results[i].gameId.toUpperCase() );
-                }
-
-                resolve( gameIdList );
             } else {
                 resolve([]);
             }

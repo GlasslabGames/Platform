@@ -18,6 +18,7 @@ var tConst, Util;
 module.exports = TelemDS_Couchbase;
 
 var exampleIn = {};
+var exampleOut = {};
 
 function TelemDS_Couchbase(options,serviceManager){
     // Glasslab libs
@@ -39,7 +40,7 @@ function TelemDS_Couchbase(options,serviceManager){
     this.currentDBVersion = 0.7;
 }
 
-TelemDS_Couchbase.prototype.connect = function(){
+TelemDS_Couchbase.prototype.connect = function(myds){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -63,6 +64,11 @@ return when.promise(function(resolve, reject) {
     this.client.on('connect', function () {
         // if design doc changes, auto update design doc
         this.setupDocsAndViews()
+            .then(function(){
+                if(myds) {
+                    return this.migrateDataAuto(myds);
+                }
+            }.bind(this))
             .then( resolve, reject );
     }.bind(this));
 
@@ -323,7 +329,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.migrateData = function(myds) {
+TelemDS_Couchbase.prototype.migrateDataAuto = function(myds) {
 // add promise wrapper
 return when.promise(function (resolve, reject) {
 // ------------------------------------------------
@@ -331,7 +337,76 @@ return when.promise(function (resolve, reject) {
     console.log("CouchBase TelemetryStore: Getting Data Schema Info...");
     this.getDataSchemaInfo()
         .then(function (info) {
-            console.log("CouchBase TelemetryStore: Data Schema Info:", info);
+            //console.log("CouchBase TelemetryStore: Data Schema Info:", info);
+
+            if( info.version != this.currentDBVersion ) {
+                info.version = this.currentDBVersion;
+            }
+
+            // ensure there is a property migrated
+            if(!info.migrated) {
+                info.migrated = {
+                    addGames: false
+                };
+            }
+
+            // add a list of functions to be called
+            var tasks = [];
+            if ( !info.migrated.addGames ) {
+                tasks.push(
+                    function() {
+                        console.log("CouchBase TelemetryStore: Auto Migrate Add Games...");
+                        return this._migrate_AddGames(myds)
+                            .then(function() {
+                                console.log("CouchBase TelemetryStore: Auto Migrate Add Games: Done!");
+                                info.migrated.addGames = true;
+                                return this.updateDataSchemaInfo(info);
+                            }.bind(this))
+                    }.bind(this)
+                );
+            }
+
+            if(tasks.length) {
+                // create a guarded Task function
+                var guardTask = guard.bind(null, guard.n(1));
+                // run each task using guardTask function
+                tasks = tasks.map(guardTask);
+
+                // wait until all guardTasks have completed
+                return sequence(tasks)
+                    .then(function() {
+                        console.log("CouchBase TelemetryStore: DB Schema Up to date!");
+                        // nothing to do
+                        resolve();
+                        return;
+                    }.bind(this))
+                    // catch all errors
+                    .then(null, reject);
+            }
+        }.bind(this))
+
+        .then(function () {
+            // all done
+            console.log("CouchBase TelemetryStore: All Done Auto Migrating");
+        }.bind(this))
+
+        // all done
+        .then(resolve, reject);
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.migrateData = function(myds) {
+// add promise wrapper
+return when.promise(function (resolve, reject) {
+// ------------------------------------------------
+
+    console.log("CouchBase TelemetryStore: Getting Data Schema Info...");
+    this.getDataSchemaInfo()
+        .then(function(info) {
+            //console.log("CouchBase TelemetryStore: Data Schema Info:", info);
 
             if( info.version != this.currentDBVersion ) {
                 info.version = this.currentDBVersion;
@@ -352,7 +427,7 @@ return when.promise(function (resolve, reject) {
                 tasks.push(
                     function() {
                         console.log("CouchBase TelemetryStore: Migrate Achievement Events...");
-                        return this._migrateEventAchievements()
+                        return this._migrate_EventAchievements()
                             .then(function() {
                                 console.log("CouchBase TelemetryStore: Migrate Achievement Events: Done!");
                                 info.migrated.achievements = true;
@@ -366,7 +441,7 @@ return when.promise(function (resolve, reject) {
                 tasks.push(
                      function() {
                          console.log("CouchBase TelemetryStore: Migrate Events to Add GameId...");
-                         return this._migrateEvents_AddingGameId(myds)
+                         return this._migrate_Events_AddingGameId(myds)
                             .then(function () {
                                  console.log("CouchBase TelemetryStore: Migrate Events to Add GameId: Done!");
                                 info.migrated.addGameId = true;
@@ -379,7 +454,7 @@ return when.promise(function (resolve, reject) {
                 tasks.push(
                     function() {
                         console.log("CouchBase TelemetryStore: Migrate GameConfig from MySQL");
-                        return this._migrateGameConfigFromMySql(myds)
+                        return this._migrate_GameConfigFromMySql(myds)
                             .then(function () {
                                 console.log("CouchBase TelemetryStore: Update GameConfig in CouchDB");
                                 info.migrated.addGameConfig = true;
@@ -403,7 +478,10 @@ return when.promise(function (resolve, reject) {
                         // nothing to do
                         resolve();
                         return;
-                    }.bind(this));
+                    }.bind(this))
+
+                    // catch all errors
+                    .then(null, reject);
             }
         }.bind(this))
 
@@ -420,7 +498,7 @@ return when.promise(function (resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype._migrateGameConfigFromMySql = function(myds) {
+TelemDS_Couchbase.prototype._migrate_GameConfigFromMySql = function(myds) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
     // get game config from SQL
@@ -451,84 +529,10 @@ return when.promise(function(resolve, reject) {
         }.bind(this))
 }.bind(this));
 // end promise wrapper
-}
-
-TelemDS_Couchbase.prototype._migrateEventsFromMysql = function(stats, myds, migrateCount) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    var sessionToGameLevelMap = [];
-    // assume game Id is SC because events where in mysql
-    var gameId = 'SC';
-
-    myds.getArchiveEventsLastId()
-        .then(function(lastId) {
-            if(lastId) {
-                return this._setEventCounter(gameId, lastId)
-                    // _setEventCounter done
-                    .then(function() {
-                        return myds.getGameSessionWithGameSection();
-                    }.bind(this))
-
-                    // getGameSessionWithGameSection done
-                    .then(function(map) {
-                        sessionToGameLevelMap = map;
-                        // migrate 5k at a time, as to no overload the DB
-                        return myds.getArchiveEvents(migrateCount);
-                    }.bind(this))
-
-                    // getArchiveEvents done
-                    .then(function(data) {
-                        //console.log("events:", data.events);
-                        if( data &&
-                            data.events &&
-                            _.isArray(data.events) &&
-                            data.events.length > 0 ) {
-
-                            // run all migrate sessions in sequence
-                            return this._migrateOldDB_SaveEvents(stats, myds, gameId, data.events, data.ids, sessionToGameLevelMap )
-                                // _migrateOldDB_SaveEvents done
-                                .then(function(ids) {
-                                    if( ids &&
-                                        _.isArray(ids) ) {
-
-                                        stats.increment('info', 'Couchbase.MigrateOldDBEvents.Done');
-                                        console.log("TelemetryStore: Migrate", ids.length, "events, last id:", ids[ids.length - 1]);
-
-                                        // start process again, loop until no more events left
-                                        process.nextTick( function(){
-                                            this.migrateEventsFromMysql(stats, myds, migrateCount);
-                                        }.bind(this) );
-                                    }
-                                }.bind(this));
-                        } else {
-                            console.log("TelemetryStore: no events to migrate");
-                            resolve();
-                        }
-                    }.bind(this));
-            } else {
-                console.log("TelemetryStore: no events to migrate");
-                resolve();
-            }
-
-        }.bind(this))
-
-        // catch all errors
-        .catch(function(err){
-            console.error("TelemetryStore: Error getting game sessions, err:", err);
-            stats.increment('error', 'MySQL.MigrateEventsFromMysql');
-
-            reject(new Error("TelemetryStore: Error migrate events from Mysql, err:", err));
-        }.bind(this));
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
 };
 
 
-
-TelemDS_Couchbase.prototype._migrateEventAchievements = function() {
+TelemDS_Couchbase.prototype._migrate_EventAchievements = function() {
 // add promise wrapper
 return when.promise(function (resolve, reject) {
 // ------------------------------------------------
@@ -574,7 +578,7 @@ return when.promise(function (resolve, reject) {
 
 
 
-TelemDS_Couchbase.prototype._migrateEvents_AddingGameId = function(myds) {
+TelemDS_Couchbase.prototype._migrate_Events_AddingGameId = function(myds) {
     // get all sessions
     return this.getAllGameSessions(myds)
         // get all events per session
@@ -832,9 +836,50 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype._migrate_AddGames = function(myds) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    // get list of all courses
+    myds.getAllCourses()
+        .then(function(courses){
+            // build list for multiset games
+            var kv = {}, key, v;
+            for(var i = 0; i < courses.length; i++){
+                key = tConst.lms.key+":"+tConst.lms.courseKey+":"+courses[i].id+":"+tConst.lms.gameKey;
+
+                if(courses[i].institutionId != null) {
+                    v = {
+                        "SC": { "settings": { "missionProgressLock": courses[i].freePlay } }
+                    };
+                } else {
+                    v = {
+                        "AA-1": { "settings": {} }
+                    };
+                }
+
+                kv[key] = { value: v };
+            }
+            //console.log("kv:", kv);
+
+            return this.mulitSetGames(kv);
+        }.bind(this))
+
+        .then(function(){
+            resolve();
+        }.bind(this))
+
+        // catch all errors
+        .then(null, reject);
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
 
 
-TelemDS_Couchbase.prototype._migrateOldDB_SaveEvents = function(stats, myds, gameId, data, ids, sessionToGameLevelMap) {
+TelemDS_Couchbase.prototype._migrate_OldDB_SaveEvents = function(stats, myds, gameId, data, ids, sessionToGameLevelMap) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -2368,19 +2413,99 @@ TelemDS_Couchbase.prototype.getConfigs = function(gameId){
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.updateConfigs = function(gameId,data){
+TelemDS_Couchbase.prototype.updateConfigs = function(gameId, data){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    gameId = gameId.toUpperCase();
+
+    var key = tConst.game.configKey+":"+gameId;
+
+    // get game config
+    this.client.set(key, data,
+        function(err, data) {
+            if(err) {
+                console.err("CouchBase TelemetryStore: Set Config Error - ", err);
+                reject(err);
+                return;
+            }
+
+            resolve(data);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+exampleOut.getGamesForCourse = {
+    "SC": { "settings": { "missionProgressLock": false } },
+    "AA-1": {}
+};
+TelemDS_Couchbase.prototype.getGamesForCourse = function(courseId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.lms.key+":"+tConst.lms.courseKey+":"+courseId+":"+tConst.lms.gameKey;
+
+    // get game config
+    this.client.get(key,
+        function(err, results) {
+            if(err) {
+                if(err.code == 13) {
+                    resolve({});
+                } else {
+                    console.err("CouchBase TelemetryStore: Get Games For Course Error - ", err);
+                    reject(err);
+                }
+                return;
+            }
+
+            resolve(results.value);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+exampleIn.updateGamesForCourse = {
+    "SC": { "settings": { "missionProgressLock": false } },
+    "AA-1": {}
+};
+TelemDS_Couchbase.prototype.updateGamesForCourse = function(courseId, data){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    var key = tConst.lms.key+":"+tConst.lms.courseKey+":"+courseId+":"+tConst.lms.gameKey;
+
+    // get game config
+    this.client.set(key, data,
+        function(err, data) {
+            if(err) {
+                console.err("CouchBase TelemetryStore: Set Games For Course Error - ", err);
+                reject(err);
+                return;
+            }
+
+            resolve(data);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.mulitSetGames = function(kv){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        gameId = gameId.toUpperCase();
-
-        var key = tConst.game.configKey+":"+gameId;
-
         // get game config
-        this.client.set(key, data,
+        this.client.setMulti(kv, {},
             function(err, data) {
                 if(err) {
-                    console.err("CouchBase TelemetryStore: Set Config Error - ", err);
+                    console.err("CouchBase TelemetryStore: Multi Set Games For Course Error - ", err);
                     reject(err);
                     return;
                 }
@@ -2393,3 +2518,40 @@ TelemDS_Couchbase.prototype.updateConfigs = function(gameId,data){
 // end promise wrapper
 };
 
+
+TelemDS_Couchbase.prototype.multiGetDistinctGamesForCourses = function(courseIds) {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var keys = [];
+        for(var i = 0; i < courseIds.length; i++) {
+            var key = tConst.lms.key+":"+tConst.lms.courseKey+":"+courseIds[i]+":"+tConst.lms.gameKey;
+            keys.push(key);
+        }
+
+        // get game config
+        this.client.getMulti(keys, {},
+            function(err, data) {
+                if(err) {
+                    if(err.code != 4101) {
+                        console.err("CouchBase TelemetryStore: Get Games For Course Error - ", err);
+                        reject(err);
+                        return;
+                    }
+                }
+
+                var games = {};
+                for(var k in data) {
+                    if(data[k].value) {
+                        games = _.merge(games, data[k].value);
+                    }
+                }
+
+                resolve(games);
+            }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
