@@ -667,3 +667,28 @@ TelemDS_Mysql.prototype.saveCompetencyResults = function(courseId, userId, compD
 }.bind(this));
 // end promise wrapper
 };
+
+
+TelemDS_Mysql.prototype.getAllCourses = function(){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q = "SELECT id, institution_id as institutionId, free_play as freePlay FROM GL_COURSE";
+
+    this.ds.query(Q)
+        .then(
+        function(results){
+            for(var i = 0; i < results.length; i++) {
+                results[i].freePlay = results[i].freePlay['0'] ? true : false;
+            }
+
+            resolve(results);
+        }.bind(this),
+        reject
+    );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
