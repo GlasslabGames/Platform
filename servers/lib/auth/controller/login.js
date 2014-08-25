@@ -56,7 +56,7 @@ function glassLabLogin(req, res, next) {
         // already logged in?
         if( req.isAuthenticated() ) {
             userInfo = req.session.passport.user;
-            
+
             // for old cached sessions, migrate them over to role instead of systemRole
             if(userInfo.systemRole && !userInfo.role)
             {
@@ -122,6 +122,7 @@ return when.promise(function(resolve, reject) {
 }
 
 function glassLabLogin_LogIn(req, user) {
+
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------

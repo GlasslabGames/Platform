@@ -38,6 +38,7 @@ module.exports = {
     "user.login.general":                   "There was an error with the information you entered.",
     "user.login.invalid":                   "The email address or password you provided does not match our records. Please try again.",
     "user.login.missing":                   "You forgot to enter your email address or password.",
+    "user.login.notVerified":               "Please verify your email account",
     "user.passwordReset.general":           "We encountered an error occurred. Please try again.",
     "user.passwordReset.code.missing":      "The code is invalid.",
     "user.passwordReset.code.expired":      "Oops, your code has expired. You'll need to go through the password reset process again.",

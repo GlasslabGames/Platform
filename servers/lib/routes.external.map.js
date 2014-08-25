@@ -378,22 +378,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/auth/register-verify/send",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "verifyCodeSend"
-            }
-        },
-        {
-            api: "/api/v2/auth/register-verify/:code/verify",
-            service: "auth",
-            controller: "user",
-            method: {
-                get: "registerVerify"
-            }
-        },
-        {
             api: "/api/v2/auth/logout",
             service: "auth",
             controller: "login",

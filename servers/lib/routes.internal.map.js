@@ -92,15 +92,6 @@ module.exports = {
             method: {
                 post: "updateGameConfigs"
             }
-        },
-        {
-            api: "/api/v2/data/config/:gameId",
-            service: "data",
-            controller: "config",
-            method: {
-                get: "index"
-            }
         }
-
     ]
 };

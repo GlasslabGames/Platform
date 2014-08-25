@@ -44,6 +44,7 @@ function Glasslab_Strategy(options) {
 util.inherits(Glasslab_Strategy, passport.Strategy);
 
 Glasslab_Strategy.prototype.authenticate = function(req) {
+
     var username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField);
     var password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField);
     //console.log("authenticate body:", req.body);
@@ -55,14 +56,21 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
     this._verify(username, password)
         .then(
             function (data) {
-                if (!data.user) {
-                    return this.fail(data.info);
-                }
                 this.success(data.user, data.info);
             }.bind(this),
             function (err) {
-                // respond with generic answer
-                this.fail({key:"user.login.invalid"});
+                if (!err.user) {
+
+                   return this.fail({key:"user.login.invalid"});
+
+                } else if (err.info === "email not verified") {
+
+                    this.fail({key:"user.login.notVerified"})
+
+                } else {
+                    this.fail({key:"user.login.general"});
+
+                }
             }.bind(this)
     );
 
@@ -86,8 +94,7 @@ Glasslab_Strategy.prototype._verify = function(username, password, done){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    //console.log("Auth: check user/pass");
-
+//    console.log("Auth: check user/pass");
     // try username
     this.findUser("username", username)
         // error, try email
@@ -99,17 +106,21 @@ return when.promise(function(resolve, reject) {
             if(!_.isObject(user)) {
                 return resolve({user: null, info: {error: 'Unknown user ' + username} });
             }
-
             this._verifyPassword(password, user)
                 .then(
                     function(){
-                        //console.log("Login OK");
-                        // clear password so it's not saved in the session
-                        delete user.password;
-                        resolve({user: user, info: null});
+
+                        if (user.verifyCodeStatus === 'verified') {
+                            delete user.password;
+                            resolve({user: user, error: null});
+                        } else {
+                            // email not verified
+                            reject({user: user, info: 'email not verified'});
+                        }
                     }.bind(this),
                     // errors
                     function(err){
+                        // invalid password or user
                         resolve({user: null, info: err});
                 }.bind(this));
         }.bind(this))

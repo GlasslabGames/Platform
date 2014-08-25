@@ -92,7 +92,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 login_Type as loginType \
             FROM GL_USER  \
             WHERE id="+ this.ds.escape(id);
-
+        console.log("ID:", id);
         this.ds.query(Q)
             .then(function(results) {
                 if(results.length > 0) {

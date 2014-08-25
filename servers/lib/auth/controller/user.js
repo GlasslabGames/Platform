@@ -17,7 +17,6 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
-    verifyCodeSend: verifyCodeSend,
     registerVerify: registerVerify
 };
 
@@ -27,66 +26,7 @@ var exampleOut = {};
 
 
 
-function verifyCodeSend(req, res, next) {
-    if( req.body.email &&
-        _.isString(req.body.email) &&
-        req.body.email.length) {
-        var email = req.body.email;
-        var verifyCode = Util.CreateUUID();
 
-        var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
-
-
-        this.glassLabStrategy.getUserByEmail(email)
-            .then(function(userData) {
-                userData.verifyCode           = verifyCode;
-                userData.verifyCodeExpiration = expirationTime;
-                userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
-
-                return this.glassLabStrategy.updateUserData(userData)
-                    .then(function(){
-                        //
-                        // 2) send email
-                        var emailData = {
-                            subject: "Playfully.org - Verify your email",
-                            to:   userData.email,
-                            user: userData,
-                            code: verifyCode,
-                            host: req.protocol+"://"+req.headers.host
-                        };
-
-                        var email = new Util.Email(
-                            this.options.auth.email,
-                            path.join(__dirname, "../email-templates"),
-                            this.stats);
-                        email.send('register-verify', emailData)
-                            .then(function(){
-                                // all ok
-                                this.requestUtil.jsonResponse(res, {});
-                            }.bind(this))
-                            // error
-                            .then(null, function(err){
-                                this.requestUtil.errorResponse(res, err, 500);
-                            }.bind(this));
-
-                    }.bind(this));
-            }.bind(this))
-
-            // catch all errors
-            .then(null, function(err) {
-                if( err.error &&
-                    err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
-                } else {
-                    console.error("AuthService: verifyCodeSend Error -", err);
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
-                }
-            }.bind(this))
-
-    } else {
-        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
-    }
-}
 
 function registerVerify(req, res, next) {
     if( req.params.code &&
@@ -517,8 +457,6 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.firstName  = Util.ConvertToString(req.body.firstName);
         regData.lastName   = Util.ConvertToString(req.body.lastName);
         regData.email      = Util.ConvertToString(req.body.email);
-        // only instructors have verification code:
-        regData.verify_code = Util.CreateUUID();
 
         if(!regData.username) {
             //this.requestUtil.errorResponse(res, "missing email", 400);
@@ -612,7 +550,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
                     promise
                         .then(function(){
-                            return sendRegisterEmail.call(this, this.options.auth.email, regData, req.protocol, req.headers.host);
+                            return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
                         }.bind(this))
                         // all ok
                         .then(function(){
@@ -666,7 +604,65 @@ function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
 }
 
+function sendVerifyEmail(email , protocol, host) {
+    if( email &&
+        _.isString(email) &&
+        email.length) {
 
+        var verifyCode = Util.CreateUUID();
+        var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
+
+
+        this.glassLabStrategy.getUserByEmail(email)
+            .then(function(userData) {
+                userData.verifyCode           = verifyCode;
+                userData.verifyCodeExpiration = expirationTime;
+                userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
+
+                return this.glassLabStrategy.updateUserData(userData)
+                    .then(function(){
+                        //
+                        // 2) send email
+                        var emailData = {
+                            subject: "Playfully.org - Verify your email",
+                            to:   userData.email,
+                            user: userData,
+                            code: verifyCode,
+                            host: protocol+"://"+host
+                        };
+
+                        var email = new Util.Email(
+                            this.options.auth.email,
+                            path.join(__dirname, "../email-templates"),
+                            this.stats);
+                        email.send('register-verify', emailData)
+                            .then(function(){
+                                // all ok
+                                this.requestUtil.jsonResponse(res, {});
+                            }.bind(this))
+                            // error
+                            .then(null, function(err){
+                                this.requestUtil.errorResponse(res, err, 500);
+                            }.bind(this));
+
+                    }.bind(this));
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err) {
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
+                } else {
+                    console.error("AuthService: sendVerifyEmail Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+            }.bind(this))
+
+    } else {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
+    }
+}
 
 function sendRegisterEmail(emailOptions, regData, protocol, host){
     var verifyCode = Util.CreateUUID();
