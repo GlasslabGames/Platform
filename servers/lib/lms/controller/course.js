@@ -334,7 +334,7 @@ function createCourse(req, res, next, serviceManager)
 
         if(!req.body.games ||
            !_.isArray(req.body.games) ) {
-            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"course.create.invalid.gameids"}, 404);
+            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"course.create.missing.gameids"}, 404);
             return;
         }
 
@@ -363,8 +363,8 @@ function createCourse(req, res, next, serviceManager)
 
             for(var i = 0; i < courseData.games.length; i++){
                 // TODO: replace this with DB lookup, return promise
-                if(!dash.isValidGameId(courseData.games[i])) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.games[i]+"' is not valid", key:"course.create.invalid.gameid"}, 404);
+                if(!dash.isValidGameId(courseData.games[i].id)) {
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.games[i].id+"' is not valid", key:"course.create.invalid.gameid"}, 404);
                     return; // exit function
                 }
             }
