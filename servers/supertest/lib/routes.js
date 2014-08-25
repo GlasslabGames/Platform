@@ -41,11 +41,30 @@ module.exports = {
     reports: {
         achievements: {
             path: "/api/v2/dash/reports/achievements/game/"+testData.testGameId+"/course/"+teacher.testClass.id,
+            // "/api/v2/dash/game/"+testData.testGameId+"/achievements/all"
+            // "/api/v2/dash/reports/achievements?gameId="+testData.testGameId+"&courseId="+teacher.testClass.id
         },
         sowo: {
             path: "/api/v2/dash/reports/sowo/game/"+testData.testGameId+"/course/"+teacher.testClass.id,
         }
     },
+    
+    mission: {
+        // This is for September 5th launch, SCE
+        path: "/api/v2/dash/course/"+teacher.testClass.id+"/game/"+testData.testGameId+"/missions"
+    
+    },
+    
+    sdk: {
+        connect: {
+            path: "/sdk/connect",
+            expected: "http://stage.playfully.org"
+        },
+        login: {
+            path: "/sdk/login"
+        }
+    },
+    // "/api/v2/dash/course/:courseId/game/:gameId/missions
     
 // FUTURE - need to pick up verification code, so difficult to implement without hooking to some kind of automated email hook
 //    password_confirm: {

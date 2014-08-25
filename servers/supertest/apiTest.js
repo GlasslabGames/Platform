@@ -41,6 +41,16 @@ describe("API v2 testing", function(done) {
 						done();
 					});
     });
+    
+    it("should return valid SDK config data", function(done) {
+        agent
+          .get(srvAddr + routes.sdk.connect.path)
+          .end(function(res) {
+              expect(res.status).to.eql(200);
+              expect(res.text).to.eql(routes.sdk.connect.expected);
+              done();
+          });        
+    });
 
     it("#shouldn't be able to manipulate data without login", function (done) {
         agent
@@ -119,8 +129,18 @@ describe("API v2 testing", function(done) {
 					});
     });
     
-    it.skip("#returns reports - SOWO", function() {
+    it("#returns reports - SOWO", function(done) {
         
+        console.log(srvAddr + routes.reports.sowo.path);
+        
+        agent
+					.get(srvAddr + routes.reports.sowo.path)
+          .type('application/json')
+					.end(function(res){
+            expect(res.status).to.eql(200);
+              // TODO - more robust checking for specific achievements for classes, likely coverage
+						done();
+					});
     });
     
     it.skip("#returns reports - achievements", function() {
