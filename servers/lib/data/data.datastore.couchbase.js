@@ -2535,7 +2535,7 @@ TelemDS_Couchbase.prototype.multiGetDistinctGamesForCourses = function(courseIds
             function(err, data) {
                 if(err) {
                     if(err.code != 4101) {
-                        console.err("CouchBase TelemetryStore: Get Games For Course Error - ", err);
+                        console.error("CouchBase TelemetryStore: Get Games For Course Error - ", err);
                         reject(err);
                         return;
                     }
