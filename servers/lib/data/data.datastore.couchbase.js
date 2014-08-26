@@ -617,69 +617,76 @@ TelemDS_Couchbase.prototype._migrate_Events_AddingGameId = function(myds) {
 
             console.log("CouchBase TelemetryStore: Migrating Adding GameId to", gameSessions.length, "Sessions");
             var guardedAsyncOperation = guard(guard.n(1), function(gameSession){
+
+                console.log("CouchBase TelemetryStore: Migrating Getting Events for gameSessionId:", gameSession.gameSessionId);
                 // get events
                 return this.getRawEvents(gameSession.gameSessionId)
                     .then(function(events) {
-                        //console.log("events:", events);
-                        // if no deviceIds skip to next
-                        if(!(events && events.length)) return;
+                        try {
+                            //console.log("events:", events);
+                            // if no deviceIds skip to next
+                            if(!(events && events.length)) return;
 
-                        // extract+remove all ids
-                        // create list of keys
-                        var keys = [];
-                        var outEvents = [];
-                        var id;
-                        var gameId    = gameSession.gameId;
-                        var gameLevel = gameSession.gameLevel;
-                        for(var i = 0; i < events.length; i++) {
-                            id = events[i].id;
-                            id = id.split(":");
+                            // extract+remove all ids
+                            // create list of keys
+                            var keys = [];
+                            var outEvents = [];
+                            var id;
+                            var gameId    = gameSession.gameId;
+                            var gameLevel = gameSession.gameLevel;
+                            for(var i = 0; i < events.length; i++) {
+                                id = events[i].id;
+                                id = id.split(":");
 
-                            // old event types
-                            if(id.length == 3) {
-                                var ok = true;
-                                // if clientId then SimCity
-                                if(events[i].clientId) {
-                                    // convert old clientIds
-                                    if( events[i].clientId == 'SC' ||
-                                        events[i].clientId == 'SD_LC' ||
-                                        events[i].clientId == 'ELA_LC') {
+                                // old event types
+                                if(id.length == 3) {
+                                    var ok = true;
+                                    // if clientId then SimCity
+                                    if(events[i].clientId) {
+                                        // convert old clientIds
+                                        if( events[i].clientId == 'SC' ||
+                                            events[i].clientId == 'SD_LC' ||
+                                            events[i].clientId == 'ELA_LC') {
 
-                                        events[i].gameOldId = events[i].clientId;
-                                        events[i].gameId = "SC";
+                                            events[i].gameOldId = events[i].clientId;
+                                            events[i].gameId = "SC";
 
-                                        delete events[i].clientId;
-                                    } else {
-                                        console.error("Event clientId does not match possible!! Event:", events[i]);
-                                        ok = false;
+                                            delete events[i].clientId;
+                                        } else {
+                                            console.error("CouchBase TelemetryStore: Migrating Event clientId does not match possible!! Event:", events[i]);
+                                            ok = false;
+                                        }
+                                    }
+
+                                    // if not gameLevel add one from session info
+                                    if(!events[i].gameLevel) {
+                                        events[i].gameLevel = gameLevel;
+                                    }
+
+                                    if(events[i].gameId) {
+                                        gameId = events[i].gameId
+                                    }
+
+                                    if(ok) {
+                                        keys.push( events[i].id );
+                                        delete events[i].id;
+                                        outEvents.push(events[i]);
                                     }
                                 }
+                            }
 
-                                // if not gameLevel add one from session info
-                                if(!events[i].gameLevel) {
-                                    events[i].gameLevel = gameLevel;
-                                }
-
-                                if(events[i].gameId) {
-                                    gameId = events[i].gameId
-                                }
-
-                                if(ok) {
-                                    keys.push( events[i].id );
-                                    delete events[i].id;
-                                    outEvents.push(events[i]);
-                                }
+                            console.log("CouchBase TelemetryStore: Migrating Adding GameId - gameId:", gameId, ", gameSessionId:", gameSession.gameSessionId, "with", outEvents.length, "Events");
+                            // only add events if there are events to add
+                            if( outEvents.length > 0 ) {
+                                // migrate event to add gameId
+                                return this.saveEvents(gameId, outEvents)
+                                    .then(function() {
+                                        return this._removeKeys(keys);
+                                    }.bind(this));
                             }
                         }
-
-                        console.log("CouchBase TelemetryStore: Migrating Adding GameId - gameId:", gameId, ", gameSessionId:", gameSession.gameSessionId, "with", outEvents.length, "Events");
-                        // only add events if there are events to add
-                        if( outEvents.length > 0 ) {
-                            // migrate event to add gameId
-                            return this.saveEvents(gameId, outEvents)
-                                .then(function() {
-                                    return this._removeKeys(keys);
-                                }.bind(this));
+                        catch(err) {
+                            console.error("CouchBase TelemetryStore: Migrating getRawEvents Error:", err);
                         }
                     }.bind(this));
 
