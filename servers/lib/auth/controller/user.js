@@ -11,66 +11,17 @@ module.exports = {
     getUserProfileData:  getUserProfileData,
     registerUserV1:      registerUserV1,
     registerUserV2:      registerUserV2,
+    validateEmailCode:   validateEmailCode,
     registerManager:     registerManager,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
-    registerVerify: registerVerify
 };
 
 var exampleIn = {};
 var exampleOut = {};
-
-
-
-
-
-
-function registerVerify(req, res, next) {
-    if( req.params.code &&
-        _.isString(req.params.code) &&
-        req.params.code.length) {
-
-        // 1) validate the code and get user data
-        this.glassLabStrategy.findUser("verify_code", req.params.code)
-            .then(function(userData) {
-                if(Util.GetTimeStamp() > userData.verifyCodeExpiration) {
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
-                } else {
-
-                    if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
-
-                        userData.verifyCodeStatus = aConst.verifyCode.status.verified;
-                        userData.verifyCodeExpiration = "NULL";
-                        userData.verifyCode = "NULL";
-
-                        return this.glassLabStrategy.updateUserData(userData)
-                            .then(function() {
-                                this.requestUtil.jsonResponse(res, {});
-                            }.bind(this));
-                    } else {
-                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
-                    }
-                }
-            }.bind(this))
-
-            // catch all errors
-            .then(null, function(err) {
-                if( err.error &&
-                    err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
-                } else {
-                    console.error("AuthService: registerVerify Error -", err);
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
-                }
-            }.bind(this));
-
-    } else {
-        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
-    }
-}
 
 
 function getUserProfileData(req, res, next) {
@@ -526,7 +477,6 @@ function registerUserV2(req, res, next, serviceManager) {
                     }
                 }
                 // if instructor or manager
-                // send email
                 else if( regData.role == lConst.role.instructor ||
                          regData.role == lConst.role.manager)
                 {
@@ -550,18 +500,19 @@ function registerUserV2(req, res, next, serviceManager) {
 
                     promise
                         .then(function(){
+                            // send email verification code
                             return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
                         }.bind(this))
                         // all ok
                         .then(function(){
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
-                            serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
+                            // Disabled auto login after registering
+                            // serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                         }.bind(this))
                         // error
                         .then(null, function(err){
                             this.stats.increment("error", "Route.Register.User.sendRegisterEmail");
                             console.error("Auth: RegisterUserV2 - Error", err);
-                            //this.requestUtil.errorResponse(res, err, 500);
                             this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
                         }.bind(this))
 
@@ -612,7 +563,6 @@ function sendVerifyEmail(email , protocol, host) {
         var verifyCode = Util.CreateUUID();
         var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
-
         this.glassLabStrategy.getUserByEmail(email)
             .then(function(userData) {
                 userData.verifyCode           = verifyCode;
@@ -621,8 +571,6 @@ function sendVerifyEmail(email , protocol, host) {
 
                 return this.glassLabStrategy.updateUserData(userData)
                     .then(function(){
-                        //
-                        // 2) send email
                         var emailData = {
                             subject: "Playfully.org - Verify your email",
                             to:   userData.email,
@@ -664,7 +612,59 @@ function sendVerifyEmail(email , protocol, host) {
     }
 }
 
-function sendRegisterEmail(emailOptions, regData, protocol, host){
+
+function validateEmailCode(req, res, next) {
+    if( req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) {
+
+        // 1) validate the code and get user data
+        this.glassLabStrategy.findUser("verify_code", req.params.code)
+            .then(function(userData) {
+                if(Util.GetTimeStamp() > userData.verifyCodeExpiration) {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
+                } else {
+
+                    if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
+
+                        userData.verifyCodeStatus = aConst.verifyCode.status.verified;
+                        userData.verifyCodeExpiration = "NULL";
+                        userData.verifyCode = "NULL";
+
+                        return this.glassLabStrategy.updateUserData(userData)
+                            .then(function() {
+                                this.requestUtil.jsonResponse(res, {});
+                                return userData;
+                            }.bind(this));
+                    } else {
+                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
+                    }
+                }
+            }.bind(this))
+            .then(function(userData) {
+                // 2) send welcome email
+                return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
+            }.bind(this), function(err) {
+                this.requestUtil.errorResponse(res, "failed to send welcome email");
+            }.bind(this))
+            // catch all errors
+            .then(null, function(err) {
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
+                } else {
+                    console.error("AuthService: validateEmailCode Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+            }.bind(this));
+
+    } else {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
+    }
+}
+
+
+function sendWelcomeEmail(emailOptions, regData, protocol, host){
     var verifyCode = Util.CreateUUID();
     // store code
     // 1) store code

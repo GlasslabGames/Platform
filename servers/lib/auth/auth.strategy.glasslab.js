@@ -65,10 +65,11 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
 
                 } else if (err.info === "email not verified") {
 
-                    this.fail({key:"user.login.notVerified"})
+                   return this.fail({key:"user.login.notVerified"});
 
                 } else {
-                    this.fail({key:"user.login.general"});
+
+                   return this.fail({key:"user.login.general"});
 
                 }
             }.bind(this)
@@ -109,19 +110,18 @@ return when.promise(function(resolve, reject) {
             this._verifyPassword(password, user)
                 .then(
                     function(){
-
+                        // check if email verified
                         if (user.verifyCodeStatus === 'verified') {
                             delete user.password;
                             resolve({user: user, error: null});
                         } else {
-                            // email not verified
                             reject({user: user, info: 'email not verified'});
                         }
                     }.bind(this),
                     // errors
                     function(err){
                         // invalid password or user
-                        resolve({user: null, info: err});
+                        reject({user: null, info: err});
                 }.bind(this));
         }.bind(this))
         // catch all errors

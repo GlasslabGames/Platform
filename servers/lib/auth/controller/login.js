@@ -66,6 +66,7 @@ function glassLabLogin(req, res, next) {
         }
     }
 
+
     var promise;
     if(!userInfo) {
         // login validation
