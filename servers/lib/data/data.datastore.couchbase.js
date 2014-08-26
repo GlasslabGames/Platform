@@ -616,16 +616,19 @@ TelemDS_Couchbase.prototype._migrate_Events_AddingGameId = function(myds) {
             if(!gameSessions) return;
 
             console.log("CouchBase TelemetryStore: Migrating Adding GameId to", gameSessions.length, "Sessions");
-            var guardedAsyncOperation = guard(guard.n(1), function(gameSession){
+            var guardedAsyncOperation = guard(guard.n(this.options.multiGetParallelNum), function(gameSession){
 
-                console.log("CouchBase TelemetryStore: Migrating Getting Events for gameSessionId:", gameSession.gameSessionId);
+                //console.log("CouchBase TelemetryStore: Migrating Getting Events - gameId:", gameSession.gameId, ", gameSessionId:", gameSession.gameSessionId);
                 // get events
                 return this.getRawEvents(gameSession.gameSessionId)
                     .then(function(events) {
                         try {
                             //console.log("events:", events);
                             // if no deviceIds skip to next
-                            if(!(events && events.length)) return;
+                            if(!(events && events.length)) {
+                                console.log("CouchBase TelemetryStore: Migrating No Events to Add - gameId:", gameSession.gameId, ", gameSessionId:", gameSession.gameSessionId, ", Events:", events);
+                                return;
+                            }
 
                             // extract+remove all ids
                             // create list of keys
