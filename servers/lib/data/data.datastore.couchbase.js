@@ -32,6 +32,7 @@ function TelemDS_Couchbase(options,serviceManager){
             password: "",
             gameSessionExpire:   1*1*60, //24*60*60 // in seconds
             multiGetChunkSize:   2000,
+            multiViewChunkSize:  20,
             multiGetParallelNum: 2
         },
         options
@@ -78,7 +79,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-TelemDS_Couchbase.prototype._multiChunkGet = function(keys, options, callback){
+TelemDS_Couchbase.prototype._chunk_getMulti = function(keys, options, callback){
     // create buckets of keys with each one having a max size of ChunckSize
     var taskList = Util.Reshape(keys, this.options.multiGetChunkSize);
 
@@ -90,7 +91,7 @@ TelemDS_Couchbase.prototype._multiChunkGet = function(keys, options, callback){
                         return;
                     }
 
-                    // merge two arrays
+                    // merge two objects
                     all = _.merge(all, results);
                     resolve(all);
                 });
@@ -98,6 +99,34 @@ TelemDS_Couchbase.prototype._multiChunkGet = function(keys, options, callback){
     }.bind(this));
 
     when.reduce(taskList, guardedAsyncOperation, {})
+        .then(function(all){
+            callback(null, all);
+        }, function(err){
+            callback(err);
+        })
+};
+
+TelemDS_Couchbase.prototype._chunk_viewKeys= function(bucket, view, keys, options, callback){
+    // create buckets of keys with each one having a max size of ChunckSize
+    var taskList = Util.Reshape(keys, this.options.multiViewChunkSize);
+
+    var guardedAsyncOperation = guard(guard.n(this.options.multiGetParallelNum), function (all, ckeys){
+        return when.promise(function(resolve, reject) {
+            this.client.view(bucket, view).query( _.merge({ keys: ckeys }, options),
+                function(err, results){
+                    if(err) {
+                        reject(err);
+                        return;
+                    }
+
+                    // merge two arrays
+                    all = all.concat(results);
+                    resolve(all);
+                });
+        }.bind(this));
+    }.bind(this));
+
+    when.reduce(taskList, guardedAsyncOperation, [])
         .then(function(all){
             callback(null, all);
         }, function(err){
@@ -734,6 +763,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+
 TelemDS_Couchbase.prototype.getAchievements = function(deviceIds){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -744,8 +774,7 @@ return when.promise(function(resolve, reject) {
         deviceIds = [deviceIds];
     }
 
-    this.client.view("telemetry", "getAllAchievementsByDeviceId").query({
-            keys: deviceIds,
+    this._chunk_viewKeys("telemetry", "getAllAchievementsByDeviceId", deviceIds, {
             stale: false
         },
         function(err, results){
@@ -762,7 +791,7 @@ return when.promise(function(resolve, reject) {
 
             var keys = _.pluck(results, 'id');
             //console.log("CouchBase TelemetryStore: keys", keys);
-            this.client.getMulti(keys, {},
+            this._chunk_getMulti(keys, {},
                 function(err, results){
                     if(err){
                         console.error("CouchBase TelemetryStore: Multi Get Achievements Error -", err);
@@ -1089,7 +1118,7 @@ return when.promise(function(resolve, reject) {
             }
 
             //console.log("CouchBase TelemetryStore: getEvents keys length", keys.length);
-            this.client.getMulti(keys, {},
+            this._chunk_getMulti(keys, {},
                 function(err, results){
                     if(err){
                         console.error("CouchBase TelemetryStore: Multi Get Events Error -", err);
@@ -1190,7 +1219,7 @@ return when.promise(function(resolve, reject) {
 
             var keys = _.pluck(results, 'id');
             //console.log("CouchBase TelemetryStore: keys", keys);
-            this._multiChunkGet(keys, {},
+            this._chunk_getMulti(keys, {},
                 function(err, results){
                     if(err){
                         if(err.code == 4101) {
@@ -1498,7 +1527,7 @@ return when.promise(function(resolve, reject) {
             }
 
             var keys = _.pluck(results, 'id');
-            this._multiChunkGet(keys, {}, function(err, results){
+            this._chunk_getMulti(keys, {}, function(err, results){
                     if(err) {
                         if(err.code == 4101) {
                             var errors = [];
@@ -1591,7 +1620,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
             var keys = _.pluck(results, 'id');
 
             //console.log("CouchBase TelemetryStore: keys", keys);
-            this.client.getMulti(keys, {},
+            this._chunk_getMulti(keys, {},
                 function(err, results){
                     if(err){
                         console.error("CouchBase TelemetryStore: Multi Get CleanUp GameSessions Error -", err);
@@ -1964,7 +1993,7 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
             keys.push(key);
         }
 
-        this.client.getMulti(keys, {}, function(err, data) {
+        this._chunk_getMulti(keys, {}, function(err, data) {
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
@@ -2024,7 +2053,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
             keys.push(key);
         }
 
-        this.client.getMulti(keys, {}, function(err, data){
+        this._chunk_getMulti(keys, {}, function(err, data){
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
@@ -2126,7 +2155,7 @@ return when.promise(function(resolve, reject) {
     }
 
     // get user game pref
-    this.client.getMulti(keys, {},
+    this._chunk_getMulti(keys, {},
         function(err, data){
             // it's ok if one fails, need to check them all for errors
             if( err &&
@@ -2531,7 +2560,7 @@ TelemDS_Couchbase.prototype.multiGetDistinctGamesForCourses = function(courseIds
         }
 
         // get game config
-        this.client.getMulti(keys, {},
+        this._chunk_getMulti(keys, {},
             function(err, data) {
                 if(err) {
                     if(err.code != 4101) {
