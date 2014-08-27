@@ -41,7 +41,7 @@ module.exports = {
         }
     },
     verifyCode: {
-        expirationInterval: 10800000, // 3 hours in milliseconds
+        expirationInterval: 6048000000, // 1 week in milliseconds
         status: {
             sent:       "sent",
             verified:   "verified"

@@ -45,8 +45,9 @@ module.exports = {
     "user.passwordReset.code.invalid":      "The URL provided is not valid. Please try cutting and pasting again from the email you received with password reset information.",
     "user.passwordReset.user.emailNotExist":"This email address does not exist in our system.",
     "user.verifyEmail.general":             "We encountered an error occurred. Please try again.",
-    "user.verifyEmail.code.missing":        "The code is invalid.",
+    "user.verifyEmail.code.missing":        "The code you entered is invalid.",
     "user.verifyEmail.code.expired":        "Oops, your code has expired. You'll need another verification code.",
+    "user.verifyEmail.accountDeleted":      "Your account has been deleted because you didn't verify your email account in the time allotted. Please try registering your account again.",
     "user.verifyEmail.code.invalid":        "The URL provided is not valid. Please try cutting and pasting again from the email you received with verification information.",
     "user.verifyEmail.user.emailNotExist":  "This email address does not exist in our system.",
     // config

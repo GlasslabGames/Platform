@@ -322,7 +322,6 @@ Glasslab_Strategy.prototype.addUser = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    console.log("VERIFY CODE:", userData.verify_code);
     var data = {
         id:             "NULL",
         version:        0,
@@ -426,7 +425,6 @@ return when.promise(function(resolve, reject) {
             data.verify_code_expiration = this.ds.escape(userData.verifyCodeExpiration);
         }
     }
-    console.log('status:', userData.verifyCodeStatus);
     if(userData.verifyCodeStatus) {
         if(userData.verifyCodeStatus == "NULL") {
             data.verify_code_status = "NULL";

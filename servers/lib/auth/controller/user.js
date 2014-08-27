@@ -25,11 +25,11 @@ var exampleOut = {};
 
 
 function getUserProfileData(req, res, next) {
+
     if( req.session &&
         req.session.passport &&
         req.session.passport.user) {
         var userData = req.session.passport.user;
-
         // check perms before returning user info
         this.webstore.getUserInfoById(userData.id)
             // ok, send data
@@ -621,12 +621,13 @@ function validateEmailCode(req, res, next) {
         // 1) validate the code and get user data
         this.glassLabStrategy.findUser("verify_code", req.params.code)
             .then(function(userData) {
+                // check if code expired
                 if(Util.GetTimeStamp() > userData.verifyCodeExpiration) {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
                 } else {
 
                     if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
-
+                        // change status to verified
                         userData.verifyCodeStatus = aConst.verifyCode.status.verified;
                         userData.verifyCodeExpiration = "NULL";
                         userData.verifyCode = "NULL";
@@ -637,26 +638,34 @@ function validateEmailCode(req, res, next) {
                                 return userData;
                             }.bind(this));
                     } else {
-                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
+                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                     }
                 }
+            }.bind(this),
+                function(err) {
+                    // potential cases if user not found:
+                    // 1. incorrect verification code
+                    // TODO account for:
+                    // 2. user account deleted because user did not verify email in time
+                    if( err.error &&
+                        err.error == "user not found") {
+                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
+                    } else {
+                        console.error("AuthService: validateEmailCode Error -", err);
+                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                    }
             }.bind(this))
             .then(function(userData) {
+                console.log(userData);
                 // 2) send welcome email
                 return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
-            }.bind(this), function(err) {
-                this.requestUtil.errorResponse(res, "failed to send welcome email");
             }.bind(this))
-            // catch all errors
             .then(null, function(err) {
-                if( err.error &&
-                    err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
-                } else {
-                    console.error("AuthService: validateEmailCode Error -", err);
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
-                }
-            }.bind(this));
+                console.log(err);
+                this.requestUtil.errorResponse(res, "failed to send welcome email");
+            })
+            // catch all errors
+;
 
     } else {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
