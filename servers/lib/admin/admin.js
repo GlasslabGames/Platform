@@ -1,4 +1,8 @@
-
+/**
+ * Admin Module
+ *
+ *
+ */
 module.exports = {
     LongName:    "Admin",
     ServiceName: "admin",

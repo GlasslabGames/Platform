@@ -1,5 +1,12 @@
+/**
+ * AdminService Module
+ *
+ * Module dependencies:
+ *  lodash     - https://github.com/lodash/lodash
+ *  when       - https://github.com/cujojs/when
+ *
+ */
 
-var http       = require('http');
 var when       = require('when');
 // Third-party libs
 var _          = require('lodash');

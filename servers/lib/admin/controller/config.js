@@ -8,5 +8,9 @@ module.exports = {
 };
 
 function version(req, res, next, serviceManager) {
-  this.requestUtil.jsonResponse(res, serviceManager.version);
+    if (serviceManager.version) {
+        this.requestUtil.jsonResponse(res, serviceManager.version);
+    } else {
+        this.requestUtil.jsonResponse(res, 'version file not found')
+    }
 }

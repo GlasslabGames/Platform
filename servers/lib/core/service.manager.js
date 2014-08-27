@@ -71,13 +71,19 @@ function ServiceManager(configFiles){
     this.routeList = {};
 }
 
-ServiceManager.prototype.loadVersion = function() {
+ServiceManager.prototype.loadVersionFile = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
     fs.readFile('./version.json', 'utf8', function (err, data) {
         if (err) {
-            throw err;
+            reject(err);
+        } else{
+            this.version = data.toString();
+            resolve(this.version);
         }
-        this.version = data.toString();
     }.bind(this));
+});
+// end promise wrapper
 };
 
 ServiceManager.prototype.setRouteMap = function(str) {
@@ -380,11 +386,17 @@ return when.promise(function(resolve, reject) {
 };
 
 ServiceManager.prototype.start = function(port) {
-    this.loadVersion();
+    this.loadVersionFile()
+        .then(function() {
+            console.log('Loading Version File...');
+        })
+        .then(null,function(err) {
+            console.error("ServiceManager: Failed to Load Version File -", err);
+        });
     // start express (session store,...), then start services
     this.initExpress()
         .then(function(){
-            console.log('Initilizing Services...');
+            console.log('Initializing Services...');
             return this.initServices();
         }.bind(this))
         .then(function() {
