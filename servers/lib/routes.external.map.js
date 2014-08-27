@@ -28,7 +28,14 @@ module.exports = {
     // ---------------------------------------------------
     // Version 2
     // ---------------------------------------------------
-
+        {
+            api: "/admin/api/version",
+            service: "admin",
+            controller: "config",
+            method: {
+                get: "version"
+            }
+        },
         {
             api: "/api/v2/data/config/:gameId",
             service: "data",

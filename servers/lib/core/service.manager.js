@@ -60,6 +60,7 @@ function ServiceManager(configFiles){
     process.env.HYDRA_ENV = global.ENV;
     this.stats            = new Util.Stats(this.options, "ServiceManager");
 
+
     try{
         this.routesMap = require('../routes.map.js');
     } catch(err){
@@ -69,6 +70,15 @@ function ServiceManager(configFiles){
     this.services  = {};
     this.routeList = {};
 }
+
+ServiceManager.prototype.loadVersion = function() {
+    fs.readFile('./version.json', 'utf8', function (err, data) {
+        if (err) {
+            throw err;
+        }
+        this.version = data.toString();
+    }.bind(this));
+};
 
 ServiceManager.prototype.setRouteMap = function(str) {
     this.routesMap = require(str);
@@ -370,7 +380,7 @@ return when.promise(function(resolve, reject) {
 };
 
 ServiceManager.prototype.start = function(port) {
-
+    this.loadVersion();
     // start express (session store,...), then start services
     this.initExpress()
         .then(function(){
