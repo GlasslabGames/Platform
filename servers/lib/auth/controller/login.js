@@ -48,36 +48,10 @@ Cases:
 */
 function glassLabLogin(req, res, next) {
     this.stats.increment("info", "Route.Login");
-
-    var userInfo;
-    if( req.session &&
-        req.session.passport &&
-        req.session.passport.user) {
-        // already logged in?
-        if( req.isAuthenticated() ) {
-            userInfo = req.session.passport.user;
-
-            // for old cached sessions, migrate them over to role instead of systemRole
-            if(userInfo.systemRole && !userInfo.role)
-            {
-                userInfo.role = userInfo.systemRole;
-                delete userInfo.systemRole;
-            }
-        }
-    }
-
-
-    var promise;
-    if(!userInfo) {
-        // login validation
-        //console.log("Auth loginRoute");
-        var authenticate = glassLabLogin_Authenticate.bind(this);
-        promise = authenticate(req, res, next);
-    } else {
-        promise = Util.PromiseContinue(userInfo);
-    }
-
-    promise.then(function(user){
+    //console.log("Auth loginRoute");
+    var authenticate = glassLabLogin_Authenticate.bind(this);
+    authenticate(req, res, next)
+        .then(function(user){
             var login = glassLabLogin_LogIn.bind(this);
             return login(req, user);
         }.bind(this))

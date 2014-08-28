@@ -204,7 +204,10 @@ exampleOut.getEnrolledCourses_WithMembers =[
         "archivedDate": null,
         "institution": 10,
         "code": "YD8WV",
-        "gameIds": [ "AA-1", "AW-1", "SC" ],
+        "games": [
+            { "id": "SC",   "settings": {"missionProgressLock": true } },
+            { "id": "AA-1", "settings": {} }
+        ],
         "studentCount": 2,
         "users":
             [
@@ -235,7 +238,10 @@ exampleOut.getEnrolledCourses_WithMembers =[
         "archived": false,
         "archivedDate": null,
         "institution": 10,
-        "gameIds": [ "AA-1", "AW-1", "SC" ],
+        "games": [
+            { "id": "SC",   "settings": {"missionProgressLock": true } },
+            { "id": "AA-1", "settings": {} }
+        ],
         "code": "SK1FC",
         "studentCount": 0,
         "users": []
@@ -249,8 +255,6 @@ function getEnrolledCourses(req, res, next) {
 
         this.myds.getEnrolledCourses(userData.id)
             .then(function(courses){
-
-                var getCourses  = _getCourses.bind(this);
                 var showMembers = false;
                 var showTeacher = false;
 
@@ -269,12 +273,12 @@ function getEnrolledCourses(req, res, next) {
                     showTeacher = true;
                 }
 
-                getCourses(courses, showMembers, showTeacher)
+                this.getCoursesDetails(courses, showMembers, showTeacher)
                     .then(function(courses){
                             this.requestUtil.jsonResponse(res, courses);
                         }.bind(this),
                         function(err){
-                            console.error("LMS Service: getEnrolledCourses Error -", err);
+                            console.error("LMS Service: getCoursesDetails Error -", err);
                             this.requestUtil.errorResponse(res, {key:"course.general"});
                         }.bind(this)
                     );
@@ -330,7 +334,7 @@ function createCourse(req, res, next, serviceManager)
 
         if(!req.body.games ||
            !_.isArray(req.body.games) ) {
-            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"course.create.invalid.gameids"}, 404);
+            this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"course.create.missing.gameids"}, 404);
             return;
         }
 
@@ -356,24 +360,11 @@ function createCourse(req, res, next, serviceManager)
             // validate gameId's
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
-            // TODO: replace this with DB lookup, return promise
-            var gameIds = dash.getListOfGameIds();
 
             for(var i = 0; i < courseData.games.length; i++){
-                var found = false;
-                // check if gameId is in the course
-                for(var j = 0; j < gameIds.length; j++) {
-                    // game Id is not case sensitive, so lowercase check
-                    if( courseData.games[i].id &&
-                        (courseData.games[i].id.toUpperCase() == gameIds[j])
-                      ) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if(!found) {
-                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.gameIds[i]+"' is not valid", key:"course.create.invalid.gameid"}, 404);
+                // TODO: replace this with DB lookup, return promise
+                if(!dash.isValidGameId(courseData.games[i].id)) {
+                    this.requestUtil.errorResponse(res, {error: "gameId '"+courseData.games[i].id+"' is not valid", key:"course.create.invalid.gameid"}, 404);
                     return; // exit function
                 }
             }
@@ -384,7 +375,13 @@ function createCourse(req, res, next, serviceManager)
 
                     if( userData.role == lConst.role.instructor ||
                         userData.role == lConst.role.manager) {
-                        return this.myds.addGamesToCourse(courseId, courseData.games)
+                        // create games map
+                        var games = {};
+                        for(var i = 0; i < courseData.games.length; i++) {
+                            games[ courseData.games[i].id ] = courseData.games[i].settings || {};
+                        }
+
+                        return this.telmStore.updateGamesForCourse(courseId, games)
                                 .then(function() {
                                     return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor);
                                 }.bind(this));
@@ -481,8 +478,7 @@ function getCourse(req, res, next) {
                     var courses    = [];
                     courses.push(course); // add course
 
-                    var getCourses = _getCourses.bind(this);
-                    getCourses(courses, showMembers, showTeacher)
+                    this.getCoursesDetails(courses, showMembers, showTeacher)
                         .then(function(courses){
                             if( courses &&
                                 courses.length > 0) {
@@ -511,70 +507,6 @@ function getCourse(req, res, next) {
     }
 }
 
-
-function _getCourses(courses, showMembers, showTeacher){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    if( courses &&
-        courses.length) {
-
-        // added empty object for reduce to work
-        courses.unshift({});
-
-        when.reduce(courses, function(data, course, i){
-            if(course.id) {
-                //console.log("id:", course.id);
-
-                // convert showMembers to int and then check it's value
-                var p;
-                if( showMembers ) {
-                    // init user
-                    course.users = [];
-
-                    p = this.myds.getStudentsOfCourse(course.id)
-                        .then(function(studentList) {
-                            course.users = _.clone(studentList);
-                            return this.myds.getGamesForCourse(course.id);
-                        }.bind(this));
-                }
-                else if( showTeacher ) {
-                    p = this.myds.getTeacherOfCourse(course.id)
-                        .then(function(teacherInfo) {
-                            course.teacher = _.clone(teacherInfo);
-                            return this.myds.getGamesForCourse(course.id);
-                        }.bind(this));
-                }
-                else {
-                    p = this.myds.getGamesForCourse(course.id);
-                }
-
-                p.then(function(games) {
-                    course.games = _.clone(games);
-                    // need to return something for reduce to continue
-                    return 1;
-                }.bind(this));
-
-                return p;
-            }
-        }.bind(this))
-            .then(null, function(err){
-                reject(err);
-            }.bind(this))
-
-            .done(function(){
-                //console.log("done");
-                // added empty object for reduce to work
-                courses.shift();
-                resolve(courses);
-            }.bind(this))
-    } else {
-        resolve(courses);
-    }
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}
 
 /*
  POST http://localhost:8001/api/v2/lms/course/107/info
@@ -670,82 +602,24 @@ function updateGamesInCourse(req, res, next, serviceManager)
             // validate gameId's
             // TODO: replace using internal route, but needs callback when route is done
             var dash = serviceManager.get("dash").service;
-            // TODO: replace this with DB lookup, return promise
-            var gameIds = dash.getListOfGameIds();
 
             for(var i = 0; i < userInputGames.length; i++){
-                var found = false;
-                // check if gameId is in the course
-                for(var j = 0; j < gameIds.length; j++) {
-                    // game Id is not case sensitive, so lowercase check
-                    if( userInputGames[i].id &&
-                        (userInputGames[i].id.toUpperCase() == gameIds[j])
-                      ) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if(!found) {
+                // TODO: replace this with DB lookup, return promise
+                if(!dash.isValidGameId(userInputGames[i].id)) {
                     this.requestUtil.errorResponse(res, {error: "gameId '"+userInputGames[i]+"' is not valid", key:"course.create.invalid.gameid"}, 404);
                     return; // exit function
                 }
             }
 
-            this.myds.getGamesForCourse(courseId)
+            this.telmStore.getGamesForCourse(courseId)
                 .then(function (currentGames) {
-                    var addGames = [];
-                    var removeGames = [];
-                    var updateGames = [];
-
-                    // find games to remove or update
-                    for (var i = 0; i < currentGames.length; i++) {
-                        var found = false;
-                        for (var j = 0; j < userInputGames.length; j++) {
-                            if (userInputGames[j].id == currentGames[i].id) {
-                                found = true;
-
-                                // if not equal then add userInput for update
-                                if(!_.isEqual(userInputGames[j], currentGames[i])) {
-                                    updateGames.push(userInputGames[j]);
-                                }
-
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            removeGames.push(currentGames[i]);
-                        }
+                    var updateGames = {};
+                    for(var i = 0; i < userInputGames.length; i++) {
+                        updateGames[ userInputGames[i].id ] = userInputGames[i].settings || {};
                     }
 
-                    // find games to add
-                    for (var i = 0; i < userInputGames.length; i++) {
-                        var found = false;
-                        for (var j = 0; j < currentGames.length; j++) {
-                            if (currentGames[j].id == userInputGames[i].id) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) {
-                            addGames.push(userInputGames[i]);
-                        }
-                    }
-
-                    var promiseList = [];
-                    if(removeGames.length > 0) {
-                        //console.log("updateCourse removeGames:", removeGames);
-                        promiseList.push(this.myds.removeGamesFromCourse(courseId, removeGames));
-                    }
-                    if(addGames.length > 0) {
-                        //console.log("updateCourse addGames:", addGames);
-                        promiseList.push(this.myds.addGamesToCourse(courseId, addGames));
-                    }
-                    if(updateGames.length > 0) {
-                        //console.log("updateCourse updateGames:", updateGames);
-                        promiseList.push(this.myds.updateGamesInCourse(courseId, updateGames));
-                    }
-                    return when.all(promiseList);
+                    updateGames = _.merge(updateGames, currentGames);
+                    return this.updateGamesForCourse(courseId, updateGames);
                 }.bind(this))
 
                 .then(function () {
