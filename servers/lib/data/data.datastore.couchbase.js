@@ -87,7 +87,7 @@ TelemDS_Couchbase.prototype._chunk_getMulti = function(keys, options, callback){
         return when.promise(function(resolve, reject) {
             this.client.getMulti(ckeys, options, function(err, results){
                     if(err) {
-                        reject(err);
+                        reject( { error: err, results: results } );
                         return;
                     }
 
@@ -102,7 +102,7 @@ TelemDS_Couchbase.prototype._chunk_getMulti = function(keys, options, callback){
         .then(function(all){
             callback(null, all);
         }, function(err){
-            callback(err);
+            callback(err.error, err.results);
         })
 };
 
