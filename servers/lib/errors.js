@@ -50,6 +50,7 @@ module.exports = {
     "user.verifyEmail.accountDeleted":      "Your account has been deleted because you didn't verify your email account in the time allotted. Please try registering your account again.",
     "user.verifyEmail.code.invalid":        "The URL provided is not valid. Please try cutting and pasting again from the email you received with verification information.",
     "user.verifyEmail.user.emailNotExist":  "This email address does not exist in our system.",
+    "user.welcomeEmail.general":            "We encountered an error sending your welcome email. Please try again",
     // config
     "data.gameId.general":                  "We encountered an error. Please try again.",
     "data.gameId.missing":                  "This game Id does not exist in our system",

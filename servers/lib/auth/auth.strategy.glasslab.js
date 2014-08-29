@@ -60,17 +60,12 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
             }.bind(this),
             function (err) {
                 if (!err.user) {
-
+                   // invalid username or password
                    return this.fail({key:"user.login.invalid"});
 
-                } else if (err.info === "email not verified") {
-
-                   return this.fail({key:"user.login.notVerified"});
-
                 } else {
-
-                   return this.fail({key:"user.login.general"});
-
+                    // email not verified
+                    return this.fail({key: err.key});
                 }
             }.bind(this)
     );
@@ -107,21 +102,25 @@ return when.promise(function(resolve, reject) {
             if(!_.isObject(user)) {
                 return resolve({user: null, info: {error: 'Unknown user ' + username} });
             }
+
             this._verifyPassword(password, user)
                 .then(
                     function(){
+
                         // check if email verified
-                        if (user.verifyCodeStatus === 'verified') {
+                        if (user.verifyCodeStatus === 'verified' || process.env.HYDRA_ENV === 'dev') {
                             delete user.password;
                             resolve({user: user, error: null});
                         } else {
-                            reject({user: user, info: 'email not verified'});
+                            // email not verified
+                            reject({user: user, key: "user.login.notVerified"});
                         }
+
                     }.bind(this),
                     // errors
                     function(err){
                         // invalid password or user
-                        reject({user: null, info: err});
+                        reject({user: null, key:  err});
                 }.bind(this));
         }.bind(this))
         // catch all errors
@@ -381,10 +380,6 @@ return when.promise(function(resolve, reject) {
 
     if(userData.password) {
         data.password = this.ds.escape(userData.password);
-    }
-
-    if(userData.reset_code) {
-        userData.resetCode = userData.reset_code;
     }
     if(userData.resetCode) {
         if(userData.resetCode == "NULL") {

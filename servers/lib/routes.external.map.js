@@ -28,14 +28,7 @@ module.exports = {
     // ---------------------------------------------------
     // Version 2
     // ---------------------------------------------------
-        {
-            api: "/admin/api/version",
-            service: "admin",
-            controller: "config",
-            method: {
-                get: "version"
-            }
-        },
+
         {
             api: "/api/v2/data/config/:gameId",
             service: "data",
@@ -400,14 +393,6 @@ module.exports = {
             controller: "login",
             method: {
                 post: "logout"
-            }
-        },
-        {
-            api: "/api/v2/auth/logout",
-            service: "auth",
-            controller: "login",
-            method: {
-                get: "logout"
             }
         },
     // ---------------------------------------------------
