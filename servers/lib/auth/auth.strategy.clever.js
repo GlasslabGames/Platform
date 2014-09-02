@@ -108,7 +108,7 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
         } else {
             try {
                 var json = JSON.parse(body);
-                console.log("Clever UserProfile:", json);
+                //console.log("Clever UserProfile:", json);
 
                 var profile = {
                     loginType: aConst.login.type.clever
