@@ -104,6 +104,13 @@
                 "consumerKey":          "fWAzCPbD9FTWmpYEEnTjZnvubWN8r2Y2",
                 "consumerSecret":       "bzw2NdSr8Jsfpg9feXv87LyUPgyzxj5j",
                 "callbackURL":          "http://127.0.0.1:8001/auth/icivics/callback"
+            },
+            "clever": {
+                "clientID": "64b61d998c2be745caa8",
+                "clientSecret": "f25194d53de4e92f6b2756359c51860618efa075",
+                "callbackURL": "http://127.0.0.1:8001/auth/clever/callback",
+                "scope": "read:user_id",
+                "customParams": { "district_id": "5401192ee49b4d3b5d00000c" }
             }
         }
     },
