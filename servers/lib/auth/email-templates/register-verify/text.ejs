@@ -1,7 +1,10 @@
 Hello {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},
-Someone recently requested to change your Glasslab account's password.
-If this was you, you can set a new password here:
-{{= host }}/passwordreset/{{= code }}
-If you don't want to change your password, just ignore this message.
-Thank you!
-The Glasslab Team
+
+    Almost there, just a little bit more, you can do it!
+    To complete the registration process, please click on the link below to confirm your email address.
+    {{= host }}/api/v2/auth/register-verify/{{= code }}/verify
+
+    If you received this email by mistake (oops), simply delete it. Your account will not be created if you don't click the confirmation link above.
+
+        Sincerely,
+        Your New Best Friends at GlassLab

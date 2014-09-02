@@ -41,6 +41,13 @@ module.exports = {
             inProgress: "in progress"
         }
     },
+    verifyCode: {
+        expirationInterval: 6048000000, // 1 week in milliseconds
+        status: {
+            sent:       "sent",
+            verified:   "verified"
+        }
+    },
     datastore: {
         keys: {
             user: "u",

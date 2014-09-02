@@ -48,7 +48,6 @@ Cases:
 */
 function glassLabLogin(req, res, next) {
     this.stats.increment("info", "Route.Login");
-
     //console.log("Auth loginRoute");
     var authenticate = glassLabLogin_Authenticate.bind(this);
     authenticate(req, res, next)
@@ -98,6 +97,7 @@ return when.promise(function(resolve, reject) {
 }
 
 function glassLabLogin_LogIn(req, user) {
+
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------

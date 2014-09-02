@@ -4,6 +4,15 @@ module.exports = {
     // --------------------------------------------------------------------------------------
     apis: [
         {
+            api: "/admin/api/version",
+            service: "admin",
+            controller: "config",
+            method: {
+                get: "version"
+            }
+        },
+
+        {
             api: "/int/v1/data/qsession/end",
             service: "data",
             controller: "_queueSession",
@@ -92,15 +101,6 @@ module.exports = {
             method: {
                 post: "updateGameConfigs"
             }
-        },
-        {
-            api: "/api/v2/data/config/:gameId",
-            service: "data",
-            controller: "config",
-            method: {
-                get: "index"
-            }
         }
-
     ]
 };

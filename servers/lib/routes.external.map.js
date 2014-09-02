@@ -28,6 +28,7 @@ module.exports = {
     // ---------------------------------------------------
     // Version 2
     // ---------------------------------------------------
+
         {
             api: "/api/v2/data/config/:gameId",
             service: "data",
@@ -376,6 +377,14 @@ module.exports = {
             controller: "user",
             method: {
                 get: "resetPasswordVerify"
+            }
+        },
+        {
+            api: "/api/v2/auth/register-verify/:code/verify",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "validateEmailCode"
             }
         },
         {
