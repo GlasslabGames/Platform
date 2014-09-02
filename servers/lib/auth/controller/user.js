@@ -12,6 +12,7 @@ module.exports = {
     registerUserV1:      registerUserV1,
     registerUserV2:      registerUserV2,
     validateEmailCode:   validateEmailCode,
+    validateBetaCode:    validateBetaCode,
     registerManager:     registerManager,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
@@ -499,8 +500,10 @@ function registerUserV2(req, res, next, serviceManager) {
 
                     promise
                         .then(function(){
+                            // beta
+                            return sendBetaConfirmEmail.call(this, regData.email, req.protocol, req.headers.host);
                             // send email verification code
-                            return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
+//                            return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
                         }.bind(this))
                         // all ok
                         .then(function(){
@@ -553,6 +556,111 @@ function registerUserV2(req, res, next, serviceManager) {
     }
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
+}
+
+function sendBetaConfirmEmail(email, protocol, host) {
+    if( !(email &&
+        _.isString(email) &&
+        email.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
+    }
+
+    var verifyCode = Util.CreateUUID();
+    var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
+
+    return this.glassLabStrategy.getUserByEmail(email)
+        .then(function(userData) {
+            userData.verifyCode           = verifyCode;
+            userData.verifyCodeExpiration = expirationTime;
+            userData.verifyCodeStatus     = aConst.verifyCode.status.beta;
+
+            return this.glassLabStrategy.updateUserData(userData)
+                .then(function(){
+                    var emailData = {
+                        subject: "Playfully.org Beta confirmation",
+                        to:   aConst.betaAdmin.email,
+                        user: userData,
+                        code: verifyCode,
+                        host: protocol+"://"+host
+                    };
+
+                    var email = new Util.Email(
+                        this.options.auth.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    email.send('beta-verify', emailData)
+                        .then(function(){
+                            // all ok
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            console.err('failed to send email:',  err);
+                        }.bind(this));
+
+                }.bind(this));
+        }.bind(this))
+        // catch all errors
+        .then(null, function(err) {
+            if( err.error &&
+                err.error == "user not found") {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
+            } else {
+                console.error("AuthService: sendVerifyEmail Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this))
+}
+
+function validateBetaCode(req, res, next) {
+    console.log('request:', req.params.code);
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
+    }
+    // 1) validate the code and get user data
+    this.glassLabStrategy.findUser("verify_code", req.params.code)
+        .then(function(userData) {
+            // check if code expired
+            if(Util.GetTimeStamp() > userData.verifyCodeExpiration) {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
+            } else {
+
+                if(userData.verifyCodeStatus === aConst.verifyCode.status.beta) {
+                    // change status to verified
+                    userData.verifyCodeStatus = aConst.verifyCode.status.sent;
+                    userData.verifyCodeExpiration = "NULL";
+                    userData.verifyCode = "NULL";
+
+                    return this.glassLabStrategy.updateUserData(userData)
+                        .then(function() {
+                            this.requestUtil.jsonResponse(res, 200);
+                            return userData;
+                        }.bind(this));
+                } else {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+            }
+        }.bind(this),
+        function(err) {
+            if( err.error &&
+                err.error == "user not found") {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
+            } else {
+                console.error("AuthService: validateBetaCode Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this))
+        .then(function(userData) {
+            // send verification email to registered user
+            return sendVerifyEmail.call(this, userData.email, req.protocol, req.headers.host);
+        }.bind(this))
+        .then(null, function(err) {
+            console.log(err);
+            this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"});
+        });
+
 }
 
 function sendVerifyEmail(email , protocol, host) {

@@ -1,0 +1,18 @@
+This email is for an admin to complete beta verification for: <br />
+
+{{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},<br />
+{{= user.email }}<br />
+
+<br/>
+To verify this user, please click on the link below:<br />
+<br/>
+
+<a href="{{= host }}/api/v2/auth/register-verify/{{= code }}/verifyBeta">{{= host }}/api/v2/auth/register-verify/{{= code }}/verifyBeta</a><br /><br />
+
+    If you received this email by mistake (oops), please let us know so we can fix it.<br />
+
+    Sincerely,<br /><br />
+    Your New Best Friends at GlassLab
+
+
+

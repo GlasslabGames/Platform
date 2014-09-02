@@ -7,6 +7,9 @@
 module.exports = {
     webappSessionPrefix: "wa_session",
     sessionCookieName:  "JSESSIONID",
+    betaAdmin: {
+      email: "charles@glasslabgames.org"
+    },
     code: {
         type: {
             institution: "institution",
@@ -44,7 +47,8 @@ module.exports = {
         expirationInterval: 6048000000, // 1 week in milliseconds
         status: {
             sent:       "sent",
-            verified:   "verified"
+            verified:   "verified",
+            beta:       "beta"
         }
     },
     datastore: {

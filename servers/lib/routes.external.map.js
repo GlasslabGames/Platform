@@ -388,6 +388,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/register-verify/:code/verifyBeta",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "validateBetaCode"
+            }
+        },
+        {
             api: "/api/v2/auth/logout",
             service: "auth",
             controller: "login",
