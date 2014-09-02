@@ -33,7 +33,7 @@ function tstamp() {
 
 describe("API v2 testing", function(done) {
 	
-    it("#should connect to " + testENV + "environment", function(done) {
+    it("#should connect to " + testENV.toUpperCase() + " environment", function(done) {
         agent
 					.get(srvAddr)
 					.end(function(res){
@@ -51,7 +51,6 @@ describe("API v2 testing", function(done) {
               done();
           });  
 		});
-
     
     it("should return valid SDK config data", function(done) {
         agent
@@ -153,7 +152,7 @@ describe("API v2 testing", function(done) {
 						if (resText[2]['userId'] == data.student.id) {
 							expect(resText[2]['results']).to.eql(data.student.sowo);	
 						} else {
-							console.log('mismatched student: ' + resText[2]['userId'])
+							console.log('mismatched student: ' + resText[2]['userId']);
 						}
 						
 						done();
@@ -171,7 +170,6 @@ describe("API v2 testing", function(done) {
 						
 						if (resText[2]['userId'] == data.student.id) {
 							expect(resText[2]['achievements']).to.eql(data.student.achievements);
-							
 						} else {
 							console.log('mismatched student: ' + resText[2]['userId']);
 						}
