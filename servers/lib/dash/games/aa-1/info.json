@@ -56,9 +56,9 @@
                 "name": "Game Achievements & Time Played",
                 "header": {
                     "text": "Game Achievements & Time Played",
-                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                    "image": "assets/game-banner-AA-1.jpg"
                 },
-                "description": "This report shows...",
+                "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
             },
             {
@@ -68,9 +68,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                    "image": "assets/game-banner-AA-1.jpg"
                 },
-                "description": "This report shows..."
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             }
         ]
     },
@@ -99,22 +99,22 @@
         "pages": {
             "product": {
                 "header": "Put your powers of persuasion to the ultimate test, on a whole new planet!",
-                "about": " Mars Generation One: Argubot Academy is an argumentation adventure game for iOS tablets and coming soon to Android. Aligned to Common Core argumentation standards on Reasoning and Evidence, it lets players construct special robots called argubots and pit them against each other to resolve conflicts and make important decisions.  In its exciting first-city-on-Mars environment, the game setting presents inspirational STEM content that places the player in the fiction of a small community on the red planet.",
+                "about": "Mars Generation One: Argubot Academy is an engaging futuristic adventure game for iOS tablets. Aligned to the Common Core State Standards, the game brings STEM content into the English Language Arts classroom, and helps middle schoolers develop persuasion and reasoning skills. In Argubot Academy, players take on the persona of a new student at Argubot Academy, the city’s middle school. There, each player will have to make very adult decisions about the building and governance of the city, for example: What type of food should the citizens cultivate? Players have to build sound arguments for every choice they make – but in this city on Mars, people settle their differences by equipping their robot assistants, called argubots, with claims and evidence, culminating in a robot battle of wits!",
                 "curriculum": [
                     "Addresses critical Common Core standards in persuasion and reasoned thinking – a cornerstone of the standards for English Language Arts",
                     "Promotes interest in STEM content while developing the literacy and leadership skills that are essential for any 21st century career",
                     "With input from experts in literacy at the National Writing Project, works well to introduce norms for classroom discussions, persuasive writing, and expository writing",
                     "Brings games into the ELA classroom to support Common Core Reading and Writing so that educators can make the most of their tablet hardware"
-                    
+
                 ],
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                        "url": "assets/3v3battle.png"
                     },
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/map.png"
+                        "url": "assets/map.png"
                     }
                 ]
             },
@@ -185,25 +185,18 @@
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Pre-Game Introduction I",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+I.pdf"
+                            "name": "Argubot Academy: Lesson 1",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Lesson_1.zip"
                         },
                         {
-                            "name": "Pre-Game Introduction II",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Pre-Game+Intro+II.pdf"
+                            "name": "Argubot Academy: Lesson 2",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Lesson_2.zip"
                         },
                         {
-                            "name": "MGO Core Lesson Plan I.pdf",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+I.pdf"
-                        },
-                        {
-                            "name": "MGO Core Lesson Plan II.pdf",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+II.pdf"
-                        },
-                        {
-                            "name": "MGO Core Lesson Plan III.pdf",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+Core+Lesson+Plan+III.pdf"
+                            "name": "Argubot Academy Routines - Coming Soon!",
+                            "link": ""
                         }
+
                     ]
                 },
                 {
@@ -213,49 +206,65 @@
                             "name": "Walkthrough",
                             "link": "https://vimeo.com/92362764"
                         }
-                        
+
                     ]
                 },
                 {
                     "category": "Info Pack",
                     "list": [
                         {
-                            "name": "One Page Game Description",
-                            "link": "http://glasslabgames.org"
+                            "name": "Game Description",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+brochure_final.pdf"
                         }
                     ]
                 }
             ],
             "research": [
                 {
-                    "category": "SRI 2014",
+                    "category": "   ",
                     "list": [
                         {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
+                            "name": "Resources from the National Writing Project",
+                            "link": "http://www.nwp.org/cs/public/print/resource_topic/persuasive_writing"
                         },
                         {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
+                            "name": "Jim Gee’s Good Video Games and Good Learning",
+                            "link": "http://www.jamespaulgee.com/sites/default/files/pub/GoodVideoGamesLearning.pdf"
+                        },
+                        {
+                            "name": "Katie Salen’s The Ecology of Games",
+                            "link": "http://mitpress.mit.edu/books/ecology-games"
+                        },
+                        {
+                            "name": "The MacArthur Foundation’s Connected Learning",
+                            "link": "http://connectedlearning.tv/what-is-connected-learning"
                         }
                     ]
                 }
             ],
             "reviews": [
                 {
-                    "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florida",
-                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission, automatic grading."
+                    "reviewer": "Common Sense Media",
+                    "review": "Engrossing missions feature imaginative STEM-themed issues. Meanwhile, it's exciting to discover that the game rewards users for making strong arguments -- not for picking a particular \"correct\" position. By teaching ELA standards through a STEM-themed storyline, the game is fundamentally interdisciplinary in all the right ways. Showing students how these skills bridge disciplines is a critical lesson, and that point is deftly delivered."
+                },
+                {
+                    "reviewer": "Forbes",
+                    "review": "Argubot Academy is significant because it addresses a part of school curriculum that few games have tried to tackle: argumentation, logic, and reasoned thinking. …  one of the impressive things about Argubot Academy is that it takes a multidisciplinary approach. It grounds ELA proficiencies in a STEM based narrative setting. ... So often we forget that the purpose of education is not only to make workers who contribute to the economy, but also, to make citizens that contribute to making a better civilization."
+                },
+                {
+                    "reviewer": "Elyse Eidman-Aadahl, Executive Director, National Writing Project ",
+                    "review": "[Argubot Academy] teaches moves in argumentation like moves in Karate. ... [We] love that this also introduces a social practice and structure in a positive frame around ‘argumentation’ which provides a significant social learning impact."
                 }
             ]
         },
         "banners": {
-            "product": "http://argubotacademy.org/images/banner_mars1.jpg",
-            "reports": "http://argubotacademy.org/images/banner_mars1.jpg"
+            "product": "assets/game-banner-AA-1.jpg",
+            "reports": "assets/game-banner-AA-1.jpg"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",
-            "google": "http://plus.google.com/glasslabgames"
+            "google": "https://plus.google.com/117864084582459836584/posts"
         }
     }
 }

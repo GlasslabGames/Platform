@@ -5,30 +5,6 @@
         "title": "Standards",
         "subGroups": [
             {
-                "id": "b",
-                "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
-                "name": "Supporting Claims",
-                "description": "Write arguments to support claims with clear reasons and relevant evidence",
-                "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources.",
-                "items": [
-                    {
-                        "id": "Core Cadet",
-                        "title": "Core Cadet",
-                        "info": "Student has completed greater than 15 Claim Cores with a high success rate!"
-                    },
-                    {
-                        "id": "Core Champion",
-                        "title": "Core Champion",
-                        "info": "Student has 100% accuracy at identifying strengths and weaknesses of claim-data pairs for his/her 5 most recent attempts."
-                    },
-                    {
-                        "id": "Bot Defender",
-                        "title": "Bot Defender",
-                        "info": "Student dominated a battle by successfully critiquing an opposing argument while defending his/her own."
-                    }
-                ]
-            },
-            {
                 "id": "a",
                 "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
                 "name": "Organizing Claims",
@@ -36,14 +12,38 @@
                 "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically.",
                 "items": [
                     {
-                        "id": "Evidence Cadet",
-                        "title": "Evidence Cadet",
-                        "info": "Great detective work! Student has collected a wide range of evidence."
-                    },
-                    {
                         "id": "Bot Champion",
                         "title": "Bot Champion",
                         "info": "Student has won three argubot battles in a row!"
+                    },
+                    {
+                        "id": "Evidence Cadet",
+                        "title": "Evidence Cadet",
+                        "info": "Great detective work! Student has collected a wide range of evidence."
+                    }
+                ]
+            },
+            {
+                "id": "b",
+                "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
+                "name": "Supporting Claims",
+                "description": "Write arguments to support claims with clear reasons and relevant evidence",
+                "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources.",
+                "items": [
+                    {
+                        "id": "Bot Defender",
+                        "title": "Bot Defender",
+                        "info": "Student dominated a battle by successfully critiquing an opposing argument while defending his/her own."
+                    },
+                    {
+                        "id": "Core Champion",
+                        "title": "Core Champion",
+                        "info": "Student has 100% accuracy at identifying strengths and weaknesses of claim-data pairs for his/her 5 most recent attempts."
+                    },
+                    {
+                        "id": "Core Cadet",
+                        "title": "Core Cadet",
+                        "info": "Student has completed greater than 15 Claim Cores with a high success rate!"
                     }
                 ]
             }

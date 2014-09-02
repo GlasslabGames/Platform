@@ -21,7 +21,7 @@ function getAssessmentDefinitions(req, res){
         // check input
         if( !( req.params &&
                req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
             return;
         }
         var gameId = req.params.gameId;
@@ -29,19 +29,12 @@ function getAssessmentDefinitions(req, res){
         gameId = gameId.toUpperCase();
 
         // check gameId exists
-        if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+        if(!this.isValidGameId(gameId)) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
             return;
         }
 
-        var game = this.games[gameId];
-        if( game.info &&
-            game.info.hasOwnProperty('assessment')) {
-            this.requestUtil.jsonResponse(res, game.info['assessment']);
-        } else {
-            this.requestUtil.jsonResponse(res, []);
-        }
-
+        this.requestUtil.jsonResponse(res, this.getGameAssessmentInfo(gameId));
     } catch(err) {
         console.trace("Reports: Get Assessment Error -", err);
         this.stats.increment("error", "GetAchievements.Catch");
@@ -57,7 +50,7 @@ function saveAssessmentResults(req, res){
         // check input
         if( !( req.params &&
             req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
             return;
         }
         var gameId = req.params.gameId;
@@ -65,8 +58,8 @@ function saveAssessmentResults(req, res){
         gameId = gameId.toUpperCase();
 
         // check gameId exists
-        if( !this.games.hasOwnProperty(gameId) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
+        if(!this.isValidGameId(gameId)) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
             return;
         }
 
@@ -113,7 +106,7 @@ function saveAssessmentResults(req, res){
                 // merge results
                 out.results = _.merge( out.results, data.results );
 
-                console.log("out:", out);
+                //console.log("out:", out);
                 return this.telmStore.saveAssessmentResults(userId, gameId, assessmentId, out);
             }.bind(this) )
 

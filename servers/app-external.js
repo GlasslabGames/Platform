@@ -8,6 +8,7 @@ var Lic            = require('./lib/lic/lic.js');
 var Data           = require('./lib/data/data.js');
 var Dash           = require('./lib/dash/dash.js');
 var manager        = new ServiceManager("~/hydra.config.json");
+var Admin          = require('./lib/admin/admin.js');
 
 manager.setRouteMap('../routes.external.map.js');
 
@@ -17,5 +18,6 @@ manager.add( LMS );
 manager.add( Lic );
 manager.add( Dash );
 manager.add( Data );
+manager.add( Admin );
 
 manager.start();

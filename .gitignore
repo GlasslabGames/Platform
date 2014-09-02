@@ -1,2 +1,4 @@
 .idea
 node_modules
+servers/loadtest/locustfile.pyc
+servers/loadtest/reports/*

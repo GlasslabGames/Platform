@@ -1,0 +1,14 @@
+1..10
+ok 1 API v2 testing should connect to stageenvironment
+ok 2 API v2 testing shouldn't be able to manipulate data without login
+ok 3 API v2 testing should log in successfully
+ok 4 API v2 testing returns classes correctly
+ok 5 API v2 testing creates new class # SKIP -
+ok 6 API v2 testing archives new class # SKIP -
+ok 7 API v2 testing restores class # SKIP -
+ok 8 API v2 testing returns reports - SOWO # SKIP -
+ok 9 API v2 testing returns reports - achievements # SKIP -
+ok 10 API v2 testing should log out afterwards
+# tests 5
+# pass 5
+# fail 0

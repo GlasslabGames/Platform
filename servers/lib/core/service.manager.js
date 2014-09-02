@@ -60,6 +60,7 @@ function ServiceManager(configFiles){
     process.env.HYDRA_ENV = global.ENV;
     this.stats            = new Util.Stats(this.options, "ServiceManager");
 
+
     try{
         this.routesMap = require('../routes.map.js');
     } catch(err){
@@ -69,6 +70,21 @@ function ServiceManager(configFiles){
     this.services  = {};
     this.routeList = {};
 }
+
+ServiceManager.prototype.loadVersionFile = function() {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+    fs.readFile('./version.json', 'utf8', function (err, data) {
+        if (err) {
+            reject(err);
+        } else{
+            this.version = data.toString();
+            resolve(this.version);
+        }
+    }.bind(this));
+});
+// end promise wrapper
+};
 
 ServiceManager.prototype.setRouteMap = function(str) {
     this.routesMap = require(str);
@@ -370,11 +386,17 @@ return when.promise(function(resolve, reject) {
 };
 
 ServiceManager.prototype.start = function(port) {
-
+    this.loadVersionFile()
+        .then(function() {
+            console.log('Loading Version File...');
+        })
+        .then(null,function(err) {
+            console.error("ServiceManager: Failed to Load Version File -", err);
+        });
     // start express (session store,...), then start services
     this.initExpress()
         .then(function(){
-            console.log('Initilizing Services...');
+            console.log('Initializing Services...');
             return this.initServices();
         }.bind(this))
         .then(function() {

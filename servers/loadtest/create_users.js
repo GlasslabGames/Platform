@@ -6,7 +6,8 @@ port = 80;
 //port = 8000;
 
 //hostname = "glasslab-dashboard-stage-164657619.us-west-2.elb.amazonaws.com";
-hostname = "test.glgames.org";
+//hostname = "test.glgames.org";
+hostname = "localhost:8001";
 
 var userTemplate = { "username":"_", "firstName":"_", "lastName":"_", "password":"_", "type":"course", "associatedId":0, "email":"" };
 var contentType = "application/json;charset=UTF-8"

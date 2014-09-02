@@ -67,7 +67,7 @@ return when.promise(function(resolve, reject) {
 
         // test connection to Couchbase
         .then(function(){
-            return this.cbds.connect();
+            return this.cbds.connect(this.myds);
         }.bind(this))
         .then(function(){
                 console.log("DataService: Couchbase DS Connected");
