@@ -3,7 +3,7 @@
  */
 var querystring   = require('querystring'),
     util          = require('util'),
-    OAuthStrategy = require('passport-oauth').OAuthStrategy;
+    OAuthStrategy = require('passport-oauth1');
 
 var _ = require('lodash');
 
@@ -133,7 +133,7 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, don
                     profile.role = lConst.role.student;
                 }
 
-                profile.username  = "icivics."+json.user.uid;
+                profile.username  = '{'+this.name+'}.'+json.user.uid;
                 if(json.user.name) {
                     profile.username += "."+json.user.name;
                 }
@@ -141,6 +141,8 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, don
                 profile.lastName  = json.user.last_name || "";
                 profile.email     = json.user.mail || "";
                 profile.password  = body;
+
+                // if teacher, create all students in all classes, create classes, add students to class
 
                 done(null, profile);
             } catch (err) {

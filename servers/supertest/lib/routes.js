@@ -11,7 +11,7 @@ var teacher  = testData.teacher,
 module.exports = {
 
     login: {
-        path: "/api/v2/auth/login/glasslab",    // TODO Change to like: routes.api.[_____].api
+        path: "/api/v2/auth/login/glasslab",
         post: {"username":teacher.email, "password":teacher.pass}
     },
     

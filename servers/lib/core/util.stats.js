@@ -34,7 +34,7 @@ function Stats(options, root){
 
     this.sRoot = root;
     this.root  = root;
-    this.env   = process.env.HYDRA_ENV || "dev";
+    this.env   = process.env.HYDRA_ENV || 'dev';
 }
 
 Stats.prototype.saveRoot = function() {
