@@ -77,12 +77,12 @@
     "details": {
         "release": "beta",
         "price": "Free",
-        "releaseDate": "April 22, 2014",
+        "releaseDate": "September 2, 2014",
         "type": "App",
         "platform": "iPad",
         "subject": "ELA",
         "grades": "6 - 8",
-        "applink": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8",
+        "applink": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8",
         "buttons": [
             {
                 "name": "Play Game",
@@ -90,7 +90,7 @@
                     {
                         "name": "Play Game",
                         "type": "ios-appstore",
-                        "link": "https://itunes.apple.com/us/app/mars-gen-one-argubot-academy/id860801947?ls=1&mt=8",
+                        "link": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8",
                         "target": "_blank"
                     }
                 ]
