@@ -31,6 +31,7 @@ function enrollInCourse(req, res, next) {
             req.body.courseCode) {
             var userData = req.session.passport.user;
             var courseCode = req.body.courseCode;
+            var courseInfo = {};
 
             // TODO: refactor this to not look like a tree
             this.myds.getCourseIdFromCourseCode(courseCode)
@@ -43,11 +44,13 @@ function enrollInCourse(req, res, next) {
                     }
                 }.bind(this))
                 //
-                .then(function(courseInfo) {
-                    if(!courseInfo) return;
+                .then(function(_courseInfo) {
+                    if(!_courseInfo) return;
 
-                    if(!courseInfo.locked) {
-                        return this.myds.isUserInCourse(userData.id, courseInfo.id);
+                    courseInfo = _courseInfo;
+
+                    if(!_courseInfo.locked) {
+                        return this.myds.isUserInCourse(userData.id, _courseInfo.id);
                     } else {
                         this.requestUtil.errorResponse(res, {key:"course.locked"}, 400);
                         return null;
@@ -60,7 +63,7 @@ function enrollInCourse(req, res, next) {
 
                     // only if they are NOT in the class
                     if(inCourse === false) {
-                        this.myds.addUserToCourse(userData.id, courseId, lConst.role.student)
+                        this.myds.addUserToCourse(userData.id, courseInfo.id, lConst.role.student)
                             .then(function() {
                                 this.requestUtil.jsonResponse(res, {});
                             }.bind(this))

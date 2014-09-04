@@ -9,42 +9,37 @@
 var _          = require('lodash');
 var when       = require('when');
 var Strategy   = require('./auth.strategy.edmodo.js');
-// load at runtime
-// Glasslab libs
-var aConst, lConst;
 
 module.exports = EdmodoAccount;
 
-function EdmodoAccount(options){
+function EdmodoAccount(options, manager, authService){
     try {
-        var Auth, LMS;
+        this._id   = "edmodo";
+        this._name = "Edmodo";
         this.options = _.merge(
             {},
             options
         );
-
-        // Glasslab libs
-        Auth = require('./auth.js');
-        LMS  = require('../lms/lms.js');
-        lConst = LMS.Const;
-        aConst = Auth.Const;
-
-        this.ds = new Auth.Datastore.MySQL(this.options.auth.datastore.mysql);
+        this._authService = authService;
 
     } catch(err) {
-        console.trace("EdmodoAccount: Error -", err);
+        console.trace(this._name+"Account: Error -", err);
         this.stats.increment("error", "Generic");
     }
 }
+
+EdmodoAccount.prototype.getId = function() {
+    return this._id;
+};
 
 EdmodoAccount.prototype.setupPassport = function(passport) {
 
     passport.use( new Strategy(
             this.options.auth.accounts.edmodo,
             function(accessToken, refreshToken, profile, done) {
-                //console.log("edmodo user - profile:", profile);
+                //console.log(this._id+" user - profile:", profile);
 
-                this._AddOrFindUser(profile)
+                this._authService.addOrUpdate_SSO_UserData(profile)
                     .then( function(profile) {
                         done(null, profile);
                     }.bind(this),
@@ -56,64 +51,3 @@ EdmodoAccount.prototype.setupPassport = function(passport) {
         )
     );
 };
-
-EdmodoAccount.prototype.setupRoutes = function(app, passport) {
-
-    // route to trigger google oauth authorization
-    app.get('/auth/edmodo/login',
-        passport.authenticate('edmodo'),
-        function(req, res) {
-            // The request will be redirected to Google for authentication, so this
-            // function will not be called.
-        }.bind(this)
-    );
-
-    // callback route
-    app.get('/auth/edmodo/callback',
-        passport.authenticate('edmodo'),
-        function(req, res) {
-            // Successful authentication, redirect home.
-            res.redirect('/auth/edmodo');
-        });
-};
-
-
-EdmodoAccount.prototype.createAccount = function(){
-    // client should handle this
-};
-
-
-EdmodoAccount.prototype._AddOrFindUser = function(userData){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    // second, no Error on found
-    this.ds.checkUserNameUnique(userData.username, true)
-        // add user
-        .then(function(userId) {
-            if(userId) {
-                userData.id = userId;
-                return this.ds.updateUserData(userData);
-            } else {
-                userData.newUser = true;
-                return this.ds.addUser(userData);
-            }
-        }.bind(this))
-
-        // all done
-        .then(function(userId){
-            userData.id = userId;
-            resolve(userData);
-        }.bind(this))
-
-        // catch all errors
-        .then(null, function(err, code){
-            console.error("EdmodoAccount: _AddOrFindUser Error -", err);
-            return reject(err, code);
-        }.bind(this));
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
