@@ -77,7 +77,7 @@
     "details": {
         "release": "beta",
         "price": "Free",
-        "releaseDate": "September 2, 2014",
+        "releaseDate": "Sep 2, 2014",
         "type": "App",
         "platform": "iPad",
         "subject": "ELA",
@@ -193,7 +193,11 @@
                             "link": "https://s3-us-west-2.amazonaws.com/playfully/Lesson_2.zip"
                         },
                         {
-                            "name": "Argubot Academy Routines - Coming Soon!",
+                            "name": "Argubot Academy: Routine 1",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/Routine_1.zip"
+                        },
+                        {
+                            "name": "Argubot Academy: more Routines Coming Soon!",
                             "link": ""
                         }
 
@@ -207,15 +211,6 @@
                             "link": "https://vimeo.com/92362764"
                         }
 
-                    ]
-                },
-                {
-                    "category": "Info Pack",
-                    "list": [
-                        {
-                            "name": "Game Description",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/MGO+brochure_final.pdf"
-                        }
                     ]
                 }
             ],
