@@ -49,7 +49,7 @@ function AuthService(options){
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options, Errors);
         this.authStore        = new AuthStore(this.options.auth.datastore.mysql);
-        this.accountsManager  = new Accounts.Manager(this.options);
+        this.accountsManager  = new Accounts.Manager(this.options, this);
         this.glassLabStrategy = this.accountsManager.get("Glasslab");
 
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
@@ -143,38 +143,27 @@ return when.promise(function(resolve, reject) {
 
 
 AuthService.prototype.registerUser = function(userData){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    this.glassLabStrategy.registerUser(userData)
-        .then(resolve, reject);
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
+    return this.glassLabStrategy.registerUser(userData);
 };
 
 AuthService.prototype.checkUserPerminsToUserData = function(userData, loginUserSessionData){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // TODO: switch based on user (from userId) login type
-    if( (userData.loginType == aConst.login.type.glassLabV1) ||
-        (userData.loginType == aConst.login.type.glassLabV2) ){
-        this.glassLabStrategy.checkUserPerminsToUserData(userData, loginUserSessionData)
-            .then(resolve, reject);
-    } else {
-            this.stats.increment("error", "RegisterUser.InvalidLoginType");
-            reject({error: "invalid login type"});
-    }
+// TODO: switch based on user (from userId) login type
+if( (userData.loginType == aConst.login.type.glassLabV1) ||
+    (userData.loginType == aConst.login.type.glassLabV2) ){
+    this.glassLabStrategy.checkUserPerminsToUserData(userData, loginUserSessionData)
+        .then(resolve, reject);
+} else {
+        this.stats.increment("error", "RegisterUser.InvalidLoginType");
+        reject({error: "invalid login type"});
+}
 // ------------------------------------------------
-    }.bind(this));
+}.bind(this));
 // end promise wrapper
 };
-
-
 
 AuthService.prototype._updateUserData = function(userData, loginUserSessionData){
 // add promise wrapper
@@ -192,3 +181,125 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+AuthService.prototype.addOrUpdate_SSO_UserData = function(userData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    // second, no Error on found
+    this.authStore.checkUserNameUnique(userData.username, true)
+        // add user
+        .then(function(userId) {
+            if(userId) {
+                userData.id = userId;
+                return this.authStore.updateUserDBData(userData);
+            } else {
+                userData.newUser = true;
+                return this.authStore.addUser(userData);
+            }
+        }.bind(this))
+
+        // all done
+        .then(function(userId){
+            // update id, if set
+            if(userId) {
+                userData.id = userId;
+            }
+
+            if(userData.hasOwnProperty('courses')) {
+                var courses = userData.courses;
+                // 1a) create list all users, add them
+                var users = _.flatten(_.pluck(courses, 'users'));
+
+                // 1b) create promise list of adding all users
+                var addUserPromiseList = [];
+                for(var i = 0; i < users.length; i++) {
+                    addUserPromiseList.push( this.addOrUpdate_SSO_UserData(users[i]) );
+                }
+
+                var addUserPromise = when.reduce(addUserPromiseList, function (allUsers, user) {
+                    allUsers[user.id] = user;
+                    return allUsers;
+                }, {});
+
+                // will need to use reduce here
+                addUserPromise
+                    // 2) create promise list of adding/updating all courses
+                    .then(function(allUsers){
+                        var addCoursePromiseList = [];
+                        for(var c in courses) {
+                            // updates users in courses
+                            for(var i = 0; courses[c].users.length; i++) {
+                                if( allUsers.hasOwnProperty( courses[c].users[i].id) ){
+                                    courses[c].users[i] = allUsers[courses[c].users[i].id];
+                                }
+                            }
+                            addCoursePromiseList.push( this.addOrUpdate_SSO_Course(courses[c]) );
+                        }
+                        return when.all(addCoursePromiseList);
+                    }.bind(this))
+                    // 3) create promise list of adding all users to courses if they already are not in courses
+                    .then(function(){
+                        var addUserToCoursePromiseList = [];
+                        for(var c in courses) {
+                            addUserToCoursePromiseList.push( this.addOrUpdate_SSO_EnrollInCourse(courses[c]) );
+                        }
+                        return when.all(addUserToCoursePromiseList);
+                    }.bind(this))
+                    .then(function(){
+                        resolve(userData);
+                    }.bind(this))
+            } else {
+                resolve(userData);
+            }
+        }.bind(this))
+
+        // catch all errors
+        .then(null, function(err, code){
+            console.error("AuthAccount: AddOrFindUser Error -", err);
+            return reject(err, code);
+        }.bind(this));
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+AuthService.prototype.addOrUpdate_SSO_Course = function(courseData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    // TODO: 2) create/update classes
+    // TODO: Does course exist
+    // Yes. update
+    // No. create
+    resolve();
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+AuthService.prototype.addOrUpdate_SSO_EnrollInCourse = function(usersData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    // TODO: 3) create promise list of adding all users to courses if they already are not in courses
+    // TODO: Is user enrolled in course
+    // Yes. do nothing
+    // No. add
+    resolve();
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+
+AuthService.prototype.getAuthStore = function() {
+    return this.authStore;
+};
+
+AuthService.prototype.getLMSStore = function() {
+    return this.lmsStore;
+};
+

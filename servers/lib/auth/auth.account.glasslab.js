@@ -14,28 +14,29 @@ var Strategy   = require('./auth.strategy.glasslab.js');
 
 module.exports = GlasslabAccount;
 
-function GlasslabAccount(options){
+function GlasslabAccount(options, manager, authService){
     try {
+        this._id   = "glasslab";
+        this._name = "GlassLab";
         this.options = _.merge(
             {},
             options
         );
 
-        this.strategy = new Strategy(this.options);
+        this.strategy = new Strategy(this.options, authService);
 
     } catch(err) {
-        console.trace("GlasslabAccount: Error -", err);
+        console.trace(this._name+"Account: Error -", err);
         this.stats.increment("error", "Generic");
     }
 }
 
-GlasslabAccount.prototype.setupPassport = function(passport) {
-    passport.use(this.strategy);
+GlasslabAccount.prototype.getId = function() {
+    return this._id;
 };
 
-
-GlasslabAccount.prototype.setupRoutes = function(app) {
-    // handled in the service API route (see route.map.js)
+GlasslabAccount.prototype.setupPassport = function(passport) {
+    passport.use(this.strategy);
 };
 
 GlasslabAccount.prototype.registerUser = function(userData) {

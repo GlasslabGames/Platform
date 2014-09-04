@@ -17,16 +17,30 @@ module.exports = GoogleAccount;
 
 function GoogleAccount(options){
     try {
+        this.id   = "google";
+        this._name = "Google";
         this.options = _.merge(
             {},
             options
         );
 
     } catch(err) {
-        console.trace("GoogleAccount: Error -", err);
+        console.trace(this._name+"Account: Error -", err);
         this.stats.increment("error", "Generic");
     }
 }
+
+
+GoogleAccount.prototype.getId = function() {
+    return this.id;
+};
+
+GoogleAccount.prototype.getAuthOptions = function() {
+    return {
+        scope: ['https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email']
+    };
+};
 
 GoogleAccount.prototype.setupPassport = function(passport, authService) {
     // http://localhost:8001/auth/google
@@ -59,39 +73,11 @@ GoogleAccount.prototype.setupPassport = function(passport, authService) {
                         done(userData, profile);
                     }.bind(this),
                     function(err) {
-                        console.error("Google Auth Error:", error);
+                        console.error(this._name+" Auth Error:", error);
                         done(null, profile);
                     }
                 );
             }
         )
     );
-};
-
-GoogleAccount.prototype.setupRoutes = function(app, passport) {
-    // route to trigger google oauth authorization
-    app.get('/auth/google',
-        passport.authenticate('google',
-            {
-                scope: ['https://www.googleapis.com/auth/userinfo.profile',
-                        'https://www.googleapis.com/auth/userinfo.email']
-            }),
-        function(req, res) {
-            // The request will be redirected to Google for authentication, so this
-            // function will not be called.
-        }.bind(this)
-    );
-
-    // callback route
-    app.get('/auth/google/callback',
-        passport.authenticate('google'),
-        function(req, res) {
-            // Successful authentication, redirect home.
-            res.redirect('/');
-        });
-};
-
-
-GoogleAccount.prototype.createAccount = function(){
-
 };
