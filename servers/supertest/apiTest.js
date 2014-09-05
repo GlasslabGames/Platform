@@ -115,28 +115,71 @@ describe("API v2 testing", function(done) {
 					});
     });
     
-    it.skip("#archives new class", function(done) {
-        
-        agent
-					.post(srvAddr + routes.classes.create.path)
-          .type('application/json')
-          .send(JSON.stringify(postData))
-					.end(function(res){
-            expect(res.status).to.eql(200);
-						done();
-					});
+    it("#archives new class", function (done) {
+
+    	// start out un-archived
+    	agent
+    		.get(srvAddr + routes.classes.info.path)
+    		.end(function (res) {
+    			expect(res.status).to.eql(200);
+    			classData = JSON.parse(res.text);
+					expect(classData["archived"]).to.eql(false);
+    			classData["archived"] = true;
+
+
+    			// send archive call
+    			agent
+    				.post(srvAddr + routes.classes.info.path)
+    				.type('application/json')
+    				.send(classData)
+    				.end(function (res) {
+    					expect(res.status).to.eql(200);
+
+    					// verify class was archived
+    					agent
+    						.get(srvAddr + routes.classes.info.path)
+    						.end(function (res) {
+    							expect(res.status).to.eql(200);
+    							expect(JSON.parse(res.text)["archived"]).to.eql(true);
+    							done();
+    						});
+    				});
+
+    		});
+
     });
 
-    it.skip("#restores class", function(done) {
+    it("#restores class", function(done) {
         
-        agent
-					.post(srvAddr + routes.classes.create.path)
-          .type('application/json')
-          .send(JSON.stringify(postData))
-					.end(function(res){
-            expect(res.status).to.eql(200);
-						done();
-					});
+			// start out archived
+      agent
+       	.get(srvAddr + routes.classes.info.path)
+       	.end(function (res) {
+       		expect(res.status).to.eql(200);
+       		classData = JSON.parse(res.text);
+       		expect(classData["archived"]).to.eql(true);
+       		classData["archived"] = false;
+
+       		// send un-archive call
+       		agent
+       			.post(srvAddr + routes.classes.info.path)
+       			.type('application/json')
+       			.send(classData)
+       			.end(function (res) {
+       				expect(res.status).to.eql(200);
+
+
+       				// verify class was un-archived
+       				agent
+       					.get(srvAddr + routes.classes.info.path)
+       					.end(function (res) {
+       						expect(res.status).to.eql(200);
+       						expect(JSON.parse(res.text)["archived"]).to.eql(false);
+       						done();
+       					});
+       			});
+       	});
+			
     });
     
     it("#returns reports - SOWO", function(done) {
