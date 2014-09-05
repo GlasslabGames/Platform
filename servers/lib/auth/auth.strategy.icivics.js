@@ -115,7 +115,7 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, don
 
                 // if teacher, create all students in all classes, create classes, add students to class
                 if(profile.role === lConst.role.instructor) {
-                    this._getGroups(profile, token, tokenSecret, json.user, done);
+                    this._getGroups(profile, token, tokenSecret, profile._json.user, done);
                 } else {
                     done(null, profile);
                 }
@@ -205,8 +205,12 @@ Strategy.prototype._getGroups = function(profile, token, tokenSecret, userData, 
                 grade: ['7'],
                 games: [{id:'AW-1', settings:{}}], // default to include AW game
                 users: [],
-                archived: parseInt(userData.og_groups[key].is_active) ? true : false,
-                archivedDate: parseInt(userData.og_groups[key].changed)
+                archived:     parseInt(userData.og_groups[key].is_active) ? false : true,
+                archivedDate: parseInt(userData.og_groups[key].changed),
+                lmsType: lConst.course.type.icivics,
+                lmsId:   '{'+lConst.course.type.icivics+'}.'+userData.og_groups[key].nid,
+                labels:  "",
+                meta:    JSON.stringify(userData.og_groups[key])
             };
         }
     }
