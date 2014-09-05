@@ -33,7 +33,7 @@ function tstamp() {
 
 describe("API v2 testing", function(done) {
 	
-    it("#should connect to " + testENV + "environment", function(done) {
+    it("#should connect to " + testENV.toUpperCase() + " environment", function(done) {
         agent
 					.get(srvAddr)
 					.end(function(res){
@@ -41,6 +41,16 @@ describe("API v2 testing", function(done) {
 						done();
 					});
     });
+	
+		it("#should retreive number of 'learning events' logged via sdk", function(done) {
+			agent
+          .get(srvAddr + routes.events.path)
+          .end(function(res) {
+              expect(res.status).to.eql(200);
+//							console.log(res.text);		// FUTURE add events count to results json doc
+              done();
+          });  
+		});
     
     it("should return valid SDK config data", function(done) {
         agent
@@ -136,13 +146,36 @@ describe("API v2 testing", function(done) {
           .type('application/json')
 					.end(function(res){
             expect(res.status).to.eql(200);
-              // TODO - more robust checking for specific achievements for classes, likely coverage
+            
+						var resText = JSON.parse(res.text);
+						
+						if (resText[2]['userId'] == data.student.id) {
+							expect(resText[2]['results']).to.eql(data.student.sowo);	
+						} else {
+							console.log('mismatched student: ' + resText[2]['userId']);
+						}
+						
 						done();
 					});
     });
     
-    it.skip("#returns reports - achievements", function() {
-        
+    it("#returns reports - achievements", function(done) {
+        agent
+					.get(srvAddr + routes.reports.achievements.path)
+          .type('application/json')
+					.end(function(res){
+            expect(res.status).to.eql(200);
+						
+						var resText = JSON.parse(res.text);
+						
+						if (resText[2]['userId'] == data.student.id) {
+							expect(resText[2]['achievements']).to.eql(data.student.achievements);
+						} else {
+							console.log('mismatched student: ' + resText[2]['userId']);
+						}
+						
+						done();
+					});
     });
     
     it("should log out afterwards", function(done) {
