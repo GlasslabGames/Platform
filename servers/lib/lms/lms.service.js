@@ -13,7 +13,7 @@ exampleOut = {};
 
 module.exports = LMSService;
 
-function LMSService(options){
+function LMSService(options, serviceManager){
     try{
         var TelmStore, WebStore, LMSStore, Errors;
 
@@ -36,6 +36,7 @@ function LMSService(options){
         this.webstore    = new WebStore(this.options.webapp.datastore.mysql);
         this.myds        = new LMSStore(this.options.lms.datastore.mysql);
         this.stats       = new Util.Stats(this.options, "LMS");
+        this.serviceManager = serviceManager;
 
     } catch(err){
         console.trace("LMSService: Error -", err);
@@ -43,13 +44,13 @@ function LMSService(options){
     }
 }
 
-LMSService.prototype.start = function(serviceManager) {
+LMSService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     // test connection to LMS MySQL
-    this.myds.connect(serviceManager)
+    this.myds.connect(this.serviceManager)
         .then(function(){
                 console.log("LMSService: MySQL DS Connected");
                 this.stats.increment("info", "MySQL.Connect");
@@ -187,6 +188,191 @@ return when.promise(function(resolve, reject) {
     } else {
         resolve(courses);
     }
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMSService.prototype.createCourse = function(userData, _courseData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    // check if instructor, manager or admin
+    if( userData.role == lConst.role.instructor ||
+        userData.role == lConst.role.manager ||
+        userData.role == lConst.role.admin ) {
+
+        var courseData = {
+            title:         _courseData.title,
+            grade:         _courseData.grade,
+            institutionId: _courseData.institution || _courseData.institutionId,
+            games:         _courseData.games,
+            id:            0,
+            code:          "",
+            studentCount:  0,
+            freePlay:      false,
+            locked:        false,
+            archived:      _courseData.archived || false,
+            archivedDate:  null,
+            lmsType:       _courseData.lmsType || 'glasslab',
+            lmsId:         _courseData.lmsId,
+            labels:        _courseData.labels || "",
+            meta:          _courseData.meta || ""
+        };
+
+        // validate gameId's
+        // TODO: replace using internal route, but needs callback when route is done
+        var dash = this.serviceManager.get("dash").service;
+
+        for(var i = 0; i < courseData.games.length; i++){
+            // TODO: replace this with DB lookup, return promise
+            if(!dash.isValidGameId(courseData.games[i].id)) {
+                reject({error: "gameId '"+courseData.games[i].id+"' is not valid", key:"course.create.invalid.gameid", statusCode:404});
+                return; // exit function
+            }
+        }
+
+        if(courseData.archived) {
+            courseData.archivedDate = Util.GetTimeStamp();
+        }
+
+        this.myds.createCourse(userData.id, courseData)
+            .then(function(courseId){
+                courseData.id = courseId;
+
+                if( userData.role == lConst.role.instructor ||
+                    userData.role == lConst.role.manager) {
+                    // create games map
+                    var games = {};
+                    for(var i = 0; i < courseData.games.length; i++) {
+                        games[ courseData.games[i].id ] = courseData.games[i].settings || {};
+                    }
+
+                    return this.telmStore.updateGamesForCourse(courseId, games)
+                        .then(function() {
+                            return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor);
+                        }.bind(this));
+                }
+            }.bind(this))
+
+            .then(function(){
+                courseData.code = this._generateCode();
+                return this.myds.addCode(courseData.code, courseData.id, lConst.code.type.course)
+                    .then(function(){
+                        resolve(courseData);
+                    }.bind(this));
+            }.bind(this))
+
+            // error catchall
+            .then(null, function(err){
+                reject(err);
+            }.bind(this));
+    } else {
+        //reject(res, "user does not have permission");
+        reject({key:"course.general"});
+    }
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+LMSService.prototype.updateCourse = function(userData, _courseData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    // check if instructor, manager or admin
+    if( userData.role == lConst.role.instructor ||
+        userData.role == lConst.role.manager ||
+        userData.role == lConst.role.admin ) {
+
+        var courseData = {
+            id:            _courseData.id,
+            title:         _courseData.title,
+            grade:         _courseData.grade,
+            institutionId: _courseData.institution || _courseData.institution,
+            archived:      _courseData.archived,
+            locked:        _courseData.lockedRegistration || _courseData.locked,
+            games:         _courseData.games,
+            lmsType:       _courseData.lmsType || 'glasslab',
+            lmsId:         _courseData.lmsId,
+            labels:        _courseData.labels || "",
+            meta:          _courseData.meta || ""
+        };
+
+        if(courseData.archived) {
+            courseData.archivedDate = Util.GetTimeStamp();
+        }
+
+        this.myds.updateCourseInfo(userData.id, courseData)
+            .then(function() {
+                if( _.isArray(courseData.games) &&
+                    courseData.games.length) {
+                    this.updateGamesInCourse(userData, courseData).then(resolve, reject);
+                } else {
+                    resolve(courseData);
+                }
+            }.bind(this))
+
+            // error catchall
+            .then(null, function(err) {
+                reject(err);
+            }.bind(this));
+    } else {
+        //reject("user does not have permission");
+        reject({key:"course.general"});
+    }
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+LMSService.prototype.updateGamesInCourse = function(userData, courseData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    // check if instructor, manager or admin
+    if( userData.role == lConst.role.instructor ||
+        userData.role == lConst.role.manager ||
+        userData.role == lConst.role.admin ) {
+
+        // validate gameId's
+        // TODO: replace using internal route, but needs callback when route is done
+        var dash = this.serviceManager.get("dash").service;
+
+        for(var i = 0; i < courseData.games.length; i++){
+            // TODO: replace this with DB lookup, return promise
+            if(!dash.isValidGameId(courseData.games[i].id)) {
+                reject({error: "gameId '"+courseData.games[i]+"' is not valid", key:"course.create.invalid.gameid", statusCode:404});
+                return; // exit function
+            }
+        }
+
+        this.telmStore.getGamesForCourse(courseData.id)
+            .then(function (currentGames) {
+                var updateGames = {};
+                for (var i = 0; i < courseData.games.length; i++) {
+                    updateGames[ courseData.games[i].id ] = courseData.games[i] || {};
+                }
+
+                updateGames = _.merge(updateGames, currentGames);
+                return this.telmStore.updateGamesForCourse(courseData.id, updateGames);
+            }.bind(this))
+
+            .then(function () {
+                resolve(courseData);
+            }.bind(this))
+
+            // error catchall
+            .then(null, function (err) {
+                reject(err);
+            }.bind(this));
+    }
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper

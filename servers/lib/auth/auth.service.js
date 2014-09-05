@@ -28,7 +28,7 @@ var Util, aConst, lConst;
 
 module.exports = AuthService;
 
-function AuthService(options){
+function AuthService(options, serviceManager){
     try {
         var Auth, Accounts, WebStore, LMSStore, AuthStore, Errors;
         this.options = _.merge(
@@ -51,6 +51,7 @@ function AuthService(options){
         this.authStore        = new AuthStore(this.options.auth.datastore.mysql);
         this.accountsManager  = new Accounts.Manager(this.options, this);
         this.glassLabStrategy = this.accountsManager.get("Glasslab");
+        this.serviceManager   = serviceManager;
 
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
         WebStore      = require('../dash/dash.js').Datastore.MySQL;
@@ -146,6 +147,15 @@ AuthService.prototype.registerUser = function(userData){
     return this.glassLabStrategy.registerUser(userData);
 };
 
+AuthService.prototype.getAuthStore = function() {
+    return this.authStore;
+};
+
+AuthService.prototype.getLMSStore = function() {
+    return this.lmsStore;
+};
+
+
 AuthService.prototype.checkUserPerminsToUserData = function(userData, loginUserSessionData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -186,7 +196,7 @@ AuthService.prototype.addOrUpdate_SSO_UserData = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    // second, no Error on found
+    // no Error on found
     this.authStore.checkUserNameUnique(userData.username, true)
         // add user
         .then(function(userId) {
@@ -234,7 +244,7 @@ return when.promise(function(resolve, reject) {
                                     courses[c].users[i] = allUsers[courses[c].users[i].id];
                                 }
                             }
-                            addCoursePromiseList.push( this.addOrUpdate_SSO_Course(courses[c]) );
+                            addCoursePromiseList.push( this.addOrUpdate_SSO_Course(userData, courses[c]) );
                         }
                         return when.all(addCoursePromiseList);
                     }.bind(this))
@@ -264,15 +274,49 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-AuthService.prototype.addOrUpdate_SSO_Course = function(courseData){
+AuthService.prototype.addOrUpdate_SSO_Course = function(userData, courseData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    // TODO: 2) create/update classes
-    // TODO: Does course exist
-    // Yes. update
-    // No. create
-    resolve();
+
+    var lmsService = this.serviceManager.get("lms").service;
+
+    // check if can create course
+    lmsService.createCourse(userData, courseData)
+        .then(function(courseInfo){
+            // created
+            resolve();
+            return null;
+        }.bind(this),
+        function(err){
+            if(err.key === "course.notUnique.name"){
+                return this.lmsStore.getCourseIdFromKey('lmsId', courseData.lmsId);
+            } else {
+                reject(err);
+            }
+        }.bind(this))
+
+        // results from getting course id
+        .then(function(courseId){
+            if(!courseId) return;
+
+            courseData.id = courseId;
+            // course not unique for this user so need up update
+            return lmsService.updateCourse(userData, courseData);
+        }.bind(this))
+
+        // results from updated course data
+        .then(function(updatedCourseData){
+            if(!updatedCourseData) return;
+
+            // updated
+            resolve();
+        }.bind(this))
+
+        // catch all errors
+        .then(null, function(err){
+            reject(err);
+        }.bind(this));
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -287,19 +331,12 @@ return when.promise(function(resolve, reject) {
     // TODO: Is user enrolled in course
     // Yes. do nothing
     // No. add
+
+    // this.lmsStore.isUserInCourse(userId, courseId)
+
     resolve();
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-};
-
-
-
-AuthService.prototype.getAuthStore = function() {
-    return this.authStore;
-};
-
-AuthService.prototype.getLMSStore = function() {
-    return this.lmsStore;
 };
 

@@ -10,6 +10,15 @@ module.exports = {
         manager:    "manager",
         student:    "student"
     },
+    course: {
+        type: {
+            glasslab:   "glasslab",
+            edmodo:     "edmodo",
+            docent:     "docent",
+            icivics:    "icivics",
+            clever:     "clever"
+        }
+    },
     code: {
         length: 5,
         charSet: "1235789ABCDFGHJKLMNPQRSTUVWXYZ",

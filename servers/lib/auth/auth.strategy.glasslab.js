@@ -43,6 +43,7 @@ function Glasslab_Strategy(options, service) {
 util.inherits(Glasslab_Strategy, passport.Strategy);
 
 Glasslab_Strategy.prototype.authenticate = function(req) {
+
     var username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField);
     var password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField);
     //console.log("authenticate body:", req.body);
@@ -187,7 +188,7 @@ return when.promise(function(resolve, reject) {
         }.bind(this))
         // encrypt password
         .then(function(){
-            return this._encryptPassword(userData.password);
+            return this.encryptPassword(userData.password);
         }.bind(this))
         // add user
         .then(function(password){
@@ -209,7 +210,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-Glasslab_Strategy.prototype._encryptPassword = function(password, passwordScheme){
+Glasslab_Strategy.prototype.encryptPassword = function(password, passwordScheme){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -310,7 +311,7 @@ return when.promise(function(resolve, reject) {
 };
 
 Glasslab_Strategy.prototype._migratePasswordToPDKDF2 = function(givenPassword, user, resolve, reject){
-    this._encryptPassword(givenPassword)
+    this.encryptPassword(givenPassword)
         .then(function(password){
             user.password = password;
             return this._service.getAuthStore().updateUserPassword(user.id, password, aConst.login.type.glassLabV2);
@@ -331,13 +332,13 @@ Glasslab_Strategy.prototype._comparePassword = function(givenPassword, storedPas
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     // encrypt password using stored password scheme
-    this._encryptPassword(givenPassword, storedPassword)
+    this.encryptPassword(givenPassword, storedPassword)
         // if encrypted Given Password
         // encrypt password using new salt and default format
         .then(function(encryptedGivenPassword){
             if( encryptedGivenPassword &&
                 storedPassword != encryptedGivenPassword) {
-                return this._encryptPassword(givenPassword);
+                return this.encryptPassword(givenPassword);
             } else {
                 resolve(storedPassword);
             }
@@ -381,7 +382,7 @@ return when.promise(function(resolve, reject) {
             // add password back
             dbUserData.password = password;
 
-            return this._checkUserPerminsToUserData(userData, loginUserSessionData);
+            return this.checkUserPerminsToUserData(userData, loginUserSessionData);
         }.bind(this))
 
         // check email, if changed
@@ -504,7 +505,7 @@ Glasslab_Strategy.prototype._isEncrypted = function(password) {
     }
 };
 
-Glasslab_Strategy.prototype._checkUserPerminsToUserData = function(userData, loginUserData){
+Glasslab_Strategy.prototype.checkUserPerminsToUserData = function(userData, loginUserData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
