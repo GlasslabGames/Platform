@@ -57,7 +57,7 @@ function ServiceManager(configFiles){
     }
 
     global.ENV            = this.options.env || 'dev';
-    process.env.HYDRA_ENV = global.ENV;
+    process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
     this.stats            = new Util.Stats(this.options, "ServiceManager");
 
     try{

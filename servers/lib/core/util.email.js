@@ -162,7 +162,7 @@ return when.promise(function(resolve, reject) {
                     if(this.stats) this.stats.increment("error", "Email."+templateName+".SendEmail");
                     console.error("Email: Error sending email -", err);
 
-                    if(process.env.HYDRA_ENV == "dev") {
+                    if(process.env.HYDRA_ENV == 'dev') {
                         // if dev env it's ok if email does not work
                         resolve(200);
                     } else {
