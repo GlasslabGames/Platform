@@ -31,6 +31,7 @@ function Glasslab_Strategy(options) {
 
     this._usernameField = 'username';
     this._passwordField = 'password';
+    this._verifyCodeField = 'verifyCode';
 
     passport.Strategy.call(this);
     this.name = 'glasslab';
@@ -44,31 +45,46 @@ function Glasslab_Strategy(options) {
 util.inherits(Glasslab_Strategy, passport.Strategy);
 
 Glasslab_Strategy.prototype.authenticate = function(req) {
-
+    console.log('REQUEST BODY', req.body);
     var username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField);
     var password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField);
+    var verifyCode = lookup(req.body, this._verifyCodeField) || lookup(req.query, this._verifyCodeField);
     //console.log("authenticate body:", req.body);
 
-    if (!username || !password) {
+    if ((!username || !password) && !verifyCode) {
         return this.fail({key:"user.login.missing"});
     }
-
-    this._verify(username, password)
-        .then(
-            function (data) {
-                this.success(data.user, data.info);
+    if (verifyCode) {
+        this._verifyOneShotHashCode(verifyCode) //
+            .then(function(userData) {
+                console.log("SUCCESS:",  userData);
+                this.success(userData.user, userData.info);
+            }.bind(this))
+            .then(null, function(err) {
+                console.log(err);
+                return this.fail({key:"user.login.invalidHashCode"});
+            }.bind(this));
+    } else {
+        this._verify(username, password)
+            .then(
+            function (userData) {
+                console.log('userData.user:', userData.user);
+                console.log('userData.info:', userData.info);
+                this.success(userData.user, userData.info);
             }.bind(this),
             function (err) {
                 if (!err.user) {
-                   // invalid username or password
-                   return this.fail({key:"user.login.invalid"});
+                    // invalid username or password
+                    return this.fail({key:"user.login.invalid"});
 
                 } else {
                     // email not verified
                     return this.fail({key: err.key});
                 }
             }.bind(this)
-    );
+        );
+    }
+
 
     function lookup(obj, field) {
         if (!obj) { return null; }
@@ -85,6 +101,20 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
         return null;
     }
 };
+Glasslab_Strategy.prototype._verifyOneShotHashCode = function(verifyCode) {
+return when.promise(function(resolve, reject) {
+    this.findUser('verify_code', verifyCode)
+        .then(function (userData) {
+            // sets verify code to null after login
+            userData.verifyCode = "NULL";
+            console.log("FOUND ONESHOT USER:", userData);
+            resolve({user: userData, error: null});
+        })
+        .then(null, function (err) {
+            reject(err);
+        });
+}.bind(this));
+}
 
 Glasslab_Strategy.prototype._verify = function(username, password, done){
 // add promise wrapper
@@ -108,7 +138,9 @@ return when.promise(function(resolve, reject) {
                     function(){
 
                         // check if email verified
-                        if (user.verifyCodeStatus === 'verified' || process.env.HYDRA_ENV === 'dev') {
+                        if (user.verifyCodeStatus === 'beta') {
+                            reject({user: user, key: "user.login.betaPending"});
+                        } else if (user.verifyCodeStatus === 'verified' || process.env.HYDRA_ENV === 'dev') {
                             delete user.password;
                             resolve({user: user, error: null});
                         } else {

@@ -408,6 +408,8 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.password   = Util.ConvertToString(req.body.password);
         regData.firstName  = Util.ConvertToString(req.body.firstName);
         regData.lastName   = Util.ConvertToString(req.body.lastName);
+        regData.school     = Util.ConvertToString(req.body.school);
+        regData.district   = Util.ConvertToString(req.body.district);
         regData.email      = Util.ConvertToString(req.body.email);
 
         if(!regData.username) {
@@ -501,7 +503,7 @@ function registerUserV2(req, res, next, serviceManager) {
                     promise
                         .then(function(){
                             // beta
-                            return sendBetaConfirmEmail.call(this, regData.email, req.protocol, req.headers.host);
+                            return sendBetaConfirmEmail.call(this, regData, req.protocol, req.headers.host);
                             // send email verification code
 //                            return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
                         }.bind(this))
@@ -558,13 +560,13 @@ function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
 }
 
-function sendBetaConfirmEmail(email, protocol, host) {
+function sendBetaConfirmEmail(regData, protocol, host) {
+    var email = regData.email;
     if( !(email &&
         _.isString(email) &&
         email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
-
     var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
@@ -573,6 +575,10 @@ function sendBetaConfirmEmail(email, protocol, host) {
             userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
             userData.verifyCodeStatus     = aConst.verifyCode.status.beta;
+
+            // School + District Info for Beta
+            userData.school = regData.school;
+            userData.district = regData.district;
 
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
@@ -612,7 +618,6 @@ function sendBetaConfirmEmail(email, protocol, host) {
 }
 
 function validateBetaCode(req, res, next) {
-    console.log('request:', req.params.code);
     if( !(req.params.code &&
         _.isString(req.params.code) &&
         req.params.code.length) ) {
@@ -622,26 +627,22 @@ function validateBetaCode(req, res, next) {
     // 1) validate the code and get user data
     this.glassLabStrategy.findUser("verify_code", req.params.code)
         .then(function(userData) {
-            // check if code expired
-            if(Util.GetTimeStamp() > userData.verifyCodeExpiration) {
-                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
-            } else {
 
                 if(userData.verifyCodeStatus === aConst.verifyCode.status.beta) {
-                    // change status to verified
+                    // change status to sent
                     userData.verifyCodeStatus = aConst.verifyCode.status.sent;
                     userData.verifyCodeExpiration = "NULL";
                     userData.verifyCode = "NULL";
 
                     return this.glassLabStrategy.updateUserData(userData)
                         .then(function() {
-                            this.requestUtil.jsonResponse(res, 200);
+                            this.requestUtil.jsonResponse(res, "Successfully Confirmed Beta User. Verification email sent to Beta User ", 200);
                             return userData;
                         }.bind(this));
                 } else {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                 }
-            }
+
         }.bind(this),
         function(err) {
             if( err.error &&
@@ -717,9 +718,11 @@ function sendVerifyEmail(email , protocol, host) {
 
 
 }
+// Validate email code
+// 1. set verify status to verified
+// 2.
 
-
-function validateEmailCode(req, res, next) {
+function validateEmailCode(req, res, next, serviceManager) {
 
     if( !(req.params.code &&
         _.isString(req.params.code) &&
@@ -731,20 +734,21 @@ function validateEmailCode(req, res, next) {
         this.glassLabStrategy.findUser("verify_code", req.params.code)
             .then(function(userData) {
                 // check if code expired
-                if(Util.GetTimeStamp() > userData.verifyCodeExpiration) {
+                if(Util.GetTimeStamp() > userData.verifyCodeExpiration && process.env.HYDRA_ENV !== 'dev') {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
                 } else {
 
-                    if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
+                    if(userData.verifyCodeStatus === aConst.verifyCode.status.sent || process.env.HYDRA_ENV === 'dev') {
                         // change status to verified
                         userData.verifyCodeStatus = aConst.verifyCode.status.verified;
+                        // Disabled for Oneshot login
+                        // userData.verifyCode        = "NULL";
                         userData.verifyCodeExpiration = "NULL";
-                        userData.verifyCode = "NULL";
 
                         return this.glassLabStrategy.updateUserData(userData)
                             .then(function() {
-                                this.requestUtil.jsonResponse(res, {});
-                                return userData;
+                                req.body.verifyCode = req.params.code;
+                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                             }.bind(this));
                     } else {
                         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
@@ -766,6 +770,7 @@ function validateEmailCode(req, res, next) {
             }.bind(this))
             .then(function(userData) {
                 // 2) send welcome email
+
                 return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
             }.bind(this))
             .then(null, function(err) {

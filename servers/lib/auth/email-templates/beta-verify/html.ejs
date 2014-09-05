@@ -1,18 +1,28 @@
-This email is for an admin to complete beta verification for: <br />
+This email is only intend for glasslab admins.  <br />
 
+If you received this email by mistake (oops), please let us know so we can fix it.<br />
+</br>
+</br>
+User Information: </br>
+<br />
+</br>
+<b>First and last name:</b> <br />
 {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},<br />
+<b>Email:</b> <br />
 {{= user.email }}<br />
-
-<br/>
+<b>School:</b> <br />
+{{= user.school}}<br />
+<b>District:</b> <br />
+{{= user.district }}<br />
+<br />
 To verify this user, please click on the link below:<br />
 <br/>
 
 <a href="{{= host }}/api/v2/auth/register-verify/{{= code }}/verifyBeta">{{= host }}/api/v2/auth/register-verify/{{= code }}/verifyBeta</a><br /><br />
 
-    If you received this email by mistake (oops), please let us know so we can fix it.<br />
 
-    Sincerely,<br /><br />
-    Your New Best Friends at GlassLab
+Sincerely,<br /><br />
+Your New Best Friends at GlassLab
 
 
 

@@ -1,16 +1,21 @@
 Hello {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},<br />
 
-Your beta account has been verified!<br />
+Welcome to Playfully Beta!
+
+Thank you for registering and joining our movement to bring the best in learning and formative assessment games to your students.
+
 <br/>
 To complete the registration process, please click on the link below to confirm your email address.<br />
 <br/>
 
-<a href="{{= host }}/api/v2/auth/register-verify/{{= code }}/verify">{{= host }}/api/v2/auth/register-verify/{{= code }}/verify</a><br /><br />
+<a href="{{= host }}/verify-email/{{= code }}">{{= host }}/verify-email/{{= code }}</a><br /><br />
 
-    If you received this email by mistake (oops), simply delete it. Your account will not be created if you don't click the confirmation link above.<br />
 
-    Sincerely,<br /><br />
-    Your New Best Friends at GlassLab
+We're looking forward to hearing your feedback and sharing our ongoing improvements with you.<br />
+
+<br />
+Sincerely,<br />
+Your New Best Friends at GlassLab (the Creators of Playfully)
 
 
 
