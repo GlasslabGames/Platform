@@ -45,19 +45,16 @@ function Glasslab_Strategy(options) {
 util.inherits(Glasslab_Strategy, passport.Strategy);
 
 Glasslab_Strategy.prototype.authenticate = function(req) {
-    console.log('REQUEST BODY', req.body);
     var username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField);
     var password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField);
     var verifyCode = lookup(req.body, this._verifyCodeField) || lookup(req.query, this._verifyCodeField);
-    //console.log("authenticate body:", req.body);
 
     if ((!username || !password) && !verifyCode) {
         return this.fail({key:"user.login.missing"});
     }
     if (verifyCode) {
-        this._verifyOneShotHashCode(verifyCode) //
+        this._verifyOneShotHashCode(verifyCode)
             .then(function(userData) {
-                console.log("SUCCESS:",  userData);
                 this.success(userData.user, userData.info);
             }.bind(this))
             .then(null, function(err) {
@@ -76,7 +73,6 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
                 if (!err.user) {
                     // invalid username or password
                     return this.fail({key:"user.login.invalid"});
-
                 } else {
                     // email not verified
                     return this.fail({key: err.key});
@@ -105,9 +101,8 @@ Glasslab_Strategy.prototype._verifyOneShotHashCode = function(verifyCode) {
 return when.promise(function(resolve, reject) {
     this.findUser('verify_code', verifyCode)
         .then(function (userData) {
-            // sets verify code to null after login
+            // sets verify code to null after verified
             userData.verifyCode = "NULL";
-            console.log("FOUND ONESHOT USER:", userData);
             resolve({user: userData, error: null});
         })
         .then(null, function (err) {

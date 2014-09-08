@@ -8,7 +8,7 @@ module.exports = {
     webappSessionPrefix: "wa_session",
     sessionCookieName:  "JSESSIONID",
     betaAdmin: {
-      email: "charles@glasslabgames.org"
+      email: "beta_playfully@glasslabgames.org"
     },
     code: {
         type: {

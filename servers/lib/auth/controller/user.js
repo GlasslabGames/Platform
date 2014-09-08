@@ -11,8 +11,8 @@ module.exports = {
     getUserProfileData:  getUserProfileData,
     registerUserV1:      registerUserV1,
     registerUserV2:      registerUserV2,
-    validateEmailCode:   validateEmailCode,
-    validateBetaCode:    validateBetaCode,
+    verifyEmailCode:     verifyEmailCode,
+    verifyBetaCode:      verifyBetaCode,
     registerManager:     registerManager,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
@@ -352,17 +352,6 @@ function updateUserData(req, res, next, serviceManager) {
  * 3. if student, enroll them in the course
  */
 
-//var example = {};
-//var example.input  = {
-//    "username":      "charosez",
-//    "firstName":     "charles",
-//    "lastName":      "tai",
-//    "password":      "bubbles",
-//    "email":         "charles@glasslabgames.org",
-//    "role":          "instructor",
-//    "loginType":     "glasslabv2"
-//}
-
 function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User");
 
@@ -561,19 +550,20 @@ function registerUserV2(req, res, next, serviceManager) {
 }
 
 function sendBetaConfirmEmail(regData, protocol, host) {
+
     var email = regData.email;
+
     if( !(email &&
         _.isString(email) &&
         email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
+
     var verifyCode = Util.CreateUUID();
-    var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
     return this.glassLabStrategy.getUserByEmail(email)
         .then(function(userData) {
             userData.verifyCode           = verifyCode;
-            userData.verifyCodeExpiration = expirationTime;
             userData.verifyCodeStatus     = aConst.verifyCode.status.beta;
 
             // School + District Info for Beta
@@ -617,21 +607,20 @@ function sendBetaConfirmEmail(regData, protocol, host) {
         }.bind(this))
 }
 
-function validateBetaCode(req, res, next) {
+function verifyBetaCode(req, res, next) {
     if( !(req.params.code &&
         _.isString(req.params.code) &&
         req.params.code.length) ) {
 
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
-    // 1) validate the code and get user data
+    // 1) verify the beta code and get user data
     this.glassLabStrategy.findUser("verify_code", req.params.code)
         .then(function(userData) {
 
                 if(userData.verifyCodeStatus === aConst.verifyCode.status.beta) {
                     // change status to sent
                     userData.verifyCodeStatus = aConst.verifyCode.status.sent;
-                    userData.verifyCodeExpiration = "NULL";
                     userData.verifyCode = "NULL";
 
                     return this.glassLabStrategy.updateUserData(userData)
@@ -718,19 +707,15 @@ function sendVerifyEmail(email , protocol, host) {
 
 
 }
-// Validate email code
-// 1. set verify status to verified
-// 2.
 
-function validateEmailCode(req, res, next, serviceManager) {
+function verifyEmailCode(req, res, next, serviceManager) {
 
     if( !(req.params.code &&
         _.isString(req.params.code) &&
         req.params.code.length) ) {
-
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
-        // 1) validate the code and get user data
+        // 1) find user data by using verify code in params
         this.glassLabStrategy.findUser("verify_code", req.params.code)
             .then(function(userData) {
                 // check if code expired
@@ -741,7 +726,7 @@ function validateEmailCode(req, res, next, serviceManager) {
                     if(userData.verifyCodeStatus === aConst.verifyCode.status.sent || process.env.HYDRA_ENV === 'dev') {
                         // change status to verified
                         userData.verifyCodeStatus = aConst.verifyCode.status.verified;
-                        // Disabled for Oneshot login
+                        // Disabled for Beta - verifyCode is set to NULL in Oneshot login
                         // userData.verifyCode        = "NULL";
                         userData.verifyCodeExpiration = "NULL";
 
@@ -764,7 +749,7 @@ function validateEmailCode(req, res, next, serviceManager) {
                         err.error == "user not found") {
                         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
                     } else {
-                        console.error("AuthService: validateEmailCode Error -", err);
+                        console.error("AuthService: verifyEmailCode Error -", err);
                         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                     }
             }.bind(this))

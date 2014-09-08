@@ -384,7 +384,7 @@ module.exports = {
             service: "auth",
             controller: "user",
             method: {
-                get: "validateEmailCode"
+                get: "verifyEmailCode"
             }
         },
         {
@@ -392,7 +392,7 @@ module.exports = {
             service: "auth",
             controller: "user",
             method: {
-                get: "validateBetaCode"
+                get: "verifyBetaCode"
             }
         },
         {
