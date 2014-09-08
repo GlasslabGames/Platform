@@ -1,4 +1,4 @@
-﻿{
+{
     "developer": {
         "id": "GL",
         "name": "GlassLab, Inc.",
@@ -10,7 +10,7 @@
     "basic" : {
         "gameId": "AA-1",
         "enabled": true,
-        "shortName": "Mars Generation One",
+        "shortName": "Argubot Academy EDU",
         "longName": "Mars Generation One: Argubot Academy EDU",
         "description": "Mars Generation One: Argubot Academy EDU is an engaging futuristic adventure game for iOS tablets. Aligned to the Common Core State Standards, the game brings STEM content into the English Language Arts classroom, and helps middle schoolers develop persuasion and reasoning skills. In Argubot Academy EDU, players take on the persona of a new student at Argubot Academy, the city’s middle school. There, each player will have to make very adult decisions about the building and governance of the city, for example: What type of food should the citizens cultivate? Players have to build sound arguments for every choice they make – but in this city on Mars, people settle their differences by equipping their robot assistants, called argubots, with claims and evidence, culminating in robot battles of the wits!",
         "settings": {
