@@ -11,10 +11,8 @@ var apiTestSuite = require('./lib/apiTestSuite.js'),
 // TEST ROUTINE //
 //////////////////
 
-var testENVs  = ["stage", "prod"];
-//var testENVs  = ["stage"];
+var testENVs  = ["prod", "stage"];  // NOTE - Since local will vary, not included by default.
 
 for (var testENV in testENVs) {
-	console.log(testENVs[testENV]);
 	apiTestSuite(testENVs[testENV], testData, routeMap);
 }

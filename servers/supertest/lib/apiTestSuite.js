@@ -26,7 +26,7 @@ var apiTestSuite = function (env, testData, routeMap) {
 	var results, newClassId, classData;
 	var agent = request.agent();
 
-	describe("API v2 testing", function (done) {
+	describe(env.toUpperCase() + " API (v2) Test Suite", function (done) {
 
 		console.log(tstamp());
 
@@ -170,14 +170,21 @@ var apiTestSuite = function (env, testData, routeMap) {
 					expect(res.status).to.eql(200);
 
 					var resText = JSON.parse(res.text);
-
-					if (resText[2]['userId'] == data.student.id) {
-						expect(resText[2]['results']).to.eql(data.student.sowo);
-					} else {
-						console.log('mismatched student: ' + resText[2]['userId']);
-					}
-
+          
+          var matched = false;
+				
+          // FUTURE - clean up and perhaps swap FOR-IN loop
+					for (var studentIndex in resText) {
+              if(resText[studentIndex]['userId'] == data.student.id) {
+                  matched = true;
+                  expect(resText[studentIndex]['results']).to.eql(data.student.sowo);
+              }
+          }
+          
+          expect(matched).to.eql(true);
+          
 					done();
+          
 				});
 		});
 
@@ -190,11 +197,16 @@ var apiTestSuite = function (env, testData, routeMap) {
 
 					var resText = JSON.parse(res.text);
 
-					if (resText[2]['userId'] == data.student.id) {
-						expect(resText[2]['achievements']).to.eql(data.student.achievements);
-					} else {
-						console.log('mismatched student: ' + resText[2]['userId']);
-					}
+          var matched = false;
+
+					for (var studentIndex in resText) {
+              if(resText[studentIndex]['userId'] == data.student.id) {
+                  matched = true;
+                  expect(resText[studentIndex]['achievements']).to.eql(data.student.achievements);
+              }
+          }
+          
+          expect(matched).to.eql(true);
 
 					done();
 				});
