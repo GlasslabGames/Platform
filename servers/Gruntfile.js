@@ -7,7 +7,8 @@ module.exports = function (grunt) {
         mochaTest: {
             test: {
                 options: {
-                    reporter: 'spec'
+									reporter: 'spec',
+									timeout: 3000
                 },
                 src: ['supertest/*.js']
             }
@@ -17,7 +18,7 @@ module.exports = function (grunt) {
             options: {
                 cwd:       ".",
                 commitish: "master",
-                failOnError: true,
+                failOnError: false,
                 template: "{%=tag%}-{%=since%}-{%=object%}{%=dirty%}",
                 prop: 'meta.revision'
             },
