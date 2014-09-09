@@ -664,7 +664,7 @@ function sendVerifyEmail(email , protocol, host) {
     var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
-    return this.glassLabStrategy.getUserByEmail(email)
+    return this.getAuthStore().getUserByEmail(email)
         .then(function(userData) {
             userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
@@ -716,8 +716,9 @@ function verifyEmailCode(req, res, next, serviceManager) {
         req.params.code.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
-        // 1) find user data by using verify code in params
-        this.glassLabStrategy.findUser("verify_code", req.params.code)
+
+        // 1) validate the code and get user data
+        this.getAuthStore().findUser("verify_code", req.params.code)
             .then(function(userData) {
                 // check if code expired
                 if(Util.GetTimeStamp() > userData.verifyCodeExpiration && process.env.HYDRA_ENV !== 'dev') {
@@ -877,7 +878,7 @@ function resetPasswordSend(req, res, next) {
 
         // 1) valid user email and get the user data
         //    update user account with code
-        this.glassLabStrategy.getUserByEmail(email)
+        this.getAuthStore().getUserByEmail(email)
             .then(function(userData) {
                 userData.resetCode           = resetCode;
                 userData.resetCodeExpiration = expirationTime;
@@ -934,7 +935,7 @@ function resetPasswordVerify(req, res, next) {
         req.params.code.length) {
 
         // 1) validate the code and get user data
-        this.glassLabStrategy.findUser("reset_code", req.params.code)
+        this.getAuthStore().findUser("reset_code", req.params.code)
             .then(function(userData) {
                 if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
@@ -985,7 +986,7 @@ function resetPasswordUpdate(req, res, next) {
         req.body.password.length) {
 
         // 1) validate the code and get user data
-        this.glassLabStrategy.findUser("reset_code", req.body.code)
+        this.getAuthStore().findUser("reset_code", req.body.code)
             .then(function(userData) {
                 if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);

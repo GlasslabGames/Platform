@@ -33,7 +33,8 @@ module.exports = {
             learning:   "learning.com",
             docent:     "docent",
             icivics:    "icivics",
-            google:     "google"
+            google:     "google",
+            clever:     "clever"
         }
     },
     passwordReset: {

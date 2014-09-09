@@ -14,25 +14,25 @@ var aConst, lConst;
 /**
  * `Strategy` constructor.
  *
- * The Edmodo authentication strategy authenticates requests by delegating to
- * Edmodo using the OAuth 2.0 protocol.
+ * The Clever authentication strategy authenticates requests by delegating to
+ * Clever using the OAuth 2.0 protocol.
  *
  * Applications must supply a `verify` callback which accepts an `accessToken`,
  * `refreshToken` and service-specific `profile`, and then calls the `done`
  * callback supplying a `user`, which should be set to `false` if the
- * credentials are not valid.  If an exception occured, `err` should be set.
+ * credentials are not valid.  If an exception occurred, `err` should be set.
  *
  * Options:
- *   - `clientID`      your Edmodo application's client id
- *   - `clientSecret`  your Edmodo application's client secret
- *   - `callbackURL`   URL to which Edmodo will redirect the user after granting authorization
+ *   - `clientID`      your Clever application's client id
+ *   - `clientSecret`  your Clever application's client secret
+ *   - `callbackURL`   URL to which Clever will redirect the user after granting authorization
  *
  * Examples:
  *
- *     passport.use(new EdmodoStrategy({
+ *     passport.use(new CleverStrategy({
  *         clientID: '123-456-789',
  *         clientSecret: 'shhh-its-a-secret'
- *         callbackURL: 'https://www.example.net/auth/edmodo/callback'
+ *         callbackURL: 'https://www.example.net/auth/Clever/callback'
  *       },
  *       function(accessToken, refreshToken, profile, done) {
  *         User.findOrCreate(..., function (err, user) {
@@ -41,19 +41,31 @@ var aConst, lConst;
  *       }
  *     ));
  *
+ * Doc URL:
+ * https://clever.com/developers/docs#identity-api-sso-oauth2-flow-section
+ *
  * @param {Object} options
  * @param {Function} verify
  * @api public
  */
 function Strategy(options, verify) {
-    options.authorizationURL = 'https://api.edmodo.com/oauth/authorize';
-    options.tokenURL         = 'https://api.edmodo.com/oauth/token';
+    this._baseURL = options.baseURL || 'https://clever.com';
+
+    options.authorizationURL = this._baseURL + "/oauth/authorize";
+    options.tokenURL = this._baseURL + "/oauth/tokens";
+
+    // NOTE: Clever uses Authorization header for oAuth, the custom header is used to set add the Auth
+    // header with base64 encoded "<client id>:<client secret>"
+    var auth = new Buffer(options.clientID+":"+options.clientSecret).toString('base64');
+    options.customHeaders = {
+        "Authorization": "Basic "+auth
+    };
 
     lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
 
     OAuth2Strategy.call(this, options, verify);
-    this.name = 'edmodo';
+    this.name = 'clever';
 }
 
 /**
@@ -63,11 +75,11 @@ util.inherits(Strategy, OAuth2Strategy);
 
 
 /**
- * Retrieve user profile from Edmodo.
+ * Retrieve user profile from Clever.
  *
  * This function constructs a normalized profile, with the following properties:
  *
- *   - `provider`         always set to `edmodo`
+ *   - `provider`         always set to `Clever`
  *   - `id`
  *   - `username`
  *   - `displayName`
@@ -77,39 +89,47 @@ util.inherits(Strategy, OAuth2Strategy);
  * @api protected
  */
 Strategy.prototype.userProfile = function(accessToken, done) {
-    this._getUserProfile('https://api.edmodo.com/users/me', accessToken, done);
+    this._getUserProfile('https://api.clever.com/me', accessToken, done);
 };
 
 Strategy.prototype._getUserProfile = function(url, accessToken, done) {
+
+    // NOTE: Clever uses Authorization header for oAuth, so this MUST be set to true
+    this._oauth2.useAuthorizationHeaderforGET(true);
+
     this._oauth2.get(url, accessToken, function (err, body, res) {
         if (err) { return done(new InternalOAuthError('failed to fetch user profile', err)); }
 
         if( res.statusCode == 302 &&
             res.headers &&
             res.headers.location) {
-            console.log("Edmodo Strategy: Redirecting to", res.headers.location);
+            console.log("Clever Strategy: Redirecting to", res.headers.location);
             this._getUserProfile(res.headers.location, accessToken, done);
         } else {
             try {
                 var json = JSON.parse(body);
+                //console.log("Clever UserProfile:", json);
 
                 var profile = {
-                    loginType: aConst.login.type.edmodo
+                    loginType: aConst.login.type.clever
                 };
                 profile._raw      = body;
                 profile._json     = json;
 
-                if(json.type == "teacher") {
+                // 'student', 'teacher' or 'district'
+                if(json.data.type == "teacher") {
                     profile.role = lConst.role.instructor;
+                } else if(json.data.type == "district") {
+                    profile.role = lConst.role.manager;
                 } else {
                     profile.role = lConst.role.student;
                 }
 
                 // add to migration
-                profile.username  = '{'+this.name+'}.'+json.id;
-                profile.firstName = json.first_name;
-                profile.lastName  = json.last_name;
-                profile.email     = json.email || "";
+                profile.username  = '{'+this.name+'}.'+json.data.id;
+                profile.firstName = json.data.name.first;
+                profile.lastName  = json.data.name.last;
+                profile.email     = json.data.email || "";
                 profile.password  = body;
 
                 done(null, profile);

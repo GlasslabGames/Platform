@@ -2,20 +2,20 @@
  * Authentication Server Module
  *
  * Module dependencies:
- * http://127.0.0.1:8001/auth/icivics/login
+
  *
  */
 // Third-party libs
 var _          = require('lodash');
 var when       = require('when');
-var Strategy   = require('./auth.strategy.icivics.js');
+var Strategy   = require('./auth.strategy.clever.js');
 
-module.exports = ICivicsAccount;
+module.exports = CleverAccount;
 
-function ICivicsAccount(options, manager, authService){
+function CleverAccount(options, manager, authService){
     try {
-        this._id   = "icivics";
-        this._name = "ICivics";
+        this._id   = "clever";
+        this._name = "Clever";
         this.options = _.merge(
             {},
             options
@@ -28,16 +28,17 @@ function ICivicsAccount(options, manager, authService){
     }
 }
 
-ICivicsAccount.prototype.getId = function() {
+CleverAccount.prototype.getId = function() {
     return this._id;
 };
 
-ICivicsAccount.prototype.setupPassport = function(passport) {
+CleverAccount.prototype.setupPassport = function(passport) {
 
+    // add district_id to query params
     passport.use( new Strategy(
-            this.options.auth.accounts.icivics,
-            function(token, tokenSecret, profile, done) {
-                //console.log(this._name+"Account user - profile:", profile);
+            this.options.auth.accounts.clever,
+            function(accessToken, refreshToken, profile, done) {
+                //console.log("clever user - profile:", profile);
 
                 this._authService.addOrUpdate_SSO_UserData(profile)
                     .then( function(profile) {
@@ -51,3 +52,4 @@ ICivicsAccount.prototype.setupPassport = function(passport) {
         )
     );
 };
+
