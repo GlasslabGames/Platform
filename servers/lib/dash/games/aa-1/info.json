@@ -16,8 +16,12 @@
         "settings": {
         },
         "license": {
-            "type": "free",
-            "valid": true
+            "type": "loginType",
+            "loginType": "glasslabv2,edmodo",
+            "valid": false,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
         },
         "thumbnail": {
             "small": "assets/thumb-game-AA-1.png",

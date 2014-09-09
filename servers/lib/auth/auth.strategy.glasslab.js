@@ -367,7 +367,7 @@ return when.promise(function(resolve, reject) {
     var isSelf = (loginUserSessionData.id == userData.id);
 
     // get/validate user by Id
-    this._service.getAuthStore().getUserById(userData.id)
+    this._service.getAuthStore().findUser('id', userData.id)
         .then(function(data){
             dbUserData = data[0];
 

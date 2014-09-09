@@ -231,19 +231,14 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.getStudentsOfCourse = function(courseId) {
+// return just userId's
+LMS_MySQL.prototype.getStudentIdsForCourse = function(courseId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var Q =
-        "SELECT     \
-            u.id,   \
-            u.first_name as firstName,  \
-            u.last_name as lastName,    \
-            u.username,                 \
-            u.email,                    \
-            u.system_role as role \
+        "SELECT u.id \
         FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
         WHERE m.role='student' AND  \
         m.course_id="+ this.ds.escape(courseId);
@@ -350,6 +345,7 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
 
         var Q =
             "SELECT         \
+                c.id,       \
                 c.title,    \
                 c.grade,    \
                 c.locked > 0 as locked,      \
@@ -960,22 +956,49 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.getCourseIdFromKey = function(key, value) {
+LMS_MySQL.prototype.getCourseInfoFromKey = function(key, value) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var Q = "SELECT id FROM GL_COURSE WHERE "+key+"="+ this.ds.escape(value);
+    var Q =
+        "SELECT         \
+            c.id,       \
+            c.title,    \
+            c.grade,    \
+            c.locked > 0 as locked,      \
+            c.archived > 0 as archived,  \
+            c.archived_Date as archivedDate, \
+            c.institution_id as institutionId, \
+            c.lmsType, \
+            c.lmsId, \
+            c.labels, \
+            c.meta, \
+            co.code \
+        FROM GL_COURSE c \
+        JOIN GL_CODE co on co.course_id=c.id \
+        WHERE c." + key + "=" + this.ds.escape(value);
+
     this.ds.query(Q)
         .then(function(results) {
-            if(results && results.length > 0){
-                resolve(results[0].id);
+            if(results.length > 0) {
+                results = results[0];
+                results.archived = results.archived ? true : false;
+                results.locked   = results.locked   ? true : false;
+
+                // convert string to array
+                results.grade = this._splitGrade(results.grade);
+
+                // normalize archive dates
+                results.archivedDate = Util.GetTimeStamp(results.archivedDate);
+
+                resolve(results);
             } else {
                 resolve();
             }
         }.bind(this),
         function(err) {
-            reject({"error": "failure", "exception": err}, 500);
+            reject({"error": "failure", "exception": err, statusCode:500});
         }.bind(this)
     );
 
