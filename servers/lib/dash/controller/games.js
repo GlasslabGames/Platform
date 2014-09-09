@@ -27,12 +27,25 @@ function getGamesBasicInfo(req, res){
                     var gameId = games[i];
 
                     var info = _.cloneDeep(this.getGameBasicInfo(gameId));
+                    info.license.valid = false;
                     if(info.license.type == "free") {
                         info.license.valid = true;
+                    }
+                    else if(info.license.type == "loginType") {
+                        info.license.loginType = info.license.loginType.split(',');
+                        if( _.contains(info.license.loginType, userData.loginType) ) {
+                            info.license.valid = true;
+                        }
                     } else {
                         // check license
                         info.license.valid = licenseGameIds.hasOwnProperty(gameId);
                     }
+
+                    // no maintenance message and if invalid lic, replace with invalid lic message
+                    if(!info.maintenance && !info.license.valid) {
+                        info.maintenance = { message: info.license.message.invalid };
+                    }
+
                     outGames.push( info );
                 }
 
@@ -90,8 +103,8 @@ exampleOut.getMyGames = [
         gameId: "AA-1",
         enabled: true,
         shortName: "Mars Generation One",
-        longName: "Mars Generation One - Argubot Academy",
-        description: "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets. Designed for students in grades 6-8, the game develops persuasion and reasoning skills for STEM &amp; 21st century careers.",
+        longName: "Mars Generation One - Argubot Academy EDU",
+        description: "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy EDU is an adventure game for iOS tablets. Designed for students in grades 6-8, the game develops persuasion and reasoning skills for STEM &amp; 21st century careers.",
         settings: { },
         license: {
             type: "free",

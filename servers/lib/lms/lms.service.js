@@ -138,11 +138,12 @@ return when.promise(function(resolve, reject) {
                     // init user
                     course.users = [];
 
-                    p = this.myds.getStudentsOfCourse(course.id)
-                        .then(function(studentList) {
+                    p = this.getStudentsOfCourse(course.id)
+                        .then(function(studentList){
                             course.users = _.clone(studentList);
+
                             return this.telmStore.getGamesForCourse(course.id);
-                        }.bind(this));
+                        }.bind(this))
                 }
                 else if( showTeacher ) {
                     p = this.myds.getTeacherOfCourse(course.id)
@@ -293,7 +294,7 @@ return when.promise(function(resolve, reject) {
             id:            _courseData.id,
             title:         _courseData.title,
             grade:         _courseData.grade,
-            institutionId: _courseData.institution || _courseData.institution,
+            institutionId: _courseData.institutionId || _courseData.institution,
             archived:      _courseData.archived,
             locked:        _courseData.lockedRegistration || _courseData.locked,
             games:         _courseData.games,
@@ -311,10 +312,17 @@ return when.promise(function(resolve, reject) {
             .then(function() {
                 if( _.isArray(courseData.games) &&
                     courseData.games.length) {
-                    this.updateGamesInCourse(userData, courseData).then(resolve, reject);
+                    return this.updateGamesInCourse(userData, courseData).then(resolve, reject);
                 } else {
                     resolve(courseData);
+                    return null;
                 }
+            }.bind(this))
+
+            .then(function(data) {
+                if(data === null) return;
+
+                resolve(courseData);
             }.bind(this))
 
             // error catchall
@@ -376,4 +384,55 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+
+LMSService.prototype.enrollInCourse = function(userData, courseCode){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var courseInfo = {};
+    this.myds.getCourseInfoFromCourseCode(courseCode)
+    //
+    .then(function(_courseInfo) {
+        if(!_courseInfo) {
+            reject({key:"user.enroll.code.invalid", statusCode:404});
+            return null;
+        }
+
+        courseInfo = _courseInfo;
+        if(!courseInfo.locked) {
+            return this.myds.isUserInCourse(userData.id, courseInfo.id);
+        } else {
+            reject({key:"course.locked", statusCode:400});
+            return null;
+        }
+    }.bind(this))
+    //
+    .then(function(inCourse) {
+        // skip if no inCourse
+        if(inCourse === null) return;
+
+        // only if they are NOT in the class
+        if(inCourse === false) {
+            this.myds.addUserToCourse(userData.id, courseInfo.id, userData.role)
+                .then(resolve, reject);
+        } else {
+            reject({key:"user.enroll.code.used", statusCode:400});
+        }
+    }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+LMSService.prototype.getStudentsOfCourse = function(courseId) {
+    return this.myds.getStudentIdsForCourse(courseId)
+        .then(function(studentIds) {
+            studentIds = _.pluck(studentIds, 'id');
+            var authService = this.serviceManager.get("auth").service;
+            return authService.getUsersData(studentIds);
+        }.bind(this));
 };

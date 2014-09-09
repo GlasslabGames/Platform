@@ -8,6 +8,8 @@
 // Third-party libs
 var _      = require('lodash');
 var when   = require('when');
+//
+var lConst;
 
 module.exports = Auth_MySQL;
 
@@ -16,6 +18,7 @@ function Auth_MySQL(options){
 
     // Glasslab libs
     MySQL   = require('../core/datastore.mysql.js');
+    lConst  = require('./auth.js').Const;
 
     this.options = _.merge(
         {
@@ -50,29 +53,56 @@ return when.promise(function(resolve, reject) {
     this.ds.query(Q)
         .then(function(results) {
             var updating = false;
+
+            var passwordLength255 = false;
+            var hasVerifyCode = false;
+            var hasSSOData = false;
+
+            var promiseList = [];
+            var Q = "";
+
             for(var i = 0; i < results.length; i++) {
+                if(results[i]['Field'] == 'ssoData') {
+                    hasSSOData = true;
+                }
 
                 if( (results[i]['Field'] == 'PASSWORD') &&
-                    (results[i]['Type'] == 'varchar(255)') &&
-                    !results[i].hasOwnProperty('VERIFY_CODE') ) {
+                    (results[i]['Type'] == 'varchar(255)') ) {
+                    passwordLength255 = true;
+                }
 
-                    updating = true;
-                    // need to update
-                    var Q = "ALTER TABLE `GL_USER` \
+                if(results[i]['Field'] == 'VERIFY_CODE') {
+                    hasVerifyCode = true;
+                }
+            }
+
+            if(passwordLength255 && !hasVerifyCode) {
+                updating = true;
+                Q = "ALTER TABLE `GL_USER` \
                             CHANGE COLUMN `PASSWORD` `PASSWORD` TEXT NOT NULL , \
                             ADD COLUMN `VERIFY_CODE` VARCHAR(255) NULL DEFAULT NULL AFTER `LOGIN_TYPE`, \
                             ADD COLUMN `VERIFY_CODE_EXPIRATION` BIGINT(20) NULL DEFAULT NULL AFTER `VERIFY_CODE`,   \
                             ADD COLUMN `VERIFY_CODE_STATUS` VARCHAR(11) NULL DEFAULT NULL AFTER `VERIFY_CODE_EXPIRATION`";
-                    this.ds.query(Q)
-                        .then(function(results) {
-                            //console.log(results);
-                            resolve(true);
-                        }.bind(this),
-                        function(err) {
-                            reject({"error": "failure", "exception": err}, 500);
-                        }.bind(this)
-                    );
-                }
+                promiseList.push( this.ds.query(Q) );
+            }
+
+            if(!hasSSOData) {
+                updating = true;
+                Q = "ALTER TABLE `GL_USER` \
+                           ADD COLUMN `ssoUsername` VARCHAR(255) NULL AFTER `LOGIN_TYPE`, \
+                           ADD COLUMN `ssoData` TEXT NULL AFTER `ssoUsername` ";
+                promiseList.push( this.ds.query(Q) );
+            }
+
+            if(promiseList.length) {
+                when.all(promiseList)
+                    .then(function(results) {
+                        //console.log(results);
+                        resolve(true);
+                    }.bind(this),
+                    function(err) {
+                        reject({"error": "failure", "exception": err}, 500);
+                    }.bind(this) );
             }
 
             if(!updating) {
@@ -107,8 +137,9 @@ return when.promise(function(resolve, reject) {
             system_Role as role, \
             USER_TYPE as type,       \
             login_Type as loginType, \
-            institution_id as institution, \
-            collect_Telemetry as collectTelemetry, \
+            ssoUsername, \
+            institution_id as institutionId, \
+            collect_Telemetry > 0 as collectTelemetry, \
             reset_Code as resetCode, \
             reset_Code_Expiration as resetCodeExpiration, \
             reset_Code_Status as resetCodeStatus, \
@@ -118,17 +149,38 @@ return when.promise(function(resolve, reject) {
         FROM \
             GL_USER \
         WHERE \
-            ENABLED=1 AND \
-            "+type+"="+this.ds.escape(value);
+            ENABLED=1 AND ";
 
+    value = this.ds.escape(value);
+    if(_.isArray(value)) {
+        Q += type+" in ("+value.join(',')+")";
+    } else {
+        // already escaped
+        Q += type+"="+value;
+    }
+
+    //console.log("Q:", Q);
     this.ds.query(Q)
         .then( function(data){
             // convert to usable userdata
             if(data.length > 0) {
-                var user = data[0];
-                user.collectTelemetry = user.collectTelemetry[0] ? true : false;
-                user.enabled = true;
+                var user = [];
+                for(var i = 0; i < data.length; i++) {
+                    user[i] = data[i];
+                    user[i].collectTelemetry = user[i].collectTelemetry ? true : false;
+                    user[i].enabled = true;
 
+                    // if not glasslab login type then set username to lms username
+                    if( (user[i].loginType !== lConst.login.type.glassLabV2) &&
+                        user[i].ssoUsername ) {
+                        user[i].username = user[i].ssoUsername;
+                    }
+                }
+
+                // if input not array then return a single user
+                if(!_.isArray(value)) {
+                    user = user[0];
+                }
                 resolve(user);
             } else {
                 reject({"error": "user not found"});
@@ -208,78 +260,6 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-Auth_MySQL.prototype.getUserByEmail = function(email){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    var Q = "SELECT " +
-        "id, " +
-        "username, " +
-        "email, " +
-        "first_name as firstName, " +
-        "last_name as lastName, " +
-        "system_role as role, " +
-        "institution_id as institutionId " +
-        "FROM GL_USER WHERE email="+this.ds.escape(email);
-    this.ds.query(Q)
-        .then(
-        function(data){
-            if( !data ||
-                !_.isArray(data) ||
-                data.length < 1) {
-                reject({"error": "user not found"}, 404);
-                return;
-            }
-
-            resolve(data[0]);
-        }.bind(this),
-        function(err) {
-            reject({"error": "failure", "exception": err}, 500);
-        }.bind(this)
-    );
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-
-Auth_MySQL.prototype.getUserById = function(id){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    var Q = "SELECT " +
-        "id, " +
-        "username, " +
-        "email, " +
-        "first_name as firstName, " +
-        "last_name as lastName, " +
-        "system_role as role, " +
-        "password," +
-        "institution_id as institutionId " +
-        "FROM GL_USER WHERE id="+this.ds.escape(id);
-    this.ds.query(Q)
-        .then(
-        function(data){
-            if( !data ||
-                !_.isArray(data) ||
-                data.length < 1) {
-                reject({"error": "user not found"}, 404);
-                return;
-            }
-
-            resolve(data);
-        }.bind(this),
-        function(err) {
-            reject({"error": "failure", "exception": err}, 500);
-        }.bind(this)
-    );
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
 
 Auth_MySQL.prototype.addUser = function(userData){
 // add promise wrapper
@@ -305,6 +285,8 @@ return when.promise(function(resolve, reject) {
         username:       this.ds.escape(userData.username),
         collect_telemetry:      0,
         login_type:     this.ds.escape(userData.loginType),
+        ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
+        ssoData:        this.ds.escape(userData.ssoData || ""),
         verify_code:    "NULL",
         verify_code_expiration: "NULL",
         verify_code_status: "NULL"
@@ -340,6 +322,8 @@ return when.promise(function(resolve, reject) {
         email:          this.ds.escape(userData.email),
         first_name:     this.ds.escape(userData.firstName),
         last_name:      this.ds.escape(userData.lastName),
+        ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
+        ssoData:        this.ds.escape(userData.ssoData || ""),
         last_updated:   "NOW()"
     };
 
@@ -410,26 +394,3 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
-
-Auth_MySQL.prototype.getUserDataFromResetCode = function(code){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    var Q = "SELECT * FROM GL_USER WHERE reset_code="+this.ds.escape(code);
-    this.ds.query(Q)
-        .then(
-        function(data){
-            if(data.length > 0) {
-                resolve(data[0]);
-            } else {
-                reject({"key":"user.passwordReset.code.invalid"});
-            }
-        }.bind(this),
-        function(err) {
-            reject({"error": "failure", "exception": err}, 500);
-        }.bind(this)
-    );
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}

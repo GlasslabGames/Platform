@@ -118,7 +118,7 @@ return when.promise(function(resolve, reject) {
     // try username
     this._service.getAuthStore().findUser("username", username)
         // error, try email
-        .then(null, function(user){
+        .then(null, function(err){
             return this._service.getAuthStore().findUser("email", username);
         }.bind(this))
         // valid user
@@ -394,7 +394,7 @@ return when.promise(function(resolve, reject) {
     var isSelf = (loginUserSessionData.id == userData.id);
 
     // get/validate user by Id
-    this._service.getAuthStore().getUserById(userData.id)
+    this._service.getAuthStore().findUser('id', userData.id)
         .then(function(data){
             dbUserData = data[0];
 
