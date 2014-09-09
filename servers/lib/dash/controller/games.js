@@ -103,8 +103,8 @@ exampleOut.getMyGames = [
         gameId: "AA-1",
         enabled: true,
         shortName: "Mars Generation One",
-        longName: "Mars Generation One - Argubot Academy",
-        description: "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets. Designed for students in grades 6-8, the game develops persuasion and reasoning skills for STEM &amp; 21st century careers.",
+        longName: "Mars Generation One - Argubot Academy EDU",
+        description: "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy EDU is an adventure game for iOS tablets. Designed for students in grades 6-8, the game develops persuasion and reasoning skills for STEM &amp; 21st century careers.",
         settings: { },
         license: {
             type: "free",
