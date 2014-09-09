@@ -569,6 +569,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
             // School + District Info for Beta
             userData.school = regData.school;
             userData.district = regData.district;
+            userData.phoneNumber = regData.phoneNumber;
 
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
@@ -672,7 +673,7 @@ function sendVerifyEmail(email , protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org - Verify your email",
+                        subject: "Beta status confirmed - Verify your email",
                         to:   userData.email,
                         user: userData,
                         code: verifyCode,
@@ -680,7 +681,7 @@ function sendVerifyEmail(email , protocol, host) {
                     };
 
                     var email = new Util.Email(
-                        this.options.auth.email,
+                        this.options.beta.email,
                         path.join(__dirname, "../email-templates"),
                         this.stats);
                     email.send('register-verify', emailData)
@@ -732,8 +733,12 @@ function verifyEmailCode(req, res, next, serviceManager) {
 
                         return this.glassLabStrategy.updateUserData(userData)
                             .then(function() {
-                                req.body.verifyCode = req.params.code;
-                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
+                                return when.promise(function(resolve,reject) {
+                                    req.body.verifyCode = req.params.code;
+                                    resolve(serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]))
+                                }).then(function() {
+                                    return userData;
+                                });
                             }.bind(this));
                     } else {
                         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
@@ -755,7 +760,6 @@ function verifyEmailCode(req, res, next, serviceManager) {
             }.bind(this))
             .then(function(userData) {
                 // 2) send welcome email
-
                 return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
             }.bind(this))
             .then(null, function(err) {
