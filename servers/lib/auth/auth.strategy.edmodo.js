@@ -111,7 +111,9 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 profile.lastName  = json.last_name;
                 // TODO: add ssoUsername
                 profile.email     = json.email || "";
-                profile.password  = body;
+
+                profile.ssoData  = body;
+                profile.password = "-";
 
                 done(null, profile);
             } catch (err) {

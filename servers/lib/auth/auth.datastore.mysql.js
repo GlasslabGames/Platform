@@ -53,23 +53,26 @@ return when.promise(function(resolve, reject) {
     this.ds.query(Q)
         .then(function(results) {
             var updating = false;
-            var hasVerifyCode = false;
-            var hasSSOUsername = false;
+
             var passwordLength255 = false;
+            var hasVerifyCode = false;
+            var hasSSOData = false;
+
             var promiseList = [];
             var Q = "";
 
             for(var i = 0; i < results.length; i++) {
-                if(results[i]['Field'] == 'VERIFY_CODE') {
-                    hasVerifyCode = true;
-                }
-                if(results[i]['Field'] == 'ssoUsername') {
-                    hasSSOUsername = true;
+                if(results[i]['Field'] == 'ssoData') {
+                    hasSSOData = true;
                 }
 
                 if( (results[i]['Field'] == 'PASSWORD') &&
                     (results[i]['Type'] == 'varchar(255)') ) {
                     passwordLength255 = true;
+                }
+
+                if(results[i]['Field'] == 'VERIFY_CODE') {
+                    hasVerifyCode = true;
                 }
             }
 
@@ -83,10 +86,11 @@ return when.promise(function(resolve, reject) {
                 promiseList.push( this.ds.query(Q) );
             }
 
-            if(!hasSSOUsername) {
+            if(!hasSSOData) {
                 updating = true;
                 Q = "ALTER TABLE `GL_USER` \
-                           ADD COLUMN `ssoUsername` VARCHAR(255) NULL AFTER `LOGIN_TYPE`";
+                           ADD COLUMN `ssoUsername` VARCHAR(255) NULL AFTER `LOGIN_TYPE`, \
+                           ADD COLUMN `ssoData` TEXT NULL AFTER `ssoUsername` ";
                 promiseList.push( this.ds.query(Q) );
             }
 
@@ -280,6 +284,7 @@ return when.promise(function(resolve, reject) {
         collect_telemetry:      0,
         login_type:     this.ds.escape(userData.loginType),
         ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
+        ssoData:        this.ds.escape(userData.ssoData || ""),
         verify_code:    "NULL",
         verify_code_expiration: "NULL",
         verify_code_status: "NULL"
@@ -316,6 +321,7 @@ return when.promise(function(resolve, reject) {
         first_name:     this.ds.escape(userData.firstName),
         last_name:      this.ds.escape(userData.lastName),
         ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
+        ssoData:        this.ds.escape(userData.ssoData || ""),
         last_updated:   "NOW()"
     };
 

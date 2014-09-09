@@ -193,7 +193,9 @@ Strategy.prototype._getProfileData = function(body) {
         profile.email     = "";
     }
 
-    profile.password  = body;
+    profile.ssoData  = body;
+    profile.password = "-";
+
     return profile;
 };
 
