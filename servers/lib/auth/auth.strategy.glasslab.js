@@ -98,7 +98,7 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
 };
 Glasslab_Strategy.prototype._verifyOneShotHashCode = function(verifyCode) {
 return when.promise(function(resolve, reject) {
-    this.findUser('verify_code', verifyCode)
+    this._service.getAuthStore().findUser('verify_code', verifyCode)
         .then(function (userData) {
             // sets verify code to null after verified
             userData.verifyCode = "NULL";
@@ -396,7 +396,7 @@ return when.promise(function(resolve, reject) {
     // get/validate user by Id
     this._service.getAuthStore().findUser('id', userData.id)
         .then(function(data){
-            dbUserData = data[0];
+            dbUserData = data;
 
             // role can not be changed
             userData.role = dbUserData.role;

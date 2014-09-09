@@ -561,7 +561,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
 
     var verifyCode = Util.CreateUUID();
 
-    return this.glassLabStrategy.getUserByEmail(email)
+    return this.getAuthStore().findUser('email', email)
         .then(function(userData) {
             userData.verifyCode           = verifyCode;
             userData.verifyCodeStatus     = aConst.verifyCode.status.beta;
@@ -570,7 +570,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
             userData.school = regData.school;
             userData.district = regData.district;
             userData.phoneNumber = regData.phoneNumber;
-
+            console.log('found user!: ', userData);
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
@@ -602,7 +602,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
                 err.error == "user not found") {
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
             } else {
-                console.error("AuthService: sendVerifyEmail Error -", err);
+                console.error("AuthService: sendBetaConfirmEmail Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
             }
         }.bind(this))
@@ -616,7 +616,7 @@ function verifyBetaCode(req, res, next) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
     // 1) verify the beta code and get user data
-    this.glassLabStrategy.findUser("verify_code", req.params.code)
+    this.getAuthStore().findUser("verify_code", req.params.code)
         .then(function(userData) {
 
                 if(userData.verifyCodeStatus === aConst.verifyCode.status.beta) {
@@ -720,6 +720,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
         // 1) validate the code and get user data
         this.getAuthStore().findUser("verify_code", req.params.code)
             .then(function(userData) {
+                console.log('found user data: ', userData);
                 // check if code expired
                 if(Util.GetTimeStamp() > userData.verifyCodeExpiration && process.env.HYDRA_ENV !== 'dev') {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
@@ -734,6 +735,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
 
                         return this.glassLabStrategy.updateUserData(userData)
                             .then(function() {
+                                console.log('updating user data: ', userData);
                                 return when.promise(function(resolve,reject) {
                                     req.body.verifyCode = req.params.code;
                                     resolve(serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]))
