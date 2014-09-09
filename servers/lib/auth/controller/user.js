@@ -565,7 +565,7 @@ function sendVerifyEmail(email , protocol, host) {
     var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
-    return this.getAuthStore().getUserByEmail(email)
+    return this.getAuthStore().findUser('email', email)
         .then(function(userData) {
             userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
@@ -775,7 +775,7 @@ function resetPasswordSend(req, res, next) {
 
         // 1) valid user email and get the user data
         //    update user account with code
-        this.getAuthStore().getUserByEmail(email)
+        this.getAuthStore().findUser('email', email)
             .then(function(userData) {
                 userData.resetCode           = resetCode;
                 userData.resetCodeExpiration = expirationTime;

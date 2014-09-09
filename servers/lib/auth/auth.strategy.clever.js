@@ -127,10 +127,21 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
 
                 // add to migration
                 profile.username  = '{'+this.name+'}.'+json.data.id;
-                profile.firstName = json.data.name.first;
+
+                if( json.data.name.middle &&
+                    json.data.name.middle.length > 0) {
+                    profile.firstName = json.data.name.first + " " + json.data.name.middle;
+                } else {
+                    profile.firstName = json.data.name.first;
+                }
                 profile.lastName  = json.data.name.last;
                 profile.email     = json.data.email || "";
-                profile.password  = body;
+
+                if(json.data.credentials) {
+                    profile.ssoUsername = json.data.credentials.district_username || "";
+                }
+                profile.ssoData  = body;
+                profile.password = "-";
 
                 done(null, profile);
             } catch (err) {

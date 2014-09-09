@@ -17,7 +17,7 @@ var Util;
 
 module.exports = DashService;
 
-function DashService(options){
+function DashService(options, serviceManager){
     try{
         var TelmStore, LmsStore, DashStore, Errors;
 
@@ -41,6 +41,8 @@ function DashService(options){
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
         this.dashStore   = new DashStore(this.options.webapp.datastore.mysql);
+
+        this.serviceManager = serviceManager;
 
         this._games = {};
 
@@ -81,7 +83,9 @@ DashService.prototype.getListOfGameIds = function() {
     for(var g in this._games) {
         if( this._games[g].info &&
             this._games[g].info.basic &&
-            this._games[g].info.basic.gameId) {
+            this._games[g].info.basic.gameId &&
+            // only return games that are enabled
+            this._games[g].info.basic.enabled) {
             gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
         }
     }
@@ -91,7 +95,9 @@ DashService.prototype.getListOfGameIds = function() {
 // TODO: replace this with DB lookup, return promise
 DashService.prototype.isValidGameId = function(gameId) {
     for(var g in this._games) {
-        if( g == gameId) {
+        if( g == gameId &&
+            // only return games that are enabled
+            this._games[g].info.basic.enabled) {
             return true;
         }
     }

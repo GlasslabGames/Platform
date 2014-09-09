@@ -30,7 +30,16 @@ function MySQL(options){
 
     this.pool = mysql.createPool(this.options);
 }
-MySQL.prototype.escape = mysql.escape;
+MySQL.prototype.escape = function(value) {
+    // if array, escape all items in array
+    if(_.isArray(value)) {
+        return _.map(value, function(item){
+            return mysql.escape(item);
+        });
+    } else {
+        return mysql.escape(value);
+    }
+};
 
 MySQL.prototype.query = function(query) {
 // add promise wrapper

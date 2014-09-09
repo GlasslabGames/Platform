@@ -10,17 +10,18 @@
     "basic": {
         "gameId": "AW-1",
         "enabled": true,
-        "maintenance":
-        {
-            "message": "Coming Soon!"
-        },
+        "maintenance": null,
         "shortName": "Argument Wars",
         "longName": "Argument Wars",
         "settings": {
         },
         "license": {
-            "type": "free",
-            "valid": true
+            "type":      "loginType",
+            "loginType": "icivics",
+            "valid": false,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
         },
         "thumbnail": {
             "small": "assets/thumb-game-AA-1.png",

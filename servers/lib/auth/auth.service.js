@@ -237,27 +237,54 @@ return when.promise(function(resolve, reject) {
                     // 2) create promise list of adding/updating all courses
                     .then(function(allUsers){
                         var addCoursePromiseList = [];
-                        for(var c in courses) {
+
+                        _.forEach(courses, function(course, c){
                             // updates users in courses
-                            for(var i = 0; courses[c].users.length; i++) {
+                            for(var i = 0; i < courses[c].users.length; i++) {
                                 if( allUsers.hasOwnProperty( courses[c].users[i].id) ){
                                     courses[c].users[i] = allUsers[courses[c].users[i].id];
                                 }
                             }
-                            addCoursePromiseList.push( this.addOrUpdate_SSO_Course(userData, courses[c]) );
+
+                            var p = this.addOrUpdate_SSO_Course(userData, courses[c])
+                                .then(function(updatedCourseData){
+                                    // update course info
+                                    userData.courses[c] = updatedCourseData;
+                                }.bind(this));
+
+                            addCoursePromiseList.push( p );
+                        }.bind(this))
+
+                if(addCoursePromiseList.length) {
+                            return when.all(addCoursePromiseList);
+                        } else {
+                            return;
                         }
-                        return when.all(addCoursePromiseList);
                     }.bind(this))
                     // 3) create promise list of adding all users to courses if they already are not in courses
                     .then(function(){
+
+                        // every course
                         var addUserToCoursePromiseList = [];
                         for(var c in courses) {
+                            //console.log("addUserToCoursePromiseList courses:", courses[c]);
                             addUserToCoursePromiseList.push( this.addOrUpdate_SSO_EnrollInCourse(courses[c]) );
                         }
-                        return when.all(addUserToCoursePromiseList);
+
+                        if(addUserToCoursePromiseList.length) {
+                            //console.log("addUserToCoursePromiseList.length:", addUserToCoursePromiseList.length);
+                            return when.all(addUserToCoursePromiseList);
+                        } else {
+                            return;
+                        }
                     }.bind(this))
                     .then(function(){
                         resolve(userData);
+                    }.bind(this))
+
+                    // catch all
+                    .then(null, function(err){
+                        reject(err);
                     }.bind(this))
             } else {
                 resolve(userData);
@@ -283,24 +310,25 @@ return when.promise(function(resolve, reject) {
 
     // check if can create course
     lmsService.createCourse(userData, courseData)
-        .then(function(courseInfo){
+        .then(function(updatedCourseData){
             // created
-            resolve();
+            resolve(updatedCourseData);
             return null;
         }.bind(this),
         function(err){
             if(err.key === "course.notUnique.name"){
-                return this.lmsStore.getCourseIdFromKey('lmsId', courseData.lmsId);
+                return this.lmsStore.getCourseInfoFromKey('lmsId', courseData.lmsId);
             } else {
                 reject(err);
             }
         }.bind(this))
 
         // results from getting course id
-        .then(function(courseId){
-            if(!courseId) return;
+        .then(function(courseDBInfo){
+            if(!courseDBInfo) return;
 
-            courseData.id = courseId;
+            // update courseData, by merging in courseInfo from DB
+            courseData = _.merge(courseDBInfo, courseData);
             // course not unique for this user so need up update
             return lmsService.updateCourse(userData, courseData);
         }.bind(this))
@@ -310,7 +338,7 @@ return when.promise(function(resolve, reject) {
             if(!updatedCourseData) return;
 
             // updated
-            resolve();
+            resolve(courseData);
         }.bind(this))
 
         // catch all errors
@@ -323,20 +351,54 @@ return when.promise(function(resolve, reject) {
 };
 
 
-AuthService.prototype.addOrUpdate_SSO_EnrollInCourse = function(usersData){
+AuthService.prototype.addOrUpdate_SSO_EnrollInCourse = function(courseData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    // TODO: 3) create promise list of adding all users to courses if they already are not in courses
-    // TODO: Is user enrolled in course
-    // Yes. do nothing
-    // No. add
 
-    // this.lmsStore.isUserInCourse(userId, courseId)
+    var lmsService = this.serviceManager.get("lms").service;
 
-    resolve();
+    var promiseList = [];
+    // all users in course
+    for(var i = 0; i < courseData.users.length; i++) {
+        promiseList.push( lmsService.enrollInCourse(courseData.users[i], courseData.code) );
+    }
+
+    if(promiseList.length) {
+        when.all(promiseList)
+            .then(resolve)
+            .then(null, function(err){
+                if( (err.key === "user.enroll.code.used") ||
+                    (err.key === "course.locked") ) {
+                    // this is ok
+                    resolve();
+                } else {
+                    reject(err);
+                }
+            }.bind(this));
+    } else {
+        resolve();
+    }
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
 
+// TODO make single request instead of X
+AuthService.prototype.getUsersData = function(studentIds){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    if(studentIds.length) {
+        this.authStore.findUser('id', studentIds)
+            .then(resolve, reject);
+    } else {
+        resolve([]);
+    }
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
