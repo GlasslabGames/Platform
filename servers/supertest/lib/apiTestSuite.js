@@ -2,33 +2,36 @@
 // IMPORTS //
 /////////////
 
+// Externals
 var request   = require('superagent'),
     mocha     = require('mocha'),
     chai      = require('chai'),
     expect    = chai.expect;
 
-var tools     	 = require('./tools.js'),
-		tstamp       = tools.tstamp;
+// Custom helper f'ns
+var tools     = require('./tools.js'),
+		tstamp    = tools.tstamp,
+    genClass  = tools.genClass,
+		genUser   = tools.genUser;
 
 
 //////////////////
 // TEST ROUTINE //
 //////////////////
 
-var apiTestSuite = function (env, testData, routeMap) {
+var apiTestSuite = function (env, data, routeMap) {
+
+	var routes  = new routeMap(data),
+			srvAddr = data.serverAddress;
 	
-	// Initializations
+	var agent   = request.agent(),
+			results = {};
 	
-	var data      = testData[env],
-			routes    = new routeMap(data),
-			srvAddr   = data.serverAddress;
-	
-	var results, newClassId, classData;
-	var agent = request.agent();
+	var classData;
 
 	describe(env.toUpperCase() + " API (v2) Test Suite", function (done) {
 
-		console.log(tstamp());
+		results['timestamp'] = tstamp();
 
 		it("#should connect to " + env.toUpperCase() + " environment", function (done) {
 			agent
@@ -44,7 +47,7 @@ var apiTestSuite = function (env, testData, routeMap) {
 				.get(srvAddr + routes.events.path)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
-					console.log(res.text);		// FUTURE add events count to results json doc
+					results['events'] = (res.text);
 					done();
 				});
 		});
@@ -173,7 +176,7 @@ var apiTestSuite = function (env, testData, routeMap) {
           
           var matched = false;
 				
-          // FUTURE - clean up and perhaps swap FOR-IN loop
+          // FUTURE - clean up and perhaps swap FOR-IN loop (achievements too)
 					for (var studentIndex in resText) {
               if(resText[studentIndex]['userId'] == data.student.id) {
                   matched = true;
@@ -224,38 +227,80 @@ var apiTestSuite = function (env, testData, routeMap) {
 				});
 		});
 
-		it.skip('#register as new teacher - normal', function (done) {
-
-			done();
-		});
-
-		it.skip('#register as new teacher - Clever', function (done) {
-
-			done();
-		});
-
-		it.skip('#register as new teacher - iCivics', function (done) {
-
-			done();
-		});
-
-		it.skip("#creates new class", function (done) {
-
-			var postData = routes.classes.create.post;
-			postData['title'] = postData['title'] + tstamp();
-
+		it('#register as new teacher - Playfully', function (done) {
+      
+			var newUser = genUser('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123');	// NOTE - should this reuse timestamp?
+			
+			results['newTeacherPost'] = newUser;
+			
+			console.log(newUser);		// DEBUG
+			
 			agent
-				.post(srvAddr + routes.classes.create.path)
+				.post(srvAddr + '/api/v2/auth/user/register')		// TODO - add to routes
 				.type('application/json')
-				.send(JSON.stringify(postData))
+				.send(newUser)
 				.end(function (res) {
+					
+					console.log(res.text);	// DEBUG
+				
 					expect(res.status).to.eql(200);
-					newClassId = res.body.id; // NOTE - passes id, prereq for archive steps
+					results['newTeacher'] = res.text;
 					done();
 				});
 		});
 
+		it("#creates new class", function (done) {
+
+			var postData = genClass("glTestClass" + tstamp(), '7, 11', data.testGameId);
+			results['newClassPost'] = postData;
+
+			agent
+				.post(srvAddr + routes.classes.create.path)
+				.type('application/json')
+				.send(postData)
+				.end(function (res) {
+					expect(res.status).to.eql(200);
+					results['newClass'] = res.body;
+					results['newClassCode'] = results['newClass']['code'];
+					done();
+				});
+		});
+    
+    it.skip('#register as a new student in that class', function(done) {
+			
+			//http://stage.playfully.org/api/v2/lms/course/code/W7JPN/verify
+			agent
+				.get(srvAddr + '/api/v2/lms/course/code/:code/verify'.replace(':code', results['newClassCode']))		// TODO - add to routes
+				.type('application/json')
+				.send(newUser)		// FIXME
+				.end(function (res) {
+					expect(res.status).to.eql(200);
+					
+					var confirmation = JSON.parse(res.text);
+//					results['newTeacher'] = res.text;
+					done();
+				});
+    });
+		
+		it.skip('#register as new teacher - Clever', function (done) {
+			done();
+		});
+
+		it.skip('#register as new teacher - iCivics', function (done) {
+			done();
+		});
+		
+		// NOTE - Edmodo not scoped if to be removed
+
 	});
+	
+	after(function() {
+		
+		// Dump resultant data to file
+		console.log(results);
+		
+	});
+	
 }
 
 module.exports = apiTestSuite;

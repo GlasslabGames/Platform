@@ -30,8 +30,7 @@ var Routes = function (testData) {
 			path: "/api/v2/lms/courses?showMembers=1"
 		},
 		create: {
-			path: "/api/v2/lms/course/create",
-			post: testData.newMGOClass,
+			path: "/api/v2/lms/course/create"
 		}
 	}
 
