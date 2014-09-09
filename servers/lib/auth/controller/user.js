@@ -677,7 +677,7 @@ function sendVerifyEmail(email , protocol, host) {
                     };
 
                     var email = new Util.Email(
-                        this.options.beta.email,
+                        this.options.auth.beta.email,
                         path.join(__dirname, "../email-templates"),
                         this.stats);
                     email.send('register-verify', emailData)
