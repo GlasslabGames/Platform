@@ -16,7 +16,7 @@ module.exports = function (grunt) {
 
         "git-describe": {
             options: {
-                cwd:       ".",
+                cwd: ".",
                 commitish: "master",
                 failOnError: false,
                 template: "{%=tag%}-{%=since%}-{%=object%}{%=dirty%}",

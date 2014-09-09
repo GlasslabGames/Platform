@@ -45,7 +45,6 @@ var Routes = function (testData) {
 
 	this.mission = {
 		path: "/api/v2/dash/course/" + teacher.testClass.id + "/game/" + testData.testGameId + "/missions"
-
 	}
 
 	this.sdk = {
@@ -57,6 +56,15 @@ var Routes = function (testData) {
 			path: "/sdk/login"
 		}
 	}
+  
+  this.register = {
+    teacher: {
+      path: '/api/v2/auth/user/register'
+    },
+    student: {
+      path: '/api/v2/lms/course/code/:code/verify'
+    }
+  }
 
 	this.logout = {
 		path: "/api/v2/auth/logout",

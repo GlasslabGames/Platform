@@ -229,20 +229,15 @@ var apiTestSuite = function (env, data, routeMap) {
 
 		it('#register as new teacher - Playfully', function (done) {
       
-			var newUser = genUser('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123');	// NOTE - should this reuse timestamp?
+			var newUser = genUser('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123', 'teacher');	// NOTE - should this reuse timestamp?
 			
 			results['newTeacherPost'] = newUser;
 			
-			console.log(newUser);		// DEBUG
-			
 			agent
-				.post(srvAddr + '/api/v2/auth/user/register')		// TODO - add to routes
+				.post(srvAddr + routes.register.teacher.path)
 				.type('application/json')
 				.send(newUser)
 				.end(function (res) {
-					
-					console.log(res.text);	// DEBUG
-				
 					expect(res.status).to.eql(200);
 					results['newTeacher'] = res.text;
 					done();
@@ -267,17 +262,19 @@ var apiTestSuite = function (env, data, routeMap) {
 		});
     
     it.skip('#register as a new student in that class', function(done) {
-			
-			//http://stage.playfully.org/api/v2/lms/course/code/W7JPN/verify
+      
+      var newStudentPost = genUser('glTestStudent' + tstamp(), results['newClassCode'], 'glasslab321', 'student');
+      results['newStudentPost'] = newStudentPost;
+      
 			agent
-				.get(srvAddr + '/api/v2/lms/course/code/:code/verify'.replace(':code', results['newClassCode']))		// TODO - add to routes
+				.post(srvAddr + routes.register.student.path.replace(':code', results['newClassCode']))
 				.type('application/json')
-				.send(newUser)		// FIXME
+				.send(newStudentPost)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 					
 					var confirmation = JSON.parse(res.text);
-//					results['newTeacher'] = res.text;
+					results['newStudent'] = res.text;
 					done();
 				});
     });
@@ -289,8 +286,28 @@ var apiTestSuite = function (env, data, routeMap) {
 		it.skip('#register as new teacher - iCivics', function (done) {
 			done();
 		});
-		
-		// NOTE - Edmodo not scoped if to be removed
+    
+    it.skip("#can reset a teacher's password", function(done) {
+      
+      agent
+				.post(srvAddr + routes.password_reset.path)
+				.type('application/json')
+				.send(testData.teacher.email)
+				.end(function (res) {
+        
+          console.log(res);
+					expect(res.status).to.eql(200);
+					
+//					var confirmation = JSON.parse(res.text);
+        
+        
+          // TODO - implement email-listener2
+        
+        
+
+					done();
+				});
+    });
 
 	});
 	

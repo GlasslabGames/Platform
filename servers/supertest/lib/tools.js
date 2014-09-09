@@ -22,15 +22,39 @@ function tstamp() {
 		date.getMinutes() + ':' + zfill(date.getSeconds(),2)
 }
 
-function genUser(name, email, passw) { 			// TODO implement to switchable b/w teach / stud
+function genUser(name, emailOrCode, passw, role) {    // FUTURE - ok, emailOrCode is a bit funkadelic.  make more robust
 
-	return JSON.stringify({
-		"firstName": name,"lastName": "",
-		"email": email.replace(/[^\w\.\@\+]/gi, ''),
-		"password": passw, "confirm": passw,
-		"role": "instructor","acceptedTerms": true,"newsletter": false,
-		"errors": [],"isRegCompleted": false
-	});
+  if (role == 'teacher') {
+	 return JSON.stringify({
+      "firstName": name,
+      "lastName": "",
+      "email": emailOrCode.replace(/[^\w\.\@\+]/gi, ''),
+      "password": passw,
+      "confirm": passw,
+      "role": "instructor",
+      "acceptedTerms": true,
+      "newsletter": false,
+      "errors": [],
+      "isRegCompleted": false
+    });
+  }
+  
+  if (role == 'student') {
+    return JSON.stringify({
+      "username": name,
+      "password": passw,
+      "confirm": passw,
+      
+      "firstName": "glTest",
+      "lastName": "Student",
+      
+      "role": "student",
+      
+      "regCode": emailOrCode,
+      "errors": [],
+      "isRegCompleted": false
+    });
+  }
 
 }
 
