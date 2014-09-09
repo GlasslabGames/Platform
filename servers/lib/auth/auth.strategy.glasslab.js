@@ -43,7 +43,6 @@ function Glasslab_Strategy(options, service) {
 util.inherits(Glasslab_Strategy, passport.Strategy);
 
 Glasslab_Strategy.prototype.authenticate = function(req) {
-
     var username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField);
     var password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField);
     //console.log("authenticate body:", req.body);
@@ -93,7 +92,7 @@ return when.promise(function(resolve, reject) {
     // try username
     this._service.getAuthStore().findUser("username", username)
         // error, try email
-        .then(null, function(user){
+        .then(null, function(err){
             return this._service.getAuthStore().findUser("email", username);
         }.bind(this))
         // valid user
@@ -367,7 +366,7 @@ return when.promise(function(resolve, reject) {
     var isSelf = (loginUserSessionData.id == userData.id);
 
     // get/validate user by Id
-    this._service.getAuthStore().getUserById(userData.id)
+    this._service.getAuthStore().findUser('id', userData.id)
         .then(function(data){
             dbUserData = data[0];
 

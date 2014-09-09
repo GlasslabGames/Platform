@@ -77,7 +77,8 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
 
     // get user list in class
     // TODO: use service route
-    this.lmsStore.getStudentsOfCourse(courseId)
+    var lmsService = this.serviceManager.get("lms").service;
+    lmsService.getStudentsOfCourse(courseId)
         .then(function(users){
             // shortcut no users
             if(!users) return;
@@ -201,7 +202,8 @@ function _getAchievements(req, res, reportId, gameId, courseId) {
     this.lmsStore.isUserInCourse(loginUserSessionData.id, courseId)
         .then(function(verified) {
             if(verified) {
-                return this.lmsStore.getStudentsOfCourse(courseId);
+                var lmsService = this.serviceManager.get("lms").service;
+                return lmsService.getStudentsOfCourse(courseId);
             } else {
                 this.requestUtil.errorResponse(res, {error: "invalid access"});
             }

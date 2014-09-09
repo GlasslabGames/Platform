@@ -10,23 +10,44 @@
     "basic": {
         "gameId": "AW-1",
         "enabled": true,
-        "maintenance":
-        {
-            "message": "Coming Soon!"
-        },
+        "maintenance": null,
         "shortName": "Argument Wars",
         "longName": "Argument Wars",
+        "description": "Try out your persuasive abilities by arguing a real Supreme Court case. The other lawyer is your competition. Whoever uses the strongest arguments wins!"
         "settings": {
         },
         "license": {
-            "type": "free",
-            "valid": true
+            "type":      "loginType",
+            "loginType": "icivics",
+            "valid": true,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
         },
         "thumbnail": {
             "small": "assets/thumb-game-AA-1.png",
             "large": "assets/thumb-game-AA-1.png"
         }
     },
+   "assessment": [
+        {
+            "enabled": false,
+            "id": "sowo",
+            "dataProcessScope": "all",
+            "engine": "javascript",
+            "trigger": "activity",
+            "rules": {
+                "wo1": {
+                    "name": "Coming soon",
+                    "description": "COMING SOON!"
+                },
+                "so1": {
+                    "name": "Coming soon",
+                    "description": "COMING SOON!"
+                }
+            }
+        }
+    ],
     "reports": {
         "list": [
             {
@@ -34,7 +55,7 @@
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
-                "description": "This report shows..."
+                "description": "Coming Soo..."
             },
             {
                 "id": "achievements",
@@ -54,13 +75,13 @@
         ]
     },
     "details": {
-        "release": "alpha",
+        "release": "beta",
         "price": "Free",
-        "releaseDate": "TBA",
+        "releaseDate": "Aug 2010",
         "type": "Browser",
-        "platform": "Browser",
-        "subject": "ELA",
-        "grades": "6 - 8",
+        "platform": "Flash/Browser",
+        "subject": "Social Studies",
+        "grades": "6 - 10",
         "buttons": [
             {
                 "name": "Download",
@@ -90,8 +111,8 @@
         ],
         "pages": {
             "product": {
-                "header": "Let Your Students Go to Town!",
-                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<\/br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve, explain the relationships in complex systems, and read informational texts and diagrams.<\/br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
+                "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
+                "about": "Argument Wars is an online game that lets players argue landmark Supreme Court cases. By finding and using the strongest support, students recreate historic legal cases while evaluating arguments and distinguishing between valid and invalid reasoning. Argument Wars brings gaming to the social studies classroom and lets students have fun while they learn about landmark cases and hone fundamental skills that are critical to success in meeting Common Core standards. ",
                 "curriculum": [
                     "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
                 ],
@@ -111,9 +132,9 @@
                     "category": "ELA Common Core",
                     "list": [
                         {
-                            "name": "CCSS.ELA-Literacy.RST.6-8.1",
+                            "name": "CCSS.ELA-Literacy.RI.6.8",
                             "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
-                            "description": "Cite specific textual evidence to support conclusions"
+                            "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
                         },
                         {
                             "name": "CCSS.ELA-Literacy.RST.6-8.7",
@@ -136,37 +157,31 @@
                             "description": "Read and understand text and make logical inferences from it"
                         }
                     ]
-                },
-                {
-                    "category": "Next Generation Science",
-                    "list": [
-                        {
-                            "description": "ESS3.C Human Impacts on Earth Systems"
-                        },
-                        {
-                            "description": "Cross Cutting Concept: Systems Thinking"
-                        }
-                    ]
-                },
-                {
-                    "category": "21st Century Skills",
-                    "list": [
-                        {
-                            "description": "Critical thinking and problem solving"
-                        }
-                    ]
                 }
+                
             ],
             "lessonPlans": [
                 {
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Routine 1",
+                            "name": "Appellate Courts: Let’s Take It Up",
                             "link": "http://glasslabgames.org"
                         },
                         {
-                            "name": "Routine 2",
+                            "name": "Interpreting the Constitution: What Does That Mean?",
+                            "link": "http://glasslabgames.org"
+                        },
+                        {
+                            "name": "Sources of Law",
+                            "link": "http://glasslabgames.org"
+                        },
+                        {
+                            "name": "Landmark Library: Brown v. Board of Education",
+                            "link": "http://glasslabgames.org"
+                        },
+                        {
+                            "name": "Landmark Library: Miranda v. Arizona",
                             "link": "http://glasslabgames.org"
                         }
                     ]
@@ -177,42 +192,15 @@
                         {
                             "name": "Walkthrough",
                             "link": "http://glasslabgames.org"
-                        },
-                        {
-                            "name": "Mission",
-                            "link": "http://glasslabgames.org"
                         }
                     ]
-                },
-                {
-                    "category": "Info Pack",
-                    "list": [
-                        {
-                            "name": "One Page Game Description",
-                            "link": "http://glasslabgames.org"
-                        }
-                    ]
-                }
-            ],
+                }            ],
             "research": [
-                {
-                    "category": "SRI 2014",
-                    "list": [
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
-                        },
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
-                        }
-                    ]
-                }
-            ],
+                            ],
             "reviews": [
                 {
-                    "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florida",
-                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission, automatic grading."
+                    "reviewer": "Kristen H., high school teacher",
+                    "review": "Argument Wars really help[s] improve their understanding of… important Supreme Court cases."
                 }
             ]
         },

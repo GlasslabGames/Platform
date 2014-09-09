@@ -93,11 +93,12 @@ util.inherits(Strategy, OAuthStrategy);
 
 Strategy.prototype.userProfile = function(token, tokenSecret, params, done) {
     //console.log("ICivics - token:", token, ", tokenSecret:", tokenSecret, ", params:", params);
-    var url = this._baseURL+ '/services/rest/service_system/connect.json';
-    this._getUserProfile(url, token, tokenSecret, null, done);
+    this._getUserProfile(token, tokenSecret, done);
 };
 
-Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, done) {
+Strategy.prototype._getUserProfile = function(token, tokenSecret, done, _url, data) {
+    var url = _url || (this._baseURL+ '/services/rest/service_system/connect.json');
+
     this._oauth.post(url, token, tokenSecret, data, function (err, body, res) {
         if (err) { return done(new InternalOAuthError('failed to fetch user profile', err)); }
 
@@ -105,7 +106,7 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, don
             res.headers &&
             res.headers.location) {
             console.log("ICivics Strategy: Redirecting to", res.headers.location);
-            this._getUserProfile(res.headers.location, token, tokenSecret, done);
+            this._getUserProfile(token, tokenSecret, done, res.headers.location);
         } else {
             try {
                 var profile = this._getProfileData(body);
@@ -115,7 +116,7 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, don
 
                 // if teacher, create all students in all classes, create classes, add students to class
                 if(profile.role === lConst.role.instructor) {
-                    this._getGroups(profile, token, tokenSecret, profile._json.user, done);
+                    this._getGroups(token, tokenSecret, done, profile, profile._json);
                 } else {
                     done(null, profile);
                 }
@@ -141,11 +142,14 @@ Strategy.prototype._getProfileData = function(body) {
         return null;
     }
 
+    if(json.hasOwnProperty('user')) {
+        json = json.user;
+    }
     //console.log("ICivics - _getUserProfile json:", json);
     //console.log("ICivics - _getUserProfile og_groups json:", json.user.og_groups);
 
     // invalid user id
-    if(parseInt(json.user.uid) == 0) {
+    if(parseInt(json.uid) == 0) {
         return null;
     }
 
@@ -155,12 +159,12 @@ Strategy.prototype._getProfileData = function(body) {
     profile._raw      = body;
     profile._json     = json;
 
-    for(var r in json.user.roles) {
-        if(json.user.roles[r] == "teacher") {
+    for(var r in json.roles) {
+        if(json.roles[r] == "teacher") {
             profile.role = lConst.role.instructor;
             break;
         }
-        else if(json.user.roles[r] == "student") {
+        else if(json.roles[r] == "student") {
             profile.role = lConst.role.student;
             break;
         }
@@ -169,28 +173,34 @@ Strategy.prototype._getProfileData = function(body) {
         profile.role = lConst.role.student;
     }
 
-    profile.username  = '{'+this.name+'}.'+json.user.uid;
-    if(json.user.name) {
-        profile.username += "."+json.user.name;
+    profile.username  = '{'+this.name+'}.'+json.uid;
+    if(json.name) {
+        profile.username += "."+json.name;
+        profile.ssoUsername = json.name;
     }
 
     if(profile.role === lConst.role.instructor) {
-        profile.firstName = json.user.first_name || "";
-        profile.lastName  = json.user.last_name || "";
-        profile.email     = json.user.mail || "";
+        profile.firstName = json.first_name || "";
+        profile.lastName  = json.last_name || "";
+        profile.email     = json.mail || "";
     }
     else if(profile.role === lConst.role.student) {
-        profile.firstName = json.user.real_name || "";
-        profile.lastName  = "";
+        var nparts = json.real_name.split(' ');
+        // remove first name part
+        profile.firstName = nparts.shift() || "";
+        // put rest as last name
+        profile.lastName  = nparts.join(" ") || "";
         profile.email     = "";
     }
 
-    profile.password  = body;
+    profile.ssoData  = body;
+    profile.password = "-";
+
     return profile;
 };
 
 
-Strategy.prototype._getGroups = function(profile, token, tokenSecret, userData, done) {
+Strategy.prototype._getGroups = function(token, tokenSecret, done, profile, userData) {
     var url = this._baseURL+ '/services/rest/service_user/og_members.json';
 
     profile.courses = {};
@@ -215,25 +225,39 @@ Strategy.prototype._getGroups = function(profile, token, tokenSecret, userData, 
         }
     }
 
-    //console.log("ICivics - teacher getMembers url:", url);
-    var data = "uid="+encodeURIComponent(uid);
-    this._oauth.post(url, token, tokenSecret, data, "application/x-www-form-urlencoded", function (err, body, res) {
-
-        console.error("ICivics - teacher getMembers Error:", err);
-        // TODO make this work
-        /*
+    var data = { uid: parseInt(uid) };
+    //console.error("ICivics - teacher getMembers data:", data);
+    this._oauth.post(url, token, tokenSecret, data, function (err, body, res) {
         if (err) {
             return done(new InternalOAuthError('failed to fetch user members', err));
         }
 
-        var json = JSON.parse(body);
-        // add users to courses
-        console.log("ICivics - teacher getMembers json:", json);
-        */
+        if(body) {
+            var json = null;
+            try{
+                var json = JSON.parse(body);
+            } catch(err){
+                return done(new InternalOAuthError('failed to fetch user members', err));
+            }
 
-        // usersData[i] = this._getProfileData(usersData[i]);
+            // add users to courses
+            //console.log("ICivics - teacher getMembers json:", JSON.stringify(json, null, 2));
+            for(var courseId in json){
+                for(var userId in json[courseId].members){
+                    // valid memeber and userId not teacher
+                    if( json[courseId].members[userId] &&
+                        parseInt(userId) != parseInt(userData.uid)
+                      ) {
+                        // normalize input
+                        profile.courses[courseId].users.push( this._getProfileData(json[courseId].members[userId]) );
+                    }
+                }
+            }
 
-        done(null, profile);
+            done(null, profile);
+        } else {
+            return done(new InternalOAuthError('failed to fetch user members - no body'));
+        }
     }.bind(this));
 };
 

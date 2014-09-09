@@ -27,12 +27,25 @@ function getGamesBasicInfo(req, res){
                     var gameId = games[i];
 
                     var info = _.cloneDeep(this.getGameBasicInfo(gameId));
+                    info.license.valid = false;
                     if(info.license.type == "free") {
                         info.license.valid = true;
+                    }
+                    else if(info.license.type == "loginType") {
+                        info.license.loginType = info.license.loginType.split(',');
+                        if( _.contains(info.license.loginType, userData.loginType) ) {
+                            info.license.valid = true;
+                        }
                     } else {
                         // check license
                         info.license.valid = licenseGameIds.hasOwnProperty(gameId);
                     }
+
+                    // no maintenance message and if invalid lic, replace with invalid lic message
+                    if(!info.maintenance && !info.license.valid) {
+                        info.maintenance = { message: info.license.message.invalid };
+                    }
+
                     outGames.push( info );
                 }
 

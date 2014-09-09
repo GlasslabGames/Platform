@@ -10,10 +10,7 @@
     "basic": {
         "gameId": "SC",
         "enabled": true,
-        "maintenance":
-        {
-            "message": "Coming Soon!"
-        },
+        "maintenance": null,
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
         "description": "SimCityEDU: Pollution Challenge!",
@@ -21,8 +18,12 @@
             "missionProgressLock": false
         },
         "license": {
-            "type":  "tier",
-            "valid": false
+            "type":      "loginType",
+            "loginType": "clever",
+            "valid": false,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
         },
         "thumbnail": {
             "small": "assets/thumb-game-SC.png",
