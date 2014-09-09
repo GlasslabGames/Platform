@@ -565,8 +565,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
         .then(function(userData) {
             userData.verifyCode           = verifyCode;
             userData.verifyCodeStatus     = aConst.verifyCode.status.beta;
-
-            // School + District Info for Beta
+            // School + District Info + Phone Number for Beta
             userData.school = regData.school;
             userData.district = regData.district;
             userData.phoneNumber = regData.phoneNumber;
@@ -579,7 +578,6 @@ function sendBetaConfirmEmail(regData, protocol, host) {
                         code: verifyCode,
                         host: protocol+"://"+host
                     };
-
                     var email = new Util.Email(
                         this.options.auth.email,
                         path.join(__dirname, "../email-templates"),
@@ -611,7 +609,6 @@ function verifyBetaCode(req, res, next) {
     if( !(req.params.code &&
         _.isString(req.params.code) &&
         req.params.code.length) ) {
-
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
     // 1) verify the beta code and get user data

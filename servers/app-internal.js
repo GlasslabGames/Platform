@@ -9,7 +9,6 @@ var Data           = require('./lib/data/data.js');
 var Dash           = require('./lib/dash/dash.js');
 var Admin          = require('./lib/admin/admin.js');
 var manager        = new ServiceManager("~/hydra.config.json");
-var Admin          = require('./lib/admin/admin.js');
 
 manager.setRouteMap('../routes.internal.map.js');
 manager.setPort(8002);
