@@ -1,10 +1,13 @@
 Hello {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},
 
-    Almost there, just a little bit more, you can do it!
+Welcome to Playfully Beta!
+
+Thank you for registering and joining our movement to bring the best in learning and formative assessment games to your students.
+
     To complete the registration process, please click on the link below to confirm your email address.
-    {{= host }}/api/v2/auth/register-verify/{{= code }}/verify
+    {{= host }}/verify-email/{{= code }}
 
-    If you received this email by mistake (oops), simply delete it. Your account will not be created if you don't click the confirmation link above.
+We're looking forward to hearing your feedback and sharing our ongoing improvements with you.
 
-        Sincerely,
-        Your New Best Friends at GlassLab
+    Sincerely,
+    Your New Best Friends at GlassLab (Creators of Playfully)

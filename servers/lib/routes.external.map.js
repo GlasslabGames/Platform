@@ -384,7 +384,15 @@ module.exports = {
             service: "auth",
             controller: "user",
             method: {
-                get: "validateEmailCode"
+                get: "verifyEmailCode"
+            }
+        },
+        {
+            api: "/api/v2/auth/register-verify/:code/verifyBeta",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "verifyBetaCode"
             }
         },
         {

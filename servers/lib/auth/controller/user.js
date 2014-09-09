@@ -11,7 +11,8 @@ module.exports = {
     getUserProfileData:  getUserProfileData,
     registerUserV1:      registerUserV1,
     registerUserV2:      registerUserV2,
-    validateEmailCode:   validateEmailCode,
+    verifyEmailCode:     verifyEmailCode,
+    verifyBetaCode:      verifyBetaCode,
     registerManager:     registerManager,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
@@ -351,17 +352,6 @@ function updateUserData(req, res, next, serviceManager) {
  * 3. if student, enroll them in the course
  */
 
-//var example = {};
-//var example.input  = {
-//    "username":      "charosez",
-//    "firstName":     "charles",
-//    "lastName":      "tai",
-//    "password":      "bubbles",
-//    "email":         "charles@glasslabgames.org",
-//    "role":          "instructor",
-//    "loginType":     "glasslabv2"
-//}
-
 function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User");
 
@@ -407,6 +397,8 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.password   = Util.ConvertToString(req.body.password);
         regData.firstName  = Util.ConvertToString(req.body.firstName);
         regData.lastName   = Util.ConvertToString(req.body.lastName);
+        regData.school     = Util.ConvertToString(req.body.school);
+        regData.district   = Util.ConvertToString(req.body.district);
         regData.email      = Util.ConvertToString(req.body.email);
 
         if(!regData.username) {
@@ -499,8 +491,10 @@ function registerUserV2(req, res, next, serviceManager) {
 
                     promise
                         .then(function(){
+                            // beta
+                            return sendBetaConfirmEmail.call(this, regData, req.protocol, req.headers.host);
                             // send email verification code
-                            return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
+//                            return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
                         }.bind(this))
                         // all ok
                         .then(function(){
@@ -555,6 +549,110 @@ function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
 }
 
+function sendBetaConfirmEmail(regData, protocol, host) {
+
+    var email = regData.email;
+
+    if( !(email &&
+        _.isString(email) &&
+        email.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
+    }
+
+    var verifyCode = Util.CreateUUID();
+
+    return this.getAuthStore().findUser('email', email)
+        .then(function(userData) {
+            userData.verifyCode           = verifyCode;
+            userData.verifyCodeStatus     = aConst.verifyCode.status.beta;
+            // School + District Info + Phone Number for Beta
+            userData.school = regData.school;
+            userData.district = regData.district;
+            userData.phoneNumber = regData.phoneNumber;
+            return this.glassLabStrategy.updateUserData(userData)
+                .then(function(){
+                    var playfullyBetaEmail = this.options.auth.beta.email.from;
+                    playfullyBetaEmail = playfullyBetaEmail.slice(1, playfullyBetaEmail.length-1);
+                    console.log(playfullyBetaEmail);
+                    var emailData = {
+                        subject: "Playfully.org Beta confirmation",
+                        to: playfullyBetaEmail,
+                        user: userData,
+                        code: verifyCode,
+                        host: protocol+"://"+host
+                    };
+                    var email = new Util.Email(
+                        this.options.auth.beta.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    email.send('beta-verify', emailData)
+                        .then(function(){
+                            // all ok
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            console.err('failed to send email:',  err);
+                        }.bind(this));
+
+                }.bind(this));
+        }.bind(this))
+        // catch all errors
+        .then(null, function(err) {
+            if( err.error &&
+                err.error == "user not found") {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
+            } else {
+                console.error("AuthService: sendBetaConfirmEmail Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this))
+}
+
+function verifyBetaCode(req, res, next) {
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
+    }
+    // 1) verify the beta code and get user data
+    this.getAuthStore().findUser("verify_code", req.params.code)
+        .then(function(userData) {
+
+                if(userData.verifyCodeStatus === aConst.verifyCode.status.beta) {
+                    // change status to sent
+                    userData.verifyCodeStatus = aConst.verifyCode.status.sent;
+                    userData.verifyCode = "NULL";
+
+                    return this.glassLabStrategy.updateUserData(userData)
+                        .then(function() {
+                            this.requestUtil.jsonResponse(res, "Successfully Confirmed Beta User. Verification email sent to Beta User ", 200);
+                            return userData;
+                        }.bind(this));
+                } else {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+
+        }.bind(this),
+        function(err) {
+            if( err.error &&
+                err.error == "user not found") {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
+            } else {
+                console.error("AuthService: validateBetaCode Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this))
+        .then(function(userData) {
+            // send verification email to registered user
+            return sendVerifyEmail.call(this, userData.email, req.protocol, req.headers.host);
+        }.bind(this))
+        .then(null, function(err) {
+            console.log(err);
+            this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"});
+        });
+
+}
+
 function sendVerifyEmail(email , protocol, host) {
     if( !(email &&
         _.isString(email) &&
@@ -574,7 +672,7 @@ function sendVerifyEmail(email , protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org - Verify your email",
+                        subject: "Beta status confirmed - Verify your email",
                         to:   userData.email,
                         user: userData,
                         code: verifyCode,
@@ -610,33 +708,37 @@ function sendVerifyEmail(email , protocol, host) {
 
 }
 
-
-function validateEmailCode(req, res, next) {
+function verifyEmailCode(req, res, next, serviceManager) {
 
     if( !(req.params.code &&
         _.isString(req.params.code) &&
         req.params.code.length) ) {
-
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
+
         // 1) validate the code and get user data
         this.getAuthStore().findUser("verify_code", req.params.code)
             .then(function(userData) {
                 // check if code expired
-                if(Util.GetTimeStamp() > userData.verifyCodeExpiration) {
+                if(Util.GetTimeStamp() > userData.verifyCodeExpiration && process.env.HYDRA_ENV !== 'dev') {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
                 } else {
 
-                    if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
+                    if(userData.verifyCodeStatus === aConst.verifyCode.status.sent || process.env.HYDRA_ENV === 'dev') {
                         // change status to verified
                         userData.verifyCodeStatus = aConst.verifyCode.status.verified;
+                        // Disabled for Beta - verifyCode is set to NULL in Oneshot login
+                        // userData.verifyCode        = "NULL";
                         userData.verifyCodeExpiration = "NULL";
-                        userData.verifyCode = "NULL";
 
                         return this.glassLabStrategy.updateUserData(userData)
                             .then(function() {
-                                this.requestUtil.jsonResponse(res, {});
-                                return userData;
+                                return when.promise(function(resolve,reject) {
+                                    req.body.verifyCode = req.params.code;
+                                    resolve(serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]))
+                                }).then(function() {
+                                    return userData;
+                                });
                             }.bind(this));
                     } else {
                         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
@@ -652,7 +754,7 @@ function validateEmailCode(req, res, next) {
                         err.error == "user not found") {
                         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
                     } else {
-                        console.error("AuthService: validateEmailCode Error -", err);
+                        console.error("AuthService: verifyEmailCode Error -", err);
                         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                     }
             }.bind(this))
@@ -720,7 +822,6 @@ return when.promise(function(resolve, reject) {
             return;
         }
 
-        //console.log(listData);
         // find correct id
         var mailListId = "";
         if(listData.data) {
@@ -747,7 +848,6 @@ return when.promise(function(resolve, reject) {
                         return;
                     }
 
-                    //console.log( subscribeData );
                     resolve();
                 });
             }
