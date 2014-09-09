@@ -155,9 +155,11 @@ return when.promise(function(resolve, reject) {
     if(_.isArray(value)) {
         Q += type+" in ("+value.join(',')+")";
     } else {
-        Q += type+"="+this.ds.escape(value);
+        // already escaped
+        Q += type+"="+value;
     }
 
+    //console.log("Q:", Q);
     this.ds.query(Q)
         .then( function(data){
             // convert to usable userdata
