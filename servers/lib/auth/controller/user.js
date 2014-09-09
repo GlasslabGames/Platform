@@ -571,15 +571,18 @@ function sendBetaConfirmEmail(regData, protocol, host) {
             userData.phoneNumber = regData.phoneNumber;
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
+                    var playfullyBetaEmail = this.options.auth.beta.email.from;
+                    playfullyBetaEmail = playfullyBetaEmail.slice(1, playfullyBetaEmail.length-1);
+                    console.log(playfullyBetaEmail);
                     var emailData = {
                         subject: "Playfully.org Beta confirmation",
-                        to:   aConst.betaAdmin.email,
+                        to: playfullyBetaEmail,
                         user: userData,
                         code: verifyCode,
                         host: protocol+"://"+host
                     };
                     var email = new Util.Email(
-                        this.options.auth.email,
+                        this.options.auth.beta.email,
                         path.join(__dirname, "../email-templates"),
                         this.stats);
                     email.send('beta-verify', emailData)
@@ -677,7 +680,7 @@ function sendVerifyEmail(email , protocol, host) {
                     };
 
                     var email = new Util.Email(
-                        this.options.auth.beta.email,
+                        this.options.auth.email,
                         path.join(__dirname, "../email-templates"),
                         this.stats);
                     email.send('register-verify', emailData)
