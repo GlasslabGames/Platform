@@ -570,7 +570,6 @@ function sendBetaConfirmEmail(regData, protocol, host) {
             userData.school = regData.school;
             userData.district = regData.district;
             userData.phoneNumber = regData.phoneNumber;
-            console.log('found user!: ', userData);
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
@@ -720,7 +719,6 @@ function verifyEmailCode(req, res, next, serviceManager) {
         // 1) validate the code and get user data
         this.getAuthStore().findUser("verify_code", req.params.code)
             .then(function(userData) {
-                console.log('found user data: ', userData);
                 // check if code expired
                 if(Util.GetTimeStamp() > userData.verifyCodeExpiration && process.env.HYDRA_ENV !== 'dev') {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
@@ -735,7 +733,6 @@ function verifyEmailCode(req, res, next, serviceManager) {
 
                         return this.glassLabStrategy.updateUserData(userData)
                             .then(function() {
-                                console.log('updating user data: ', userData);
                                 return when.promise(function(resolve,reject) {
                                     req.body.verifyCode = req.params.code;
                                     resolve(serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]))
@@ -825,7 +822,6 @@ return when.promise(function(resolve, reject) {
             return;
         }
 
-        //console.log(listData);
         // find correct id
         var mailListId = "";
         if(listData.data) {
@@ -852,7 +848,6 @@ return when.promise(function(resolve, reject) {
                         return;
                     }
 
-                    //console.log( subscribeData );
                     resolve();
                 });
             }

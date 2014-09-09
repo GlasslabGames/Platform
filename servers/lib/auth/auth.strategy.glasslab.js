@@ -64,8 +64,6 @@ Glasslab_Strategy.prototype.authenticate = function(req) {
         this._verify(username, password)
             .then(
             function (userData) {
-                console.log('userData.user:', userData.user);
-                console.log('userData.info:', userData.info);
                 this.success(userData.user, userData.info);
             }.bind(this),
             function (err) {
@@ -114,7 +112,6 @@ Glasslab_Strategy.prototype._verify = function(username, password, done){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-//    console.log("Auth: check user/pass");
     // try username
     this._service.getAuthStore().findUser("username", username)
         // error, try email
