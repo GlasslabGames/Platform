@@ -84,27 +84,11 @@
         "grades": "6 - 10",
         "buttons": [
             {
-                "name": "Download",
-                "links": [
-                    {
-                        "name": "PC (1.0 GB)",
-                        "type": "default",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.msi"
-                    },
-                    {
-                        "name": "Mac (1.0 GB)",
-                        "type": "default",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.dmg"
-                    }
-                ]
-            },
-            {
                 "name": "Play Game",
                 "links": [
                     {
                         "name": "Play Game",
-                        "type": "default",
-                        "link": "/game/play/SC"
+                        "type": "playInfo"
                     }
                 ]
             }
@@ -212,6 +196,14 @@
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",
             "google": "http://plus.google.com/glasslabgames"
+        }
+    },
+    "playInfo": {
+        "title": "Argument Wars",
+        "embed": "https://www.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R3/Main.swf",
+        "size": {
+            "width": 550,
+            "height": 400
         }
     }
 }

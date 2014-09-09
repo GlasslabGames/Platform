@@ -194,8 +194,7 @@
                 "links": [
                     {
                         "name": "Play Game",
-                        "type": "default",
-                        "link": "/games/SC/missions"
+                        "type": "missions"
                     }
                 ]
             }
@@ -362,6 +361,7 @@
             "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-SessionURL={{configSessionUrl}}&-DataURL={{configDataUrl}}",
             "diagram": "/assets/games/{{gameId}}/challenges?challengeId={{missionId}}&courseId={{courseId}}&sessionURL={{configSessionUrl}}&dataURL={{configDataUrl}}&type=play"
         },
+        "title": "SimCityEdu Missions",
         "groups": [
             {
                 "enabled": true,
