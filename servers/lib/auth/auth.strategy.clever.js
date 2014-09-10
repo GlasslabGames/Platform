@@ -140,7 +140,13 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 if(json.data.credentials) {
                     profile.ssoUsername = json.data.credentials.district_username || "";
                 }
-                profile.ssoData  = body;
+
+                if(profile.role == lConst.role.instructor) {
+                    profile.ssoData = body;
+                } else {
+                    profile.ssoData = "-"; // prevent PII
+                }
+
                 profile.password = "-";
 
                 done(null, profile);

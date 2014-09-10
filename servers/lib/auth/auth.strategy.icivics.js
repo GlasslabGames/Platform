@@ -193,7 +193,12 @@ Strategy.prototype._getProfileData = function(body) {
         profile.email     = "";
     }
 
-    profile.ssoData  = body;
+    if(profile.role == lConst.role.instructor) {
+        profile.ssoData = body;
+    } else {
+        profile.ssoData = "-"; // prevent PII
+    }
+
     profile.password = "-";
 
     return profile;
@@ -235,7 +240,7 @@ Strategy.prototype._getGroups = function(token, tokenSecret, done, profile, user
         if(body) {
             var json = null;
             try{
-                var json = JSON.parse(body);
+                json = JSON.parse(body);
             } catch(err){
                 return done(new InternalOAuthError('failed to fetch user members', err));
             }
