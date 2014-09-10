@@ -77,11 +77,12 @@
         },
         "beta": {
             "email": {
-                "from": "<beta_playfully@glasslabgames.org>",
+                "to":   "beta_playfully@glasslabgames.org",
+                "from": "Playfully Beta <beta_playfully@glasslabgames.org>",
                 "transport": {
                     "service": "Gmail",
                     "auth": {
-                        "user": "--ReplaceInCustomConfig--",
+                        "user": "beta_playfully@glasslabgames.org",
                         "pass": "--ReplaceInCustomConfig--"
                     }
                 }
