@@ -255,7 +255,7 @@ return when.promise(function(resolve, reject) {
                             addCoursePromiseList.push( p );
                         }.bind(this))
 
-                if(addCoursePromiseList.length) {
+                        if(addCoursePromiseList.length) {
                             return when.all(addCoursePromiseList);
                         } else {
                             return;
@@ -319,6 +319,7 @@ return when.promise(function(resolve, reject) {
             if(err.key === "course.notUnique.name"){
                 return this.lmsStore.getCourseInfoFromKey('lmsId', courseData.lmsId);
             } else {
+                console.error("addOrUpdate_SSO_Course Error:", err);
                 reject(err);
             }
         }.bind(this))

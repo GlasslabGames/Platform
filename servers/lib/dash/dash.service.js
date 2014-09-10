@@ -96,6 +96,9 @@ DashService.prototype.getListOfGameIds = function() {
 DashService.prototype.isValidGameId = function(gameId) {
     for(var g in this._games) {
         if( g == gameId &&
+            this._games[g] &&
+            this._games[g].info &&
+            this._games[g].info.basic &&
             // only return games that are enabled
             this._games[g].info.basic.enabled) {
             return true;
@@ -264,7 +267,11 @@ DashService.prototype._loadGameFiles = function() {
                         if(file.charAt(0) != '.') {
                             var name = path.basename(file, path.extname(file));
                             var filePath = path.join(dir, gameName, file);
-                            this._games[gameId][name] = require(filePath);
+                            try {
+                                this._games[gameId][name] = require(filePath);
+                            } catch(err) {
+                                console.error("loadGameFiles filePath:", filePath, ", Error:", err);
+                            }
                         }
                     }.bind(this));
 

@@ -181,7 +181,7 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.msi"
+                        "link": "https://gl-clients.s3.amazonaws.com/updates/SimCityEDU/base/1_2_1124/glgames/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
