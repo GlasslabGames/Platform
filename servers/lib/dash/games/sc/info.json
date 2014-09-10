@@ -184,11 +184,11 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "https://gl-clients.s3.amazonaws.com/updates/SimCityEDU/base/1_2_1124/glgames/SimCityEDU_setup.msi"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/glgames/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.dmg"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1122/SimCityEDU_setup.dmg"
                     }
                 ]
             },
@@ -380,7 +380,7 @@
                         "title": "Parktown",
                         "description": "Can you get every kid to school?",
                         "locked": false,
-                        "icon": "assets/game-SC-missions-build-icon-green.png",
+                        "icon": "/assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
@@ -441,7 +441,7 @@
                         "title": "Little Alexandria",
                         "description": "Can you create new jobs for the citizens?",
                         "locked": true,
-                        "icon": "assets/game-SC-missions-build-icon-green.png",
+                        "icon": "/assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
@@ -597,7 +597,7 @@
                         "title": "Sierra Madre",
                         "description": "Find out how to keep the power level optimal and lower air pollution.",
                         "locked": true,
-                        "icon": "assets/game-SC-missions-build-icon-green.png",
+                        "icon": "/assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
@@ -753,7 +753,7 @@
                         "title": "Jackson City",
                         "description": "The city needs your skills to increase jobs and lower air pollution.",
                         "locked": true,
-                        "icon": "assets/game-SC-missions-build-icon-green.png",
+                        "icon": "/assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
