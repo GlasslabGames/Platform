@@ -156,17 +156,6 @@ DashService.prototype.getGameMissions = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
-DashService.prototype.getGamePlayInfo = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('playInfo') ) {
-        return this._games[gameId].info.playInfo;
-    } else {
-        return null;
-    }
-};
-
-// TODO: replace this with DB lookup, return promise
 DashService.prototype.getGameBasicInfo = function(gameId) {
     if( this._games.hasOwnProperty(gameId) &&
         this._games[gameId].hasOwnProperty('info') &&

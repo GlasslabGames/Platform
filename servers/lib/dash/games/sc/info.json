@@ -28,6 +28,9 @@
         "thumbnail": {
             "small": "assets/thumb-game-SC.png",
             "large": "assets/thumb-game-SC.png"
+        },
+        "play": {
+            "type": "missions"
         }
     },
     "assessment": [
@@ -194,7 +197,7 @@
                 "links": [
                     {
                         "name": "Play Game",
-                        "type": "missions"
+                        "type": "play"
                     }
                 ]
             }
