@@ -12,7 +12,7 @@ var apiTestSuite = require('./lib/apiTestSuite.js'),
 //////////////////
 
 //var testENVs  = ["prod", "stage"];  // NOTE - Since local will vary, not included by default.
-var testENVs  = ["stage"];  // DEBUG - use for testing in isloation
+var testENVs  = ["prod"];  // DEBUG - use for testing in isloation
 
 for (var testENV in testENVs) {
 	apiTestSuite(testENVs[testENV], testData[testENVs[testENV]], routeMap);
