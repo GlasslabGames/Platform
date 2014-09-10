@@ -175,14 +175,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/game/:gameId/playInfo",
-            service: "dash",
-            controller: "game",
-            method: {
-                get: "getGamePlayInfo"
-            }
-        },
-        {
             api: "/api/v2/dash/game/:gameId",
             service: "dash",
             controller: "game",

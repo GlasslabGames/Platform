@@ -10,8 +10,7 @@ module.exports = {
     getGameDetails:      getGameDetails,
     getGameReports:      getGameReports,
     getCourseGameMissions: getCourseGameMissions,
-    getGameMissions:     getGameMissions,
-    getGamePlayInfo:     getGamePlayInfo
+    getGameMissions:     getGameMissions
 
 };
 
@@ -282,45 +281,6 @@ function getCourseGameMissions(req, res){
                     console.error("getGameMissions Error:", err);
                     this.requestUtil.errorResponse(res, "Get Missions Error");
                 }.bind(this));
-        } else {
-            this.requestUtil.jsonResponse(res, {});
-        }
-
-    } catch(err) {
-        console.trace("Reports: Get Game Missions Error -", err);
-        this.stats.increment("error", "GetGameInfo.Catch");
-        this.requestUtil.errorResponse(res, "Server Error");
-    }
-}
-
-/*
- GET
- http://localhost:8001/api/v2/dash/game/SC/playInfo
- */
-exampleIn.getGamePlayInfo = {
-    gameId: 'SC'
-};
-function getGamePlayInfo(req, res) {
-    try {
-        // check input
-        if (!( req.params &&
-            req.params.hasOwnProperty("gameId") )) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"}, 404);
-            return;
-        }
-        var gameId = req.params.gameId;
-        // gameIds are not case sensitive
-        gameId = gameId.toUpperCase();
-
-        // check gameId exists
-        if (!this.isValidGameId(gameId)) {
-            this.requestUtil.errorResponse(res, {key: "report.gameId.invalid", error: "invalid gameId"});
-            return;
-        }
-
-        var playInfo = _.cloneDeep(this.getGamePlayInfo(gameId));
-        if( playInfo ) {
-            this.requestUtil.jsonResponse(res, playInfo);
         } else {
             this.requestUtil.jsonResponse(res, {});
         }

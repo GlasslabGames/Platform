@@ -571,12 +571,9 @@ function sendBetaConfirmEmail(regData, protocol, host) {
             userData.phoneNumber = regData.phoneNumber;
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
-                    var playfullyBetaEmail = this.options.auth.beta.email.from;
-                    playfullyBetaEmail = playfullyBetaEmail.slice(1, playfullyBetaEmail.length-1);
-                    console.log(playfullyBetaEmail);
                     var emailData = {
                         subject: "Playfully.org Beta confirmation",
-                        to: playfullyBetaEmail,
+                        to: this.options.auth.beta.email.to,
                         user: userData,
                         code: verifyCode,
                         host: protocol+"://"+host
