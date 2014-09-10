@@ -9,7 +9,8 @@ module.exports = {
 		tstamp: tstamp,
     
     genUser: genUser,
-    genClass: genClass
+    genClass: genClass,
+		requestAccess: requestAccess
 }
 
 function zfill(num, size) {
@@ -58,6 +59,17 @@ function genUser(name, emailOrCode, passw, role) { // FUTURE - ok, emailOrCode i
   }
 
 }
+
+// NOTE - for closed beta registration flow
+function requestAccess(name, email, passw) {
+  return JSON.stringify({
+		firstName:name,
+		email:email,
+		password:passw,
+		role:"instructor"
+	});
+}
+
 
 function genClass(name, grades, gameId) {   // FUTURE - support for multi-game classes
 	
