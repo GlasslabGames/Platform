@@ -380,7 +380,7 @@
                         "title": "Parktown",
                         "description": "Can you get every kid to school?",
                         "locked": false,
-                        "icon": "",
+                        "icon": "assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
@@ -441,7 +441,7 @@
                         "title": "Little Alexandria",
                         "description": "Can you create new jobs for the citizens?",
                         "locked": true,
-                        "icon": "",
+                        "icon": "assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
@@ -597,7 +597,7 @@
                         "title": "Sierra Madre",
                         "description": "Find out how to keep the power level optimal and lower air pollution.",
                         "locked": true,
-                        "icon": "",
+                        "icon": "assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
@@ -753,7 +753,7 @@
                         "title": "Jackson City",
                         "description": "The city needs your skills to increase jobs and lower air pollution.",
                         "locked": true,
-                        "icon": "",
+                        "icon": "assets/game-SC-missions-build-icon-green.png",
                         "completed": false,
                         "completedDate": null,
                         "links": [
