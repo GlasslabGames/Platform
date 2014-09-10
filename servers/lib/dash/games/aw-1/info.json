@@ -32,7 +32,7 @@
             "type": "modal",
             "modal": {
                 "title": "Argument Wars",
-                "embed": "https://www.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R3/Main.swf",
+                "embed": "https://staging.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R4/Main.swf",
                 "size": {
                     "width": 550,
                     "height": 400
