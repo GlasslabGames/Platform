@@ -48,7 +48,7 @@ function getUserProfileData(req, res, next) {
                 this.requestUtil.errorResponse(res, err);
             }.bind(this))
     } else {
-        this.requestUtil.errorResponse(res, "not logged in");
+        this.requestUtil.errorResponse(res, { status: "error", error: {key:'user.login.notLoggedIn'}}, 200);
     }
 }
 

@@ -16,7 +16,7 @@ function loginStatus(req, res){
     if( req.isAuthenticated() ) {
         this.requestUtil.jsonResponse(res, { status: "ok", info: "login valid" } );
     } else {
-        this.requestUtil.errorResponse(res, { status: "error", error: "login invalid", statusCode:400 });
+        this.requestUtil.errorResponse(res, { status: "error", error: {key:'user.login.notLoggedIn'}}, 200 );
     }
 }
 
