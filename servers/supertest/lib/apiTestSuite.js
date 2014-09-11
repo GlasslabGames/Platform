@@ -3,16 +3,18 @@
 /////////////
 
 // Externals
-var request   = require('superagent'),
+var fs				= require('fs'),
+		request   = require('superagent'),
     mocha     = require('mocha'),
     chai      = require('chai'),
     expect    = chai.expect;
 
 // Custom helper f'ns
-var tools     = require('./tools.js'),
-		tstamp    = tools.tstamp,
-    genClass  = tools.genClass,
-		genUser   = tools.genUser;
+var tools    			= require('./tools.js'),
+		tstamp    		= tools.tstamp,
+    genClass  		= tools.genClass,
+		genUser   		= tools.genUser,
+		requestAccess = tools.requestAccess;
 
 
 //////////////////
@@ -215,7 +217,7 @@ var apiTestSuite = function (env, data, routeMap) {
 				});
 		});
 
-		it("should log out afterwards", function (done) {
+		it("#should log out afterwards", function (done) {
 
 			agent
 				.post(srvAddr + routes.logout.path)
@@ -227,24 +229,51 @@ var apiTestSuite = function (env, data, routeMap) {
 				});
 		});
 
-		it('#register as new teacher - Playfully', function (done) {
+		it.skip('#register as new teacher - Playfully', function (done) {   // FUTURE - reinstate post closed beta
       
 			var newUser = genUser('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123', 'teacher');	// NOTE - should this reuse timestamp?
-			
 			results['newTeacherPost'] = newUser;
-			
+      
+      console.log(srvAddr + routes.register.teacher.path);
+      
 			agent
 				.post(srvAddr + routes.register.teacher.path)
 				.type('application/json')
-				.send(newUser)
+				.send(JSON.parse(newUser))
 				.end(function (res) {
+        
 					expect(res.status).to.eql(200);
 					results['newTeacher'] = res.text;
 					done();
 				});
+      
 		});
+		
+		
+		it.skip('#can request access to Playfully.org', function(done) {
+			
+			
+			// TODO - still in dev, blocked by server issues
+			var newUser = requestAccess('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123');	// NOTE - should this reuse timestamp?
+			results['newTeacherPost'] = newUser;
+      
+      console.log(srvAddr + routes.register.teacher.path);
+      
+			agent
+				.post(srvAddr + routes.register.teacher.path)
+				.type('application/json')
+				.send(JSON.parse(newUser))
+				.end(function (res) {
+        
+					expect(res.status).to.eql(200);
+					results['newTeacher'] = res.text;
+					done();
+				});
+			
+		});
+		
 
-		it("#creates new class", function (done) {
+		it.skip("#creates new class", function(done) {
 
 			var postData = genClass("glTestClass" + tstamp(), '7, 11', data.testGameId);
 			results['newClassPost'] = postData;
@@ -261,7 +290,7 @@ var apiTestSuite = function (env, data, routeMap) {
 				});
 		});
     
-    it.skip('#register as a new student in that class', function(done) {
+    it.skip('#register as a new student in that class', function(done) {    // NOTE - will not work with closed beta
       
       var newStudentPost = genUser('glTestStudent' + tstamp(), results['newClassCode'], 'glasslab321', 'student');
       results['newStudentPost'] = newStudentPost;
@@ -269,7 +298,7 @@ var apiTestSuite = function (env, data, routeMap) {
 			agent
 				.post(srvAddr + routes.register.student.path.replace(':code', results['newClassCode']))
 				.type('application/json')
-				.send(newStudentPost)
+				.send(JSON.parse(newStudentPost))
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 					
@@ -292,18 +321,15 @@ var apiTestSuite = function (env, data, routeMap) {
       agent
 				.post(srvAddr + routes.password_reset.path)
 				.type('application/json')
-				.send(testData.teacher.email)
+				.send({'email': data.teacher.email})
 				.end(function (res) {
         
           console.log(res);
-					expect(res.status).to.eql(200);
-					
-//					var confirmation = JSON.parse(res.text);
-        
+					expect(res.status).to.eql(200);        
         
           // TODO - implement email-listener2
         
-        
+          // accounts@glasslabgames.org
 
 					done();
 				});
@@ -311,11 +337,20 @@ var apiTestSuite = function (env, data, routeMap) {
 
 	});
 	
-	after(function() {
-		
+	after(function () {
+
 		// Dump resultant data to file
-		console.log(results);
-		
+
+		var resultFile = 'supertest/results/' + env + results['timestamp'] + '.json';		// NOTE - may need to clean the tstamp for fname
+
+		fs.writeFile(resultFile, JSON.stringify(results, null, 4), function (err) {
+			if (err) {
+				console.log(err);
+			} else {
+				console.log("Results saved to " + resultFile);
+			}
+		});
+
 	});
 	
 }

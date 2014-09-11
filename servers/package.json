@@ -38,6 +38,7 @@
     "grunt-mocha": "*",
     "grunt-mocha-test": "*",
     "istanbul": "^0.3.0",
+    "mail-listener2": "^0.1.7",
     "mocha": "*",
     "superagent": "^0.18.2",
     "supertest": "*"
