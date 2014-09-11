@@ -153,7 +153,8 @@ return when.promise(function(resolve, reject) {
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
-            c.institution_id as institution     \
+            c.institution_id as institution,     \
+            c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
         WHERE m.user_id="+ this.ds.escape(userId)+
         " ORDER BY c.date_created";
@@ -199,7 +200,8 @@ return when.promise(function(resolve, reject) {
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
-            c.institution_id as institution     \
+            c.institution_id as institution,     \
+            c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
         WHERE c.id="+ this.ds.escape(couserId);
 
