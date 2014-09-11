@@ -48,7 +48,7 @@ function getUserProfileData(req, res, next) {
                 this.requestUtil.errorResponse(res, err);
             }.bind(this))
     } else {
-        this.requestUtil.errorResponse(res, "not logged in");
+        this.requestUtil.errorResponse(res, { status: "error", error: {key:'user.login.notLoggedIn'}}, 200);
     }
 }
 
@@ -499,7 +499,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         // all ok
                         .then(function(){
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
-                            this.requestUtil.jsonResponse(res, 200);
+                            this.requestUtil.jsonResponse(res, {});
                             // Disabled auto login after registering
                             // serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                         }.bind(this))
