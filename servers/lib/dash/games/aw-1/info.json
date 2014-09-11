@@ -155,7 +155,7 @@
                         }
                     ]
                 }
-                
+
             ],
             "lessonPlans": [
                 {
@@ -187,13 +187,14 @@
                     "category": "Videos",
                     "list": [
                         {
-                            "name": "Walkthrough",
-                            "link": "http://glasslabgames.org"
+                            "name": "Overview",
+                            "link": " https://www.youtube.com/watch?v=kZF_s1jNBrM"
                         }
                     ]
-                }            ],
+                }
+            ],
             "research": [
-                            ],
+            ],
             "reviews": [
                 {
                     "reviewer": "Kristen H., high school teacher",
@@ -215,7 +216,7 @@
         },
         "social": {
             "facebook": "http://facebook.com/icivics",
-            "twitter": "http://twitter.com/icivics",
+            "twitter": "http://twitter.com/icivics"
         }
     }
 }
