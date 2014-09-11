@@ -50,7 +50,7 @@ function enrollInCourse(req, res, next) {
     }
 }
 
-exampleOut.getCourses =
+exampleOut.unenrollFromCourse =
 {
     courseId: 123
 };

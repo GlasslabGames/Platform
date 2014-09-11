@@ -32,7 +32,7 @@
             "type": "modal",
             "modal": {
                 "title": "Argument Wars",
-                "embed": "https://www.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R3/Main.swf",
+                "embed": "https://staging.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
                 "size": {
                     "width": 550,
                     "height": 400
@@ -109,7 +109,9 @@
                 "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
                 "about": "Argument Wars is an online game that lets players argue landmark Supreme Court cases. By finding and using the strongest support, students recreate historic legal cases while evaluating arguments and distinguishing between valid and invalid reasoning. Argument Wars brings gaming to the social studies classroom and lets students have fun while they learn about landmark cases and hone fundamental skills that are critical to success in meeting Common Core standards. ",
                 "curriculum": [
-                    "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
+                    " Addresses Common Core standards related to evaluating arguments and assessing whether reasoning is valid",
+                    " Offers an engaging way for students to interact with commonly-taught Supreme Court landmark cases",
+                    " Helps students understand the role the United States Supreme Court has played in defining constitutional rights"
                 ],
                 "slideshow": [
                     {
@@ -153,7 +155,7 @@
                         }
                     ]
                 }
-                
+
             ],
             "lessonPlans": [
                 {
@@ -161,23 +163,23 @@
                     "list": [
                         {
                             "name": "Appellate Courts: Let’s Take It Up",
-                            "link": "http://glasslabgames.org"
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Appellate+Courts.pdf"
                         },
                         {
                             "name": "Interpreting the Constitution: What Does That Mean?",
-                            "link": "http://glasslabgames.org"
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Interpreting+the+Constitution.pdf"
                         },
                         {
                             "name": "Sources of Law",
-                            "link": "http://glasslabgames.org"
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Sources+of+Law.pdf"
                         },
                         {
                             "name": "Landmark Library: Brown v. Board of Education",
-                            "link": "http://glasslabgames.org"
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Brown.pdf"
                         },
                         {
                             "name": "Landmark Library: Miranda v. Arizona",
-                            "link": "http://glasslabgames.org"
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Miranda.pdf"
                         }
                     ]
                 },
@@ -185,28 +187,36 @@
                     "category": "Videos",
                     "list": [
                         {
-                            "name": "Walkthrough",
-                            "link": "http://glasslabgames.org"
+                            "name": "Overview",
+                            "link": " https://www.youtube.com/watch?v=kZF_s1jNBrM"
                         }
                     ]
-                }            ],
+                }
+            ],
             "research": [
-                            ],
+            ],
             "reviews": [
                 {
                     "reviewer": "Kristen H., high school teacher",
-                    "review": "Argument Wars really help[s] improve their understanding of… important Supreme Court cases."
+                    "review": "Argument Wars really help[s] improve their understanding of important Supreme Court cases."
+                },
+                {
+                    "reviewer": " – N. Morris, high school teacher",
+                    "review": "[Argument Wars is] great for helping kids see that you have to use FACTS... not just feelings."
+                },
+                {
+                    "reviewer": "– David S., teacher",
+                    "review": "My students thoroughly enjoy playing Argument Wars."
                 }
             ]
         },
         "banners": {
-            "product": "http://argubotacademy.org/images/banner_mars1.jpg",
-            "reports": "http://argubotacademy.org/images/banner_mars1.jpg"
+            "product": "assets/game-banner-AW-1.jpg",
+            "reports": "assets/game-banner-AW-1.jpg"
         },
         "social": {
-            "facebook": "http://facebook.com/glasslabgames",
-            "twitter": "http://twitter.com/glasslabgames",
-            "google": "http://plus.google.com/glasslabgames"
+            "facebook": "http://facebook.com/icivics",
+            "twitter": "http://twitter.com/icivics"
         }
     }
 }
