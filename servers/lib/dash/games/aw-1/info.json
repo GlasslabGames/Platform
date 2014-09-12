@@ -116,11 +116,7 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/3v3battle.png"
-                    },
-                    {
-                        "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/map.png"
+                        "url": "assets/ArgWarsPlayfullyGameImage_600x480.jpg"
                     }
                 ]
             },
