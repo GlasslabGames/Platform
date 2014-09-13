@@ -94,7 +94,7 @@
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
-                "description": "This report shows..."
+                "description": "Coming Soon!"
             },
             {
                 "id": "competency",
@@ -184,7 +184,7 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1122/glgames/SimCityEDU_setup.msi"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1122/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
@@ -212,18 +212,19 @@
         "pages": {
             "product": {
                 "header": "Let Your Students Go to Town!",
-                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<\/br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve, explain the relationships in complex systems, and read informational texts and diagrams.<\/br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
+                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.",
+                "video": "https://vimeo.com/102270816",
                 "curriculum": [
                     "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
                 ],
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                        "url": "assets/3v3battle.png"
                     },
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/map.png"
+                        "url": "assets/map.png"
                     }
                 ]
             },
