@@ -66,21 +66,15 @@
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
-                "description": "Coming Soo..."
+                "description": "Coming Soon!"
             },
             {
                 "id": "achievements",
-                "enabled": true,
+                "enabled": false,
                 "name": "Game Achievements & Time Played",
                 "header": "Game Achievements & Time Played",
-                "description": "This report shows...",
+                "description": "Coming Soon!",
                 "groups": [
-                    {
-                        "name": "Common Core Standards Report"
-                    },
-                    {
-                        "name": "21st Century Skills"
-                    }
                 ]
             }
         ]
