@@ -29,8 +29,8 @@
             "large": "assets/thumb-game-AW-1.png"
         },
         "play": {
-            "type": "modal",
-            "modal": {
+            "type": "page",
+            "page": {
                 "title": "Argument Wars",
                 "embed": "https://staging.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
                 "size": {
