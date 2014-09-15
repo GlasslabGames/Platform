@@ -126,24 +126,24 @@
                             "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RST.6-8.7",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
-                            "description": "Integrate information from texts & diagrams"
+                            "name": "CCSS.ELA-LIteracy.RI.7.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RI/7/8/",
+                            "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RI.7.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
-                            "description": "Cite several pieces of textual evidence to support analysis"
+                            "name": "CCSS.ELA-Literacy.RI.8.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RI/8/8/",
+                            "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant; recognize irrelevant evidence."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RI.6-8.10",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
-                            "description": "Proficiently read and comprehend literary nonfiction"
+                            "name": "CCSS.ELA-Literacy.RI.9-10.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RI/9-10/8/",
+                            "description": "Evaluate arguments and claims; assess whether reasoning is valid and evidence is relevant; identify fallacious reasoning."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.CCRA.R.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
-                            "description": "Read and understand text and make logical inferences from it"
+                            "name": "CCSS.ELA-Literacy.RH.6-8.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
+                            "description": "Distinguish among fact, opinion, and reasoned judgment in a text."
                         }
                     ]
                 }
