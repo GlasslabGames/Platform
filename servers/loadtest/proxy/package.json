@@ -1,0 +1,12 @@
+{
+    "author": "Joseph Sutton",
+    "name": "proxy",
+    "description": "",
+    "version": "0.0.1",
+    "engines": {
+        "node": "*"
+    },
+    "dependencies": {
+        "http-proxy": "*"
+    }
+}

@@ -1,21 +1,47 @@
 {
-    "name": "Telemetry-Servers",
-    "version": "0.0.5",
-    "private": true,
-    "dependencies": {
-        "when":       "*",
-        "lodash":     "*",
-        "express":    "~3.4.4",
-        "multiparty": "~3.1.0",
-        "request":    "~2.27.0",
-        "mysql":      "~2.0.0-rc1",
-        "redis":      "~0.9.0",
-        "hiredis":    "~0.1.15",
-        "validator":  "~2.0.0",
-        "couchbase":  "*",
-        "passport":   "*",
-        "passport-local": "*",
-        "node-uuid":  "*",
-        "node-statsd": "*"
-    }
+  "name": "Platform-Services",
+  "version": "0.4.0",
+  "private": true,
+  "dependencies": {
+    "when": "2.7.x",
+    "lodash": "2.4.x",
+    "express": "3.4.x",
+    "multiparty": "3.1.x",
+    "request": "2.27.x",
+    "mysql": "2.0.x",
+    "redis": "0.9.x",
+    "validator": "2.0.x",
+    "couchbase": "1.2.x",
+    "passport": "0.1.x",
+    "passport-local": "0.1.x",
+    "passport-oauth": "1.0.x",
+    "node-uuid": "1.4.x",
+    "node-statsd": "0.0.x",
+    "statsd": "0.7.x",
+    "moment": "2.5.x",
+    "q-io": "1.11.x",
+    "nodemailer": "0.6.x",
+    "ejs": "1.0.x",
+    "mailchimp": "1.1.x",
+    "csv": "0.3.x",
+    "csv-stringify": "0.0.x",
+    "handlebars": "2.0.x"
+  },
+  "optionalDependencies": {
+    "hiredis": "0.1.x"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "grunt": "*",
+    "grunt-git-describe": "*",
+    "grunt-mocha": "*",
+    "grunt-mocha-test": "*",
+    "istanbul": "^0.3.0",
+    "mocha": "*",
+    "superagent": "^0.18.2",
+    "supertest": "*"
+  },
+  "scripts": {
+    "test": "grunt"
+  }
 }

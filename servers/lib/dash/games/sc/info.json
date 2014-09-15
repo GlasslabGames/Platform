@@ -1,0 +1,784 @@
+{
+    "developer": {
+        "id": "GL",
+        "name": "GlassLab, Inc.",
+        "logo": {
+            "small": "assets/glasslab-logo.png",
+            "large": "assets/glasslab-logo-2x.png"
+        }
+    },
+    "basic": {
+        "gameId": "SC",
+        "enabled": true,
+        "maintenance":
+        {
+            "message": "Coming Soon!"
+        },
+        "shortName": "SimCityEdu",
+        "longName": "SimCityEDU: Pollution Challenge!",
+        "description": "SimCityEDU: Pollution Challenge!",
+        "settings" : {
+            "missionProgressLock": false
+        },
+        "license": {
+            "type":  "tier",
+            "valid": false
+        },
+        "thumbnail": {
+            "small": "assets/thumb-game-SC.png",
+            "large": "assets/thumb-game-SC.png"
+        }
+    },
+    "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "park_wo1": {
+                    "name": "Parktown - Crazy Plopper",
+                    "description": "Places too many bus stops."
+                },
+                "park_so1": {
+                    "name": "Parktown - Housing Mogul",
+                    "description": "Zone residential areas to increase #students"
+                },
+
+                "alex_wo1": {
+                    "name": "Alexandria - NoZoner",
+                    "description": "Less than 15 zones (Commercial/Industrial) within a certain amount of time."
+                },
+                "alex_so1": {
+                    "name": "Alexandria - Industrial Champion",
+                    "description": "More commercial zones plopped than industrial"
+                },
+
+                "sierra_wo1": {
+                    "name": "Sierra - Brown Out",
+                    "description": ""
+                },
+                "sierra_so1": {
+                    "name": "Sierra - Smog Destroyer",
+                    "description": "Bulldoze the first coal plant AND no power outage/failure"
+                },
+
+                "jack_wo1": {
+                    "name": "Jackson City - Home Builder",
+                    "description": "Misunderstanding: zone residential to bring in more people for increased jobs"
+                },
+                "jack_so1": {
+                    "name": "Jackson City - Smog Destroyer",
+                    "description": "Bulldoze the first coal plant AND no power outage/failure"
+                }
+            }
+        },
+        {
+            "enabled": false,
+            "id": "competency",
+            "dataProcessScope": "gameSession",
+            "engine": "weka",
+            "trigger": "endSession"
+        }
+    ],
+    "reports": {
+        "list": [
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": "Shout Out and Watch Out Report",
+                "description": "This report shows..."
+            },
+            {
+                "id": "competency",
+                "assessmentId": "competency",
+                "enabled": false,
+                "name": "Competency Levels: Complex Problem Solving",
+                "header": "Competency Levels: Complex Problem Solving",
+                "description": "This report shows...",
+                "icons": {
+                    "small": "assets/icon-plus-green.png",
+                    "large": "assets/icon-plus-green@2x.png"
+                },
+                "levels": {
+                    "max":  3,
+                    "description": [
+                        "Level 1 - The player understands...",
+                        "Level 2 - The player demonstrates...",
+                        "Level 3 - The player demonstrates..."
+                    ]
+                },
+                "groups": [
+                    {
+                        "name": "Gameplay",
+                        "list": [
+                            {
+                                "id": "cps_m3",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Sierra Madre"
+                            },
+                            {
+                                "id": "cps_m5",
+                                "title": "Mission 6",
+                                "description": "It's Complicated - Jackson City"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Systems Maps Challenges",
+                        "list": [
+                            {
+                                "id": "lewt_m3",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Pre-Game Systems Map"
+                            },
+                            {
+                                "id": "lewt_m3",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Post-Game Systems Map"
+                            },
+                            {
+                                "id": "lewt_m5",
+                                "title": "Mission 4",
+                                "description": "Pollution Problems - Sierra Madre"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "mission-progress",
+                "enabled": false,
+                "icons": {
+                    "complete": {
+                        "small": "assets/add-blue.png",
+                        "large": "assets/add-blue@2x.png"
+                    },
+                    "not-complete": {
+                        "small": "assets/add-grey-square.png",
+                        "large": "assets/add-grey-square@2x.png"
+                    }
+                }
+            },
+            {
+                "id": "learning-progress",
+                "enabled": false
+            },
+            {
+                "id": "diagram-view",
+                "enabled": false
+            }
+        ]
+    },
+    "details": {
+        "buttons": [
+            {
+                "name": "Download",
+                "links": [
+                    {
+                        "name": "PC (1.0 GB)",
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.msi"
+                    },
+                    {
+                        "name": "Mac (1.0 GB)",
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.dmg"
+                    }
+                ]
+            },
+            {
+                "name": "Play Game",
+                "links": [
+                    {
+                        "name": "Play Game",
+                        "type": "default",
+                        "link": "/games/SC/missions"
+                    }
+                ]
+            }
+        ],
+        "release": "live",
+        "price": "Premium Subscription",
+        "releaseDate": "Nov. 2, 2013",
+        "type": "Client Download",
+        "platform": "PC & Mac",
+        "subject": "21st Century Skills, Science, ELA",
+        "grades": "6 - 8",
+        "pages": {
+            "product": {
+                "header": "Let Your Students Go to Town!",
+                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<\/br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve, explain the relationships in complex systems, and read informational texts and diagrams.<\/br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
+                "curriculum": [
+                    "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "http://argubotacademy.org/images/carousel/3v3battle.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "http://argubotacademy.org/images/carousel/map.png"
+                    }
+                ]
+            },
+            "standards": [
+                {
+                    "category": "ELA Common Core",
+                    "groups": [
+                        {
+                            "list": [
+                                {
+                                    "name": "CCSS.ELA-Literacy.RST.6-8.1",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
+                                    "description": "Cite specific textual evidence to support conclusions"
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RST.6-8.7",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
+                                    "description": "Integrate information from texts & diagrams"
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.7.1",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
+                                    "description": "Cite several pieces of textual evidence to support analysis"
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.6-8.10",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
+                                    "description": "Proficiently read and comprehend literary nonfiction"
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.CCRA.R.1",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
+                                    "description": "Read and understand text and make logical inferences from it"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "category": "Next Generation Science",
+                    "groups": [
+                        {
+                            "list": [
+                                {
+                                    "description": "ESS3.C Human Impacts on Earth Systems"
+                                },
+                                {
+                                    "description": "Cross Cutting Concept: Systems Thinking"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "category": "21st Century Skills",
+                    "groups": [
+                        {
+                            "list": [
+                                {
+                                    "description": "Critical thinking and problem solving"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "lessonPlans": [
+                {
+                    "category": "Lesson Plans",
+                    "list": [
+                        {
+                            "name": "Routine 1",
+                            "link": "http://glasslabgames.org"
+                        },
+                        {
+                            "name": "Routine 2",
+                            "link": "http://glasslabgames.org"
+                        }
+                    ]
+                },
+                {
+                    "category": "Videos",
+                    "list": [
+                        {
+                            "name": "Walkthrough",
+                            "link": "http://glasslabgames.org"
+                        },
+                        {
+                            "name": "Mission",
+                            "link": "http://glasslabgames.org"
+                        }
+                    ]
+                },
+                {
+                    "category": "Info Pack",
+                    "list": [
+                        {
+                            "name": "One Page Game Description",
+                            "link": "http://glasslabgames.org"
+                        }
+                    ]
+                }
+            ],
+            "research": [
+                {
+                    "category": "SRI 2014",
+                    "list": [
+                        {
+                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
+                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
+                        },
+                        {
+                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
+                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
+                        }
+                    ]
+                }
+            ],
+            "reviews": [
+                {
+                    "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florida",
+                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission, automatic grading."
+                }
+            ]
+        },
+        "banners": {
+            "product": "http://argubotacademy.org/images/banner_mars1.jpg",
+            "reports": "http://argubotacademy.org/images/banner_mars1.jpg"
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "http://plus.google.com/glasslabgames"
+        }
+    },
+    "missions": {
+        "linkSchema": {
+            "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-SessionURL={{configSessionUrl}}&-DataURL={{configDataUrl}}",
+            "diagram": "/assets/games/{{gameId}}/challenges?challengeId={{missionId}}&courseId={{courseId}}&sessionURL={{configSessionUrl}}&dataURL={{configDataUrl}}&type=play"
+        },
+        "groups": [
+            {
+                "enabled": true,
+                "id": "1234",
+                "title": "Mission 1 - School Is In",
+                "locked": false,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "enabled": true,
+                        "id": "MedusaA1School01",
+                        "title": "Parktown",
+                        "description": "Can you get every kid to school?",
+                        "locked": false,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "f04804f0-fedf-11e2-ab09-1f14110c1a8d",
+                        "title": "Systems Map Tutorial 1",
+                        "description": "Create a map that explains how to enroll all Parktown kids in school.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "enabled": true,
+                "id": "5678",
+                "title": "Mission 2 - We Need Jobs!",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "enabled": false,
+                        "id": "12b38320-fee0-11e2-ab09-1f14110c1a8d",
+                        "title": "Systems Map Tutorial 2",
+                        "description": "Create a map that explains what creates new jobs for the citizens.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": true,
+                        "id": "MedusaA1Jobs01",
+                        "title": "Little Alexandria",
+                        "description": "Can you create new jobs for the citizens?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "397255e0-fee0-11e2-ab09-1f14110c1a8d",
+                        "title": "Systems Map Tutorial 3",
+                        "description": "Add more nodes to your map, and explain what else could create new jobs for the citizens.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "enabled": false,
+                "id": "9123",
+                "title": "Mission 3 - Read All About It!",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "enabled": false,
+                        "id": "95347e00-0b63-11e3-8ffd-0800200c9a66",
+                        "title": "Reading Diagrams Tutorial",
+                        "description": "How can coal power plants filter air pollution?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "2d2d2ec0-e01f-11e2-a7e8-3f4343712aaf",
+                        "title": "Solar Panels",
+                        "description": "Why are new solar panels more efficient than older ones?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "c9a942d0-e01e-11e2-a7e8-3f4343712aaf",
+                        "title": "Diesel Fuel",
+                        "description": "How to cut four hundred tons of pollution each year?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "212f0b70-0a8b-11e3-8ffd-0800200c9a66",
+                        "title": "Water Pollution",
+                        "description": "How do wastewater and sewage hurt animals living in the port's water?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "2bfb6dc0-e40a-11e2-9336-d1ab0cf51c41",
+                        "title": "Growing Business",
+                        "description": "Why is a larger port good for everyone in Regal City?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "enabled": true,
+                "id": "4567",
+                "title": "Mission 4 - Pollution Problems",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "enabled": false,
+                        "id": "063cf110-e0f6-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Pre-Game Systems Map",
+                        "description": "Create a map that explains what creates power and causes air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": true,
+                        "id": "MedusaA1Power01",
+                        "title": "Sierra Madre",
+                        "description": "Find out how to keep the power level optimal and lower air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "723dfa90-e0f5-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Post-Game Systems Map",
+                        "description": "Have your ideas changed or stayed the same?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "enabled": false,
+                "id": "8912",
+                "title": "Mission 5 - Read It, Find It, Prove It!",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "enabled": false,
+                        "id": "534cd7f0-0495-11e3-8ffd-0800200c9a66",
+                        "title": "Evidence Challenge Tutorial",
+                        "description": "What evidence supports the claim that special filters reduce air pollution?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "57a862b0-e01e-11e2-a7e8-3f4343712aaf",
+                        "title": "Solar Panels",
+                        "description": "What evidence supports the claim that new designs will lead to more efficient solar panels?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "47b0dc70-e01e-11e2-a7e8-3f4343712aaf",
+                        "title": "Diesel Fuel",
+                        "description": "What evidence supports the claim that cleaner fuel can lower air pollution?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "212f0b71-0a8b-11e3-8ffd-0800200c9a66",
+                        "title": "Water Pollution",
+                        "description": "What evidence supports the claim that algae blooms lower the amount of oxygen in the water?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "12252b50-e01f-11e2-a7e8-3f4343712aaf",
+                        "title": "Growing Business",
+                        "description": "What evidence supports the claim that a larger port with lead to more orders for local products?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "enabled": true,
+                "id": "3456",
+                "title": "Mission 6 - It's Complicated",
+                "locked": true,
+                "completed": false,
+                "completedDate": null,
+                "missions": [
+                    {
+                        "enabled": false,
+                        "id": "b71d8d00-e0f6-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Pre-Game Systems Map",
+                        "description": "Create a map that explains what creates jobs and causes air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": true,
+                        "id": "MedusaA1Pollution01",
+                        "title": "Jackson City",
+                        "description": "The city needs your skills to increase jobs and lower air pollution.",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "game",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "enabled": false,
+                        "id": "249ed870-e0f7-11e2-a9b1-fbf5ea959a8c",
+                        "title": "Post-Game Systems Map",
+                        "description": "Have your ideas changed or stayed the same?",
+                        "locked": true,
+                        "icon": "",
+                        "completed": false,
+                        "completedDate": null,
+                        "links": [
+                            {
+                                "$linkSchemaId": "diagram",
+                                "name": "Play",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

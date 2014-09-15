@@ -1,0 +1,17 @@
+FROM hydra/allinone_base2
+
+# -----------------------------
+# install app
+ADD ./servers /usr/src/app
+WORKDIR /usr/src/app
+
+# install your application's dependencies
+RUN rm -rf node_modules
+RUN npm install
+
+# replace this with your application's default port
+EXPOSE 8080
+
+# replace this with your main "server" script file
+CMD [ "node", "app.js" ]
+# -----------------------------

@@ -4,6 +4,7 @@
 PROG="server_start.sh"
 PROG_PATH="/home/dev/github/Platform/servers" ## Not need, but sometimes helpful (if $PROG resides in /opt for example).
 PID_PATH="/var/run/"
+export HOME="/root"
 
 start() {
     ## Change from /dev/null to something like /var/log/$PROG if you want to save output.

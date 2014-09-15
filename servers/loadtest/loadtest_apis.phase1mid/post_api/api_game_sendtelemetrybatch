@@ -1,0 +1,592 @@
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Scenario_Loaded","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:00"},"timestamp":"63520679720"},{"name":"GL_Computer_Specs","eventData":{"Computer name":"Josephs-MacBook-Pro.local","User name":"josephsutton","EA_PLATFORM":"OSX on x86","OS name":"OSX","OS version number":"10.8.5","Debugger present":"yes","CPU count":"8","Processor type":"x86_64","Memory load":"86%","Total physical memory":"2048 Mb","Available physical memory":"-1565 Mb","Total virtual memory":"6144 Mb","Free virtual memory":"859 Mb","CPU Brand":"Intel(R) Core(TM) i7-3615QM CPU @ 2.30GHz","CPU Speed":"I64d","scenarioTime":"00:00"},"timestamp":"63520679720"},{"name":"GL_Scenario_Accepted","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:06"},"timestamp":"63520679726"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"00:08"},"timestamp":"63520679728"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:10"},"timestamp":"63520679730"},{"name":"GL_Feedback_Off_Manual","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:11"},"timestamp":"63520679731"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:13"},"timestamp":"63520679733"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:13"},"timestamp":"63520679733"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:14"},"timestamp":"63520679734"},{"name":"GL_Feedback_Off_Manual","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:15"},"timestamp":"63520679735"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:17"},"timestamp":"63520679737"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:17"},"timestamp":"63520679737"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:17"},"timestamp":"63520679737"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:18"},"timestamp":"63520679738"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:20"},"timestamp":"63520679740"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:21"},"timestamp":"63520679741"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:21"},"timestamp":"63520679741"},{"name":"GL_Feedback_Off_Manual","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:23"},"timestamp":"63520679743"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:27"},"timestamp":"63520679747"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Feedback_On","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:29"},"timestamp":"63520679749"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:30"},"timestamp":"63520679750"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.20","busStops":"0","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:30"},"timestamp":"63520679750"},{"name":"GL_Feedback_Off_Manual","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:30"},"timestamp":"63520679750"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:31"},"timestamp":"63520679751"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:32"},"timestamp":"63520679752"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:33"},"timestamp":"63520679753"},{"name":"GL_Zone","eventData":{"type":"residential","scenarioTime":"00:33"},"timestamp":"63520679753"},{"name":"GL_Feedback_Off_Manual","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:34"},"timestamp":"63520679754"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:36"},"timestamp":"63520679756"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"education","scenarioTime":"00:38"},"timestamp":"63520679758"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9182fa79","name":"T_Edu_T1_GradeSchoolBusStop_01_01_N","Pos":"57.25, -640.90, 140.08","scenarioTime":"00:41"},"timestamp":"63520679761"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9182fa79","name":"T_Edu_T1_GradeSchoolBusStop_01_01_N","Pos":"-256.22, -577.57, 146.52","scenarioTime":"00:43"},"timestamp":"63520679763"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9182fa79","name":"T_Edu_T1_GradeSchoolBusStop_01_01_N","Pos":"-132.18, -214.54, 139.74","scenarioTime":"00:45"},"timestamp":"63520679765"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A1 - Bus Stop.txt","scenarioTime":"00:45"},"timestamp":"63520679765"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9182fa79","name":"T_Edu_T1_GradeSchoolBusStop_01_01_N","Pos":"-8.83, 326.00, 151.52","scenarioTime":"00:48"},"timestamp":"63520679768"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9182fa79","name":"T_Edu_T1_GradeSchoolBusStop_01_01_N","Pos":"-136.34, 173.91, 146.78","scenarioTime":"00:49"},"timestamp":"63520679769"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9182fa79","name":"T_Edu_T1_GradeSchoolBusStop_01_01_N","Pos":"469.33, -700.23, 213.42","scenarioTime":"00:51"},"timestamp":"63520679771"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"00:55"},"timestamp":"63520679775"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"01:01"},"timestamp":"63520679781"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"01:01"},"timestamp":"63520679781"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"01:01"},"timestamp":"63520679781"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.20","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"01:02"},"timestamp":"63520679782"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"01:05"},"timestamp":"63520679785"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"01:08"},"timestamp":"63520679788"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"01:08"},"timestamp":"63520679788"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"01:08"},"timestamp":"63520679788"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"01:20"},"timestamp":"63520679800"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Grade School","scenarioTime":"01:21"},"timestamp":"63520679801"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Grade School","scenarioTime":"01:21"},"timestamp":"63520679801"},{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Grade School","scenarioTime":"01:22"},"timestamp":"63520679802"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"01:24"},"timestamp":"63520679804"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"01:25"},"timestamp":"63520679805"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Trade Depot","scenarioTime":"01:28"},"timestamp":"63520679808"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Trade Depot","scenarioTime":"01:32"},"timestamp":"63520679812"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Trade Depot","scenarioTime":"01:32"},"timestamp":"63520679812"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"01:32"},"timestamp":"63520679812"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.20","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"01:33"},"timestamp":"63520679813"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Trade Depot","scenarioTime":"01:34"},"timestamp":"63520679814"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Trade Depot","scenarioTime":"01:35"},"timestamp":"63520679815"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Trade Depot","scenarioTime":"01:36"},"timestamp":"63520679816"},{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Trade Depot","scenarioTime":"01:37"},"timestamp":"63520679817"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Trade Depot","scenarioTime":"01:39"},"timestamp":"63520679819"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Trade Depot","scenarioTime":"01:39"},"timestamp":"63520679819"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Unit_Plop","eventData":{"UGuid":"0xd5fa3551","name":"T1 Import/Export Sign","Pos":"299.26, -644.93, 170.95","scenarioTime":"01:53"},"timestamp":"63520679833"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Trade Depot","scenarioTime":"01:55"},"timestamp":"63520679835"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Trade Depot","scenarioTime":"01:56"},"timestamp":"63520679836"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Trade Depot","scenarioTime":"01:56"},"timestamp":"63520679836"},{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Trade Depot","scenarioTime":"01:56"},"timestamp":"63520679836"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Trade Depot","scenarioTime":"01:58"},"timestamp":"63520679838"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Freight Shipping Warehouse","scenarioTime":"01:59"},"timestamp":"63520679839"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"02:00"},"timestamp":"63520679840"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.27","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"02:03"},"timestamp":"63520679843"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"02:03"},"timestamp":"63520679843"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"02:04"},"timestamp":"63520679844"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"02:04"},"timestamp":"63520679844"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"02:05"},"timestamp":"63520679845"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Grade School","scenarioTime":"02:06"},"timestamp":"63520679846"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Grade School","scenarioTime":"02:06"},"timestamp":"63520679846"},{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Grade School","scenarioTime":"02:07"},"timestamp":"63520679847"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"02:08"},"timestamp":"63520679848"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"02:14"},"timestamp":"63520679854"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Wind Power Plant","scenarioTime":"02:15"},"timestamp":"63520679855"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Wind Power Plant","scenarioTime":"02:15"},"timestamp":"63520679855"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"02:15"},"timestamp":"63520679855"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Wind Power Plant","scenarioTime":"02:17"},"timestamp":"63520679857"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Wind Power Plant","scenarioTime":"02:17"},"timestamp":"63520679857"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Wind Power Plant","scenarioTime":"02:18"},"timestamp":"63520679858"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Wind Power Plant","scenarioTime":"02:18"},"timestamp":"63520679858"},{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Wind Power Plant","scenarioTime":"02:19"},"timestamp":"63520679859"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Wind Power Plant","scenarioTime":"02:20"},"timestamp":"63520679860"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Wind Power Plant","scenarioTime":"02:22"},"timestamp":"63520679862"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x7b9807b2","name":"T_Power_Wind_T1_Sign_01","Pos":"-174.24, 133.71, 146.18","scenarioTime":"02:28"},"timestamp":"63520679868"},{"name":"GL_Dezone","eventData":{"type":"residential","scenarioTime":"02:28"},"timestamp":"63520679868"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.30","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"02:34"},"timestamp":"63520679874"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.30","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"03:04"},"timestamp":"63520679904"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"03:17"},"timestamp":"63520679917"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"03:20"},"timestamp":"63520679920"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Grade School","scenarioTime":"03:21"},"timestamp":"63520679921"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"03:22"},"timestamp":"63520679922"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"03:22"},"timestamp":"63520679922"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"03:24"},"timestamp":"63520679924"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Grade School","scenarioTime":"03:26"},"timestamp":"63520679926"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"03:26"},"timestamp":"63520679926"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"03:26"},"timestamp":"63520679926"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"03:26"},"timestamp":"63520679926"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x1b4acc2c","name":"T_Edu_T1_GradeSchoolSign_01_01_N","Pos":"192.13, -379.53, 145.60","scenarioTime":"03:29"},"timestamp":"63520679929"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x8c4245a6","name":"T_Edu_T1_GradeSchoolLot_01_01_N","Pos":"121.86, -350.16, 145.14","scenarioTime":"03:32"},"timestamp":"63520679932"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.30","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"03:34"},"timestamp":"63520679934"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"03:41"},"timestamp":"63520679941"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Trade Depot","scenarioTime":"03:42"},"timestamp":"63520679942"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Trade Depot","scenarioTime":"03:42"},"timestamp":"63520679942"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"03:42"},"timestamp":"63520679942"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"03:51"},"timestamp":"63520679951"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Wind Power Plant","scenarioTime":"03:55"},"timestamp":"63520679955"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Wind Power Plant","scenarioTime":"03:55"},"timestamp":"63520679955"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"03:55"},"timestamp":"63520679955"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.30","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"04:05"},"timestamp":"63520679965"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"04:26"},"timestamp":"63520679986"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"04:33"},"timestamp":"63520679993"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Grade School","scenarioTime":"04:33"},"timestamp":"63520679993"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"04:33"},"timestamp":"63520679993"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"04:33"},"timestamp":"63520679993"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.33","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"04:35"},"timestamp":"63520679995"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"04:36"},"timestamp":"63520679996"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Grade School","scenarioTime":"04:39"},"timestamp":"63520679999"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Grade School","scenarioTime":"04:40"},"timestamp":"63520680000"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Grade School","scenarioTime":"04:40"},"timestamp":"63520680000"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Grade School","scenarioTime":"04:40"},"timestamp":"63520680000"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"04:40"},"timestamp":"63520680000"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Classrooms","scenarioTime":"04:42"},"timestamp":"63520680002"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Classrooms","scenarioTime":"04:42"},"timestamp":"63520680002"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9b0054b7","name":"T_Edu_T1_GradeSchoolFlagPole_01_01_N","Pos":"170.03, -387.40, 144.38","scenarioTime":"04:46"},"timestamp":"63520680006"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x9b0054b7","name":"T_Edu_T1_GradeSchoolFlagPole_01_01_N","Pos":"179.02, -408.60, 144.64","scenarioTime":"04:52"},"timestamp":"63520680012"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"04:57"},"timestamp":"63520680017"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"education","scenarioTime":"05:05"},"timestamp":"63520680025"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.44","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"05:05"},"timestamp":"63520680025"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Trade Depot","scenarioTime":"05:16"},"timestamp":"63520680036"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Trade Depot","scenarioTime":"05:16"},"timestamp":"63520680036"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"education","scenarioTime":"05:16"},"timestamp":"63520680036"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"education","scenarioTime":"05:28"},"timestamp":"63520680048"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Wind Power Plant","scenarioTime":"05:32"},"timestamp":"63520680052"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Wind Power Plant","scenarioTime":"05:32"},"timestamp":"63520680052"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Wind Power Plant","scenarioTime":"05:32"},"timestamp":"63520680052"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"education","scenarioTime":"05:32"},"timestamp":"63520680052"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.58","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"05:35"},"timestamp":"63520680055"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"education","scenarioTime":"06:05"},"timestamp":"63520680085"},{"name":"GL_Challenge_Heartbeat","eventData":{"attendance":"0.64","busStops":"6","name":"Medusa A1 - Bus Stop.txt","scenarioTime":"06:06"},"timestamp":"63520680086"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+2fcc8049-b5fd-4e72-8922-94e98868d0fd
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Scenario_Loaded","eventData":{"name":"Medusa A2 - Worker Shortage.txt","scenarioTime":"00:00"},"timestamp":"63520680185"},{"name":"GL_Computer_Specs","eventData":{"Computer name":"Josephs-MacBook-Pro.local","User name":"josephsutton","EA_PLATFORM":"OSX on x86","OS name":"OSX","OS version number":"10.8.5","Debugger present":"yes","CPU count":"8","Processor type":"x86_64","Memory load":"86%","Total physical memory":"2048 Mb","Available physical memory":"-1588 Mb","Total virtual memory":"6144 Mb","Free virtual memory":"859 Mb","CPU Brand":"Intel(R) Core(TM) i7-3615QM CPU @ 2.30GHz","CPU Speed":"I64d","scenarioTime":"00:00"},"timestamp":"63520680185"},{"name":"GL_Scenario_Accepted","eventData":{"name":"Medusa A2 - Worker Shortage.txt","scenarioTime":"00:07"},"timestamp":"63520680192"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Feedback_On","eventData":{"name":"Medusa A2 - Worker Shortage.txt","scenarioTime":"00:15"},"timestamp":"63520680200"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"00:15"},"timestamp":"63520680200"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A2 - Worker Shortage.txt","scenarioTime":"00:22"},"timestamp":"63520680207"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:23"},"timestamp":"63520680208"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:23"},"timestamp":"63520680208"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:25"},"timestamp":"63520680210"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:25"},"timestamp":"63520680210"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:25"},"timestamp":"63520680210"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:27"},"timestamp":"63520680212"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:27"},"timestamp":"63520680212"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:27"},"timestamp":"63520680212"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:28"},"timestamp":"63520680213"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:28"},"timestamp":"63520680213"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:29"},"timestamp":"63520680214"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"650","name":"Medusa A2 - Worker Shortage.txt","population":"1742","simoleons":"2698","scenarioTime":"00:30"},"timestamp":"63520680215"},{"name":"GL_Dezone","eventData":{"type":"residential","scenarioTime":"00:31"},"timestamp":"63520680216"},{"name":"GL_Dezone","eventData":{"type":"residential","scenarioTime":"00:31"},"timestamp":"63520680216"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:33"},"timestamp":"63520680218"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:33"},"timestamp":"63520680218"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:37"},"timestamp":"63520680222"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:37"},"timestamp":"63520680222"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:38"},"timestamp":"63520680223"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:38"},"timestamp":"63520680223"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:38"},"timestamp":"63520680223"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:40"},"timestamp":"63520680225"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:42"},"timestamp":"63520680227"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:42"},"timestamp":"63520680227"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:43"},"timestamp":"63520680228"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:43"},"timestamp":"63520680228"},{"name":"GL_Feedback_On","eventData":{"name":"Medusa A2 - Worker Shortage.txt","scenarioTime":"00:45"},"timestamp":"63520680230"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:45"},"timestamp":"63520680230"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:46"},"timestamp":"63520680231"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:49"},"timestamp":"63520680234"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:50"},"timestamp":"63520680235"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:50"},"timestamp":"63520680235"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:52"},"timestamp":"63520680237"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:52"},"timestamp":"63520680237"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:55"},"timestamp":"63520680240"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:55"},"timestamp":"63520680240"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:55"},"timestamp":"63520680240"},{"name":"GL_Zone","eventData":{"type":"industrial","scenarioTime":"00:56"},"timestamp":"63520680241"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Challenge_Secondary_Heartbeat","eventData":{"Jobs":"750","Workers":"354","scenarioTime":"01:00"},"timestamp":"63520680245"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"750","name":"Medusa A2 - Worker Shortage.txt","population":"1742","simoleons":"2896","scenarioTime":"01:00"},"timestamp":"63520680245"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"840","name":"Medusa A2 - Worker Shortage.txt","population":"1731","simoleons":"3094","scenarioTime":"01:31"},"timestamp":"63520680276"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"01:32"},"timestamp":"63520680277"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Town Hall","scenarioTime":"01:33"},"timestamp":"63520680278"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Town Hall","scenarioTime":"01:33"},"timestamp":"63520680278"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"demolish","scenarioTime":"01:33"},"timestamp":"63520680278"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Town Hall","scenarioTime":"01:44"},"timestamp":"63520680289"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Town Hall","scenarioTime":"01:44"},"timestamp":"63520680289"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Town Hall","scenarioTime":"01:45"},"timestamp":"63520680290"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Town Hall","scenarioTime":"01:45"},"timestamp":"63520680290"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Town Hall","scenarioTime":"01:47"},"timestamp":"63520680292"},{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Town Hall","scenarioTime":"01:47"},"timestamp":"63520680292"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Town Hall","scenarioTime":"01:50"},"timestamp":"63520680295"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Town Hall","scenarioTime":"01:51"},"timestamp":"63520680296"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Town Hall","scenarioTime":"01:53"},"timestamp":"63520680298"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Sandpillar Apts","scenarioTime":"01:55"},"timestamp":"63520680300"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"demolish","scenarioTime":"02:00"},"timestamp":"63520680305"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Abiogenic Oil","scenarioTime":"02:02"},"timestamp":"63520680307"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Abiogenic Oil","scenarioTime":"02:02"},"timestamp":"63520680307"},{"name":"GL_Challenge_Secondary_Heartbeat","eventData":{"Jobs":"890","Workers":"362","scenarioTime":"02:03"},"timestamp":"63520680308"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"890","name":"Medusa A2 - Worker Shortage.txt","population":"1730","simoleons":"3193","scenarioTime":"02:03"},"timestamp":"63520680308"},{"name":"GL_Unit_Bulldoze","eventData":{"UGuid":"0xdfa4b31a","name":"ComW1D1_Lot32x48_24_0xf0554d0b","Pos":"-793.36, -230.13, 144.07","scenarioTime":"02:03"},"timestamp":"63520680308"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Abandoned Building","scenarioTime":"02:08"},"timestamp":"63520680313"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Abandoned Building","scenarioTime":"02:09"},"timestamp":"63520680314"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Abandoned Building","scenarioTime":"02:10"},"timestamp":"63520680315"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Abandoned Building","scenarioTime":"02:11"},"timestamp":"63520680316"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Abandoned Building","scenarioTime":"02:15"},"timestamp":"63520680320"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Abandoned Building","scenarioTime":"02:16"},"timestamp":"63520680321"},{"name":"GL_Unit_Bulldoze","eventData":{"UGuid":"0xdfa4b31a","name":"ComW1D1_Lot32x48_24_0xf0554d0b","Pos":"-849.24, -232.71, 141.12","scenarioTime":"02:18"},"timestamp":"63520680323"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Abandoned Building","scenarioTime":"02:20"},"timestamp":"63520680325"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Abandoned Building","scenarioTime":"02:20"},"timestamp":"63520680325"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"DuBouis Antiques","scenarioTime":"02:21"},"timestamp":"63520680326"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"DuBouis Antiques","scenarioTime":"02:21"},"timestamp":"63520680326"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"DuBouis Antiques","scenarioTime":"02:24"},"timestamp":"63520680329"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"DuBouis Antiques","scenarioTime":"02:24"},"timestamp":"63520680329"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"demolish","scenarioTime":"02:26"},"timestamp":"63520680331"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"demolish","scenarioTime":"02:26"},"timestamp":"63520680331"},{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"education","scenarioTime":"02:28"},"timestamp":"63520680333"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_ToolCategory","eventData":{"action":"opened","tool":"zones","scenarioTime":"02:30"},"timestamp":"63520680335"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"zones","scenarioTime":"02:30"},"timestamp":"63520680335"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"955","name":"Medusa A2 - Worker Shortage.txt","population":"1719","simoleons":"3391","scenarioTime":"02:34"},"timestamp":"63520680339"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Solar Plant","scenarioTime":"02:34"},"timestamp":"63520680339"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Solar Plant","scenarioTime":"02:34"},"timestamp":"63520680339"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"demolish","scenarioTime":"02:34"},"timestamp":"63520680339"},{"name":"GL_Unit_Plop","eventData":{"UGuid":"0x7ab81be6","name":"Glass Solar Panels","Pos":"74.04, -174.46, 140.83","scenarioTime":"02:38"},"timestamp":"63520680343"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Extroodo Donut Mfg.","scenarioTime":"02:50"},"timestamp":"63520680355"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Extroodo Donut Mfg.","scenarioTime":"02:50"},"timestamp":"63520680355"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Extroodo Donut Mfg.","scenarioTime":"02:52"},"timestamp":"63520680357"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Extroodo Donut Mfg.","scenarioTime":"02:52"},"timestamp":"63520680357"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Price Machine Parts","scenarioTime":"02:53"},"timestamp":"63520680358"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Price Machine Parts","scenarioTime":"02:54"},"timestamp":"63520680359"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Tasty Chemical, Co.","scenarioTime":"02:54"},"timestamp":"63520680359"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Tasty Chemical, Co.","scenarioTime":"02:54"},"timestamp":"63520680359"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Tasty Chemical, Co.","scenarioTime":"02:56"},"timestamp":"63520680361"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Vacant Factory","scenarioTime":"02:56"},"timestamp":"63520680361"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Vacant Factory","scenarioTime":"02:58"},"timestamp":"63520680363"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Inwood Apts","scenarioTime":"03:03"},"timestamp":"63520680368"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Inwood Apts","scenarioTime":"03:03"},"timestamp":"63520680368"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Tande Accommodations","scenarioTime":"03:04"},"timestamp":"63520680369"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Tande Accommodations","scenarioTime":"03:04"},"timestamp":"63520680369"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Tande Accommodations","scenarioTime":"03:05"},"timestamp":"63520680370"},{"name":"GL_Challenge_Secondary_Heartbeat","eventData":{"Jobs":"995","Workers":"439","scenarioTime":"03:05"},"timestamp":"63520680370"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"995","name":"Medusa A2 - Worker Shortage.txt","population":"1767","simoleons":"1029","scenarioTime":"03:05"},"timestamp":"63520680370"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Wood Trim Apts","scenarioTime":"03:06"},"timestamp":"63520680371"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Wood Trim Apts","scenarioTime":"03:06"},"timestamp":"63520680371"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Wood Trim Apts","scenarioTime":"03:07"},"timestamp":"63520680372"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Solar Plant","scenarioTime":"03:08"},"timestamp":"63520680373"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Solar Plant","scenarioTime":"03:08"},"timestamp":"63520680373"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Solar Plant","scenarioTime":"03:08"},"timestamp":"63520680373"},{"name":"GL_Action_Building","eventData":{"action":"turnedOff","name":"Solar Plant","scenarioTime":"03:11"},"timestamp":"63520680376"},{"name":"GL_Action_Building","eventData":{"action":"turnedOn","name":"Solar Plant","scenarioTime":"03:11"},"timestamp":"63520680376"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Solar Plant","scenarioTime":"03:12"},"timestamp":"63520680377"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"demolish","scenarioTime":"03:12"},"timestamp":"63520680377"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Glass Solar Panels","scenarioTime":"03:13"},"timestamp":"63520680378"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"TintPaint, Co.","scenarioTime":"03:20"},"timestamp":"63520680385"},{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"TintPaint, Co.","scenarioTime":"03:21"},"timestamp":"63520680386"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"TintPaint, Co.","scenarioTime":"03:22"},"timestamp":"63520680387"},{"name":"GL_Action_Building","eventData":{"action":"selected","name":"Town Hall","scenarioTime":"03:22"},"timestamp":"63520680387"},{"name":"GL_Action_Building","eventData":{"action":"deselected","name":"Town Hall","scenarioTime":"03:23"},"timestamp":"63520680388"},{"name":"GL_Action_ToolCategory","eventData":{"action":"closed","tool":"demolish","scenarioTime":"03:23"},"timestamp":"63520680388"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&
+
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="events"
+Content-Type: application/json
+
+[{"name":"GL_Action_Building","eventData":{"action":"viewed","name":"Town Hall","scenarioTime":"03:28"},"timestamp":"63520680393"},{"name":"GL_Action_Building","eventData":{"action":"view-hidden","name":"Town Hall","scenarioTime":"03:30"},"timestamp":"63520680395"},{"name":"GL_Challenge_Heartbeat","eventData":{"jobs":"995","name":"Medusa A2 - Worker Shortage.txt","population":"1827","simoleons":"1098","scenarioTime":"03:37"},"timestamp":"63520680402"}]
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameSessionId"
+
+75bae3fc-60e0-4ae0-a381-9ff247519261
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY
+Content-Disposition: form-data; name="gameVersion"
+
+SC_1.0.1058
+--EA_HTTP_REQUEST_SIMPLE_BOUNDARY--
+&

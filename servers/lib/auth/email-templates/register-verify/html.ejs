@@ -1,0 +1,16 @@
+Hello {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},<br />
+
+Almost there, just a little bit more, you can do it!<br />
+<br/>
+To complete the registration process, please click on the link below to confirm your email address.<br />
+<br/>
+
+<a href="{{= host }}/api/v2/auth/register-verify/{{= code }}/verify">{{= host }}/api/v2/auth/register-verify/{{= code }}/verify</a><br /><br />
+
+    If you received this email by mistake (oops), simply delete it. Your account will not be created if you don't click the confirmation link above.<br />
+
+    Sincerely,<br /><br />
+    Your New Best Friends at GlassLab
+
+
+
