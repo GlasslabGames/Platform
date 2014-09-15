@@ -102,6 +102,8 @@
             "product": {
                 "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
                 "about": "Argument Wars is an online game that lets players argue landmark Supreme Court cases. By finding and using the strongest support, students recreate historic legal cases while evaluating arguments and distinguishing between valid and invalid reasoning. Argument Wars brings gaming to the social studies classroom and lets students have fun while they learn about landmark cases and hone fundamental skills that are critical to success in meeting Common Core standards. ",
+                "video":"https://www.youtube.com/watch?v=kZF_s1jNBrM",
+                "brochure":"https://cdn.icivics.org/sites/default/files/uploads/ArgumentWars_Guide.pdf",
                 "curriculum": [
                     " Addresses Common Core standards related to evaluating arguments and assessing whether reasoning is valid",
                     " Offers an engaging way for students to interact with commonly-taught Supreme Court landmark cases",
@@ -124,24 +126,24 @@
                             "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RST.6-8.7",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
-                            "description": "Integrate information from texts & diagrams"
+                            "name": "CCSS.ELA-LIteracy.RI.7.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RI/7/8/",
+                            "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RI.7.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
-                            "description": "Cite several pieces of textual evidence to support analysis"
+                            "name": "CCSS.ELA-Literacy.RI.8.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RI/8/8/",
+                            "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant; recognize irrelevant evidence."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.RI.6-8.10",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
-                            "description": "Proficiently read and comprehend literary nonfiction"
+                            "name": "CCSS.ELA-Literacy.RI.9-10.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RI/9-10/8/",
+                            "description": "Evaluate arguments and claims; assess whether reasoning is valid and evidence is relevant; identify fallacious reasoning."
                         },
                         {
-                            "name": "CCSS.ELA-Literacy.CCRA.R.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
-                            "description": "Read and understand text and make logical inferences from it"
+                            "name": "CCSS.ELA-Literacy.RH.6-8.8",
+                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
+                            "description": "Distinguish among fact, opinion, and reasoned judgment in a text."
                         }
                     ]
                 }
