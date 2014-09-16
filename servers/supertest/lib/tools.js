@@ -66,6 +66,7 @@ function requestAccess(name, email, passw) {
   return JSON.stringify({
 		firstName:name,
 		email:email.replace(/[^\w\.\@\+]/gi, ''),
+		school: 'glassLab',
 		password:passw,
 		role:"instructor"
 	});
