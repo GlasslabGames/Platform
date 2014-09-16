@@ -386,7 +386,7 @@
             "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-sdkURL={{sdkUrl}}",
             "diagram": "/assets/games/{{gameId}}/challenges?challengeId={{missionId}}&courseId={{courseId}}&sessionURL={{configSessionUrl}}&dataURL={{configDataUrl}}&type=play"
         },
-        "title": "SimCityEdu Missions",
+        "title": "SimCityEDU Missions",
         "groups": [
             {
                 "enabled": true,
