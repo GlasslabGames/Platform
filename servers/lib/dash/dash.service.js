@@ -182,6 +182,18 @@ DashService.prototype.getGameReportInfo = function(gameId, reportId) {
     }
 };
 
+// TODO: replace this with DB lookup, return promise
+DashService.prototype.getGameReleases = function(gameId) {
+    if( this._games.hasOwnProperty(gameId) &&
+        this._games[gameId].hasOwnProperty('info') &&
+        this._games[gameId].info.hasOwnProperty('releases') ) {
+        return this._games[gameId].info.releases;
+    } else {
+        return {};
+    }
+};
+
+
 // TODO: replace this with DB lookup
 DashService.prototype.getListOfAchievements = function(gameId, playerAchievement) {
     // if no player achievements then default to none

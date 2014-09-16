@@ -102,7 +102,7 @@
                 "enabled": false,
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": "Competency Levels: Complex Problem Solving",
-                "description": "This report shows...",
+                "description": "Coming Soon!",
                 "icons": {
                     "small": "assets/icon-plus-green.png",
                     "large": "assets/icon-plus-green@2x.png"
@@ -810,5 +810,35 @@
                 ]
             }
         ]
+    },
+    "releases": {
+        "SimCityEDU 1.1.1106": {
+            "Name":"SimCityEDU",
+            "ProductVersion":"1.1.1106",
+            "URL":"http://clients.glgames.org/updates/SimCityEDU/patches/1_1_1106/SimCityEDU_patch.msp",
+            "Size":"413925376",
+            "ReleaseDate":"14/02/2014",
+            "ServerFileName":"SimCityEDU_patch.msp",
+            "Flags":"IsPatch",
+            "RegistryKey":"HKCR\\simcityedu\\Version",
+            "Version":"1.1.1106",
+            "Enhancement":"Replaced the female advisor to a male version.",
+            "Enhancement1":"UI has been improved on various screens.",
+            "Replaces":"All"
+        },
+        "SimCityEDU 1.0.1101": {
+            "Name":"SimCityEDU",
+            "ProductVersion":"1.0.1101",
+            "URL":"http://clients.glgames.org/updates/SimCityEDU/patches/1_0_1101/SimCityEDU_patch.msp",
+            "Size":"395317248",
+            "ReleaseDate":"10/12/2013",
+            "ServerFileName":"SimCityEDU_patch.msp",
+            "Flags":"IsPatch",
+            "RegistryKey":"HKCR\\simcityedu\\Version",
+            "Version":"1.0.1101",
+            "Enhancement":"Updated the Sierra Madre city to contain no abandoned buildings.",
+            "Enhancement1":"UI has been improved on various screens.",
+            "Replaces":"All"
+        }
     }
 }

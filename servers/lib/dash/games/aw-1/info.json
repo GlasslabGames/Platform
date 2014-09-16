@@ -119,31 +119,36 @@
             "standards": [
                 {
                     "category": "ELA Common Core",
-                    "list": [
+                    "groups": [
                         {
-                            "name": "CCSS.ELA-Literacy.RI.6.8",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
-                            "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
-                        },
-                        {
-                            "name": "CCSS.ELA-LIteracy.RI.7.8",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RI/7/8/",
-                            "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant."
-                        },
-                        {
-                            "name": "CCSS.ELA-Literacy.RI.8.8",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RI/8/8/",
-                            "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant; recognize irrelevant evidence."
-                        },
-                        {
-                            "name": "CCSS.ELA-Literacy.RI.9-10.8",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RI/9-10/8/",
-                            "description": "Evaluate arguments and claims; assess whether reasoning is valid and evidence is relevant; identify fallacious reasoning."
-                        },
-                        {
-                            "name": "CCSS.ELA-Literacy.RH.6-8.8",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
-                            "description": "Distinguish among fact, opinion, and reasoned judgment in a text."
+                            "name": " ",
+                            "list": [
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.6.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
+                                    "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
+                                },
+                                {
+                                    "name": "CCSS.ELA-LIteracy.RI.7.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/7/8/",
+                                    "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant."
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.8.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/8/8/",
+                                    "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant; recognize irrelevant evidence."
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.9-10.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/9-10/8/",
+                                    "description": "Evaluate arguments and claims; assess whether reasoning is valid and evidence is relevant; identify fallacious reasoning."
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RH.6-8.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
+                                    "description": "Distinguish among fact, opinion, and reasoned judgment in a text."
+                                }
+                            ]
                         }
                     ]
                 }

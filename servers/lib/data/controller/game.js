@@ -2,6 +2,8 @@
 var path      = require('path');
 var _         = require('lodash');
 var when      = require('when');
+var ini       = require('ini');
+//
 var lConst    = require('../../lms/lms.const.js');
 var Util      = require('../../core/util.js');
 
@@ -12,7 +14,8 @@ module.exports = {
     updateDevice: updateDevice,
     getGamePlayInfo: getGamePlayInfo,
     postTotalTimePlayed: postTotalTimePlayed,
-    postGameAchievement: postGameAchievement
+    postGameAchievement: postGameAchievement,
+    releases: releases
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -80,6 +83,7 @@ function getGameData(req, res, next)
 
     // TODO: check if gameId in DB
 
+
     this.cbds.getUserGameData(userId, gameId)
         .then(function(data){
             this.requestUtil.jsonResponse(res, data);
@@ -113,6 +117,7 @@ function deleteGameData(req, res, next)
     var gameId = req.params.gameId;
 
     // TODO: check if gameId in DB
+
 
     this.cbds.removeUserGameData(userId, gameId)
         .then(function(){
@@ -216,6 +221,7 @@ function postTotalTimePlayed(req, res, next) {
         var gameId = req.params.gameId;
 
         // TODO: validate gameId
+
 
         // update device Id
         //console.log("deviceId:", req.body.deviceId);
@@ -339,5 +345,37 @@ function postGameAchievement(req, res, next) {
 
     } else {
         this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+// http://127.0.0.1:8001/api/v2/data/game/SC/releases.ini
+function releases(req, res, next, serviceManager) {
+    if( !( req.params &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, {error: "missing client/game Id"});
+        return
+    }
+    var gameId = req.params.gameId;
+
+    // TODO: replace this with DB lookup, return promise
+    if( !serviceManager.get("dash").service.isValidGameId(gameId) ) {
+        this.requestUtil.errorResponse(res, {error: "invalid gameId"});
+        return
+    }
+
+    var outType = '.ini';
+    if( req.params && req.params.hasOwnProperty("type") ) {
+        outType = req.params.type;
+    }
+
+    var releaseInfo = serviceManager.get("dash").service.getGameReleases(gameId);
+
+    if(outType === '.ini') {
+        var out = ";aiu;\r\n\r\n";
+
+        out += ini.stringify(releaseInfo);
+        this.requestUtil.textResponse(res, out, 200);
+    } else {
+        this.requestUtil.jsonResponse(res, releaseInfo );
     }
 }

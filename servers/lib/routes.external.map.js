@@ -38,6 +38,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/data/game/:gameId/releases:type",
+            service: "data",
+            controller: "game",
+            method: {
+                get: "releases"
+            }
+        },
+        {
             api: "/api/v2/data/eventsCount",
             service: "data",
             controller: "events",
