@@ -73,26 +73,40 @@ var Q = "DESCRIBE GL_COURSE";
 this.ds.query(Q)
     .then(function(results) {
         var updating = false;
+        var found = false;
         for(var i = 0; i < results.length; i++) {
-            if( (results[i]['Field'] == 'institution_id') &&
-                (results[i]['Null'] == 'NO') ) {
-
+            if((results[i]['Field'] == 'institution_id') && (results[i]['Null'] == 'NO')) {
                 updating = true;
-                // need to update
-                var Q = "ALTER TABLE `GL_COURSE` CHANGE COLUMN `institution_id` `institution_id` BIGINT(20) NULL";
-                this.ds.query(Q)
-                    .then(function(results) {
-                        //console.log(results);
-                        resolve(true);
-                    }.bind(this),
-                    function(err) {
-                        reject({"error": "failure", "exception": err}, 500);
-                    }.bind(this)
-                );
+            }
+            else if(results[i]['Field'] == 'lmsType') {
+                found = true;
             }
         }
 
-        if(!updating) {
+        // could not find 'lmsType'
+        if(!found) {
+            updating = true;
+        }
+
+        if(updating) {
+            // need to update
+            var Q = "ALTER TABLE `GL_COURSE` " +
+                "CHANGE COLUMN `institution_id` `institution_id` BIGINT(20) NULL," +
+                "ADD COLUMN `lmsType` VARCHAR(12) NULL DEFAULT 'glasslab' AFTER `TITLE`," +
+                "ADD COLUMN `lmsId` VARCHAR(255) NULL AFTER `lmsType`," +
+                "ADD COLUMN `labels` VARCHAR(255) NULL AFTER `lmsId`," +
+                "ADD COLUMN `meta` TEXT NULL AFTER `labels`," +
+                "ADD UNIQUE INDEX `lmsId_UNIQUE` (`lmsId` ASC)";
+            this.ds.query(Q)
+                .then(function (results) {
+                    //console.log(results);
+                    resolve(true);
+                }.bind(this),
+                function (err) {
+                    reject({"error": "failure", "exception": err}, 500);
+                }.bind(this)
+            );
+        } else {
             resolve(false);
         }
     }.bind(this),
@@ -139,7 +153,8 @@ return when.promise(function(resolve, reject) {
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
-            c.institution_id as institution     \
+            c.institution_id as institution,     \
+            c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
         WHERE m.user_id="+ this.ds.escape(userId)+
         " ORDER BY c.date_created";
@@ -185,7 +200,8 @@ return when.promise(function(resolve, reject) {
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
-            c.institution_id as institution     \
+            c.institution_id as institution,     \
+            c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
         WHERE c.id="+ this.ds.escape(couserId);
 
@@ -217,19 +233,14 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.getStudentsOfCourse = function(courseId) {
+// return just userId's
+LMS_MySQL.prototype.getStudentIdsForCourse = function(courseId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var Q =
-        "SELECT     \
-            u.id,   \
-            u.first_name as firstName,  \
-            u.last_name as lastName,    \
-            u.username,                 \
-            u.email,                    \
-            u.system_role as role \
+        "SELECT u.id \
         FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
         WHERE m.role='student' AND  \
         m.course_id="+ this.ds.escape(courseId);
@@ -336,6 +347,7 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
 
         var Q =
             "SELECT         \
+                c.id,       \
                 c.title,    \
                 c.grade,    \
                 c.locked > 0 as locked,      \
@@ -626,23 +638,28 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.createCourse = function(userId, title, grade, institutionId) {
+LMS_MySQL.prototype.createCourse = function(userId, courseData) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
         // if institutionId not set then set it to zero
-        if(!institutionId) {
-            institutionId = "NULL";
+        if(!courseData.institutionId) {
+            courseData.institutionId = "NULL";
         } else {
-            institutionId = parseInt(institutionId);
+            courseData.institutionId = parseInt(courseData.institutionId);
         }
 
-        if(_.isArray(grade)) {
-            grade = grade.join(',');
+        if(_.isArray(courseData.grade)) {
+            courseData.grade = courseData.grade.join(',');
         }
 
-        title = this.ds.escape(title);
+        courseData.grade   = this.ds.escape(courseData.grade);
+        courseData.title   = this.ds.escape(courseData.title);
+        courseData.lmsType = this.ds.escape(courseData.lmsType || "glasslab");               // lmsType for sso lms
+        courseData.lmsId   = courseData.lmsId ? this.ds.escape(courseData.lmsId) : "NULL";   // lmsId for sso lms
+        courseData.labels  = courseData.labels ? this.ds.escape(courseData.labels) : "NULL"; // labels
+        courseData.meta    = courseData.meta ? this.ds.escape(courseData.meta) : "NULL";     // meta data
 
         var values = [
             "NULL",  // id
@@ -652,11 +669,15 @@ return when.promise(function(resolve, reject) {
             "NULL",  // code
             "NOW()", // date created
             0,       // free play
-            this.ds.escape(grade),    // grade
-            institutionId,            // institution id
-            "NOW()",                  // last updated
-            0,                        // locked
-            title                     // title
+            courseData.grade,                 // grade
+            courseData.institutionId,         // institution id
+            "NOW()",                          // last updated
+            0,                                // locked
+            courseData.title,                 // title
+            courseData.lmsType,               // lmsType for sso lms
+            courseData.lmsId,                 // lmsId for sso lms
+            courseData.labels,                // labels
+            courseData.meta                   // meta data
         ];
         values = values.join(',');
 
@@ -673,16 +694,20 @@ return when.promise(function(resolve, reject) {
             "institution_id," +
             "last_updated," +
             "locked," +
-            "title" +
+            "title," +
+            "lmsType," +
+            "lmsId," +
+            "labels," +
+            "meta" +
             ") ";
 
         // if institutionId == NULL unique constraint will not apply so we need to check it
-        if(institutionId == "NULL") {
+        if(courseData.institutionId == "NULL") {
             Q += "SELECT "+values+" FROM GL_COURSE ";
             // check if course name already exists for null institution_id's
             Q += "WHERE NOT EXISTS " +
                 "(SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
-            Q += "c.title="+title+" AND m.user_id="+parseInt(userId)+") LIMIT 1";
+            Q += "c.title="+courseData.title+" AND m.user_id="+parseInt(userId)+") LIMIT 1";
         } else {
             Q += "VALUES("+values+")";
         }
@@ -737,24 +762,50 @@ return when.promise(function(resolve, reject) {
     //console.log("getCourses Q:", Q);
     this.ds.query(Q).then(function(data){
             if(data.length) {
-                var Q = "UPDATE GL_COURSE " +
-                    "SET last_updated=NOW(), " +
-                    "title="+this.ds.escape(courseData.title)+", "+
-                    "grade="+this.ds.escape(courseData.grade)+", ";
+                var Q = "UPDATE GL_COURSE SET ";
+
+                var values = {
+                    last_updated: "NOW()",
+                    title: this.ds.escape(courseData.title),
+                    grade: this.ds.escape(courseData.grade)
+                };
+
+                values.lmsType = this.ds.escape(courseData.lmsType || "glasslab");               // lmsType for sso lms
+                values.lmsId   = courseData.lmsId ? this.ds.escape(courseData.lmsId) : "NULL";   // lmsId for sso lms
+                values.labels  = courseData.labels ? this.ds.escape(courseData.labels) : "NULL"; // labels
+                values.meta    = courseData.meta ? this.ds.escape(courseData.meta) : "NULL";     // meta data
+
+                if(!courseData.institutionId ||
+                    courseData.institutionId === "NULL"
+                  ) {
+                    values.institution_id = "NULL";
+                } else {
+                    values.institution_id = parseInt(courseData.institutionId);
+                }
+
+                if(_.isArray(courseData.grade)) {
+                    values.grade = courseData.grade.join(',');
+                }
 
                 if(courseData.archived) {
-                    Q += "archived=true, archived_date="+courseData.archivedDate+", ";
+                    values.archived = true;
+                    values.archived_date = courseData.archivedDate;
                 } else {
-                    Q += "archived=false, archived_date=NULL, ";
+                    values.archived = false;
+                    values.archived_date = 'NULL';
                 }
                 if(courseData.hasOwnProperty('locked')) {
                     // convert bool to int
                     courseData.locked = (courseData.locked) ? 1 : 0;
-                    Q += "locked="+this.ds.escape(courseData.locked)+", ";
+                    values.locked = this.ds.escape(courseData.locked);
                 }
 
-                Q += "institution_Id="+courseData.institutionId+" "+
-                    "WHERE id="+courseData.id;
+                values = _.reduce(values, function(result, value, key){
+                    result.push(key+'='+value);
+                    return result;
+                }, []);
+                Q += values.join(',');
+                Q += " WHERE id="+courseData.id;
 
                 //console.log("updateCourse Q:", Q);
                 this.ds.query(Q).then(resolve, reject);
@@ -899,6 +950,57 @@ return when.promise(function(resolve, reject) {
         }.bind(this),
         function(err) {
             reject({"error": "failure", "exception": err}, 500);
+        }.bind(this)
+    );
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.getCourseInfoFromKey = function(key, value) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var Q =
+        "SELECT         \
+            c.id,       \
+            c.title,    \
+            c.grade,    \
+            c.locked > 0 as locked,      \
+            c.archived > 0 as archived,  \
+            c.archived_Date as archivedDate, \
+            c.institution_id as institutionId, \
+            c.lmsType, \
+            c.lmsId, \
+            c.labels, \
+            c.meta, \
+            co.code \
+        FROM GL_COURSE c \
+        JOIN GL_CODE co on co.course_id=c.id \
+        WHERE c." + key + "=" + this.ds.escape(value);
+
+    this.ds.query(Q)
+        .then(function(results) {
+            if(results.length > 0) {
+                results = results[0];
+                results.archived = results.archived ? true : false;
+                results.locked   = results.locked   ? true : false;
+
+                // convert string to array
+                results.grade = this._splitGrade(results.grade);
+
+                // normalize archive dates
+                results.archivedDate = Util.GetTimeStamp(results.archivedDate);
+
+                resolve(results);
+            } else {
+                resolve();
+            }
+        }.bind(this),
+        function(err) {
+            reject({"error": "failure", "exception": err, statusCode:500});
         }.bind(this)
     );
 

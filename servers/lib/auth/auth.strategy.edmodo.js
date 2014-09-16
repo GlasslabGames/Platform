@@ -2,8 +2,8 @@
  * Module dependencies.
  */
 var util = require('util')
-    , OAuth2Strategy     = require('passport-oauth').OAuth2Strategy
-    , InternalOAuthError = require('passport-oauth').InternalOAuthError;
+    , OAuth2Strategy     = require('passport-oauth2')
+    , InternalOAuthError = require('passport-oauth2').InternalOAuthError;
 
 var _ = require('lodash');
 
@@ -84,11 +84,28 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
     this._oauth2.get(url, accessToken, function (err, body, res) {
         if (err) { return done(new InternalOAuthError('failed to fetch user profile', err)); }
 
+        // check if contains a "url" property
+        if( res.statusCode == 200 ) {
+            try {
+                var tmp = JSON.parse(body);
+                // contains url and url is NOT the same as the one just tried
+                if( tmp.hasOwnProperty('url') &&
+                    (url != tmp.url) ) {
+                    console.log("Edmodo Strategy: Redirecting to", tmp.url);
+                    this._getUserProfile(tmp.url, accessToken, done);
+                    return;
+                }
+            } catch(err) {
+                // this is ok
+            }
+        }
+
         if( res.statusCode == 302 &&
             res.headers &&
             res.headers.location) {
             console.log("Edmodo Strategy: Redirecting to", res.headers.location);
             this._getUserProfile(res.headers.location, accessToken, done);
+            return;
         } else {
             try {
                 var json = JSON.parse(body);
@@ -105,13 +122,20 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                     profile.role = lConst.role.student;
                 }
 
-                // TODO: add "edmodo" string to username
                 // add to migration
-                profile.username  = json.id+"."+json.username;
-                profile.firstName = json.first_name;
-                profile.lastName  = json.last_name;
+                profile.username  = '{'+this.name+'}.'+json.id;
+                profile.firstName = json.first_name || "[none]";
+                profile.lastName  = json.last_name || "";
+                profile.ssoUsername  = json.username || "[none]";
                 profile.email     = json.email || "";
-                profile.password  = body;
+
+                if(profile.role == lConst.role.instructor) {
+                    profile.ssoData = body;
+                } else {
+                    profile.ssoData = "-"; // prevent PII
+                }
+
+                profile.password = "-";
 
                 done(null, profile);
             } catch (err) {

@@ -9,7 +9,9 @@ module.exports = {
     getUserGameAchievements: getUserGameAchievements,
     getGameDetails:      getGameDetails,
     getGameReports:      getGameReports,
+    getCourseGameMissions: getCourseGameMissions,
     getGameMissions:     getGameMissions
+
 };
 
 var exampleIn = {};
@@ -123,11 +125,11 @@ function getGameReports(req, res){
  GET
  http://localhost:8001/api/v2/dash/course/8/game/SC/missions
 */
-exampleIn.getGameMissions = {
+exampleIn.getCourseGameMissions = {
     gameId: 'SC',
     courseId: 1
 };
-function getGameMissions(req, res){
+function getCourseGameMissions(req, res){
     try {
         // check input
         if( !( req.params &&
@@ -151,15 +153,13 @@ function getGameMissions(req, res){
             return;
         }
         var courseId = req.params.courseId;
-
         var userData = req.session.passport.user;
 
-        var missions = _.cloneDeep(this.getGameMissions(gameId));
-        if( missions ) {
+        var gameMissions = _.cloneDeep(this.getGameMissions(gameId));
+        if( gameMissions ) {
 
-            var missionGroups = _.cloneDeep(missions.groups);
-            var linkSchema    = missions.linkSchema;
-
+            var missionGroups = _.cloneDeep(gameMissions.groups);
+            var linkSchema    = gameMissions.linkSchema;
             var missionProgressLock = false;
 
             this.telmStore.getGamesForCourse(courseId)
@@ -270,7 +270,10 @@ function getGameMissions(req, res){
                         }
                     }
 
-                    this.requestUtil.jsonResponse(res, missionGroups);
+                    this.requestUtil.jsonResponse(res, {
+                        title: missions.title,
+                        groups: missionGroups
+                    });
                 }.bind(this))
 
                 // catch all errors
@@ -279,7 +282,88 @@ function getGameMissions(req, res){
                     this.requestUtil.errorResponse(res, "Get Missions Error");
                 }.bind(this));
         } else {
-            this.requestUtil.jsonResponse(res, []);
+            this.requestUtil.jsonResponse(res, {});
+        }
+
+    } catch(err) {
+        console.trace("Reports: Get Game Missions Error -", err);
+        this.stats.increment("error", "GetGameInfo.Catch");
+        this.requestUtil.errorResponse(res, "Server Error");
+    }
+}
+
+/*
+ GET
+ http://localhost:8001/api/v2/dash/game/SC/missions
+ */
+exampleIn.getGameMissions = {
+    gameId: 'SC'
+};
+function getGameMissions(req, res){
+    try {
+        // check input
+        if( !( req.params &&
+            req.params.hasOwnProperty("gameId") ) ) {
+            this.requestUtil.errorResponse(res, {error: "invalid game id"}, 404);
+            return;
+        }
+        var gameId = req.params.gameId;
+        // gameIds are not case sensitive
+        gameId = gameId.toUpperCase();
+
+        // check gameId exists
+        if( !this.isValidGameId(gameId) ) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+            return;
+        }
+        var userData = req.session.passport.user;
+
+        var gameMissions = _.cloneDeep(this.getGameMissions(gameId));
+        if( gameMissions ) {
+            var missionGroups = _.cloneDeep(gameMissions.groups);
+            var linkSchema    = gameMissions.linkSchema;
+            var missionProgressLock = false;
+            for(var i = 0; i < missionGroups.length; i++) {
+                var missions = missionGroups[i].missions;
+                var lastCompletedDate = null;
+                for (var j = 0; j < missions.length; j++) {
+                    // update links
+                    for (var k = 0; k < missions[j].links.length; k++) {
+
+                        // if has $linkSchemaId replace link with $linkSchemaId
+                        if(missions[j].links[k].hasOwnProperty("$linkSchemaId")) {
+                            missions[j].links[k].link = linkSchema[ missions[j].links[k]["$linkSchemaId"] ];
+
+                            // replace keys
+                            var data = {
+                                gameId:           gameId,
+                                webSessionId:     req.cookies["connect.sid"],
+                                missionId:        missions[j].id,
+                                configSessionUrl: req.headers.host,
+                                configDataUrl:    req.headers.host
+                            };
+
+                            // encodeURIComponent all data inputs
+                            for(var d in data) {
+                                data[d] = encodeURIComponent(data[d]);
+                            }
+
+                            var template = handlebars.compile( missions[j].links[k].link );
+                            missions[j].links[k].link = template(data);
+
+                            // remove $linkSchemaId
+                            delete missions[j].links[k]["$linkSchemaId"];
+                        }
+                    }
+                }
+            }
+
+            this.requestUtil.jsonResponse(res, {
+                title: gameMissions.title,
+                groups: missionGroups
+            });
+        } else {
+            this.requestUtil.jsonResponse(res, {});
         }
 
     } catch(err) {

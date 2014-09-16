@@ -28,12 +28,21 @@ module.exports = {
     // ---------------------------------------------------
     // Version 2
     // ---------------------------------------------------
+
         {
             api: "/api/v2/data/config/:gameId",
             service: "data",
             controller: "config",
             method: {
                 get: "index"
+            }
+        },
+        {
+            api: "/api/v2/data/game/:gameId/releases:type",
+            service: "data",
+            controller: "game",
+            method: {
+                get: "releases"
             }
         },
         {
@@ -159,6 +168,14 @@ module.exports = {
         },
         {
             api: "/api/v2/dash/course/:courseId/game/:gameId/missions",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getCourseGameMissions"
+            }
+        },
+        {
+            api: "/api/v2/dash/game/:gameId/missions",
             service: "dash",
             controller: "game",
             method: {
@@ -376,6 +393,22 @@ module.exports = {
             controller: "user",
             method: {
                 get: "resetPasswordVerify"
+            }
+        },
+        {
+            api: "/api/v2/auth/register-verify/:code/verify",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "verifyEmailCode"
+            }
+        },
+        {
+            api: "/api/v2/auth/register-verify/:code/verifyBeta",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "verifyBetaCode"
             }
         },
         {

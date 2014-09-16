@@ -3,30 +3,62 @@
         "id": "IC",
         "name": "iCivics",
         "logo": {
-            "small": "http://argubotacademy.org/images/glasslab_logo.png",
-            "large": "http://argubotacademy.org/images/glasslab_logo.png"
+            "small": "assets/icivics-logo.png",
+            "large": "assets/icivics-logo-2x.png"
         }
     },
     "basic": {
         "gameId": "AW-1",
         "enabled": true,
-        "maintenance":
-        {
-            "message": "Coming Soon!"
-        },
+        "maintenance": null,
         "shortName": "Argument Wars",
         "longName": "Argument Wars",
+        "description": "Try out your persuasive abilities by arguing a real Supreme Court case. The other lawyer is your competition. Whoever uses the strongest arguments wins!",
         "settings": {
         },
         "license": {
-            "type": "free",
-            "valid": true
+            "type":      "loginType",
+            "loginType": "icivics",
+            "valid": true,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-AA-1.png",
-            "large": "assets/thumb-game-AA-1.png"
+            "small": "assets/thumb-game-AW-1.png",
+            "large": "assets/thumb-game-AW-1.png"
+        },
+        "play": {
+            "type": "page",
+            "page": {
+                "title": "Argument Wars",
+                "embed": "https://staging.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
+                "size": {
+                    "width": 940,
+                    "height": 640
+                }
+            }
         }
     },
+    "assessment": [
+        {
+            "enabled": false,
+            "id": "sowo",
+            "dataProcessScope": "all",
+            "engine": "javascript",
+            "trigger": "activity",
+            "rules": {
+                "wo1": {
+                    "name": "Coming soon",
+                    "description": "COMING SOON!"
+                },
+                "so1": {
+                    "name": "Coming soon",
+                    "description": "COMING SOON!"
+                }
+            }
+        }
+    ],
     "reports": {
         "list": [
             {
@@ -34,140 +66,117 @@
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
-                "description": "This report shows..."
+                "description": "Coming Soon!"
             },
             {
                 "id": "achievements",
-                "enabled": true,
+                "enabled": false,
                 "name": "Game Achievements & Time Played",
                 "header": "Game Achievements & Time Played",
-                "description": "This report shows...",
+                "description": "Coming Soon!",
                 "groups": [
-                    {
-                        "name": "Common Core Standards Report"
-                    },
-                    {
-                        "name": "21st Century Skills"
-                    }
                 ]
             }
         ]
     },
     "details": {
-        "release": "alpha",
+        "release": "beta",
         "price": "Free",
-        "releaseDate": "TBA",
+        "releaseDate": "Aug 2010",
         "type": "Browser",
-        "platform": "Browser",
-        "subject": "ELA",
-        "grades": "6 - 8",
+        "platform": "Flash/Browser",
+        "subject": "Social Studies",
+        "grades": "6 - 10",
         "buttons": [
-            {
-                "name": "Download",
-                "links": [
-                    {
-                        "name": "PC (1.0 GB)",
-                        "type": "default",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.msi"
-                    },
-                    {
-                        "name": "Mac (1.0 GB)",
-                        "type": "default",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_1_1106/2/SimCityEDU_setup.dmg"
-                    }
-                ]
-            },
             {
                 "name": "Play Game",
                 "links": [
                     {
                         "name": "Play Game",
-                        "type": "default",
-                        "link": "/game/play/SC"
+                        "type": "play"
                     }
                 ]
             }
         ],
         "pages": {
             "product": {
-                "header": "Let Your Students Go to Town!",
-                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<\/br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve, explain the relationships in complex systems, and read informational texts and diagrams.<\/br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
+                "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
+                "about": "Argument Wars is an online game that lets players argue landmark Supreme Court cases. By finding and using the strongest support, students recreate historic legal cases while evaluating arguments and distinguishing between valid and invalid reasoning. Argument Wars brings gaming to the social studies classroom and lets students have fun while they learn about landmark cases and hone fundamental skills that are critical to success in meeting Common Core standards. ",
+                "video":"https://www.youtube.com/watch?v=kZF_s1jNBrM",
+                "brochure":"https://cdn.icivics.org/sites/default/files/uploads/ArgumentWars_Guide.pdf",
                 "curriculum": [
-                    "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
+                    " Addresses Common Core standards related to evaluating arguments and assessing whether reasoning is valid",
+                    " Offers an engaging way for students to interact with commonly-taught Supreme Court landmark cases",
+                    " Helps students understand the role the United States Supreme Court has played in defining constitutional rights"
                 ],
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/3v3battle.png"
-                    },
-                    {
-                        "type": "image",
-                        "url": "http://argubotacademy.org/images/carousel/map.png"
+                        "url": "assets/ArgWarsPlayfullyGameImage_600x480.jpg"
                     }
                 ]
             },
             "standards": [
                 {
                     "category": "ELA Common Core",
-                    "list": [
+                    "groups": [
                         {
-                            "name": "CCSS.ELA-Literacy.RST.6-8.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
-                            "description": "Cite specific textual evidence to support conclusions"
-                        },
-                        {
-                            "name": "CCSS.ELA-Literacy.RST.6-8.7",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
-                            "description": "Integrate information from texts & diagrams"
-                        },
-                        {
-                            "name": "CCSS.ELA-Literacy.RI.7.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
-                            "description": "Cite several pieces of textual evidence to support analysis"
-                        },
-                        {
-                            "name": "CCSS.ELA-Literacy.RI.6-8.10",
-                            "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
-                            "description": "Proficiently read and comprehend literary nonfiction"
-                        },
-                        {
-                            "name": "CCSS.ELA-Literacy.CCRA.R.1",
-                            "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
-                            "description": "Read and understand text and make logical inferences from it"
-                        }
-                    ]
-                },
-                {
-                    "category": "Next Generation Science",
-                    "list": [
-                        {
-                            "description": "ESS3.C Human Impacts on Earth Systems"
-                        },
-                        {
-                            "description": "Cross Cutting Concept: Systems Thinking"
-                        }
-                    ]
-                },
-                {
-                    "category": "21st Century Skills",
-                    "list": [
-                        {
-                            "description": "Critical thinking and problem solving"
+                            "name": " ",
+                            "list": [
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.6.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
+                                    "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
+                                },
+                                {
+                                    "name": "CCSS.ELA-LIteracy.RI.7.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/7/8/",
+                                    "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant."
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.8.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/8/8/",
+                                    "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant; recognize irrelevant evidence."
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RI.9-10.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/9-10/8/",
+                                    "description": "Evaluate arguments and claims; assess whether reasoning is valid and evidence is relevant; identify fallacious reasoning."
+                                },
+                                {
+                                    "name": "CCSS.ELA-Literacy.RH.6-8.8",
+                                    "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
+                                    "description": "Distinguish among fact, opinion, and reasoned judgment in a text."
+                                }
+                            ]
                         }
                     ]
                 }
+
             ],
             "lessonPlans": [
                 {
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Routine 1",
-                            "link": "http://glasslabgames.org"
+                            "name": "Appellate Courts: Let’s Take It Up",
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Appellate+Courts.pdf"
                         },
                         {
-                            "name": "Routine 2",
-                            "link": "http://glasslabgames.org"
+                            "name": "Interpreting the Constitution: What Does That Mean?",
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Interpreting+the+Constitution.pdf"
+                        },
+                        {
+                            "name": "Sources of Law",
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Sources+of+Law.pdf"
+                        },
+                        {
+                            "name": "Landmark Library: Brown v. Board of Education",
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Brown.pdf"
+                        },
+                        {
+                            "name": "Landmark Library: Miranda v. Arizona",
+                            "link": "https://s3.amazonaws.com/playfully_AW-1/Miranda.pdf"
                         }
                     ]
                 },
@@ -175,55 +184,36 @@
                     "category": "Videos",
                     "list": [
                         {
-                            "name": "Walkthrough",
-                            "link": "http://glasslabgames.org"
-                        },
-                        {
-                            "name": "Mission",
-                            "link": "http://glasslabgames.org"
-                        }
-                    ]
-                },
-                {
-                    "category": "Info Pack",
-                    "list": [
-                        {
-                            "name": "One Page Game Description",
-                            "link": "http://glasslabgames.org"
+                            "name": "Overview",
+                            "link": " https://www.youtube.com/watch?v=kZF_s1jNBrM"
                         }
                     ]
                 }
             ],
             "research": [
-                {
-                    "category": "SRI 2014",
-                    "list": [
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
-                        },
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
-                        }
-                    ]
-                }
             ],
             "reviews": [
                 {
-                    "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florida",
-                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission, automatic grading."
+                    "reviewer": "Kristen H., high school teacher",
+                    "review": "Argument Wars really help[s] improve their understanding of important Supreme Court cases."
+                },
+                {
+                    "reviewer": " – N. Morris, high school teacher",
+                    "review": "[Argument Wars is] great for helping kids see that you have to use FACTS... not just feelings."
+                },
+                {
+                    "reviewer": "– David S., teacher",
+                    "review": "My students thoroughly enjoy playing Argument Wars."
                 }
             ]
         },
         "banners": {
-            "product": "http://argubotacademy.org/images/banner_mars1.jpg",
-            "reports": "http://argubotacademy.org/images/banner_mars1.jpg"
+            "product": "assets/game-banner-AW-1.jpg",
+            "reports": "assets/game-banner-AW-1.jpg"
         },
         "social": {
-            "facebook": "http://facebook.com/glasslabgames",
-            "twitter": "http://twitter.com/glasslabgames",
-            "google": "http://plus.google.com/glasslabgames"
+            "facebook": "http://facebook.com/icivics",
+            "twitter": "http://twitter.com/icivics"
         }
     }
 }

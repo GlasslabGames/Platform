@@ -3,7 +3,8 @@
  */
 var querystring   = require('querystring'),
     util          = require('util'),
-    OAuthStrategy = require('passport-oauth').OAuthStrategy;
+    OAuthStrategy = require('passport-oauth1'),
+    InternalOAuthError = require('passport-oauth1').InternalOAuthError;
 
 var _ = require('lodash');
 
@@ -91,13 +92,13 @@ util.inherits(Strategy, OAuthStrategy);
  */
 
 Strategy.prototype.userProfile = function(token, tokenSecret, params, done) {
-    console.log("ICivics - token:", token, ", tokenSecret:", tokenSecret, ", params:", params);
-
-    var url = this._baseURL+ '/services/rest/service_system/connect.json';
-    this._getUserProfile(url, token, tokenSecret, null, done);
+    //console.log("ICivics - token:", token, ", tokenSecret:", tokenSecret, ", params:", params);
+    this._getUserProfile(token, tokenSecret, done);
 };
 
-Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, done) {
+Strategy.prototype._getUserProfile = function(token, tokenSecret, done, _url, data) {
+    var url = _url || (this._baseURL+ '/services/rest/service_system/connect.json');
+
     this._oauth.post(url, token, tokenSecret, data, function (err, body, res) {
         if (err) { return done(new InternalOAuthError('failed to fetch user profile', err)); }
 
@@ -105,47 +106,162 @@ Strategy.prototype._getUserProfile = function(url, token, tokenSecret, data, don
             res.headers &&
             res.headers.location) {
             console.log("ICivics Strategy: Redirecting to", res.headers.location);
-            this._getUserProfile(res.headers.location, token, tokenSecret, done);
+            this._getUserProfile(token, tokenSecret, done, res.headers.location);
         } else {
             try {
-                //console.log("ICivics - _getUserProfile url:", url);
-                //console.log("ICivics - _getUserProfile body:", body);
-                var json = JSON.parse(body);
-                //console.log("ICivics - _getUserProfile json:", json);
-
-                var profile = {
-                    loginType: aConst.login.type.icivics
-                };
-                profile._raw      = body;
-                profile._json     = json;
-
-                for(var r in json.user.roles) {
-                    if(json.user.roles[r] == "teacher") {
-                        profile.role = lConst.role.instructor;
-                        break;
-                    }
-                    else if(json.user.roles[r] == "student") {
-                        profile.role = lConst.role.student;
-                        break;
-                    }
-                }
-                if(!profile.role) {
-                    profile.role = lConst.role.student;
+                var profile = this._getProfileData(body);
+                if(!profile) {
+                    return done(new InternalOAuthError('invalid user'));
                 }
 
-                profile.username  = "icivics."+json.user.uid;
-                if(json.user.name) {
-                    profile.username += "."+json.user.name;
+                // if teacher, create all students in all classes, create classes, add students to class
+                if(profile.role === lConst.role.instructor) {
+                    this._getGroups(token, tokenSecret, done, profile, profile._json);
+                } else {
+                    done(null, profile);
                 }
-                profile.firstName = json.user.first_name || "";
-                profile.lastName  = json.user.last_name || "";
-                profile.email     = json.user.mail || "";
-                profile.password  = body;
-
-                done(null, profile);
             } catch (err) {
                 done(err);
             }
+        }
+    }.bind(this));
+};
+
+Strategy.prototype._getProfileData = function(body) {
+
+    //console.log("ICivics - _getUserProfile url:", url);
+    //console.log("ICivics - _getUserProfile body:", body);
+    var json = {};
+    if(_.isString(body)) {
+        json = JSON.parse(body);
+    }
+    else if(_.isObject(body)) {
+        json = body;
+        body = JSON.stringify(body);
+    } else {
+        return null;
+    }
+
+    if(json.hasOwnProperty('user')) {
+        json = json.user;
+    }
+    //console.log("ICivics - _getUserProfile json:", json);
+    //console.log("ICivics - _getUserProfile og_groups json:", json.user.og_groups);
+
+    // invalid user id
+    if(parseInt(json.uid) == 0) {
+        return null;
+    }
+
+    var profile = {
+        loginType: aConst.login.type.icivics
+    };
+    profile._raw      = body;
+    profile._json     = json;
+
+    for(var r in json.roles) {
+        if(json.roles[r] == "teacher") {
+            profile.role = lConst.role.instructor;
+            break;
+        }
+        else if(json.roles[r] == "student") {
+            profile.role = lConst.role.student;
+            break;
+        }
+    }
+    if(!profile.role) {
+        profile.role = lConst.role.student;
+    }
+
+    profile.username  = '{'+this.name+'}.'+json.uid;
+    if(json.name) {
+        profile.username += "."+json.name;
+        profile.ssoUsername = json.name;
+    }
+
+    if(profile.role === lConst.role.instructor) {
+        profile.firstName = json.first_name || "";
+        profile.lastName  = json.last_name || "";
+        profile.email     = json.mail || "";
+    }
+    else if(profile.role === lConst.role.student) {
+        var nparts = json.real_name.split(' ');
+        // remove first name part
+        profile.firstName = nparts.shift() || "";
+        // put rest as last name
+        profile.lastName  = nparts.join(" ") || "";
+        profile.email     = "";
+    }
+
+    if(profile.role == lConst.role.instructor) {
+        profile.ssoData = body;
+    } else {
+        profile.ssoData = "-"; // prevent PII
+    }
+
+    profile.password = "-";
+
+    return profile;
+};
+
+
+Strategy.prototype._getGroups = function(token, tokenSecret, done, profile, userData) {
+    var url = this._baseURL+ '/services/rest/service_user/og_members.json';
+
+    profile.courses = {};
+
+    var uid = userData.uid;
+    for(var key in userData.og_groups) {
+        // only add active classes
+        if(userData.og_groups[key].is_active) {
+            profile.courses[key] = {
+                type: aConst.login.type.icivics,
+                title: userData.og_groups[key].title,
+                grade: ['7'],
+                games: [{id:'AW-1', settings:{}}], // default to include AW game
+                users: [],
+                archived:     parseInt(userData.og_groups[key].is_active) ? false : true,
+                archivedDate: parseInt(userData.og_groups[key].changed),
+                lmsType: lConst.course.type.icivics,
+                lmsId:   '{'+lConst.course.type.icivics+'}.'+userData.og_groups[key].nid,
+                labels:  "",
+                meta:    JSON.stringify(userData.og_groups[key])
+            };
+        }
+    }
+
+    var data = { uid: parseInt(uid) };
+    //console.error("ICivics - teacher getMembers data:", data);
+    this._oauth.post(url, token, tokenSecret, data, function (err, body, res) {
+        if (err) {
+            return done(new InternalOAuthError('failed to fetch user members', err));
+        }
+
+        if(body) {
+            var json = null;
+            try{
+                json = JSON.parse(body);
+            } catch(err){
+                return done(new InternalOAuthError('failed to fetch user members', err));
+            }
+
+            // add users to courses
+            //console.log("ICivics - teacher getMembers json:", JSON.stringify(json, null, 2));
+            for(var courseId in json){
+                for(var userId in json[courseId].members){
+                    // valid memeber and userId not teacher
+                    if( json[courseId].members[userId] &&
+                        parseInt(userId) != parseInt(userData.uid)
+                      ) {
+                        // normalize input
+                        profile.courses[courseId].users.push( this._getProfileData(json[courseId].members[userId]) );
+                    }
+                }
+            }
+
+            done(null, profile);
+        } else {
+            return done(new InternalOAuthError('failed to fetch user members - no body'));
         }
     }.bind(this));
 };

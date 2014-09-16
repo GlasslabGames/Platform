@@ -17,7 +17,7 @@ var Util;
 
 module.exports = DashService;
 
-function DashService(options){
+function DashService(options, serviceManager){
     try{
         var TelmStore, LmsStore, DashStore, Errors;
 
@@ -41,6 +41,8 @@ function DashService(options){
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
         this.dashStore   = new DashStore(this.options.webapp.datastore.mysql);
+
+        this.serviceManager = serviceManager;
 
         this._games = {};
 
@@ -81,7 +83,9 @@ DashService.prototype.getListOfGameIds = function() {
     for(var g in this._games) {
         if( this._games[g].info &&
             this._games[g].info.basic &&
-            this._games[g].info.basic.gameId) {
+            this._games[g].info.basic.gameId &&
+            // only return games that are enabled
+            this._games[g].info.basic.enabled) {
             gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
         }
     }
@@ -91,7 +95,12 @@ DashService.prototype.getListOfGameIds = function() {
 // TODO: replace this with DB lookup, return promise
 DashService.prototype.isValidGameId = function(gameId) {
     for(var g in this._games) {
-        if( g == gameId) {
+        if( g == gameId &&
+            this._games[g] &&
+            this._games[g].info &&
+            this._games[g].info.basic &&
+            // only return games that are enabled
+            this._games[g].info.basic.enabled) {
             return true;
         }
     }
@@ -173,6 +182,18 @@ DashService.prototype.getGameReportInfo = function(gameId, reportId) {
     }
 };
 
+// TODO: replace this with DB lookup, return promise
+DashService.prototype.getGameReleases = function(gameId) {
+    if( this._games.hasOwnProperty(gameId) &&
+        this._games[gameId].hasOwnProperty('info') &&
+        this._games[gameId].info.hasOwnProperty('releases') ) {
+        return this._games[gameId].info.releases;
+    } else {
+        return {};
+    }
+};
+
+
 // TODO: replace this with DB lookup
 DashService.prototype.getListOfAchievements = function(gameId, playerAchievement) {
     // if no player achievements then default to none
@@ -247,7 +268,11 @@ DashService.prototype._loadGameFiles = function() {
                         if(file.charAt(0) != '.') {
                             var name = path.basename(file, path.extname(file));
                             var filePath = path.join(dir, gameName, file);
-                            this._games[gameId][name] = require(filePath);
+                            try {
+                                this._games[gameId][name] = require(filePath);
+                            } catch(err) {
+                                console.error("loadGameFiles filePath:", filePath, ", Error:", err);
+                            }
                         }
                     }.bind(this));
 

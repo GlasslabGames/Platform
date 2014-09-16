@@ -7,6 +7,9 @@
 module.exports = {
     webappSessionPrefix: "wa_session",
     sessionCookieName:  "JSESSIONID",
+    support: {
+      email: "support@glasslabgames.org"
+    },
     code: {
         type: {
             institution: "institution",
@@ -30,7 +33,8 @@ module.exports = {
             learning:   "learning.com",
             docent:     "docent",
             icivics:    "icivics",
-            google:     "google"
+            google:     "google",
+            clever:     "clever"
         }
     },
     passwordReset: {
@@ -38,6 +42,14 @@ module.exports = {
         status: {
             sent:       "sent",
             inProgress: "in progress"
+        }
+    },
+    verifyCode: {
+        expirationInterval: 6048000000, // 1 week in milliseconds
+        status: {
+            sent:       "sent",
+            verified:   "verified",
+            beta:       "beta"
         }
     },
     datastore: {
