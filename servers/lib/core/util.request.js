@@ -25,6 +25,15 @@ function RequestUtil(options, errors){
     this.errors = errors || {};
 }
 
+RequestUtil.prototype.getFullHostUrl = function(req) {
+    var protocal = "http://";
+    if(req.connection.encrypted) {
+        protocal = "https://";
+    }
+
+    return protocal + req.headers.host;
+};
+
 RequestUtil.prototype.errorResponse = function(res, obj, code){
     // default 400 error code
     if(!code) { code = 400; }
