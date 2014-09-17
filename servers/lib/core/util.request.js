@@ -25,6 +25,15 @@ function RequestUtil(options, errors){
     this.errors = errors || {};
 }
 
+RequestUtil.prototype.getFullHostUrl = function(req) {
+    var protocal = "http://";
+    if(req.connection.encrypted) {
+        protocal = "https://";
+    }
+
+    return protocal + req.headers.host;
+};
+
 RequestUtil.prototype.errorResponse = function(res, obj, code){
     // default 400 error code
     if(!code) { code = 400; }
@@ -58,6 +67,28 @@ RequestUtil.prototype.errorResponse = function(res, obj, code){
     }
 
     this.jsonResponse(res, obj, obj.statusCode);
+};
+
+RequestUtil.prototype.downloadResponse = function(res, data, name, type){
+    if(!name) { name = "download"; }
+    if(!type) { type = "application/force-download"; }
+
+    res.writeHead(200, {
+        "Content-Type": type
+        ,"Content-Disposition": "attachment; filename=\""+name+"\""
+        //,"Content-Length": data.length
+    });
+    res.end( data );
+};
+
+RequestUtil.prototype.textResponse = function(res, data, code, type){
+    if(!code) { code = 200; }
+    if(!type) { type = "text/plain"; }
+
+    res.writeHead(code, {
+        "Content-Type": type
+    });
+    res.end( data );
 };
 
 RequestUtil.prototype.jsonResponse = function(res, obj, code){

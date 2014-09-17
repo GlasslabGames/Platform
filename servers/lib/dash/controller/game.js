@@ -240,6 +240,7 @@ function getCourseGameMissions(req, res){
                                         webSessionId:     req.cookies["connect.sid"],
                                         missionId:        missions[j].id,
                                         courseId:         courseId,
+                                        sdkUrl:           this.requestUtil.getFullHostUrl(req),
                                         configSessionUrl: req.headers.host,
                                         configDataUrl:    req.headers.host
                                     };
@@ -339,6 +340,7 @@ function getGameMissions(req, res){
                                 gameId:           gameId,
                                 webSessionId:     req.cookies["connect.sid"],
                                 missionId:        missions[j].id,
+                                sdkUrl:           this.requestUtil.getFullHostUrl(req),
                                 configSessionUrl: req.headers.host,
                                 configDataUrl:    req.headers.host
                             };

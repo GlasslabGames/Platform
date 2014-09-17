@@ -29,10 +29,10 @@
             "large": "assets/thumb-game-AW-1.png"
         },
         "play": {
-            "type": "modal",
-            "modal": {
+            "type": "page",
+            "page": {
                 "title": "Argument Wars",
-                "embed": "https://staging.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
+                "embed": "https://cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
                 "size": {
                     "width": 940,
                     "height": 640
@@ -66,21 +66,15 @@
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
-                "description": "Coming Soo..."
+                "description": "Coming Soon!"
             },
             {
                 "id": "achievements",
-                "enabled": true,
+                "enabled": false,
                 "name": "Game Achievements & Time Played",
                 "header": "Game Achievements & Time Played",
-                "description": "This report shows...",
+                "description": "Coming Soon!",
                 "groups": [
-                    {
-                        "name": "Common Core Standards Report"
-                    },
-                    {
-                        "name": "21st Century Skills"
-                    }
                 ]
             }
         ]
@@ -111,6 +105,8 @@
                 "title": "Product Description",
                 "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
                 "about": "Argument Wars is an online game that lets players argue landmark Supreme Court cases. By finding and using the strongest support, students recreate historic legal cases while evaluating arguments and distinguishing between valid and invalid reasoning. Argument Wars brings gaming to the social studies classroom and lets students have fun while they learn about landmark cases and hone fundamental skills that are critical to success in meeting Common Core standards. ",
+                "video":"https://www.youtube.com/watch?v=kZF_s1jNBrM",
+                "brochure":"https://cdn.icivics.org/sites/default/files/uploads/ArgumentWars_Guide.pdf",
                 "curriculum": [
                     " Addresses Common Core standards related to evaluating arguments and assessing whether reasoning is valid",
                     " Offers an engaging way for students to interact with commonly-taught Supreme Court landmark cases",
@@ -119,7 +115,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/ArgWarsPlayfullyGameImage_600x480.jpg"
+                        "url": "assets/AW-carousel_1.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_3.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_5.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_6.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_7.jpg"
                     }
                 ]
             },
@@ -131,7 +143,7 @@
                 "list": [
                     {
                         "category": "ELA Common Core",
-                        "list": [
+                        "groups": [
                             {
                                 "name": "CCSS.ELA-Literacy.RI.6.8",
                                 "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
