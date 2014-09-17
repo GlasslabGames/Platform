@@ -184,7 +184,7 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/SimCityEDU_setup.msi"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/2/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
@@ -383,10 +383,10 @@
     },
     "missions": {
         "linkSchema": {
-            "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-SessionURL={{configSessionUrl}}&-DataURL={{configDataUrl}}",
+            "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-sdkURL={{sdkUrl}}",
             "diagram": "/assets/games/{{gameId}}/challenges?challengeId={{missionId}}&courseId={{courseId}}&sessionURL={{configSessionUrl}}&dataURL={{configDataUrl}}&type=play"
         },
-        "title": "SimCityEdu Missions",
+        "title": "SimCityEDU Missions",
         "groups": [
             {
                 "enabled": true,

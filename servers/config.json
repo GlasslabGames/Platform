@@ -113,9 +113,9 @@
                 "callbackURL": "http://127.0.0.1:8001/auth/edmodo/callback"
             },
             "icivics": {
-                "baseURL":              "https://www.icivics.org",
-                "consumerKey":          "nspp95qt3ts8EMk5TkcWZpcVVFyuoUEa",
-                "consumerSecret":       "rAkG68NwXvrrDBM973Vify3uQPWAFfE4",
+                "baseURL":              "https://staging.icivics.org",
+                "consumerKey":          "fWAzCPbD9FTWmpYEEnTjZnvubWN8r2Y2",
+                "consumerSecret":       "bzw2NdSr8Jsfpg9feXv87LyUPgyzxj5j",
                 "callbackURL":          "http://127.0.0.1:8001/auth/icivics/callback"
             },
             "clever": {
