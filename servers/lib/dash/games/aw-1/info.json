@@ -63,7 +63,7 @@
         "list": [
             {
                 "id": "sowo",
-                "enabled": true,
+                "enabled": false,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
                 "description": "Coming Soon!"
