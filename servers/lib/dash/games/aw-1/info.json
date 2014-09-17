@@ -70,10 +70,10 @@
             },
             {
                 "id": "achievements",
-                "enabled": false,
+                "enabled": true,
                 "name": "Game Achievements & Time Played",
                 "header": "Game Achievements & Time Played",
-                "description": "Coming Soon!",
+                "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "groups": [
                 ]
             }
