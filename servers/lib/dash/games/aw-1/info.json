@@ -112,7 +112,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/ArgWarsPlayfullyGameImage_600x480.jpg"
+                        "url": "assets/AW-carousel_1.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_3.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_5.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_6.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_7.jpg"
                     }
                 ]
             },
