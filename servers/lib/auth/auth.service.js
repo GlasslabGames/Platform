@@ -249,7 +249,7 @@ return when.promise(function(resolve, reject) {
                             var p = this.addOrUpdate_SSO_Course(userData, courses[c])
                                 .then(function(updatedCourseData){
                                     // update course info
-                                    userData.courses[c] = updatedCourseData;
+                                    userData.courses[c] = _.merge(userData.courses[c], updatedCourseData);
                                 }.bind(this));
 
                             addCoursePromiseList.push( p );

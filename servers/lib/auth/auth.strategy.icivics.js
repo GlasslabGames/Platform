@@ -105,7 +105,7 @@ Strategy.prototype._getUserProfile = function(token, tokenSecret, done, _url, da
         if( res.statusCode == 302 &&
             res.headers &&
             res.headers.location) {
-            console.log("ICivics Strategy: Redirecting to", res.headers.location);
+            //console.log("ICivics Strategy: Redirecting to", res.headers.location);
             this._getUserProfile(token, tokenSecret, done, res.headers.location);
         } else {
             try {
