@@ -181,19 +181,21 @@
         "buttons": [
             {
                 "name": "Download",
+                "type": "download",
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/2/SimCityEDU_setup.msi"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/2_0_1126/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/SimCityEDU_setup.dmg"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/2_0_1126/SimCityEDU_setup.dmg"
                     }
                 ]
             },
             {
                 "name": "Play Game",
+                "type": "play",
                 "links": [
                     {
                         "name": "Play Game",
@@ -211,6 +213,10 @@
         "grades": "6 - 8",
         "pages": {
             "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
                 "header": "Let Your Students Go to Town!",
                 "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<br> <br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve and explain the relationships in complex systems.<br><br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
                 "video": "https://vimeo.com/102270816",
@@ -241,71 +247,84 @@
                     }
                 ]
             },
-            "standards": [
-                {
-                    "category": "ELA Common Core",
-                    "groups": [
-                        {
-                            "list": [
-                                {
-                                    "name": "CCSS.ELA-Literacy.RST.6-8.1",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
-                                    "description": "Cite specific textual evidence to support conclusions"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RST.6-8.7",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
-                                    "description": "Integrate information from texts & diagrams"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RI.7.1",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
-                                    "description": "Cite several pieces of textual evidence to support analysis"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RI.6-8.10",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
-                                    "description": "Proficiently read and comprehend literary nonfiction"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.CCRA.R.1",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
-                                    "description": "Read and understand text and make logical inferences from it"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "category": "Next Generation Science",
-                    "groups": [
-                        {
-                            "list": [
-                                {
-                                    "description": "ESS3.C Human Impacts on Earth Systems"
-                                },
-                                {
-                                    "description": "Cross Cutting Concept: Systems Thinking"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "category": "21st Century Skills",
-                    "groups": [
-                        {
-                            "list": [
-                                {
-                                    "description": "Critical thinking and problem solving"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
-            "lessonPlans": [
-                {
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": true,
+                "id": "standards",
+                "title": "Standards Alignment",
+                "list": [
+                  {
+                      "category": "ELA Common Core",
+                      "groups": [
+                          {
+                              "list": [
+                                  {
+                                      "name": "CCSS.ELA-Literacy.RST.6-8.1",
+                                      "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
+                                      "description": "Cite specific textual evidence to support conclusions"
+                                  },
+                                  {
+                                      "name": "CCSS.ELA-Literacy.RST.6-8.7",
+                                      "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
+                                      "description": "Integrate information from texts & diagrams"
+                                  },
+                                  {
+                                      "name": "CCSS.ELA-Literacy.RI.7.1",
+                                      "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
+                                      "description": "Cite several pieces of textual evidence to support analysis"
+                                  },
+                                  {
+                                      "name": "CCSS.ELA-Literacy.RI.6-8.10",
+                                      "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
+                                      "description": "Proficiently read and comprehend literary nonfiction"
+                                  },
+                                  {
+                                      "name": "CCSS.ELA-Literacy.CCRA.R.1",
+                                      "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
+                                      "description": "Read and understand text and make logical inferences from it"
+                                  }
+                              ]
+                          }
+                      ]
+                  },
+                  {
+                      "category": "Next Generation Science",
+                      "groups": [
+                          {
+                              "list": [
+                                  {
+                                      "description": "ESS3.C Human Impacts on Earth Systems"
+                                  },
+                                  {
+                                      "description": "Cross Cutting Concept: Systems Thinking"
+                                  }
+                              ]
+                          }
+                      ]
+                  },
+                  {
+                      "category": "21st Century Skills",
+                      "groups": [
+                          {
+                              "list": [
+                                  {
+                                      "description": "Critical thinking and problem solving"
+                                  }
+                              ]
+                          }
+                      ]
+                  }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": false,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans & Videos",
+                "list": [
+                  {
                     "category": "Lesson Plans",
                     "list": [
                         {
@@ -325,8 +344,8 @@
                             "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+4.pdf"
                         }
                     ]
-                },
-                {
+                  },
+                  {
                     "category": "Videos",
                     "list": [
                         {
@@ -338,8 +357,8 @@
                             "link": "http://glasslabgames.org"
                         }
                     ]
-                },
-                {
+                   },
+                  {
                     "category": "Info Pack",
                     "list": [
                         {
@@ -347,28 +366,41 @@
                             "link": "http://www.simcityedu.org/wp-content/uploads/2013/11/SCE_PC_Brochure_sml-1.pdf"
                         }
                     ]
-                }
-            ],
-            "research": [
-                {
-                    "category": "SRI 2014",
-                    "list": [
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
-                        },
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
-                        }
-                    ]
-                }
-            ],
-            "reviews": [
-                {
+                   }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                  {
+                      "category": "SRI 2014",
+                      "list": [
+                          {
+                              "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
+                              "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
+                          },
+                          {
+                              "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
+                              "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
+                          }
+                      ]
+                  }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": true,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                  {
                     "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florida",
-                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission, automatic grading."
-                },
+                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission,      automatic grading."
+                  },
                 {
                     "reviewer": "Frank Lopes<\/br>Teacher, East Windsor Middle School<\/br>East Windsor, CT",
                     "review": " I also wanted to take the time out to say how impressed I’ve been with the challenges. But most of all, the lessons. These lessons really to do a great job of compelling students to engage in textual analysis in effective ways. SimCityEdu has really outdone themselves. Bravo!"
@@ -377,7 +409,14 @@
                     "reviewer": "Joanna Doyle<\/br>Teacher, Edison Regional Gifted Center<\/br>Chicago, IL",
                     "review": "  I launched today and it was fantastic! All the students were engaged and the classroom chatter was on topic. I had 7 students come up to me at the end of class and ask if they could continue to work on SimCityEDU at home. YES!"
                 }
-            ]
+                ]
+            },
+            "check": {
+                "order": 6,
+                "enabled": true,
+                "id": "check",
+                "title": "System Requirements"
+            }
         },
         "banners": {
             "product": "assets/game-banner-SC.jpg",
