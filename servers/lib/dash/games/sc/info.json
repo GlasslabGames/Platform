@@ -309,12 +309,20 @@
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Routine 1",
-                            "link": "http://glasslabgames.org"
+                            "name": "Mission 1 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+1.pdf"
                         },
                         {
-                            "name": "Routine 2",
-                            "link": "http://glasslabgames.org"
+                            "name": "Mission 2 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+2.pdf"
+                        },
+                        {
+                            "name": "Mission 3 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+3.pdf"
+                        },
+                        {
+                            "name": "Mission 4 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+4.pdf"
                         }
                     ]
                 },
