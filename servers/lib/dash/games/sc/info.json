@@ -217,7 +217,7 @@
                 "id": "product",
                 "title": "Product Description",
                 "header": "Let Your Students Go to Town!",
-                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<br> <br> Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve, explain the relationships in complex systems, and read informational texts and diagrams.<br><br> Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
+                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<br> <br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve and explain the relationships in complex systems.<br><br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
                 "video": "https://vimeo.com/102270816",
                 "brochure":"http://www.simcityedu.org/wp-content/uploads/2013/11/SCE_PC_Brochure_sml-1.pdf",
                 "curriculum": [
@@ -325,12 +325,20 @@
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Routine 1",
-                            "link": "http://glasslabgames.org"
+                            "name": "Mission 1 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+1.pdf"
                         },
                         {
-                            "name": "Routine 2",
-                            "link": "http://glasslabgames.org"
+                            "name": "Mission 2 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+2.pdf"
+                        },
+                        {
+                            "name": "Mission 3 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+3.pdf"
+                        },
+                        {
+                            "name": "Mission 4 Lesson Plan",
+                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+4.pdf"
                         }
                     ]
                   },
