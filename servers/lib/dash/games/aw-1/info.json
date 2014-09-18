@@ -90,6 +90,7 @@
         "buttons": [
             {
                 "name": "Play Game",
+                "type": "play",
                 "links": [
                     {
                         "name": "Play Game",

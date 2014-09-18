@@ -191,6 +191,22 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/games/minimal",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesBasicInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/details",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesDetails"
+            }
+        },
+        {
             api: "/api/v2/dash/games",
             service: "dash",
             controller: "games",
