@@ -1,6 +1,6 @@
 [
     {
-        "id": "CCSS.ELA-Literacy.RI.6-8",
+        "id": "a",
         "description": "Common Core Standards",
         "title": "Standards",
         "subGroups": [
@@ -8,7 +8,7 @@
                 "id": "a",
                 "title": "CCSS.ELA-Literacy.RI.6-8",
                 "name": "Argumentation",
-                "description": "",
+                "description": "Common Core Standards",
                 "info": "",
                 "items": [
                     {

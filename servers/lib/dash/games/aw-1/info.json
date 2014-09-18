@@ -102,6 +102,7 @@
         "pages": {
             "product": {
                 "order": 1,
+                "enabled": true,
                 "id": "product",
                 "title": "Product Description",
                 "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
@@ -138,6 +139,7 @@
             },
             "standards": {
                 "order": 2,
+                "enabled": true,
                 "authRequired": true,
                 "id": "standards",
                 "title": "Standards Alignment",
@@ -177,6 +179,7 @@
             },
             "lessonPlans": {
                 "order": 3,
+                "enabled": true,
                 "id": "lessonPlans",
                 "authRequired": true,
                 "title": "Lesson Plans & Videos",
@@ -219,6 +222,7 @@
             },
             "research": {
                 "order": 4,
+                "enabled": true,
                 "id": "research",
                 "authRequired": true,
                 "title": "Research",
@@ -226,6 +230,7 @@
             },
             "reviews": {
                 "order": 5,
+                "enabled": true,
                 "id": "reviews",
                 "title": "Reviews",
                 "list": [
