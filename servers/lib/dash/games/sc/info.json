@@ -185,11 +185,11 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/2/SimCityEDU_setup.msi"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/2_0_1126/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/SimCityEDU_setup.dmg"
+                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/2_0_1126/SimCityEDU_setup.dmg"
                     }
                 ]
             },
@@ -214,7 +214,7 @@
         "pages": {
             "product": {
                 "order": 1,
-                "enable": true,
+                "enabled": true,
                 "id": "product",
                 "title": "Product Description",
                 "header": "Let Your Students Go to Town!",
@@ -249,7 +249,7 @@
             },
             "standards": {
                 "order": 2,
-                "enable": true,
+                "enabled": true,
                 "authRequired": true,
                 "id": "standards",
                 "title": "Standards Alignment",
@@ -319,7 +319,7 @@
             },
             "lessonPlans": {
                 "order": 3,
-                "enable": true,
+                "enabled": false,
                 "authRequired": true,
                 "id": "lessonPlans",
                 "title": "Lesson Plans & Videos",
@@ -371,7 +371,7 @@
             },
             "research": {
                 "order": 4,
-                "enable": true,
+                "enabled": true,
                 "authRequired": true,
                 "id": "research",
                 "title": "Research",
@@ -393,7 +393,7 @@
             },
             "reviews": {
                 "order": 5,
-                "enable": true,
+                "enabled": true,
                 "id": "reviews",
                 "title": "Reviews",
                 "list": [
@@ -413,7 +413,7 @@
             },
             "check": {
                 "order": 6,
-                "enable": true,
+                "enabled": true,
                 "id": "check",
                 "title": "System Requirements"
             }
