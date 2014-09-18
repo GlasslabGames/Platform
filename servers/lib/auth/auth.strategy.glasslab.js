@@ -131,7 +131,8 @@ return when.promise(function(resolve, reject) {
                         // check if email verified
                         if (user.verifyCodeStatus === 'beta') {
                             reject({user: user, key: "user.login.betaPending"});
-                        } else if (user.verifyCodeStatus === 'verified' || process.env.HYDRA_ENV === 'dev') {
+                        } else if ( user.verifyCodeStatus === aConst.verifyCode.status.verified ||
+                                    user.verifyCodeStatus == null ) {
                             delete user.password;
                             resolve({user: user, error: null});
                         } else {

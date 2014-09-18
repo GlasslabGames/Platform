@@ -11,7 +11,9 @@ module.exports = {
     genUser: genUser,
     genClass: genClass,
 		requestAccess: requestAccess,
-		listenForEmailsFrom: listenForEmailsFrom
+		listenForEmailsFrom: listenForEmailsFrom,
+		setGame: setGame,
+		setCourse: setCourse
 }
 
 function zfill(num, size) {
@@ -128,4 +130,12 @@ function listenForEmailsFrom(emailAddress, cb) {
 			// keep waiting 
 		}
 	});
+}
+
+function setGame(route, gameId) {
+	return route.replace(":gameId", gameId);
+}
+
+function setCourse(route, courseId) {
+	return route.replace(":courseId", courseId);
 }
