@@ -214,6 +214,7 @@
         "pages": {
             "product": {
                 "order": 1,
+                "enable": true,
                 "id": "product",
                 "title": "Product Description",
                 "header": "Let Your Students Go to Town!",
@@ -248,6 +249,7 @@
             },
             "standards": {
                 "order": 2,
+                "enable": true,
                 "authRequired": true,
                 "id": "standards",
                 "title": "Standards Alignment",
@@ -317,6 +319,7 @@
             },
             "lessonPlans": {
                 "order": 3,
+                "enable": true,
                 "authRequired": true,
                 "id": "lessonPlans",
                 "title": "Lesson Plans & Videos",
@@ -368,6 +371,7 @@
             },
             "research": {
                 "order": 4,
+                "enable": true,
                 "authRequired": true,
                 "id": "research",
                 "title": "Research",
@@ -389,6 +393,7 @@
             },
             "reviews": {
                 "order": 5,
+                "enable": true,
                 "id": "reviews",
                 "title": "Reviews",
                 "list": [
@@ -408,6 +413,7 @@
             },
             "check": {
                 "order": 6,
+                "enable": true,
                 "id": "check",
                 "title": "System Requirements"
             }
