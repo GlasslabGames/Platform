@@ -15,7 +15,9 @@ var tools    						= require('./tools.js'),
     genClass  					= tools.genClass,
 		genUser   					= tools.genUser,
 		requestAccess 			= tools.requestAccess,
-		listenForEmailsFrom = tools.listenForEmailsFrom;
+		listenForEmailsFrom = tools.listenForEmailsFrom,
+		setCourse           = tools.setCourse,
+		setGame							= tools.setGame;
 
 //////////////////
 // TEST ROUTINE //
@@ -24,7 +26,8 @@ var tools    						= require('./tools.js'),
 var apiTestSuite = function (env, data, routeMap) {
 
 	var routes  = new routeMap(data),
-			srvAddr = data.serverAddress;
+			srvAddr = data.serverAddress,
+			teacher = data.teacher;
 	
 	var agent   = request.agent(),
 			results = {};
@@ -40,8 +43,6 @@ var apiTestSuite = function (env, data, routeMap) {
 				.get(srvAddr)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
-					
-					
 					done();
 				});
 		});
@@ -56,21 +57,20 @@ var apiTestSuite = function (env, data, routeMap) {
 				});
 		});
 
-		it("should return valid SDK config data", function (done) {
+		it("should return valid SDK config data for MGO", function (done) {
 			agent
 				.get(srvAddr + routes.sdk.connect.path)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
-					expect(res.text).to.eql(routes.sdk.connect.expected);
+					expect(res.text).to.eql(data.serverAddress);
 				
 					agent
-						.get(res.text + '/api/v2/data/config/' + data.testGameId)
+						.get(res.text + '/api/v2/data/config/' + "AA-1")
 						.end(function (res) {
-							
-							console.log(res.text);
-							// TODO check event size and timeout data in the AA-1
-							
-
+							expect(res.status).to.eql(200);
+							expect(res.text).to.contain("eventsMaxSize");
+							expect(res.text).to.contain("eventsMinSize");
+							expect(res.text).to.contain("eventsPeriodSecs");
 							done();
 						});
 				});
@@ -91,15 +91,15 @@ var apiTestSuite = function (env, data, routeMap) {
 			agent
 				.post(srvAddr + routes.login.path)
 				.type('application/json')
-				.send(routes.login.post)
+				.send({"username": teacher.email, "password": teacher.pass})
 				.end(function (res) {
 					expect(res.status).to.eql(200);
-					expect(res.body.id).to.eql(data.teacher.userId);
+					expect(res.body.id).to.eql(teacher.userId);
 					done();
 				});
-
 		});
 
+		
 		it("#returns classes correctly", function (done) {
 
 			agent
@@ -107,16 +107,18 @@ var apiTestSuite = function (env, data, routeMap) {
 				.type('application/json')
 				.end(function (res) {
 					expect(res.status).to.eql(200);
+					// FUTURE - do some validation of returned data
 					done();
 				});
-
 		});
 
 		it("#archives new class", function (done) {
+			
+			var coursePath = setCourse(routes.classes.info.path,teacher.testClass.id);
 
 			// start out un-archived
 			agent
-				.get(srvAddr + routes.classes.info.path)
+				.get(srvAddr + coursePath)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 					classData = JSON.parse(res.text);
@@ -125,7 +127,7 @@ var apiTestSuite = function (env, data, routeMap) {
 
 					// send archive call
 					agent
-						.post(srvAddr + routes.classes.info.path)
+						.post(srvAddr + coursePath)
 						.type('application/json')
 						.send(classData)
 						.end(function (res) {
@@ -133,23 +135,23 @@ var apiTestSuite = function (env, data, routeMap) {
 
 							// verify class was archived
 							agent
-								.get(srvAddr + routes.classes.info.path)
+								.get(srvAddr + coursePath)
 								.end(function (res) {
 									expect(res.status).to.eql(200);
 									expect(JSON.parse(res.text)["archived"]).to.eql(true);
 									done();
 								});
 						});
-
 				});
-
 		});
 
 		it("#restores class", function (done) {
+			
+			var coursePath = setCourse(routes.classes.info.path,teacher.testClass.id);
 
 			// start out archived
 			agent
-				.get(srvAddr + routes.classes.info.path)
+				.get(srvAddr + coursePath)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 					classData = JSON.parse(res.text);
@@ -158,7 +160,7 @@ var apiTestSuite = function (env, data, routeMap) {
 
 					// send un-archive call
 					agent
-						.post(srvAddr + routes.classes.info.path)
+						.post(srvAddr + coursePath)
 						.type('application/json')
 						.send(classData)
 						.end(function (res) {
@@ -167,7 +169,7 @@ var apiTestSuite = function (env, data, routeMap) {
 
 							// verify class was un-archived
 							agent
-								.get(srvAddr + routes.classes.info.path)
+								.get(srvAddr + coursePath)
 								.end(function (res) {
 									expect(res.status).to.eql(200);
 									expect(JSON.parse(res.text)["archived"]).to.eql(false);
@@ -175,39 +177,39 @@ var apiTestSuite = function (env, data, routeMap) {
 								});
 						});
 				});
-
 		});
+
 
 		it("#returns reports - SOWO", function (done) {
 
 			agent
-				.get(srvAddr + routes.reports.sowo.path)
+				.get(srvAddr + setCourse(setGame(routes.reports.sowo.path, data.testGameId), teacher.testClass.id))
 				.type('application/json')
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 
 					var resText = JSON.parse(res.text);
-          
-          var matched = false;
-				
-          // FUTURE - clean up and perhaps swap FOR-IN loop (achievements too)
+
+					var matched = false;
+
+					// FUTURE - clean up and perhaps swap FOR-IN loop (achievements too)
 					for (var studentIndex in resText) {
-              if(resText[studentIndex]['userId'] == data.student.id) {
-                  matched = true;
-                  expect(resText[studentIndex]['results']).to.eql(data.student.sowo);
-              }
-          }
-          
-          expect(matched).to.eql(true);
-          
+						if(resText[studentIndex]['userId'] == data.student.id) {
+								matched = true;
+								expect(resText[studentIndex]['results']).to.eql(data.student.sowo);
+						}
+					}
+
+					expect(matched).to.eql(true);
+
 					done();
-          
 				});
 		});
+		
 
 		it("#returns reports - achievements", function (done) {
 			agent
-				.get(srvAddr + routes.reports.achievements.path)
+				.get(srvAddr + setCourse(setGame(routes.reports.achievements.path, data.testGameId), teacher.testClass.id))
 				.type('application/json')
 				.end(function (res) {
 					expect(res.status).to.eql(200);
@@ -240,26 +242,7 @@ var apiTestSuite = function (env, data, routeMap) {
 				});
 		});
 
-//		it.skip('#register as new teacher - Playfully', function (done) {   // FUTURE - reinstate post closed beta
-//      
-//			var newUser = genUser('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123', 'teacher');
-//				// NOTE - should this reuse timestamp?
-//			results['newTeacherPost'] = newUser;
-//      
-//      console.log(srvAddr + routes.register.teacher.path);
-//      
-//			agent
-//				.post(srvAddr + routes.register.teacher.path)
-//				.type('application/json')
-//				.send(JSON.parse(newUser))
-//				.end(function (res) {
-//        
-//					expect(res.status).to.eql(200);
-//					results['newTeacher'] = res.text;
-//					done();
-//				});
-//      
-//		});
+
 		
 		it('#can request access to Playfully.org', function(done) {
 			
@@ -274,34 +257,47 @@ var apiTestSuite = function (env, data, routeMap) {
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 					results['newTeacher'] = res.text;
-					
+
 				
-					done(); // TODO - this is step 1 of 3
-									// need to reroute the confirm email
-									// click on the confirm link, then
-									// catch the response email and confirm
-									
-									// NOTE - following steps will only work
-									// locally if config is changed, if case
-				
+					if (env == 'local') {
+						console.log('go time');
+						// click on the confirm link, then
+						
+						listenForEmailsFrom('accounts@glasslabgames.org', function (email) {
+
+							confirmationEmail = email;
+							
+							console.log(email);
+
+							done();
+						});
+						
+						
+						// catch the response email and confirm
+
+						// NOTE - following steps will only work
+						// locally if config is changed, if case
+						done();
+					}
+					else {
+						// NOTE - cannot man-in-middle the registration email, so done here
+						done(); 
+					}
 				});
-			
 		});
 		
-		it.skip('#register as new teacher - Clever', function (done) {
+		it.skip('#sign in as a Clever user', function (done) {
 			done();
 		});
 			
 		it("#lists SCE missions", function(done) {
+
 			agent
-				.get(srvAddr + "/api/v2/dash/game/SC/missions")
+				.get(srvAddr + setGame(routes.mission.path, "SC"))
 				.end(function(res) {
 					expect(res.status).to.eql(200);
-				
-//					console.log(res.text);	// DEBUG/
 					done();
 				})
-			
 		});
 
 		it.skip('#register as new teacher - iCivics', function (done) {
@@ -325,24 +321,6 @@ var apiTestSuite = function (env, data, routeMap) {
 				});
 		});
 		
-//    it.skip('#register as a new student in that class', function(done) {    // NOTE - will not work with closed beta
-//      
-//      var newStudentPost = genUser('glTestStudent' + tstamp(), results['newClassCode'], 'glasslab321', 'student');
-//      results['newStudentPost'] = newStudentPost;
-//      
-//			agent
-//				.post(srvAddr + routes.register.student.path.replace(':code', results['newClassCode']))
-//				.type('application/json')
-//				.send(JSON.parse(newStudentPost))
-//				.end(function (res) {
-//					expect(res.status).to.eql(200);
-//					
-//					var confirmation = JSON.parse(res.text);
-//					results['newStudent'] = res.text;
-//					done();
-//				});
-//    });
-		
     it("#can reset a teacher's password", function(done) {
       
 			var confirmationEmail;
@@ -350,7 +328,7 @@ var apiTestSuite = function (env, data, routeMap) {
       agent
 				.post(srvAddr + routes.password_reset.path)
 				.type('application/json')
-				.send({'email': data.teacher.email})
+				.send({'email': teacher.email})
 				.end(function (res) {
 
 					expect(res.status).to.eql(200);
@@ -358,8 +336,6 @@ var apiTestSuite = function (env, data, routeMap) {
 					listenForEmailsFrom('accounts@glasslabgames.org', function (email) {
 
 						confirmationEmail = email;
-						
-						
 
 						done();
 					});
@@ -378,7 +354,6 @@ var apiTestSuite = function (env, data, routeMap) {
 				console.log("Results saved to " + resultFile);
 			}
 		});
-
 	});
 	
 }

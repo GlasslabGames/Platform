@@ -181,6 +181,7 @@
         "buttons": [
             {
                 "name": "Download",
+                "type": "download",
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
@@ -194,6 +195,7 @@
             },
             {
                 "name": "Play Game",
+                "type": "play",
                 "links": [
                     {
                         "name": "Play Game",

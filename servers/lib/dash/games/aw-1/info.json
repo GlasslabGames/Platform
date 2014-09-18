@@ -32,7 +32,7 @@
             "type": "page",
             "page": {
                 "title": "Argument Wars",
-                "embed": "https://cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
+                "embed": "https://staging.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
                 "size": {
                     "width": 940,
                     "height": 640
@@ -63,17 +63,17 @@
         "list": [
             {
                 "id": "sowo",
-                "enabled": true,
+                "enabled": false,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
                 "description": "Coming Soon!"
             },
             {
                 "id": "achievements",
-                "enabled": false,
+                "enabled": true,
                 "name": "Game Achievements & Time Played",
                 "header": "Game Achievements & Time Played",
-                "description": "Coming Soon!",
+                "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "groups": [
                 ]
             }
@@ -90,6 +90,7 @@
         "buttons": [
             {
                 "name": "Play Game",
+                "type": "play",
                 "links": [
                     {
                         "name": "Play Game",

@@ -6,6 +6,7 @@ var Util      = require('../../core/util.js');
 
 module.exports = {
     getGamesBasicInfo: getGamesBasicInfo,
+    getGamesDetails:   getGamesDetails,
     getMyGames:        getMyGames
 };
 
@@ -63,6 +64,56 @@ function getGamesBasicInfo(req, res){
     }
 }
 
+
+function getGamesDetails(req, res){
+    try {
+        var userData = req.session.passport.user;
+
+        this.dashStore.getLicensedGameIdsFromUserId(userData.id)
+            .then(function(licenseGameIds){
+                var outGames = [];
+
+                // TODO: replace with promise
+                var games = this.getListOfGameIds();
+                for(var i = 0; i < games.length; i++) {
+                    var gameId = games[i];
+
+                    var info = _.cloneDeep(this.getGameDetails(gameId));
+                    info.license.valid = false;
+                    if(info.license.type == "free") {
+                        info.license.valid = true;
+                    }
+                    else if(info.license.type == "loginType") {
+                        info.license.loginType = info.license.loginType.split(',');
+                        if( _.contains(info.license.loginType, userData.loginType) ) {
+                            info.license.valid = true;
+                        }
+                    } else {
+                        // check license
+                        info.license.valid = licenseGameIds.hasOwnProperty(gameId);
+                    }
+
+                    // no maintenance message and if invalid lic, replace with invalid lic message
+                    if(!info.maintenance && !info.license.valid) {
+                        info.maintenance = { message: info.license.message.invalid };
+                    }
+
+                    outGames.push( info );
+                }
+
+                this.requestUtil.jsonResponse(res, outGames);
+            }.bind(this))
+
+            // catch all errors
+            .then(null, function(err) {
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this));
+
+    } catch(err) {
+        console.trace("Reports: Get Game Basic Info Error -", err);
+        this.stats.increment("error", "GetGameBasicInfo.Catch");
+    }
+}
 
 // http://localhost:8001/api/v2/dash/myGames
 // returns list of games a user has added to there classes

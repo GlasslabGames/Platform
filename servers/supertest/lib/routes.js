@@ -3,11 +3,7 @@ var Routes = function (testData) {
 	var teacher = testData.teacher;
 
 	this.login = {
-		path: "/api/v2/auth/login/glasslab",
-		post: {
-			"username": teacher.email,
-			"password": teacher.pass
-		}
+		path: "/api/v2/auth/login/glasslab"
 	}
 
 	this.events = {
@@ -16,15 +12,12 @@ var Routes = function (testData) {
 	}
 
 	this.password_reset = {
-		path: "/api/v2/auth/password-reset/send/",
-		post: {
-			"email": teacher.email
-		}
+		path: "/api/v2/auth/password-reset/send/"
 	}
 
 	this.classes = {
 		info: {
-			path: "/api/v2/lms/course/" + teacher.testClass.id + "/info"
+			path: "/api/v2/lms/course/:courseId/info"
 		},
 		list: {
 			path: "/api/v2/lms/courses?showMembers=1"
@@ -36,21 +29,20 @@ var Routes = function (testData) {
 
 	this.reports = {
 		achievements: {
-			path: "/api/v2/dash/reports/achievements/game/" + testData.testGameId + "/course/" + teacher.testClass.id
+			path: "/api/v2/dash/reports/achievements/game/:gameId/course/:courseId"
 		},
 		sowo: {
-			path: "/api/v2/dash/reports/sowo/game/" + testData.testGameId + "/course/" + teacher.testClass.id
+			path: "/api/v2/dash/reports/sowo/game/:gameId/course/:courseId"
 		}
 	}
 
 	this.mission = {
-		path: "/api/v2/dash/course/" + teacher.testClass.id + "/game/" + testData.testGameId + "/missions"
+		path: "/api/v2/dash/game/:gameId/missions"
 	}
 
 	this.sdk = {
 		connect: {
-			path: "/sdk/connect",
-			expected: testData.serverAddress
+			path: "/sdk/connect"
 		},
 		login: {
 			path: "/sdk/login"
