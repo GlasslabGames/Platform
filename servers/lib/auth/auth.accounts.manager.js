@@ -48,13 +48,12 @@ AccountsManager.prototype.get = function(name) {
 }
 
 AccountsManager.prototype.setupRoutes = function(app, passport) {
-    for(var i in this.accounts) {
-
-        var id = this.accounts[i].getId();
+    _.forEach(this.accounts, function(account){
+        var id = account.getId();
         if( _.isString(id) ) {
             var authOptions = null;
-            if(_.isFunction(this.accounts[i].getAuthOptions)) {
-                authOptions = this.accounts[i].getAuthOptions();
+            if(_.isFunction(account.getAuthOptions)) {
+                authOptions = account.getAuthOptions();
             }
 
             // route to trigger google oauth authorization
@@ -72,11 +71,11 @@ AccountsManager.prototype.setupRoutes = function(app, passport) {
                 function(req, res) {
                     // Successful authentication, redirect home.
                     res.redirect('/auth/'+id);
-                });
+                }.bind(this));
 
-            if(_.isFunction(this.accounts[i].setupRoutes)) {
-                this.accounts[i].setupRoutes(app, passport);
+            if(_.isFunction(account.setupRoutes)) {
+                account.setupRoutes(app, passport);
             }
         }
-    }
+    }.bind(this))
 };
