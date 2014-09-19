@@ -185,20 +185,22 @@ Strategy.prototype._getProfileData = function(body) {
         profile.email     = json.mail || "";
     }
     else if(profile.role === lConst.role.student) {
+        // prevent PII
+
         var nparts = json.real_name.split(' ');
         // remove first name part
         profile.firstName = nparts.shift() || "";
         // put rest as last name
-        profile.lastName  = nparts.join(" ") || "";
+        profile.lastName  = nparts.join(" ").substring(0, 1) || "";
         profile.email     = "";
     }
 
-    if(profile.role == lConst.role.instructor) {
-        profile.ssoData = body;
+    if(profile.role === lConst.role.student) {
+        // prevent PII
+        profile.ssoData = "-";
     } else {
-        profile.ssoData = "-"; // prevent PII
+        profile.ssoData = body;
     }
-
     profile.password = "-";
 
     return profile;
