@@ -175,6 +175,8 @@ return when.promise(function(resolve, reject) {
                         user[i].ssoUsername ) {
                         user[i].username = user[i].ssoUsername;
                     }
+                    // add user permissions object
+                    user[i].permits = lConst.permits[user[i].role];
                 }
 
                 // if input not array then return a single user

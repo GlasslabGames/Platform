@@ -35,12 +35,6 @@ function getUserProfileData(req, res, next) {
         this.webstore.getUserInfoById(userData.id)
             // ok, send data
             .then(function(userData){
-
-                // if not student then make instructor (hiding internal manager and admin users)
-                if(userData.role != lConst.role.student) {
-                    userData.role = lConst.role.instructor;
-                }
-
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error
@@ -67,12 +61,6 @@ function getUserDataById(req, res, next) {
             }.bind(this))
             // ok, send data
             .then(function(userData){
-
-                // if not student then make instructor (hiding internal manager and admin users)
-                if(userData.role != lConst.role.student) {
-                    userData.role = lConst.role.instructor;
-                }
-
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error

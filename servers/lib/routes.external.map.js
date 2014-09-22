@@ -423,6 +423,7 @@ module.exports = {
     // Research
     // ---------------------------------------------------
         {
+            requireAuth: true,
             api: "/api/v2/research/game/:gameId/events",
             service: "research",
             controller: "events",
@@ -431,6 +432,7 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
             api: "/api/v2/research/game/:gameId/parse-schema",
             service: "research",
             controller: "csv",
