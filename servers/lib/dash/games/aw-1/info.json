@@ -32,7 +32,7 @@
             "type": "page",
             "page": {
                 "title": "Argument Wars",
-                "embed": "https://staging.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
+                "embed": "//cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5-Staging/Main.swf",
                 "size": {
                     "width": 940,
                     "height": 640

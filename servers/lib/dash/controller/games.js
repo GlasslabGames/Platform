@@ -16,47 +16,61 @@ var exampleOut = {};
 // no input
 function getGamesBasicInfo(req, res){
     try {
-        var userData = req.session.passport.user;
+        var loginType = "guest";
+        var promise = null;
+        if( req.session &&
+            req.session.passport &&
+            req.session.passport.user ) {
+            var userData = req.session.passport.user;
+            loginType = userData.loginType;
 
-        this.dashStore.getLicensedGameIdsFromUserId(userData.id)
-            .then(function(licenseGameIds){
-                var outGames = [];
+            promise = this.dashStore.getLicensedGameIdsFromUserId(userData.id);
+        } else {
+            promise = Util.PromiseContinue();
+        }
 
-                // TODO: replace with promise
-                var games = this.getListOfGameIds();
-                for(var i = 0; i < games.length; i++) {
-                    var gameId = games[i];
+        promise.then(function(licenseGameIds){
+            // ensure licenseGameIds is object
+            if(!licenseGameIds) { licenseGameIds = {}; }
+            var outGames = [];
 
-                    var info = _.cloneDeep(this.getGameBasicInfo(gameId));
-                    info.license.valid = false;
-                    if(info.license.type == "free") {
+            // TODO: replace with promise
+            var games = this.getListOfGameIds();
+            for(var i = 0; i < games.length; i++) {
+                var gameId = games[i];
+
+                var info = _.cloneDeep(this.getGameBasicInfo(gameId));
+
+                // TODO: move license check to it's own function
+                info.license.valid = false;
+                if(info.license.type == "free") {
+                    info.license.valid = true;
+                }
+                else if(info.license.type == "loginType") {
+                    info.license.loginType = info.license.loginType.split(',');
+                    if( _.contains(info.license.loginType, loginType) ) {
                         info.license.valid = true;
                     }
-                    else if(info.license.type == "loginType") {
-                        info.license.loginType = info.license.loginType.split(',');
-                        if( _.contains(info.license.loginType, userData.loginType) ) {
-                            info.license.valid = true;
-                        }
-                    } else {
-                        // check license
-                        info.license.valid = licenseGameIds.hasOwnProperty(gameId);
-                    }
-
-                    // no maintenance message and if invalid lic, replace with invalid lic message
-                    if(!info.maintenance && !info.license.valid) {
-                        info.maintenance = { message: info.license.message.invalid };
-                    }
-
-                    outGames.push( info );
+                } else {
+                    // check license
+                    info.license.valid = licenseGameIds.hasOwnProperty(gameId);
                 }
 
-                this.requestUtil.jsonResponse(res, outGames);
-            }.bind(this))
+                // no maintenance message and if invalid lic, replace with invalid lic message
+                if(!info.maintenance && !info.license.valid) {
+                    info.maintenance = { message: info.license.message.invalid };
+                }
 
-            // catch all errors
-            .then(null, function(err) {
-                this.requestUtil.errorResponse(res, err);
-            }.bind(this));
+                outGames.push( info );
+            }
+
+            this.requestUtil.jsonResponse(res, outGames);
+        }.bind(this))
+
+        // catch all errors
+        .then(null, function(err) {
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
@@ -67,47 +81,61 @@ function getGamesBasicInfo(req, res){
 
 function getGamesDetails(req, res){
     try {
-        var userData = req.session.passport.user;
+        var loginType = "guest";
+        var promise = null;
+        if( req.session &&
+            req.session.passport &&
+            req.session.passport.user ) {
+            var userData = req.session.passport.user;
+            loginType = userData.loginType;
 
-        this.dashStore.getLicensedGameIdsFromUserId(userData.id)
-            .then(function(licenseGameIds){
-                var outGames = [];
+            promise = this.dashStore.getLicensedGameIdsFromUserId(userData.id);
+        } else {
+            promise = Util.PromiseContinue();
+        }
 
-                // TODO: replace with promise
-                var games = this.getListOfGameIds();
-                for(var i = 0; i < games.length; i++) {
-                    var gameId = games[i];
+        promise.then(function(licenseGameIds) {
+            // ensure licenseGameIds is object
+            if(!licenseGameIds) { licenseGameIds = {}; }
+            var outGames = [];
 
-                    var info = _.cloneDeep(this.getGameDetails(gameId));
-                    info.license.valid = false;
-                    if(info.license.type == "free") {
+            // TODO: replace with promise
+            var games = this.getListOfGameIds();
+            for(var i = 0; i < games.length; i++) {
+                var gameId = games[i];
+
+                var info = _.cloneDeep(this.getGameDetails(gameId));
+
+                // TODO: move license check to it's own function
+                info.license.valid = false;
+                if(info.license.type == "free") {
+                    info.license.valid = true;
+                }
+                else if(info.license.type == "loginType") {
+                    info.license.loginType = info.license.loginType.split(',');
+                    if( _.contains(info.license.loginType, loginType) ) {
                         info.license.valid = true;
                     }
-                    else if(info.license.type == "loginType") {
-                        info.license.loginType = info.license.loginType.split(',');
-                        if( _.contains(info.license.loginType, userData.loginType) ) {
-                            info.license.valid = true;
-                        }
-                    } else {
-                        // check license
-                        info.license.valid = licenseGameIds.hasOwnProperty(gameId);
-                    }
-
-                    // no maintenance message and if invalid lic, replace with invalid lic message
-                    if(!info.maintenance && !info.license.valid) {
-                        info.maintenance = { message: info.license.message.invalid };
-                    }
-
-                    outGames.push( info );
+                } else {
+                    // check license
+                    info.license.valid = licenseGameIds.hasOwnProperty(gameId);
                 }
 
-                this.requestUtil.jsonResponse(res, outGames);
-            }.bind(this))
+                // no maintenance message and if invalid lic, replace with invalid lic message
+                if(!info.maintenance && !info.license.valid) {
+                    info.maintenance = { message: info.license.message.invalid };
+                }
 
-            // catch all errors
-            .then(null, function(err) {
-                this.requestUtil.errorResponse(res, err);
-            }.bind(this));
+                outGames.push( info );
+            }
+
+            this.requestUtil.jsonResponse(res, outGames);
+        }.bind(this))
+
+        // catch all errors
+        .then(null, function(err) {
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
