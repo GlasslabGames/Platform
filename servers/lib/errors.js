@@ -22,6 +22,7 @@ module.exports = {
     "course.general":                       "We encountered an error. Please try again.",
     "course.locked":                        "Course Registration is Locked at the moment. Please try again later.",
     "course.notUnique.name":                "Class names must be unique. Please choose a different class name.",
+    "user.permit.invalid":                  "Your role does not have permission to access this feature",
     "user.enroll.general":                  "There was an error with the information you entered.",
     "user.enroll.code.missing":             "The class code is missing.",
     "user.enroll.code.invalid":             "The class code is invalid.",

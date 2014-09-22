@@ -9,8 +9,19 @@ module.exports = {
 };
 
 function getCsvParseSchema(req, res, next){
+
     try {
         // check input
+        if( req.session &&
+        req.session.passport) {
+            var userData = req.session.passport.user;
+            // check user permission
+            if (!userData.permits.research) {
+                this.requestUtil.errorResponse(res, {error: "user.permit.invalid"});
+                return;
+            }
+        }
+
         if( !( req.params &&
             req.params.hasOwnProperty("gameId") ) ) {
             this.requestUtil.errorResponse(res, {error: "missing game id"});

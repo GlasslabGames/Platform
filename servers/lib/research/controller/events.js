@@ -29,9 +29,22 @@ module.exports = {
     dateRange
  */
 function getEventsByDate(req, res, next){
+
+
+
     try {
         // set timeout so request doesn't close connection
         req.connection.setTimeout(this.options.request.httpTimeout);
+
+        if( req.session &&
+        req.session.passport) {
+            var userData = req.session.passport.user;
+            // check user permission
+            if (!userData.permits.research) {
+                this.requestUtil.errorResponse(res, {key: "user.permit.invalid"});
+                return;
+            }
+        }
 
         if(!req.query) {
             this.requestUtil.errorResponse(res, {error: "missing arguments"}, 401);
