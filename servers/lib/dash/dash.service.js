@@ -193,7 +193,6 @@ DashService.prototype.getGameReleases = function(gameId) {
     }
 };
 
-
 // TODO: replace this with DB lookup
 DashService.prototype.getListOfAchievements = function(gameId, playerAchievement) {
     // if no player achievements then default to none
