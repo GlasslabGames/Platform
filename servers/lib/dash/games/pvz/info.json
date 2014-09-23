@@ -1,0 +1,60 @@
+{
+    "developer": {
+        "id": "GL",
+        "name": "GlassLab, Inc.",
+        "logo": {
+            "small": "assets/glasslab-logo.png",
+            "large": "assets/glasslab-logo-2x.png"
+        }
+    },
+    "basic": {
+        "gameId": "PVZ",
+        "enabled": true,
+        "maintenance": null,
+        "shortName": "PvZ EDU",
+        "longName": "Plants vs. Zombies EDU",
+        "description": "Battle the zombies with your army of plants... and learn!",
+        "settings" : {
+        },
+        "license": {
+            "type": "loginType",
+            "loginType": "glasslabv2",
+            "valid": false,
+            "message": {
+                "invalid": "In Development"
+            }
+        },
+        "thumbnail": {
+            "small": "assets/thumb-game-PVZ.png",
+            "large": "assets/thumb-game-PVZ.png"
+        }
+    },
+    "assessment": [
+    ],
+    "reports": {
+        "list": [
+        ]
+    },
+    "details": {
+        "release": "dev",
+        "price": "TBD",
+        "releaseDate": "TBD",
+        "type": "App",
+        "platform": "iPad",
+        "subject": "TBD",
+        "grades": "6 - 8",
+        "buttons": [
+        ],
+        "pages": {
+        },
+        "banners": {
+            "product": "assets/game-banner-AA-1.jpg",
+            "reports": "assets/game-banner-AA-1.jpg"
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "https://plus.google.com/117864084582459836584/posts"
+        }
+    }
+}

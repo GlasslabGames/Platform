@@ -436,6 +436,28 @@ module.exports = {
             }
         },
     // ---------------------------------------------------
+    // Research
+    // ---------------------------------------------------
+        {
+            requireAuth: true,
+            api: "/api/v2/research/game/:gameId/events",
+            service: "research",
+            controller: "events",
+            method: {
+                get: "getEventsByDate"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/research/game/:gameId/parse-schema",
+            service: "research",
+            controller: "csv",
+            method: {
+                get: "getCsvParseSchema",
+                post: "updateCsvParseSchema"
+            }
+        },
+    // ---------------------------------------------------
     // Version 1
     // ---------------------------------------------------
         {

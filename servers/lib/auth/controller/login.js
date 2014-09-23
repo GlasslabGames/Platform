@@ -124,11 +124,6 @@ return when.promise(function(resolve, reject) {
                     var tuser = _.clone(user);
                     tuser.courses = courses;
 
-                    // if not student then make instructor (hiding internal manager and admin users)
-                    if(tuser.role != lConst.role.student) {
-                        tuser.role = lConst.role.instructor;
-                    }
-
                     this.stats.increment("info", "Route.Login.Auth.GetUserCourses.Done");
                     resolve(tuser);
                 }.bind(this))
