@@ -57,5 +57,16 @@ module.exports = {
             user: "u",
             device: "d"
         }
+    },
+    permits: {
+      instructor: {
+        class: true
+      },
+      developer: {
+        game: true
+      },
+      admin: {
+        research: true
+      }
     }
 };

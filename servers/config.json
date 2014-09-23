@@ -129,5 +129,15 @@
     "assessment": {
         "host": "localhost",
         "port": 8003
+    },
+    "research": {
+        "dataChunkSize": 2000,
+        "datastore": {
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_gamedata",
+                "password": "glasslab"
+            }
+        }
     }
 }
