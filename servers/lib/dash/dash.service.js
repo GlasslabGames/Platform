@@ -333,16 +333,32 @@ DashService.prototype._loadGameFiles = function() {
 };
 
 DashService.prototype._filterDisabledGameInfo = function(gameInfo) {
+    var deleted = false;
     _.forEach(gameInfo, function(item, i) {
         if( _.isObject(gameInfo[i]) &&
             gameInfo[i].hasOwnProperty('enabled') &&
             (gameInfo[i].enabled == false) ) {
             console.info("gameInfo removing disabled object:", gameInfo[i]);
             delete gameInfo[i];
+            deleted = true;
         }
 
-        if( _.isObject(gameInfo[i]) || _.isArray(gameInfo[i]) ){
+        if( _.isArray(gameInfo[i]) ){
+            deleted = this._filterDisabledGameInfo(gameInfo[i]);
+            if(deleted) {
+                // re-index array, remove all null values
+                var newArray = [];
+                for(var j = 0; j < gameInfo[i].length; j++){
+                    if(gameInfo[i][j]) newArray.push(gameInfo[i][j]);
+                }
+                gameInfo[i] = newArray;
+            }
+        }
+        else if( _.isObject(gameInfo[i]) ) {
             this._filterDisabledGameInfo(gameInfo[i]);
         }
+
     }.bind(this));
+
+    return deleted;
 };
