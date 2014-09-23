@@ -35,7 +35,7 @@ function getGamesBasicInfo(req, res){
             var outGames = [];
 
             // TODO: replace with promise
-            var games = this.getListOfGameIds();
+            var games = this.getListOfVisibleGameIds();
             for(var i = 0; i < games.length; i++) {
                 var gameId = games[i];
 
@@ -100,7 +100,7 @@ function getGamesDetails(req, res){
             var outGames = [];
 
             // TODO: replace with promise
-            var games = this.getListOfGameIds();
+            var games = this.getListOfVisibleGameIds();
             for(var i = 0; i < games.length; i++) {
                 var gameId = games[i];
 

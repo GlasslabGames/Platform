@@ -10,6 +10,7 @@
     "basic": {
         "gameId": "AW-1",
         "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Argument Wars",
         "longName": "Argument Wars",

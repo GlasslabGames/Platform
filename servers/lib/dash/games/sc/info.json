@@ -10,6 +10,7 @@
     "basic": {
         "gameId": "SC",
         "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
@@ -19,7 +20,7 @@
         },
         "license": {
             "type":      "loginType",
-            "loginType": "clever",
+            "loginType": "glasslabv2,clever",
             "valid": false,
             "message": {
                 "invalid": "Coming Soon!"
