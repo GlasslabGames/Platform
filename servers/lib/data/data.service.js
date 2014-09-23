@@ -44,6 +44,8 @@ function DataService(options, serviceManager){
         this.cbds        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase, serviceManager);
         this.stats       = new Util.Stats(this.options, "Data");
 
+        this._serviceManager = serviceManager;
+
     } catch(err) {
         console.trace("DataService: Error -", err);
         this.stats.increment("error", "Generic");
@@ -587,6 +589,14 @@ return when.promise(function(resolve, reject) {
             // added saved data to list
             //console.log("data:", data);
             processedEvents.push(data);
+        }
+
+        // TODO: replace this with DB lookup, return promise
+        if( !this._serviceManager.get("dash").service.isValidGameId(gameId) ) {
+            errList.push(new Error("invalid gameId"));
+            this.stats.increment("error", "invalid.gameId");
+            reject(errList);
+            return
         }
 
         // adds the promise to the list

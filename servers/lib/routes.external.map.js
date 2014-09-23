@@ -191,6 +191,22 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/games/minimal",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesBasicInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/details",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesDetails"
+            }
+        },
+        {
             api: "/api/v2/dash/games",
             service: "dash",
             controller: "games",
@@ -417,6 +433,28 @@ module.exports = {
             controller: "login",
             method: {
                 post: "logout"
+            }
+        },
+    // ---------------------------------------------------
+    // Research
+    // ---------------------------------------------------
+        {
+            requireAuth: true,
+            api: "/api/v2/research/game/:gameId/events",
+            service: "research",
+            controller: "events",
+            method: {
+                get: "getEventsByDate"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/research/game/:gameId/parse-schema",
+            service: "research",
+            controller: "csv",
+            method: {
+                get: "getCsvParseSchema",
+                post: "updateCsvParseSchema"
             }
         },
     // ---------------------------------------------------

@@ -134,19 +134,26 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 } else {
                     profile.firstName = json.data.name.first;
                 }
-                profile.lastName  = json.data.name.last;
-                profile.email     = json.data.email || "";
+
+                if(profile.role === lConst.role.student) {
+                    // prevent PII
+                    profile.lastName  = json.data.name.last.substring(0, 1) || "";
+                    profile.email     = "";
+                } else {
+                    profile.lastName  = json.data.name.last;
+                    profile.email     = json.data.email || "";
+                }
 
                 if(json.data.credentials) {
                     profile.ssoUsername = json.data.credentials.district_username || "";
                 }
 
-                if(profile.role == lConst.role.instructor) {
-                    profile.ssoData = body;
+                if(profile.role === lConst.role.student) {
+                    // prevent PII
+                    profile.ssoData = "-";
                 } else {
-                    profile.ssoData = "-"; // prevent PII
+                    profile.ssoData = body;
                 }
-
                 profile.password = "-";
 
                 done(null, profile);

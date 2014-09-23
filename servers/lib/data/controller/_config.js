@@ -8,7 +8,6 @@ module.exports = {
 
 function updateGameConfigs(req, res, next, serviceManager)
 {
-
     if (Object.keys(req.body).length < 1) {
         this.requestUtil.errorResponse(res, {key: "data.gameConfig.missing", statsCode: 400});
         return;
@@ -30,9 +29,4 @@ function updateGameConfigs(req, res, next, serviceManager)
     } else {
         this.requestUtil.errorResponse(res, {key: "data.gameId.invalid", statusCode: 401});
     }
-
 }
-
-
-
-

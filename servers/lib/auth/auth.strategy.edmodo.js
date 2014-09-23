@@ -123,18 +123,25 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 }
 
                 // add to migration
-                profile.username  = '{'+this.name+'}.'+json.id;
-                profile.firstName = json.first_name || "[none]";
-                profile.lastName  = json.last_name || "";
-                profile.ssoUsername  = json.username || "[none]";
-                profile.email     = json.email || "";
+                profile.username     = '{'+this.name+'}.'+json.id;
+                profile.firstName    = json.first_name || "";
+                profile.ssoUsername  = json.username || "";
 
-                if(profile.role == lConst.role.instructor) {
-                    profile.ssoData = body;
+                if(profile.role === lConst.role.student) {
+                    // prevent PII
+                    profile.lastName = json.last_name.substring(0, 1) || "";
+                    profile.email    = "";
                 } else {
-                    profile.ssoData = "-"; // prevent PII
+                    profile.lastName = json.last_name || "";
+                    profile.email    = json.email || "";
                 }
 
+                if(profile.role === lConst.role.student) {
+                    // prevent PII
+                    profile.ssoData = "-";
+                } else {
+                    profile.ssoData = body;
+                }
                 profile.password = "-";
 
                 done(null, profile);
