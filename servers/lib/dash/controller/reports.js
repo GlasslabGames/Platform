@@ -18,9 +18,18 @@ exampleIn.getSOWO = {
     gameId: "AA-1",
     courseId: 1
 };
-exampleOut.getSOWO = [
-
-];
+exampleOut.getSOWO =
+    [
+        {"results": {"watchout": [
+            {"total": 6, "overPercent": 1, "timestamp": 1409012387023, "id": "wo1", "name": "Contradictory Mechanic", "description": "Student is struggling with claim-data pairs. They are consistently using evidence that contradicts their claim. More core construction practice is needed."},
+            {"total": 2, "overPercent": 0.5, "timestamp": 1408658285716, "id": "wo3", "name": "Straggler", "description": "Struggling with identifying strengths and weaknesses of claim-data pairs."}
+        ], "shoutout": [
+            {"total": 10, "overPercent": 2.6666666666666665, "timestamp": 1409012387031, "id": "so1", "name": "Nailed It!", "description": "Outstanding performance at identifying weaknesses of claim-data pairs."}
+        ]}, "gameId": "AA-1", "userId": "25", "assessmentId": "sowo"},
+        {"gameId": "AA-1", "userId": "250", "assessmentId": "sowo", "results": {"watchout": [
+            {"total": 6, "overPercent": 1, "timestamp": 1409256462557, "id": "wo1", "name": "Contradictory Mechanic", "description": "Student is struggling with claim-data pairs. They are consistently using evidence that contradicts their claim. More core construction practice is needed."}
+        ], "shoutout": []}}
+    ];
 function getReport(req, res, next) {
     try {
         if (!req.params.reportId) {
@@ -53,6 +62,9 @@ function getReport(req, res, next) {
         }
         else if(reportId == 'achievements') {
             _getAchievements.call(this, req, res, reportId, gameId, courseId);
+        }
+        else if(reportId == 'mission-progress') {
+            _getMissionProgress.call(this, req, res, reportId, gameId, courseId);
         }
         else {
             this.requestUtil.errorResponse(res, {key:"report.reportId.invalid", error: "invalid reportId"});
@@ -396,4 +408,51 @@ function getReportInfo(req, res){
     }
 
     this.requestUtil.jsonResponse(res, this.getGameReportInfo(gameId, reportId) );
+}
+
+function _getMissionProgress(req, res, reportId, gameId, courseId) {
+    var lmsService = this.serviceManager.get("lms").service;
+    lmsService.getStudentsOfCourse(courseId)
+        .then(function(userList){
+
+            for(var i in userList){
+                cmp.push( this.getMissionTimePlayed(userList[i].id, courseId, gameId) );
+            }
+
+            var p = when.reduce(cmp, function(allUsers, userData){
+                return allUsers.push(userData);
+            }, []);
+
+            p.then(function(allUsers){
+                this.requestUtil.jsonResponse(res, allUsers );
+            })
+
+        });
+}
+
+function getMissionTimePlayed(userId, gameId, courseId){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var userData = {
+        gameId: gameId,
+        userId: userId
+    };
+    this.dashStore.getCompletedMissions(userId, courseId, gameId)
+        .then(function(missionProgress){
+            userData.missions = missionProgress;
+
+            return this.telmStore.getGamePlayInfo(userId, gameId);
+        })
+        .then(function(ttp){
+            userData.totalTimePlayed = ttp;
+
+            // merge missionProgress + userData
+            resolve(userData);
+        });
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 }

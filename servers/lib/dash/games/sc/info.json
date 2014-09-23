@@ -156,7 +156,7 @@
             },
             {
                 "id": "mission-progress",
-                "enabled": false,
+                "enabled": true,
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
