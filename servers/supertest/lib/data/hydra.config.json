@@ -1,0 +1,20 @@
+// Development Hydra Config to launch local testing with email checking
+
+{
+    "env": "dev",
+    "auth": {
+    	"beta": {
+    		"email": {
+    			"to": "build+betaReg@glasslabgames.org",
+    			"from": "Playfully Beta <build+betaReg@glasslabgames.org>",
+                "transport": {
+                    "service": "Gmail",
+                    "auth": {
+                        "user": "build+betaReg@glasslabgames.org",
+                        "pass": "glasslab"
+                    }
+                }
+    		}
+    	}
+    }
+}

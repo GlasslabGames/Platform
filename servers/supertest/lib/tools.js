@@ -13,7 +13,8 @@ module.exports = {
 		requestAccess: requestAccess,
 		listenForEmailsFrom: listenForEmailsFrom,
 		setGame: setGame,
-		setCourse: setCourse
+		setCourse: setCourse,
+    conLog: conLog
 }
 
 function zfill(num, size) {
@@ -138,4 +139,18 @@ function setGame(route, gameId) {
 
 function setCourse(route, courseId) {
 	return route.replace(":courseId", courseId);
+}
+
+function conLog(content, flag, header) {
+  if (flag) {
+    if (header) {
+      console.log("+".repeat(header.length() + 8))
+      console.log("++  " + header + "  ++");
+      console.log("+".repeat(header.length() + 8))
+      console.log(content);
+    } else {
+      console.log(content);
+    }
+      
+  }
 }
