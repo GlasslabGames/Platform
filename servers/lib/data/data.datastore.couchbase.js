@@ -2425,34 +2425,34 @@ TelemDS_Couchbase.prototype.getAssessmentResults = function(userId, gameId, asse
 
 TelemDS_Couchbase.prototype.getConfigs = function(gameId){
 // add promise wrapper
-    return when.promise(function(resolve, reject) {
+return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        gameId = gameId.toUpperCase();
+    gameId = gameId.toUpperCase();
 
-        var key = tConst.game.configKey+":"+gameId;
+    var key = tConst.game.configKey+":"+gameId;
 
-         // get game config
-        this.client.get(key, function(err, data) {
-            if(err) {
-                // NOT "No such key"
-                if(err.code != 13) {
-                    console.error("CouchBase TelemetryStore: Get Config Error -", err);
-                    reject(err);
-                    return;
-                }
-                else {
-                    reject(err);
-                    return;
-                }
+     // get game config
+    this.client.get(key, function(err, data) {
+        if(err) {
+            // NOT "No such key"
+            if(err.code != 13) {
+                console.error("CouchBase TelemetryStore: Get Config Error -", err);
+                reject(err);
+                return;
             }
-            resolve(data.value)
-        }.bind(this));
-// ------------------------------------------------
+            else {
+                reject(err);
+                return;
+            }
+        }
+        resolve(data.value)
     }.bind(this));
+// ------------------------------------------------
+}.bind(this));
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.updateConfigs = function(gameId, data){
+TelemDS_Couchbase.prototype.updateConfigs = function(gameId, config){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -2461,7 +2461,7 @@ return when.promise(function(resolve, reject) {
     var key = tConst.game.configKey+":"+gameId;
 
     // get game config
-    this.client.set(key, data,
+    this.client.set(key, config,
         function(err, data) {
             if(err) {
                 console.err("CouchBase TelemetryStore: Set Config Error - ", err);
@@ -2469,7 +2469,7 @@ return when.promise(function(resolve, reject) {
                 return;
             }
 
-            resolve(data);
+            resolve(config);
         }.bind(this));
 
 // ------------------------------------------------
