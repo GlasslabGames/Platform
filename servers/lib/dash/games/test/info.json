@@ -10,6 +10,7 @@
     "basic": {
         "gameId": "TEST",
         "enabled": true,
+        "visible": false,
         "maintenance": null,
         "shortName": "TEST",
         "longName": "TEST game",
