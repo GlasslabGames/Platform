@@ -338,7 +338,7 @@ DashService.prototype._filterDisabledGameInfo = function(gameInfo) {
         if( _.isObject(gameInfo[i]) &&
             gameInfo[i].hasOwnProperty('enabled') &&
             (gameInfo[i].enabled == false) ) {
-            console.info("gameInfo removing disabled object:", gameInfo[i]);
+            //console.info("gameInfo removing disabled object:", gameInfo[i]);
             delete gameInfo[i];
             deleted = true;
         }
