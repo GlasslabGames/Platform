@@ -435,19 +435,19 @@
                     "list": [
                         {
                             "name": "Mission 1 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+1.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1.pdf"
                         },
                         {
                             "name": "Mission 2 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+2.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2.pdf"
                         },
                         {
                             "name": "Mission 3 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+3.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3.pdf"
                         },
                         {
                             "name": "Mission 4 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+4.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4.pdf"
                         }
                     ]
                   },
@@ -456,11 +456,7 @@
                     "list": [
                         {
                             "name": "Walkthrough",
-                            "link": "http://glasslabgames.org"
-                        },
-                        {
-                            "name": "Mission",
-                            "link": "http://glasslabgames.org"
+                            "link": "http://vimeo.com/102270816"
                         }
                     ]
                    },
