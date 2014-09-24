@@ -10,6 +10,7 @@ module.exports = {
     Controller: {
         user:  require('./controller/user.js'),
         login: require('./controller/login.js'),
+        newsletter:  require('./controller/newsletter.js'),
 
         _user:  require('./controller/_user.js')
     },

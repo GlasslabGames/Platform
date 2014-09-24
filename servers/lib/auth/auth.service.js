@@ -18,10 +18,10 @@ var path       = require('path');
 // Third-party libs
 var _          = require('lodash');
 var when       = require('when');
-var express    = require('express');
 var passport   = require('passport');
 var couchbase  = require('couchbase');
 var check      = require('validator').check;
+var mailChimp  = require('mailchimp').MailChimpAPI;
 
 // load at runtime
 var Util, aConst, lConst;
@@ -399,6 +399,66 @@ return when.promise(function(resolve, reject) {
         resolve([]);
     }
 
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
+AuthService.prototype.subscribeToNewsletter = function(apiKey, mailListName, regData){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    try {
+        var api = new mailChimp(apiKey, { version : '2.0' });
+    } catch (err) {
+        reject(err);
+        return;
+    }
+
+    api.call('lists', 'list', {
+        filters: {
+            list_name: mailListName
+        }
+    }, function (err, listData) {
+        if (err) {
+            reject(err);
+            return;
+        }
+
+        // find correct id
+        var mailListId = "";
+        if(listData.data) {
+            for(var i = 0; i < listData.data.length; i++) {
+                if(listData.data[i].name == mailListName) {
+                    mailListId = listData.data[i].id;
+                }
+            }
+
+            if(mailListId && mailListId.length > 0) {
+                var subscribeParams = {
+                    id: mailListId,
+                    email: {
+                        email: regData.email
+                    },
+                    merge_vars: {
+                        FNAME: regData.firstName,
+                        LNAME: regData.lastName
+                    }
+                };
+                api.call('lists', 'subscribe', subscribeParams, function (err, subscribeData) {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+
+                    resolve(subscribeData);
+                });
+            }
+        }
+
+    });
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
