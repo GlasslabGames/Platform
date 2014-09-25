@@ -62,6 +62,11 @@ module.exports = {
     "data.gameId.general":                  "We encountered an error. Please try again.",
     "data.gameId.missing":                  "This game Id does not exist in our system",
     "data.gameId.invalid":                  "This game Id is not in our list of valid games",
-    "data.gameConfig.missing":              "You did not input game config"
-
+    "data.gameConfig.missing":              "You did not input game config",
+    //
+    "report.general":                       "There is a problem with this report",
+    "report.access.invalid":                "Invalid Access",
+    "report.gameId.invalid":                "Invalid gameId",
+    "report.gameId.missing":                "Missing gameId",
+    "report.reportId.missing":              "Missing ReportId"
 };

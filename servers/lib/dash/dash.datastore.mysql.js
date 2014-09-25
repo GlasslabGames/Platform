@@ -168,82 +168,6 @@ return when.promise(function(resolve, reject) {
 }
 
 
-WebStore_MySQL.prototype.createActivityResults = function(gameSessionId, userId, courseId, gameLevel) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-// insert into DB
-    var values = [
-        "NULL",
-        0,
-        this.ds.escape(gameLevel), // aka activityId
-        this.ds.escape(courseId),
-        "NULL",
-        "NOW()",
-        this.ds.escape(gameSessionId),
-        "NOW()",
-        "NULL", // end time
-        "UNIX_TIMESTAMP()", // start time
-        "NULL", // score
-        "NULL", // note
-        this.ds.escape(waConst.activityResult.status.new), // status
-        "NULL", // student feedback code
-        "NULL", // teacher feedback code
-        this.ds.escape(userId)
-    ];
-    values = values.join(",");
-    var Q = "INSERT INTO GL_ACTIVITY_RESULTS (\
-        id,\
-        version,\
-        activity_id,\
-        course_id,\
-        data,\
-        date_created,\
-        game_session_id,\
-        last_updated,\
-        end_time,\
-        start_time,\
-        score,\
-        note,\
-        status,\
-        student_feedback_code,\
-        teacher_feedback_code,\
-        user_id\
-        ) VALUES("+values+")";
-
-    this.ds.query(Q).then(resolve, reject);
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-WebStore_MySQL.prototype.updateActivityResults = function(gameSessionId, stars, cancelled) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    // if cancelled set status to canceled
-    var status = (cancelled) ? waConst.activityResult.status.cancelled : waConst.activityResult.status.live;
-
-    var Q = "UPDATE GL_ACTIVITY_RESULTS" +
-        " SET" +
-        "   last_updated=NOW()" +
-        "  ,end_time=UNIX_TIMESTAMP()" +
-        "  ,status="+this.ds.escape(status) +
-        "  ,score="+this.ds.escape(stars) +
-        " WHERE" +
-        "  game_session_id="+this.ds.escape(gameSessionId);
-
-    this.ds.query(Q).then(resolve, reject);
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-
 exampleOut.getLicensedGameIdsFromUserId = {
     "SC": true
 };
@@ -285,7 +209,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-// TODO: use a new table with gameId column
+// TODO: move this to couchbase
 // return missions map with "missionId" as key and "endTime" value
 WebStore_MySQL.prototype.getCompletedMissions = function(userId, courseId, gameId) {
 // add promise wrapper

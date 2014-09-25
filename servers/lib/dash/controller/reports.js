@@ -12,8 +12,9 @@ module.exports = {
 
 var exampleIn = {}, exampleOut = {};
 
-// http://localhost:8001/api/v2/dash/reports/sowo/game/AA-1/course/93
-// http://localhost:8001/api/v2/dash/reports/sowo?gameId=AA-1&courseId=93
+// http://127.0.0.1:8001/api/v2/dash/reports/sowo/game/AA-1/course/44
+// http://127.0.0.1:8001/api/v2/dash/reports/achievements/game/AA-1/course/44
+// http://127.0.0.1:8001/api/v2/dash/reports/mission-progress/game/SC/course/44
 exampleIn.getSOWO = {
     gameId: "AA-1",
     courseId: 1
@@ -176,7 +177,6 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
 }
 
 
-// http://localhost:8001/api/v2/dash/reports/achievements?gameId=AA-1&courseId=93
 exampleIn._getAchievements = {
     gameId: "AA-1",
     courseId: 93
@@ -344,7 +344,7 @@ function getTotalTimePlayed(req, res) {
                                                 gameData.ExplorationManager.ExplorationManager.hasOwnProperty('m_totalTimePlayed') &&
                                                 gameData.ExplorationManager.ExplorationManager.m_totalTimePlayed) {
 
-                                                console.log("totalTimePlayed from SaveGame - userId:", userId, ", totalTimePlayed:", totalTimePlayed);
+                                                //console.log("totalTimePlayed from SaveGame - userId:", userId, ", totalTimePlayed:", totalTimePlayed);
                                                 // ensure it's a float and make it seconds
                                                 totalTimePlayed = parseFloat(gameData.ExplorationManager.ExplorationManager.m_totalTimePlayed);
                                             }
@@ -372,7 +372,7 @@ function getTotalTimePlayed(req, res) {
                         this.requestUtil.jsonResponse(res, list);
                     }.bind(this));
                 } else {
-                    this.requestUtil.errorResponse(res, {error: "invalid access"});
+                    this.requestUtil.errorResponse(res, {key: "report.access.invalid"});
                 }
             }.bind(this))
             // error
@@ -388,11 +388,11 @@ function getTotalTimePlayed(req, res) {
 
 function getReportInfo(req, res){
     if (!req.params.reportId) {
-        this.requestUtil.errorResponse(res, {key:"report.reportId.missing", error: "missing reportId"});
+        this.requestUtil.errorResponse(res, {key:"report.reportId.missing"});
         return;
     }
     if (!req.params.gameId) {
-        this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+        this.requestUtil.errorResponse(res, {key:"report.gameId.missing"});
         return;
     }
 
@@ -403,54 +403,100 @@ function getReportInfo(req, res){
     // TODO: change to promise
     // check if valid gameId
     if(!this.isValidGameId(gameId)) {
-        this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+        this.requestUtil.errorResponse(res, {key:"report.gameId.invalid"});
         return;
     }
 
     this.requestUtil.jsonResponse(res, this.getGameReportInfo(gameId, reportId) );
 }
 
+
+exampleOut._getAchievements = [
+    {
+        "userId": 25,
+        "missions": [
+            {
+
+            }
+        ],
+        "totalTimePlayed": 123456789
+    }
+];
 function _getMissionProgress(req, res, reportId, gameId, courseId) {
     var lmsService = this.serviceManager.get("lms").service;
     lmsService.getStudentsOfCourse(courseId)
-        .then(function(userList){
+        .then(function(userList) {
+            var cmp = [];
+            // get all users missions info in promises
+            var getMissionTimePlayed = _getMissionTimePlayed.bind(this);
 
-            for(var i in userList){
-                cmp.push( this.getMissionTimePlayed(userList[i].id, courseId, gameId) );
+            for(var i in userList) {
+                console.log("courseId:", courseId, ", gameId:", gameId, ", userId:", userList[i].id);
+                cmp.push( getMissionTimePlayed(userList[i].id, gameId) );
             }
 
+            // add users mission info to user list
             var p = when.reduce(cmp, function(allUsers, userData){
-                return allUsers.push(userData);
-            }, []);
+                allUsers.push(userData);
+                return allUsers;
+            }.bind(this), []);
 
             p.then(function(allUsers){
                 this.requestUtil.jsonResponse(res, allUsers );
-            })
-
-        });
+            }.bind(this))
+            // catch all errors
+            .then(null, function(err){
+                console.error("getMissionProgress Error:", err);
+                this.requestUtil.errorResponse(res, {key:"report.general"});
+            }.bind(this));
+        }.bind(this));
 }
 
-function getMissionTimePlayed(userId, gameId, courseId){
+function _getMissionTimePlayed(userId, gameId){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var userData = {
-        gameId: gameId,
         userId: userId
     };
-    this.dashStore.getCompletedMissions(userId, courseId, gameId)
-        .then(function(missionProgress){
-            userData.missions = missionProgress;
+    var dataService = this.serviceManager.get("data").service;
+
+    dataService.getCompletedMissions(userId, gameId)
+        .then(function(completedMissions){
+
+            userData.missions = [];
+            // flatten mission list
+            var gameMissions = _.cloneDeep(this.getGameMissions(gameId));
+            for(var i = 0; i < gameMissions.groups.length; i++){
+                for(var j = 0; j < gameMissions.groups[i].missions.length; j++){
+
+                    // remove links, they are not needed
+                    delete gameMissions.groups[i].missions[j].links;
+
+                    userData.missions.push(gameMissions.groups[i].missions[j]);
+                }
+            }
+
+            //console.log("completedMissions:", completedMissions);
+            //console.log("gameMissions:",      gameMissions);
+            // add completed mission flags
+            for(i = 0; i < userData.missions.length; i++){
+                for(j = 0; j < completedMissions.length; j++){
+                    if(userData.missions[i].id == completedMissions[j].gameLevel) {
+                        userData.missions[i].completed = completedMissions[j].summary.completed;
+                        userData.missions[i].completedDate = completedMissions[j].serverEndTimeStamp;
+                    }
+                }
+            }
 
             return this.telmStore.getGamePlayInfo(userId, gameId);
-        })
-        .then(function(ttp){
-            userData.totalTimePlayed = ttp;
-
-            // merge missionProgress + userData
+        }.bind(this))
+        .then(function(playInfo){
+            // add ttp info
+            userData.totalTimePlayed = playInfo.totalTimePlayed;
             resolve(userData);
-        });
+        }.bind(this));
 
 // ------------------------------------------------
 }.bind(this));
