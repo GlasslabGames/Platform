@@ -1,18 +1,28 @@
 {
-    "env": "dev",
-    "auth": {
-    	"beta": {
-    		"email": {
-    			"to": "build+betaReg@glasslabgames.org",
-    			"from": "Playfully Beta <build+betaReg@glasslabgames.org>",
-                "transport": {
-                    "service": "Gmail",
-                    "auth": {
-                        "user": "build+betaReg@glasslabgames.org",
-                        "pass": "glasslab"
-                    }
-                }
-    		}
-    	}
+  "env": "dev",
+  "auth": {
+    "email": {
+      "from": "<build@glasslabgames.org>",
+      "transport": {
+        "service": "Gmail",
+        "auth": {
+          "user": "build@glasslabgames.org",
+          "pass": "glasslab"
+        }
+      }
+    },
+    "beta": {
+      "email": {
+        "to": "build@glasslabgames.org",
+        "from": "Playfully Beta <build@glasslabgames.org>",
+        "transport": {
+          "service": "Gmail",
+          "auth": {
+            "user": "build@glasslabgames.org",
+            "pass": "glasslab"
+          }
+        }
+      }
     }
+  }
 }
