@@ -208,37 +208,3 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
-
-// TODO: move this to couchbase
-// return missions map with "missionId" as key and "endTime" value
-WebStore_MySQL.prototype.getCompletedMissions = function(userId, courseId, gameId) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    var Q = "SELECT activity_id as mission, end_time as endTime" +
-        " FROM GL_ACTIVITY_RESULTS" +
-        " WHERE status='live'" +
-        " AND score > 0" +
-        " AND user_id=" + this.ds.escape(userId) +
-        " AND course_id=" + this.ds.escape(courseId) +
-        " ORDER BY end_time";
-
-    //console.log("Q:", Q);
-    this.ds.query(Q).then(function(results) {
-            if(results.length > 0) {
-                var missions = {};
-                for(var i = 0; i < results.length; i++) {
-                    missions[ results[i].mission ] = results[i].endTime;
-                }
-                resolve( missions );
-            } else {
-                resolve([]);
-            }
-        }.bind(this)
-        , reject);
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
