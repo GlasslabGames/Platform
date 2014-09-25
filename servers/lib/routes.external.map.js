@@ -167,14 +167,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/course/:courseId/game/:gameId/missions",
-            service: "dash",
-            controller: "game",
-            method: {
-                get: "getCourseGameMissions"
-            }
-        },
-        {
             api: "/api/v2/dash/game/:gameId/missions",
             service: "dash",
             controller: "game",
