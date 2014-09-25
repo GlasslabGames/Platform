@@ -486,6 +486,15 @@ return when.promise(function(resolve, reject) {
                     if(userData.missions[i].id == completedMissions[j].gameLevel) {
                         userData.missions[i].completed = completedMissions[j].summary.completed;
                         userData.missions[i].completedDate = completedMissions[j].serverEndTimeStamp;
+                        userData.missions[i].data = {};
+
+                        // add summary and score info to mission data
+                        if(completedMissions[j].summary) {
+                            userData.missions[i].data.summary = completedMissions[j].summary;
+                        }
+                        if(completedMissions[j].score) {
+                            userData.missions[i].data.score = completedMissions[j].score;
+                        }
                     }
                 }
             }
