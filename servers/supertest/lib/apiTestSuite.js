@@ -36,18 +36,25 @@ var games = require('./games/index.js'),
 // TEST ROUTINE //
 //////////////////
 
-var apiTestSuite = function (env, data, routeMap, verbose) {
-
+var apiTestSuite = function (env, data, routeMap, logLevel) {
+  
+  // Set write level
+  conLog = conLog(logLevel);
+  
 	var routes  = new routeMap(data),
 			srvAddr = data.serverAddress,
 			teacher = data.teacher;
-  
-  var newTeacher, newStudent;   // NOTE - to store data between tests for generated users
 	
 	var agent   = request.agent(),
 			results = {};
 	
-	var classData;
+	var classData, adminEmail, newTeacher, newTeacherLogin, newStudent;   // NOTE - to store data between tests for generated users
+  
+  if (env == 'local') {
+    adminEmail = 'build@glasslabgames.org';
+  } else {
+    adminEmail = 'accounts@glasslabgames.org';
+  }
 
 	describe(env.toUpperCase() + " API (v2) Test Suite", function (done) {
 
@@ -76,7 +83,7 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
 				});
 		});
 
-		it("[0. general] should return valid SDK config data for MGO", function (done) {
+		it("[0. general] #should return valid SDK config data for MGO", function (done) {
 			agent
 				.get(srvAddr + routes.sdk.connect.path)
 				.end(function (res) {
@@ -131,7 +138,7 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
 				.type('application/json')
 				.end(function (res) {
 					expect(res.status).to.eql(200);
-//          conLog(res.text, verbose);  // DEBUG
+          conLog(res.text, 'classes');  // DEBUG
         
 					// FUTURE - do some validation of returned data
 					done();
@@ -254,7 +261,6 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
             }
             expect(matched).to.eql(true);
           }
-
 					done();
 				});
 		});
@@ -279,16 +285,14 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
 				.type('application/json')
 				.send({'email': teacher.email})
 				.end(function (res) {
-
 					expect(res.status).to.eql(200);
-
-					listenForEmailsFrom('accounts@glasslabgames.org', function (email) {
-
-						confirmationEmail = email;
-
-						done();
-					});
 				});
+      
+      listenForEmailsFrom(adminEmail, function (email) {
+        confirmationEmail = email;
+        done();
+      });
+      
     });
     
 
@@ -298,34 +302,39 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
     
 		it('[2. new beta user] #can request access to Playfully.org', function(done) {
 			
+      // Prepare data for beta registration tests
 			newTeacher = JSON.parse(requestAccess('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123'));
+      newTeacherLogin = JSON.stringify({"username": newTeacher['email'], "password": newTeacher['password']});
+      
+      // Store data for future debugging opportunities, repro
 			results['newTeacherRequestPost'] = newTeacher;
+
+      if (env == 'local') {
+        listenForEmailsFrom(adminEmail, function (email) {
+          confirmationEmail = email;
+          results['requestEmail'] = email;
+
+          var linkReg = new RegExp(srvAddr+'.*?(?=\n)');
+          var confirmLink = email.text.match(linkReg)[0];
+//          conLog(confirmLink, 'link');  // DEBUG
+          done();
+        });
+      }
       
 			agent
 				.post(srvAddr + routes.register.teacher.path)
 				.type('application/json')
 				.send(newTeacher)
 				.end(function (res) {
-        
 					expect(res.status).to.eql(200);
-
-					if (env == 'local') {
-            
-            console.log('should be checking now');
-						
-						listenForEmailsFrom('build@glasslabgames.org', function (email) {
-
-							confirmationEmail = email;
-							conLog(email, verbose, 'email');		// DEBUG
-							
-							// click on the confirm link, then
-              done();
-							
-						});
-					}
         
-					else {	done();  }
+          if (env != 'local') {
+            // Not waiting for email
+            // response, so done here
+            done(); 
+          }
 				});
+      
 		});
   
     it('[2. new beta user] #cannot log in without being confirmed', function(done) {
@@ -333,7 +342,7 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
       agent
 				.post(srvAddr + routes.login.path)
 				.type('application/json')
-				.send({"username": newTeacher['email'], "password": newTeacher['password']})
+				.send(newTeacherLogin)
 				.end(function (res) {
         
           expect(res.status).to.eql(401);
@@ -342,21 +351,24 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
 					done();
 				});
       
+      // TODO hit confirm link and then check again, this time for 200
+      
+      
     });
     
     if (env == 'local') {
       
       // NOTE - can only test when connected to local machine
 						
-      it('[2. new beta user] #cannot log in without verifying email', function(done) {
+      it.skip('[2. new beta user] #cannot log in without verifying email', function(done) {
 
         agent
           .post(srvAddr + routes.login.path)
           .type('application/json')
-          .send({"username": newTeacher['email'], "password": newTeacher['pass']})
+          .send(newTeacherLogin)
           .end(function (res) {
             expect(res.status).to.eql(401);
-            expect(res.text['error']).to.eql("Please verify your email account");
+            expect(JSON.parse(res.text)['error']).to.eql(errors["user.login.notVerified"]);
             done();
           });
       });
@@ -367,10 +379,14 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
         agent
           .post(srvAddr + routes.login.path)
           .type('application/json')
-          .send({"username": newTeacher['email'], "password": newTeacher['pass']})
+          .send(newTeacherLogin)
           .end(function (res) {
-            expect(res.status).to.eql(401);
-            expect(res.text['error']).to.eql("Please verify your email account");
+            expect(res.status).to.eql(200);
+          
+          
+          
+            // TODO - magic.w
+          
             done();
           });
       });
@@ -401,15 +417,12 @@ var apiTestSuite = function (env, data, routeMap, verbose) {
 			done();
 		});
     
-    it.skip('[4. Clever user] #shows SimCityEDU reports', function(done) {
-      
+    it.skip('[4. Clever user] #shows SimCityEDU reports', function(done) {  
       done();
     });
 
     // TODO - add login & data verification for clever
     
-    
-
 	});
 	
 	after(function () {
