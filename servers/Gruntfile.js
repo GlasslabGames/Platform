@@ -8,7 +8,7 @@ module.exports = function (grunt) {
             test: {
                 options: {
 									reporter: 'spec',
-									timeout: 27000		// NOTE - needed to be extended for email checking
+									timeout: 20000,		// NOTE - reduced; may need extention for email checking
                 },
                 src: ['supertest/*.js']
             }

@@ -30,7 +30,8 @@ function tstamp() {
 		date.getMinutes() + ':' + zfill(date.getSeconds(),2)
 }
 
-function genUser(name, emailOrCode, passw, role) { // FUTURE - ok, emailOrCode is a bit funkadelic.  make more robust
+// FUTURE - ok, emailOrCode is a bit funkadelic.  make more robust
+function genUser(name, emailOrCode, passw, role) {
 
   if (role == 'student') {
     return JSON.stringify({
@@ -87,6 +88,7 @@ function genClass(name, grades, gameId) {   // FUTURE - support for multi-game c
 		
 }
 
+// FUTURE - replace "console.log"s with conLog, once fixed
 function listenForEmailsFrom(emailAddress, cb) {
 	var mailListener = new MailListener({
 		username: "build@glasslabgames.org",
@@ -94,42 +96,41 @@ function listenForEmailsFrom(emailAddress, cb) {
 		host: "imap.gmail.com",
 		port: 993, // imap port
 		tls: true,
-		tlsOptions: {
-			rejectUnauthorized: false
-		},
+    tlsOptions: {	rejectUnauthorized: false },
 		mailbox: "INBOX", // mailbox to monitor
-		//  searchFilter: ["UNSEEN", "FLAGGED"], // the search filter being used after an IDLE notification has been retrieved
 		markSeen: true, // all fetched email willbe marked as seen and not fetched next time
-		//  mailParserOptions: {streamAttachments: true}, // options to be passed to mailParser lib.
 		attachments: false, // download attachments as they are encountered to the project directory
-		//  attachmentOptions: { directory: "attachments/" }
 	});
 	mailListener.start(); // start listening
 	mailListener.on("server:connected", function () {
-//		console.log("imapConnected");		// DEBUG
+		console.log("imapConnected, checking for mail from " + emailAddress);		// DEBUG
 	});
 	mailListener.on("server:disconnected", function () {
-		console.log("imapDisconnected");
+		console.log("imapDisconnected");  
 	});
 	mailListener.on("error", function (err) {
+    console.log('ERROR');
 		console.log(err);
 	});
+  
 	mailListener.on("mail", function (mail, seqno, attributes) {
-		// do something with mail object including attachments
 		var newMail = {
 				subject: mail['subject'],
-				// NOTE - hmm, statref'ing '[0]' seems troublingly unrobust
+				// FIXME - hmm, statref'ing '[0]' seems troublingly unrobust
 				sender: mail['from'][0]['address'],
 				userEmail: mail['to'][0]['address'],
-				text: mail['text']
+				text: mail['text']  // FUTURE - add logging for verbose mode
 			}
-			// if email matches req'd
+		
+    // if email matches req'd
 		if (emailAddress == newMail.sender) {
-			cb(newMail); // Callback which will run the test upon
+      mailListener.stop();
+      cb(newMail); // Callback which will run the test upon
 		} else {
-			console.log('mismatch: ' + newMail.sender);
-			// keep waiting 
+			console.log('mismatch: ' + newMail.sender);  // DEBUG
+			// keep waiting
 		}
+    
 	});
 }
 
@@ -141,16 +142,23 @@ function setCourse(route, courseId) {
 	return route.replace(":courseId", courseId);
 }
 
-function conLog(content, flag, header) {
-  if (flag) {
-    if (header) {
-      console.log("+".repeat(header.length() + 8))
-      console.log("++  " + header + "  ++");
-      console.log("+".repeat(header.length() + 8))
-      console.log(content);
-    } else {
-      console.log(content);
-    }
-      
+function conLog(flag, filename) {
+  
+  // Verbose
+  function vLog(content, header) {
+    
+    // FUTURE - if filename, write to file instead of console
+    var br = Array(header.length + 9).join("+");
+    console.log(br);
+    console.log("||  " + header + "  ||");
+    console.log(br);
+    console.log(content);
   }
+  
+  // Quiet
+  function qLog () {
+    // Do nothing, for now
+  }
+  
+  return ((flag) ? vLog : qLog);
 }
