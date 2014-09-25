@@ -609,7 +609,7 @@ function verifyBetaCode(req, res, next) {
 
                     return this.glassLabStrategy.updateUserData(userData)
                         .then(function() {
-                            this.requestUtil.jsonResponse(res, "Successfully Confirmed Beta User. Verification email sent to Beta User ", 200);
+                            this.requestUtil.jsonResponse(res, {"text": "Successfully Confirmed Beta User. Verification email sent to Beta User", "statusCode":200});
                             return userData;
                         }.bind(this));
                 } else {
