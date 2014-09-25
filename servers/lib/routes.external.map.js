@@ -388,6 +388,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/newsletter/subscribe",
+            service: "auth",
+            controller: "newsletter",
+            method: {
+                post: "subscribe"
+            }
+        },
+        {
             api: "/api/v2/auth/password-reset/send",
             service: "auth",
             controller: "user",
