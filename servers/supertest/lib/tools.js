@@ -89,7 +89,10 @@ function genClass(name, grades, gameId) {   // FUTURE - support for multi-game c
 }
 
 // FUTURE - replace "console.log"s with conLog, once fixed
-function listenForEmailsFrom(emailAddress, cb) {
+function listenForEmailsFrom(emailAddress, subj, cb, logger) {
+  
+//  logger = logger || console.log;
+  
 	var mailListener = new MailListener({
 		username: "build@glasslabgames.org",
 		password: "glasslab",
@@ -99,36 +102,52 @@ function listenForEmailsFrom(emailAddress, cb) {
     tlsOptions: {	rejectUnauthorized: false },
 		mailbox: "INBOX", // mailbox to monitor
 		markSeen: true, // all fetched email willbe marked as seen and not fetched next time
+//		markSeen: false, // FIXME testing out 
 		attachments: false, // download attachments as they are encountered to the project directory
 	});
 	mailListener.start(); // start listening
+  
 	mailListener.on("server:connected", function () {
-		console.log("imapConnected, checking for mail from " + emailAddress);		// DEBUG
+		logger("imapConnected, checking for mail from " + emailAddress);		// DEBUG
 	});
 	mailListener.on("server:disconnected", function () {
-		console.log("imapDisconnected");  
+		logger("imapDisconnected");
 	});
 	mailListener.on("error", function (err) {
-    console.log('ERROR');
-		console.log(err);
+//    logger(err, 'ERROR');
 	});
-  
+    
+  // FUTURE - return list of mail not marked read.  mark the union of that return
+  //    and any other mail listeners, and mark all as read
 	mailListener.on("mail", function (mail, seqno, attributes) {
+    
 		var newMail = {
-				subject: mail['subject'],
-				// FIXME - hmm, statref'ing '[0]' seems troublingly unrobust
-				sender: mail['from'][0]['address'],
-				userEmail: mail['to'][0]['address'],
-				text: mail['text']  // FUTURE - add logging for verbose mode
-			}
+		  subject: mail['subject'],
+		  // FIXME - hmm, statref'ing '[0]' seems troublingly unrobust
+		  sender: mail['from'][0]['address'],
+		  userEmail: mail['to'][0]['address'],
+		  text: mail['text'] // FUTURE - add logging for verbose mode
+		}
 		
     // if email matches req'd
 		if (emailAddress == newMail.sender) {
-      mailListener.stop();
-      cb(newMail); // Callback which will run the test upon
+      if (subj == newMail.subject) {
+        mailListener.stop();
+        cb(newMail); // Callback which will run the test
+        
+//          mailListener.imap.addFlags(attributes.uid, '\\Seen', function(err) {
+//            if(!err) {
+//             console.log('mail marked as read');
+//            } else {
+//              console.log(err);
+//            }
+//          });
+        
+      } else {
+        logger(newMail.subject, 'wrong sender subject');  // DEBUG
+      }
 		} else {
-			console.log('mismatch: ' + newMail.sender);  // DEBUG
-			// keep waiting
+			logger(newMail.sender, 'wrong sender email');  // DEBUG
 		}
     
 	});
@@ -146,12 +165,14 @@ function conLog(flag, filename) {
   
   // Verbose
   function vLog(content, header) {
-    
     // FUTURE - if filename, write to file instead of console
-    var br = Array(header.length + 9).join("+");
-    console.log(br);
-    console.log("||  " + header + "  ||");
-    console.log(br);
+    
+    if (header) {
+      var br = Array(header.length + 9).join("+");
+      console.log(br);
+      console.log("||  " + header + "  ||");
+      console.log(br);
+    }
     console.log(content);
   }
   
