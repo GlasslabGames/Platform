@@ -32,7 +32,7 @@ function sendBatchTelemetryV2(req, outRes, next){
 
         //console.log("send telemetry batch body:", req.body);
         // Queue Data
-        this._validateSendBatch(2, outRes, req.body);
+        this._validateSendBatch(outRes, req.body);
     } catch(err) {
         console.trace("Collector: Send Telemetry Batch Error -", err);
         this.stats.increment("error", "SendBatchTelemetry.Catch");

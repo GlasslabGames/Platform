@@ -95,7 +95,7 @@
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
-                "description": "Coming Soon!"
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
                 "id": "competency",
@@ -156,7 +156,7 @@
             },
             {
                 "id": "mission-progress",
-                "enabled": false,
+                "enabled": true,
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
@@ -435,19 +435,19 @@
                     "list": [
                         {
                             "name": "Mission 1 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+1.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1.pdf"
                         },
                         {
                             "name": "Mission 2 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+2.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2.pdf"
                         },
                         {
                             "name": "Mission 3 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+3.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3.pdf"
                         },
                         {
                             "name": "Mission 4 Lesson Plan",
-                            "link": "https://s3-us-west-2.amazonaws.com/playfully/SCE/SCE+Lesson+4_Mission+4.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4.pdf"
                         }
                     ]
                   },
@@ -456,11 +456,7 @@
                     "list": [
                         {
                             "name": "Walkthrough",
-                            "link": "http://glasslabgames.org"
-                        },
-                        {
-                            "name": "Mission",
-                            "link": "http://glasslabgames.org"
+                            "link": "http://vimeo.com/102270816"
                         }
                     ]
                    },
