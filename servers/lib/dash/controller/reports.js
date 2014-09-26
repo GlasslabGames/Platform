@@ -431,7 +431,7 @@ function _getMissionProgress(req, res, reportId, gameId, courseId) {
             var getMissionTimePlayed = _getMissionTimePlayed.bind(this);
 
             for(var i in userList) {
-                console.log("courseId:", courseId, ", gameId:", gameId, ", userId:", userList[i].id);
+                //console.log("courseId:", courseId, ", gameId:", gameId, ", userId:", userList[i].id);
                 cmp.push( getMissionTimePlayed(userList[i].id, gameId) );
             }
 
