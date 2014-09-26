@@ -48,7 +48,9 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 	var agent   = request.agent(),
 			results = {};
 	
-	var classData, adminEmail, newTeacher, newTeacherLogin, newStudent;   // NOTE - to store data between tests for generated users
+  // NOTE - to store data between tests for generated users
+	var classData, adminEmail, newTeacher, newTeacherLogin,
+      confirmLink, verifyLink, newStudent;
   
   if (env == 'local') {
     adminEmail = 'build@glasslabgames.org';
@@ -56,6 +58,9 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
     adminEmail = 'accounts@glasslabgames.org';
   }
 
+  
+  // FUTURE - change the casing format to a list.
+  // then, make blocks of code 
 	describe(env.toUpperCase() + " API (v2) Test Suite", function (done) {
 
 		results['timestamp'] = tstamp();
@@ -229,8 +234,8 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
             // FUTURE - clean up (achievements too)
             for (var studentIndex in resText) {
               if(resText[studentIndex]['userId'] == data.student.id) {
-                  matched = true;
-                  expect(resText[studentIndex]['results']).to.eql(data.student.sowo);
+                matched = true;
+                expect(resText[studentIndex]['results']).to.eql(data.student.sowo);
               }
             }
             expect(matched).to.eql(true);
@@ -241,28 +246,29 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 		});
 		
 		it("[1. existing user] #returns reports - achievements", function (done) {
-			agent
-				.get(srvAddr + setCourse(setGame(routes.reports.achievements.path, data.testGameId), teacher.testClass.id))
-				.type('application/json')
-				.end(function (res) {
-					expect(res.status).to.eql(200);
 
-					var resText = JSON.parse(res.text);
+		  agent
+		    .get(srvAddr + setCourse(setGame(routes.reports.achievements.path, data.testGameId), teacher.testClass.id))
+		    .type('application/json')
+		    .end(function (res) {
+		      expect(res.status).to.eql(200);
 
-          if(env != 'local') {
-            
-            var matched = false;
+		      var resText = JSON.parse(res.text);
 
-            for (var studentIndex in resText) {
-                if(resText[studentIndex]['userId'] == data.student.id) {
-                    matched = true;
-                    expect(resText[studentIndex]['achievements']).to.eql(data.student.achievements);
-                }
-            }
-            expect(matched).to.eql(true);
-          }
-					done();
-				});
+		      if (env != 'local') {
+
+		        var matched = false;
+
+		        for (var studentIndex in resText) {
+		          if (resText[studentIndex]['userId'] == data.student.id) {
+		            matched = true;
+		            expect(resText[studentIndex]['achievements']).to.eql(data.student.achievements);
+		          }
+		        }
+		        expect(matched).to.eql(true);
+		      }
+		      done();
+		    });
 		});
     
     it("[1. existing user] #should log out successfully", function (done) {
@@ -288,10 +294,11 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 					expect(res.status).to.eql(200);
 				});
       
-      listenForEmailsFrom(adminEmail, function (email) {
+      listenForEmailsFrom(adminEmail, "Your Playfully.org Password", function (email) {
         confirmationEmail = email;
+        conLog(confirmationEmail, 'reset password email') // DEBUG
         done();
-      });
+      }, conLog);
       
     });
     
@@ -304,21 +311,24 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 			
       // Prepare data for beta registration tests
 			newTeacher = JSON.parse(requestAccess('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123'));
-      newTeacherLogin = JSON.stringify({"username": newTeacher['email'], "password": newTeacher['password']});
+      newTeacherLogin = {"username": newTeacher['email'], "password": newTeacher['password']};
       
       // Store data for future debugging opportunities, repro
 			results['newTeacherRequestPost'] = newTeacher;
 
       if (env == 'local') {
-        listenForEmailsFrom(adminEmail, function (email) {
+        listenForEmailsFrom(adminEmail, "Playfully.org Beta confirmation", function (email) {
           confirmationEmail = email;
           results['requestEmail'] = email;
 
           var linkReg = new RegExp(srvAddr+'.*?(?=\n)');
-          var confirmLink = email.text.match(linkReg)[0];
-//          conLog(confirmLink, 'link');  // DEBUG
-          done();
-        });
+          
+          confirmLink = email.text.match(linkReg)[0];
+          conLog(confirmLink, 'link');  // DEBUG
+          
+          done();   // FUTURE - needs lock to avoid multiple calls with async
+          
+        }, conLog);
       }
       
 			agent
@@ -331,37 +341,59 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
           if (env != 'local') {
             // Not waiting for email
             // response, so done here
-            done(); 
+            done();
           }
 				});
       
 		});
-  
-    it('[2. new beta user] #cannot log in without being confirmed', function(done) {
-      
+
+    it('[2. new beta user] #cannot log in without being confirmed', function (done) {
+
       agent
-				.post(srvAddr + routes.login.path)
-				.type('application/json')
-				.send(newTeacherLogin)
-				.end(function (res) {
-        
+        .post(srvAddr + routes.login.path)
+        .type('application/json')
+        .send(newTeacherLogin)
+        .end(function (res) {
           expect(res.status).to.eql(401);
+          console.log(JSON.parse(res.text)['error']);
           expect(JSON.parse(res.text)['error']).to.eql(errors["user.login.betaPending"]);
         
-					done();
-				});
-      
-      // TODO hit confirm link and then check again, this time for 200
-      
-      
+          done();
+        });
     });
     
     if (env == 'local') {
       
       // NOTE - can only test when connected to local machine
-						
-      it.skip('[2. new beta user] #cannot log in without verifying email', function(done) {
+			
+      it('[2. new beta user] #admin can approve new teacher user', function (done) {
+      
+        
+        listenForEmailsFrom(adminEmail, "Beta status confirmed - Verify your email", function (email) {
+          confirmationEmail = email;
+          results['requestEmail'] = email;
 
+          var linkReg = new RegExp(srvAddr+'.*?(?=\n)');
+
+          verifyLink = email.text.match(linkReg)[0];
+          conLog(verifyLink, 'link');  // DEBUG
+
+          done();   // FUTURE - needs lock to avoid multiple calls with async
+
+        }, conLog);
+        
+        
+        agent
+          .get(confirmLink)
+          .type('application/json')
+          .end(function (res) {
+            expect(res.status).to.eql(200);
+            conLog(res.text, "confirmation");
+          });
+      });
+      
+      it('[2. new beta user] #cannot log in without verifying email', function(done) {
+                
         agent
           .post(srvAddr + routes.login.path)
           .type('application/json')
@@ -369,22 +401,35 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
           .end(function (res) {
             expect(res.status).to.eql(401);
             expect(JSON.parse(res.text)['error']).to.eql(errors["user.login.notVerified"]);
-            done();
+
+            agent
+              .get(verifyLink)
+              .type('application/json')
+              .end(function (res) {
+                agent
+                .post(srvAddr + routes.login.path)
+                .type('application/json')
+                .send(newTeacherLogin)
+                .end(function (res) {
+                  expect(res.status).to.eql(200);
+                  
+                  done();
+                  
+                });
+              });
+          
           });
       });
 
       it.skip('[2. new beta user] #can log in once confirmed and verified', function(done) {
 
-        
         agent
           .post(srvAddr + routes.login.path)
           .type('application/json')
           .send(newTeacherLogin)
           .end(function (res) {
             expect(res.status).to.eql(200);
-          
-          
-          
+            
             // TODO - magic.w
           
             done();

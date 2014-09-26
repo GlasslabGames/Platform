@@ -14,8 +14,10 @@ var apiTestSuite = require('./lib/apiTestSuite.js'),
 //var testENVs  = ["prod", "stage", "local"];  // NOTE - Since local will vary, not included by default.
 var testENVs  = ["local"];  // DEBUG - use for testing in isloation
 
-var debugFlag = true;   // Will log debug statements to console if TRUE
+var logDebug = 1;   // NOTE - 0: quiet, 1: verbose
+
+// NOTE - timeout is set in the grunt config
 
 for (var testENV in testENVs) {
-	apiTestSuite(testENVs[testENV], testData[testENVs[testENV]], routeMap, debugFlag);
+	apiTestSuite(testENVs[testENV], testData[testENVs[testENV]], routeMap, logDebug);
 }
