@@ -67,14 +67,20 @@
                 "id": "sowo",
                 "enabled": false,
                 "name": "Shout Out and Watch Out Report",
-                "header": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-AW-1.jpg"
+                },
                 "description": "Coming Soon!"
             },
             {
                 "id": "achievements",
                 "enabled": true,
-                "name": "Game Achievements & Time Played",
-                "header": "Game Achievements & Time Played",
+                "name": "Learning Events & Time Played",
+                "header": {
+                    "text": "Learning Events & Time Played",
+                    "image": "assets/game-banner-AW-1.jpg"
+                },
                 "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "groups": [
                 ]
