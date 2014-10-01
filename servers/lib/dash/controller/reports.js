@@ -67,6 +67,9 @@ function getReport(req, res, next) {
         else if(reportId == 'mission-progress') {
             _getMissionProgress.call(this, req, res, reportId, gameId, courseId);
         }
+        else if(reportId == 'competency') {
+            _getCompetency.call(this, req, res, reportId, gameId, courseId);
+        }
         else {
             this.requestUtil.errorResponse(res, {key:"report.reportId.invalid", error: "invalid reportId"});
         }
@@ -76,8 +79,7 @@ function getReport(req, res, next) {
     }
 }
 
-
-// http://localhost:8001/api/v2/dash/reports/sowo?gameId=AA-1&courseId=93
+// http://127.0.0.1:8001/api/v2/dash/reports/sowo/game/AA-1/course/93
 exampleIn.getSOWO = {
     gameId: "AA-1",
     courseId: 1
@@ -510,4 +512,73 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+}
+
+
+// http://127.0.0.1:8001/api/v2/dash/reports/competency/game/SC/course/44
+exampleOut.getCompetency = [
+
+];
+function _getCompetency(req, res, reportId, gameId, courseId) {
+    var assessmentId = reportId;
+
+    // get user list in class
+    // TODO: use service route
+    var lmsService = this.serviceManager.get("lms").service;
+    lmsService.getStudentsOfCourse(courseId)
+        .then(function(users){
+            // shortcut no users
+            if(!users) return;
+
+            var outList = [];
+            var userMap = {};
+            var promistList = [];
+
+            //console.log("users:", users);
+
+            // get SOWO data per game per user
+            users.forEach(function(user){
+                var userId = user.id;
+
+                //console.log("getAssessmentResults gameId:", gameId, ", userId:", userId, ", assessmentId:", assessmentId);
+                var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                    .then(function(assessmentData){
+                        // shortcut invalid assessmentData
+                        if(!assessmentData || !assessmentData.results) return;
+
+                        // create copy of data for output
+                        var outAssessmentData = _.cloneDeep(assessmentData);
+
+                        // TODO: replace this with promise
+                        // find assessment by ID
+                        var assessment = this.getGameAssessmentInfo(gameId);
+
+                        for(var i = 0; i < assessment.length; i++) {
+                            if(assessment[i].id == assessmentId) {
+
+                                // merge in info from game assessment info
+                                for(var j in assessment[i].missions) {
+                                    // check if exist in results, if not then set to empty object {}
+                                    outAssessmentData.results[j] = _.merge(outAssessmentData.results[j] || {}, assessment[i].missions[j]);
+                                }
+
+                                // done!
+                                break;
+                            }
+                        }
+
+                        return outAssessmentData;
+                    }.bind(this));
+                promistList.push(p);
+            }.bind(this));
+
+            when.reduce(promistList, function(list, item){
+                    list.push(item);
+                    return list;
+                }.bind(this), [])
+                .then(function(outList){
+                    // all done
+                    this.requestUtil.jsonResponse(res, outList);
+                }.bind(this));
+        }.bind(this));
 }
