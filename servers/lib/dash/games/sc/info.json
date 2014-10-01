@@ -10,16 +10,18 @@
     "basic": {
         "gameId": "SC",
         "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
+        "shortDescription": "SimCityEDU: Pollution Challenge!",
         "description": "SimCityEDU: Pollution Challenge!",
         "settings" : {
             "missionProgressLock": false
         },
         "license": {
             "type":      "loginType",
-            "loginType": "clever",
+            "loginType": "glasslabv2,clever",
             "valid": false,
             "message": {
                 "invalid": "Coming Soon!"
@@ -94,7 +96,7 @@
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
-                "description": "Coming Soon!"
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
                 "id": "competency",
@@ -155,7 +157,7 @@
             },
             {
                 "id": "mission-progress",
-                "enabled": false,
+                "enabled": true,
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
@@ -181,19 +183,21 @@
         "buttons": [
             {
                 "name": "Download",
+                "type": "download",
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/2/SimCityEDU_setup.msi"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1126/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
-                        "link": "http://clients.glgames.org/updates/SimCityEDU/base/1_2_1124/stage/SimCityEDU_setup.dmg"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1126/SimCityEDU_setup.dmg"
                     }
                 ]
             },
             {
                 "name": "Play Game",
+                "type": "play",
                 "links": [
                     {
                         "name": "Play Game",
@@ -211,10 +215,14 @@
         "grades": "6 - 8",
         "pages": {
             "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
                 "header": "Let Your Students Go to Town!",
-                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<br> <br> Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve, explain the relationships in complex systems, and read informational texts and diagrams.<br><br> Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
+                "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<br> <br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve and explain the relationships in complex systems.<br><br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
                 "video": "https://vimeo.com/102270816",
-                "brochure":"http://www.simcityedu.org/wp-content/uploads/2013/11/SCE_PC_Brochure_sml-1.pdf",
+                "_brochure":"http://www.simcityedu.org/wp-content/uploads/2013/11/SCE_PC_Brochure_sml-1.pdf",
                 "curriculum": [
                     "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
                 ],
@@ -241,126 +249,261 @@
                     }
                 ]
             },
-            "standards": [
-                {
-                    "category": "ELA Common Core",
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": true,
+                "id": "standards",
+                "title": "Standards Alignment",
+                "list": [
+                  {
+                    "category": "Framework for 21st Century Learning",
                     "groups": [
                         {
                             "list": [
                                 {
-                                    "name": "CCSS.ELA-Literacy.RST.6-8.1",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
-                                    "description": "Cite specific textual evidence to support conclusions"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RST.6-8.7",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
-                                    "description": "Integrate information from texts & diagrams"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RI.7.1",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
-                                    "description": "Cite several pieces of textual evidence to support analysis"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RI.6-8.10",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
-                                    "description": "Proficiently read and comprehend literary nonfiction"
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.CCRA.R.1",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
-                                    "description": "Read and understand text and make logical inferences from it"
+                                    "name": "Critical Thinking and Problem Solving",
+                                    "link": "http://www.p21.org/about-us/p21-framework/260",
+                                    "description": "Use Systems Thinking and Make Judgements and Decisions"
                                 }
                             ]
                         }
                     ]
                 },
                 {
-                    "category": "Next Generation Science",
+                    "category": "Next Generation Science Standards (NGSS):Itemized Standards",
                     "groups": [
                         {
                             "list": [
                                 {
-                                    "description": "ESS3.C Human Impacts on Earth Systems"
+                                    "name": "MS-LS2-1",
+                                    "link": "http://www.nextgenscience.org/ms-ls2-1-ecosystems-interactions-energy-and-dynamics",
+                                    "description": "Interdependent relationships in ecosystems: resource allocation"
                                 },
                                 {
-                                    "description": "Cross Cutting Concept: Systems Thinking"
+                                    "name": "MS-LS2-4",
+                                    "link": "http://www.nextgenscience.org/ms-ls2-4-ecosystems-interactions-energy-and-dynamics",
+                                    "description": "Evaluate effect of resource changes on ecosystem population"
+                                },
+                                {
+                                    "name": "MS-LS2-5",
+                                    "link": "http://www.nextgenscience.org/ms-ls2-5-ecosystems-interactions-energy-and-dynamics",
+                                    "description": "Evaluate interdependent relationships in ecosystems"
+                                },
+                                {
+                                    "name": "MS-ETS1-1",
+                                    "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                    "description": "Defining and delimiting the scope of a problem"
+                                },
+                                {
+                                    "name": "MS-ETS1-2",
+                                    "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                    "description": "Designing and evaluating solutions>"
+                                },
+                                {
+                                    "name": "MS-ETS1-3",
+                                    "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                    "description": "Optimizing solutions through systematic evaluation"
+                                },
+                                {
+                                    "name": "MS-ESS3-3",
+                                    "link": "http://www.nextgenscience.org/msess-hi-human-impacts",
+                                    "description": "Evaluating human impact on the environment"
                                 }
                             ]
                         }
                     ]
                 },
                 {
-                    "category": "21st Century Skills",
+                    "category": "Next Generation Science Standards (NGSS):Crosscutting Concepts",
                     "groups": [
                         {
                             "list": [
                                 {
-                                    "description": "Critical thinking and problem solving"
+                                    "name": "Cause and Effect",
+                                    "link": "http://www.nextgenscience.org/three-dimensions",
+                                    "description": "investigating and explaining causal relationships"
+                                },
+                                {
+                                    "name": "Systems and System Models",
+                                    "link": "http://www.nextgenscience.org/three-dimensions",
+                                    "description": "defining and explaining systems of study"
+                                },
+                                {
+                                    "name": "Scale, Proportion, and Quantity",
+                                    "link": "http://www.nextgenscience.org/three-dimensions",
+                                    "description": "Understanding impact of scale, proportion, and quantity on a system>"
+                                },
+                                {
+                                    "name": "Stability and Change",
+                                    "link": "http://www.nextgenscience.org/three-dimensions",
+                                    "description": "Studying factors of system stability and change"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "category": "Connections to Engineering, Technology, and Applications of Science",
+                    "groups": [
+                        {
+                            "list": [
+                                {
+                                    "name":"Influence of Science, Engineering, and Technology on Society and Nature",
+                                    "link":"http://www.nap.edu/openbook.php?record_id=13165&page=201",
+                                    "description": "Core interdisciplinary connections"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "category": "Common Core Math Standards (CCSS)",
+                    "groups": [
+                        {
+                            "list":[
+                                {
+                                    "name":"CCSS.MATH.6.EE.B.6",
+                                    "link":"http://www.corestandards.org/Math/Content/6/EE/#CCSS.Math.Content.6.EE.B.6",
+                                    "description":"Understanding/identifying variables"
+                                },
+                                {
+                                    "name":"CCSS.MATH.7.EE.B.4",
+                                    "link":"http://www.corestandards.org/Math/Content/7/EE/#CCSS.Math.Content.7.EE.B.4",
+                                    "description":"Understanding/identifying variables"
+                                },
+                                {
+                                    "name":"CCSS.MATH.6.RP.A.1",
+                                    "link":"http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
+                                    "description":"Understanding/identifying ratios"
+                                },
+                                {
+                                  "name":"CCSS.MATH.7.RP.A.2",
+                                   "link":"http://www.corestandards.org/Math/Content/7/RP/#CCSS.Math.Content.7.RP.A.2",
+                                   "description":"Understanding/identifying ratios"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "category": "Council for Economic Education (CEE)",
+                    "groups": [
+                        {
+                            "list":[
+
+
+                                {
+                                    "name":"Standard 1 (Scarcity: Productive Resources)",
+                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                    "description":"Productive Resources"
+                                },
+                                {
+                                    "name":"Standard 1 (Scarcity: Human Capital)",
+                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                    "description":"Human Capital"
+                                },
+                                {
+                                    "name":"Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
+                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                    "description":"Cost/Benefit Analysis"
+                                },
+                                {
+                                    "name":"Standard 6 (Specialization and Trade: Division of Labor)",
+                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                    "description":"Division of Labor"
+                                },
+                                {
+                                    "name":"Standard 6 (Specialization and Trade: Employment/Unemployment)",
+                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                    "description":"Employment/Unemployment"
                                 }
                             ]
                         }
                     ]
                 }
-            ],
-            "lessonPlans": [
-                {
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans & Videos",
+                "list": [
+                  {
                     "category": "Lesson Plans",
                     "list": [
                         {
-                            "name": "Routine 1",
-                            "link": "http://glasslabgames.org"
+                            "name": "Mission 1 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1.pdf"
                         },
                         {
-                            "name": "Routine 2",
-                            "link": "http://glasslabgames.org"
+                            "name": "Mission 2 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2.pdf"
+                        },
+                        {
+                            "name": "Mission 3 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3.pdf"
+                        },
+                        {
+                            "name": "Mission 4 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4.pdf"
                         }
                     ]
-                },
-                {
+                  },
+                  {
                     "category": "Videos",
                     "list": [
                         {
                             "name": "Walkthrough",
-                            "link": "http://glasslabgames.org"
-                        },
-                        {
-                            "name": "Mission",
-                            "link": "http://glasslabgames.org"
+                            "link": "http://vimeo.com/102270816"
                         }
                     ]
-                },
-                {
-                    "category": "Info Pack",
-                    "list": [
+                   },
+                  {
+                    "_category": "Info Pack",
+                    "_list": [
                         {
                             "name": "One Page Game Description",
                             "link": "http://www.simcityedu.org/wp-content/uploads/2013/11/SCE_PC_Brochure_sml-1.pdf"
                         }
                     ]
-                }
-            ],
-            "research": [
-                {
-                    "category": "SRI 2014",
-                    "list": [
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
-                        },
-                        {
-                            "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
-                            "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
-                        }
-                    ]
-                }
-            ],
-            "reviews": [
-                {
+                   }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                  {
+                      "category": "SRI 2014",
+                      "list": [
+                          {
+                              "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
+                              "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
+                          },
+                          {
+                              "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
+                              "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
+                          }
+                      ]
+                  }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": true,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                  {
                     "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florida",
-                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission, automatic grading."
-                },
+                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission,      automatic grading."
+                  },
                 {
                     "reviewer": "Frank Lopes<\/br>Teacher, East Windsor Middle School<\/br>East Windsor, CT",
                     "review": " I also wanted to take the time out to say how impressed I’ve been with the challenges. But most of all, the lessons. These lessons really to do a great job of compelling students to engage in textual analysis in effective ways. SimCityEdu has really outdone themselves. Bravo!"
@@ -369,7 +512,14 @@
                     "reviewer": "Joanna Doyle<\/br>Teacher, Edison Regional Gifted Center<\/br>Chicago, IL",
                     "review": "  I launched today and it was fantastic! All the students were engaged and the classroom chatter was on topic. I had 7 students come up to me at the end of class and ask if they could continue to work on SimCityEDU at home. YES!"
                 }
-            ]
+                ]
+            },
+            "check": {
+                "order": 6,
+                "enabled": true,
+                "id": "check",
+                "title": "System Requirements"
+            }
         },
         "banners": {
             "product": "assets/game-banner-SC.jpg",
@@ -378,15 +528,15 @@
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",
-            "google": "http://plus.google.com/glasslabgames"
+            "google": "https://plus.google.com/117864084582459836584/posts"
         }
     },
     "missions": {
         "linkSchema": {
-            "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-SessionURL={{configSessionUrl}}&-DataURL={{configDataUrl}}",
+            "game": "simcityedu://?-Session={{webSessionId}}&-GameScenario={{missionId}}&-CourseId={{courseId}}&-sdkURL={{sdkUrl}}",
             "diagram": "/assets/games/{{gameId}}/challenges?challengeId={{missionId}}&courseId={{courseId}}&sessionURL={{configSessionUrl}}&dataURL={{configDataUrl}}&type=play"
         },
-        "title": "SimCityEdu Missions",
+        "title": "SimCityEDU Missions",
         "groups": [
             {
                 "enabled": true,
@@ -812,33 +962,5 @@
         ]
     },
     "releases": {
-        "SimCityEDU 1.1.1106": {
-            "Name":"SimCityEDU",
-            "ProductVersion":"1.1.1106",
-            "URL":"http://clients.glgames.org/updates/SimCityEDU/patches/1_1_1106/SimCityEDU_patch.msp",
-            "Size":"413925376",
-            "ReleaseDate":"14/02/2014",
-            "ServerFileName":"SimCityEDU_patch.msp",
-            "Flags":"IsPatch",
-            "RegistryKey":"HKCR\\simcityedu\\Version",
-            "Version":"1.1.1106",
-            "Enhancement":"Replaced the female advisor to a male version.",
-            "Enhancement1":"UI has been improved on various screens.",
-            "Replaces":"All"
-        },
-        "SimCityEDU 1.0.1101": {
-            "Name":"SimCityEDU",
-            "ProductVersion":"1.0.1101",
-            "URL":"http://clients.glgames.org/updates/SimCityEDU/patches/1_0_1101/SimCityEDU_patch.msp",
-            "Size":"395317248",
-            "ReleaseDate":"10/12/2013",
-            "ServerFileName":"SimCityEDU_patch.msp",
-            "Flags":"IsPatch",
-            "RegistryKey":"HKCR\\simcityedu\\Version",
-            "Version":"1.0.1101",
-            "Enhancement":"Updated the Sierra Madre city to contain no abandoned buildings.",
-            "Enhancement1":"UI has been improved on various screens.",
-            "Replaces":"All"
-        }
     }
 }

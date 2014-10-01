@@ -44,6 +44,8 @@ function DataService(options, serviceManager){
         this.cbds        = new Telemetry.Datastore.Couchbase(this.options.telemetry.datastore.couchbase, serviceManager);
         this.stats       = new Util.Stats(this.options, "Data");
 
+        this._serviceManager = serviceManager;
+
     } catch(err) {
         console.trace("DataService: Error -", err);
         this.stats.increment("error", "Generic");
@@ -143,19 +145,17 @@ DataService.prototype._validateGameVersion = function(gameVersion){
 };
 
 // ---------------------------------------
-DataService.prototype._validateSendBatch = function(version, res, data, gameSessionId){
+DataService.prototype._validateSendBatch = function(res, data, gameSessionId){
     var promise;
 
-    // get session for version 2
-    if(version != 1) {
-        // eventList needs to be an array
-        if(!gameSessionId) {
-            if( _.isArray(data) && data.length > 0) {
-                gameSessionId = data[0].gameSessionId;
-            }
-            else if( _.isObject(data) && data.hasOwnProperty('gameSessionId')) {
-                gameSessionId = data.gameSessionId;
-            }
+    // get session
+    // eventList needs to be an array
+    if(!gameSessionId) {
+        if( _.isArray(data) && data.length > 0) {
+            gameSessionId = data[0].gameSessionId;
+        }
+        else if( _.isObject(data) && data.hasOwnProperty('gameSessionId')) {
+            gameSessionId = data.gameSessionId;
         }
     }
 
@@ -163,11 +163,7 @@ DataService.prototype._validateSendBatch = function(version, res, data, gameSess
         // validate session and get data
         promise = this.cbds.validateSession(gameSessionId)
             .then(function(sdata){
-                if(version == 1) {
-                    return this._saveBatchV1(gameSessionId, sdata.userId, sdata.gameLevel, data);
-                } else {
-                    return this._saveBatchV2(gameSessionId, sdata.userId, sdata.gameLevel, data);
-                }
+                return this._saveBatchV2(gameSessionId, sdata.userId, sdata.gameLevel, data);
             }.bind(this));
     } else {
         this.stats.increment("error", "ValidateSendBatch.NoGameSessionId");
@@ -190,182 +186,6 @@ DataService.prototype._validateSendBatch = function(version, res, data, gameSess
             }.bind(this));
     }
 };
-
-var exampleInput = {};
-exampleInput.saveBatchV1 = {
-    "userId": 12,
-    "deviceId": "123",
-    "clientTimeStamp": 1392775453,
-    "gameId": "SC",
-    "clientVersion": "1.2.4156",
-    "gameLevel": "Mission2.SubMission1",
-    "gameSessionId": "34c8e488-c6b8-49f2-8f06-97f19bf07060",
-    "eventName": "CustomEvent",
-    "eventData": {
-        "float key": 1.23,
-        "int key": 1,
-        "string key": "asd"
-    }
-};
-DataService.prototype._saveBatchV1 = function(gameSessionId, userId, gameLevel, eventList) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-    var score = 0;
-
-    //console.log("saveBatch data: ", data);
-
-    // data needs to be an object
-    if(_.isObject(eventList)) {
-        if(eventList.stars) {
-            score = eventList.stars;
-        }
-
-        if(eventList.events) {
-
-            // parse events
-            if( _.isString(eventList.events) ) {
-                try {
-                    eventList.events = JSON.parse(eventList.events);
-                } catch(err) {
-                    console.error("DataService: Error -", err, ", JSON events:", eventList.events);
-                    this.stats.increment("error", "SaveBatch.JSONParse");
-                    reject(err);
-                    return;
-                }
-            }
-
-            // object but not array, it should be an array
-            if(  _.isObject(eventList.events) &&
-                !_.isArray(eventList.events) ) {
-                eventList.events = [eventList.events];
-            }
-
-            // still not array, we have a problem
-            if(!_.isArray(eventList.events))
-            {
-                reject(new Error("invalid event type"));
-                return;
-            }
-
-            if(!eventList.events.length) {
-                resolve(score);
-                return;
-            }
-
-            //console.log("DataService: data", data);
-            //console.log("DataService: gameVersion", data.gameVersion);
-
-            // find score if it exists
-            var gameId = 'SC';
-            var event;
-            var events = [];
-            for(var i = 0; i < eventList.events.length; i++) {
-                event = {
-                    gameId: "",
-                    clientVersion: "",
-                    serverTimeStamp: 0,
-                    clientTimeStamp: 0,
-                    eventName: ""
-                };
-
-                // get name
-                if(eventList.events[i].name) {
-                    event.eventName = eventList.events[i].name;
-                } else {
-                    // skip to next event
-                    continue;
-                }
-
-                // get timestamp if provided
-                if(eventList.events[i].timestamp) {
-                    // if string, convert timestamp to int
-                    if( _.isString(eventList.events[i].timestamp) ) {
-                        event.clientTimeStamp = parseInt(eventList.events[i].timestamp);
-                    }
-                    if( _.isNumber(eventList.events[i].timestamp) ) {
-                        event.clientTimeStamp = eventList.events[i].timestamp;
-                    }
-                } else {
-                    event.clientTimeStamp = Util.GetTimeStamp();
-                }
-
-                var gameParts = eventList.gameVersion.split("_");
-                var clientVersion;
-                var _gameId;
-                if(gameParts.length > 2) {
-                    clientVersion = gameParts.pop();
-                    _gameId        = gameParts.join("_");
-                } else if(gameParts.length == 2) {
-                    clientVersion = gameParts[1];
-                    _gameId        = gameParts[0];
-                } else if(gameParts.length == 1) {
-                    clientVersion = gameParts[0];
-                    _gameId        = gameParts[0];
-                }
-
-                // set gameId for all events
-                if(_gameId) {
-                    gameId = _gameId;
-                }
-                event.gameId = _gameId;
-
-                event.clientVersion = clientVersion;
-
-                // add data
-                if(eventList.events[i].eventData) {
-                    event.eventData = eventList.events[i].eventData;
-                }
-
-                if(userId) {
-                    event.userId = userId;
-                }
-
-                // get score
-                if( eventList.events[i].name &&
-                    eventList.events[i].name == tConst.game.scoreKey) {
-                    if( eventList.events[i].eventData &&
-                        eventList.events[i].eventData.stars) {
-                        score = eventList.events[i].eventData.stars;
-                    }
-                }
-
-                event.gameSessionId = gameSessionId;
-                event.serverTimeStamp = Util.GetTimeStamp();
-
-                // adds the promise to the list
-                //console.log("event:", event);
-                events.push(event);
-            }
-
-            this.cbds.saveEvents(gameId, events)
-                .then(
-                    function(){
-                        this.stats.increment("info", "SaveBatch.Done");
-                        resolve(score);
-                    }.bind(this),
-                    function(err){
-                        reject(err);
-                    }.bind(this)
-                );
-
-        } else {
-            // no events
-            this.stats.increment("info", "SaveBatch.Done");
-            resolve(score);
-            return;
-        }
-    } else {
-        console.error("DataService: Error - invalid data type");
-        this.stats.increment("error", "SaveBatch.Invalid.DataType");
-        reject(new Error("invalid data type"));
-        return;
-    }
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}
 
 /*
  example inputs:
@@ -421,6 +241,7 @@ DataService.prototype._saveBatchV2 = function(gameSessionId, userId, gameLevel, 
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     // verify all required values are set
+    // default SC
     var gameId = 'SC';
 
     // eventList is object but not array
@@ -440,6 +261,7 @@ return when.promise(function(resolve, reject) {
 
         var processedEvents = [];
         var errList = [];
+        var sessionData = {};
         for(var i = 0; i < eventList.length; i++)
         {
             var data = eventList[i];
@@ -584,13 +406,52 @@ return when.promise(function(resolve, reject) {
                 gameId = data.gameId;
             }
 
+            if(gameId == "SC") {
+                if(data.eventName == "GL_Scenario_Score") {
+
+                    var completed = false;
+                    if( data.eventData.stars &&
+                        parseInt(data.eventData.stars) > 0 ) {
+                        completed = true;
+                    }
+                    sessionData = _.merge(sessionData, {
+                        score: data.eventData,
+                        summary: {
+                            completed: completed
+                        }
+                    });
+                }
+                else if(data.eventName == "GL_Scenario_Summary") {
+                    sessionData = _.merge(sessionData, { summary: data.eventData });
+                }
+            }
+
             // added saved data to list
             //console.log("data:", data);
             processedEvents.push(data);
         }
 
-        // adds the promise to the list
-        this.cbds.saveEvents(gameId, processedEvents)
+        var p = null;
+        if(_.keys(sessionData).length > 0) {
+            p = this.cbds.updateGameSessionV2(gameSessionId, sessionData);
+            console.log("gameSessionId:", gameSessionId, ", sessionData:", sessionData);
+        } else {
+            p = Util.PromiseContinue();
+        }
+
+        // TODO: replace this with DB lookup, return promise
+        if( !this._serviceManager.get("dash").service.isValidGameId(gameId) ) {
+            errList.push(new Error("invalid gameId"));
+            this.stats.increment("error", "invalid.gameId");
+            reject(errList);
+            return
+        }
+
+        // update session or skip to saving events
+        p.then(function() {
+                // adds the promise to the list
+                return this.cbds.saveEvents(gameId, processedEvents);
+            }.bind(this))
             .then(
                 function(){
                     if(errList.length > 0){
@@ -672,5 +533,33 @@ DataService.prototype._convertEventName = function(rawName, gameId) {
 
 // throw errors
 DataService.prototype._validateEventData = function(eventName, eventData) {
+    // TODO: ya.... this should be done at some point, but whom has time?
+};
 
+DataService.prototype.getCompletedMissions = function(userId, gameId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    this.cbds.getRawGameSessionsInfoByUserId(gameId, userId)
+        .then(function(sessions){
+
+            var completedMissions = [];
+            for(var i = 0; i < sessions.length; i++) {
+                if( sessions[i].hasOwnProperty("summary") &&
+                    sessions[i].summary.completed) {
+                    completedMissions.push(sessions[i]);
+                }
+            }
+
+            //console.log("getGameSessionsInfoByUserId completeMissions:", completeMissions);
+            resolve(completedMissions);
+        }.bind(this))
+        .then(null, function(err){
+            reject(err);
+        }.bind(this));
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
 };

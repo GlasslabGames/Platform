@@ -10,14 +10,16 @@
     "basic": {
         "gameId": "AW-1",
         "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Argument Wars",
         "longName": "Argument Wars",
+        "shortDescription": "Use your reasoning powers to argue landmark Supreme Court cases!",
         "description": "Try out your persuasive abilities by arguing a real Supreme Court case. The other lawyer is your competition. Whoever uses the strongest arguments wins!",
         "settings": {
         },
         "license": {
-            "type":      "loginType",
+            "type": "loginType",
             "loginType": "icivics",
             "valid": true,
             "message": {
@@ -32,7 +34,7 @@
             "type": "page",
             "page": {
                 "title": "Argument Wars",
-                "embed": "https://cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5/Main.swf",
+                "embed": "//cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5-Staging/Main.swf",
                 "size": {
                     "width": 940,
                     "height": 640
@@ -63,17 +65,17 @@
         "list": [
             {
                 "id": "sowo",
-                "enabled": true,
+                "enabled": false,
                 "name": "Shout Out and Watch Out Report",
                 "header": "Shout Out and Watch Out Report",
                 "description": "Coming Soon!"
             },
             {
                 "id": "achievements",
-                "enabled": false,
+                "enabled": true,
                 "name": "Game Achievements & Time Played",
                 "header": "Game Achievements & Time Played",
-                "description": "Coming Soon!",
+                "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "groups": [
                 ]
             }
@@ -90,6 +92,7 @@
         "buttons": [
             {
                 "name": "Play Game",
+                "type": "play",
                 "links": [
                     {
                         "name": "Play Game",
@@ -100,6 +103,10 @@
         ],
         "pages": {
             "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
                 "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
                 "about": "Argument Wars is an online game that lets players argue landmark Supreme Court cases. By finding and using the strongest support, students recreate historic legal cases while evaluating arguments and distinguishing between valid and invalid reasoning. Argument Wars brings gaming to the social studies classroom and lets students have fun while they learn about landmark cases and hone fundamental skills that are critical to success in meeting Common Core standards. ",
                 "video":"https://www.youtube.com/watch?v=kZF_s1jNBrM",
@@ -112,100 +119,137 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/ArgWarsPlayfullyGameImage_600x480.jpg"
+                        "url": "assets/AW-carousel_1.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_3.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_5.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_6.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AW-carousel_7.jpg"
                     }
                 ]
             },
-            "standards": [
-                {
-                    "category": "ELA Common Core",
-                    "groups": [
-                        {
-                            "name": " ",
-                            "list": [
-                                {
-                                    "name": "CCSS.ELA-Literacy.RI.6.8",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
-                                    "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
-                                },
-                                {
-                                    "name": "CCSS.ELA-LIteracy.RI.7.8",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/7/8/",
-                                    "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant."
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RI.8.8",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/8/8/",
-                                    "description": "Evaluate arguments and claims; assess whether reasoning is sound and evidence is relevant; recognize irrelevant evidence."
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RI.9-10.8",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RI/9-10/8/",
-                                    "description": "Evaluate arguments and claims; assess whether reasoning is valid and evidence is relevant; identify fallacious reasoning."
-                                },
-                                {
-                                    "name": "CCSS.ELA-Literacy.RH.6-8.8",
-                                    "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/8/",
-                                    "description": "Distinguish among fact, opinion, and reasoned judgment in a text."
-                                }
-                            ]
-                        }
-                    ]
-                }
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": true,
+                "id": "standards",
+                "title": "Standards Alignment",
+                "list": [
+                    {
+                        "category": "ELA Common Core",
+                        "groups": [
+                            {
+                                "name": "CCSS.ELA-Literacy.RI.6.8",
+                                "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
+                                "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
+                            },
+                            {
+                                "name": "CCSS.ELA-Literacy.RST.6-8.7",
+                                "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/7/",
+                                "description": "Integrate information from texts & diagrams"
+                            },
+                            {
+                                "name": "CCSS.ELA-Literacy.RI.7.1",
+                                "link": "http://www.corestandards.org/ELA-Literacy/RI/7/1/",
+                                "description": "Cite several pieces of textual evidence to support analysis"
+                            },
+                            {
+                                "name": "CCSS.ELA-Literacy.RI.6-8.10",
+                                "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
+                                "description": "Proficiently read and comprehend literary nonfiction"
+                            },
+                            {
+                                "name": "CCSS.ELA-Literacy.CCRA.R.1",
+                                "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/1/",
+                                "description": "Read and understand text and make logical inferences from it"
+                            }
+                        ]
+                    }
 
-            ],
-            "lessonPlans": [
-                {
-                    "category": "Lesson Plans",
-                    "list": [
-                        {
-                            "name": "Appellate Courts: Let’s Take It Up",
-                            "link": "https://s3.amazonaws.com/playfully_AW-1/Appellate+Courts.pdf"
-                        },
-                        {
-                            "name": "Interpreting the Constitution: What Does That Mean?",
-                            "link": "https://s3.amazonaws.com/playfully_AW-1/Interpreting+the+Constitution.pdf"
-                        },
-                        {
-                            "name": "Sources of Law",
-                            "link": "https://s3.amazonaws.com/playfully_AW-1/Sources+of+Law.pdf"
-                        },
-                        {
-                            "name": "Landmark Library: Brown v. Board of Education",
-                            "link": "https://s3.amazonaws.com/playfully_AW-1/Brown.pdf"
-                        },
-                        {
-                            "name": "Landmark Library: Miranda v. Arizona",
-                            "link": "https://s3.amazonaws.com/playfully_AW-1/Miranda.pdf"
-                        }
-                    ]
-                },
-                {
-                    "category": "Videos",
-                    "list": [
-                        {
-                            "name": "Overview",
-                            "link": " https://www.youtube.com/watch?v=kZF_s1jNBrM"
-                        }
-                    ]
-                }
-            ],
-            "research": [
-            ],
-            "reviews": [
-                {
-                    "reviewer": "Kristen H., high school teacher",
-                    "review": "Argument Wars really help[s] improve their understanding of important Supreme Court cases."
-                },
-                {
-                    "reviewer": " – N. Morris, high school teacher",
-                    "review": "[Argument Wars is] great for helping kids see that you have to use FACTS... not just feelings."
-                },
-                {
-                    "reviewer": "– David S., teacher",
-                    "review": "My students thoroughly enjoy playing Argument Wars."
-                }
-            ]
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "id": "lessonPlans",
+                "authRequired": true,
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Lesson Plans",
+                        "list": [
+                            {
+                                "name": "Appellate Courts: Let’s Take It Up",
+                                "link": "https://s3.amazonaws.com/playfully_AW-1/Appellate+Courts.pdf"
+                            },
+                            {
+                                "name": "Interpreting the Constitution: What Does That Mean?",
+                                "link": "https://s3.amazonaws.com/playfully_AW-1/Interpreting+the+Constitution.pdf"
+                            },
+                            {
+                                "name": "Sources of Law",
+                                "link": "https://s3.amazonaws.com/playfully_AW-1/Sources+of+Law.pdf"
+                            },
+                            {
+                                "name": "Landmark Library: Brown v. Board of Education",
+                                "link": "https://s3.amazonaws.com/playfully_AW-1/Brown.pdf"
+                            },
+                            {
+                                "name": "Landmark Library: Miranda v. Arizona",
+                                "link": "https://s3.amazonaws.com/playfully_AW-1/Miranda.pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "Overview",
+                                "link": " https://www.youtube.com/watch?v=kZF_s1jNBrM"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "id": "research",
+                "authRequired": true,
+                "title": "Research",
+                "list": []
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": true,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                    {
+                        "reviewer": "Kristen H., high school teacher",
+                        "review": "Argument Wars really help[s] improve their understanding of important Supreme Court cases."
+                    },
+                    {
+                        "reviewer": " – N. Morris, high school teacher",
+                        "review": "[Argument Wars is] great for helping kids see that you have to use FACTS... not just feelings."
+                    },
+                    {
+                        "reviewer": "– David S., teacher",
+                        "review": "My students thoroughly enjoy playing Argument Wars."
+                    }
+                ]
+            }
         },
         "banners": {
             "product": "assets/game-banner-AW-1.jpg",

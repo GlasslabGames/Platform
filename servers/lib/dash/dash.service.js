@@ -83,9 +83,7 @@ DashService.prototype.getListOfGameIds = function() {
     for(var g in this._games) {
         if( this._games[g].info &&
             this._games[g].info.basic &&
-            this._games[g].info.basic.gameId &&
-            // only return games that are enabled
-            this._games[g].info.basic.enabled) {
+            this._games[g].info.basic.gameId) {
             gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
         }
     }
@@ -98,13 +96,26 @@ DashService.prototype.isValidGameId = function(gameId) {
         if( g == gameId &&
             this._games[g] &&
             this._games[g].info &&
-            this._games[g].info.basic &&
-            // only return games that are enabled
-            this._games[g].info.basic.enabled) {
+            this._games[g].info.basic) {
             return true;
         }
     }
     return false;
+};
+
+// TODO: replace this with DB lookup, return promise
+// returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
+DashService.prototype.getListOfVisibleGameIds = function() {
+    var gameIds = [];
+    for(var g in this._games) {
+        if( this._games[g].info &&
+            this._games[g].info.basic &&
+            this._games[g].info.basic.gameId &&
+            this._games[g].info.basic.visible) {
+            gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
+        }
+    }
+    return gameIds;
 };
 
 // TODO: replace this with DB lookup, return promise
@@ -176,7 +187,8 @@ DashService.prototype.getGameAssessmentInfo = function(gameId) {
 DashService.prototype.getGameReportInfo = function(gameId, reportId) {
     var list = this._games[gameId].info.reports.list;
     for(var i = 0; i < list.length; i++) {
-        if(list[i].id == reportId) {
+        if( _.isObject(list[i]) &&
+            list[i].id == reportId) {
             return list[i];
         }
     }
@@ -192,7 +204,6 @@ DashService.prototype.getGameReleases = function(gameId) {
         return {};
     }
 };
-
 
 // TODO: replace this with DB lookup
 DashService.prototype.getListOfAchievements = function(gameId, playerAchievement) {
@@ -211,6 +222,9 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
     //console.log("a:", a);
 
     for(var i = 0; i < a.length; i++) {
+        // if not object skip to next
+        if( !_.isObject(a[i]) ) continue;
+
         var groupId = a[i].id;
 
         for(var j = 0; j < a[i].subGroups.length; j++) {
@@ -276,6 +290,9 @@ DashService.prototype._loadGameFiles = function() {
                         }
                     }.bind(this));
 
+                    // remove all enabled=false objects
+                    this._filterDisabledGameInfo(this._games[gameId]);
+
                     // add developer to game details and reports
                     if( this._games[gameId].info &&
                         this._games[gameId].info.developer &&
@@ -297,7 +314,8 @@ DashService.prototype._loadGameFiles = function() {
                     var list = this._games[gameId].info.reports.list;
                     // add achievements to 'achievements' reports
                     for(var i = 0; i < list.length; i++) {
-                        if(list[i].id == 'achievements') {
+                        if( _.isObject(list[i]) &&
+                            list[i].id == 'achievements') {
                             this._games[gameId].info.reports.list[i].achievements = this.getGameAchievements(gameId);
                         }
                     }
@@ -312,4 +330,35 @@ DashService.prototype._loadGameFiles = function() {
 // ------------------------------------------------
     }.bind(this));
 // end promise wrapper
+};
+
+DashService.prototype._filterDisabledGameInfo = function(gameInfo) {
+    var deleted = false;
+    _.forEach(gameInfo, function(item, i) {
+        if( _.isObject(gameInfo[i]) &&
+            gameInfo[i].hasOwnProperty('enabled') &&
+            (gameInfo[i].enabled == false) ) {
+            //console.info("gameInfo removing disabled object:", gameInfo[i]);
+            delete gameInfo[i];
+            deleted = true;
+        }
+
+        if( _.isArray(gameInfo[i]) ){
+            deleted = this._filterDisabledGameInfo(gameInfo[i]);
+            if(deleted) {
+                // re-index array, remove all null values
+                var newArray = [];
+                for(var j = 0; j < gameInfo[i].length; j++){
+                    if(gameInfo[i][j]) newArray.push(gameInfo[i][j]);
+                }
+                gameInfo[i] = newArray;
+            }
+        }
+        else if( _.isObject(gameInfo[i]) ) {
+            this._filterDisabledGameInfo(gameInfo[i]);
+        }
+
+    }.bind(this));
+
+    return deleted;
 };

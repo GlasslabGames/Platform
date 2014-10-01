@@ -2,7 +2,6 @@
 var path      = require('path');
 var _         = require('lodash');
 var when      = require('when');
-var mailChimp = require('mailchimp').MailChimpAPI;
 var lConst    = require('../../lms/lms.const.js');
 var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
@@ -35,12 +34,6 @@ function getUserProfileData(req, res, next) {
         this.webstore.getUserInfoById(userData.id)
             // ok, send data
             .then(function(userData){
-
-                // if not student then make instructor (hiding internal manager and admin users)
-                if(userData.role != lConst.role.student) {
-                    userData.role = lConst.role.instructor;
-                }
-
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error
@@ -67,12 +60,6 @@ function getUserDataById(req, res, next) {
             }.bind(this))
             // ok, send data
             .then(function(userData){
-
-                // if not student then make instructor (hiding internal manager and admin users)
-                if(userData.role != lConst.role.student) {
-                    userData.role = lConst.role.instructor;
-                }
-
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error
@@ -474,7 +461,7 @@ function registerUserV2(req, res, next, serviceManager) {
                 {
                     var promise;
                     if(req.body.newsletter) {
-                        promise = subscribeToNewsletter(
+                        promise = this.subscribeToNewsletter(
                             this.options.auth.email.mailChimp.apiKey,
                             this.options.auth.email.mailChimp.mailListName,
                             regData)
@@ -622,7 +609,7 @@ function verifyBetaCode(req, res, next) {
 
                     return this.glassLabStrategy.updateUserData(userData)
                         .then(function() {
-                            this.requestUtil.jsonResponse(res, "Successfully Confirmed Beta User. Verification email sent to Beta User ", 200);
+                            this.requestUtil.jsonResponse(res, {"text": "Successfully Confirmed Beta User. Verification email sent to Beta User", "statusCode":200});
                             return userData;
                         }.bind(this));
                 } else {
@@ -713,60 +700,58 @@ function verifyEmailCode(req, res, next, serviceManager) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
 
-        // 1) validate the code and get user data
-        this.getAuthStore().findUser("verify_code", req.params.code)
-            .then(function(userData) {
-                // check if code expired
-                if(Util.GetTimeStamp() > userData.verifyCodeExpiration && process.env.HYDRA_ENV !== 'dev') {
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
+    // 1) validate the code and get user data
+    this.getAuthStore().findUser("verify_code", req.params.code)
+        .then(function(userData) {
+            // check if code expired
+            if(Util.GetTimeStamp() > userData.verifyCodeExpiration && process.env.HYDRA_ENV !== 'dev') {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
+            } else {
+
+                if(userData.verifyCodeStatus === aConst.verifyCode.status.sent || process.env.HYDRA_ENV === 'dev') {
+                    // change status to verified
+                    userData.verifyCodeStatus = aConst.verifyCode.status.verified;
+                    // Disabled for Beta - verifyCode is set to NULL in Oneshot login
+                    // userData.verifyCode        = "NULL";
+                    userData.verifyCodeExpiration = "NULL";
+
+                    return this.glassLabStrategy.updateUserData(userData)
+                        .then(function() {
+                            return when.promise(function(resolve,reject) {
+                                req.body.verifyCode = req.params.code;
+                                resolve(serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]))
+                            }).then(function() {
+                                return userData;
+                            });
+                        }.bind(this));
                 } else {
-
-                    if(userData.verifyCodeStatus === aConst.verifyCode.status.sent || process.env.HYDRA_ENV === 'dev') {
-                        // change status to verified
-                        userData.verifyCodeStatus = aConst.verifyCode.status.verified;
-                        // Disabled for Beta - verifyCode is set to NULL in Oneshot login
-                        // userData.verifyCode        = "NULL";
-                        userData.verifyCodeExpiration = "NULL";
-
-                        return this.glassLabStrategy.updateUserData(userData)
-                            .then(function() {
-                                return when.promise(function(resolve,reject) {
-                                    req.body.verifyCode = req.params.code;
-                                    resolve(serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]))
-                                }).then(function() {
-                                    return userData;
-                                });
-                            }.bind(this));
-                    } else {
-                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
-                    }
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                 }
-            }.bind(this),
-                function(err) {
-                    // potential cases if user not found:
-                    // 1. incorrect verification code
-                    // TODO account for:
-                    // 2. user account deleted because user did not verify email in time
-                    if( err.error &&
-                        err.error == "user not found") {
-                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
-                    } else {
-                        console.error("AuthService: verifyEmailCode Error -", err);
-                        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
-                    }
-            }.bind(this))
-            .then(function(userData) {
-                // 2) send welcome email
-                return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
-            }.bind(this))
-            .then(null, function(err) {
-                console.log(err);
-                this.requestUtil.errorResponse(res, {key:"user.welcomeEmail.general"});
-            })
-            // catch all errors
-;
-
-    }
+            }
+        }.bind(this),
+            function(err) {
+                // potential cases if user not found:
+                // 1. incorrect verification code
+                // TODO account for:
+                // 2. user account deleted because user did not verify email in time
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
+                } else {
+                    console.error("AuthService: verifyEmailCode Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+        }.bind(this))
+        .then(function(userData) {
+            // 2) send welcome email
+            return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
+        }.bind(this))
+        // catch all errors
+        .then(null, function(err) {
+            console.log(err);
+            this.requestUtil.errorResponse(res, {key:"user.welcomeEmail.general"});
+        });
+}
 
 
 function sendWelcomeEmail(emailOptions, regData, protocol, host){
@@ -797,64 +782,6 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
 }
 
 
-function subscribeToNewsletter(apiKey, mailListName, regData){
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-    try {
-        var api = new mailChimp(apiKey, { version : '2.0' });
-    } catch (err) {
-        reject(err);
-        return;
-    }
-
-    api.call('lists', 'list', {
-        filters: {
-            list_name: mailListName
-        }
-    }, function (err, listData) {
-        if (err) {
-            reject(err);
-            return;
-        }
-
-        // find correct id
-        var mailListId = "";
-        if(listData.data) {
-            for(var i = 0; i < listData.data.length; i++) {
-                if(listData.data[i].name == mailListName) {
-                    mailListId = listData.data[i].id;
-                }
-            }
-
-            if(mailListId && mailListId.length > 0) {
-                var subscribeParams = {
-                    id: mailListId,
-                    email: {
-                        email: regData.email
-                    },
-                    merge_vars: {
-                        FNAME: regData.firstName,
-                        LNAME: regData.lastName
-                    }
-                };
-                api.call('lists', 'subscribe', subscribeParams, function (err, subscribeData) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-
-                    resolve();
-                });
-            }
-        }
-
-    });
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-}
 
 
 exampleIn.resetPasswordSend =

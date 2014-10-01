@@ -22,6 +22,7 @@ module.exports = {
     "course.general":                       "We encountered an error. Please try again.",
     "course.locked":                        "Course Registration is Locked at the moment. Please try again later.",
     "course.notUnique.name":                "Class names must be unique. Please choose a different class name.",
+    "user.permit.invalid":                  "Your role does not have permission to access this feature",
     "user.enroll.general":                  "There was an error with the information you entered.",
     "user.enroll.code.missing":             "The class code is missing.",
     "user.enroll.code.invalid":             "The class code is invalid.",
@@ -45,12 +46,12 @@ module.exports = {
     "user.login.notVerified":               "Please verify your email account",
     "user.login.betaPending":               "Your account is currently pending approval by our admin. We will notify you of your beta status via email shortly. If you have any questions, please let us know at: " + aConst.support.email,
     "user.login.notLoggedIn":               "You are not logged in",
-    "user.passwordReset.general":           "We encountered an error occurred. Please try again.",
+    "user.passwordReset.general":           "We encountered an error. Please try again.",
     "user.passwordReset.code.missing":      "The code is invalid.",
     "user.passwordReset.code.expired":      "Oops, your code has expired. You'll need to go through the password reset process again.",
     "user.passwordReset.code.invalid":      "The URL provided is not valid. Please try cutting and pasting again from the email you received with password reset information.",
     "user.passwordReset.user.emailNotExist":"This email address does not exist in our system.",
-    "user.verifyEmail.general":             "We encountered an error occurred. Please try again.",
+    "user.verifyEmail.general":             "We encountered an error. Please try again.",
     "user.verifyEmail.code.missing":        "The code you entered is invalid.",
     "user.verifyEmail.code.expired":        "Oops, your code has expired. You'll need another verification code.",
     "user.verifyEmail.accountDeleted":      "Your account has been deleted because you didn't verify your email account in the time allotted. Please try registering your account again.",
@@ -61,6 +62,11 @@ module.exports = {
     "data.gameId.general":                  "We encountered an error. Please try again.",
     "data.gameId.missing":                  "This game Id does not exist in our system",
     "data.gameId.invalid":                  "This game Id is not in our list of valid games",
-    "data.gameConfig.missing":              "You did not input game config"
-
+    "data.gameConfig.missing":              "You did not input game config",
+    //
+    "report.general":                       "There is a problem with this report",
+    "report.access.invalid":                "Invalid Access",
+    "report.gameId.invalid":                "Invalid gameId",
+    "report.gameId.missing":                "Missing gameId",
+    "report.reportId.missing":              "Missing ReportId"
 };

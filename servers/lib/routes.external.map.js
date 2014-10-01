@@ -167,14 +167,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/course/:courseId/game/:gameId/missions",
-            service: "dash",
-            controller: "game",
-            method: {
-                get: "getCourseGameMissions"
-            }
-        },
-        {
             api: "/api/v2/dash/game/:gameId/missions",
             service: "dash",
             controller: "game",
@@ -188,6 +180,22 @@ module.exports = {
             controller: "game",
             method: {
                 get: "getGameDetails"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/minimal",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesBasicInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/details",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesDetails"
             }
         },
         {
@@ -372,6 +380,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/newsletter/subscribe",
+            service: "auth",
+            controller: "newsletter",
+            method: {
+                post: "subscribe"
+            }
+        },
+        {
             api: "/api/v2/auth/password-reset/send",
             service: "auth",
             controller: "user",
@@ -417,6 +433,28 @@ module.exports = {
             controller: "login",
             method: {
                 post: "logout"
+            }
+        },
+    // ---------------------------------------------------
+    // Research
+    // ---------------------------------------------------
+        {
+            requireAuth: true,
+            api: "/api/v2/research/game/:gameId/events",
+            service: "research",
+            controller: "events",
+            method: {
+                get: "getEventsByDate"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/research/game/:gameId/parse-schema",
+            service: "research",
+            controller: "csv",
+            method: {
+                get: "getCsvParseSchema",
+                post: "updateCsvParseSchema"
             }
         },
     // ---------------------------------------------------
