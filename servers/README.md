@@ -137,6 +137,11 @@ Running the app
   ```sh
   $ ./service.sh restart
   ```
+  * Possible problems:
+      * Permission denied error (```Error: EACCES, permission denied '/var/log/hydra/app-external.log```). This happened because hydra was under root instead of the user. To fix (insert your username instead of user):
+      ```sh
+      $ sudo chown -R user hydra
+      ```
 2. In a browser go to [http://localhost:8001](http://localhost:8001)
 
 
