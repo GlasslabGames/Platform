@@ -144,10 +144,10 @@ function listenForEmailsFrom(emailAddress, subj, cb, logger) {
 //          });
         
       } else {
-        logger(newMail.subject, 'wrong sender subject');  // DEBUG
+//        logger(newMail.subject, 'wrong sender subject');  // DEBUG
       }
 		} else {
-			logger(newMail.sender, 'wrong sender email');  // DEBUG
+//			logger(newMail.sender, 'wrong sender email');  // DEBUG
 		}
     
 	});

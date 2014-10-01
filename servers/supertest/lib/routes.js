@@ -1,3 +1,5 @@
+// FUTURE shortcut everything past "path," not needed
+
 var Routes = function (testData) {
 	
 	var teacher = testData.teacher;
@@ -59,9 +61,12 @@ var Routes = function (testData) {
   }
 
 	this.logout = {
-		path: "/api/v2/auth/logout",
-		post: {}
+		path: "/api/v2/auth/logout"
 	}
+  
+  this.verifyEmail = {
+    path: "/api/v2/auth/register-verify/:code/verify"
+  }
 }
 
 module.exports = Routes;

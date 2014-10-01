@@ -27,10 +27,10 @@ var tools    						= require('./tools.js'),
 var errors = require('../../lib/errors.js');
 
 // Game specific data and functions
-var games = require('./games/index.js'),
-    aa1   = games.aa1,
-    aw1   = games.aw1,
-    sc    = games.sc;
+//var games  = require('./games/index.js'),
+//    aa1    = games.aa1,
+//    aw1    = games.aw1,
+//    sc     = games.sc;
 
 //////////////////
 // TEST ROUTINE //
@@ -50,7 +50,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 	
   // NOTE - to store data between tests for generated users
 	var classData, adminEmail, newTeacher, newTeacherLogin,
-      confirmLink, verifyLink, newStudent;
+      approveLink, verifyLink, verifyCode, newStudent;
   
   if (env == 'local') {
     adminEmail = 'build@glasslabgames.org';
@@ -143,7 +143,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 				.type('application/json')
 				.end(function (res) {
 					expect(res.status).to.eql(200);
-          conLog(res.text, 'classes');  // DEBUG
+//          conLog(res.text, 'classes');  // DEBUG
         
 					// FUTURE - do some validation of returned data
 					done();
@@ -263,6 +263,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 		          if (resText[studentIndex]['userId'] == data.student.id) {
 		            matched = true;
 		            expect(resText[studentIndex]['achievements']).to.eql(data.student.achievements);
+                break;
 		          }
 		        }
 		        expect(matched).to.eql(true);
@@ -275,14 +276,14 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 			agent
 				.post(srvAddr + routes.logout.path)
 				.type('application/json')
-				.send(routes.logout.post)
+				.send({}) // NOTE - hardcoded
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 					done();
 				});
 		});
-       
-    it("[1. existing user] #can reset a teacher's password", function(done) {
+    
+    it.skip("[1. existing user] #can reset a teacher's password", function(done) {
       
 			var confirmationEmail;
 			
@@ -316,35 +317,31 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
       // Store data for future debugging opportunities, repro
 			results['newTeacherRequestPost'] = newTeacher;
 
-      if (env == 'local') {
+      if (env == 'local') {   // FUTURE swap 'local' with testable group
+        
+        // Stop 0: get admin email, grab approve link (and generate verify link)
         listenForEmailsFrom(adminEmail, "Playfully.org Beta confirmation", function (email) {
           confirmationEmail = email;
-          results['requestEmail'] = email;
-
-          var linkReg = new RegExp(srvAddr+'.*?(?=\n)');
+          results['approveEmail'] = email;
           
-          confirmLink = email.text.match(linkReg)[0];
-          conLog(confirmLink, 'link');  // DEBUG
+          approveLink = email.text.match(new RegExp(srvAddr+'.*?(?=\n)'))[0];
           
-          done();   // FUTURE - needs lock to avoid multiple calls with async
+          results['approveLink'] = approveLink;
+          results['verifyLink'] = verifyLink;
           
+          done();
         }, conLog);
       }
       
+      // request new teacher account
 			agent
 				.post(srvAddr + routes.register.teacher.path)
 				.type('application/json')
 				.send(newTeacher)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
-        
-          if (env != 'local') {
-            // Not waiting for email
-            // response, so done here
-            done();
-          }
+          if (env != 'local') { done(); }
 				});
-      
 		});
 
     it('[2. new beta user] #cannot log in without being confirmed', function (done) {
@@ -355,92 +352,77 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
         .send(newTeacherLogin)
         .end(function (res) {
           expect(res.status).to.eql(401);
-          console.log(JSON.parse(res.text)['error']);
           expect(JSON.parse(res.text)['error']).to.eql(errors["user.login.betaPending"]);
-        
           done();
         });
     });
     
-    if (env == 'local') {
-      
-      // NOTE - can only test when connected to local machine
-			
-      it('[2. new beta user] #admin can approve new teacher user', function (done) {
-      
+  if (env == 'local') {
+    
+    it('[2. new beta user] #admin can approve new teacher user', function (done) {
+
+       // Step 1: preemptively wait for the verify email to user
+      listenForEmailsFrom(adminEmail, "Beta status confirmed - Verify your email", function (email) {
+        confirmationEmail = email;
+        results['verifyEmail'] = email;
         
-        listenForEmailsFrom(adminEmail, "Beta status confirmed - Verify your email", function (email) {
-          confirmationEmail = email;
-          results['requestEmail'] = email;
+        conLog(email.text, 'email ajhsdbfalshbdfabdjsf');
 
-          var linkReg = new RegExp(srvAddr+'.*?(?=\n)');
+        verifyCode = email.text.match(new RegExp('email/.*?(?=\n)'))[0];
+        verifyCode = verifyCode.substring(6, verifyCode.length);
 
-          verifyLink = email.text.match(linkReg)[0];
-          conLog(verifyLink, 'link');  // DEBUG
+        verifyLink = srvAddr + routes.verifyEmail.path.replace(':code', verifyCode);
 
-          done();   // FUTURE - needs lock to avoid multiple calls with async
+        done();
+      }, conLog);
 
-        }, conLog);
-        
-        
-        agent
-          .get(confirmLink)
-          .type('application/json')
-          .end(function (res) {
-            expect(res.status).to.eql(200);
-            conLog(res.text, "confirmation");
-          });
-      });
-      
-      it('[2. new beta user] #cannot log in without verifying email', function(done) {
-                
-        agent
-          .post(srvAddr + routes.login.path)
-          .type('application/json')
-          .send(newTeacherLogin)
-          .end(function (res) {
-            expect(res.status).to.eql(401);
-            expect(JSON.parse(res.text)['error']).to.eql(errors["user.login.notVerified"]);
+      // approve user
+      agent
+        .get(approveLink)
+        .type('application/json')
+        .end(function (res) {
+          expect(res.status).to.eql(200);
+        });
+    });
 
-            agent
-              .get(verifyLink)
-              .type('application/json')
-              .end(function (res) {
-                agent
-                .post(srvAddr + routes.login.path)
-                .type('application/json')
-                .send(newTeacherLogin)
-                .end(function (res) {
-                  expect(res.status).to.eql(200);
-                  
-                  done();
-                  
-                });
-              });
-          
-          });
-      });
+    it('[2. new beta user] #cannot log in without verifying email', function(done) {
 
-      it.skip('[2. new beta user] #can log in once confirmed and verified', function(done) {
+      agent
+        .post(srvAddr + routes.login.path)
+        .type('application/json')
+        .send(newTeacherLogin)
+        .end(function (res) {
+          expect(res.status).to.eql(401);
+          expect(JSON.parse(res.text)['error']).to.eql(errors["user.login.notVerified"]);
 
-        agent
-          .post(srvAddr + routes.login.path)
-          .type('application/json')
-          .send(newTeacherLogin)
-          .end(function (res) {
-            expect(res.status).to.eql(200);
-            
-            // TODO - magic.w
-          
-            done();
-          });
-      });
-      
-    } else {
-      // Just skip those tests
-      it.skip('[2. new beta user] #cannot log in without verifying email - APPROVE & MANUALLY CONFIRM', function() {});
-      it.skip('[2. new beta user] #can log in once confirmed and verified - MANUALLY CONFIRM', function() {});
-    }
+          agent
+            .get(verifyLink)    // FIXME
+            .type('application/json')
+            .end(function (res) {
+              conLog(res.text, 'verifyLinkRes');
+              expect(res.status).to.eql(200);
+              done();
+            });
+        });
+    });
+
+    it('[2. new beta user] #can log in once confirmed and verified', function(done) {
+
+      agent
+        .post(srvAddr + routes.login.path)
+        .type('application/json')
+        .send(newTeacherLogin)
+        .end(function (res) {
+          expect(res.status).to.eql(200);
+          done();
+        });
+    });
+
+  } else {
+    // Just skip those tests
+    it.skip('[2. new beta user] #cannot log in without verifying email - APPROVE & MANUALLY CONFIRM', function() {});
+    it.skip('[2. new beta user] #can log in once confirmed and verified - MANUALLY CONFIRM', function() {});
+  }
       
     //////////////////////////
     //// 3. iCivics user /////
