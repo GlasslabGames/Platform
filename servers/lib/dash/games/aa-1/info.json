@@ -91,6 +91,16 @@
         "applink": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8",
         "buttons": [
             {
+                "name": "Getting Started Guide",
+                "type": "link",
+                "links": [
+                    {
+                        "target": "_blank",
+                        "link": "../assets/pdf/quick_start_guide_AA-1.pdf"
+                    }
+                ]
+            },
+            {
                 "name": "Play Game",
                 "type": "link",
                 "links": [
