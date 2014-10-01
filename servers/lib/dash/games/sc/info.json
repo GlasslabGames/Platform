@@ -14,6 +14,7 @@
         "maintenance": null,
         "shortName": "SimCityEdu",
         "longName": "SimCityEDU: Pollution Challenge!",
+        "shortDescription": "SimCityEDU: Pollution Challenge!",
         "description": "SimCityEDU: Pollution Challenge!",
         "settings" : {
             "missionProgressLock": false
@@ -80,11 +81,38 @@
             }
         },
         {
-            "enabled": false,
+            "enabled": true,
             "id": "competency",
             "dataProcessScope": "gameSession",
             "engine": "weka",
-            "trigger": "endSession"
+            "trigger": "endSession",
+            "missions": {
+                "cps_m3": {
+                    "type": "Gameplay",
+                    "title": "Mission 4",
+                    "description": "Pollution Problems - Sierra Madre"
+                },
+                "cps_m5": {
+                    "type": "Gameplay",
+                    "title": "Mission 6",
+                    "description": "It's Complicated - Jackson City"
+                },
+                "lewt_m3": {
+                    "type": "Systems Maps Challenges",
+                    "title": "Mission 4",
+                    "description": "Pollution Problems - Pre-Game Systems Map"
+                },
+                "lewt_m4": {
+                    "type": "Systems Maps Challenges",
+                    "title": "Mission 4",
+                    "description": "Pollution Problems - Post-Game Systems Map"
+                },
+                "lewt_m5": {
+                    "type": "Systems Maps Challenges",
+                    "title": "Mission 4",
+                    "description": "Pollution Problems - Sierra Madre"
+                }
+            }
         }
     ],
     "reports": {
@@ -94,13 +122,16 @@
                 "assessmentId": "sowo",
                 "enabled": true,
                 "name": "Shout Out and Watch Out Report",
-                "header": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-SC.jpg"
+                },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
                 "id": "competency",
                 "assessmentId": "competency",
-                "enabled": false,
+                "enabled": true,
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": "Competency Levels: Complex Problem Solving",
                 "description": "Coming Soon!",
@@ -115,44 +146,7 @@
                         "Level 2 - The player demonstrates...",
                         "Level 3 - The player demonstrates..."
                     ]
-                },
-                "groups": [
-                    {
-                        "name": "Gameplay",
-                        "list": [
-                            {
-                                "id": "cps_m3",
-                                "title": "Mission 4",
-                                "description": "Pollution Problems - Sierra Madre"
-                            },
-                            {
-                                "id": "cps_m5",
-                                "title": "Mission 6",
-                                "description": "It's Complicated - Jackson City"
-                            }
-                        ]
-                    },
-                    {
-                        "name": "Systems Maps Challenges",
-                        "list": [
-                            {
-                                "id": "lewt_m3",
-                                "title": "Mission 4",
-                                "description": "Pollution Problems - Pre-Game Systems Map"
-                            },
-                            {
-                                "id": "lewt_m3",
-                                "title": "Mission 4",
-                                "description": "Pollution Problems - Post-Game Systems Map"
-                            },
-                            {
-                                "id": "lewt_m5",
-                                "title": "Mission 4",
-                                "description": "Pollution Problems - Sierra Madre"
-                            }
-                        ]
-                    }
-                ]
+                }
             },
             {
                 "id": "mission-progress",
@@ -180,6 +174,16 @@
     },
     "details": {
         "buttons": [
+            {
+                "name": "Getting Started Guide",
+                "type": "link",
+                "links": [
+                    {
+                        "target": "_blank",
+                        "link": "../assets/pdf/quick_start_guide_SC.pdf"
+                    }
+                ]
+            },
             {
                 "name": "Download",
                 "type": "download",
@@ -386,7 +390,7 @@
                     ]
                 },
                 {
-                    "category": "National Council for Economic Education (NCEE)",
+                    "category": "Council for Economic Education (CEE)",
                     "groups": [
                         {
                             "list":[

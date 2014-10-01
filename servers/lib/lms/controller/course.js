@@ -356,7 +356,6 @@ function getCourse(req, res, next) {
             // check if enrolled in course
             var showMembers = false;
             var showTeacher = false;
-            var promise;
             if( userData.role == lConst.role.instructor ||
                 userData.role == lConst.role.manager ||
                 userData.role == lConst.role.admin ) {
@@ -369,18 +368,18 @@ function getCourse(req, res, next) {
                         showMembers = (req.query.showMembers === "true") ? true : false;
                     }
                 }
-
-                // do nothing promise
-                promise = when.promise(function(resolve){resolve(1)}.bind(this));
             } else {
                 showTeacher = true;
-                // check if enrolled
-                promise = this.myds.isEnrolledInCourse(userData.id, courseId);
             }
 
-            promise
-                .then(function(){
-                    return this.myds.getCourse(courseId);
+            // check if enrolled
+            this.myds.isEnrolledInCourse(userData.id, courseId)
+                .then(function(isEnrolled){
+                    if(isEnrolled) {
+                        return this.myds.getCourse(courseId);
+                    } else {
+                        return when.reject({key:"course.general"});
+                    }
                 }.bind(this))
                 .then(function(course){
 
@@ -451,7 +450,15 @@ function updateCourseInfo(req, res, next, serviceManager)
         var courseData = req.body;
         courseData.id = req.params.courseId;
 
-        this.updateCourse(userData, courseData)
+        // check if enrolled
+        this.myds.isEnrolledInCourse(userData.id, courseData.id)
+            .then(function(isEnrolled){
+                if(isEnrolled) {
+                    return this.updateCourse(userData, courseData);
+                } else {
+                    return when.reject({key:"course.general"});
+                }
+            }.bind(this))
             .then(function(){
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);
             }.bind(this))
@@ -489,7 +496,15 @@ function updateGamesInCourse(req, res, next, serviceManager)
         courseData.id = req.params.courseId;
         courseData.games = req.body;
 
-        this.updateGamesInCourse(userData, courseData)
+        // check if enrolled
+        this.myds.isEnrolledInCourse(userData.id, courseData.id)
+            .then(function(isEnrolled){
+                if(isEnrolled) {
+                    return this.updateGamesInCourse(userData, courseData);
+                } else {
+                    return when.reject({key:"course.general"});
+                }
+            }.bind(this))
             .then(function(){
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);
             }.bind(this))

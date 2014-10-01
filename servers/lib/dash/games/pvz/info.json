@@ -14,6 +14,7 @@
         "maintenance": null,
         "shortName": "PvZ EDU",
         "longName": "Plants vs. Zombies EDU",
+        "shortDescription": "Plants vs. Zombies EDU",
         "description": "Battle the zombies with your army of plants... and learn!",
         "settings" : {
         },

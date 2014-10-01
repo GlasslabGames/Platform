@@ -362,12 +362,15 @@ return when.promise(function(resolve, reject) {
 
         this.telmStore.getGamesForCourse(courseData.id)
             .then(function (currentGames) {
+
+                // find if game removed
                 var updateGames = {};
+                var gameId;
                 for (var i = 0; i < courseData.games.length; i++) {
-                    updateGames[ courseData.games[i].id ] = courseData.games[i] || {};
+                    gameId = courseData.games[i].id;
+                    updateGames[ gameId ] = _.merge(courseData.games[i], currentGames[gameId]) || {};
                 }
 
-                updateGames = _.merge(updateGames, currentGames);
                 return this.telmStore.updateGamesForCourse(courseData.id, updateGames);
             }.bind(this))
 

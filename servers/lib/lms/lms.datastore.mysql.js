@@ -879,7 +879,7 @@ return when.promise(function(resolve, reject) {
     this.ds.query(Q)
         .then(function(results) {
                 if(results.length > 0) {
-                    resolve();
+                    resolve(true);
                 } else {
                     reject({"error": "user not found"}, 500);
                 }
