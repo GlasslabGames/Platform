@@ -175,6 +175,16 @@
     "details": {
         "buttons": [
             {
+                "name": "Getting Started Guide",
+                "type": "link",
+                "links": [
+                    {
+                        "target": "_blank",
+                        "link": "../assets/pdf/quick_start_guide_SC.pdf"
+                    }
+                ]
+            },
+            {
                 "name": "Download",
                 "type": "download",
                 "links": [
