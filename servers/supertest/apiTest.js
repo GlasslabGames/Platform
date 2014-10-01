@@ -11,10 +11,10 @@ var apiTestSuite = require('./lib/apiTestSuite.js'),
 // TEST ROUTINE //
 //////////////////
 
-//var testENVs  = ["prod", "stage", "local"];  // NOTE - Since local will vary, not included by default.
-var testENVs  = ["local"];  // DEBUG - use for testing in isloation
+//var testENVs  = ["prod", "stage", "local", "dev"];  // NOTE - Since local will vary, not included by default.
+var testENVs  = ["stage"];  // DEBUG - use for testing in isloation
 
-var logDebug = 1;   // NOTE - 0: quiet, 1: verbose
+var logDebug = 0;   // NOTE - 0: quiet, 1: verbose
 
 // NOTE - timeout is set in the grunt config
 
