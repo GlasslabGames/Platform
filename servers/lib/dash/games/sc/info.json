@@ -131,7 +131,7 @@
             {
                 "id": "competency",
                 "assessmentId": "competency",
-                "enabled": true,
+                "enabled": false,
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": "Competency Levels: Complex Problem Solving",
                 "description": "Coming Soon!",
