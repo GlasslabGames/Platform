@@ -283,7 +283,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 				});
 		});
     
-    it.skip("[1. existing user] #can reset a teacher's password", function(done) {
+    it("[1. existing user] #can reset a teacher's password", function(done) {
       
 			var confirmationEmail;
 			
