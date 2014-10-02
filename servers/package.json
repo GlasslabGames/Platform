@@ -42,7 +42,7 @@
     "mail-listener2": "^0.1.7",
     "mocha": "*",
     "superagent": "^0.18.2",
-    "supertest": "*"
+    "supertest": "^0.13.0"
   },
   "scripts": {
     "test": "grunt"
