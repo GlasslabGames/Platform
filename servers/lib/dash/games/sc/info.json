@@ -63,7 +63,7 @@
 
                 "sierra_wo1": {
                     "name": "Sierra - Brown Out",
-                    "description": ""
+                    "description": "More than two attempts AND no power outage/failure"
                 },
                 "sierra_so1": {
                     "name": "Sierra - Smog Destroyer",
