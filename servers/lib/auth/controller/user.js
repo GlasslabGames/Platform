@@ -601,18 +601,23 @@ function verifyBetaCode(req, res, next) {
     // 1) verify the beta code and get user data
     this.getAuthStore().findUser("verify_code", req.params.code)
         .then(function(userData) {
-
                 if(userData.verifyCodeStatus === aConst.verifyCode.status.beta) {
-                    // change status to sent
-                    userData.verifyCodeStatus = aConst.verifyCode.status.sent;
-                    userData.verifyCode = "NULL";
-
-                    return this.glassLabStrategy.updateUserData(userData)
-                        .then(function() {
-                            this.requestUtil.jsonResponse(res, {"text": "Successfully Confirmed Beta User. Verification email sent to Beta User", "statusCode":200});
-                            return userData;
-                        }.bind(this));
-                } else {
+                    return when.resolve(userData);
+                }
+                else if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
+                    if( !req.query.hasOwnProperty('resend') ||
+                        !req.query.resend
+                    ) {
+                        this.requestUtil.jsonResponse(res, {"text": "Verify Email has already been sent, add \"?resend=1\" at the end of the url if you want to resend", "statusCode":200});
+                    } else {
+                        // force send email again
+                        return when.resolve(userData);
+                    }
+                }
+                else if(userData.verifyCodeStatus === aConst.verifyCode.status.verified) {
+                    this.requestUtil.jsonResponse(res, {"text": "Email has been verified by the user", "statusCode":200});
+                }
+                else {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                 }
 
@@ -627,8 +632,15 @@ function verifyBetaCode(req, res, next) {
             }
         }.bind(this))
         .then(function(userData) {
+            if(!userData) return; // no data so skip
+
             // send verification email to registered user
-            return sendVerifyEmail.call(this, userData.email, req.protocol, req.headers.host);
+            return sendVerifyEmail.call(this, userData.email, req.protocol, req.headers.host, userData.verifyCode);
+        }.bind(this))
+        .then(function(sent) {
+            if(!sent) return; // no data so skip, error already handled above
+
+            this.requestUtil.jsonResponse(res, {"text": "Successfully Confirmed Beta User. Verification email sent to Beta User", "statusCode":200});
         }.bind(this))
         .then(null, function(err) {
             console.log(err);
@@ -637,19 +649,17 @@ function verifyBetaCode(req, res, next) {
 
 }
 
-function sendVerifyEmail(email , protocol, host) {
+function sendVerifyEmail(email , protocol, host, verifyCode) {
     if( !(email &&
         _.isString(email) &&
         email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
 
-    var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
     return this.getAuthStore().findUser('email', email)
         .then(function(userData) {
-            userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
             userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
 
@@ -667,9 +677,10 @@ function sendVerifyEmail(email , protocol, host) {
                         this.options.auth.email,
                         path.join(__dirname, "../email-templates"),
                         this.stats);
-                    email.send('register-verify', emailData)
+                    return email.send('register-verify', emailData)
                         .then(function(){
                             // all ok
+                            return true;
                         }.bind(this))
                         // error
                         .then(null, function(err){
@@ -689,7 +700,6 @@ function sendVerifyEmail(email , protocol, host) {
             }
         }.bind(this))
 
-
 }
 
 function verifyEmailCode(req, res, next, serviceManager) {
@@ -708,7 +718,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.expired"}, 400);
             } else {
 
-                if(userData.verifyCodeStatus === aConst.verifyCode.status.sent || process.env.HYDRA_ENV === 'dev') {
+                if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
                     // change status to verified
                     userData.verifyCodeStatus = aConst.verifyCode.status.verified;
                     // Disabled for Beta - verifyCode is set to NULL in Oneshot login
@@ -725,7 +735,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
                             });
                         }.bind(this));
                 } else {
-                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.alreadyValidated"}, 400);
                 }
             }
         }.bind(this),
