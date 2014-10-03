@@ -180,7 +180,7 @@
                 "links": [
                     {
                         "target": "_blank",
-                        "link": "../assets/pdf/quick_start_guide_SC.pdf"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/guides/SCE+quick+start+guide.pdf"
                     }
                 ]
             },
