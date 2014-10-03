@@ -1,14 +1,9 @@
-var stage = require('./data/stage.js'),
-    local = require('./data/local.js'),
-    prod  = require('./data/prod.js'),
-    valid = require('./data/valid.js');
-
 module.exports = {
 
-    stage: stage,
-    local: local,
-    prod: prod,
+    stage: require('./data/stage.js'),
+    local: require('./data/local.js'),
+    prod: require('./data/prod.js'),
+    dev:  require('./data/dev.js'),
 	
-    valid: valid
+    valid: require('./data/valid.js')
 }
-

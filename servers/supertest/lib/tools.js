@@ -13,7 +13,8 @@ module.exports = {
 		requestAccess: requestAccess,
 		listenForEmailsFrom: listenForEmailsFrom,
 		setGame: setGame,
-		setCourse: setCourse
+		setCourse: setCourse,
+    conLog: conLog
 }
 
 function zfill(num, size) {
@@ -29,7 +30,8 @@ function tstamp() {
 		date.getMinutes() + ':' + zfill(date.getSeconds(),2)
 }
 
-function genUser(name, emailOrCode, passw, role) { // FUTURE - ok, emailOrCode is a bit funkadelic.  make more robust
+// FUTURE - ok, emailOrCode is a bit funkadelic.  make more robust
+function genUser(name, emailOrCode, passw, role) {
 
   if (role == 'student') {
     return JSON.stringify({
@@ -86,49 +88,68 @@ function genClass(name, grades, gameId) {   // FUTURE - support for multi-game c
 		
 }
 
-function listenForEmailsFrom(emailAddress, cb) {
+// FUTURE - replace "console.log"s with conLog, once fixed
+function listenForEmailsFrom(emailAddress, subj, cb, logger) {
+  
+//  logger = logger || console.log;
+  
 	var mailListener = new MailListener({
 		username: "build@glasslabgames.org",
 		password: "glasslab",
 		host: "imap.gmail.com",
 		port: 993, // imap port
 		tls: true,
-		tlsOptions: {
-			rejectUnauthorized: false
-		},
+    tlsOptions: {	rejectUnauthorized: false },
 		mailbox: "INBOX", // mailbox to monitor
-		//  searchFilter: ["UNSEEN", "FLAGGED"], // the search filter being used after an IDLE notification has been retrieved
 		markSeen: true, // all fetched email willbe marked as seen and not fetched next time
-		//  mailParserOptions: {streamAttachments: true}, // options to be passed to mailParser lib.
+//		markSeen: false, // FIXME testing out 
 		attachments: false, // download attachments as they are encountered to the project directory
-		//  attachmentOptions: { directory: "attachments/" }
 	});
 	mailListener.start(); // start listening
+  
 	mailListener.on("server:connected", function () {
-//		console.log("imapConnected");		// DEBUG
+		logger("imapConnected, checking for mail from " + emailAddress);		// DEBUG
 	});
 	mailListener.on("server:disconnected", function () {
-		console.log("imapDisconnected");
+		logger("imapDisconnected");
 	});
 	mailListener.on("error", function (err) {
-		console.log(err);
+//    logger(err, 'ERROR');
 	});
+    
+  // FUTURE - return list of mail not marked read.  mark the union of that return
+  //    and any other mail listeners, and mark all as read
 	mailListener.on("mail", function (mail, seqno, attributes) {
-		// do something with mail object including attachments
+    
 		var newMail = {
-				subject: mail['subject'],
-				// NOTE - hmm, statref'ing '[0]' seems troublingly unrobust
-				sender: mail['from'][0]['address'],
-				userEmail: mail['to'][0]['address'],
-				text: mail['text']
-			}
-			// if email matches req'd
-		if (emailAddress == newMail.sender) {
-			cb(newMail); // Callback which will run the test upon
-		} else {
-			console.log('mismatch: ' + newMail.sender);
-			// keep waiting 
+		  subject: mail['subject'],
+		  // FIXME - hmm, statref'ing '[0]' seems troublingly unrobust
+		  sender: mail['from'][0]['address'],
+		  userEmail: mail['to'][0]['address'],
+		  text: mail['text'] // FUTURE - add logging for verbose mode
 		}
+		
+    // if email matches req'd
+		if (emailAddress == newMail.sender) {
+      if (subj == newMail.subject) {
+        mailListener.stop();
+        cb(newMail); // Callback which will run the test
+        
+//          mailListener.imap.addFlags(attributes.uid, '\\Seen', function(err) {
+//            if(!err) {
+//             console.log('mail marked as read');
+//            } else {
+//              console.log(err);
+//            }
+//          });
+        
+      } else {
+//        logger(newMail.subject, 'wrong sender subject');  // DEBUG
+      }
+		} else {
+//			logger(newMail.sender, 'wrong sender email');  // DEBUG
+		}
+    
 	});
 }
 
@@ -138,4 +159,27 @@ function setGame(route, gameId) {
 
 function setCourse(route, courseId) {
 	return route.replace(":courseId", courseId);
+}
+
+function conLog(flag, filename) {
+  
+  // Verbose
+  function vLog(content, header) {
+    // FUTURE - if filename, write to file instead of console
+    
+    if (header) {
+      var br = Array(header.length + 9).join("+");
+      console.log(br);
+      console.log("||  " + header + "  ||");
+      console.log(br);
+    }
+    console.log(content);
+  }
+  
+  // Quiet
+  function qLog () {
+    // Do nothing, for now
+  }
+  
+  return ((flag) ? vLog : qLog);
 }
