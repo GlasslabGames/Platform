@@ -150,7 +150,14 @@
             },
             {
                 "id": "mission-progress",
+                "assessmentId": "mission-progress",
                 "enabled": true,
+                "name": "Mission Progress Report",
+                 "header": {
+                    "text": "Mission Progress Report",
+                    "image": "assets/game-banner-SC.jpg"
+                },
+                "description": "This report shows student' key achievements to date and total time played.",
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
