@@ -1,6 +1,8 @@
 .idea
 .DS_Store
+servers/.DS_Store
 node_modules
 servers/loadtest/locustfile.pyc
 servers/loadtest/reports/*
 servers/supertest/results/*.json
+servers/supertest/results/*.zip

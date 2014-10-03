@@ -12,7 +12,7 @@
         "enabled": true,
         "visible": true,
         "maintenance": null,
-        "shortName": "SimCityEdu",
+        "shortName": "SimCityEDU",
         "longName": "SimCityEDU: Pollution Challenge!",
         "shortDescription": "SimCityEDU: Pollution Challenge!",
         "description": "SimCityEDU: Pollution Challenge!",
@@ -63,7 +63,7 @@
 
                 "sierra_wo1": {
                     "name": "Sierra - Brown Out",
-                    "description": ""
+                    "description": "More than two attempts AND no power outage/failure"
                 },
                 "sierra_so1": {
                     "name": "Sierra - Smog Destroyer",
@@ -187,7 +187,7 @@
                 "links": [
                     {
                         "target": "_blank",
-                        "link": "../assets/pdf/quick_start_guide_SC.pdf"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/guides/SCE+quick+start+guide.pdf"
                     }
                 ]
             },

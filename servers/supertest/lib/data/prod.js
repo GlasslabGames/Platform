@@ -35,7 +35,7 @@ module.exports = {
             shoutout:[{
                 "total": 3,
                 "overPercent": 0.3333333333333333,
-                "timestamp": 1409956849018,
+                "timestamp": 1410466528144,
                 "id": "so1",
                 "name": "Nailed It!",
                 "description": "Outstanding performance at identifying weaknesses of claim-data pairs."
