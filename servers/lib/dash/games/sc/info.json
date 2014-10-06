@@ -129,11 +129,34 @@
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
+                "id": "mission-progress",
+                "enabled": false,
+                "name": "Mission Progress",
+                "header": {
+                    "text": "Mission Progress",
+                    "image": "assets/game-banner-SC.jpg"
+                },
+                "description": "Coming Soon!",
+                "icons": {
+                    "complete": {
+                        "small": "assets/add-blue.png",
+                        "large": "assets/add-blue@2x.png"
+                    },
+                    "not-complete": {
+                        "small": "assets/add-grey-square.png",
+                        "large": "assets/add-grey-square@2x.png"
+                    }
+                }
+            },
+            {
                 "id": "competency",
                 "assessmentId": "competency",
                 "enabled": false,
                 "name": "Competency Levels: Complex Problem Solving",
-                "header": "Competency Levels: Complex Problem Solving",
+                "header": {
+                    "text": "Competency Levels: Complex Problem Solving",
+                    "image": "assets/game-banner-SC.jpg"
+                },
                 "description": "Coming Soon!",
                 "icons": {
                     "small": "assets/icon-plus-green.png",
@@ -146,20 +169,6 @@
                         "Level 2 - The player demonstrates...",
                         "Level 3 - The player demonstrates..."
                     ]
-                }
-            },
-            {
-                "id": "mission-progress",
-                "enabled": true,
-                "icons": {
-                    "complete": {
-                        "small": "assets/add-blue.png",
-                        "large": "assets/add-blue@2x.png"
-                    },
-                    "not-complete": {
-                        "small": "assets/add-grey-square.png",
-                        "large": "assets/add-grey-square@2x.png"
-                    }
                 }
             },
             {
@@ -190,7 +199,7 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/SimCityEDU_setup.msi"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/prod-pc/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",

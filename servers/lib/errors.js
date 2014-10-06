@@ -40,9 +40,9 @@ module.exports = {
     // not used any more
     //"user.notUnique.institution":  "The institution name is already in use. Please provide a different institution name.",
     "user.login.general":                   "There was an error with the information you entered.",
-    "user.login.invalid":                   "The email address or password you provided does not match our records. Please try again.",
-    "user.login.invalidHashCode":            "The hash code you entered is invalid.",
-    "user.login.missing":                   "You forgot to enter your email address or password.",
+    "user.login.invalid":                   "The screen name/email address or password you provided does not match our records. Please try again.",
+    "user.login.invalidHashCode":           "The hash code you entered is invalid.",
+    "user.login.missing":                   "You forgot to enter your screen name/email address or password.",
     "user.login.notVerified":               "Please verify your email account",
     "user.login.betaPending":               "Your account is currently pending approval by our admin. We will notify you of your beta status via email shortly. If you have any questions, please let us know at: " + aConst.support.email,
     "user.login.notLoggedIn":               "You are not logged in",
