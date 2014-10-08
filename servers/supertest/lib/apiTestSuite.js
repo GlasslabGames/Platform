@@ -276,7 +276,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 			agent
 				.post(srvAddr + routes.logout.path)
 				.type('application/json')
-				.send({}) // NOTE - hardcoded
+				.send({})
 				.end(function (res) {
 					expect(res.status).to.eql(200);
 					done();
@@ -317,7 +317,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
       // Store data for future debugging opportunities, repro
 			results['newTeacherRequestPost'] = newTeacher;
 
-      if (env == 'local') {   // FUTURE swap 'local' with testable group
+      if (env == 'local') {   // TODO swap 'local' with testable group
         
         // Stop 0: get admin email, grab approve link (and generate verify link)
         listenForEmailsFrom(adminEmail, "Playfully.org Beta confirmation", function (email) {
