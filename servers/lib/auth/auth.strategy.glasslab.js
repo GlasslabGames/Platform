@@ -129,7 +129,7 @@ return when.promise(function(resolve, reject) {
                     function(){
 
                         // check if email verified
-                        if (user.verifyCodeStatus === 'beta') {
+                        if (user.verifyCodeStatus === aConst.verifyCode.status.beta) {
                             reject({user: user, key: "user.login.betaPending"});
                         } else if ( user.verifyCodeStatus === aConst.verifyCode.status.verified ||
                                     user.verifyCodeStatus == null ) {
