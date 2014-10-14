@@ -30,8 +30,6 @@ module.exports = {
  */
 function getEventsByDate(req, res, next){
 
-
-
     try {
         // set timeout so request doesn't close connection
         req.connection.setTimeout(this.options.request.httpTimeout);
@@ -40,7 +38,7 @@ function getEventsByDate(req, res, next){
         req.session.passport) {
             var userData = req.session.passport.user;
             // check user permission
-            if (!userData.permits.research) {
+            if (!userData.permits.nav.parser) {
                 this.requestUtil.errorResponse(res, {key: "user.permit.invalid"});
                 return;
             }
