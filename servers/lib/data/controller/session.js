@@ -3,14 +3,30 @@ var _      = require('lodash');
 var when   = require('when');
 //
 var Util   = require('../../core/util.js');
-var tConst = require('../data.const.js');
 
 module.exports = {
-    startSessionV2: startSessionV2,
-    endSessionV2:   endSessionV2
+    startSessionV2:   startSessionV2,
+    endSessionV2:     endSessionV2,
+    startPlaySession: startPlaySession
 };
 
 var exampleInput = {};
+var exampleOutput = {};
+
+// http://127.0.0.1:8001/api/v2/data/playSession/start
+exampleOutput.startPlaySession = {
+    playSessionId: '1234-5678-901235'
+};
+function startPlaySession(req, res){
+    var playSession = {
+        playSessionId: Util.CreateUUID()
+    };
+
+    this.requestUtil.jsonResponse(res, playSession);
+    this.stats.increment("info", "StartPlaySession.Done");
+}
+
+
 exampleInput.startSessionV2 = {
     gameId:    "AA-1",
     deviceId:  "123-ASD",

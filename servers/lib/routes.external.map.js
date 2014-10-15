@@ -70,6 +70,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/data/playSession/start",
+            service: "data",
+            controller: "session",
+            method: {
+                get: "startPlaySession"
+            }
+        },
+        {
             api: "/api/v2/data/events",
             service: "data",
             controller: "events",
