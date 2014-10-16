@@ -235,7 +235,17 @@
                 "id": "research",
                 "authRequired": true,
                 "title": "Research",
-                "list": []
+                "list": [
+                  {
+                        "category": "   ",
+                        "list": [
+                            {
+                                "name": "The Impact of iCivics on Students’ Core Civic Knowledge",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/AW-1/research/LeCompte%2C+Moore+%26+Blevins+-+Impact+of+iCivics+on+Students%27+Core+Civic+Knowledge.pdf"
+                            }
+                        ]
+                    }
+                ]
             },
             "reviews": {
                 "order": 5,
