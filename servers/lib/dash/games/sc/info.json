@@ -242,7 +242,7 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/prod-pc/SimCityEDU_setup.msi"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/stage-pc/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
