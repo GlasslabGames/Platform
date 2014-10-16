@@ -88,28 +88,33 @@
             "trigger": "endSession",
             "missions": {
                 "cps_m3": {
+                    "id": "cps_m3",
                     "type": "Gameplay",
                     "title": "Mission 4",
                     "description": "Pollution Problems - Sierra Madre"
                 },
                 "cps_m5": {
+                    "id": "cps_m5",
                     "type": "Gameplay",
                     "title": "Mission 6",
                     "description": "It's Complicated - Jackson City"
                 },
                 "lewt_m3": {
+                    "id": "lewt_m3",
                     "type": "Systems Maps Challenges",
                     "title": "Mission 4",
                     "description": "Pollution Problems - Pre-Game Systems Map"
                 },
                 "lewt_m4": {
+                    "id": "lewt_m4",
                     "type": "Systems Maps Challenges",
-                    "title": "Mission 4",
+                    "title": "Mission 5",
                     "description": "Pollution Problems - Post-Game Systems Map"
                 },
                 "lewt_m5": {
+                    "id": "lewt_m5",
                     "type": "Systems Maps Challenges",
-                    "title": "Mission 4",
+                    "title": "Mission 6",
                     "description": "Pollution Problems - Sierra Madre"
                 }
             }
@@ -151,23 +156,59 @@
             {
                 "id": "competency",
                 "assessmentId": "competency",
-                "enabled": false,
+                "enabled": true,
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": {
                     "text": "Competency Levels: Complex Problem Solving",
                     "image": "assets/game-banner-SC.jpg"
                 },
-                "description": "Coming Soon!",
+                "description": "This report shows most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from Gameplay or Learning Challenges",
                 "icons": {
                     "small": "assets/icon-plus-green.png",
                     "large": "assets/icon-plus-green@2x.png"
                 },
-                "levels": {
-                    "max":  3,
-                    "description": [
-                        "Level 1 - The player understands...",
-                        "Level 2 - The player demonstrates...",
-                        "Level 3 - The player demonstrates..."
+                "table": {
+                    "headers": [
+                        {
+                            "id": "uni",
+                            "title": "Univariate",
+                            "description": "The player demonstrates univariate thinking, attending to only one cause & effect relationship"
+                        },
+                        {
+                            "id": "multi",
+                            "title": "Multivariate",
+                            "description": "The player demonstrates basic multivariate thinking and is able to successfully complete the mission"
+                        }
+                    ],
+                    "labels": [
+                        {
+                            "id": "mastered",
+                            "title": "Mastered",
+                            "description": "Mastered"
+                        },
+                        {
+                            "id": "not-mastered",
+                            "title": "Not Mastered",
+                            "description": "Not Mastered"
+                        },
+                        {
+                            "id": "not-enough-info",
+                            "title": "Not Enough Info",
+                            "description": "Not Enough Info"
+                        }
+                    ],
+                    "groups": [
+                        {
+                            "id": "cps_m3",
+                            "title": "Pollution Problems",
+                            "description": "Pollution Problems - Sierra Madre"
+                        },
+                        {
+                            "id": "cps_m5",
+                            "title": "It's Complicated",
+                            "description": "It's Complicated - Jackson City"
+
+                        }
                     ]
                 }
             },
@@ -185,6 +226,7 @@
         "buttons": [
             {
                 "name": "Getting Started Guide",
+                "authRequired": true,
                 "type": "link",
                 "links": [
                     {
@@ -196,10 +238,11 @@
             {
                 "name": "Download",
                 "type": "download",
+                "authRequired": true,
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/prod-pc/SimCityEDU_setup.msi"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/stage-pc/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
@@ -210,6 +253,7 @@
             {
                 "name": "Play Game",
                 "type": "play",
+                "authRequired": true,
                 "links": [
                     {
                         "name": "Play Game",

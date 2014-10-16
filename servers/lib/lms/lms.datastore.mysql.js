@@ -809,12 +809,27 @@ return when.promise(function(resolve, reject) {
                 Q += " WHERE id="+courseData.id;
 
                 //console.log("updateCourse Q:", Q);
-                this.ds.query(Q).then(resolve, reject);
+                this.ds.query(Q)
+                    .then(
+                    resolve,
+                    function(err){
+                        if( err.code &&
+                            err.code === "ER_DUP_ENTRY") {
+                            reject({key:"course.notUnique.name"}, 400);
+                        } else {
+                            console.error("updateCourseInfo UPDATE err:", err);
+                            reject({key:"course.general"}, 400);
+                        }
+                    }.bind(this)
+                );
             } else {
                 reject({key:"course.notUnique.name"}, 400);
             }
         }.bind(this),
-        reject
+        function(err){
+            console.error("updateCourseInfo SELECT err:", err);
+            reject({key:"course.general"}, 400);
+        }.bind(this)
     );
 // ------------------------------------------------
 }.bind(this));
