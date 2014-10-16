@@ -23,6 +23,18 @@ var tools    						= require('./tools.js'),
 // Routes - on-hold for referencing
 // var routes = require('../../lib/routes.external.map.js');
 
+// TODO move this out to tools
+function logout(agent, logoutPath, cb) {
+  agent
+    .post(logoutPath)
+    .type('application/json')
+    .send({})
+    .end(function (res) {
+      expect(res.status).to.eql(200);
+      cb();
+    });
+}
+
 // Errors
 var errors = require('../../lib/errors.js');
 
@@ -57,7 +69,6 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
   } else {
     adminEmail = 'accounts@glasslabgames.org';
   }
-
   
   // FUTURE - change the casing format to a list.
   // then, make blocks of code 
@@ -105,6 +116,17 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 							done();
 						});
 				});
+		});
+    
+    it("[0. general] #able to log in student user via SDK login", function (done) {
+			agent
+        .post(srvAddr + routes.sdk.login.path)
+        .type('application/json')
+        .send({"username":"gltest-01","password":"glasslab321"})  // TODO move to data pages
+        .end(function (res) {
+          expect(res.status).to.eql(200);
+          logout(agent, srvAddr + routes.logout.path, done);
+        });
 		});
 
 		it("[0. general] #shouldn't be able to manipulate data without login", function (done) {
@@ -273,14 +295,17 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 		});
     
     it("[1. existing user] #should log out successfully", function (done) {
-			agent
-				.post(srvAddr + routes.logout.path)
-				.type('application/json')
-				.send({})
-				.end(function (res) {
-					expect(res.status).to.eql(200);
-					done();
-				});
+//			agent
+//				.post(srvAddr + routes.logout.path)
+//				.type('application/json')
+//				.send({})
+//				.end(function (res) {
+//					expect(res.status).to.eql(200);
+//					done();
+//				});
+      
+      logout(agent, srvAddr + routes.logout.path, done);
+      
 		});
     
     it("[1. existing user] #can reset a teacher's password", function(done) {
@@ -297,7 +322,6 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
       
       listenForEmailsFrom(adminEmail, "Your Playfully.org Password", function (email) {
         confirmationEmail = email;
-        conLog(confirmationEmail, 'reset password email') // DEBUG
         done();
       }, conLog);
       
@@ -365,8 +389,6 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
       listenForEmailsFrom(adminEmail, "Beta status confirmed - Verify your email", function (email) {
         confirmationEmail = email;
         results['verifyEmail'] = email;
-        
-        conLog(email.text, 'email ajhsdbfalshbdfabdjsf');
 
         verifyCode = email.text.match(new RegExp('email/.*?(?=\n)'))[0];
         verifyCode = verifyCode.substring(6, verifyCode.length);
