@@ -167,44 +167,50 @@
                     "small": "assets/icon-plus-green.png",
                     "large": "assets/icon-plus-green@2x.png"
                 },
-                "levels": [
-                    {
-                        "title": "Mastered",
-                        "description": "Mastered"
-                    },
-                    {
-                        "title": "Not Mastered",
-                        "description": "Not Mastered"
-                    },
-                    {
-                        "title": "Not Enough Info",
-                        "description": "Not Enough Info"
-                    }
-                ],
-                "variant": [
-                    {
-                        "id": "uni",
-                        "title": "Univariate",
-                        "info": "The player demonstrates univariate thinking, attending to only one cause & effect relationship"
-                    },
-                    {
-                        "id": "multi",
-                        "title": "Multivariate",
-                        "info": "The player demonstrates basic multivariate thinking and is able to successfully complete the mission"
-                    }
-                ],
-                "competency": [
-                    {
-                        "id": "cps_m3",
-                        "title": "Mission 4",
-                        "description": "Pollution Problems - Sierra Madre"
-                    },
-                    {
-                        "id": "cps_m5",
-                        "title": "Mission 6",
-                        "description": "It's Complicated - Jackson City"
-                    }
-                ]
+                "table": {
+                    "headers": [
+                        {
+                            "id": "uni",
+                            "title": "Univariate",
+                            "description": "The player demonstrates univariate thinking, attending to only one cause & effect relationship"
+                        },
+                        {
+                            "id": "multi",
+                            "title": "Multivariate",
+                            "description": "The player demonstrates basic multivariate thinking and is able to successfully complete the mission"
+                        }
+                    ],
+                    "labels": [
+                        {
+                            "id": "mastered",
+                            "title": "Mastered",
+                            "description": "Mastered"
+                        },
+                        {
+                            "id": "not-mastered",
+                            "title": "Not Mastered",
+                            "description": "Not Mastered"
+                        },
+                        {
+                            "id": "not-enough-info",
+                            "title": "Not Enough Info",
+                            "description": "Not Enough Info"
+                        }
+                    ],
+                    "groups": [
+                        {
+                            "id": "cps_m3",
+                            "title": "Pollution Problems",
+                            "description": "Pollution Problems - Sierra Madre"
+                        },
+                        {
+                            "id": "cps_m5",
+                            "title": "It's Complicated",
+                            "description": "It's Complicated - Jackson City"
+
+                        }
+                    ]
+                }
             },
             {
                 "id": "learning-progress",
