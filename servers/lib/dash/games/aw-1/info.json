@@ -99,6 +99,7 @@
             {
                 "name": "Play Game",
                 "type": "play",
+                "authRequired": true,
                 "links": [
                     {
                         "name": "Play Game",

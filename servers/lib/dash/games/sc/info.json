@@ -226,6 +226,7 @@
         "buttons": [
             {
                 "name": "Getting Started Guide",
+                "authRequired": true,
                 "type": "link",
                 "links": [
                     {
@@ -237,6 +238,7 @@
             {
                 "name": "Download",
                 "type": "download",
+                "authRequired": true,
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
@@ -251,6 +253,7 @@
             {
                 "name": "Play Game",
                 "type": "play",
+                "authRequired": true,
                 "links": [
                     {
                         "name": "Play Game",
