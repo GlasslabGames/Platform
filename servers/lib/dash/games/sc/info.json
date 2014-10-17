@@ -167,6 +167,31 @@
                         "small": "assets/add-grey-square.png",
                         "large": "assets/add-grey-square@2x.png"
                     }
+                },
+                "table": {
+                    "headers": [
+                        {
+                            "id": "MedusaA1School01",
+                            "title": "School Is In",
+                            "description": false
+                        },
+                        {
+                            "id": "MedusaA1Jobs01",
+                            "title": "We Need Jobs!",
+                            "description": false
+                        },
+                        {
+                            "id": "MedusaA1Power01",
+                            "title": "Pollution Problems",
+                            "description": false
+                        },
+                        {
+                            "id": "MedusaA1Pollution01",
+                            "title": "It's Complicated",
+                            "description": false
+
+                    ],
+                    "labels": []
                 }
             },
             {
