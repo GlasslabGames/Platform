@@ -8,7 +8,7 @@ module.exports = {
     // Manually generated test user
     teacher: {
         userId: 6815,
-        email: 'build+teacher@glasslabgames.org',
+        email: 'build+manager@glasslabgames.org',
         pass:  'glasslab123',
         testClass: {
             id: 1574,

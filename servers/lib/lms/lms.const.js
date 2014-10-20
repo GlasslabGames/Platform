@@ -9,7 +9,7 @@ module.exports = {
         instructor: "instructor",
         manager:    "manager",
         student:    "student",
-        admin:      "admin"
+        developer:  "developer"
     },
     course: {
         type: {

@@ -60,13 +60,34 @@ module.exports = {
     },
     permits: {
       instructor: {
-        class: true
+          nav: {
+              dashboard: true,
+              games:     true,
+              courses:   true,
+              reports:   true,
+              support:   true,
+              parser:    false
+          }
       },
       developer: {
-        game: true
+          nav: {
+              dashboard: true,
+              games:     true,
+              courses:   true,
+              reports:   true,
+              support:   true,
+              parser:    true
+          }
       },
       admin: {
-        research: true
+          nav: {
+              dashboard: true,
+              games:     true,
+              courses:   true,
+              reports:   true,
+              support:   true,
+              parser:    true
+          }
       }
     }
 };

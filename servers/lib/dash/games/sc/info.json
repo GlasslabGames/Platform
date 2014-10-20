@@ -88,28 +88,33 @@
             "trigger": "endSession",
             "missions": {
                 "cps_m3": {
+                    "id": "cps_m3",
                     "type": "Gameplay",
                     "title": "Mission 4",
                     "description": "Pollution Problems - Sierra Madre"
                 },
                 "cps_m5": {
+                    "id": "cps_m5",
                     "type": "Gameplay",
                     "title": "Mission 6",
                     "description": "It's Complicated - Jackson City"
                 },
                 "lewt_m3": {
+                    "id": "lewt_m3",
                     "type": "Systems Maps Challenges",
                     "title": "Mission 4",
                     "description": "Pollution Problems - Pre-Game Systems Map"
                 },
                 "lewt_m4": {
+                    "id": "lewt_m4",
                     "type": "Systems Maps Challenges",
-                    "title": "Mission 4",
+                    "title": "Mission 5",
                     "description": "Pollution Problems - Post-Game Systems Map"
                 },
                 "lewt_m5": {
+                    "id": "lewt_m5",
                     "type": "Systems Maps Challenges",
-                    "title": "Mission 4",
+                    "title": "Mission 6",
                     "description": "Pollution Problems - Sierra Madre"
                 }
             }
@@ -129,16 +134,14 @@
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
-                "id": "competency",
-                "assessmentId": "competency",
+                "id": "mission-progress",
                 "enabled": false,
-                "name": "Competency Levels: Complex Problem Solving",
-                "header": "Competency Levels: Complex Problem Solving",
-                "description": "Coming Soon!",
-                "icons": {
-                    "small": "assets/icon-plus-green.png",
-                    "large": "assets/icon-plus-green@2x.png"
+                "name": "Mission Progress",
+                "header": {
+                    "text": "Mission Progress",
+                    "image": "assets/game-banner-SC.jpg"
                 },
+<<<<<<< HEAD
                 "levels": {
                     "max":  3,
                     "description": [
@@ -195,6 +198,65 @@
                 }
             },
             {
+                "id": "competency",
+                "assessmentId": "competency",
+                "enabled": true,
+                "name": "Competency Levels: Complex Problem Solving",
+                "header": {
+                    "text": "Competency Levels: Complex Problem Solving",
+                    "image": "assets/game-banner-SC.jpg"
+                },
+                "description": "This report shows most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from Gameplay or Learning Challenges",
+                "icons": {
+                    "small": "assets/icon-plus-green.png",
+                    "large": "assets/icon-plus-green@2x.png"
+                },
+                "table": {
+                    "headers": [
+                        {
+                            "id": "uni",
+                            "title": "Univariate",
+                            "description": "The player demonstrates univariate thinking, attending to only one cause & effect relationship"
+                        },
+                        {
+                            "id": "multi",
+                            "title": "Multivariate",
+                            "description": "The player demonstrates basic multivariate thinking and is able to successfully complete the mission"
+                        }
+                    ],
+                    "labels": [
+                        {
+                            "id": "mastered",
+                            "title": "Mastered",
+                            "description": "Mastered"
+                        },
+                        {
+                            "id": "not-mastered",
+                            "title": "Not Mastered",
+                            "description": "Not Mastered"
+                        },
+                        {
+                            "id": "not-enough-info",
+                            "title": "Not Enough Info",
+                            "description": "Not Enough Info"
+                        }
+                    ],
+                    "groups": [
+                        {
+                            "id": "cps_m3",
+                            "title": "Pollution Problems",
+                            "description": "Pollution Problems - Sierra Madre"
+                        },
+                        {
+                            "id": "cps_m5",
+                            "title": "It's Complicated",
+                            "description": "It's Complicated - Jackson City"
+
+                        }
+                    ]
+                }
+            },
+            {
                 "id": "learning-progress",
                 "enabled": false
             },
@@ -208,6 +270,7 @@
         "buttons": [
             {
                 "name": "Getting Started Guide",
+                "authRequired": true,
                 "type": "link",
                 "links": [
                     {
@@ -219,10 +282,11 @@
             {
                 "name": "Download",
                 "type": "download",
+                "authRequired": true,
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/SimCityEDU_setup.msi"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/stage-pc/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
@@ -233,6 +297,7 @@
             {
                 "name": "Play Game",
                 "type": "play",
+                "authRequired": true,
                 "links": [
                     {
                         "name": "Play Game",
@@ -257,7 +322,7 @@
                 "header": "Let Your Students Go to Town!",
                 "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<br> <br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve and explain the relationships in complex systems.<br><br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
                 "video": "https://vimeo.com/102270816",
-                "_brochure":"http://www.simcityedu.org/wp-content/uploads/2013/11/SCE_PC_Brochure_sml-1.pdf",
+                "brochure":"https://s3-us-west-1.amazonaws.com/playfully-games/SC/brochures/SIMCITYbrochure_v3small.pdf",
                 "curriculum": [
                     "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game algins to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
                 ],

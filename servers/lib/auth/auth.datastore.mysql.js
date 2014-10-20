@@ -9,7 +9,7 @@
 var _      = require('lodash');
 var when   = require('when');
 //
-var lConst;
+var aConst;
 
 module.exports = Auth_MySQL;
 
@@ -18,7 +18,7 @@ function Auth_MySQL(options){
 
     // Glasslab libs
     MySQL   = require('../core/datastore.mysql.js');
-    lConst  = require('./auth.js').Const;
+    aConst  = require('./auth.js').Const;
 
     this.options = _.merge(
         {
@@ -171,12 +171,12 @@ return when.promise(function(resolve, reject) {
                     user[i].enabled = true;
 
                     // if not glasslab login type then set username to lms username
-                    if( (user[i].loginType !== lConst.login.type.glassLabV2) &&
+                    if( (user[i].loginType !== aConst.login.type.glassLabV2) &&
                         user[i].ssoUsername ) {
                         user[i].username = user[i].ssoUsername;
                     }
                     // add user permissions object
-                    user[i].permits = lConst.permits[user[i].role];
+                    user[i].permits = aConst.permits[user[i].role];
                 }
 
                 // if input not array then return a single user

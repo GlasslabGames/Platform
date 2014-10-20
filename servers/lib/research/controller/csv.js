@@ -16,7 +16,7 @@ function getCsvParseSchema(req, res, next){
         req.session.passport) {
             var userData = req.session.passport.user;
             // check user permission
-            if (!userData.permits.research) {
+            if (!userData.permits.nav.parser) {
                 this.requestUtil.errorResponse(res, {error: "user.permit.invalid"});
                 return;
             }
@@ -49,6 +49,17 @@ function getCsvParseSchema(req, res, next){
 
 function updateCsvParseSchema(req, res, next){
     try {
+        // check user
+        if( req.session &&
+            req.session.passport) {
+            var userData = req.session.passport.user;
+            // check user permission
+            if (!userData.permits.nav.parser) {
+                this.requestUtil.errorResponse(res, {error: "user.permit.invalid"});
+                return;
+            }
+        }
+
         // check input
         if( !( req.params &&
             req.params.hasOwnProperty("gameId") ) ) {

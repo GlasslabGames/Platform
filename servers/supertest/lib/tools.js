@@ -27,7 +27,7 @@ function tstamp() {
 	var date = (new Date());
 	return zfill(date.getDate(),2) + '.' + zfill(date.getMonth()+1,2) +
 		'.' + date.getFullYear() + '-' + zfill(date.getHours(),2) + ':' +
-		date.getMinutes() + ':' + zfill(date.getSeconds(),2)
+		date.getMinutes() + ':' + zfill(date.getSeconds(),2);
 }
 
 // FUTURE - ok, emailOrCode is a bit funkadelic.  make more robust
@@ -84,14 +84,14 @@ function genClass(name, grades, gameId) {   // FUTURE - support for multi-game c
         title:name,
         grade:grades,
         games:[{"id":gameId}]
-    })
+    });
 		
 }
 
 // FUTURE - replace "console.log"s with conLog, once fixed
 function listenForEmailsFrom(emailAddress, subj, cb, logger) {
   
-//  logger = logger || console.log;
+  logger = logger || console.log;
   
 	var mailListener = new MailListener({
 		username: "build@glasslabgames.org",
@@ -108,10 +108,14 @@ function listenForEmailsFrom(emailAddress, subj, cb, logger) {
 	mailListener.start(); // start listening
   
 	mailListener.on("server:connected", function () {
-		logger("imapConnected, checking for mail from " + emailAddress);		// DEBUG
+		if (logger) { 
+      logger("imapConnected, checking for mail from " + emailAddress);		// DEBUG
+    }
 	});
 	mailListener.on("server:disconnected", function () {
-		logger("imapDisconnected");
+		if (logger) {
+      logger("imapDisconnected");
+    }
 	});
 	mailListener.on("error", function (err) {
 //    logger(err, 'ERROR');
