@@ -135,24 +135,6 @@
             },
             {
                 "id": "mission-progress",
-                "enabled": false,
-                "name": "Mission Progress",
-                "header": {
-                    "text": "Mission Progress",
-                    "image": "assets/game-banner-SC.jpg"
-                },
-<<<<<<< HEAD
-                "levels": {
-                    "max":  3,
-                    "description": [
-                        "Level 1 - The player understands...",
-                        "Level 2 - The player demonstrates...",
-                        "Level 3 - The player demonstrates..."
-                    ]
-                }
-            },
-            {
-                "id": "mission-progress",
                 "assessmentId": "mission-progress",
                 "enabled": true,
                 "name": "Mission Progress Report",
