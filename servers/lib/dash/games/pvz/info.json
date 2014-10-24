@@ -32,6 +32,15 @@
         }
     },
     "assessment": [
+        {
+            "enabled": true,
+            "id": "competency",
+            "dataProcessScope": "gameSession",
+            "engine": "weka",
+            "trigger": "endSession",
+            "missions": {
+            }
+        }
     ],
     "reports": {
         "list": [
