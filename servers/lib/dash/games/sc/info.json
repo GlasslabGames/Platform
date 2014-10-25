@@ -21,7 +21,7 @@
         },
         "license": {
             "type":      "loginType",
-            "loginType": "glasslabv2,clever",
+            "loginType": "glasslabv2,clever,edmodo",
             "valid": false,
             "message": {
                 "invalid": "Coming Soon!"
@@ -129,19 +129,22 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-SC.jpg"
+                    "image": "assets/game-banner-SC.jpg",
+                    "skinny": "assets/skinny-banner-SC.jpg"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
                 "id": "mission-progress",
-                "enabled": false,
-                "name": "Mission Progress",
-                "header": {
-                    "text": "Mission Progress",
-                    "image": "assets/game-banner-SC.jpg"
+                "assessmentId": "mission-progress",
+                "enabled": true,
+                "name": "Mission Progress Report",
+                 "header": {
+                    "text": "Mission Progress Report",
+                    "image": "assets/game-banner-SC.jpg",
+                    "skinny": "assets/skinny-banner-SC.jpg"
                 },
-                "description": "Coming Soon!",
+                "description": "This report shows student' key achievements to date and total time played.",
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
@@ -151,6 +154,31 @@
                         "small": "assets/add-grey-square.png",
                         "large": "assets/add-grey-square@2x.png"
                     }
+                },
+                "table": {
+                    "headers": [
+                        {
+                            "id": "MedusaA1School01",
+                            "title": "School Is In",
+                            "description": false
+                        },
+                        {
+                            "id": "MedusaA1Jobs01",
+                            "title": "We Need Jobs!",
+                            "description": false
+                        },
+                        {
+                            "id": "MedusaA1Power01",
+                            "title": "Pollution Problems",
+                            "description": false
+                        },
+                        {
+                            "id": "MedusaA1Pollution01",
+                            "title": "It's Complicated",
+                            "description": false
+                        }
+                    ],
+                    "labels": []
                 }
             },
             {
@@ -242,11 +270,11 @@
                 "links": [
                     {
                         "name": "PC (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/prod-pc/SimCityEDU_setup.msi"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.msi"
                     },
                     {
                         "name": "Mac (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.0.1127/signature-version-2/SimCityEDU_setup.dmg"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.dmg"
                     }
                 ]
             },
