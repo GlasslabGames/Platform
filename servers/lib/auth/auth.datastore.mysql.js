@@ -320,7 +320,6 @@ return when.promise(function(resolve, reject) {
         verify_code_status: "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
-        phone_number:    this.ds.escape(userData.phoneNumber)
     };
 
     var keys   = _.keys(data);
