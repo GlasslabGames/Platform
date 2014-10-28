@@ -348,6 +348,9 @@ function registerUserV2(req, res, next, serviceManager) {
         lastName:      "",
         password:      "",
         email:         "",
+        state:         "",
+        school:        "",
+        phoneNumber:   "",
         role:          req.body.role,
         loginType:     aConst.login.type.glassLabV2
     };
@@ -379,14 +382,16 @@ function registerUserV2(req, res, next, serviceManager) {
     }
     else if(regData.role == lConst.role.instructor) {
         // email and username is the same
-        req.body.username  = req.body.email;
-        regData.username   = Util.ConvertToString(req.body.username);
-        regData.password   = Util.ConvertToString(req.body.password);
-        regData.firstName  = Util.ConvertToString(req.body.firstName);
-        regData.lastName   = Util.ConvertToString(req.body.lastName);
-        regData.school     = Util.ConvertToString(req.body.school);
-        regData.district   = Util.ConvertToString(req.body.district);
-        regData.email      = Util.ConvertToString(req.body.email);
+        req.body.username   = req.body.email;
+        regData.username    = Util.ConvertToString(req.body.username);
+        regData.password    = Util.ConvertToString(req.body.password);
+        regData.firstName   = Util.ConvertToString(req.body.firstName);
+        regData.lastName    = Util.ConvertToString(req.body.lastName);
+        regData.school      = Util.ConvertToString(req.body.school);
+        regData.email       = Util.ConvertToString(req.body.email);
+        regData.state       = Util.ConvertToString(req.body.state);
+        regData.phoneNumber = Util.ConvertToString(req.body.phoneNumber);
+
 
         if(!regData.username) {
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
@@ -402,6 +407,18 @@ function registerUserV2(req, res, next, serviceManager) {
         }
         if(!regData.email) {
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.email"}, 400);
+            return;
+        }
+        if (!regData.state) {
+            this.requestUtil.errorResponse(res, {key: "user.create.input.missing.state"}, 400);
+            return;
+        }
+        if (!regData.phoneNumber) {
+            this.requestUtil.errorResponse(res, {key: "user.create.input.missing.phoneNumber"}, 400);
+            return;
+        }
+        if (!regData.school) {
+            this.requestUtil.errorResponse(res, {key: "user.create.input.missing.school"}, 400);
             return;
         }
     } else {
@@ -656,12 +673,9 @@ function sendVerifyEmail(regData, protocol, host) {
 
     return this.getAuthStore().findUser('email', regData.email)
         .then(function(userData) {
-            userData.verifyCode = verifyCode;
+            userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
             userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
-            userData.school = regData.school;
-            userData.district = regData.district;
-            userData.phoneNumber = regData.phoneNumber;
 
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){

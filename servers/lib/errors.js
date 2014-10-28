@@ -35,6 +35,9 @@ module.exports = {
     "user.create.input.missing.password":   "Missing Password",
     "user.create.input.missing.firstName":  "Missing First Name",
     "user.create.input.missing.email":      "Missing Email",
+    "user.create.input.missing.state":      "Missing State",
+    "user.create.input.missing.phoneNumber":"Missing Phone Number",
+    "user.create.input.missing.school":     "Missing School",
     "user.notUnique.email":                 "The email address is already in use by another user. Please provide a different email address.",
     "user.notUnique.screenName":            "The screen name is already in use by another user.",
     // not used any more

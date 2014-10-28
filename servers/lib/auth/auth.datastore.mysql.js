@@ -59,6 +59,7 @@ return when.promise(function(resolve, reject) {
             var hasSSOData = false;
             var hasState = false;
             var hasPhoneNumber = false;
+            var hasSchool = false;
 
             var promiseList = [];
             var Q = "";
@@ -82,6 +83,9 @@ return when.promise(function(resolve, reject) {
                 }
                 if (results[i]['Field'] == 'PHONE_NUMBER') {
                     hasPhoneNumber = true;
+                }
+                if (results[i]['Field'] == 'SCHOOL') {
+                    hasSchool = true;
                 }
             }
 
@@ -113,7 +117,14 @@ return when.promise(function(resolve, reject) {
             if (!hasPhoneNumber) {
                 updating = true;
                 Q = "ALTER TABLE `GL_USER` \
-                           ADD COLUMN `PHONE_NUMBER` VARCHAR(13) NULL DEFAULT NULL AFTER `State`";
+                           ADD COLUMN `PHONE_NUMBER` VARCHAR(13) NULL DEFAULT NULL AFTER `STATE`";
+                promiseList.push(this.ds.query(Q));
+            }
+
+            if (!hasSchool) {
+                updating = true;
+                Q = "ALTER TABLE `GL_USER` \
+                           ADD COLUMN `SCHOOL` VARCHAR(255) NULL DEFAULT NULL AFTER `PHONE_NUMBER`";
                 promiseList.push(this.ds.query(Q));
             }
 
