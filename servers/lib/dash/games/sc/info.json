@@ -87,6 +87,12 @@
             "engine": "weka",
             "trigger": "endSession",
             "missions": {
+                "cps_m2": {
+                    "id": "cps_m2",
+                    "type": "Gameplay",
+                    "title": "Mission 2",
+                    "description": "Worker Shortage - Little Alexandria"
+                },
                 "cps_m3": {
                     "id": "cps_m3",
                     "type": "Gameplay",
@@ -226,6 +232,11 @@
                         }
                     ],
                     "groups": [
+                        {
+                            "id": "cps_m2",
+                            "title": "Worker Shortage",
+                            "description": "Worker Shortage - Little Alexandria"
+                        },
                         {
                             "id": "cps_m3",
                             "title": "Pollution Problems",

@@ -17,6 +17,7 @@ var _          = require('lodash');
 var when       = require('when');
 var express    = require('express');
 var couchbase  = require('couchbase');
+var cors       = require('cors');
 
 // load at runtime
 var Util;
@@ -128,6 +129,7 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.urlencoded());
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
+                this.app.use(cors());
 
                 this.app.use(express.session({
                     secret: this.options.services.session.secret || "keyboard kitty",

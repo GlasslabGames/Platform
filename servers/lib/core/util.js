@@ -149,9 +149,16 @@ function getExpressLogger(options, express, stats){
             status = "";
         }
 
+        // method type "OPTIONS" is a preflighted request with the introduction of cors
+        // they usually return 204 which means no data is sent back, but is approves the incoming POST request
+        var method = t['method'](req, res);
+        if( method && method == "OPTIONS" ) {
+            return method+' '+URL+' '+status;
+        }
+
         return t['remote-addy'](req, res)+' - - ['+
             t['date'](req, res)+'] "'+
-            t['method'](req, res)+' '+
+            method+' '+
             URL+' HTTP/'+
             t['http-version'](req, res)+'" '+
             status+' '+

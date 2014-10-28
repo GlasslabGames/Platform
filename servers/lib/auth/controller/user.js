@@ -348,6 +348,8 @@ function registerUserV2(req, res, next, serviceManager) {
         lastName:      "",
         password:      "",
         email:         "",
+        state:         "",
+        school:        "",
         role:          req.body.role,
         loginType:     aConst.login.type.glassLabV2
     };
@@ -379,37 +381,41 @@ function registerUserV2(req, res, next, serviceManager) {
     }
     else if(regData.role == lConst.role.instructor) {
         // email and username is the same
-        req.body.username  = req.body.email;
-        regData.username   = Util.ConvertToString(req.body.username);
-        regData.password   = Util.ConvertToString(req.body.password);
-        regData.firstName  = Util.ConvertToString(req.body.firstName);
-        regData.lastName   = Util.ConvertToString(req.body.lastName);
-        regData.school     = Util.ConvertToString(req.body.school);
-        regData.district   = Util.ConvertToString(req.body.district);
-        regData.email      = Util.ConvertToString(req.body.email);
+        req.body.username   = req.body.email;
+        regData.username    = Util.ConvertToString(req.body.username);
+        regData.password    = Util.ConvertToString(req.body.password);
+        regData.firstName   = Util.ConvertToString(req.body.firstName);
+        regData.lastName    = Util.ConvertToString(req.body.lastName);
+        regData.school      = Util.ConvertToString(req.body.school);
+        regData.email       = Util.ConvertToString(req.body.email);
+        regData.state       = Util.ConvertToString(req.body.state);
+
 
         if(!regData.username) {
-            //this.requestUtil.errorResponse(res, "missing email", 400);
-            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.email"}, 400);
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
             return;
         }
         if(!regData.password) {
-            //this.requestUtil.errorResponse(res, "missing password", 400);
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.password"}, 400);
             return;
         }
         if(!regData.firstName) {
-            //this.requestUtil.errorResponse(res, "missing firstName", 400);
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.firstName"}, 400);
             return;
         }
         if(!regData.email) {
-            //this.requestUtil.errorResponse(res, "missing email", 400);
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.email"}, 400);
             return;
         }
+        if (!regData.state) {
+            this.requestUtil.errorResponse(res, {key: "user.create.input.missing.state"}, 400);
+            return;
+        }
+        if (!regData.school) {
+            this.requestUtil.errorResponse(res, {key: "user.create.input.missing.school"}, 400);
+            return;
+        }
     } else {
-        //this.requestUtil.errorResponse(res, "invalid role", 401);
         this.requestUtil.errorResponse(res, {key:"user.create.invalid.role"}, 401);
         return;
     }
@@ -427,7 +433,6 @@ function registerUserV2(req, res, next, serviceManager) {
 
         this.stats.increment("error", "Route.Register.User");
         //console.error("AuthServer registerUser Error:", err);
-        //this.requestUtil.jsonResponse(res, err, code);
         this.requestUtil.errorResponse(res, err, code);
     }.bind(this);
 
@@ -478,10 +483,11 @@ function registerUserV2(req, res, next, serviceManager) {
 
                     promise
                         .then(function(){
-                            // beta
-                            return sendBetaConfirmEmail.call(this, regData, req.protocol, req.headers.host);
                             // send email verification code
-//                            return sendVerifyEmail.call(this, regData.email, req.protocol, req.headers.host);
+                            return sendVerifyEmail.call(this, regData, req.protocol, req.headers.host);
+                            // beta
+                            //return sendBetaConfirmEmail.call(this, regData, req.protocol, req.headers.host);
+
                         }.bind(this))
                         // all ok
                         .then(function(){
@@ -649,24 +655,26 @@ function verifyBetaCode(req, res, next) {
 
 }
 
-function sendVerifyEmail(email , protocol, host, verifyCode) {
-    if( !(email &&
-        _.isString(email) &&
-        email.length) ) {
+function sendVerifyEmail(regData, protocol, host) {
+    if( !(regData.email &&
+        _.isString(regData.email) &&
+        regData.email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
 
+    var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
-    return this.getAuthStore().findUser('email', email)
+    return this.getAuthStore().findUser('email', regData.email)
         .then(function(userData) {
+            userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
             userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
 
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Beta status confirmed - Verify your email",
+                        subject: "Playfully.org - Verify your email",
                         to:   userData.email,
                         user: userData,
                         code: verifyCode,
@@ -721,10 +729,11 @@ function verifyEmailCode(req, res, next, serviceManager) {
                 if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
                     // change status to verified
                     userData.verifyCodeStatus = aConst.verifyCode.status.verified;
-                    // Disabled for Beta - verifyCode is set to NULL in Oneshot login
-                    // userData.verifyCode        = "NULL";
+                    // Disabled while one shot login is active - look inside verifyOneShotLogin
+                    //userData.verifyCode        = "NULL";
                     userData.verifyCodeExpiration = "NULL";
 
+                    // automatically login user in
                     return this.glassLabStrategy.updateUserData(userData)
                         .then(function() {
                             return when.promise(function(resolve,reject) {
