@@ -57,6 +57,7 @@ return when.promise(function(resolve, reject) {
             var passwordLength255 = false;
             var hasVerifyCode = false;
             var hasSSOData = false;
+            var hasState = false;
 
             var promiseList = [];
             var Q = "";
@@ -73,6 +74,10 @@ return when.promise(function(resolve, reject) {
 
                 if(results[i]['Field'] == 'VERIFY_CODE') {
                     hasVerifyCode = true;
+                }
+
+                if (results[i]['Field'] == 'STATE') {
+                    hasState = true;
                 }
             }
 
@@ -92,6 +97,13 @@ return when.promise(function(resolve, reject) {
                            ADD COLUMN `ssoUsername` VARCHAR(255) NULL AFTER `LOGIN_TYPE`, \
                            ADD COLUMN `ssoData` TEXT NULL AFTER `ssoUsername` ";
                 promiseList.push( this.ds.query(Q) );
+            }
+
+            if (!hasState) {
+                updating = true;
+                Q = "ALTER TABLE `GL_USER` \
+                           ADD COLUMN `State` VARCHAR(225) NULL DEFAULT NULL AFTER      `VERIFY_CODE_STATUS`";
+                promiseList.push(this.ds.query(Q));
             }
 
             if(promiseList.length) {
