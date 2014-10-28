@@ -350,7 +350,6 @@ function registerUserV2(req, res, next, serviceManager) {
         email:         "",
         state:         "",
         school:        "",
-        phoneNumber:   "",
         role:          req.body.role,
         loginType:     aConst.login.type.glassLabV2
     };
@@ -390,7 +389,6 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.school      = Util.ConvertToString(req.body.school);
         regData.email       = Util.ConvertToString(req.body.email);
         regData.state       = Util.ConvertToString(req.body.state);
-        regData.phoneNumber = Util.ConvertToString(req.body.phoneNumber);
 
 
         if(!regData.username) {
@@ -411,10 +409,6 @@ function registerUserV2(req, res, next, serviceManager) {
         }
         if (!regData.state) {
             this.requestUtil.errorResponse(res, {key: "user.create.input.missing.state"}, 400);
-            return;
-        }
-        if (!regData.phoneNumber) {
-            this.requestUtil.errorResponse(res, {key: "user.create.input.missing.phoneNumber"}, 400);
             return;
         }
         if (!regData.school) {
