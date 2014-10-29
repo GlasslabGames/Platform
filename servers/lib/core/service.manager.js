@@ -83,7 +83,7 @@ return when.promise(function(resolve, reject) {
             resolve(this.version);
         }
     }.bind(this));
-});
+}.bind(this));
 // end promise wrapper
 };
 
