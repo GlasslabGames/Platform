@@ -37,7 +37,6 @@ function DashService(options, serviceManager){
 
         this.requestUtil = new Util.Request(this.options, Errors);
         this.stats       = new Util.Stats(this.options, "Dash");
-
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
         this.dashStore   = new DashStore(this.options.webapp.datastore.mysql);
@@ -45,6 +44,7 @@ function DashService(options, serviceManager){
         this.serviceManager = serviceManager;
 
         this._games = {};
+
 
     } catch(err){
         console.trace("DashService: Error -", err);
@@ -77,6 +77,7 @@ return when.promise(function(resolve, reject) {
 };
 
 // TODO: replace this with DB lookup, return promise
+
 // returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
 DashService.prototype.getListOfGameIds = function() {
     var gameIds = [];
@@ -91,16 +92,19 @@ DashService.prototype.getListOfGameIds = function() {
 };
 
 // TODO: replace this with DB lookup, return promise
+//promise transition in progress.  changing existing code
 DashService.prototype.isValidGameId = function(gameId) {
-    for(var g in this._games) {
-        if( g == gameId &&
-            this._games[g] &&
-            this._games[g].info &&
-            this._games[g].info.basic) {
-            return true;
+    return when.promise(function(resolve, reject) {
+        for (var g in this._games) {
+            if (g == gameId &&
+                this._games[g] &&
+                this._games[g].info &&
+                this._games[g].info.basic) {
+                return true;
+            }
         }
-    }
-    return false;
+        return false;
+    }.bind(this));
 };
 
 // TODO: replace this with DB lookup, return promise
@@ -260,6 +264,10 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
 
 
 // TODO: replace this with DB lookup
+
+// develop new system for representing this achievement.json/info.json type data
+//c:INFO:GameID could be a way to do it that would be useful.
+// this.client.get('c:INFO:' + gameId, function(err, res){}); but promisify this, not callback style
 DashService.prototype._loadGameFiles = function() {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -361,4 +369,33 @@ DashService.prototype._filterDisabledGameInfo = function(gameInfo) {
     }.bind(this));
 
     return deleted;
+};
+
+DashService.prototype._saveAssessmentResults = function(userId, gameId, assessmentId, data){
+    this.telmStore.getAssessmentResults(userId, gameId, assessmentId, data)
+        .then(function(aeResults){
+
+            var out = _.cloneDeep(aeResults);
+            out.gameId = gameId;
+            out.userId = userId;
+            out.assessmentId = assessmentId;
+
+            // merge results if they exist
+            if( !out.results &&
+                !_.isObject(out.results) ) {
+                out.results = {};
+            }
+
+            // remove old data
+            if( _.isArray(out.results.watchout) ||
+                _.isArray(out.results.shoutout) ) {
+                delete out.results.watchout;
+                delete out.results.shoutout;
+            }
+            // merge results
+            out.results = _.merge( out.results, data.results );
+
+            //console.log("out:", out);
+            return this.telmStore.saveAssessmentResults(userId, gameId, assessmentId, out);
+        }.bind(this) );
 };

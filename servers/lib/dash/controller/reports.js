@@ -53,6 +53,8 @@ function getReport(req, res, next) {
 
         // TODO: change to promise
         // check if valid gameId
+        this.isValidGameId(gameId)
+        
         if(!this.isValidGameId(gameId)) {
             this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
             return;

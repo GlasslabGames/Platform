@@ -146,7 +146,6 @@ function startSessionV2(req, outRes){
     }
 };
 
-
 exampleInput.endSessionV2 = {
     gameSessionId:  "ASD-123-QWER",
     timestamp:      123456789
@@ -227,6 +226,7 @@ function endSessionV2(req, outRes){
         this.requestUtil.errorResponse(outRes, "End Session Error", 500);
     }
 };
+
 // ---------------------------------------
 
 function pushJob(userId, gameId, gameSessionId) {
