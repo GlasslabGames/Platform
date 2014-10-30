@@ -372,7 +372,8 @@ DashService.prototype._filterDisabledGameInfo = function(gameInfo) {
 };
 
 DashService.prototype._saveAssessmentResults = function(userId, gameId, assessmentId, data){
-    this.telmStore.getAssessmentResults(userId, gameId, assessmentId, data)
+
+    return this.telmStore.getAssessmentResults(userId, gameId, assessmentId, data)
         .then(function(aeResults){
 
             var out = _.cloneDeep(aeResults);

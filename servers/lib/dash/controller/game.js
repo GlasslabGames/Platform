@@ -215,19 +215,42 @@ function saveAssessmentResults(req, res){
     var gameId = req.body.gameId;
     gameId = gameId.toUpperCase();
     var assessmentId = req.params.assessmentId;
-    assessmentId = AssessmentId.toUpperCase();
     var data = req.body;
 
-    this._saveAssessmentResults(userId, gameId, assessmentId, data)
-        .then(function(){
+
+    this.isValidGameId(gameId)
+        .then(function(state) {
+
+            if (!state) {
+                return when.reject({key: "report.gameId.invalid"});
+            }
+
+            if (!req.params.userId) {
+                return when.reject({key: "report.userId.missing"});
+            }
+            var userId = req.params.userId;
+
+            if (!req.params.assessmentId) {
+                return when.reject({key: report.assessmentId.missing});
+            }
+            var assessmentId = req.params.assessmentId;
+
+            // userId, assessmentId, data
+            if (!req.body) {
+                return when.reject({key: report.body.missing});
+            }
+            var data = req.body;
+
+            // merge in current assessment
+            return this._saveAssessmentResults(userId, gameId, assessmentId, data);
+        }.bind(this) )
+        .then(function () {
             this.requestUtil.jsonResponse(res, {});
-        }.bind(this) )
+        }.bind(this))
         // error
-        .then(null, function(err){
-            this.requestUtil.errorResponse(res, err);
-        }.bind(this) )
         .catch(function(err){
             console.trace("Reports: Save Assessment Error -", err);
+            this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
         });
 };

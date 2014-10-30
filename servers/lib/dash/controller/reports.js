@@ -32,53 +32,52 @@ exampleOut.getSOWO =
         ], "shoutout": []}}
     ];
 function getReport(req, res, next) {
-    try {
-        if (!req.params.reportId) {
-            this.requestUtil.errorResponse(res, {key:"report.reportId.missing", error: "missing reportId"});
-            return;
-        }
-        if (!req.params.gameId) {
-            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
-            return;
-        }
-        if (!req.params.courseId) {
-            this.requestUtil.errorResponse(res, {key:"report.courseId.missing", error: "missing courseId"});
-            return;
-        }
 
-        var reportId = req.params.reportId.toLowerCase();
-        var courseId = parseInt(req.params.courseId);
-        // gameId is not case sensitive
-        var gameId = req.params.gameId.toUpperCase();
-
-        // TODO: change to promise
-        // check if valid gameId
-        this.isValidGameId(gameId)
-        
-        if(!this.isValidGameId(gameId)) {
-            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
-            return;
-        }
-
-        if(reportId == 'sowo') {
-            _getSOWO.call(this, req, res, reportId, gameId, courseId);
-        }
-        else if(reportId == 'achievements') {
-            _getAchievements.call(this, req, res, reportId, gameId, courseId);
-        }
-        else if(reportId == 'mission-progress') {
-            _getMissionProgress.call(this, req, res, reportId, gameId, courseId);
-        }
-        else if(reportId == 'competency') {
-            _getCompetency.call(this, req, res, reportId, gameId, courseId);
-        }
-        else {
-            this.requestUtil.errorResponse(res, {key:"report.reportId.invalid", error: "invalid reportId"});
-        }
-    } catch(err) {
-        console.trace("Reports: Get Reports Error -", err);
-        this.stats.increment("error", "getReport.Catch");
+    if (!req.params.reportId) {
+        this.requestUtil.errorResponse(res, {key:"report.reportId.missing", error: "missing reportId"});
+        return;
     }
+    if (!req.params.gameId) {
+        this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+        return;
+    }
+    if (!req.params.courseId) {
+        this.requestUtil.errorResponse(res, {key:"report.courseId.missing", error: "missing courseId"});
+        return;
+    }
+
+    var reportId = req.params.reportId.toLowerCase();
+    var courseId = parseInt(req.params.courseId);
+    // gameId is not case sensitive
+    var gameId = req.params.gameId.toUpperCase();
+
+    // check if valid gameId
+    this.isValidGameId(gameId)
+        .then(function(state){
+            if(!state){
+                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+            } else {
+                if(reportId == 'sowo') {
+                    _getSOWO.call(this, req, res, reportId, gameId, courseId);
+                }
+                else if(reportId == 'achievements') {
+                    _getAchievements.call(this, req, res, reportId, gameId, courseId);
+                }
+                else if(reportId == 'mission-progress') {
+                    _getMissionProgress.call(this, req, res, reportId, gameId, courseId);
+                }
+                else if(reportId == 'competency') {
+                    _getCompetency.call(this, req, res, reportId, gameId, courseId);
+                }
+                else {
+                    this.requestUtil.errorResponse(res, {key:"report.reportId.invalid", error: "invalid reportId"});
+                }
+            }
+        }.bind(this) )
+        .catch(function(err){
+            console.trace("Reports: Get Reports Error -", err);
+            this.stats.increment("error", "getReport.Catch");
+        }.bind(this) );
 }
 
 // http://127.0.0.1:8001/api/v2/dash/reports/sowo/game/AA-1/course/93
@@ -404,14 +403,15 @@ function getReportInfo(req, res){
     // gameId is not case sensitive
     var gameId = req.params.gameId.toUpperCase();
 
-    // TODO: change to promise
     // check if valid gameId
-    if(!this.isValidGameId(gameId)) {
-        this.requestUtil.errorResponse(res, {key:"report.gameId.invalid"});
-        return;
-    }
-
-    this.requestUtil.jsonResponse(res, this.getGameReportInfo(gameId, reportId) );
+    this.isValidGameId(gameId)
+        .then(function(state){
+            if(!state){
+                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid"});
+            } else {
+                this.requestUtil.jsonResponse(res, this.getGameReportInfo(gameId, reportId) );
+            }
+        }.bind(this) )
 }
 
 
