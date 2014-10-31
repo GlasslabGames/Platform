@@ -77,21 +77,6 @@ return when.promise(function(resolve, reject) {
 };
 
 // TODO: replace this with DB lookup, return promise
-
-// returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
-DashService.prototype.getListOfGameIds = function() {
-    var gameIds = [];
-    for(var g in this._games) {
-        if( this._games[g].info &&
-            this._games[g].info.basic &&
-            this._games[g].info.basic.gameId) {
-            gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
-        }
-    }
-    return gameIds;
-};
-
-// TODO: replace this with DB lookup, return promise
 //promise transition complete.
 // accepts a single id or array of game ids.  checks if all are valid
 // 2 references in dash.service, 2 in dash _game, 5 in dash game, 2 in dash reports,
@@ -130,7 +115,8 @@ DashService.prototype._isValidGameId = function(gameId){
 
 // TODO: replace this with DB lookup, return promise
 // returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
-// 2 references in dash games
+// promise transition complete
+// 2 references in dash games, 1 in data events
 DashService.prototype.getListOfVisibleGameIds = function() {
     return when.promise(function(resolve, reject){
         var gameIds = [];
@@ -144,11 +130,6 @@ DashService.prototype.getListOfVisibleGameIds = function() {
         }
         return gameIds;
     }.bind(this) );
-};
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGames = function() {
-    return this._games;
 };
 
 // TODO: replace this with DB lookup, return promise

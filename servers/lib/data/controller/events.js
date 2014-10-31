@@ -44,24 +44,28 @@ function sendBatchTelemetryV2(req, outRes, next){
 function eventsCount(req, res, next, serviceManager){
     try {
         // TODO: replace this with DB lookup, return promise
-        var gameIds = serviceManager.get("dash").service.getListOfGameIds();
+        var dash = serviceManager.get("dash").service
 
-        when.reduce(gameIds, function(eventCount, gameId) {
-            return this.cbds.getEventCount(gameId)
-                .then(function(count){
-                    return eventCount + count;
-                }.bind(this))
-        }.bind(this), 0)
-            .then(function(eventCount){
-                if(!eventCount) {
-                    eventCount = 0;
-                }
-                this.requestUtil.jsonResponse(res, {eventCount: eventCount});
-            }.bind(this))
-            //
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
-            }.bind(this))
+        getListOfVisibleGameIds()
+            .then(function(gameIds){
+                when.reduce(gameIds, function(eventCount, gameId) {
+                    return this.cbds.getEventCount(gameId)
+                        .then(function(count){
+                            return eventCount + count;
+                        }.bind(this))
+                }.bind(this), 0)
+                    .then(function(eventCount){
+                        if(!eventCount) {
+                            eventCount = 0;
+                        }
+                        this.requestUtil.jsonResponse(res, {eventCount: eventCount});
+                    }.bind(this))
+                    //
+                    .then(null, function(err){
+                        this.requestUtil.errorResponse(res, err);
+                    }.bind(this))
+
+            }.bind(this) );
 
     } catch(err) {
         console.trace("Collector: Events Count Error -", err);
