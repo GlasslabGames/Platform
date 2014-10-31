@@ -80,7 +80,7 @@ return when.promise(function(resolve, reject) {
 //promise transition complete.
 // accepts a single id or array of game ids.  checks if all are valid
 // 2 references in dash.service, 2 in dash _game, 5 in dash game, 2 in dash reports,
-// 1 in data.services, 1 in data config.js, 1 in data game.js, 2 in lms.service
+// 1 in data.services, 1 in data config, 1 in data _config, 1 in data game.js, 2 in lms.service
 DashService.prototype.isValidGameId = function(gameId) {
     if(!_.isArray(gameId)){
         gameId = [gameId];
@@ -130,17 +130,6 @@ DashService.prototype.getListOfVisibleGameIds = function() {
         }
         return gameIds;
     }.bind(this) );
-};
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGameReports = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('reports') ) {
-        return this._games[gameId].info.reports;
-    } else {
-        return [];
-    }
 };
 
 // TODO: replace this with DB lookup, return promise
