@@ -226,50 +226,51 @@ return when.promise(function(resolve, reject) {
         // validate gameId's
         // TODO: replace using internal route, but needs callback when route is done
         var dash = this.serviceManager.get("dash").service;
+        var gameIds = _.pluck(courseData.games, "id");
 
-        for(var i = 0; i < courseData.games.length; i++){
-            // TODO: replace this with DB lookup, return promise
-            if(!dash.isValidGameId(courseData.games[i].id)) {
-                reject({error: "gameId '"+courseData.games[i].id+"' is not valid", key:"course.create.invalid.gameid", statusCode:404});
-                return; // exit function
-            }
-        }
-
-        if(courseData.archived) {
-            courseData.archivedDate = Util.GetTimeStamp();
-        }
-
-        this.myds.createCourse(userData.id, courseData)
-            .then(function(courseId){
-                courseData.id = courseId;
-
-                if( userData.role == lConst.role.instructor ||
-                    userData.role == lConst.role.manager) {
-                    // create games map
-                    var games = {};
-                    for(var i = 0; i < courseData.games.length; i++) {
-                        games[ courseData.games[i].id ] = courseData.games[i].settings || {};
-                    }
-
-                    return this.telmStore.updateGamesForCourse(courseId, games)
-                        .then(function() {
-                            return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor);
-                        }.bind(this));
+        this.isValidGameId(gameIds)
+            .then(function(state){
+                if(!state){
+                    return reject({error: "some gameId is not valid", key:"course.create.invalid.gameid", statusCode:404});
                 }
-            }.bind(this))
 
-            .then(function(){
-                courseData.code = this._generateCode();
-                return this.myds.addCode(courseData.code, courseData.id, lConst.code.type.course)
+                if(courseData.archived) {
+                    courseData.archivedDate = Util.GetTimeStamp();
+                }
+
+                this.myds.createCourse(userData.id, courseData)
+                    .then(function(courseId){
+                        courseData.id = courseId;
+
+                        if( userData.role == lConst.role.instructor ||
+                            userData.role == lConst.role.manager) {
+                            // create games map
+                            var games = {};
+                            for(var i = 0; i < courseData.games.length; i++) {
+                                games[ courseData.games[i].id ] = courseData.games[i].settings || {};
+                            }
+
+                            return this.telmStore.updateGamesForCourse(courseId, games)
+                                .then(function() {
+                                    return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor);
+                                }.bind(this));
+                        }
+                    }.bind(this))
+
                     .then(function(){
-                        resolve(courseData);
-                    }.bind(this));
-            }.bind(this))
+                        courseData.code = this._generateCode();
+                        return this.myds.addCode(courseData.code, courseData.id, lConst.code.type.course)
+                            .then(function(){
+                                resolve(courseData);
+                            }.bind(this));
+                    }.bind(this))
 
-            // error catchall
-            .then(null, function(err){
-                reject(err);
-            }.bind(this));
+                    // error catchall
+                    .then(null, function(err){
+                        reject(err);
+                    }.bind(this));
+            }.bind(this) );
+
     } else {
         //reject(res, "user does not have permission");
         reject({key:"course.general"});

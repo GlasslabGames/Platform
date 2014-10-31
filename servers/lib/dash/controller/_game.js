@@ -69,13 +69,13 @@ function saveAssessmentResults(req, res){
             var userId = req.params.userId;
 
             if (!req.params.assessmentId) {
-                return when.reject({key: report.assessmentId.missing});
+                return when.reject({key: "report.assessmentId.missing"});
             }
             var assessmentId = req.params.assessmentId;
 
             // userId, assessmentId, data
             if (!req.body) {
-                return when.reject({key: report.body.missing});
+                return when.reject({key: "report.body.missing"});
             }
             var data = req.body;
 

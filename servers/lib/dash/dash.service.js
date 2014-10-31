@@ -94,17 +94,35 @@ DashService.prototype.getListOfGameIds = function() {
 // TODO: replace this with DB lookup, return promise
 //promise transition in progress.  changing existing code
 DashService.prototype.isValidGameId = function(gameId) {
+    if(!_.isArray(gameId)){
+        gameId = [gameId];
+    }
+    var promiseList = [];
+    gameId.forEach(function(id){
+        promiseList.push(this._isValidGameId(id));
+    }.bind(this) );
+
+    return when.all(promiseList)
+        .then(function(){
+            return true;
+        })
+        .catch(function(){
+            return false;
+        });
+};
+
+DashService.prototype._isValidGameId = function(gameId){
     return when.promise(function(resolve, reject) {
-        for (var g in this._games) {
-            if (g == gameId &&
-                this._games[g] &&
-                this._games[g].info &&
-                this._games[g].info.basic) {
-                return true;
+            for (var g in this._games) {
+                if (g == gameId &&
+                    this._games[g] &&
+                    this._games[g].info &&
+                    this._games[g].info.basic) {
+                    return resolve();
+                }
             }
-        }
-        return false;
-    }.bind(this));
+            reject();
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise
