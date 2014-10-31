@@ -35,6 +35,9 @@ module.exports = {
     "user.create.input.missing.password":   "Missing Password",
     "user.create.input.missing.firstName":  "Missing First Name",
     "user.create.input.missing.email":      "Missing Email",
+    "user.create.input.missing.state":      "Missing State",
+    "user.create.input.missing.phoneNumber":"Missing Phone Number",
+    "user.create.input.missing.school":     "Missing School",
     "user.notUnique.email":                 "The email address is already in use by another user. Please provide a different email address.",
     "user.notUnique.screenName":            "The screen name is already in use by another user.",
     // not used any more
@@ -43,7 +46,7 @@ module.exports = {
     "user.login.invalid":                   "The screen name/email address or password you provided does not match our records. Please try again.",
     "user.login.invalidHashCode":           "The hash code you entered is invalid.",
     "user.login.missing":                   "You forgot to enter your screen name/email address or password.",
-    "user.login.notVerified":               "Please verify your email account",
+    "user.login.notVerified":               "Please check your email to complete creating your account",
     "user.login.betaPending":               "Your account is currently pending approval by our admin. We will notify you of your beta status via email shortly. If you have any questions, please let us know at: " + aConst.support.email,
     "user.login.notLoggedIn":               "You are not logged in",
     "user.passwordReset.general":           "We encountered an error. Please try again.",
