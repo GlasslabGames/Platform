@@ -357,8 +357,9 @@ function releases(req, res, next, serviceManager) {
     }
     var gameId = req.params.gameId;
 
+    var dash = serviceManager.get("dash").service;
     // TODO: replace this with DB lookup, return promise
-    serviceManager.get("dash").service.isValidGameId(gameId)
+    dash.isValidGameId(gameId)
         .then(function(state){
             if(!state){
                 this.requestUtil.errorResponse(res, {error: "invalid gameId"});

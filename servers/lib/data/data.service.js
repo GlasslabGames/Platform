@@ -439,8 +439,9 @@ return when.promise(function(resolve, reject) {
             p = Util.PromiseContinue();
         }
 
+        var dash = this._serviceManager.get("dash").service;
         // TODO: replace this with DB lookup, return promise
-        this._serviceManager.get("dash").service.isValidGameId(gameId)
+        dash.isValidGameId(gameId)
             .then(function(state){
                 if(!state){
                     errList.push(new Error("invalid gameId"));

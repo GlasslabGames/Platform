@@ -92,7 +92,7 @@ DashService.prototype.getListOfGameIds = function() {
 };
 
 // TODO: replace this with DB lookup, return promise
-//promise transition in progress.  changing existing code
+//promise transition complete.  check for quality.
 DashService.prototype.isValidGameId = function(gameId) {
     if(!_.isArray(gameId)){
         gameId = [gameId];

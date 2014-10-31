@@ -228,10 +228,10 @@ return when.promise(function(resolve, reject) {
         var dash = this.serviceManager.get("dash").service;
         var gameIds = _.pluck(courseData.games, "id");
 
-        this.isValidGameId(gameIds)
+        dash.isValidGameId(gameIds)
             .then(function(state){
                 if(!state){
-                    return reject({error: "some gameId is not valid", key:"course.create.invalid.gameid", statusCode:404});
+                    return reject({error: "Some game id is not valid", key:"course.create.invalid.gameid", statusCode:404});
                 }
 
                 if(courseData.archived) {
@@ -353,15 +353,16 @@ return when.promise(function(resolve, reject) {
         // TODO: replace using internal route, but needs callback when route is done
         var dash = this.serviceManager.get("dash").service;
 
-        for(var i = 0; i < courseData.games.length; i++){
-            // TODO: replace this with DB lookup, return promise
-            if(!dash.isValidGameId(courseData.games[i].id)) {
-                reject({error: "gameId '"+courseData.games[i]+"' is not valid", key:"course.create.invalid.gameid", statusCode:404});
-                return; // exit function
-            }
-        }
+        // TODO: replace this with DB lookup, return promise
+        var gameIds = _.pluck(courseData.games, "id");
+        dash.isValidGameId(gameIds)
+            .then(function(state){
+                if(!state){
+                    return reject({error: "Some game id is not valid", key:"course.create.invalid.gameid", statusCode:404});
+                }
 
-        this.telmStore.getGamesForCourse(courseData.id)
+                return this.telmStore.getGamesForCourse(courseData.id);
+            }.bind(this) )
             .then(function (currentGames) {
 
                 // find if game removed
