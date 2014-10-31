@@ -35,36 +35,39 @@ function getGamesBasicInfo(req, res){
             var outGames = [];
 
             // TODO: replace with promise
-            var games = this.getListOfVisibleGameIds();
-            for(var i = 0; i < games.length; i++) {
-                var gameId = games[i];
+            this.getListOfVisibleGameIds()
+                .then(function(games){
+                    for(var i = 0; i < games.length; i++) {
+                        var gameId = games[i];
 
-                var info = _.cloneDeep(this.getGameBasicInfo(gameId));
+                        var info = _.cloneDeep(this.getGameBasicInfo(gameId));
 
-                // TODO: move license check to it's own function
-                info.license.valid = false;
-                if(info.license.type == "free") {
-                    info.license.valid = true;
-                }
-                else if(info.license.type == "loginType") {
-                    info.license.loginType = info.license.loginType.split(',');
-                    if( _.contains(info.license.loginType, loginType) ) {
-                        info.license.valid = true;
+                        // TODO: move license check to it's own function
+                        info.license.valid = false;
+                        if(info.license.type == "free") {
+                            info.license.valid = true;
+                        }
+                        else if(info.license.type == "loginType") {
+                            info.license.loginType = info.license.loginType.split(',');
+                            if( _.contains(info.license.loginType, loginType) ) {
+                                info.license.valid = true;
+                            }
+                        } else {
+                            // check license
+                            info.license.valid = licenseGameIds.hasOwnProperty(gameId);
+                        }
+
+                        // no maintenance message and if invalid lic, replace with invalid lic message
+                        if(!info.maintenance && !info.license.valid) {
+                            info.maintenance = { message: info.license.message.invalid };
+                        }
+
+                        outGames.push( info );
                     }
-                } else {
-                    // check license
-                    info.license.valid = licenseGameIds.hasOwnProperty(gameId);
-                }
 
-                // no maintenance message and if invalid lic, replace with invalid lic message
-                if(!info.maintenance && !info.license.valid) {
-                    info.maintenance = { message: info.license.message.invalid };
-                }
+                    this.requestUtil.jsonResponse(res, outGames);
 
-                outGames.push( info );
-            }
-
-            this.requestUtil.jsonResponse(res, outGames);
+                }.bind(this) );
         }.bind(this))
 
         // catch all errors
@@ -100,36 +103,39 @@ function getGamesDetails(req, res){
             var outGames = [];
 
             // TODO: replace with promise
-            var games = this.getListOfVisibleGameIds();
-            for(var i = 0; i < games.length; i++) {
-                var gameId = games[i];
+            return this.getListOfVisibleGameIds()
+                .then(function(games){
+                    for(var i = 0; i < games.length; i++) {
+                        var gameId = games[i];
 
-                var info = _.cloneDeep(this.getGameDetails(gameId));
+                        var info = _.cloneDeep(this.getGameDetails(gameId));
 
-                // TODO: move license check to it's own function
-                info.license.valid = false;
-                if(info.license.type == "free") {
-                    info.license.valid = true;
-                }
-                else if(info.license.type == "loginType") {
-                    info.license.loginType = info.license.loginType.split(',');
-                    if( _.contains(info.license.loginType, loginType) ) {
-                        info.license.valid = true;
+                        // TODO: move license check to it's own function
+                        info.license.valid = false;
+                        if(info.license.type == "free") {
+                            info.license.valid = true;
+                        }
+                        else if(info.license.type == "loginType") {
+                            info.license.loginType = info.license.loginType.split(',');
+                            if( _.contains(info.license.loginType, loginType) ) {
+                                info.license.valid = true;
+                            }
+                        } else {
+                            // check license
+                            info.license.valid = licenseGameIds.hasOwnProperty(gameId);
+                        }
+
+                        // no maintenance message and if invalid lic, replace with invalid lic message
+                        if(!info.maintenance && !info.license.valid) {
+                            info.maintenance = { message: info.license.message.invalid };
+                        }
+
+                        outGames.push( info );
                     }
-                } else {
-                    // check license
-                    info.license.valid = licenseGameIds.hasOwnProperty(gameId);
-                }
 
-                // no maintenance message and if invalid lic, replace with invalid lic message
-                if(!info.maintenance && !info.license.valid) {
-                    info.maintenance = { message: info.license.message.invalid };
-                }
+                    this.requestUtil.jsonResponse(res, outGames);
 
-                outGames.push( info );
-            }
-
-            this.requestUtil.jsonResponse(res, outGames);
+                }.bind(this) );
         }.bind(this))
 
         // catch all errors
