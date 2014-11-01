@@ -6,7 +6,7 @@ mkdir -p $LOG_DIR
 start() {
     # install dependencies from package.json
     npm install
-    grunt
+    grunt #create version file
 
     #./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
     ./service_start.sh app-external "app-external.js"

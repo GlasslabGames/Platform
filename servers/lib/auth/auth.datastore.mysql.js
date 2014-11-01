@@ -57,6 +57,8 @@ return when.promise(function(resolve, reject) {
             var passwordLength255 = false;
             var hasVerifyCode = false;
             var hasSSOData = false;
+            var hasState = false;
+            var hasSchool = false;
 
             var promiseList = [];
             var Q = "";
@@ -73,6 +75,16 @@ return when.promise(function(resolve, reject) {
 
                 if(results[i]['Field'] == 'VERIFY_CODE') {
                     hasVerifyCode = true;
+                }
+
+                if (results[i]['Field'] == 'STATE') {
+                    hasState = true;
+                }
+                if (results[i]['Field'] == 'PHONE_NUMBER') {
+                    hasPhoneNumber = true;
+                }
+                if (results[i]['Field'] == 'SCHOOL') {
+                    hasSchool = true;
                 }
             }
 
@@ -92,6 +104,20 @@ return when.promise(function(resolve, reject) {
                            ADD COLUMN `ssoUsername` VARCHAR(255) NULL AFTER `LOGIN_TYPE`, \
                            ADD COLUMN `ssoData` TEXT NULL AFTER `ssoUsername` ";
                 promiseList.push( this.ds.query(Q) );
+            }
+
+            if (!hasState) {
+                updating = true;
+                Q = "ALTER TABLE `GL_USER` \
+                           ADD COLUMN `STATE` VARCHAR(225) NULL DEFAULT NULL AFTER      `VERIFY_CODE_STATUS`";
+                promiseList.push(this.ds.query(Q));
+            }
+
+            if (!hasSchool) {
+                updating = true;
+                Q = "ALTER TABLE `GL_USER` \
+                           ADD COLUMN `SCHOOL` VARCHAR(255) NULL DEFAULT NULL AFTER `STATE`";
+                promiseList.push(this.ds.query(Q));
             }
 
             if(promiseList.length) {
@@ -291,7 +317,9 @@ return when.promise(function(resolve, reject) {
         ssoData:        this.ds.escape(userData.ssoData || ""),
         verify_code:    "NULL",
         verify_code_expiration: "NULL",
-        verify_code_status: "NULL"
+        verify_code_status: "NULL",
+        state:          this.ds.escape(userData.state),
+        school:         this.ds.escape(userData.school),
     };
 
     var keys   = _.keys(data);
