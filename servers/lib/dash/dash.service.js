@@ -175,14 +175,18 @@ DashService.prototype.getGameMissions = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
+//promise transition complete
+//2 references in dash games
 DashService.prototype.getGameBasicInfo = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('basic') ) {
-        return this._games[gameId].info.basic;
-    } else {
-        return null;
-    }
+    return when.promise(resolve, reject, function(){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('basic') ) {
+            return this._games[gameId].info.basic;
+        } else {
+            return null;
+        }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise

@@ -37,10 +37,17 @@ function getGamesBasicInfo(req, res){
             // TODO: replace with promise
             this.getListOfVisibleGameIds()
                 .then(function(games){
+                    var promiseList = [];
+                    game.forEach(function (game) {
+                        promiseList.push(this.getGameBasicInfo(gameId));
+                    }.bind(this));
+                    return when.all(promiseList);
+                }.bind(this) )
+                .then(function(promiseList){
                     for(var i = 0; i < games.length; i++) {
                         var gameId = games[i];
 
-                        var info = _.cloneDeep(this.getGameBasicInfo(gameId));
+                        var info = _.cloneDeep(promiseList[i]);
 
                         // TODO: move license check to it's own function
                         info.license.valid = false;
@@ -234,6 +241,9 @@ function getMyGames(req, res) {
                     gamesList.push( this.getGameBasicInfo(gameId) );
                 }
 
+                return when.all(gamesList);
+            }.bind(this) )
+            .then(function(gamesList){
                 this.requestUtil.jsonResponse(res, gamesList);
             }.bind(this))
 
