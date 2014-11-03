@@ -104,39 +104,45 @@ function getGamesDetails(req, res){
 
             // TODO: replace with promise
             return this.getListOfVisibleGameIds()
-                .then(function(games){
-                    for(var i = 0; i < games.length; i++) {
-                        var gameId = games[i];
 
-                        var info = _.cloneDeep(this.getGameDetails(gameId));
-
-                        // TODO: move license check to it's own function
-                        info.license.valid = false;
-                        if(info.license.type == "free") {
-                            info.license.valid = true;
-                        }
-                        else if(info.license.type == "loginType") {
-                            info.license.loginType = info.license.loginType.split(',');
-                            if( _.contains(info.license.loginType, loginType) ) {
-                                info.license.valid = true;
-                            }
-                        } else {
-                            // check license
-                            info.license.valid = licenseGameIds.hasOwnProperty(gameId);
-                        }
-
-                        // no maintenance message and if invalid lic, replace with invalid lic message
-                        if(!info.maintenance && !info.license.valid) {
-                            info.maintenance = { message: info.license.message.invalid };
-                        }
-
-                        outGames.push( info );
-                    }
-
-                    this.requestUtil.jsonResponse(res, outGames);
-
-                }.bind(this) );
         }.bind(this))
+        .then(function(games){
+            var promiseList = [];
+            games.forEach(function(gameId){
+                promiseList.push(this.getGameDetails(gameId));
+            }.bind(this) );
+            return when.all(promiseList)
+        }.bind(this) )
+        .then(function(promiseList){
+            // promiseList, once resolved, contains details from various games
+            promiseList.forEach(function(gameDetails){
+                var info = _.cloneDeep(gameDetails);
+
+                // TODO: move license check to it's own function
+                info.license.valid = false;
+                if(info.license.type == "free") {
+                    info.license.valid = true;
+                }
+                else if(info.license.type == "loginType") {
+                    info.license.loginType = info.license.loginType.split(',');
+                    if( _.contains(info.license.loginType, loginType) ) {
+                        info.license.valid = true;
+                    }
+                } else {
+                    // check license
+                    info.license.valid = licenseGameIds.hasOwnProperty(gameId);
+                }
+
+                // no maintenance message and if invalid lic, replace with invalid lic message
+                if(!info.maintenance && !info.license.valid) {
+                    info.maintenance = { message: info.license.message.invalid };
+                }
+
+                outGames.push( info );
+
+            }.bind(this) );
+            this.requestUtil.jsonResponse(res, outGames);
+        }.bind(this) )
 
         // catch all errors
         .then(null, function(err) {

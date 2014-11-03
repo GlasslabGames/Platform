@@ -76,13 +76,17 @@ function getGameDetails(req, res){
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+                return reject({key:"report.gameId.invalid"});
             } else {
-                this.requestUtil.jsonResponse(res, this.getGameDetails(gameId));
+                return this.getGameDetails(gameId);
             }
+        }.bind(this) )
+        .then(function(gameDetails){
+            this.requestUtil.jsonResponse(res, gameDetails);
         }.bind(this) )
         .catch(function(err){
             console.trace("Reports: Get Game Info Error -", err);
+            this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "GetGameInfo.Catch");
         }.bind(this) );
 }

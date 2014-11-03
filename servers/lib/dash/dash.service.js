@@ -114,7 +114,7 @@ DashService.prototype._isValidGameId = function(gameId){
 };
 
 // TODO: replace this with DB lookup, return promise
-// returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
+// returns an uppercase list of all game Ids, game Ids are ALWAYS uppercase
 // promise transition complete
 // 2 references in dash games, 1 in data events
 DashService.prototype.getListOfVisibleGameIds = function() {
@@ -143,14 +143,18 @@ DashService.prototype.getGameAchievements = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
+//promise transition complete
+// 1 reference in dash game, 1 reference in dash games
 DashService.prototype.getGameDetails = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('details') ) {
-        return this._games[gameId].info.details;
-    } else {
-        return {};
-    }
+    return when.promise(function(resolve, reject){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('details') ) {
+            return this._games[gameId].info.details;
+        } else {
+            return {};
+        }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise
