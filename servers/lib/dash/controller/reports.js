@@ -111,17 +111,19 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
 
                  //console.log("getAssessmentResults gameId:", gameId, ", userId:", userId, ", assessmentId:", assessmentId);
                  var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
-                    .then(function(assessmentData){
+                    .then(function(assessmentData) {
                          // shortcut invalid assessmentData
-                         if(!assessmentData || !assessmentData.results) return;
+                         if (!assessmentData || !assessmentData.results) return;
 
                          // create copy of data for output
                          var outAssessmentData = _.cloneDeep(assessmentData);
 
                          // TODO: replace this with promise
                          // find assessment by ID
-                         var assessment = this.getGameAssessmentInfo(gameId);
+                         return this.getGameAssessmentInfo(gameId);
 
+                     }.bind(this))
+                     .then(function(assessment){
                          for(var i = 0; i < assessment.length; i++) {
                              if(assessment[i].id == assessmentId) {
                                  // merge in sowo info from game assessment info
@@ -165,7 +167,8 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                          }
 
                          outList.push(outAssessmentData);
-                    }.bind(this));
+
+                     }.bind(this) )
 
                 promistList.push(p);
             }.bind(this));
@@ -557,8 +560,9 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
 
                         // TODO: replace this with promise
                         // find assessment by ID
-                        var assessment = this.getGameAssessmentInfo(gameId);
-
+                        return this.getGameAssessmentInfo(gameId);
+                    }.bind(this))
+                    .then(function(assessment){
                         for(var i = 0; i < assessment.length; i++) {
                             if(assessment[i].id == assessmentId) {
 
@@ -572,9 +576,8 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                                 break;
                             }
                         }
-
                         return outAssessmentData;
-                    }.bind(this));
+                    }.bind(this) );
                 promistList.push(p);
             }.bind(this));
 

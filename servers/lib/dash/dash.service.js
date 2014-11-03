@@ -186,8 +186,12 @@ DashService.prototype.getGameBasicInfo = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash _game, 2 references in dash reports
 DashService.prototype.getGameAssessmentInfo = function(gameId) {
-    return this._games[gameId].info.assessment;
+    return when.promise(resolve, reject, function(){
+        return this._games[gameId].info.assessment;
+    }.bind(this) );
 };
 
 

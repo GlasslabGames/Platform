@@ -30,13 +30,16 @@ function getAssessmentDefinitions(req, res){
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
-            } else {
-                this.requestUtil.jsonResponse(res, this.getGameAssessmentInfo(gameId));
+                return when.reject({ key: "report.gameId.invalid" } );
             }
+            return this.getGameAssessmentInfo(gameId);
+        }.bind(this) )
+        .then(function(assessmentInfo){
+            this.requestUtil.jsonResponse(res, assessmentInfo);
         }.bind(this) )
         .catch(function(err){
             console.trace("Reports: Get Assessment Error -", err);
+            this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "GetAchievements.Catch");
         }.bind(this) );
 }
