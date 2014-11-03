@@ -410,11 +410,16 @@ function getReportInfo(req, res){
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid"});
-            } else {
-                this.requestUtil.jsonResponse(res, this.getGameReportInfo(gameId, reportId) );
+                when.reject( {key:"report.gameId.invalid"} );
             }
+            return this.getGameReportInfo(gameId, reportId);
         }.bind(this) )
+        .then(function(reportInfo){
+                this.requestUtil.jsonResponse(res, reportInfo);
+        }.bind(this) )
+        .catch(function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this) );
 }
 
 

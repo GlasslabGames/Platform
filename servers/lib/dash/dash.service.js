@@ -77,7 +77,7 @@ return when.promise(function(resolve, reject) {
 };
 
 // TODO: replace this with DB lookup, return promise
-//promise transition complete.
+// promise transition complete.
 // accepts a single id or array of game ids.  checks if all are valid
 // 2 references in dash.service, 2 in dash _game, 5 in dash game, 2 in dash reports,
 // 1 in data.services, 1 in data config, 1 in data _config, 1 in data game.js, 2 in lms.service
@@ -144,7 +144,7 @@ DashService.prototype.getGameAchievements = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
-//promise transition complete
+// promise transition complete
 // 1 reference in dash game, 1 reference in dash games
 DashService.prototype.getGameDetails = function(gameId) {
     return when.promise(function(resolve, reject){
@@ -159,7 +159,7 @@ DashService.prototype.getGameDetails = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
-//promise transition complete
+// promise transition complete
 // 1 reference in dash game, 1 in dash reports
 DashService.prototype.getGameMissions = function(gameId) {
     return when.promise(resolve, reject, function(){
@@ -175,8 +175,8 @@ DashService.prototype.getGameMissions = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
-//promise transition complete
-//2 references in dash games
+// promise transition complete
+// 2 references in dash games
 DashService.prototype.getGameBasicInfo = function(gameId) {
     return when.promise(resolve, reject, function(){
         if( this._games.hasOwnProperty(gameId) &&
@@ -200,14 +200,18 @@ DashService.prototype.getGameAssessmentInfo = function(gameId) {
 
 
 // TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash reports
 DashService.prototype.getGameReportInfo = function(gameId, reportId) {
-    var list = this._games[gameId].info.reports.list;
-    for(var i = 0; i < list.length; i++) {
-        if( _.isObject(list[i]) &&
-            list[i].id == reportId) {
-            return list[i];
+    return when.promise(resolve, reject, function(){
+        var list = this._games[gameId].info.reports.list;
+        for(var i = 0; i < list.length; i++) {
+            if( _.isObject(list[i]) &&
+                list[i].id == reportId) {
+                return list[i];
+            }
         }
-    }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise
