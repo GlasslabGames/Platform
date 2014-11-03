@@ -146,64 +146,70 @@ function getGameMissions(req, res){
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+                when.reject({key: "report.gameId.invalid"});
             } else {
                 var userData = req.session.passport.user;
+                return this.getGameMissions(gameId);
+            }
+        }.bind(this) )
+        .then(function(missions){
+            var gameMissions = _.cloneDeep(missions);
+            if( gameMissions ) {
+                var missionGroups = _.cloneDeep(gameMissions.groups);
+                var linkSchema    = gameMissions.linkSchema;
+                var missionProgressLock = false;
+                for(var i = 0; i < missionGroups.length; i++) {
+                    var missions = missionGroups[i].missions;
+                    var lastCompletedDate = null;
+                    for (var j = 0; j < missions.length; j++) {
+                        // update links
+                        for (var k = 0; k < missions[j].links.length; k++) {
 
-                var gameMissions = _.cloneDeep(this.getGameMissions(gameId));
-                if( gameMissions ) {
-                    var missionGroups = _.cloneDeep(gameMissions.groups);
-                    var linkSchema    = gameMissions.linkSchema;
-                    var missionProgressLock = false;
-                    for(var i = 0; i < missionGroups.length; i++) {
-                        var missions = missionGroups[i].missions;
-                        var lastCompletedDate = null;
-                        for (var j = 0; j < missions.length; j++) {
-                            // update links
-                            for (var k = 0; k < missions[j].links.length; k++) {
+                            // if has $linkSchemaId replace link with $linkSchemaId
+                            if(missions[j].links[k].hasOwnProperty("$linkSchemaId")) {
+                                missions[j].links[k].link = linkSchema[ missions[j].links[k]["$linkSchemaId"] ];
 
-                                // if has $linkSchemaId replace link with $linkSchemaId
-                                if(missions[j].links[k].hasOwnProperty("$linkSchemaId")) {
-                                    missions[j].links[k].link = linkSchema[ missions[j].links[k]["$linkSchemaId"] ];
+                                // replace keys
+                                var data = {
+                                    gameId:           gameId,
+                                    webSessionId:     req.cookies["connect.sid"],
+                                    missionId:        missions[j].id,
+                                    sdkUrl:           this.requestUtil.getFullHostUrl(req),
+                                    configSessionUrl: req.headers.host,
+                                    configDataUrl:    req.headers.host
+                                };
 
-                                    // replace keys
-                                    var data = {
-                                        gameId:           gameId,
-                                        webSessionId:     req.cookies["connect.sid"],
-                                        missionId:        missions[j].id,
-                                        sdkUrl:           this.requestUtil.getFullHostUrl(req),
-                                        configSessionUrl: req.headers.host,
-                                        configDataUrl:    req.headers.host
-                                    };
-
-                                    // encodeURIComponent all data inputs
-                                    for(var d in data) {
-                                        data[d] = encodeURIComponent(data[d]);
-                                    }
-
-                                    var template = handlebars.compile( missions[j].links[k].link );
-                                    missions[j].links[k].link = template(data);
-
-                                    // remove $linkSchemaId
-                                    delete missions[j].links[k]["$linkSchemaId"];
+                                // encodeURIComponent all data inputs
+                                for(var d in data) {
+                                    data[d] = encodeURIComponent(data[d]);
                                 }
+
+                                var template = handlebars.compile( missions[j].links[k].link );
+                                missions[j].links[k].link = template(data);
+
+                                // remove $linkSchemaId
+                                delete missions[j].links[k]["$linkSchemaId"];
                             }
                         }
                     }
-
-                    this.requestUtil.jsonResponse(res, {
-                        title: gameMissions.title,
-                        groups: missionGroups
-                    });
-                } else {
-                    this.requestUtil.jsonResponse(res, {});
                 }
+
+                this.requestUtil.jsonResponse(res, {
+                    title: gameMissions.title,
+                    groups: missionGroups
+                });
+            } else {
+                this.requestUtil.jsonResponse(res, {});
             }
         }.bind(this) )
         .catch(function(err) {
             console.trace("Reports: Get Game Missions Error -", err);
             this.stats.increment("error", "GetGameInfo.Catch");
-            this.requestUtil.errorResponse(res, "Server Error");
+            if(err.key == "report.gameId.invalid"){
+                this.requestUtil.errorResponse(res, err);
+            } else {
+                this.requestUtil.errorResponse(res, "Server Error");
+            }
         }.bind(this) );
 }
 

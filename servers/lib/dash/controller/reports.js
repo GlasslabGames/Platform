@@ -471,7 +471,11 @@ return when.promise(function(resolve, reject) {
 
             userData.missions = [];
             // flatten mission list
-            var gameMissions = _.cloneDeep(this.getGameMissions(gameId));
+            return this.getGameMissions(gameId);
+        }.bind(this) )
+        .then(function(missions){
+
+            var gameMissions = _.cloneDeep(missions);
             for(var i = 0; i < gameMissions.groups.length; i++){
                 for(var j = 0; j < gameMissions.groups[i].missions.length; j++){
 
@@ -504,7 +508,7 @@ return when.promise(function(resolve, reject) {
             }
 
             return this.telmStore.getGamePlayInfo(userId, gameId);
-        }.bind(this))
+        }.bind(this) )
         .then(function(playInfo){
             // add ttp info
             userData.totalTimePlayed = playInfo.totalTimePlayed;

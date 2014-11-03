@@ -133,6 +133,7 @@ DashService.prototype.getListOfVisibleGameIds = function() {
 };
 
 // TODO: replace this with DB lookup, return promise
+// ask Joe/Ben about, perhaps. come back to later.
 DashService.prototype.getGameAchievements = function(gameId) {
     if( this._games.hasOwnProperty(gameId) &&
         this._games[gameId].hasOwnProperty('achievements') ) {
@@ -158,14 +159,19 @@ DashService.prototype.getGameDetails = function(gameId) {
 };
 
 // TODO: replace this with DB lookup, return promise
+//promise transition complete
+// 1 reference in dash game, 1 in dash reports
 DashService.prototype.getGameMissions = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('missions') ) {
-        return this._games[gameId].info.missions;
-    } else {
-        return null;
-    }
+    return when.promise(resolve, reject, function(){
+
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('missions') ) {
+            return this._games[gameId].info.missions;
+        } else {
+            return null;
+        }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise
