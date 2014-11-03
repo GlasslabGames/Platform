@@ -133,14 +133,17 @@ DashService.prototype.getListOfVisibleGameIds = function() {
 };
 
 // TODO: replace this with DB lookup, return promise
-// ask Joe/Ben about, perhaps. come back to later.
+// promise transition complete
+// 1 reference in dash.service
 DashService.prototype.getGameAchievements = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('achievements') ) {
-        return this._games[gameId].achievements;
-    } else {
-        return {};
-    }
+    return when.promise(resolve, reject, function(){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('achievements') ) {
+            return this._games[gameId].achievements;
+        } else {
+            return {};
+        }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise
@@ -215,14 +218,18 @@ DashService.prototype.getGameReportInfo = function(gameId, reportId) {
 };
 
 // TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in data game // check about error wording
 DashService.prototype.getGameReleases = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('releases') ) {
-        return this._games[gameId].info.releases;
-    } else {
-        return {};
-    }
+    return when.promise(resolve, reject, function(){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('releases') ) {
+            return this._games[gameId].info.releases;
+        } else {
+            return {};
+        }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup
@@ -291,60 +298,74 @@ DashService.prototype._loadGameFiles = function() {
         try{
             var dir = path.join(__dirname, "games");
             var files = fs.readdirSync(dir);
-
+            var gameId;
+            var gameAchievements = [];
             files.forEach(function(gameName){
-                // skip dot files
-                if(gameName.charAt(0) != '.') {
-                    var gameId = gameName.toUpperCase();
-
-                    // gameName is not case sensitive
-                    this._games[ gameId ] = {};
-
-                    var gameFiles = fs.readdirSync( path.join(dir, gameName) );
-
-                    gameFiles.forEach(function(file){
-                        if(file.charAt(0) != '.') {
-                            var name = path.basename(file, path.extname(file));
-                            var filePath = path.join(dir, gameName, file);
-                            try {
-                                this._games[gameId][name] = require(filePath);
-                            } catch(err) {
-                                console.error("loadGameFiles filePath:", filePath, ", Error:", err);
-                            }
-                        }
-                    }.bind(this));
-
-                    // remove all enabled=false objects
-                    this._filterDisabledGameInfo(this._games[gameId]);
-
-                    // add developer to game details and reports
-                    if( this._games[gameId].info &&
-                        this._games[gameId].info.developer &&
-                        this._games[gameId].info.basic &&
-                        this._games[gameId].info.details &&
-                        this._games[gameId].info.reports ) {
-                        this._games[gameId].info.basic.developer = this._games[gameId].info.developer;
-                    }
-
-                    // add game info(basic) to game details and reports
-                    if( this._games[gameId].info &&
-                        this._games[gameId].info.basic &&
-                        this._games[gameId].info.details &&
-                        this._games[gameId].info.reports ) {
-                        this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
-                        this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
-                    }
-
-                    var list = this._games[gameId].info.reports.list;
-                    // add achievements to 'achievements' reports
-                    for(var i = 0; i < list.length; i++) {
-                        if( _.isObject(list[i]) &&
-                            list[i].id == 'achievements') {
-                            this._games[gameId].info.reports.list[i].achievements = this.getGameAchievements(gameId);
-                        }
-                    }
+                if(gameName.charAt(0) != '.'){
+                    gameId = gameName.toUpperCase();
+                    gameAchievements.push(this.getGameAchievements(gameId));
                 }
-            }.bind(this));
+            }.bind(this) );
+            // index refers to index in gameAchievements promise array
+            var index = 0;
+            when.all(gameAchievements)
+                .then(function(gameAchievements){
+                    files.forEach(function(gameName){
+                        // skip dot files
+                        if(gameName.charAt(0) != '.') {
+                            gameId = gameName.toUpperCase();
+
+                            // gameName is not case sensitive
+                            this._games[ gameId ] = {};
+
+                            var gameFiles = fs.readdirSync( path.join(dir, gameName) );
+
+                            gameFiles.forEach(function(file){
+                                if(file.charAt(0) != '.') {
+                                    var name = path.basename(file, path.extname(file));
+                                    var filePath = path.join(dir, gameName, file);
+                                    try {
+                                        this._games[gameId][name] = require(filePath);
+                                    } catch(err) {
+                                        console.error("loadGameFiles filePath:", filePath, ", Error:", err);
+                                    }
+                                }
+                            }.bind(this));
+
+                            // remove all enabled=false objects
+                            this._filterDisabledGameInfo(this._games[gameId]);
+
+                            // add developer to game details and reports
+                            if( this._games[gameId].info &&
+                                this._games[gameId].info.developer &&
+                                this._games[gameId].info.basic &&
+                                this._games[gameId].info.details &&
+                                this._games[gameId].info.reports ) {
+                                this._games[gameId].info.basic.developer = this._games[gameId].info.developer;
+                            }
+
+                            // add game info(basic) to game details and reports
+                            if( this._games[gameId].info &&
+                                this._games[gameId].info.basic &&
+                                this._games[gameId].info.details &&
+                                this._games[gameId].info.reports ) {
+                                this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
+                                this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
+                            }
+
+                            var list = this._games[gameId].info.reports.list;
+                            // add achievements to 'achievements' reports
+
+                            for(var i = 0; i < list.length; i++) {
+                                if( _.isObject(list[i]) &&
+                                    list[i].id == 'achievements') {
+                                    this._games[gameId].info.reports.list[i].achievements = gameAchievements[index];
+                                }
+                            }
+                            index++;
+                        }
+                    }.bind(this) );
+                }.bind(this) );
         } catch(err) {
             console.error("DashService: Load Game Files Error -", err);
         }

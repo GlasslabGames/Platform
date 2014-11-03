@@ -360,25 +360,29 @@ function releases(req, res, next, serviceManager) {
     var dash = serviceManager.get("dash").service;
     // TODO: replace this with DB lookup, return promise
     dash.isValidGameId(gameId)
-        .then(function(state){
-            if(!state){
-                this.requestUtil.errorResponse(res, {error: "invalid gameId"});
-            } else{
-                var outType = '.ini';
-                if( req.params && req.params.hasOwnProperty("type") ) {
-                    outType = req.params.type;
-                }
-
-                var releaseInfo = serviceManager.get("dash").service.getGameReleases(gameId);
-
-                if(outType === '.ini') {
-                    var out = ";aiu;\r\n\r\n";
-
-                    out += ini.stringify(releaseInfo);
-                    this.requestUtil.textResponse(res, out, 200);
-                } else {
-                    this.requestUtil.jsonResponse(res, releaseInfo );
-                }
+        .then(function(state) {
+            if (!state) {
+                return when.reject({error: "invalid gameId"});
             }
-        }).bind(this);
+            var outType = '.ini';
+            if (req.params && req.params.hasOwnProperty("type")) {
+                outType = req.params.type;
+            }
+            var dash = serviceManager.get("dash").service;
+            return dash.getGameReleases(gameId);
+
+        }.bind(this) )
+        .then(function(releaseInfo){
+            if(outType === '.ini') {
+                var out = ";aiu;\r\n\r\n";
+
+                out += ini.stringify(releaseInfo);
+                this.requestUtil.textResponse(res, out, 200);
+            } else {
+                this.requestUtil.jsonResponse(res, releaseInfo );
+            }
+        }).bind(this)
+        .catch(function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this) );
 }
