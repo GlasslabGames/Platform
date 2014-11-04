@@ -55,7 +55,7 @@ function getReport(req, res, next) {
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid"});
             } else {
                 if(reportId == 'sowo') {
                     _getSOWO.call(this, req, res, reportId, gameId, courseId);
@@ -70,7 +70,7 @@ function getReport(req, res, next) {
                     _getCompetency.call(this, req, res, reportId, gameId, courseId);
                 }
                 else {
-                    this.requestUtil.errorResponse(res, {key:"report.reportId.invalid", error: "invalid reportId"});
+                    this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
                 }
             }
         }.bind(this) )
@@ -109,77 +109,77 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
             users.forEach(function(user){
                 var userId = user.id;
 
-                 //console.log("getAssessmentResults gameId:", gameId, ", userId:", userId, ", assessmentId:", assessmentId);
-                 var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                //console.log("getAssessmentResults gameId:", gameId, ", userId:", userId, ", assessmentId:", assessmentId);
+                var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData) {
-                         // shortcut invalid assessmentData
-                         if (!assessmentData || !assessmentData.results) return;
+                        // shortcut invalid assessmentData
+                        if (!assessmentData || !assessmentData.results) return;
 
-                         // create copy of data for output
-                         var outAssessmentData = _.cloneDeep(assessmentData);
+                        // create copy of data for output
+                        var outAssessmentData = _.cloneDeep(assessmentData);
 
-                         // TODO: replace this with promise
-                         // find assessment by ID
-                         return this.getGameAssessmentInfo(gameId);
+                        // TODO: replace this with promise
+                        // find assessment by ID
+                        return this.getGameAssessmentInfo(gameId);
 
-                     }.bind(this))
-                     .then(function(assessment){
-                         for(var i = 0; i < assessment.length; i++) {
-                             if(assessment[i].id == assessmentId) {
-                                 // merge in sowo info from game assessment info
+                    }.bind(this) )
+                    .then(function(assessment){
+                        for(var i = 0; i < assessment.length; i++) {
+                            if(assessment[i].id == assessmentId) {
+                                // merge in sowo info from game assessment info
 
-                                 // output is array not object
-                                 outAssessmentData.results.shoutout = [];
-                                 // shoutout rules
-                                 for(var j in assessmentData.results.shoutout) {
-                                     var so = assessmentData.results.shoutout[j];
-                                     // don't need to expose the gameSessionId
-                                     delete so.gameSessionId;
-                                     so.id = j;
+                                // output is array not object
+                                outAssessmentData.results.shoutout = [];
+                                // shoutout rules
+                                for(var j in assessmentData.results.shoutout) {
+                                    var so = assessmentData.results.shoutout[j];
+                                    // don't need to expose the gameSessionId
+                                    delete so.gameSessionId;
+                                    so.id = j;
 
-                                     outAssessmentData.results.shoutout.push( _.merge(
-                                         so,
-                                         assessment[i].rules[ j ] )
-                                     );
+                                    outAssessmentData.results.shoutout.push( _.merge(
+                                        so,
+                                        assessment[i].rules[ j ] )
+                                    );
                                     //console.log("shoutout:", assessmentData.results.shoutout[j]);
-                                 }
+                                }
 
-                                 // output is array not object
-                                 outAssessmentData.results.watchout = [];
-                                 // watchout rules
-                                 for(var j in assessmentData.results.watchout) {
-                                     var wo = assessmentData.results.watchout[j];
-                                     // don't need to expose the gameSessionId
-                                     delete wo.gameSessionId;
-                                     wo.id = j;
+                                // output is array not object
+                                outAssessmentData.results.watchout = [];
+                                // watchout rules
+                                for(var j in assessmentData.results.watchout) {
+                                    var wo = assessmentData.results.watchout[j];
+                                    // don't need to expose the gameSessionId
+                                    delete wo.gameSessionId;
+                                    wo.id = j;
 
-                                     outAssessmentData.results.watchout.push( _.merge(
-                                         wo,
-                                         assessment[i].rules[ j ] )
-                                     );
+                                    outAssessmentData.results.watchout.push( _.merge(
+                                        wo,
+                                        assessment[i].rules[ j ] )
+                                    );
 
-                                     //console.log("shoutout:", assessmentData.results.watchout[j]);
-                                 }
+                                    //console.log("shoutout:", assessmentData.results.watchout[j]);
+                                }
 
-                                 // done!
-                                 break;
-                             }
-                         }
+                                // done!
+                                break;
+                            }
+                        }
 
-                         outList.push(outAssessmentData);
+                        outList.push(outAssessmentData);
 
-                     }.bind(this) )
+                    }.bind(this) );
 
                 promistList.push(p);
-            }.bind(this));
+            }.bind(this) );
 
 
             when.all(promistList)
                 .then(function(){
                     // all done
                     this.requestUtil.jsonResponse(res, outList);
-                }.bind(this));
-        }.bind(this));
+                }.bind(this) );
+        }.bind(this) );
 }
 
 
@@ -410,7 +410,7 @@ function getReportInfo(req, res){
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                when.reject( {key:"report.gameId.invalid"} );
+                return when.reject( {key:"report.gameId.invalid"} );
             }
             return this.getGameReportInfo(gameId, reportId);
         }.bind(this) )
@@ -521,10 +521,10 @@ return when.promise(function(resolve, reject) {
             // add ttp info
             userData.totalTimePlayed = playInfo.totalTimePlayed;
             resolve(userData);
-        }.bind(this));
+        }.bind(this) );
 
 // ------------------------------------------------
-}.bind(this));
+}.bind(this) );
 // end promise wrapper
 }
 
@@ -566,7 +566,7 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                         // TODO: replace this with promise
                         // find assessment by ID
                         return this.getGameAssessmentInfo(gameId);
-                    }.bind(this))
+                    }.bind(this) )
                     .then(function(assessment){
                         for(var i = 0; i < assessment.length; i++) {
                             if(assessment[i].id == assessmentId) {
@@ -584,7 +584,7 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                         return outAssessmentData;
                     }.bind(this) );
                 promistList.push(p);
-            }.bind(this));
+            }.bind(this) );
 
             when.reduce(promistList, function(list, item){
                     list.push(item);
@@ -593,6 +593,6 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                 .then(function(outList){
                     // all done
                     this.requestUtil.jsonResponse(res, outList);
-                }.bind(this));
-        }.bind(this));
+                }.bind(this) );
+        }.bind(this) );
 }

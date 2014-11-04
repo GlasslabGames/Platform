@@ -40,7 +40,7 @@ function getGamesBasicInfo(req, res){
                     var promiseList = [];
                     game.forEach(function (game) {
                         promiseList.push(this.getGameBasicInfo(gameId));
-                    }.bind(this));
+                    }.bind(this) );
                     return when.all(promiseList);
                 }.bind(this) )
                 .then(function(promiseList){
@@ -75,12 +75,12 @@ function getGamesBasicInfo(req, res){
                     this.requestUtil.jsonResponse(res, outGames);
 
                 }.bind(this) );
-        }.bind(this))
+        }.bind(this) )
 
         // catch all errors
         .then(null, function(err) {
             this.requestUtil.errorResponse(res, err);
-        }.bind(this));
+        }.bind(this) );
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
@@ -112,13 +112,13 @@ function getGamesDetails(req, res){
             // TODO: replace with promise
             return this.getListOfVisibleGameIds()
 
-        }.bind(this))
+        }.bind(this) )
         .then(function(games){
             var promiseList = [];
             games.forEach(function(gameId){
                 promiseList.push(this.getGameDetails(gameId));
             }.bind(this) );
-            return when.all(promiseList)
+            return when.all(promiseList);
         }.bind(this) )
         .then(function(promiseList){
             // promiseList, once resolved, contains details from various games
@@ -154,7 +154,7 @@ function getGamesDetails(req, res){
         // catch all errors
         .then(null, function(err) {
             this.requestUtil.errorResponse(res, err);
-        }.bind(this));
+        }.bind(this) );
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
@@ -245,12 +245,12 @@ function getMyGames(req, res) {
             }.bind(this) )
             .then(function(gamesList){
                 this.requestUtil.jsonResponse(res, gamesList);
-            }.bind(this))
+            }.bind(this) )
 
             // catch all errors
             .then(null, function(err) {
                 this.requestUtil.errorResponse(res, err);
-            }.bind(this));
+            }.bind(this) );
 
     } catch(err) {
         console.trace("Reports: Get MyGames Error -", err);

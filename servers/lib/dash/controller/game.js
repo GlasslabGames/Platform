@@ -21,38 +21,38 @@ exampleIn.getUserGameAchievements = {
     gameId: 'AA-1'
 };
 function getUserGameAchievements(req, res){
-        // check input
-        if( !( req.params &&
-            req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "invalid game id"});
-            return;
-        }
+    // check input
+    if( !( req.params &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, {error: "invalid game id"});
+        return;
+    }
 
-        // gameIds are not case sensitive
-        var gameId = req.params.gameId.toUpperCase();
-        var userData = req.session.passport.user;
+    // gameIds are not case sensitive
+    var gameId = req.params.gameId.toUpperCase();
+    var userData = req.session.passport.user;
 
-        // check gameId exists
-        this.isValidGameId(gameId)
-            .then(function(state){
-                if(!state){
-                    this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
-                } else {
-                    this.telmStore.getGamePlayInfo(userData.id, gameId)
-                        .then(function(info){
-                            // if achievement exist then return them otherwise sent empty object
-                            this.requestUtil.jsonResponse(res, this.getListOfAchievements(gameId, info.achievement) );
-                        }.bind(this))
-                        // catch all
-                        .then(null, function(err){
-                            this.requestUtil.errorResponse(res, err);
-                        }.bind(this));
-                }
-            }.bind(this) )
-            .catch(function(err){
-                console.trace("Reports: Get Achievements Error -", err);
-                this.stats.increment("error", "GetAchievements.Catch");
-            }.bind(this) );
+    // check gameId exists
+    this.isValidGameId(gameId)
+        .then(function(state){
+            if(!state){
+                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+            } else {
+                this.telmStore.getGamePlayInfo(userData.id, gameId)
+                    .then(function(info){
+                        // if achievement exist then return them otherwise sent empty object
+                        this.requestUtil.jsonResponse(res, this.getListOfAchievements(gameId, info.achievement) );
+                    }.bind(this) )
+                    // catch all
+                    .then(null, function(err){
+                        this.requestUtil.errorResponse(res, err);
+                    }.bind(this) );
+            }
+        }.bind(this) )
+        .catch(function(err){
+            console.trace("Reports: Get Achievements Error -", err);
+            this.stats.increment("error", "GetAchievements.Catch");
+        }.bind(this) );
 }
 
 
@@ -77,9 +77,8 @@ function getGameDetails(req, res){
         .then(function(state){
             if(!state){
                 return reject({key:"report.gameId.invalid"});
-            } else {
-                return this.getGameDetails(gameId);
             }
+            return this.getGameDetails(gameId);
         }.bind(this) )
         .then(function(gameDetails){
             this.requestUtil.jsonResponse(res, gameDetails);
@@ -252,11 +251,11 @@ function saveAssessmentResults(req, res){
         }.bind(this) )
         .then(function () {
             this.requestUtil.jsonResponse(res, {});
-        }.bind(this))
+        }.bind(this) )
         // error
         .catch(function(err){
             console.trace("Reports: Save Assessment Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
-        });
+        }.bind(this) );
 };

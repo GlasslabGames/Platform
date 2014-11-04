@@ -87,11 +87,11 @@ function saveAssessmentResults(req, res){
         }.bind(this) )
         .then(function () {
             this.requestUtil.jsonResponse(res, {});
-        }.bind(this))
+        }.bind(this) )
         // error
         .catch(function(err){
             console.trace("Reports: Save Assessment Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
-        });
+        }.bind(this) );
 }

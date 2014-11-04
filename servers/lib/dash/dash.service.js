@@ -128,7 +128,11 @@ DashService.prototype.getListOfVisibleGameIds = function() {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
-        return gameIds;
+        if(gameIds.length !== 0){
+            resolve(gameIds);
+        } else{
+            reject();
+        }
     }.bind(this) );
 };
 
@@ -136,12 +140,12 @@ DashService.prototype.getListOfVisibleGameIds = function() {
 // promise transition complete
 // 1 reference in dash.service
 DashService.prototype.getGameAchievements = function(gameId) {
-    return when.promise(resolve, reject, function(){
+    return when.promise(function(resolve, reject){
         if( this._games.hasOwnProperty(gameId) &&
             this._games[gameId].hasOwnProperty('achievements') ) {
-            return this._games[gameId].achievements;
+            resolve(this._games[gameId].achievements);
         } else {
-            return {};
+            reject({});
         }
     }.bind(this) );
 };
@@ -154,9 +158,9 @@ DashService.prototype.getGameDetails = function(gameId) {
         if( this._games.hasOwnProperty(gameId) &&
             this._games[gameId].hasOwnProperty('info') &&
             this._games[gameId].info.hasOwnProperty('details') ) {
-            return this._games[gameId].info.details;
+            resolve(this._games[gameId].info.details);
         } else {
-            return {};
+            reject({});
         }
     }.bind(this) );
 };
@@ -165,14 +169,14 @@ DashService.prototype.getGameDetails = function(gameId) {
 // promise transition complete
 // 1 reference in dash game, 1 in dash reports
 DashService.prototype.getGameMissions = function(gameId) {
-    return when.promise(resolve, reject, function(){
+    return when.promise(function(resolve, reject){
 
         if( this._games.hasOwnProperty(gameId) &&
             this._games[gameId].hasOwnProperty('info') &&
             this._games[gameId].info.hasOwnProperty('missions') ) {
-            return this._games[gameId].info.missions;
+            resolve(this._games[gameId].info.missions);
         } else {
-            return null;
+            reject(null);
         }
     }.bind(this) );
 };
@@ -181,13 +185,13 @@ DashService.prototype.getGameMissions = function(gameId) {
 // promise transition complete
 // 2 references in dash games
 DashService.prototype.getGameBasicInfo = function(gameId) {
-    return when.promise(resolve, reject, function(){
+    return when.promise(function(resolve, reject){
         if( this._games.hasOwnProperty(gameId) &&
             this._games[gameId].hasOwnProperty('info') &&
             this._games[gameId].info.hasOwnProperty('basic') ) {
-            return this._games[gameId].info.basic;
+            resolve(this._games[gameId].info.basic);
         } else {
-            return null;
+            reject(null);
         }
     }.bind(this) );
 };
@@ -196,8 +200,8 @@ DashService.prototype.getGameBasicInfo = function(gameId) {
 // promise transition complete
 // 1 reference in dash _game, 2 references in dash reports
 DashService.prototype.getGameAssessmentInfo = function(gameId) {
-    return when.promise(resolve, reject, function(){
-        return this._games[gameId].info.assessment;
+    return when.promise(function(resolve, reject){
+        resolve(this._games[gameId].info.assessment);
     }.bind(this) );
 };
 
@@ -206,14 +210,15 @@ DashService.prototype.getGameAssessmentInfo = function(gameId) {
 // promise transition complete
 // 1 reference in dash reports
 DashService.prototype.getGameReportInfo = function(gameId, reportId) {
-    return when.promise(resolve, reject, function(){
+    return when.promise(function(resolve, reject){
         var list = this._games[gameId].info.reports.list;
         for(var i = 0; i < list.length; i++) {
             if( _.isObject(list[i]) &&
                 list[i].id == reportId) {
-                return list[i];
+                resolve(list[i]);
             }
         }
+        reject();
     }.bind(this) );
 };
 
@@ -221,13 +226,13 @@ DashService.prototype.getGameReportInfo = function(gameId, reportId) {
 // promise transition complete
 // 1 reference in data game // check about error wording
 DashService.prototype.getGameReleases = function(gameId) {
-    return when.promise(resolve, reject, function(){
+    return when.promise(function(resolve, reject){
         if( this._games.hasOwnProperty(gameId) &&
             this._games[gameId].hasOwnProperty('info') &&
             this._games[gameId].info.hasOwnProperty('releases') ) {
-            return this._games[gameId].info.releases;
+            resolve(this._games[gameId].info.releases);
         } else {
-            return {};
+            reject({});
         }
     }.bind(this) );
 };
@@ -373,7 +378,7 @@ DashService.prototype._loadGameFiles = function() {
         console.log('DashService: Loaded Game Files');
         resolve();
 // ------------------------------------------------
-    }.bind(this));
+    }.bind(this) );
 // end promise wrapper
 };
 

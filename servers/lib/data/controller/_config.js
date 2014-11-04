@@ -19,7 +19,7 @@ function updateGameConfigs(req, res, next, serviceManager)
     var dash = serviceManager.get("dash");
 
     // check if gameId exists
-    dash.isValidGameId()
+    dash.isValidGameId(gameId)
         .then(function(state){
             if(!state){
                 return reject({key: "data.gameId.invalid", statusCode: 401});

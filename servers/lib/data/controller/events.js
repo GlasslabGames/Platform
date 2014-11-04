@@ -44,7 +44,7 @@ function sendBatchTelemetryV2(req, outRes, next){
 function eventsCount(req, res, next, serviceManager){
     try {
         // TODO: replace this with DB lookup, return promise
-        var dash = serviceManager.get("dash").service
+        var dash = serviceManager.get("dash").service;
 
         getListOfVisibleGameIds()
             .then(function(gameIds){
@@ -52,18 +52,18 @@ function eventsCount(req, res, next, serviceManager){
                     return this.cbds.getEventCount(gameId)
                         .then(function(count){
                             return eventCount + count;
-                        }.bind(this))
+                        }.bind(this) );
                 }.bind(this), 0)
                     .then(function(eventCount){
                         if(!eventCount) {
                             eventCount = 0;
                         }
                         this.requestUtil.jsonResponse(res, {eventCount: eventCount});
-                    }.bind(this))
+                    }.bind(this) )
                     //
                     .then(null, function(err){
                         this.requestUtil.errorResponse(res, err);
-                    }.bind(this))
+                    }.bind(this) );
 
             }.bind(this) );
 

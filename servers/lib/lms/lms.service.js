@@ -255,7 +255,7 @@ return when.promise(function(resolve, reject) {
                                     return this.myds.addUserToCourse(userData.id, courseId, lConst.role.instructor);
                                 }.bind(this));
                         }
-                    }.bind(this))
+                    }.bind(this) )
 
                     .then(function(){
                         courseData.code = this._generateCode();
@@ -263,12 +263,12 @@ return when.promise(function(resolve, reject) {
                             .then(function(){
                                 resolve(courseData);
                             }.bind(this));
-                    }.bind(this))
+                    }.bind(this) )
 
                     // error catchall
                     .then(null, function(err){
                         reject(err);
-                    }.bind(this));
+                    }.bind(this) );
             }.bind(this) );
 
     } else {
@@ -277,7 +277,7 @@ return when.promise(function(resolve, reject) {
     }
 
 // ------------------------------------------------
-}.bind(this));
+}.bind(this) );
 // end promise wrapper
 };
 
@@ -374,20 +374,20 @@ return when.promise(function(resolve, reject) {
                 }
 
                 return this.telmStore.updateGamesForCourse(courseData.id, updateGames);
-            }.bind(this))
+            }.bind(this) )
 
             .then(function () {
                 resolve(courseData);
-            }.bind(this))
+            }.bind(this) )
 
             // error catchall
             .then(null, function (err) {
                 reject(err);
-            }.bind(this));
+            }.bind(this) );
     }
 
 // ------------------------------------------------
-}.bind(this));
+}.bind(this) );
 // end promise wrapper
 };
 
