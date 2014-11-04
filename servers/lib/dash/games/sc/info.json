@@ -84,7 +84,7 @@
             "enabled": true,
             "id": "competency",
             "dataProcessScope": "gameSession",
-            "engine": "netica",
+            "engine": "weka",
             "trigger": "endSession",
             "missions": {
                 "cps_m2": {
