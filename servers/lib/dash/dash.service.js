@@ -224,7 +224,7 @@ DashService.prototype.getGameReportInfo = function(gameId, reportId) {
 
 // TODO: replace this with DB lookup, return promise
 // promise transition complete
-// 1 reference in data game // check about error wording
+// 1 reference in data game
 DashService.prototype.getGameReleases = function(gameId) {
     return when.promise(function(resolve, reject){
         if( this._games.hasOwnProperty(gameId) &&
