@@ -87,6 +87,12 @@
             "engine": "weka",
             "trigger": "endSession",
             "missions": {
+                "cps_m2": {
+                    "id": "cps_m2",
+                    "type": "Gameplay",
+                    "title": "Mission 2",
+                    "description": "Worker Shortage Little Alexandria"
+                },
                 "cps_m3": {
                     "id": "cps_m3",
                     "type": "Gameplay",
@@ -188,7 +194,8 @@
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": {
                     "text": "Competency Levels: Complex Problem Solving",
-                    "image": "assets/game-banner-SC.jpg"
+                    "image": "assets/game-banner-SC.jpg",
+                    "skinny": "assets/skinny-banner-SC.jpg"
                 },
                 "description": "This report shows most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from Gameplay or Learning Challenges",
                 "icons": {
@@ -226,6 +233,11 @@
                         }
                     ],
                     "groups": [
+                        {
+                            "id": "cps_m2",
+                            "title": "Worker Shortage",
+                            "description": "Worker Shortage - Little Alexandria"
+                        },
                         {
                             "id": "cps_m3",
                             "title": "Pollution Problems",
