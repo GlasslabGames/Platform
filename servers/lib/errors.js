@@ -29,6 +29,7 @@ module.exports = {
     "user.enroll.code.used":                "You have already enrolled for this class",
     "user.unenroll.general":                "There was an error with the information you entered.",
     "user.unenroll.notEnrolled":            "You are not enrolled in this class",
+    "user.enroll.sdk.course.invalid":       "The course you tried to join does not have this game",
     "user.update.general":                  "We encountered an issue and cannot update your information at this time.",
     "user.create.general":                  "There was an error with the information you entered.",
     "user.create.input.missing.username":   "Missing Username",

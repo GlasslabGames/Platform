@@ -13,7 +13,8 @@ module.exports = {
     getCourse:              getCourse,
     updateCourseInfo:       updateCourseInfo,
     updateGamesInCourse:    updateGamesInCourse,
-    verifyCode:             verifyCode
+    verifyCode:             verifyCode,
+    verifyGameInCourse:     verifyGameInCourse
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -562,4 +563,34 @@ function verifyCode(req, res, next) {
                 this.requestUtil.errorResponse(res, {key:"user.enroll.code.invalid", statusCode:404});
             }
         }.bind(this))
+}
+
+function verifyGameInCourse(req, res, next) {
+
+    if (!req.params || !req.params.hasOwnProperty("courseId")) {
+        this.requestUtil.errorResponse(res, {key: "course.general"});
+        return;
+    }
+    if (!req.params || !req.params.hasOwnProperty("gameId")) {
+        this.requestUtil.errorResponse(res, {key: "course.general"});
+        return;
+    }
+
+    this.telmStore.getGamesForCourse(req.params.courseId)
+        .then(function(games) {
+            var hasGameInCourse = false;
+            var gameList = Object.keys(games);
+            for (var i = 0; i < gameList.length; i++) {
+                if (gameList[i] === req.params.gameId) {
+                    hasGameInCourse = true;
+                }
+            }
+
+            if (hasGameInCourse) {
+                var courseInfo = {status: "game found in course", games: gameList};
+                this.requestUtil.jsonResponse(res, courseInfo);
+            } else {
+                this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.invalid", statusCode: 404});
+            }
+        }.bind(this));
 }
