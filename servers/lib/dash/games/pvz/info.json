@@ -36,7 +36,7 @@
             "enabled": true,
             "id": "competency",
             "dataProcessScope": "gameSession",
-            "engine": "weka",
+            "engine": "netica",
             "trigger": "endSession",
             "missions": {
             }
