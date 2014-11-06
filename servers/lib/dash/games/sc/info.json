@@ -230,6 +230,11 @@
                             "id": "not-enough-info",
                             "title": "Not Enough Info",
                             "description": "Not Enough Info"
+                        },
+                        {
+                            "id": "not-covered",
+                            "title": "Not Covered",
+                            "description": "Not Covered"
                         }
                     ],
                     "groups": [
