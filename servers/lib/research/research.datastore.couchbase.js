@@ -65,17 +65,6 @@ return when.promise(function(resolve, reject) {
 };
 
 
-// http://stackoverflow.com/questions/19178782/how-to-reshape-an-array-with-lodash
-// In:  array = [1, 2, 3, 4, 5, 6, ,7, 8], n = 3
-// Out: [[1, 2, 3], [4, 5, 6], [7, 8]]
-function reshape(array, n){
-    return _.compact(array.map(function(el, i){
-        if (i % n === 0) {
-            return array.slice(i, i + n);
-        }
-    }));
-}
-
 
 ResearchDS_Couchbase.prototype.getEventsByGameIdDate = function(gameId, startDateArray, endDateArray, limit){
 // add promise wrapper

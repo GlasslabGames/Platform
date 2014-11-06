@@ -16,29 +16,32 @@ exampleIn.getAssessmentDefinitions = {
     gameId: 'AA-1'
 };
 function getAssessmentDefinitions(req, res){
-    try {
-
-        // check input
-        if( !( req.params &&
-               req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
-            return;
-        }
-        var gameId = req.params.gameId;
-        // gameIds are not case sensitive
-        gameId = gameId.toUpperCase();
-
-        // check gameId exists
-        if(!this.isValidGameId(gameId)) {
-            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
-            return;
-        }
-
-        this.requestUtil.jsonResponse(res, this.getGameAssessmentInfo(gameId));
-    } catch(err) {
-        console.trace("Reports: Get Assessment Error -", err);
-        this.stats.increment("error", "GetAchievements.Catch");
+    // check input
+    if( !( req.params &&
+           req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+        return;
     }
+    var gameId = req.params.gameId;
+    // gameIds are not case sensitive
+    gameId = gameId.toUpperCase();
+
+    // check gameId exists
+    this.isValidGameId(gameId)
+        .then(function(state){
+            if(!state){
+                return when.reject({ key: "report.gameId.invalid" } );
+            }
+            return this.getGameAssessmentInfo(gameId);
+        }.bind(this) )
+        .then(function(assessmentInfo){
+            this.requestUtil.jsonResponse(res, assessmentInfo);
+        }.bind(this) )
+        .catch(function(err){
+            console.trace("Reports: Get Assessment Error -", err);
+            this.requestUtil.errorResponse(res, err);
+            this.stats.increment("error", "GetAchievements.Catch");
+        }.bind(this) );
 }
 
 
@@ -46,81 +49,49 @@ exampleIn.saveAssessmentResults = {
 
 };
 function saveAssessmentResults(req, res){
-    try {
-        // check input
-        if( !( req.params &&
-            req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
-            return;
-        }
-        var gameId = req.params.gameId;
-        // gameIds are not case sensitive
-        gameId = gameId.toUpperCase();
-
-        // check gameId exists
-        if(!this.isValidGameId(gameId)) {
-            this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
-            return;
-        }
-
-        if( !req.params.userId ) {
-            this.requestUtil.errorResponse(res, {error: "missing userId"});
-            return;
-        }
-        var userId = req.params.userId;
-
-        if( !req.params.assessmentId ) {
-            this.requestUtil.errorResponse(res, {error: "missing assessmentId"});
-            return;
-        }
-        var assessmentId = req.params.assessmentId;
-
-        // userId, assessmentId, data
-        if( !req.body ) {
-            this.requestUtil.errorResponse(res, {error: "missing body"});
-            return;
-        }
-        var data = req.body;
-
-        // merge in current assessment
-        this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
-            .then(function(aeResults){
-
-                var out = _.cloneDeep(aeResults);
-                out.gameId = gameId;
-                out.userId = userId;
-                out.assessmentId = assessmentId;
-
-                // merge results if they exist
-                if( !out.results &&
-                    !_.isObject(out.results) ) {
-                    out.results = {};
-                }
-
-                // remove old data
-                if( _.isArray(out.results.watchout) ||
-                    _.isArray(out.results.shoutout) ) {
-                    delete out.results.watchout;
-                    delete out.results.shoutout;
-                }
-                // merge results
-                out.results = _.merge( out.results, data.results );
-
-                //console.log("out:", out);
-                return this.telmStore.saveAssessmentResults(userId, gameId, assessmentId, out);
-            }.bind(this) )
-
-
-            .then(function(){
-                this.requestUtil.jsonResponse(res, {});
-            }.bind(this) )
-            // error
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
-            }.bind(this) );
-
-    } catch(err) {
-        console.trace("Reports: Save Assessment Error -", err);
-        this.stats.increment("error", "SaveAssessment.Catch");
+    // check input
+    if( !( req.params &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+        return;
     }
+    var gameId = req.params.gameId;
+    // gameIds are not case sensitive
+    gameId = gameId.toUpperCase();
+
+    // check gameId exists
+    this.isValidGameId(gameId)
+        .then(function(state) {
+            if (!state) {
+                return when.reject({key: "report.gameId.invalid"});
+            }
+
+            if (!req.params.userId) {
+                return when.reject({key: "report.userId.missing"});
+            }
+            var userId = req.params.userId;
+
+            if (!req.params.assessmentId) {
+                return when.reject({key: "report.assessmentId.missing"});
+            }
+            var assessmentId = req.params.assessmentId;
+
+            // userId, assessmentId, data
+            if (!req.body) {
+                return when.reject({key: "report.body.missing"});
+            }
+            var data = req.body;
+
+            // merge in current assessment
+            return this._saveAssessmentResults(userId, gameId, assessmentId, data);
+        }.bind(this) )
+        .then(function () {
+            this.requestUtil.jsonResponse(res, {});
+        }.bind(this) )
+        // error
+        .catch(function(err){
+            console.trace("Reports: Save Assessment Error -", err);
+            this.requestUtil.errorResponse(res, err);
+            this.stats.increment("error", "SaveAssessment.Catch");
+        }.bind(this) );
 }

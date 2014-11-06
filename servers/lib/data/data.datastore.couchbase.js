@@ -445,8 +445,7 @@ return when.promise(function (resolve, reject) {
             if(!info.migrated) {
                 info.migrated = {
                     achievements: false,
-                    addGameId:    false,
-                    addGameConfig: false
+                    addGameId:    false
                 };
             }
 
@@ -479,20 +478,6 @@ return when.promise(function (resolve, reject) {
                     }.bind(this)
                 );
             }
-            if ( !info.migrated.addGameConfig ) {
-                tasks.push(
-                    function() {
-                        console.log("CouchBase TelemetryStore: Migrate GameConfig from MySQL");
-                        return this._migrate_GameConfigFromMySql(myds)
-                            .then(function () {
-                                console.log("CouchBase TelemetryStore: Update GameConfig in CouchDB");
-                                info.migrated.addGameConfig = true;
-                                return this.updateDataSchemaInfo(info);
-                            }.bind(this))
-                    }.bind(this)
-                );
-            }
-
 
             if(tasks.length) {
                 // create a guarded Task function
@@ -523,39 +508,6 @@ return when.promise(function (resolve, reject) {
         .then(resolve, reject);
 
 // ------------------------------------------------
-}.bind(this));
-// end promise wrapper
-};
-
-TelemDS_Couchbase.prototype._migrate_GameConfigFromMySql = function(myds) {
-// add promise wrapper
-return when.promise(function(resolve, reject) {
-    // get game config from SQL
-    var promises = [];
-    var gameConfigs;
-    myds.getConfigs()
-        .then(function(gameConfigs) {
-            gameConfigs = gameConfigs;
-            when.promise(function(resolve,reject) {
-                resolve(this.serviceManager.get("dash").service.getListOfGameIds());
-            }.bind(this))
-                .then(function(gameIds) {
-
-                    // populate all games with SC game config
-                    for (var i = 0; i < gameIds.length; i++) {
-                        promises.push(this.updateConfigs(gameIds[i], gameConfigs));
-                    }
-
-                    // wait until all games configs have been updated
-                    when.all(promises).then(function() {
-                        resolve();
-                    }.bind(this));
-                }.bind(this));
-
-
-
-
-        }.bind(this))
 }.bind(this));
 // end promise wrapper
 };
