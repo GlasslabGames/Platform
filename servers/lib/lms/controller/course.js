@@ -568,11 +568,11 @@ function verifyCode(req, res, next) {
 function verifyGameInCourse(req, res, next) {
 
     if (!req.params || !req.params.hasOwnProperty("courseId")) {
-        this.requestUtil.errorResponse(res, {key: "course.general"});
+        this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.missing"});
         return;
     }
     if (!req.params || !req.params.hasOwnProperty("gameId")) {
-        this.requestUtil.errorResponse(res, {key: "course.general"});
+        this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.game.missing"});
         return;
     }
 
@@ -583,9 +583,9 @@ function verifyGameInCourse(req, res, next) {
             for (var i = 0; i < gameList.length; i++) {
                 if (gameList[i] === req.params.gameId) {
                     hasGameInCourse = true;
+                    break;
                 }
             }
-
             if (hasGameInCourse) {
                 var courseInfo = {status: "game found in course", games: gameList};
                 this.requestUtil.jsonResponse(res, courseInfo);
