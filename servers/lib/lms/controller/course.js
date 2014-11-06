@@ -590,7 +590,7 @@ function verifyGameInCourse(req, res, next) {
                 var courseInfo = {status: "game found in course", games: gameList};
                 this.requestUtil.jsonResponse(res, courseInfo);
             } else {
-                this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.invalid", statusCode: 404});
+                this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.invalid", statusCode:404});
             }
         }.bind(this));
 }

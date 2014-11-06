@@ -251,7 +251,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/lms/course/:courseId/game/:gameId/verify-game",
+            api: "/api/v2/lms/course/:courseId/game/:gameId/verify-course",
             service: "lms",
             controller: "course",
             method: {
