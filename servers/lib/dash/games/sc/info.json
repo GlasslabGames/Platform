@@ -91,7 +91,7 @@
                     "id": "cps_m2",
                     "type": "Gameplay",
                     "title": "Mission 2",
-                    "description": "Worker Shortage Little Alexandria"
+                    "description": "We Need Jobs - Little Alexandria"
                 },
                 "cps_m3": {
                     "id": "cps_m3",
@@ -150,7 +150,7 @@
                     "image": "assets/game-banner-SC.jpg",
                     "skinny": "assets/skinny-banner-SC.jpg"
                 },
-                "description": "This report shows student' key achievements to date and total time played.",
+                "description": "This report shows student's key achievements to date and total time played.",
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
@@ -230,24 +230,39 @@
                             "id": "not-enough-info",
                             "title": "Not Enough Info",
                             "description": "Not Enough Info"
+                        },
+                        {
+                            "id": "not-covered",
+                            "title": "Not Covered",
+                            "description": "Not Covered"
                         }
                     ],
                     "groups": [
                         {
                             "id": "cps_m2",
-                            "title": "Worker Shortage",
-                            "description": "Worker Shortage - Little Alexandria"
+                            "title": "We Need Jobs",
+                            "description": "We Need Jobs - Little Alexandria",
+                            "categories": [
+                                "uni"
+                            ]
                         },
                         {
                             "id": "cps_m3",
                             "title": "Pollution Problems",
-                            "description": "Pollution Problems - Sierra Madre"
+                            "description": "Pollution Problems - Sierra Madre",
+                            "categories": [
+                                "uni",
+                                "multi"
+                            ]
                         },
                         {
                             "id": "cps_m5",
                             "title": "It's Complicated",
-                            "description": "It's Complicated - Jackson City"
-
+                            "description": "It's Complicated - Jackson City",
+                            "categories": [
+                                "uni",
+                                "multi"
+                            ]
                         }
                     ]
                 }
