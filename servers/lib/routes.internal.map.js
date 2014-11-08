@@ -65,6 +65,7 @@ module.exports = {
             service: "dash",
             controller: "_game",
             method: {
+                get: "getAssessmentResults",
                 post: "saveAssessmentResults"
             }
         },
