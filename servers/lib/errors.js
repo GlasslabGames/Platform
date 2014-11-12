@@ -73,6 +73,10 @@ module.exports = {
     "report.general":                       "There is a problem with this report",
     "report.access.invalid":                "Invalid Access",
     "report.gameId.invalid":                "Invalid gameId",
+    "report.reportId.invalid":              "invalid reportId",
     "report.gameId.missing":                "Missing gameId",
-    "report.reportId.missing":              "Missing ReportId"
+    "report.reportId.missing":              "Missing ReportId",
+    "report.userId.missing":                "Missing UserId",
+    "report.assessmentId.missing":          "Missing AssessmentId",
+    "report.body.missing":                  "Missing Body"
 };

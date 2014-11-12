@@ -439,42 +439,46 @@ return when.promise(function(resolve, reject) {
             p = Util.PromiseContinue();
         }
 
+        var dash = this._serviceManager.get("dash").service;
         // TODO: replace this with DB lookup, return promise
-        if( !this._serviceManager.get("dash").service.isValidGameId(gameId) ) {
-            errList.push(new Error("invalid gameId"));
-            this.stats.increment("error", "invalid.gameId");
-            reject(errList);
-            return
-        }
-
-        // update session or skip to saving events
-        p.then(function() {
-                // adds the promise to the list
-                return this.cbds.saveEvents(gameId, processedEvents);
-            }.bind(this))
-            .then(
-                function(){
-                    if(errList.length > 0){
-                        // some errors occurred
-                        this.stats.increment("error", "SaveBatch2");
-                        reject(errList);
-                    } else {
-                        this.stats.increment("info", "SaveBatch2.Done");
-
-                        this.addActivity(userId, gameId, gameSessionId)
-                            .then(null, function(err){
-                                console.error("DataService: addActivity Error -", err);
-                            }.bind(this));
-
-                        resolve();
-                    }
-                }.bind(this),
-                function(err){
-                    this.stats.increment("error", "SaveBatch2");
-                    errList.push(err);
+        dash.isValidGameId(gameId)
+            .then(function(state){
+                if(!state){
+                    errList.push(new Error("invalid gameId"));
+                    this.stats.increment("error", "invalid.gameId");
                     reject(errList);
-                }.bind(this)
-            );
+                } else{
+                    // update session or skip to saving events
+                    p.then(function() {
+                            // adds the promise to the list
+                            return this.cbds.saveEvents(gameId, processedEvents);
+                        }.bind(this))
+                        .then(
+                            function(){
+                                if(errList.length > 0){
+                                    // some errors occurred
+                                    this.stats.increment("error", "SaveBatch2");
+                                    reject(errList);
+                                } else {
+                                    this.stats.increment("info", "SaveBatch2.Done");
+
+                                    this.addActivity(userId, gameId, gameSessionId)
+                                        .then(null, function(err){
+                                            console.error("DataService: addActivity Error -", err);
+                                        }.bind(this));
+
+                                    resolve();
+                                }
+                            }.bind(this),
+                            function(err){
+                                this.stats.increment("error", "SaveBatch2");
+                                errList.push(err);
+                                reject(errList);
+                            }.bind(this)
+                        );
+                }
+            }.bind(this) );
+
     } else {
         console.error("DataService: Error - invalid data type");
         this.stats.increment("error", "SaveBatch2.Invalid.DataType");

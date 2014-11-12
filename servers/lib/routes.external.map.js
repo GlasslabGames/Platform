@@ -135,6 +135,15 @@ module.exports = {
         // ---------------------------------------------------
         {
             requireAuth: true,
+            api: "/api/v2/dash/game/assessment/:assessmentId",
+            service: "dash",
+            controller: "game",
+            method: {
+                post: "saveAssessmentResults"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/dash/reports/:reportId/game/:gameId/course/:courseId",
             service: "dash",
             controller: "reports",
