@@ -46,7 +46,7 @@ function eventsCount(req, res, next, serviceManager){
         // TODO: replace this with DB lookup, return promise
         var dash = serviceManager.get("dash").service;
 
-        getListOfVisibleGameIds()
+        dash.getListOfVisibleGameIds()
             .then(function(gameIds){
                 when.reduce(gameIds, function(eventCount, gameId) {
                     return this.cbds.getEventCount(gameId)
