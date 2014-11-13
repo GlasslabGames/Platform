@@ -82,6 +82,28 @@ function getEventsByDate(req, res, next){
             return;
         }
         startDate = moment(startDate);
+        if( req.query.startDateHour ) {
+            var startDateHour = req.query.startDateHour;
+            startDate.hour( startDateHour );
+        }
+        else {
+            startDate.hour(0);
+        }
+        if( req.query.startDateMin ) {
+            var startDateMin = req.query.startDateMin;
+            startDate.minute( startDateMin );
+        }
+        else {
+            startDate.minute(0);
+        }
+        if( req.query.startDateSec ) {
+            var startDateSec = req.query.startDateSec;
+            startDate.seconds( startDateSec );
+        }
+        else {
+            startDate.seconds(0);
+        }
+        startDate = startDate.utc();
 
         var endDate = moment();
         if(req.query.dateRange) {
@@ -102,9 +124,30 @@ function getEventsByDate(req, res, next){
             }
             endDate = moment(endDate);
         }
-        endDate.hour(23);
-        endDate.minute(59);
-        endDate.seconds(59);
+        if( req.query.endDateHour ) {
+            var endDateHour = req.query.endDateHour;
+            endDate.hour( endDateHour );
+        }
+        else {
+            endDate.hour(23);
+        }
+        if( req.query.endDateMin ) {
+            var endDateMin = req.query.endDateMin;
+            endDate.minute( endDateMin );
+        }
+        else {
+            endDate.minute(59);
+        }
+        if( req.query.endDateSec ) {
+            var endDateSec = req.query.endDateSec;
+            endDate.seconds( endDateSec );
+        }
+        else {
+            endDate.seconds(59);
+        }
+        //endDate.hour(23);
+        //endDate.minute(59);
+        //endDate.seconds(59);
         endDate = endDate.utc();
 
 
