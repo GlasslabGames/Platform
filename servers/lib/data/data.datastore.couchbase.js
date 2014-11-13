@@ -2381,7 +2381,7 @@ return when.promise(function(resolve, reject) {
     this.client.set(key, config,
         function(err, data) {
             if(err) {
-                console.err("CouchBase TelemetryStore: Set Config Error - ", err);
+                console.error("CouchBase TelemetryStore: Set Config Error - ", err);
                 reject(err);
                 return;
             }
@@ -2440,7 +2440,7 @@ return when.promise(function(resolve, reject) {
     this.client.set(key, data,
         function(err, data) {
             if(err) {
-                console.err("CouchBase TelemetryStore: Set Games For Course Error - ", err);
+                console.error("CouchBase TelemetryStore: Set Games For Course Error - ", err);
                 reject(err);
                 return;
             }
@@ -2461,7 +2461,7 @@ return when.promise(function(resolve, reject) {
     this.client.setMulti(kv, {},
         function(err, data) {
             if(err) {
-                console.err("CouchBase TelemetryStore: Multi Set Games For Course Error - ", err);
+                console.error("CouchBase TelemetryStore: Multi Set Games For Course Error - ", err);
                 reject(err);
                 return;
             }
