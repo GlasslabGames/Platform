@@ -581,7 +581,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
                         }.bind(this))
                         // error
                         .then(null, function(err){
-                            console.err('failed to send email:',  err);
+                            console.error('failed to send email:',  err);
                         }.bind(this));
 
                 }.bind(this));
@@ -692,7 +692,7 @@ function sendVerifyEmail(regData, protocol, host) {
                         }.bind(this))
                         // error
                         .then(null, function(err){
-                            console.err('failed to send email:',  err);
+                            console.error('failed to send email:',  err);
                         }.bind(this));
 
                 }.bind(this));
