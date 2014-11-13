@@ -18,6 +18,8 @@ function getGamesBasicInfo(req, res){
     try {
         var loginType = "guest";
         var promise = null;
+        var gameIds;
+        var outGames = [];
         if( req.session &&
             req.session.passport &&
             req.session.passport.user ) {
@@ -32,20 +34,20 @@ function getGamesBasicInfo(req, res){
         promise.then(function(licenseGameIds){
             // ensure licenseGameIds is object
             if(!licenseGameIds) { licenseGameIds = {}; }
-            var outGames = [];
 
             // TODO: replace with promise
             this.getListOfVisibleGameIds()
-                .then(function(games){
+                .then(function(ids){
+                    gameIds = ids;
                     var promiseList = [];
-                    game.forEach(function (game) {
+                    gameIds.forEach(function (gameId) {
                         promiseList.push(this.getGameBasicInfo(gameId));
                     }.bind(this) );
                     return when.all(promiseList);
                 }.bind(this) )
                 .then(function(promiseList){
-                    for(var i = 0; i < games.length; i++) {
-                        var gameId = games[i];
+                    for(var i = 0; i < gameIds.length; i++) {
+                        var gameId = gameIds[i];
 
                         var info = _.cloneDeep(promiseList[i]);
 
@@ -93,6 +95,7 @@ function getGamesDetails(req, res){
     try {
         var loginType = "guest";
         var promise = null;
+        var outGames = [];
         if( req.session &&
             req.session.passport &&
             req.session.passport.user ) {
@@ -107,7 +110,6 @@ function getGamesDetails(req, res){
         promise.then(function(licenseGameIds) {
             // ensure licenseGameIds is object
             if(!licenseGameIds) { licenseGameIds = {}; }
-            var outGames = [];
 
             // TODO: replace with promise
             return this.getListOfVisibleGameIds()
@@ -144,9 +146,7 @@ function getGamesDetails(req, res){
                 if(!info.maintenance && !info.license.valid) {
                     info.maintenance = { message: info.license.message.invalid };
                 }
-
                 outGames.push( info );
-
             }.bind(this) );
             this.requestUtil.jsonResponse(res, outGames);
         }.bind(this) )

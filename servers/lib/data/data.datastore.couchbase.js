@@ -2412,7 +2412,7 @@ return when.promise(function(resolve, reject) {
                 if(err.code == 13) {
                     resolve({});
                 } else {
-                    console.err("CouchBase TelemetryStore: Get Games For Course Error - ", err);
+                    console.error("CouchBase TelemetryStore: Get Games For Course Error - ", err);
                     reject(err);
                 }
                 return;
