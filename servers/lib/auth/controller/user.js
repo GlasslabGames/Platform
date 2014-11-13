@@ -939,6 +939,12 @@ function resetPasswordUpdate(req, res, next) {
                             userData.resetCodeExpiration = "NULL";
                             userData.resetCode = "NULL";
 
+                            // If this user missed the verify code, we can authorize them here as well
+                            if( userData.verifyCodeStatus === aConst.verifyCode.status.sent ) {
+                                userData.verifyCodeStatus = aConst.verifyCode.status.verified;
+                                userData.verifyCodeExpiration = "NULL";
+                            }
+
                             return this.glassLabStrategy.updateUserData(userData);
                         }.bind(this))
                         .then(function() {
