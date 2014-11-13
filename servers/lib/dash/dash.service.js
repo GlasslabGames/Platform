@@ -138,6 +138,21 @@ DashService.prototype.getListOfVisibleGameIds = function() {
 
 // TODO: replace this with DB lookup, return promise
 // promise transition complete
+// 1 reference in dash game
+DashService.prototype.getGameReports = function(gameId) {
+    return when.promise(function(resolve, reject) {
+        if (this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('reports')) {
+            resolve(this._games[gameId].info.reports);
+        } else {
+            reject([]);
+        }
+    }.bind(this));
+};
+
+// TODO: replace this with DB lookup, return promise
+// promise transition complete
 // 1 reference in dash.service
 DashService.prototype.getGameAchievements = function(gameId) {
     return when.promise(function(resolve, reject){

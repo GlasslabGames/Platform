@@ -99,7 +99,7 @@ function getGameReports(req, res){
     // check input
     if( !( req.params &&
         req.params.hasOwnProperty("gameId") ) ) {
-        this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+        this.requestUtil.errorResponse(res, {key:"report.gameId.missing"});
         return;
     }
 
@@ -111,15 +111,19 @@ function getGameReports(req, res){
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+                return when.reject({key: "report.gameId.invalid"});
             } else {
-                this.requestUtil.jsonResponse(res, this.getGameReports(gameId));
+                return this.getGameReports(gameId);
             }
-        }.bind(this) )
+        }.bind(this))
+        .then(function(gameReports){
+            this.requestUtil.jsonResponse(res, gameReports);
+        }.bind(this))
         .catch(function(err){
+            this.requestUtil.errorResponse(res, err);
             console.trace("Reports: Get Game Reports Error -", err);
             this.stats.increment("error", "GetGameReports.Catch");
-        }.bind(this) );
+        }.bind(this));
 }
 
 
