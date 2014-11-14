@@ -102,7 +102,6 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
             var outList = [];
             var userMap = {};
             var promistList = [];
-
             //console.log("users:", users);
 
             // get SOWO data per game per user
@@ -113,7 +112,7 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                 var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData) {
                         // shortcut invalid assessmentData
-                        if (!assessmentData || !assessmentData.results) return;
+                        if (!assessmentData || !assessmentData.results) return when.reject();
 
                         // create copy of data for output
                         var outAssessmentData = _.cloneDeep(assessmentData);
@@ -168,7 +167,10 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
 
                         outList.push(outAssessmentData);
 
-                    }.bind(this) );
+                    }.bind(this))
+                    .catch(function(){
+                        console.error("Get SOWO Error - Key is not defined in database");
+                    }.bind(this));
 
                 promistList.push(p);
             }.bind(this) );
@@ -469,18 +471,20 @@ function _getMissionTimePlayed(userId, gameId){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
+    var completedMissions;
     var userData = {
         userId: userId
     };
     var dataService = this.serviceManager.get("data").service;
 
     dataService.getCompletedMissions(userId, gameId)
-        .then(function(completedMissions){
+        .then(function(missions){
 
+            completedMissions = missions;
             userData.missions = [];
             // flatten mission list
             return this.getGameMissions(gameId);
-        }.bind(this) )
+        }.bind(this))
         .then(function(missions){
 
             var gameMissions = _.cloneDeep(missions);
@@ -516,15 +520,19 @@ return when.promise(function(resolve, reject) {
             }
 
             return this.telmStore.getGamePlayInfo(userId, gameId);
-        }.bind(this) )
+        }.bind(this))
         .then(function(playInfo){
             // add ttp info
             userData.totalTimePlayed = playInfo.totalTimePlayed;
             resolve(userData);
-        }.bind(this) );
+        }.bind(this))
+        .catch(function(err){
+            console.error("getMissionTimePlayed Error:", err);
+            this.requestUtil.errorResponse(res, {key:"report.general"});
+        }.bind(this));
 
 // ------------------------------------------------
-}.bind(this) );
+}.bind(this));
 // end promise wrapper
 }
 
@@ -558,7 +566,7 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                 var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData){
                         // shortcut invalid assessmentData
-                        if(!assessmentData || !assessmentData.results) return;
+                        if(!assessmentData || !assessmentData.results) return when.reject();
 
                         // create copy of data for output
                         var outAssessmentData = _.cloneDeep(assessmentData);
@@ -582,8 +590,14 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                             }
                         }
                         return outAssessmentData;
-                    }.bind(this) );
-                promistList.push(p);
+                    }.bind(this))
+                    .catch(function(err){
+                        console.error("Get Competency Error - Key is not defined in database");
+                        p = 'reject';
+                    });
+                if(p !== 'reject'){
+                    promistList.push(p);
+                }
             }.bind(this) );
 
             when.reduce(promistList, function(list, item){
