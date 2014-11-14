@@ -62,7 +62,7 @@
                 "name": "Learning Events & Time Played",
                 "header": {
                     "text": "Learning Events & Time Played",
-                    "image": "assets/game-banner-AA-1.jpg",
+                    "image": "assets/game-banner-AA-1.png",
                     "skinny": "assets/skinny-banner-AA-1.jpg"
                 },
                 "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
@@ -75,7 +75,7 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-AA-1.jpg",
+                    "image": "assets/game-banner-AA-1.png",
                     "skinny": "assets/skinny-banner-AA-1.jpg"
                 },
                 "table": {
@@ -172,11 +172,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/3v3battle.png"
+                        "url": "assets/AA-1-carousel_1.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/map.png"
+                        "url": "assets/AA-1-carousel_2.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AA-1-carousel_3.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AA-1-carousel_4.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/AA-1-carousel_5.png"
                     }
                 ]
             },
@@ -340,8 +352,8 @@
             }
         },
         "banners": {
-            "product": "assets/game-banner-AA-1.jpg",
-            "reports": "assets/game-banner-AA-1.jpg"
+            "product": "assets/game-banner-AA-1.png",
+            "reports": "assets/game-banner-AA-1.png"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
