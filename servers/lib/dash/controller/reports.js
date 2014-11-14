@@ -90,6 +90,7 @@ exampleOut.getSOWO = [
 ];
 function _getSOWO(req, res, reportId, gameId, courseId) {
     var assessmentId = reportId;
+    var outAssessmentData;
 
     // get user list in class
     // TODO: use service route
@@ -112,10 +113,10 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                 var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData) {
                         // shortcut invalid assessmentData
-                        if (!assessmentData || !assessmentData.results) return when.reject();
+                        if (!assessmentData || !assessmentData.results) return;
 
                         // create copy of data for output
-                        var outAssessmentData = _.cloneDeep(assessmentData);
+                        outAssessmentData = _.cloneDeep(assessmentData);
 
                         // TODO: replace this with promise
                         // find assessment by ID
@@ -123,6 +124,7 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
 
                     }.bind(this) )
                     .then(function(assessment){
+                        if(!assessment) return;
                         for(var i = 0; i < assessment.length; i++) {
                             if(assessment[i].id == assessmentId) {
                                 // merge in sowo info from game assessment info
@@ -543,6 +545,7 @@ exampleOut.getCompetency = [
 ];
 function _getCompetency(req, res, reportId, gameId, courseId) {
     var assessmentId = reportId;
+    var outAssessmentData;
 
     // get user list in class
     // TODO: use service route
@@ -566,16 +569,17 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                 var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData){
                         // shortcut invalid assessmentData
-                        if(!assessmentData || !assessmentData.results) return when.reject();
+                        if(!assessmentData || !assessmentData.results) return;
 
                         // create copy of data for output
-                        var outAssessmentData = _.cloneDeep(assessmentData);
+                        outAssessmentData = _.cloneDeep(assessmentData);
 
                         // TODO: replace this with promise
                         // find assessment by ID
                         return this.getGameAssessmentInfo(gameId);
                     }.bind(this) )
                     .then(function(assessment){
+                        if(!assessment) return;
                         for(var i = 0; i < assessment.length; i++) {
                             if(assessment[i].id == assessmentId) {
 
