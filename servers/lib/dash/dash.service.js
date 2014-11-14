@@ -37,7 +37,6 @@ function DashService(options, serviceManager){
 
         this.requestUtil = new Util.Request(this.options, Errors);
         this.stats       = new Util.Stats(this.options, "Dash");
-
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
         this.dashStore   = new DashStore(this.options.webapp.datastore.mysql);
@@ -45,6 +44,7 @@ function DashService(options, serviceManager){
         this.serviceManager = serviceManager;
 
         this._games = {};
+
 
     } catch(err){
         console.trace("DashService: Error -", err);
@@ -77,132 +77,179 @@ return when.promise(function(resolve, reject) {
 };
 
 // TODO: replace this with DB lookup, return promise
-// returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
-DashService.prototype.getListOfGameIds = function() {
-    var gameIds = [];
-    for(var g in this._games) {
-        if( this._games[g].info &&
-            this._games[g].info.basic &&
-            this._games[g].info.basic.gameId) {
-            gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
-        }
-    }
-    return gameIds;
-};
-
-// TODO: replace this with DB lookup, return promise
+// promise transition complete.
+// accepts a single id or array of game ids.  checks if all are valid
+// 2 references in dash.service, 2 in dash _game, 5 in dash game, 2 in dash reports,
+// 1 in data.services, 1 in data config, 1 in data _config, 1 in data game.js, 2 in lms.service
 DashService.prototype.isValidGameId = function(gameId) {
-    for(var g in this._games) {
-        if( g == gameId &&
-            this._games[g] &&
-            this._games[g].info &&
-            this._games[g].info.basic) {
+    if(!_.isArray(gameId)){
+        gameId = [gameId];
+    }
+    var promiseList = [];
+    gameId.forEach(function(id){
+        promiseList.push(this._isValidGameId(id));
+    }.bind(this) );
+
+    return when.all(promiseList)
+        .then(function(){
             return true;
-        }
-    }
-    return false;
+        })
+        .catch(function(){
+            return false;
+        });
+};
+
+DashService.prototype._isValidGameId = function(gameId){
+    return when.promise(function(resolve, reject) {
+            for (var g in this._games) {
+                if (g == gameId &&
+                    this._games[g] &&
+                    this._games[g].info &&
+                    this._games[g].info.basic) {
+                    return resolve();
+                }
+            }
+            reject();
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise
-// returns a uppercase list of all game Ids, game Ids are ALWAYS uppercase
+// returns an uppercase list of all game Ids, game Ids are ALWAYS uppercase
+// promise transition complete
+// 2 references in dash games, 1 in data events
 DashService.prototype.getListOfVisibleGameIds = function() {
-    var gameIds = [];
-    for(var g in this._games) {
-        if( this._games[g].info &&
-            this._games[g].info.basic &&
-            this._games[g].info.basic.gameId &&
-            this._games[g].info.basic.visible) {
-            gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
+    return when.promise(function(resolve, reject){
+        var gameIds = [];
+        for(var g in this._games) {
+            if( this._games[g].info &&
+                this._games[g].info.basic &&
+                this._games[g].info.basic.gameId &&
+                this._games[g].info.basic.visible) {
+                gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
+            }
         }
-    }
-    return gameIds;
+        if(gameIds.length !== 0){
+            resolve(gameIds);
+        } else{
+            reject();
+        }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup, return promise
-DashService.prototype.getGames = function() {
-    return this._games;
-};
-
-// TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash game
 DashService.prototype.getGameReports = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('reports') ) {
-        return this._games[gameId].info.reports;
-    } else {
-        return [];
-    }
-};
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGameAchievements = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('achievements') ) {
-        return this._games[gameId].achievements;
-    } else {
-        return {};
-    }
-};
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGameDetails = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('details') ) {
-        return this._games[gameId].info.details;
-    } else {
-        return {};
-    }
-};
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGameMissions = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('missions') ) {
-        return this._games[gameId].info.missions;
-    } else {
-        return null;
-    }
-};
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGameBasicInfo = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('basic') ) {
-        return this._games[gameId].info.basic;
-    } else {
-        return null;
-    }
-};
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGameAssessmentInfo = function(gameId) {
-    return this._games[gameId].info.assessment;
-};
-
-
-// TODO: replace this with DB lookup, return promise
-DashService.prototype.getGameReportInfo = function(gameId, reportId) {
-    var list = this._games[gameId].info.reports.list;
-    for(var i = 0; i < list.length; i++) {
-        if( _.isObject(list[i]) &&
-            list[i].id == reportId) {
-            return list[i];
+    return when.promise(function(resolve, reject) {
+        if (this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('reports')) {
+            resolve(this._games[gameId].info.reports);
+        } else {
+            reject([]);
         }
-    }
+    }.bind(this));
 };
 
 // TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash.service
+DashService.prototype.getGameAchievements = function(gameId) {
+    return when.promise(function(resolve, reject){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('achievements') ) {
+            resolve(this._games[gameId].achievements);
+        } else {
+            reject({});
+        }
+    }.bind(this) );
+};
+
+// TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash game, 1 reference in dash games
+DashService.prototype.getGameDetails = function(gameId) {
+    return when.promise(function(resolve, reject){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('details') ) {
+            resolve(this._games[gameId].info.details);
+        } else {
+            reject({});
+        }
+    }.bind(this) );
+};
+
+// TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash game, 1 in dash reports
+DashService.prototype.getGameMissions = function(gameId) {
+    return when.promise(function(resolve, reject){
+
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('missions') ) {
+            resolve(this._games[gameId].info.missions);
+        } else {
+            reject(null);
+        }
+    }.bind(this) );
+};
+
+// TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 2 references in dash games
+DashService.prototype.getGameBasicInfo = function(gameId) {
+    return when.promise(function(resolve, reject){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('basic') ) {
+            resolve(this._games[gameId].info.basic);
+        } else {
+            reject(null);
+        }
+    }.bind(this) );
+};
+
+// TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash _game, 2 references in dash reports
+DashService.prototype.getGameAssessmentInfo = function(gameId) {
+    return when.promise(function(resolve, reject){
+        resolve(this._games[gameId].info.assessment);
+    }.bind(this) );
+};
+
+
+// TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in dash reports
+DashService.prototype.getGameReportInfo = function(gameId, reportId) {
+    return when.promise(function(resolve, reject){
+        var list = this._games[gameId].info.reports.list;
+        for(var i = 0; i < list.length; i++) {
+            if( _.isObject(list[i]) &&
+                list[i].id == reportId) {
+                resolve(list[i]);
+            }
+        }
+        reject();
+    }.bind(this) );
+};
+
+// TODO: replace this with DB lookup, return promise
+// promise transition complete
+// 1 reference in data game
 DashService.prototype.getGameReleases = function(gameId) {
-    if( this._games.hasOwnProperty(gameId) &&
-        this._games[gameId].hasOwnProperty('info') &&
-        this._games[gameId].info.hasOwnProperty('releases') ) {
-        return this._games[gameId].info.releases;
-    } else {
-        return {};
-    }
+    return when.promise(function(resolve, reject){
+        if( this._games.hasOwnProperty(gameId) &&
+            this._games[gameId].hasOwnProperty('info') &&
+            this._games[gameId].info.hasOwnProperty('releases') ) {
+            resolve(this._games[gameId].info.releases);
+        } else {
+            reject({});
+        }
+    }.bind(this) );
 };
 
 // TODO: replace this with DB lookup
@@ -267,11 +314,13 @@ DashService.prototype._loadGameFiles = function() {
         try{
             var dir = path.join(__dirname, "games");
             var files = fs.readdirSync(dir);
-
+            var gameId;
+            // game achievements initially is an array of promises
+            var gameAchievements = [];
             files.forEach(function(gameName){
                 // skip dot files
                 if(gameName.charAt(0) != '.') {
-                    var gameId = gameName.toUpperCase();
+                    gameId = gameName.toUpperCase();
 
                     // gameName is not case sensitive
                     this._games[ gameId ] = {};
@@ -310,23 +359,52 @@ DashService.prototype._loadGameFiles = function() {
                         this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
                         this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
                     }
+                    var state = false;
 
                     var list = this._games[gameId].info.reports.list;
-                    // add achievements to 'achievements' reports
+
                     for(var i = 0; i < list.length; i++) {
                         if( _.isObject(list[i]) &&
                             list[i].id == 'achievements') {
-                            this._games[gameId].info.reports.list[i].achievements = this.getGameAchievements(gameId);
+                            state = true;
+                            break;
                         }
+                    }
+                    if(state){
+                        gameAchievements.push(this.getGameAchievements(gameId));
                     }
                 }
             }.bind(this));
+            when.all(gameAchievements)
+                .then(function(gameAchievements){
+                    var index = 0;
+                    var list;
+                    files.forEach(function(gameName){
+                        if(gameName.charAt(0) != '.') {
+                            gameId = gameName.toUpperCase();
+                            list = this._games[gameId].info.reports.list;
+
+                            // add achievements to 'achievements' reports
+                            for(var i = 0; i < list.length; i++) {
+                                if( _.isObject(list[i]) &&
+                                    list[i].id == 'achievements') {
+                                    this._games[gameId].info.reports.list[i].achievements = gameAchievements[index];
+                                }
+                            }
+                            index++;
+                        }
+                    }.bind(this));
+
+                    console.log('DashService: Loaded Game Files');
+                    resolve();
+                }.bind(this))
+                .then(null, function(err){
+                    console.error("DashService: Load Game Files Error -", err);
+                }.bind(this));
         } catch(err) {
             console.error("DashService: Load Game Files Error -", err);
         }
 
-        console.log('DashService: Loaded Game Files');
-        resolve();
 // ------------------------------------------------
     }.bind(this));
 // end promise wrapper
@@ -361,4 +439,34 @@ DashService.prototype._filterDisabledGameInfo = function(gameInfo) {
     }.bind(this));
 
     return deleted;
+};
+
+DashService.prototype._saveAssessmentResults = function(userId, gameId, assessmentId, data){
+
+    return this.telmStore.getAssessmentResults(userId, gameId, assessmentId, data)
+        .then(function(aeResults){
+
+            var out = _.cloneDeep(aeResults);
+            out.gameId = gameId;
+            out.userId = userId;
+            out.assessmentId = assessmentId;
+
+            // merge results if they exist
+            if( !out.results &&
+                !_.isObject(out.results) ) {
+                out.results = {};
+            }
+
+            // remove old data
+            if( _.isArray(out.results.watchout) ||
+                _.isArray(out.results.shoutout) ) {
+                delete out.results.watchout;
+                delete out.results.shoutout;
+            }
+            // merge results
+            out.results = _.merge( out.results, data.results );
+
+            //console.log("out:", out);
+            return this.telmStore.saveAssessmentResults(userId, gameId, assessmentId, out);
+        }.bind(this) );
 };

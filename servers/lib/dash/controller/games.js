@@ -18,6 +18,8 @@ function getGamesBasicInfo(req, res){
     try {
         var loginType = "guest";
         var promise = null;
+        var gameIds;
+        var outGames = [];
         if( req.session &&
             req.session.passport &&
             req.session.passport.user ) {
@@ -32,45 +34,55 @@ function getGamesBasicInfo(req, res){
         promise.then(function(licenseGameIds){
             // ensure licenseGameIds is object
             if(!licenseGameIds) { licenseGameIds = {}; }
-            var outGames = [];
 
             // TODO: replace with promise
-            var games = this.getListOfVisibleGameIds();
-            for(var i = 0; i < games.length; i++) {
-                var gameId = games[i];
+            this.getListOfVisibleGameIds()
+                .then(function(ids){
+                    gameIds = ids;
+                    var promiseList = [];
+                    gameIds.forEach(function (gameId) {
+                        promiseList.push(this.getGameBasicInfo(gameId));
+                    }.bind(this) );
+                    return when.all(promiseList);
+                }.bind(this) )
+                .then(function(promiseList){
+                    for(var i = 0; i < gameIds.length; i++) {
+                        var gameId = gameIds[i];
 
-                var info = _.cloneDeep(this.getGameBasicInfo(gameId));
+                        var info = _.cloneDeep(promiseList[i]);
 
-                // TODO: move license check to it's own function
-                info.license.valid = false;
-                if(info.license.type == "free") {
-                    info.license.valid = true;
-                }
-                else if(info.license.type == "loginType") {
-                    info.license.loginType = info.license.loginType.split(',');
-                    if( _.contains(info.license.loginType, loginType) ) {
-                        info.license.valid = true;
+                        // TODO: move license check to it's own function
+                        info.license.valid = false;
+                        if(info.license.type == "free") {
+                            info.license.valid = true;
+                        }
+                        else if(info.license.type == "loginType") {
+                            info.license.loginType = info.license.loginType.split(',');
+                            if( _.contains(info.license.loginType, loginType) ) {
+                                info.license.valid = true;
+                            }
+                        } else {
+                            // check license
+                            info.license.valid = licenseGameIds.hasOwnProperty(gameId);
+                        }
+
+                        // no maintenance message and if invalid lic, replace with invalid lic message
+                        if(!info.maintenance && !info.license.valid) {
+                            info.maintenance = { message: info.license.message.invalid };
+                        }
+
+                        outGames.push( info );
                     }
-                } else {
-                    // check license
-                    info.license.valid = licenseGameIds.hasOwnProperty(gameId);
-                }
 
-                // no maintenance message and if invalid lic, replace with invalid lic message
-                if(!info.maintenance && !info.license.valid) {
-                    info.maintenance = { message: info.license.message.invalid };
-                }
+                    this.requestUtil.jsonResponse(res, outGames);
 
-                outGames.push( info );
-            }
-
-            this.requestUtil.jsonResponse(res, outGames);
-        }.bind(this))
+                }.bind(this) );
+        }.bind(this) )
 
         // catch all errors
         .then(null, function(err) {
             this.requestUtil.errorResponse(res, err);
-        }.bind(this));
+        }.bind(this) );
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
@@ -83,6 +95,7 @@ function getGamesDetails(req, res){
     try {
         var loginType = "guest";
         var promise = null;
+        var outGames = [];
         if( req.session &&
             req.session.passport &&
             req.session.passport.user ) {
@@ -97,14 +110,22 @@ function getGamesDetails(req, res){
         promise.then(function(licenseGameIds) {
             // ensure licenseGameIds is object
             if(!licenseGameIds) { licenseGameIds = {}; }
-            var outGames = [];
 
             // TODO: replace with promise
-            var games = this.getListOfVisibleGameIds();
-            for(var i = 0; i < games.length; i++) {
-                var gameId = games[i];
+            return this.getListOfVisibleGameIds()
 
-                var info = _.cloneDeep(this.getGameDetails(gameId));
+        }.bind(this) )
+        .then(function(games){
+            var promiseList = [];
+            games.forEach(function(gameId){
+                promiseList.push(this.getGameDetails(gameId));
+            }.bind(this) );
+            return when.all(promiseList);
+        }.bind(this) )
+        .then(function(promiseList){
+            // promiseList, once resolved, contains details from various games
+            promiseList.forEach(function(gameDetails){
+                var info = _.cloneDeep(gameDetails);
 
                 // TODO: move license check to it's own function
                 info.license.valid = false;
@@ -125,17 +146,15 @@ function getGamesDetails(req, res){
                 if(!info.maintenance && !info.license.valid) {
                     info.maintenance = { message: info.license.message.invalid };
                 }
-
                 outGames.push( info );
-            }
-
+            }.bind(this) );
             this.requestUtil.jsonResponse(res, outGames);
-        }.bind(this))
+        }.bind(this) )
 
         // catch all errors
         .then(null, function(err) {
             this.requestUtil.errorResponse(res, err);
-        }.bind(this));
+        }.bind(this) );
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
@@ -222,13 +241,16 @@ function getMyGames(req, res) {
                     gamesList.push( this.getGameBasicInfo(gameId) );
                 }
 
+                return when.all(gamesList);
+            }.bind(this) )
+            .then(function(gamesList){
                 this.requestUtil.jsonResponse(res, gamesList);
-            }.bind(this))
+            }.bind(this) )
 
             // catch all errors
             .then(null, function(err) {
                 this.requestUtil.errorResponse(res, err);
-            }.bind(this));
+            }.bind(this) );
 
     } catch(err) {
         console.trace("Reports: Get MyGames Error -", err);

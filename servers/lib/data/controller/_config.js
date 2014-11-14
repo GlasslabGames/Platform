@@ -13,20 +13,24 @@ function updateGameConfigs(req, res, next, serviceManager)
         return;
     }
 
+    // gameIds are not case sensitive
     var gameId = req.params.gameId.toUpperCase();
     var config = req.body;
-    var gameIds = serviceManager.get("dash").service.getListOfGameIds();
+    var dash = serviceManager.get("dash");
 
-    // check if gameId exists in list of gameIds
-    if (_.contains(gameIds, gameId)) {
-        this.cbds.updateConfigs(gameId, config)
-            .then(function(){
-                this.requestUtil.jsonResponse(res, { status: "ok" });
-            }.bind(this))
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
-            }.bind(this));
-    } else {
-        this.requestUtil.errorResponse(res, {key: "data.gameId.invalid", statusCode: 401});
-    }
+    // check if gameId exists
+    dash.isValidGameId(gameId)
+        .then(function(state){
+            if(!state){
+                return reject({key: "data.gameId.invalid", statusCode: 401});
+            }
+
+            return this.cbds.updateCongs(gameId, config);
+        }.bind(this) )
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .catch(function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this) );
 }
