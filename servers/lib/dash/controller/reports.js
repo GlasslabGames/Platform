@@ -90,6 +90,7 @@ exampleOut.getSOWO = [
 ];
 function _getSOWO(req, res, reportId, gameId, courseId) {
     var assessmentId = reportId;
+    var currentAssessmentData;
     var outAssessmentData;
 
     // get user list in class
@@ -118,6 +119,9 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                         // create copy of data for output
                         outAssessmentData = _.cloneDeep(assessmentData);
 
+                        // Set the current assessment data
+                        currentAssessmentData = assessmentData;
+
                         // TODO: replace this with promise
                         // find assessment by ID
                         return this.getGameAssessmentInfo(gameId);
@@ -132,8 +136,8 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                                 // output is array not object
                                 outAssessmentData.results.shoutout = [];
                                 // shoutout rules
-                                for(var j in assessmentData.results.shoutout) {
-                                    var so = assessmentData.results.shoutout[j];
+                                for(var j in currentAssessmentData.results.shoutout) {
+                                    var so = currentAssessmentData.results.shoutout[j];
                                     // don't need to expose the gameSessionId
                                     delete so.gameSessionId;
                                     so.id = j;
@@ -142,14 +146,14 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                                         so,
                                         assessment[i].rules[ j ] )
                                     );
-                                    //console.log("shoutout:", assessmentData.results.shoutout[j]);
+                                    //console.log("shoutout:", currentAssessmentData.results.shoutout[j]);
                                 }
 
                                 // output is array not object
                                 outAssessmentData.results.watchout = [];
                                 // watchout rules
-                                for(var j in assessmentData.results.watchout) {
-                                    var wo = assessmentData.results.watchout[j];
+                                for(var j in currentAssessmentData.results.watchout) {
+                                    var wo = currentAssessmentData.results.watchout[j];
                                     // don't need to expose the gameSessionId
                                     delete wo.gameSessionId;
                                     wo.id = j;
@@ -159,7 +163,7 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                                         assessment[i].rules[ j ] )
                                     );
 
-                                    //console.log("shoutout:", assessmentData.results.watchout[j]);
+                                    //console.log("shoutout:", currentAssessmentData.results.watchout[j]);
                                 }
 
                                 // done!
