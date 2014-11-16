@@ -78,6 +78,43 @@
                     "image": "assets/game-banner-AA-1.png",
                     "skinny": "assets/skinny-banner-AA-1.jpg"
                 },
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "title": "Nailed It!",
+                                    "description": "Outstanding performance at identifying weaknesses of claim-data pairs."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "title": "Contradictory Mechanic",
+                                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that contradicts their claim. More core construction practice is needed."
+                                },
+                                {
+                                    "id": "wo2",
+                                    "title": "Irrelevant Mechanic",
+                                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that is irrelevant to their claim. More core construction practice is needed."
+                                },
+                                {
+                                    "id": "wo3",
+                                    "title": "Straggler",
+                                    "description": "Struggling with identifying strengths and weaknesses of claim-data pairs."
+                                }
+                            ]
+                        }
+                    ]
+                },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             }
         ]
