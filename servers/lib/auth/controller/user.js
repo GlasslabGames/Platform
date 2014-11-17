@@ -12,6 +12,7 @@ module.exports = {
     registerUserV2:      registerUserV2,
     verifyEmailCode:     verifyEmailCode,
     verifyBetaCode:      verifyBetaCode,
+    verifyDeveloperCode: verifyDeveloperCode,
     registerManager:     registerManager,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
@@ -415,7 +416,35 @@ function registerUserV2(req, res, next, serviceManager) {
             this.requestUtil.errorResponse(res, {key: "user.create.input.missing.school"}, 400);
             return;
         }
-    } else {
+    }
+    else if( regData.role == lConst.role.developer ) {
+        // email and username is the same
+        req.body.username   = req.body.email;
+        regData.username    = Util.ConvertToString(req.body.username);
+        regData.password    = Util.ConvertToString(req.body.password);
+        regData.firstName   = Util.ConvertToString(req.body.firstName);
+        regData.lastName    = Util.ConvertToString(req.body.lastName);
+        regData.email       = Util.ConvertToString(req.body.email);
+
+
+        if(!regData.username) {
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
+            return;
+        }
+        if(!regData.password) {
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.password"}, 400);
+            return;
+        }
+        if(!regData.firstName) {
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.firstName"}, 400);
+            return;
+        }
+        if(!regData.email) {
+            this.requestUtil.errorResponse(res, {key:"user.create.input.missing.email"}, 400);
+            return;
+        }
+    }
+    else {
         this.requestUtil.errorResponse(res, {key:"user.create.invalid.role"}, 401);
         return;
     }
@@ -504,6 +533,20 @@ function registerUserV2(req, res, next, serviceManager) {
                         }.bind(this))
 
                 }
+                // if developer
+                else if( regData.role == lConst.role.developer ) {
+                    sendDeveloperConfirmEmail.call( this, regData, req.protocol, req.headers.host )
+                        .then(function(){
+                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
+                            this.requestUtil.jsonResponse(res, {});
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            this.stats.increment("error", "Route.Register.User.sendRegisterEmail");
+                            console.error("Auth: RegisterUserV2 - Error", err);
+                            this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
+                        }.bind(this))
+                }
             }.bind(this))
             // catch all errors
             .then(null, registerErr);
@@ -511,7 +554,8 @@ function registerUserV2(req, res, next, serviceManager) {
 
 
     // instructor
-    if(regData.role == lConst.role.instructor) {
+    if( regData.role == lConst.role.instructor ||
+        regData.role == lConst.role.developer ) {
         register(regData);
     }
     // else student
@@ -598,6 +642,58 @@ function sendBetaConfirmEmail(regData, protocol, host) {
         }.bind(this))
 }
 
+function sendDeveloperConfirmEmail(regData, protocol, host) {
+
+    var email = regData.email;
+
+    if( !(email &&
+        _.isString(email) &&
+        email.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
+    }
+
+    var verifyCode = Util.CreateUUID();
+
+    return this.getAuthStore().findUser('email', email)
+        .then(function(userData) {
+            userData.verifyCode           = verifyCode;
+            userData.verifyCodeStatus     = aConst.verifyCode.status.approve;
+            return this.glassLabStrategy.updateUserData(userData)
+                .then(function(){
+                    var emailData = {
+                        subject: "Playfully.org Developer confirmation",
+                        to: this.options.auth.developer.email.to,
+                        user: userData,
+                        code: verifyCode,
+                        host: protocol+"://"+host
+                    };
+                    var email = new Util.Email(
+                        this.options.auth.developer.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    email.send('developer-verify', emailData)
+                        .then(function(){
+                            // all ok
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            console.error('failed to send email:',  err);
+                        }.bind(this));
+
+                }.bind(this));
+        }.bind(this))
+        // catch all errors
+        .then(null, function(err) {
+            if( err.error &&
+                err.error == "user not found") {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
+            } else {
+                console.error("AuthService: sendDeveloperConfirmEmail Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this))
+}
+
 function verifyBetaCode(req, res, next) {
     if( !(req.params.code &&
         _.isString(req.params.code) &&
@@ -607,7 +703,8 @@ function verifyBetaCode(req, res, next) {
     // 1) verify the beta code and get user data
     this.getAuthStore().findUser("verify_code", req.params.code)
         .then(function(userData) {
-                if(userData.verifyCodeStatus === aConst.verifyCode.status.beta) {
+                if( userData.verifyCodeStatus === aConst.verifyCode.status.beta ||
+                    userData.verifyCodeStatus === aConst.verifyCode.status.approve ) {
                     return when.resolve(userData);
                 }
                 else if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
@@ -641,7 +738,7 @@ function verifyBetaCode(req, res, next) {
             if(!userData) return; // no data so skip
 
             // send verification email to registered user
-            return sendVerifyEmail.call(this, userData.email, req.protocol, req.headers.host, userData.verifyCode);
+            return sendVerifyEmail.call(this, userData, req.protocol, req.headers.host, userData.verifyCode);
         }.bind(this))
         .then(function(sent) {
             if(!sent) return; // no data so skip, error already handled above
@@ -652,7 +749,62 @@ function verifyBetaCode(req, res, next) {
             console.log(err);
             this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"});
         });
+}
 
+function verifyDeveloperCode(req, res, next) {
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
+    }
+    // 1) verify the beta code and get user data
+    this.getAuthStore().findUser("verify_code", req.params.code)
+        .then(function(userData) {
+            if( userData.verifyCodeStatus === aConst.verifyCode.status.approve ) {
+                return when.resolve(userData);
+            }
+            else if(userData.verifyCodeStatus === aConst.verifyCode.status.sent) {
+                if( !req.query.hasOwnProperty('resend') ||
+                    !req.query.resend
+                    ) {
+                    this.requestUtil.jsonResponse(res, {"text": "Verify Email has already been sent, add \"?resend=1\" at the end of the url if you want to resend", "statusCode":200});
+                } else {
+                    // force send email again
+                    return when.resolve(userData);
+                }
+            }
+            else if(userData.verifyCodeStatus === aConst.verifyCode.status.verified) {
+                this.requestUtil.jsonResponse(res, {"text": "Email has been verified by the user", "statusCode":200});
+            }
+            else {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+
+        }.bind(this),
+            function(err) {
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
+                } else {
+                    console.error("AuthService: verifyDeveloperCode Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+            }.bind(this))
+        .then(function(userData) {
+            if(!userData) return; // no data so skip
+
+            // send verification email to registered user
+            return sendDeveloperVerifyEmail.call(this, userData, req.protocol, req.headers.host, userData.verifyCode);
+        }.bind(this))
+        .then(function(sent) {
+            if(!sent) return; // no data so skip, error already handled above
+
+            this.requestUtil.jsonResponse(res, {"text": "Successfully Confirmed Developer. Verification email sent to the Developer", "statusCode":200});
+        }.bind(this))
+        .then(null, function(err) {
+            console.log(err);
+            this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"});
+        });
 }
 
 function sendVerifyEmail(regData, protocol, host) {
@@ -686,6 +838,61 @@ function sendVerifyEmail(regData, protocol, host) {
                         path.join(__dirname, "../email-templates"),
                         this.stats);
                     return email.send('register-verify', emailData)
+                        .then(function(){
+                            // all ok
+                            return true;
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            console.error('failed to send email:',  err);
+                        }.bind(this));
+
+                }.bind(this));
+        }.bind(this))
+        // catch all errors
+        .then(null, function(err) {
+            if( err.error &&
+                err.error == "user not found") {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
+            } else {
+                console.error("AuthService: sendVerifyEmail Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this))
+
+}
+
+function sendDeveloperVerifyEmail(regData, protocol, host) {
+    if( !(regData.email &&
+        _.isString(regData.email) &&
+        regData.email.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
+    }
+
+    var verifyCode = Util.CreateUUID();
+    var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
+
+    return this.getAuthStore().findUser('email', regData.email)
+        .then(function(userData) {
+            userData.verifyCode           = verifyCode;
+            userData.verifyCodeExpiration = expirationTime;
+            userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
+
+            return this.glassLabStrategy.updateUserData(userData)
+                .then(function(){
+                    var emailData = {
+                        subject: "Playfully.org - Verify your email",
+                        to:   userData.email,
+                        user: userData,
+                        code: verifyCode,
+                        host: protocol+"://"+host
+                    };
+
+                    var email = new Util.Email(
+                        this.options.auth.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    return email.send('register-developer-verify', emailData)
                         .then(function(){
                             // all ok
                             return true;
@@ -762,8 +969,14 @@ function verifyEmailCode(req, res, next, serviceManager) {
                 }
         }.bind(this))
         .then(function(userData) {
-            // 2) send welcome email
-            return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
+            // 2) send welcome email to developers
+            if( userData.role === lConst.role.developer ) {
+                return sendDeveloperWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
+            }
+            // 2) send welcome email to everyone else
+            else {
+                return sendWelcomeEmail.call(this, this.options.auth.email, userData, req.protocol, req.headers.host);
+            }
         }.bind(this))
         // catch all errors
         .then(null, function(err) {
@@ -798,6 +1011,33 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
         this.stats);
 
     return email.send('register-welcome', emailData);
+}
+
+function sendDeveloperWelcomeEmail(emailOptions, regData, protocol, host){
+    var verifyCode = Util.CreateUUID();
+    // store code
+    // 1) store code
+    /*
+     var emailData = {
+     user: regData,
+     code: verifyCode
+     };
+     */
+    // TODO
+    // instructor, manager or admin (all require email)
+    // 2) send email
+    var emailData = {
+        subject: "Welcome to Playfully.org Developer!",
+        to:   regData.email,
+        user: regData,
+        host: protocol+"://"+host
+    };
+    var email = new Util.Email(
+        emailOptions,
+        path.join(__dirname, "../email-templates"),
+        this.stats);
+
+    return email.send('register-developer-welcome', emailData);
 }
 
 

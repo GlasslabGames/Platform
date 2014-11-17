@@ -131,7 +131,12 @@ return when.promise(function(resolve, reject) {
                     this.stats.increment("error", "Route.Login.Auth.LogIn.GetCourse");
                     reject(err);
                 }.bind(this));
-        } else {
+        }
+        else if( user.role == lConst.role.developer ) {
+            this.stats.increment("info", "Route.Login.Auth.Developer.Done");
+            resolve( user );
+        }
+        else {
             this.stats.increment("error", "Route.Login.Auth.LogIn.InvalidRole");
             reject(new Error("invalid role"));
         }

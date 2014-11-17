@@ -453,6 +453,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/register-verify/:code/verifyDeveloper",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "verifyDeveloperCode"
+            }
+        },
+        {
             api: "/api/v2/auth/logout",
             service: "auth",
             controller: "login",

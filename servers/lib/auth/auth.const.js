@@ -49,7 +49,8 @@ module.exports = {
         status: {
             sent:       "sent",
             verified:   "verified",
-            beta:       "beta"
+            beta:       "beta",
+            approve:    "approve"
         }
     },
     datastore: {

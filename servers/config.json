@@ -88,6 +88,19 @@
                 }
             }
         },
+        "developer": {
+            "email": {
+                "to":   "accounts@glasslabgames.org",
+                "from": "GlassLab Games Developer <accounts@glasslabgames.org>",
+                "transport": {
+                    "service": "Gmail",
+                    "auth": {
+                        "user": "accounts@glasslabgames.org",
+                        "pass": "--ReplaceInCustomConfig--"
+                    }
+                }
+            }
+        },
         "datastore": {
             "mysql": {
                 "host"    : "localhost",

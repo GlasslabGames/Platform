@@ -50,6 +50,7 @@ module.exports = {
     "user.login.missing":                   "You forgot to enter your screen name/email address or password.",
     "user.login.notVerified":               "Please check your email to complete creating your account",
     "user.login.betaPending":               "Your account is currently pending approval by our admin. We will notify you of your beta status via email shortly. If you have any questions, please let us know at: " + aConst.support.email,
+    "user.login.approvePending":            "Your account is currently pending approval by our admin. We will notify you of your registration status via email shortly. If you have any questions, please let us know at: " + aConst.support.email,
     "user.login.notLoggedIn":               "You are not logged in",
     "user.passwordReset.general":           "We encountered an error. Please try again.",
     "user.passwordReset.code.missing":      "The code is invalid.",

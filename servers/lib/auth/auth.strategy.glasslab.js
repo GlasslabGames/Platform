@@ -131,6 +131,8 @@ return when.promise(function(resolve, reject) {
                         // check if email verified
                         if (user.verifyCodeStatus === aConst.verifyCode.status.beta) {
                             reject({user: user, key: "user.login.betaPending"});
+                        } else if( user.verifyCodeStatus === aConst.verifyCode.status.approve ) {
+                            reject( { user: user, key: "user.login.approvePending" } );
                         } else if ( user.verifyCodeStatus === aConst.verifyCode.status.verified ||
                                     user.verifyCodeStatus == null ) {
                             delete user.password;
