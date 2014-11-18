@@ -152,5 +152,8 @@
                 "password": "glasslab"
             }
         }
+    },
+    "sdk": {
+        "connect": "$host", "//": "$host is default, returns req.headers.host"
     }
 }
