@@ -38,7 +38,7 @@ function ResearchService(options, serviceManager){
         this.requestUtil = new Util.Request(this.options);
         this.store       = new Research.Datastore.Couchbase(this.options.research.datastore.couchbase);
         this.stats       = new Util.Stats(this.options, "Research");
-        this._serviceManager = serviceManager;
+        this.serviceManager = serviceManager;
         
     } catch(err) {
         console.trace("Auth: Error -", err);
@@ -65,7 +65,7 @@ return when.promise(function(resolve, reject) {
         .then(function(){
             // load csv file
 
-            //this.cronJob();
+            this.cronJob();
             var dir = __dirname+'/parser_schema/';
             //console.log("dir:", dir);
             fs.readdir(dir, function(error, files) {
@@ -100,22 +100,34 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+// ongoing job that schedules the parser to write data to a csv file
+// will end after a certain number of successful jobs
+// goal: integrate with s3 buckets and notification emails
 ResearchService.prototype.cronJob = function(){
     var someCrazyRandomNumber = 0;
+    var serviceManager = this.serviceManager;
+
     // actual time wanted: new CronJob('0 0 1 * * *', function(){
     // will alter this time for prototyping
-    new CronJob('30 30 14 * * *', function(){
+    new CronJob('*/15 * * * * *', function(){
         var a = Date.now();
-        function timeStop(){
+        function archiveCheck(){
             var b = Date.now();
             if(b-a < 100){
-                // invoke with properly credentialed req, res, next
-                // exactly how it fits in require more investigation
-                //this.serviceManager.internalRoute('/api/v2/research/game/SC/events', 'get', [req, res, next]);
-                console.log("time test",++someCrazyRandomNumber);
-                setTimeout(timeStop, 10);
+                serviceManager.internalRoute("/api/v2/research/archive", 'get', ['SC', 100])
+                    .then(function(){
+                        timeStop();
+                    }.bind(this))
+                    .catch(function(err){
+                        if(err !== 'invalid route'){
+                            // email failure notification
+                            console.error('Cron Error -',err);
+                        }
+                    }.bind(this));
+            } else{
+                // email success notification
             }
         }
-        timeStop();
-    }, null, true, "America/Los_Angeles");
+        archiveCheck();
+    }.bind(this), null, true, "America/Los_Angeles");
 };

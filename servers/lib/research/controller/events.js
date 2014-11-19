@@ -3,9 +3,11 @@ var _         = require('lodash');
 var when      = require('when');
 var moment    = require('moment');
 var csv       = require('csv');
+var Util      = require('../../core/util.js');
 
 module.exports = {
-    getEventsByDate: getEventsByDate
+    getEventsByDate: getEventsByDate,
+    _archiveEventsByDate: _archiveEventsByDate
 };
 
 /*
@@ -28,6 +30,75 @@ module.exports = {
     startEpoc
     dateRange
  */
+
+// access data from a particular time period on the parser.  Write data to a csv (ultimately s3 bucket)
+// adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
+function _archiveEventsByDate(gameId, limit){
+    return when.promise(function(resolve, reject) {
+        try {
+
+            var parsedSchemaData = {header: "", rows: {}};
+            // if no schema assume it's gameId
+            var schema = gameId;
+
+            var startDate = "11-13-14";
+            startDate = moment(startDate);
+            startDate = startDate.utc();
+
+            var endDate = moment();
+            var timeFormat = "MM/DD/YYYY HH:mm:ss";
+
+            this.store.getCsvDataByGameId(gameId)
+                .then(function (csvData) {
+                    return parseCSVSchema(csvData);
+                }.bind(this))
+
+                .then(function (_parsedSchemaData) {
+                    parsedSchemaData = _parsedSchemaData;
+
+                    //console.log("Getting Events For Game:", gameId, "from", startDate.format("MM/DD/YYYY"), "to", endDate.format("MM/DD/YYYY"));
+                    return this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
+                }.bind(this))
+
+                .then(function (events) {
+
+                    //console.log("Running Filter...");
+                    //console.log("Processing", events.length, "Events...");
+                    // process events
+                    var p = processEvents.call(this, parsedSchemaData, events, timeFormat);
+                    p.then(function (outList) {
+                        var outData = outList.join("\n");
+                        console.log(__dirname);
+                        var fileName = __dirname
+                            + '/../../../../../../Desktop/'
+                            + gameId
+                            + "_" + startDate.format("YYYY-DD-MM")
+                            + "_" + endDate.format("YYYY-DD-MM")
+                            + ".csv";
+                        return Util.WriteToCSV(outData, fileName);
+                    }.bind(this))
+                    .then(function(){
+                        resolve();
+                    }.bind(this))
+                    .catch(function(err){
+                        reject(err);
+                        console.trace("Research: Process Events -", err);
+                    }.bind(this));
+
+                }.bind(this))
+
+                // catch all
+                .then(null, function (err) {
+                    reject(err);
+                }.bind(this));
+
+        } catch (err) {
+            reject(err);
+            console.error("Research: Get User Data Error -", err);
+        }
+    }.bind(this));
+}
+
 function getEventsByDate(req, res, next){
 
     try {

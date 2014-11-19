@@ -10,6 +10,7 @@ var moment = require('moment');
 var when   = require('when');
 var _      = require('lodash');
 var uuid   = require('node-uuid');
+var fs     = require('fs');
 var aws    = require('aws-sdk');
 
 function capitalize(string) {
@@ -201,8 +202,23 @@ module.exports = {
     String: {
         capitalize: capitalize
     },
-    Reshape: reshape
+    Reshape: reshape,
+    WriteToCSV: writeToCSV
 };
+
+// writes data to a chosen file
+function writeToCSV(data, file){
+    return when.promise(function(resolve, reject){
+        var writeCSV = fs.createWriteStream(file);
+        writeCSV.write(data, 'utf8');
+        writeCSV.on('end', function(){
+            resolve();
+        }.bind(this));
+        writeCSV.on('error', function(err){
+            reject(err);
+        }.bind(this));
+    }.bind(this));
+}
 
 // sets s3 credentials and creates s3 instance
 function s3Config(){

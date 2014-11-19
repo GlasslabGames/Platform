@@ -117,7 +117,7 @@ return when.promise(function(resolve, reject) {
                 keys.push( results[i].id );
             }
 
-            var taskList = reshape(keys, this.options.multiGetChunkSize);
+            var taskList = Util.Reshape(keys, this.options.multiGetChunkSize);
             console.log("CouchBase ResearchStore: getEventsByKeys Number of Chunks:", taskList.length);
 
             var guardedAsyncOperation, taskResults;
@@ -153,7 +153,7 @@ ResearchDS_Couchbase.prototype.getUserDataBySessions = function(gameSessionIdLis
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var taskList = reshape(gameSessionIdList, this.options.multiGetChunkSize);
+    var taskList = Util.Reshape(gameSessionIdList, this.options.multiGetChunkSize);
     console.log("getUserDataBySessions totalEvents:", taskList.length);
 
     var guardedAsyncOperation, taskResults;

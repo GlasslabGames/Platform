@@ -485,6 +485,7 @@ ServiceManager.prototype.internalRoute = function(routePath, method, args){
             args = [args, this];
         }
 
-        route.func.apply(route.service, args);
+        return route.func.apply(route.service, args);
     }
+    return when.reject('invalid route');
 };
