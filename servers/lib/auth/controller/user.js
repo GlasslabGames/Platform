@@ -826,7 +826,7 @@ function sendVerifyEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org - Verify your email",
+                        subject: "GlassLab Games - Verify your email",
                         to:   userData.email,
                         user: userData,
                         code: verifyCode,
