@@ -7,7 +7,7 @@ var Util      = require('../../core/util.js');
 
 module.exports = {
     getEventsByDate: getEventsByDate,
-    _archiveEventsByDate: _archiveEventsByDate
+    _archiveEventsByDate: archiveEventsByDate
 };
 
 /*
@@ -33,63 +33,163 @@ module.exports = {
 
 // access data from a particular time period on the parser.  Write data to a csv (ultimately s3 bucket)
 // adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
-function _archiveEventsByDate(gameId, limit){
+
+
+function archiveEventsByDate(gameId, limit){
+    return when.promise(function(resolve, reject){
+        var hour = 0;
+        var eventsLeft = limit;
+        var date = "11-13-14";
+        var todayDate = new Date();
+        var startDate = moment(date).utc().format("YYYY-DD-MM");
+        todayDate = todayDate.setHours(0,0,0,0);
+        var part = 1;
+        var parsedSchemaData;
+        var file = __dirname
+            + '/../../../../../../Desktop/'
+            + gameId
+            + "_" + startDate
+            + "_part" + part + ".csv";
+        var existingFile = false;
+        //
+        function recursor(){
+            return when.promise(function(resolve, reject){
+                _archiveEventsByHour.call(this, gameId, limit, hour, eventsLeft, date, part, file, parsedSchemaData, existingFile)
+                    .then(function(left){
+                        existingFile = true;
+                        eventsLeft = left;
+                        hour++;
+                        if(hour < 24){
+                            if(eventsLeft <= 0){
+                                part++;
+                                file = __dirname
+                                    + '/../../../../../../Desktop/'
+                                    + gameId
+                                    + "_" + startDate
+                                    + "_part" + part + ".csv";
+                                eventsLeft = limit;
+                                existingFile = false;
+                            }
+                            recursor.call(this)
+                                .then(function(state){
+                                    console.log('resolvez');
+                                    resolve(state)
+                                }.bind(this))
+                                .catch(function(err){
+                                    console.log('rejectz');
+                                    reject(err);
+                                }.bind(this));
+                        } else{
+                            var startOfDay = new Date(date);
+                            startOfDay = startOfDay.setHours(0,0,0,0);
+                            if(startOfDay === todayDate){
+                                return resolve(true);
+                            }
+                            resolve(false);
+                        }
+                    }.bind(this));
+            }.bind(this));
+        }
+
+        // call to get start date
+        //var archiveInfo;
+        //var archiveKey = 'gd:archiveInfo';
+        //this.store.client.get(archiveKey, function(err, results){
+        //    if(err){
+        //        return reject(err);
+        //    }
+        //    archiveInfo = results[gameId]
+        //    date = archiveInfo.lastArchive.date;
+        //    return date;
+        //}.bind(this))
+        //.then(function(date) {
+        //    if(date !== todayDate){
+        //        return recursor();
+        //    }
+        //    when.reject('up to date');
+        //}.bind(this))
+        //.then(function(state){
+        //    archiveInfo.lastArchive.date = date + '1 day';
+        //    this.store.client.set(archiveInfo, function(err, results){
+        //        if(err){
+        //            when.reject(err);
+        //        }
+        //        resolve(state);
+        //    }.bind(this));
+        //}.bind(this))
+        //.catch(function(err){
+        //    if(err === 'up to date'){
+        //        resolve(true);
+        //    }
+        //    reject(err);
+        //}.bind(this));
+        this.store.getCsvDataByGameId(gameId)
+            .then(function (csvData) {
+                return parseCSVSchema(csvData);
+            }.bind(this))
+            .then(function (_parsedSchemaData) {
+                parsedSchemaData = _parsedSchemaData;
+                recursor.call(this)
+            }.bind(this))
+            .then(function(state){
+                console.log('completez');
+                resolve(state);
+            }.bind(this))
+            .catch(function(err){
+                console.log('_____rejectz');
+                reject(err);
+            }.bind(this));
+
+    }.bind(this));
+}
+
+function _archiveEventsByHour(gameId, limit, hour, eventsLeft, date, part, file, parsedSchemaData, existingFile){
     return when.promise(function(resolve, reject) {
         try {
+            if(hour === 15 || hour === 16 || date === '11-14-14'){
+                console.log('stap!');
+            }
+            var eventsUsed;
 
-            var parsedSchemaData = {header: "", rows: {}};
-            // if no schema assume it's gameId
-            var schema = gameId;
-
-            var startDate = "11-13-14";
-            startDate = moment(startDate);
+            var startDate = moment(date);
+            startDate.hour(hour);
+            startDate.minute(0);
+            startDate.seconds(0);
             startDate = startDate.utc();
 
-            var endDate = moment();
+            var endDate = moment(date);
+            endDate.hour(hour);
+            endDate.minute(59);
+            endDate.seconds(59);
+            endDate = endDate.utc();
+
             var timeFormat = "MM/DD/YYYY HH:mm:ss";
 
-            this.store.getCsvDataByGameId(gameId)
-                .then(function (csvData) {
-                    return parseCSVSchema(csvData);
-                }.bind(this))
-
-                .then(function (_parsedSchemaData) {
-                    parsedSchemaData = _parsedSchemaData;
-
-                    //console.log("Getting Events For Game:", gameId, "from", startDate.format("MM/DD/YYYY"), "to", endDate.format("MM/DD/YYYY"));
-                    return this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
-                }.bind(this))
-
+            this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
                 .then(function (events) {
 
-                    //console.log("Running Filter...");
+                    console.log("Running Filter...:", events);
                     //console.log("Processing", events.length, "Events...");
+                    eventsUsed = events.length;
                     // process events
-                    var p = processEvents.call(this, parsedSchemaData, events, timeFormat);
-                    p.then(function (outList) {
-                        var outData = outList.join("\n");
-                        console.log(__dirname);
-                        var fileName = __dirname
-                            + '/../../../../../../Desktop/'
-                            + gameId
-                            + "_" + startDate.format("YYYY-DD-MM")
-                            + "_" + endDate.format("YYYY-DD-MM")
-                            + ".csv";
-                        return Util.WriteToCSV(outData, fileName);
-                    }.bind(this))
-                    .then(function(){
-                        resolve();
-                    }.bind(this))
-                    .catch(function(err){
-                        reject(err);
-                        console.trace("Research: Process Events -", err);
-                    }.bind(this));
-
+                    return processEvents.call(this, parsedSchemaData, events, timeFormat, existingFile);
                 }.bind(this))
-
+                .then(function (outList) {
+                    if(!existingFile){
+                        outList[0] = outList[0] + "\n";
+                    }
+                    var outData = outList.join("\n");
+                    return Util.WriteToCSV(outData, file);
+                }.bind(this))
+                .then(function(){
+                    console.log('resolve1');
+                    eventsLeft -= eventsUsed;
+                    resolve(eventsLeft);
+                }.bind(this))
                 // catch all
                 .then(null, function (err) {
                     reject(err);
+                    console.trace("Research: Process Events -", err);
                 }.bind(this));
 
         } catch (err) {
@@ -339,7 +439,7 @@ return when.promise(function(resolve, reject) {
 }
 
 
-function processEvents(parsedSchema, events, timeFormat) {
+function processEvents(parsedSchema, events, timeFormat, existingFile) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -349,6 +449,7 @@ return when.promise(function(resolve, reject) {
 
     var outIt = 0;
     var outList = [];
+    existingFile = existingFile || false;
 
     gameSessionIdList = _.pluck(events, "gameSessionId");
     this.store.getUserDataBySessions(gameSessionIdList)
@@ -426,7 +527,9 @@ return when.promise(function(resolve, reject) {
             console.log("Done Processing", events.length, "Events -> Out Events", outList.length);
 
             // add header
-            outList.unshift(parsedSchema.header);
+            if(!existingFile){
+                outList.unshift(parsedSchema.header);
+            }
             resolve(outList);
         }.bind(this));
 

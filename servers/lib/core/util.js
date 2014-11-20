@@ -209,14 +209,12 @@ module.exports = {
 // writes data to a chosen file
 function writeToCSV(data, file){
     return when.promise(function(resolve, reject){
-        var writeCSV = fs.createWriteStream(file);
-        writeCSV.write(data, 'utf8');
-        writeCSV.on('end', function(){
-            resolve();
-        }.bind(this));
-        writeCSV.on('error', function(err){
-            reject(err);
-        }.bind(this));
+        fs.appendFile(file, data, function(err){
+            if(err){
+                return reject(err);
+            }
+            resolve()
+        }.bind(this))
     }.bind(this));
 }
 
