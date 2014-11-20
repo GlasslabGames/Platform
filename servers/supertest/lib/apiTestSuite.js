@@ -320,7 +320,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
 					expect(res.status).to.eql(200);
 				});
       
-      listenForEmailsFrom(adminEmail, "Your Playfully.org Password", function (email) {
+      listenForEmailsFrom(adminEmail, "Your GlassLab Games Password", function (email) {
         confirmationEmail = email;
         done();
       }, conLog);
@@ -332,7 +332,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
     //// 2. new beta user /////
     ///////////////////////////
     
-		it('[2. new beta user] #can request access to Playfully.org', function(done) {
+		it('[2. new beta user] #can request access to GlassLab Games', function(done) {
 			
       // Prepare data for beta registration tests
 			newTeacher = JSON.parse(requestAccess('glTestTeacher' + tstamp(), 'build+' + tstamp() + '@glasslabgames.org', 'glasslab123'));
@@ -344,7 +344,7 @@ var apiTestSuite = function (env, data, routeMap, logLevel) {
       if (env == 'local') {   // TODO swap 'local' with testable group
         
         // Stop 0: get admin email, grab approve link (and generate verify link)
-        listenForEmailsFrom(adminEmail, "Playfully.org Beta confirmation", function (email) {
+        listenForEmailsFrom(adminEmail, "GlassLab Games Beta confirmation", function (email) {
           confirmationEmail = email;
           results['approveEmail'] = email;
           

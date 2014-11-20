@@ -146,8 +146,10 @@
                 "authRequired": true,
                 "links": [
                     {
+                        "target": "_blank",
                         "name": "iPad",
-                        "link": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8"
+                        "link": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8",
+                        "type": "ios-appstore"
                     }
                 ]
             }

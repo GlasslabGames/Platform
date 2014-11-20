@@ -661,7 +661,7 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org Developer confirmation",
+                        subject: "GlassLab Games Developer confirmation",
                         to: this.options.auth.developer.email.to,
                         user: userData,
                         code: verifyCode,
@@ -881,7 +881,7 @@ function sendDeveloperVerifyEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org - Verify your email",
+                        subject: "GlassLab Games - Verify your email",
                         to:   userData.email,
                         user: userData,
                         code: verifyCode,
@@ -1027,7 +1027,7 @@ function sendDeveloperWelcomeEmail(emailOptions, regData, protocol, host){
     // instructor, manager or admin (all require email)
     // 2) send email
     var emailData = {
-        subject: "Welcome to Playfully.org Developer!",
+        subject: "Welcome to GlassLab Games Developer!",
         to:   regData.email,
         user: regData,
         host: protocol+"://"+host
