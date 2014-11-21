@@ -72,5 +72,11 @@ function index(req, res, next, serviceManager)
 function connect(req, res, next)
 {
     var host = req.headers.host;
+    if( this.options.sdk &&
+        this.options.sdk.connect ) {
+        if( this.options.sdk.connect != "$host" ) {
+            host = this.options.sdk.connect;
+        }
+    }
     res.send("http://"+host);
 }
