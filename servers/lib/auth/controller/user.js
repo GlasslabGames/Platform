@@ -609,7 +609,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org Beta confirmation",
+                        subject: "GlassLabGames.org Beta confirmation",
                         to: this.options.auth.beta.email.to,
                         user: userData,
                         code: verifyCode,
@@ -1000,7 +1000,7 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
     // instructor, manager or admin (all require email)
     // 2) send email
     var emailData = {
-        subject: "Welcome to Playfully.org!",
+        subject: "Welcome to GlassLabGames.org!",
         to:   regData.email,
         user: regData,
         host: protocol+"://"+host
@@ -1069,7 +1069,7 @@ function resetPasswordSend(req, res, next) {
                         //
                         // 2) send email
                         var emailData = {
-                            subject: "Your Playfully.org Password",
+                            subject: "Your GlassLabGames.org Password",
                             to:   userData.email,
                             user: userData,
                             code: resetCode,
