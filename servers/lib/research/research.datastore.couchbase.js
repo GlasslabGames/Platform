@@ -319,15 +319,16 @@ ResearchDS_Couchbase.prototype.getArchiveInfo = function(){
             resolve(archiveInfo);
         }.bind(this))
     }.bind(this));
-}
+};
 
 ResearchDS_Couchbase.prototype.updateArchiveInfo = function(data){
+    var archiveKey = 'gd:archiveInfo';
     return when.promise(function(resolve, reject){
-        this.client.set(data, function(err, results){
+        this.client.set(archiveKey, data, function(err, results){
             if(err){
                 reject(err);
             }
             resolve();
         }.bind(this));
     }.bind(this));
-}
+};

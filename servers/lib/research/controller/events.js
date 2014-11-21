@@ -53,7 +53,9 @@ function archiveEventsByDate(gameId, maxEvents, date){
         var file;
         var existingFile = false;
 
-        //
+        // calls archiveEventsByLimit.
+        // If limit is reached, calls again, changing the file so data can be written to new csv
+        // determines if analyzed date is today, and sends that information
         function recursor(){
             return when.promise(function(resolve, reject){
                 _archiveEventsByLimit.call(this, gameId, limit, startDateTime, endDateTime, file, parsedSchemaData, existingFile)
@@ -70,34 +72,32 @@ function archiveEventsByDate(gameId, maxEvents, date){
                                 existingFile = false;
                             }
                             recursor.call(this)
-                                .then(function (state) {
-                                    resolve(state)
+                                .then(function () {
+                                    resolve()
                                 }.bind(this))
                                 .catch(function (err) {
                                     reject(err);
                                 }.bind(this));
                         } else {
-                            var state = (thisDate === todayDate);
-                            return resolve(state);
+                            resolve();
                         }
                     }.bind(this));
             }.bind(this));
         }
 
         var archiveInfo;
-        var upToDate;
         this.store.getArchiveInfo()
             .then(function(info){
-                //archiveInfo = info;
-                ////86400000 is length of day in ms. date saved in terms of milliseconds.
-                //var dateInMS = archiveInfo[gameId].lastArchive.date + 86400000;
-                //archiveInfo[gameId].lastArchive.date = dateInMS;
-                //var dateObj = new Date(dateInMS);
-                //var dateArr = dateObj.toJSON().split('-');
-                //var date = dateArr[1] + '-' + dateArr[2].slice(0,2) + '-' + dateArr[0].slice(2,4);
+                archiveInfo = info;
+                // one day in milliseconds.  Date is saved in gd:archiveInfo in terms of milliseconds
+                // for testing I defaulted lastArchive.date to 1325404800000, which is start of day January 1, 2012
+                var oneDay = 86400000;
+                var dateInMS = archiveInfo[gameId].lastArchive.date + oneDay;
+                archiveInfo[gameId].lastArchive.date = dateInMS;
+                var dateObj = new Date(dateInMS);
+                var dateArr = dateObj.toJSON().split('-');
+                var date = dateArr[1] + '-' + dateArr[2].slice(0,2) + '-' + dateArr[0].slice(2,4);
 
-                //still determining how to format the date from gd:archiveInfo. hard coding date for now.
-                //date = "11-10-14";
                 var dates = _initDates(date);
                 startDateTime = dates[0];
                 endDateTime = dates[1];
@@ -122,12 +122,14 @@ function archiveEventsByDate(gameId, maxEvents, date){
             .then(function(state){
                 upToDate = state;
                 var jobEnd = Date.now();
-                //archiveInfo[gameId].lastArchive.eventCount = eventCount;
-                //// time of processing this day, in milliseconds
-                //archiveInfo[gameId].lastArchive.processTime = jobEnd - jobStart;
-                //return this.store.updateArchiveInfo(archiveInfo);
+                // total number of events for game on this day
+                archiveInfo[gameId].lastArchive.eventCount = eventCount;
+                // time of processing this day, in milliseconds
+                archiveInfo[gameId].lastArchive.processTime = jobEnd - jobStart;
+                return this.store.updateArchiveInfo(archiveInfo);
             }.bind(this))
             .then(function(){
+                var upToDate = (thisDate === todayDate);
                 resolve(upToDate);
             }.bind(this))
             .catch(function(err){
