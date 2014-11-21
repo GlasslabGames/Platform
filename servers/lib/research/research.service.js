@@ -110,22 +110,26 @@ ResearchService.prototype.cronJob = function(){
     // hard coded ids array for now
     // when integrate info.json couchbase stuff, then can use view to find list of all ids programmatically
     var ids = ['SC'];
+    var dates = ['11-10-14', '11-11-14', '11-12-14', '11-13-14', '11-14-14', '11-15-14', '11-16-14', '11-17-14', '11-18-14', '11-19-14', '11-20-14', '11-21-14'];
+    var dateIndex = 0;
     var index = 0;
 
     // actual time wanted: new CronJob('0 0 1 * * *', function(){
     // will alter this time for prototyping
     // message You specified a Timezone but have not included the `time` module. Timezone functionality is disabled. Please install the `time` module to use Timezones in your application.
-    new CronJob('0 0 * * * *', function(){
+    new CronJob('30 26 * * * *', function(){
         var a = Date.now();
         function archiveCheck(){
             var b = Date.now();
             // adjust timespan for end limit on process
             // currently set to 100 ms before job stops the recursive calls
             if(b-a < 100 && index < ids.length){
-                serviceManager.internalRoute("/api/v2/research/archive", 'get', [ids[index], 50])
+                serviceManager.internalRoute("/api/v2/research/archive", 'get', [ids[index], 50, dates[dateIndex]])
                     .then(function(upToDate){
+                        dateIndex++;
                         if(upToDate){
                             index++;
+                            dateIndex = 0;
                         }
                         archiveCheck();
                     }.bind(this))

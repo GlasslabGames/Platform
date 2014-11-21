@@ -327,7 +327,7 @@ ResearchDS_Couchbase.prototype.updateArchiveInfo = function(data){
             if(err){
                 reject(err);
             }
-            resolve(state);
+            resolve();
         }.bind(this));
     }.bind(this));
 }

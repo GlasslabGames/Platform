@@ -35,7 +35,7 @@ module.exports = {
 // adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
 
 
-function archiveEventsByDate(gameId, maxEvents){
+function archiveEventsByDate(gameId, maxEvents, date){
     return when.promise(function(resolve, reject){
         var limit = maxEvents;
         var jobStart = Date.now();
@@ -77,7 +77,8 @@ function archiveEventsByDate(gameId, maxEvents){
                                     reject(err);
                                 }.bind(this));
                         } else {
-                            resolve(thisDate === todayDate);
+                            var state = (thisDate === todayDate);
+                            return resolve(state);
                         }
                     }.bind(this));
             }.bind(this));
@@ -87,15 +88,16 @@ function archiveEventsByDate(gameId, maxEvents){
         var upToDate;
         this.store.getArchiveInfo()
             .then(function(info){
-                archiveInfo = info;
-                var archiveDate = new Date(archiveInfo[gameId].lastArchive.date);
-                var formerDate = archiveDate.getDate();
-                var currentDate = archiveDate.setDate(formerDate + 1);
-                var date = JSON.stringify(currentDate);
-                archiveInfo[gameId].lastArchive.date = date;
+                //archiveInfo = info;
+                ////86400000 is length of day in ms. date saved in terms of milliseconds.
+                //var dateInMS = archiveInfo[gameId].lastArchive.date + 86400000;
+                //archiveInfo[gameId].lastArchive.date = dateInMS;
+                //var dateObj = new Date(dateInMS);
+                //var dateArr = dateObj.toJSON().split('-');
+                //var date = dateArr[1] + '-' + dateArr[2].slice(0,2) + '-' + dateArr[0].slice(2,4);
 
-                // still determining how to format the date from gd:archiveInfo. hard coding date for now.
-                date = "11-13-14";
+                //still determining how to format the date from gd:archiveInfo. hard coding date for now.
+                //date = "11-10-14";
                 var dates = _initDates(date);
                 startDateTime = dates[0];
                 endDateTime = dates[1];
@@ -120,10 +122,10 @@ function archiveEventsByDate(gameId, maxEvents){
             .then(function(state){
                 upToDate = state;
                 var jobEnd = Date.now();
-                archiveInfo[gameId].lastArchive.eventCount = eventCount;
-                // time of processing this day, in milliseconds
-                archiveInfo[gameId].lastArchive.processTime = jobEnd - jobStart;
-                return this.store.updateArchiveInfo(archiveInfo);
+                //archiveInfo[gameId].lastArchive.eventCount = eventCount;
+                //// time of processing this day, in milliseconds
+                //archiveInfo[gameId].lastArchive.processTime = jobEnd - jobStart;
+                //return this.store.updateArchiveInfo(archiveInfo);
             }.bind(this))
             .then(function(){
                 resolve(upToDate);
