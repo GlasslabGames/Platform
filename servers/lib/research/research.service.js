@@ -115,7 +115,7 @@ ResearchService.prototype.cronJob = function(){
     // actual time wanted: new CronJob('0 0 1 * * *', function(){
     // will alter this time for prototyping
     // message You specified a Timezone but have not included the `time` module. Timezone functionality is disabled. Please install the `time` module to use Timezones in your application.
-    new CronJob('20 28 * * * *', function(){
+    new CronJob('0 0 * * * *', function(){
         var a = Date.now();
         function archiveCheck(){
             var b = Date.now();

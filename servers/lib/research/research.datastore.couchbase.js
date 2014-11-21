@@ -307,3 +307,27 @@ ResearchDS_Couchbase.prototype.getCsvDataByGameId = function(gameId) {
     }.bind(this));
 // end promise wrapper
 };
+
+ResearchDS_Couchbase.prototype.getArchiveInfo = function(){
+    var archiveKey = 'gd:archiveInfo';
+    return when.promise(function(resolve, reject){
+        this.client.get(archiveKey, function(err, results){
+            if(err){
+                return reject(err);
+            }
+            var archiveInfo = results.value;
+            resolve(archiveInfo);
+        }.bind(this))
+    }.bind(this));
+}
+
+ResearchDS_Couchbase.prototype.updateArchiveInfo = function(data){
+    return when.promise(function(resolve, reject){
+        this.client.set(data, function(err, results){
+            if(err){
+                reject(err);
+            }
+            resolve(state);
+        }.bind(this));
+    }.bind(this));
+}

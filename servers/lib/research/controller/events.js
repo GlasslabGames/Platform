@@ -38,20 +38,19 @@ module.exports = {
 function archiveEventsByDate(gameId, maxEvents){
     return when.promise(function(resolve, reject){
         var limit = maxEvents;
+        var jobStart = Date.now();
 
         var startDateTime;
         var endDateTime;
         var todayDate;
         var thisDate;
         var formattedDate;
+        var eventCount = 0;
 
         var part = 1;
         var parsedSchemaData;
-        var fileString = __dirname
-            + '/../../../../../../Desktop/'
-            + gameId
-            + "_" + formattedDate;
-        var file = fileString + "_part" + part + ".csv";
+        var fileString;
+        var file;
         var existingFile = false;
 
         //
@@ -61,6 +60,7 @@ function archiveEventsByDate(gameId, maxEvents){
                     .then(function(outputs){
                         limit = outputs[0];
                         startDateTime = outputs[1];
+                        eventCount += outputs[2];
                         if(startDateTime !== endDateTime) {
                             existingFile = true;
                             if (limit === 0) {
@@ -77,93 +77,61 @@ function archiveEventsByDate(gameId, maxEvents){
                                     reject(err);
                                 }.bind(this));
                         } else {
-                            if (thisDate === todayDate) {
-                                resolve(true);
-                            } else {
-                                resolve(false);
-                            }
+                            resolve(thisDate === todayDate);
                         }
                     }.bind(this));
             }.bind(this));
         }
 
-        // call to get start date
-        //var archiveInfo;
-        //var archiveKey = 'gd:archiveInfo';
-        //this.store.client.get(archiveKey, function(err, results){
-        //    if(err){
-        //        return reject(err);
-        //    }
-        //    archiveInfo = results[gameId]
-        //    date = archiveInfo.lastArchive.date;
-        //    return date;
-        //}.bind(this))
-        //.then(function(date) {
-        //    if(date !== todayDate){
-        //        return recursor();
-        //    }
-        //    when.reject('up to date');
-        //}.bind(this))
-        //.then(function(state){
-        //    archiveInfo.lastArchive.date = date + '1 day';
-        //    this.store.client.set(archiveInfo, function(err, results){
-        //        if(err){
-        //            when.reject(err);
-        //        }
-        //        resolve(state);
-        //    }.bind(this));
-        //}.bind(this))
-        //.catch(function(err){
-        //    if(err === 'up to date'){
-        //        resolve(true);
-        //    }
-        //    reject(err);
-        //}.bind(this));
         var archiveInfo;
-        var archiveKey = 'gd:archiveInfo';
+        var upToDate;
+        this.store.getArchiveInfo()
+            .then(function(info){
+                archiveInfo = info;
+                var archiveDate = new Date(archiveInfo[gameId].lastArchive.date);
+                var formerDate = archiveDate.getDate();
+                var currentDate = archiveDate.setDate(formerDate + 1);
+                var date = JSON.stringify(currentDate);
+                archiveInfo[gameId].lastArchive.date = date;
 
-        this.store.client.get(archiveKey, function(err, results){
-            if(err){
-                return reject(err);
-            }
-            archiveInfo = results[gameId]
-            date = archiveInfo.lastArchive.date;
-            return date;
-        }.bind(this))
-        .then(function(date){
-            // date format is date object, "yyyy-mm-ddThh-MM-ss-SSSZ"
-            //    2014-12-03T02:00:07.758Z"
-            var dates = initDates(date);
-            var startDateTime = dates[0];
-            var endDateTime = dates[1];
-            var todayDate = dates[2];
-            var thisDate = dates[3];
-            var formattedDate = dates[4];
+                // still determining how to format the date from gd:archiveInfo. hard coding date for now.
+                date = "11-13-14";
+                var dates = _initDates(date);
+                startDateTime = dates[0];
+                endDateTime = dates[1];
+                todayDate = dates[2];
+                thisDate = dates[3];
+                formattedDate = dates[4];
+                fileString = __dirname
+                    + '/../../../../../../Desktop/'
+                    + gameId
+                    + "_" + formattedDate;
+                file = fileString + "_part" + part + ".csv";
 
-            return this.store.getCsvDataByGameId(gameId);
-        }.bind(this))
-        .then(function (csvData) {
-           return parseCSVSchema(csvData);
-        }.bind(this))
-        .then(function (_parsedSchemaData) {
-            parsedSchemaData = _parsedSchemaData;
-            return recursor.call(this)
-        }.bind(this))
-        .then(function(state){
-            var archiveDate = archiveInfo.lastArchive.date.getDate();
-            archiveInfo.lastArchive.date.setDate(archiveDate+1);
-
-            this.store.client.set(archiveInfo, function(err, results){
-                if(err){
-                    when.reject(err);
-                }
-                resolve(state);
+                return this.store.getCsvDataByGameId(gameId);
+            }.bind(this))
+            .then(function (csvData) {
+               return parseCSVSchema(csvData);
+            }.bind(this))
+            .then(function (_parsedSchemaData) {
+                parsedSchemaData = _parsedSchemaData;
+                return recursor.call(this)
+            }.bind(this))
+            .then(function(state){
+                upToDate = state;
+                var jobEnd = Date.now();
+                archiveInfo[gameId].lastArchive.eventCount = eventCount;
+                // time of processing this day, in milliseconds
+                archiveInfo[gameId].lastArchive.processTime = jobEnd - jobStart;
+                return this.store.updateArchiveInfo(archiveInfo);
+            }.bind(this))
+            .then(function(){
+                resolve(upToDate);
+            }.bind(this))
+            .catch(function(err){
+                console.log('Archive Events By Date Error - ',err);
+                reject(err);
             }.bind(this));
-        }.bind(this))
-        .catch(function(err){
-            console.log('Archive Events By Date Error - ',err);
-            reject(err);
-        }.bind(this));
 
     }.bind(this));
 }
@@ -175,13 +143,14 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
             var timeFormat = "MM/DD/YYYY HH:mm:ss";
             var eventsLeft = limit;
             var updatedDateTime = startDateTime;
+            var eventCount;
 
             this.store.getEventsByGameIdDate(gameId, startDateTime.toArray(), endDateTime.toArray(), limit)
                 .then(function (events) {
                     console.log("Running Filter...");
-                    //console.log("Processing", events.length, "Events...");
-                    eventsLeft -= events.length;
-                    console.log('initialLen:', events.length);
+
+                    eventCount = events.length;
+                    eventsLeft -= eventCount;
                     if(eventsLeft === 0){
                         var lastEventTime = events[events.length-1].serverTimeStamp;
                         var lastSecond = Math.floor(lastEventTime/1000)*1000;
@@ -206,7 +175,7 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
                                 events.pop();
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
                             }
-                            console.log('updated len:', events.length);
+                            eventCount = events.length;
                         } else{
                             seconds++;
                             if(seconds === 60){
@@ -240,11 +209,13 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
                     return processEvents.call(this, parsedSchemaData, events, timeFormat, existingFile);
                 }.bind(this))
                 .then(function (outList) {
-                    var outData = outList.join("\n");
-                    return Util.WriteToCSV(outData, file);
+                    if(eventCount > 0){
+                        var outData = outList.join("\n");
+                        return Util.WriteToCSV(outData, file);
+                    }
                 }.bind(this))
                 .then(function(){
-                    resolve([eventsLeft, updatedDateTime]);
+                    resolve([eventsLeft, updatedDateTime, eventCount]);
                 }.bind(this))
                 // catch all
                 .then(null, function (err) {
@@ -259,7 +230,7 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
     }.bind(this));
 }
 
-function initDates(date){
+function _initDates(date){
     var startDateTime = moment(date);
     startDateTime.hour(0);
     startDateTime.minute(0);
