@@ -35,57 +35,53 @@ module.exports = {
 // adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
 
 
-function archiveEventsByDate(gameId, limit){
+function archiveEventsByDate(gameId, maxEvents){
     return when.promise(function(resolve, reject){
-        var hour = 0;
-        var eventsLeft = limit;
-        var date = "11-13-14";
-        var todayDate = new Date();
-        var startDate = moment(date).utc().format("YYYY-DD-MM");
-        todayDate = todayDate.setHours(0,0,0,0);
+        var limit = maxEvents;
+
+        var startDateTime;
+        var endDateTime;
+        var todayDate;
+        var thisDate;
+        var formattedDate;
+
         var part = 1;
         var parsedSchemaData;
-        var file = __dirname
+        var fileString = __dirname
             + '/../../../../../../Desktop/'
             + gameId
-            + "_" + startDate
-            + "_part" + part + ".csv";
+            + "_" + formattedDate;
+        var file = fileString + "_part" + part + ".csv";
         var existingFile = false;
+
         //
         function recursor(){
             return when.promise(function(resolve, reject){
-                _archiveEventsByHour.call(this, gameId, limit, hour, eventsLeft, date, part, file, parsedSchemaData, existingFile)
-                    .then(function(left){
-                        existingFile = true;
-                        eventsLeft = left;
-                        hour++;
-                        if(hour < 24){
-                            if(eventsLeft <= 0){
+                _archiveEventsByLimit.call(this, gameId, limit, startDateTime, endDateTime, file, parsedSchemaData, existingFile)
+                    .then(function(outputs){
+                        limit = outputs[0];
+                        startDateTime = outputs[1];
+                        if(startDateTime !== endDateTime) {
+                            existingFile = true;
+                            if (limit === 0) {
                                 part++;
-                                file = __dirname
-                                    + '/../../../../../../Desktop/'
-                                    + gameId
-                                    + "_" + startDate
-                                    + "_part" + part + ".csv";
-                                eventsLeft = limit;
+                                file = fileString + "_part" + part + ".csv";
+                                limit = maxEvents;
                                 existingFile = false;
                             }
                             recursor.call(this)
-                                .then(function(state){
-                                    console.log('resolvez');
+                                .then(function (state) {
                                     resolve(state)
                                 }.bind(this))
-                                .catch(function(err){
-                                    console.log('rejectz');
+                                .catch(function (err) {
                                     reject(err);
                                 }.bind(this));
-                        } else{
-                            var startOfDay = new Date(date);
-                            startOfDay = startOfDay.setHours(0,0,0,0);
-                            if(startOfDay === todayDate){
-                                return resolve(true);
+                        } else {
+                            if (thisDate === todayDate) {
+                                resolve(true);
+                            } else {
+                                resolve(false);
                             }
-                            resolve(false);
                         }
                     }.bind(this));
             }.bind(this));
@@ -123,68 +119,132 @@ function archiveEventsByDate(gameId, limit){
         //    }
         //    reject(err);
         //}.bind(this));
-        this.store.getCsvDataByGameId(gameId)
-            .then(function (csvData) {
-                return parseCSVSchema(csvData);
-            }.bind(this))
-            .then(function (_parsedSchemaData) {
-                parsedSchemaData = _parsedSchemaData;
-                recursor.call(this)
-            }.bind(this))
-            .then(function(state){
-                console.log('completez');
+        var archiveInfo;
+        var archiveKey = 'gd:archiveInfo';
+
+        this.store.client.get(archiveKey, function(err, results){
+            if(err){
+                return reject(err);
+            }
+            archiveInfo = results[gameId]
+            date = archiveInfo.lastArchive.date;
+            return date;
+        }.bind(this))
+        .then(function(date){
+            // date format is date object, "yyyy-mm-ddThh-MM-ss-SSSZ"
+            //    2014-12-03T02:00:07.758Z"
+            var dates = initDates(date);
+            var startDateTime = dates[0];
+            var endDateTime = dates[1];
+            var todayDate = dates[2];
+            var thisDate = dates[3];
+            var formattedDate = dates[4];
+
+            return this.store.getCsvDataByGameId(gameId);
+        }.bind(this))
+        .then(function (csvData) {
+           return parseCSVSchema(csvData);
+        }.bind(this))
+        .then(function (_parsedSchemaData) {
+            parsedSchemaData = _parsedSchemaData;
+            return recursor.call(this)
+        }.bind(this))
+        .then(function(state){
+            var archiveDate = archiveInfo.lastArchive.date.getDate();
+            archiveInfo.lastArchive.date.setDate(archiveDate+1);
+
+            this.store.client.set(archiveInfo, function(err, results){
+                if(err){
+                    when.reject(err);
+                }
                 resolve(state);
-            }.bind(this))
-            .catch(function(err){
-                console.log('_____rejectz');
-                reject(err);
             }.bind(this));
+        }.bind(this))
+        .catch(function(err){
+            console.log('Archive Events By Date Error - ',err);
+            reject(err);
+        }.bind(this));
 
     }.bind(this));
 }
 
-function _archiveEventsByHour(gameId, limit, hour, eventsLeft, date, part, file, parsedSchemaData, existingFile){
+
+function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, parsedSchemaData, existingFile){
     return when.promise(function(resolve, reject) {
         try {
-            if(hour === 15 || hour === 16 || date === '11-14-14'){
-                console.log('stap!');
-            }
-            var eventsUsed;
-
-            var startDate = moment(date);
-            startDate.hour(hour);
-            startDate.minute(0);
-            startDate.seconds(0);
-            startDate = startDate.utc();
-
-            var endDate = moment(date);
-            endDate.hour(hour);
-            endDate.minute(59);
-            endDate.seconds(59);
-            endDate = endDate.utc();
-
             var timeFormat = "MM/DD/YYYY HH:mm:ss";
+            var eventsLeft = limit;
+            var updatedDateTime = startDateTime;
 
-            this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
+            this.store.getEventsByGameIdDate(gameId, startDateTime.toArray(), endDateTime.toArray(), limit)
                 .then(function (events) {
-
-                    console.log("Running Filter...:", events);
+                    console.log("Running Filter...");
                     //console.log("Processing", events.length, "Events...");
-                    eventsUsed = events.length;
+                    eventsLeft -= events.length;
+                    console.log('initialLen:', events.length);
+                    if(eventsLeft === 0){
+                        var lastEventTime = events[events.length-1].serverTimeStamp;
+                        var lastSecond = Math.floor(lastEventTime/1000)*1000;
+                        var date = new Date(lastEventTime);
+
+                        var seconds = date.getSeconds()-1;
+                        var minute = date.getMinutes();
+                        var hour = date.getHours();
+                        var milliseconds = 999;
+
+                        if(seconds === -1){
+                            minute--;
+                            seconds = 59;
+                            if(minute === -1){
+                                minute = 59;
+                                hour--;
+                            }
+                        }
+
+                        if(events[0].serverTimeStamp !== lastEventTime) {
+                            while (lastEventTime >= lastSecond) {
+                                events.pop();
+                                lastEventTime = events[events.length - 1].serverTimeStamp;
+                            }
+                            console.log('updated len:', events.length);
+                        } else{
+                            seconds++;
+                            if(seconds === 60){
+                                seconds = 0;
+                                minute++;
+                                if(minute === 60){
+                                    minute = 0;
+                                    hour++;
+                                    if(hour === 24){
+                                        updatedDateTime = endDateTime;
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        // compensates for time zone conversion from pst to utc in moment.  GMT-0800 (PST)
+                        if(hour + 8 <= 24){
+                            hour += 8;
+                        } else{
+                            hour = 8 - (24 - hour);
+                        }
+                        updatedDateTime.hour(hour);
+                        updatedDateTime.minute(minute);
+                        updatedDateTime.seconds(seconds);
+                        updatedDateTime.milliseconds(milliseconds);
+                        updatedDateTime = updatedDateTime.utc();
+                    } else{
+                        updatedDateTime = endDateTime;
+                    }
                     // process events
                     return processEvents.call(this, parsedSchemaData, events, timeFormat, existingFile);
                 }.bind(this))
                 .then(function (outList) {
-                    if(!existingFile){
-                        outList[0] = outList[0] + "\n";
-                    }
                     var outData = outList.join("\n");
                     return Util.WriteToCSV(outData, file);
                 }.bind(this))
                 .then(function(){
-                    console.log('resolve1');
-                    eventsLeft -= eventsUsed;
-                    resolve(eventsLeft);
+                    resolve([eventsLeft, updatedDateTime]);
                 }.bind(this))
                 // catch all
                 .then(null, function (err) {
@@ -197,6 +257,30 @@ function _archiveEventsByHour(gameId, limit, hour, eventsLeft, date, part, file,
             console.error("Research: Get User Data Error -", err);
         }
     }.bind(this));
+}
+
+function initDates(date){
+    var startDateTime = moment(date);
+    startDateTime.hour(0);
+    startDateTime.minute(0);
+    startDateTime.seconds(0);
+    startDateTime = startDateTime.utc();
+
+    var endDateTime = moment(date);
+    endDateTime.hour(23);
+    endDateTime.minute(59);
+    endDateTime.seconds(59);
+    endDateTime = endDateTime.utc();
+
+    var todayDate = new Date();
+    todayDate = todayDate.setHours(0,0,0,0);
+
+    var thisDate =  new Date(date);
+    thisDate = thisDate.setHours(0,0,0,0);
+
+    var formattedDate = startDateTime.format("YYYY-DD-MM");
+
+    return [startDateTime, endDateTime, todayDate, thisDate, formattedDate];
 }
 
 function getEventsByDate(req, res, next){
@@ -404,7 +488,7 @@ function parseCSVSchema(csvData) {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var parsedSchemaData = { header: "", rows: {} };
-
+    //console.log('csvzz:', csvData, 'endzz');
     try {
         csv()
         .from(csvData, { delimiter: ',', escape: '"' })
@@ -424,13 +508,16 @@ return when.promise(function(resolve, reject) {
         .on('end', function(){
             resolve(parsedSchemaData);
         }.bind(this))
-        .on('error', function(error){
-            reject(error);
+        .on('error', function(err){
+            reject(err);
         }.bind(this));
 
     } catch(err) {
         console.trace("Research: Parse CSV Schema Error -", err);
-        this.requestUtil.errorResponse(res, {error: err});
+        var res = res || false;
+        if(res){
+            this.requestUtil.errorResponse(res, {error: err});
+        }
     }
 
 // ------------------------------------------------
