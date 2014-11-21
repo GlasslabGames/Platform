@@ -111,9 +111,9 @@ ResearchService.prototype.cronJob = function(){
     var ids = ['SC', 'AA-1', 'AW-1'];
     var index = 0;
 
-    // actual time wanted: new CronJob('0 0 1 * * *', function(){
+    // actual time wanted: new CronJob('0 0 0 * * *', function(){
     // will alter this time for prototyping
-    new CronJob('0 0 1 * * *', function(){
+    new CronJob('0 0 0 * * *', function(){
         var startTime = Date.now();
         function archiveCheck(){
             var currentTime = Date.now();

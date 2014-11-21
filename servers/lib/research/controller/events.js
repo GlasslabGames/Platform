@@ -42,7 +42,7 @@ function archiveEventsByDate(gameId, maxEvents, date){
 
         var startDateTime;
         var endDateTime;
-        var todayDate;
+        var yesterdayDate;
         var thisDate;
         var formattedDate;
         var eventCount = 0;
@@ -55,7 +55,6 @@ function archiveEventsByDate(gameId, maxEvents, date){
 
         // calls archiveEventsByLimit.
         // If limit is reached, calls again, changing the file so data can be written to new csv
-        // determines if analyzed date is today, and sends that information
         function recursor(){
             return when.promise(function(resolve, reject){
                 _archiveEventsByLimit.call(this, gameId, limit, startDateTime, endDateTime, file, parsedSchemaData, existingFile)
@@ -101,9 +100,14 @@ function archiveEventsByDate(gameId, maxEvents, date){
                 var dates = _initDates(date);
                 startDateTime = dates[0];
                 endDateTime = dates[1];
-                todayDate = dates[2];
+                yesterdayDate = dates[2];
                 thisDate = dates[3];
                 formattedDate = dates[4];
+
+                if(thisDate > yesterdayDate){
+                    return when.reject('up to date');
+                }
+
                 fileString = __dirname
                     + '/../../../../../../Desktop/'
                     + gameId
@@ -129,10 +133,13 @@ function archiveEventsByDate(gameId, maxEvents, date){
                 return this.store.updateArchiveInfo(archiveInfo);
             }.bind(this))
             .then(function(){
-                var upToDate = (thisDate === todayDate);
+                var upToDate = (thisDate === yesterdayDate);
                 resolve(upToDate);
             }.bind(this))
             .catch(function(err){
+                if(err === 'up to date'){
+                    return resolve(true);
+                }
                 console.log('Archive Events By Date Error - ',err);
                 reject(err);
             }.bind(this));
@@ -247,15 +254,16 @@ function _initDates(date){
     endDateTime.seconds(59);
     endDateTime = endDateTime.utc();
 
-    var todayDate = new Date();
-    todayDate = todayDate.setHours(0,0,0,0);
+    var yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate()-1);
+    yesterdayDate = yesterdayDate.setHours(0,0,0,0);
 
     var thisDate =  new Date(date);
     thisDate = thisDate.setHours(0,0,0,0);
 
     var formattedDate = startDateTime.format("YYYY-DD-MM");
 
-    return [startDateTime, endDateTime, todayDate, thisDate, formattedDate];
+    return [startDateTime, endDateTime, yesterdayDate, thisDate, formattedDate];
 }
 
 function getEventsByDate(req, res, next){
