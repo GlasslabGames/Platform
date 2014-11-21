@@ -21,7 +21,7 @@ function renderEmailTemplate(req, res, next) {
     }
 
     var emailData = {
-        subject: "Welcome to Playfully",
+        subject: "Welcome to GlassLab Games",
         to:   "test@test.com",
         user: {
             firstName: "First",
