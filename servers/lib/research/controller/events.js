@@ -5,6 +5,8 @@ var moment    = require('moment');
 var csv       = require('csv');
 var Util      = require('../../core/util.js');
 
+var TOTALEVENTS = 0;
+
 module.exports = {
     getEventsByDate: getEventsByDate,
     _archiveEventsByDate: archiveEventsByDate
@@ -105,7 +107,7 @@ function archiveEventsByDate(gameId, maxEvents, date){
                 thisDate = dates[3];
                 formattedDate = dates[4];
                 fileString = __dirname
-                    + '/../../../../../../Desktop/'
+                    + '/../../../../../../../Desktop/'
                     + gameId
                     + "_" + formattedDate;
                 file = fileString + "_part" + part + ".csv";
@@ -180,6 +182,7 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
                             }
                             eventCount = events.length;
+                            lastEventTime++;
                         } else{
                             seconds++;
                             if(seconds === 60){
@@ -196,7 +199,7 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
                             }
                         }
                         // compensates for time zone conversion from pst to utc in moment.  GMT-0800 (PST)
-                        if(hour + 8 <= 24){
+                        /*if(hour + 8 <= 24){
                             hour += 8;
                         } else{
                             hour = 8 - (24 - hour);
@@ -204,12 +207,15 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
                         updatedDateTime.hour(hour);
                         updatedDateTime.minute(minute);
                         updatedDateTime.seconds(seconds);
-                        updatedDateTime.milliseconds(milliseconds);
+                        updatedDateTime.milliseconds(milliseconds);*/
+                        updatedDateTime = moment(lastEventTime);
                         updatedDateTime = updatedDateTime.utc();
                     } else{
                         updatedDateTime = endDateTime;
                     }
                     // process events
+                    TOTALEVENTS += eventCount;
+                    console.log( "DEBUG Event count: " + TOTALEVENTS );
                     return processEvents.call(this, parsedSchemaData, events, timeFormat, existingFile);
                 }.bind(this))
                 .then(function (outList) {

@@ -11,7 +11,6 @@ var when   = require('when');
 var _      = require('lodash');
 var uuid   = require('node-uuid');
 var fs     = require('fs');
-var aws    = require('aws-sdk');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -191,6 +190,7 @@ module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
     Email:   require('./util.email.js'),
+    S3Util:   require('./util.s3.js'),
     ConvertToString:  convertToString,
     PromiseContinue:  promiseContinue,
     PromiseError:     promiseError,
@@ -217,140 +217,3 @@ function writeToCSV(data, file){
         }.bind(this))
     }.bind(this));
 }
-
-// sets s3 credentials and creates s3 instance
-function s3Config(){
-    var configPath = __dirname + '/../../../aws_config.json';
-    aws.config.loadFromPath(configPath);
-    var s3 = new aws.S3();
-    return s3;
-}
-
-// places new s3 object in playfully bucket.  also could replace existing object at same key
-function createS3Object(s3, key, data){
-    return when.promise(function(resolve, reject){
-        var params = {};
-        params.Bucket = 'playfully';
-        params.Body = data;
-        params.Key = key;
-        s3.putObject(params, function(err, results){
-            if(err){
-                console.error('S3 Create Object Error - ', err);
-                reject('create');
-            } else{
-                console.log('S3 Object created');
-                resolve();
-            }
-        }.bind(this));
-    }.bind(this));
-}
-
-// demo method to test out s3 rest operations
-function s3Start(key, data){
-    var s3;
-    return when.promise(function(resolve, reject){
-        console.log('s3 begins');
-        s3 = s3Config();
-        createS3Object(s3, key, data)
-            .then(function(){
-                return getS3Object(s3, key);
-            }.bind(this))
-            .then(function(results){
-                console.log(results);
-                return deleteS3Object(s3, key)
-            }.bind(this))
-            .then(function(){
-                return listS3Objects(s3);
-            }.bind(this))
-            .then(function(list){
-                list.forEach(function(object){
-                    if(object.Key === key){
-                        reject();
-                    }
-                }.bind(this));
-                resolve();
-            }.bind(this))
-            .catch(function(err){
-                console.log('S3 Some Random - ', err);
-                reject();
-            }.bind(this));
-    }.bind(this));
-}
-
-// gets s3 object from playfully bucket
-function getS3Object(s3, key){
-    return when.promise(function(resolve, reject){
-        var params = {};
-        params.Bucket = 'playfully';
-        params.Key = key;
-
-        s3.getObject(params, function(err, results){
-            if(err){
-                console.error('S3 Get Object Error - ', err);
-                reject('get');
-            } else{
-                console.log('S3 Object Get');
-                object = results.Body.toString();
-                resolve(object);
-            }
-        }.bind(this));
-    }.bind(this));
-}
-
-// deletes s3 object from playfully bucket
-function deleteS3Object(s3, key){
-    return when.promise(function(resolve, reject){
-        var params = {};
-        params.Bucket = 'playfully';
-        params.Key = key;
-
-        s3.deleteObject(params, function(err, results){
-            if(err){
-                console.error('S3 Delete Object Error - ', err);
-                reject('delete');
-            } else{
-                console.log('S3 Object Deleted');
-                resolve();
-            }
-        }.bind(this));
-    }.bind(this));
-}
-
-// updates s3 object from playfully bucket
-function updateS3Object(s3, key, data){
-    return when.promise(function(resolve, reject){
-        getS3Object(s3, key)
-            .then(function(object){
-                _.merge(object, data);
-                return createS3Object(s3, key, object);
-            }.bind(this))
-            .then(function(){
-                resolve();
-            }.bind(this))
-            .catch(function(err){
-                reject('update');
-            }.bind(this));
-    }.bind(this));
-}
-// lists all the s3 objects in playfully bucket
-function listS3Objects(s3){
-    return when.promise(function(resolve, reject){
-        var params = {};
-        params.Bucket = 'playfully';
-
-        s3.listObjects(params, function(err, data){
-            if(err){
-                console.error('S3 List Objects Error - ', err);
-                reject('list');
-            } else{
-                console.log('S3 Object Listed');
-                resolve(data.Contents);
-            }
-        }.bind(this));
-    }.bind(this));
-}
-
-//http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html
-//http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-examples.html
-
-//s3Start('test', 'test data');
