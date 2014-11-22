@@ -110,19 +110,24 @@ ResearchService.prototype.cronJob = function(){
     // when integrate info.json couchbase stuff, then can use view to find list of all ids programmatically
     var ids = ['SC', 'AA-1', 'AW-1'];
     var index = 0;
+    var eventCount = 0;
+    var upToDate;
 
     // actual time wanted: new CronJob('0 0 0 * * *', function(){
     // will alter this time for prototyping
-    new CronJob('0 0 0 * * *', function(){
+    new CronJob('20 13 * * * *', function(){
         var startTime = Date.now();
         function archiveCheck(){
             var currentTime = Date.now();
             // four hours in milliseconds, job runs from 1 to 5 am.
             var fourHours = 14400000;
             if(currentTime - startTime < fourHours && index < ids.length){
-                serviceManager.internalRoute("/api/v2/research/archive", 'get', [ids[index], 100])
-                    .then(function(upToDate){
+                serviceManager.internalRoute("/api/v2/research/archive", 'get', [ids[index], 100, eventCount])
+                    .then(function(output){
+                        upToDate = output[0];
+                        eventCount = output[1];
                         if(upToDate){
+                            eventCount = 0;
                             index++;
                         }
                         archiveCheck();

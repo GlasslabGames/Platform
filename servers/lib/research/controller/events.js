@@ -35,7 +35,7 @@ module.exports = {
 // adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
 
 
-function archiveEventsByDate(gameId, maxEvents, date){
+function archiveEventsByDate(gameId, maxEvents, count){
     return when.promise(function(resolve, reject){
         var limit = maxEvents;
         var jobStart = Date.now();
@@ -45,7 +45,7 @@ function archiveEventsByDate(gameId, maxEvents, date){
         var yesterdayDate;
         var thisDate;
         var formattedDate;
-        var eventCount = 0;
+        var eventCount = count;
 
         var part = 1;
         var parsedSchemaData;
@@ -134,7 +134,7 @@ function archiveEventsByDate(gameId, maxEvents, date){
             }.bind(this))
             .then(function(){
                 var upToDate = (thisDate === yesterdayDate);
-                resolve(upToDate);
+                resolve([upToDate, eventCount]);
             }.bind(this))
             .catch(function(err){
                 if(err === 'up to date'){
