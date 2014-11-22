@@ -35,17 +35,19 @@ module.exports = {
 // adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
 
 
-function archiveEventsByDate(gameId, maxEvents, date){
+function archiveEventsByDate(gameId, count, startProcess){
     return when.promise(function(resolve, reject){
-        var limit = maxEvents;
-        var jobStart = Date.now();
+        // multiple of the limit in _archiveEventsByLimit, toggle as needed for testing
+        // with the production query limit of 2000, maxCSVQueries would be 5, 5*2000 is 10000
+        var maxCSVQueries = 2;
+        var queriesTillNewCSV = maxCSVQueries;
 
         var startDateTime;
         var endDateTime;
-        var todayDate;
+        var yesterdayDate;
         var thisDate;
         var formattedDate;
-        var eventCount = 0;
+        var eventCount = count;
 
         var part = 1;
         var parsedSchemaData;
@@ -55,20 +57,19 @@ function archiveEventsByDate(gameId, maxEvents, date){
 
         // calls archiveEventsByLimit.
         // If limit is reached, calls again, changing the file so data can be written to new csv
-        // determines if analyzed date is today, and sends that information
         function recursor(){
             return when.promise(function(resolve, reject){
-                _archiveEventsByLimit.call(this, gameId, limit, startDateTime, endDateTime, file, parsedSchemaData, existingFile)
+                _archiveEventsByLimit.call(this, gameId, startDateTime, endDateTime, file, parsedSchemaData, existingFile)
                     .then(function(outputs){
-                        limit = outputs[0];
-                        startDateTime = outputs[1];
-                        eventCount += outputs[2];
+                        startDateTime = outputs[0];
+                        eventCount += outputs[1];
+                        queriesTillNewCSV--;
                         if(startDateTime !== endDateTime) {
                             existingFile = true;
-                            if (limit === 0) {
+                            if (queriesTillNewCSV === 0) {
+                                queriesTillNewCSV = maxCSVQueries;
                                 part++;
                                 file = fileString + "_part" + part + ".csv";
-                                limit = maxEvents;
                                 existingFile = false;
                             }
                             recursor.call(this)
@@ -101,9 +102,14 @@ function archiveEventsByDate(gameId, maxEvents, date){
                 var dates = _initDates(date);
                 startDateTime = dates[0];
                 endDateTime = dates[1];
-                todayDate = dates[2];
+                yesterdayDate = dates[2];
                 thisDate = dates[3];
                 formattedDate = dates[4];
+
+                if(thisDate > yesterdayDate){
+                    return when.reject('up to date');
+                }
+
                 fileString = __dirname
                     + '/../../../../../../Desktop/'
                     + gameId
@@ -121,18 +127,22 @@ function archiveEventsByDate(gameId, maxEvents, date){
             }.bind(this))
             .then(function(state){
                 upToDate = state;
-                var jobEnd = Date.now();
+                var endProcess = Date.now();
                 // total number of events for game on this day
                 archiveInfo[gameId].lastArchive.eventCount = eventCount;
                 // time of processing this day, in milliseconds
-                archiveInfo[gameId].lastArchive.processTime = jobEnd - jobStart;
+                var processTime = endProcess - startProcess;
+                archiveInfo[gameId].lastArchive.processTime = processTime;
                 return this.store.updateArchiveInfo(archiveInfo);
             }.bind(this))
             .then(function(){
-                var upToDate = (thisDate === todayDate);
-                resolve(upToDate);
+                var upToDate = (thisDate === yesterdayDate);
+                resolve([upToDate, eventCount]);
             }.bind(this))
             .catch(function(err){
+                if(err === 'up to date'){
+                    return resolve(true);
+                }
                 console.log('Archive Events By Date Error - ',err);
                 reject(err);
             }.bind(this));
@@ -141,75 +151,51 @@ function archiveEventsByDate(gameId, maxEvents, date){
 }
 
 
-function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, parsedSchemaData, existingFile){
+function _archiveEventsByLimit(gameId, startDateTime, endDateTime, file, parsedSchemaData, existingFile){
     return when.promise(function(resolve, reject) {
         try {
             var timeFormat = "MM/DD/YYYY HH:mm:ss";
-            var eventsLeft = limit;
+            // query limit for couchbase.  the max number of elements in csv file is a multiple of this value
+            var limit = 60;
             var updatedDateTime = startDateTime;
             var eventCount;
 
             this.store.getEventsByGameIdDate(gameId, startDateTime.toArray(), endDateTime.toArray(), limit)
                 .then(function (events) {
                     console.log("Running Filter...");
-
                     eventCount = events.length;
-                    eventsLeft -= eventCount;
-                    if(eventsLeft === 0){
-                        var lastEventTime = events[events.length-1].serverTimeStamp;
-                        var lastSecond = Math.floor(lastEventTime/1000)*1000;
-                        var date = new Date(lastEventTime);
+                    if(eventCount < limit){
+                        // did not find events up to limit, so day's querying is done
+                        updatedDateTime = endDateTime;
+                    }
+                    else {
+                        // events found, limitParam reached
+                        var lastEventTime = events[events.length - 1].serverTimeStamp;
+                        var lastSecond = new Date(lastEventTime);
+                        lastSecond.setMilliseconds(0);
+                        lastSecond = Date.parse(lastSecond);
 
-                        var seconds = date.getSeconds()-1;
-                        var minute = date.getMinutes();
-                        var hour = date.getHours();
-                        var milliseconds = 999;
-
-                        if(seconds === -1){
-                            minute--;
-                            seconds = 59;
-                            if(minute === -1){
-                                minute = 59;
-                                hour--;
-                            }
-                        }
-
-                        if(events[0].serverTimeStamp !== lastEventTime) {
-                            while (lastEventTime >= lastSecond) {
+                        if (events[0].serverTimeStamp < lastSecond) {
+                            while (lastEventTime >= lastSecond || events.length === 1) {
                                 events.pop();
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
                             }
-                            eventCount = events.length;
-                        } else{
-                            seconds++;
-                            if(seconds === 60){
-                                seconds = 0;
-                                minute++;
-                                if(minute === 60){
-                                    minute = 0;
-                                    hour++;
-                                    if(hour === 24){
-                                        updatedDateTime = endDateTime;
-                                        return;
-                                    }
-                                }
-                            }
+                        } else {
+                            // if the first event selected occurred in the same second as the last
+                            // then there is danger that some events may be excluded.
+                            // if error occurs, refactor logic to avoid losses
+                            var timestamp = new Date(lastSecond).toJSON();
+                            console.trace('Number of Events at this second >= query limit.  Data may be lost:', new Date(lastSecond).toJSON());
+                            return when.reject({"eventsAtSecondExceedLimit": timestamp});
                         }
-                        // compensates for time zone conversion from pst to utc in moment.  GMT-0800 (PST)
-                        if(hour + 8 <= 24){
-                            hour += 8;
-                        } else{
-                            hour = 8 - (24 - hour);
-                        }
-                        updatedDateTime.hour(hour);
-                        updatedDateTime.minute(minute);
-                        updatedDateTime.seconds(seconds);
-                        updatedDateTime.milliseconds(milliseconds);
+                        // I removed the lastEventTime++ because of Couchbase's non-inclusive start query
+                        // fear of event occurring 1 ms after another event being excluded
+                        // maybe a bit paranoid. i'll trust your judgment
+                        updatedDateTime = moment(lastEventTime);
                         updatedDateTime = updatedDateTime.utc();
-                    } else{
-                        updatedDateTime = endDateTime;
+                        eventCount = events.length;
                     }
-                    // process events
+
                     return processEvents.call(this, parsedSchemaData, events, timeFormat, existingFile);
                 }.bind(this))
                 .then(function (outList) {
@@ -219,7 +205,7 @@ function _archiveEventsByLimit(gameId, limit, startDateTime, endDateTime, file, 
                     }
                 }.bind(this))
                 .then(function(){
-                    resolve([eventsLeft, updatedDateTime, eventCount]);
+                    resolve([updatedDateTime, eventCount]);
                 }.bind(this))
                 // catch all
                 .then(null, function (err) {
@@ -247,15 +233,16 @@ function _initDates(date){
     endDateTime.seconds(59);
     endDateTime = endDateTime.utc();
 
-    var todayDate = new Date();
-    todayDate = todayDate.setHours(0,0,0,0);
+    var yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate()-1);
+    yesterdayDate = yesterdayDate.setHours(0,0,0,0);
 
     var thisDate =  new Date(date);
     thisDate = thisDate.setHours(0,0,0,0);
 
     var formattedDate = startDateTime.format("YYYY-DD-MM");
 
-    return [startDateTime, endDateTime, todayDate, thisDate, formattedDate];
+    return [startDateTime, endDateTime, yesterdayDate, thisDate, formattedDate];
 }
 
 function getEventsByDate(req, res, next){
