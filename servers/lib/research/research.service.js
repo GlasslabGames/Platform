@@ -64,9 +64,7 @@ return when.promise(function(resolve, reject) {
 
         .then(function(){
             // Run the cron job
-            if( process.env.HYDRA_ENV == "prod" ) {
-                //this.cronJob();
-            }
+            //this.cronJob();
 
             // load csv file
             var dir = __dirname+'/parser_schema/';

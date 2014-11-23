@@ -9,7 +9,8 @@ var TOTALEVENTS = 0;
 
 module.exports = {
     getEventsByDate: getEventsByDate,
-    _archiveEventsByDate: archiveEventsByDate
+    archiveEventsByGameId: archiveEventsByGameId,
+    archiveEvents: archiveEvents
 };
 
 /*
@@ -35,6 +36,90 @@ module.exports = {
 
 // access data from a particular time period on the parser.  Write data to a csv (ultimately s3 bucket)
 // adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
+
+function archiveEventsByGameId(req, res, next) {
+
+}
+
+function archiveEvents(req, res, next) {
+    // 0eebfae0-6d9b-ede9-41e1-f726be96e1b0
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    }
+
+    // If the code is not valid
+    if( req.params.code != "0eebfae0-6d9b-ede9-41e1-f726be96e1b0" ) {
+        this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    }
+
+    // Check for game Id
+    var ids = [];
+    if( req.query.gameId ) {
+        ids.push( req.query.gameId );
+    }
+    else {
+        ids.push( "SC" );
+        ids.push( "AA-1" );
+        ids.push( "AW-1" );
+    }
+
+
+    // Get the service manager
+    var serviceManager = this.serviceManager;
+
+    // hard coded ids array for now
+    // when integrate info.json couchbase stuff, then can use view to find list of all ids programmatically
+    var index = 0;
+    var eventCount = 0;
+    var startProcess;
+    var upToDate;
+
+    // Set the duration if it exists, other default to 1 hour
+    var duration = 1;
+    if( req.query.duration ) {
+        duration = req.query.duration;
+    }
+    duration *= ( 3600 * 1000 );
+
+    // Everything seems valid, return a response
+    this.requestUtil.jsonResponse(res, {status:"archiving triggered"});
+
+    // actual time wanted: new CronJob('0 0 0 * * *', function(){
+    // will alter this time for prototyping
+    return when.promise(function(resolve, reject) {
+        var startTime = Date.now();
+        startProcess = Date.now();
+        function archiveCheck() {
+            var currentTime = Date.now();
+            // duration in milliseconds, job runs from 12 am to 4 am pacific time normally,
+            // but can be triggered at any time provided a valid code.
+            if(currentTime - startTime < duration && index < ids.length){
+                archiveEventsByDate.call( this, ids[index], eventCount, startProcess )
+                    .then(function(output){
+                        upToDate = output[0];
+                        eventCount = output[1];
+                        if(upToDate){
+                            eventCount = 0;
+                            index++;
+                            startProcess = Date.now();
+                        }
+                        archiveCheck.call(this);
+                    }.bind(this))
+                    .catch(function(err){
+                        console.log( "Error in archiving: " + err );
+                        reject();
+                    }.bind(this));
+            } else{
+                console.log('completed archiving job');
+                resolve();
+                // email success notification
+            }
+        }
+        archiveCheck.call(this);
+    }.bind(this));
+}
 
 
 function archiveEventsByDate(gameId, count, startProcess){
@@ -77,7 +162,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                                 if( outData.length > 1 ) {
                                     outData = outData.join("\n");
                                     var dates = fileString.split( "-" );
-                                    this.serviceManager.awss3.putS3Object( "archives/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv", outData );
+                                    this.serviceManager.awss3.putS3Object( "archives/" + process.env.HYDRA_ENV + "/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv", outData );
                                     //Util.WriteToCSV(outData, file);
                                     outData = [];
                                 }
@@ -100,7 +185,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                             if( outData.length > 1 ) {
                                 outData = outData.join("\n");
                                 var dates = fileString.split( "-" );
-                                return this.serviceManager.awss3.putS3Object( "archives/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv", outData );
+                                return this.serviceManager.awss3.putS3Object( "archives/" + process.env.HYDRA_ENV + "/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv", outData );
                                 //return Util.WriteToCSV(outData, file);
                             }
                             else {
@@ -171,7 +256,7 @@ function archiveEventsByDate(gameId, count, startProcess){
             }.bind(this))
             .catch(function(err){
                 if(err === 'up to date'){
-                    return resolve(true);
+                    return// resolve(true);
                 }
                 console.log('Archive Events By Date Error - ',err);
                 reject(err);
