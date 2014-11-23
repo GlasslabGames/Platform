@@ -102,6 +102,14 @@ module.exports = {
             method: {
                 post: "updateGameConfigs"
             }
-        }
+        },
+        {
+            api: "/api/v2/research/archive",
+            service: "research",
+            controller: "events",
+            method: {
+                get: "_archiveEventsByDate"
+            }
+        },
     ]
 };

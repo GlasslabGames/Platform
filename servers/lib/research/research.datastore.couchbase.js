@@ -117,7 +117,7 @@ return when.promise(function(resolve, reject) {
                 keys.push( results[i].id );
             }
 
-            var taskList = reshape(keys, this.options.multiGetChunkSize);
+            var taskList = Util.Reshape(keys, this.options.multiGetChunkSize);
             console.log("CouchBase ResearchStore: getEventsByKeys Number of Chunks:", taskList.length);
 
             var guardedAsyncOperation, taskResults;
@@ -153,7 +153,7 @@ ResearchDS_Couchbase.prototype.getUserDataBySessions = function(gameSessionIdLis
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    var taskList = reshape(gameSessionIdList, this.options.multiGetChunkSize);
+    var taskList = Util.Reshape(gameSessionIdList, this.options.multiGetChunkSize);
     console.log("getUserDataBySessions totalEvents:", taskList.length);
 
     var guardedAsyncOperation, taskResults;
@@ -306,4 +306,29 @@ ResearchDS_Couchbase.prototype.getCsvDataByGameId = function(gameId) {
 // ------------------------------------------------
     }.bind(this));
 // end promise wrapper
+};
+
+ResearchDS_Couchbase.prototype.getArchiveInfo = function(){
+    var archiveKey = 'gd:archiveInfo';
+    return when.promise(function(resolve, reject){
+        this.client.get(archiveKey, function(err, results){
+            if(err){
+                return reject(err);
+            }
+            var archiveInfo = results.value;
+            resolve(archiveInfo);
+        }.bind(this))
+    }.bind(this));
+};
+
+ResearchDS_Couchbase.prototype.updateArchiveInfo = function(data){
+    var archiveKey = 'gd:archiveInfo';
+    return when.promise(function(resolve, reject){
+        this.client.set(archiveKey, data, function(err, results){
+            if(err){
+                reject(err);
+            }
+            resolve();
+        }.bind(this));
+    }.bind(this));
 };
