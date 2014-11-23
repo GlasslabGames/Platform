@@ -79,5 +79,7 @@ module.exports = {
     "report.reportId.missing":              "Missing ReportId",
     "report.userId.missing":                "Missing UserId",
     "report.assessmentId.missing":          "Missing AssessmentId",
-    "report.body.missing":                  "Missing Body"
+    "report.body.missing":                  "Missing Body",
+    // research
+    "research.access.invalid":              "Invalid Access"
 };

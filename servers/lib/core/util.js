@@ -10,6 +10,7 @@ var moment = require('moment');
 var when   = require('when');
 var _      = require('lodash');
 var uuid   = require('node-uuid');
+var fs     = require('fs');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -189,6 +190,7 @@ module.exports = {
     Request: require('./util.request.js'),
     Stats:   require('./util.stats.js'),
     Email:   require('./util.email.js'),
+    S3Util:   require('./util.s3.js'),
     ConvertToString:  convertToString,
     PromiseContinue:  promiseContinue,
     PromiseError:     promiseError,
@@ -200,5 +202,19 @@ module.exports = {
     String: {
         capitalize: capitalize
     },
-    Reshape: reshape
+    Reshape: reshape,
+    WriteToCSV: writeToCSV
 };
+
+// writes data to a chosen file
+function writeToCSV(data, file){
+    var copiedData = [].concat( data );
+    return when.promise(function(resolve, reject){
+        fs.appendFile(file, copiedData, function(err){
+            if(err){
+                return reject(err);
+            }
+            resolve()
+        }.bind(this))
+    }.bind(this));
+}
