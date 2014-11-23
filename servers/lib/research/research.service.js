@@ -65,7 +65,7 @@ return when.promise(function(resolve, reject) {
         .then(function(){
             // Run the cron job
             if( process.env.HYDRA_ENV == "prod" ) {
-                this.cronJob();
+                //this.cronJob();
             }
 
             // load csv file
@@ -119,14 +119,13 @@ ResearchService.prototype.cronJob = function(){
 
     // actual time wanted: new CronJob('0 0 0 * * *', function(){
     // will alter this time for prototyping
-    new CronJob('0 37 * * * *', function(){
+    new CronJob('0 0 0 * * *', function(){
         var startTime = Date.now();
         startProcess = Date.now();
         function archiveCheck(){
             var currentTime = Date.now();
             // four hours in milliseconds, job runs from 12 am to 4 am pacific time.
             var fourHours = 14400000;
-            console.log( "\n\n\n\ncheck again\n\n\n\n" );
             if(currentTime - startTime < fourHours && index < ids.length){
                 serviceManager.internalRoute("/api/v2/research/archive", 'get', [ids[index], eventCount, startProcess])
                     .then(function(output){

@@ -208,8 +208,9 @@ module.exports = {
 
 // writes data to a chosen file
 function writeToCSV(data, file){
+    var copiedData = [].concat( data );
     return when.promise(function(resolve, reject){
-        fs.appendFile(file, data, function(err){
+        fs.appendFile(file, copiedData, function(err){
             if(err){
                 return reject(err);
             }

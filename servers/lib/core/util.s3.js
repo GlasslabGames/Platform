@@ -18,13 +18,16 @@ function S3Util(options){
     this.s3 = new aws.S3();
 
     // Set bucket variables
-    this.bucket = "glg-archives";
+    this.bucket = "playfully";
 }
 
 // demo method to test out s3 rest operations
 S3Util.prototype.sample = function(key, data) {
     return when.promise(function(resolve, reject){
-        this.createS3Object(key, data)
+        this.putS3Object("PVZ/TEST/2/myText.txt", "data")
+            .then(function(){
+                return this.createS3Object(key, data);
+            }.bind(this))
             .then(function(){
                 return this.getS3Object(key);
             }.bind(this))
@@ -52,6 +55,30 @@ S3Util.prototype.sample = function(key, data) {
 }
 
 
+S3Util.prototype.getBucket = function(key) {
+    return when.promise(function(resolve, reject) {
+        var params = {};
+    }.bind(this));
+}
+
+S3Util.prototype.createS3Bucket = function( bucket ) {
+    return when.promise( function( resolve, reject ) {
+        resolve();
+        var params = {};
+        params.Bucket = bucket;
+        this.s3.createBucket( params, function( err, data ) {
+            if( err ) {
+                console.error( "S3 Create Bucket Error - ", err );
+                reject( "Create Bucket" );
+            }
+            else {
+                console.log( "S3 Bucket Created" );
+                resolve();
+            }
+        }.bind( this ) );
+    }.bind( this ) );
+}
+
 S3Util.prototype.createS3Object = function(key, data) {
     return when.promise(function(resolve, reject){
         var params = {};
@@ -70,12 +97,6 @@ S3Util.prototype.createS3Object = function(key, data) {
     }.bind(this));
 }
 
-S3Util.prototype.getBucket = function(key) {
-    return when.promise(function(resolve, reject) {
-        var params = {};
-    }.bind(this));
-}
-
 // gets s3 object from playfully bucket
 S3Util.prototype.getS3Object = function(key){
     return when.promise(function(resolve, reject){
@@ -91,6 +112,28 @@ S3Util.prototype.getS3Object = function(key){
                 console.log('S3 Object Get');
                 object = results.Body.toString();
                 resolve(object);
+            }
+        }.bind(this));
+    }.bind(this));
+}
+
+// gets s3 object from playfully bucket
+S3Util.prototype.putS3Object = function(key, data){
+    var copiedData = data + "";
+    return when.promise(function(resolve, reject){
+        var params = {};
+        params.Bucket = this.bucket;
+        params.Key = key;
+        //params.ContentLength = 0;
+        params.Body = copiedData;
+
+        this.s3.putObject(params, function(err, results){
+            if(err){
+                console.error('S3 Put Object Error - ', err);
+                reject('put object');
+            } else{
+                console.log('S3 Object Put');
+                resolve();
             }
         }.bind(this));
     }.bind(this));

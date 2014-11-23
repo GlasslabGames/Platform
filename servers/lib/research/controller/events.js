@@ -57,6 +57,8 @@ function archiveEventsByDate(gameId, count, startProcess){
         var file;
         var existingFile = false;
 
+        var outData = [];
+
         // calls archiveEventsByLimit.
         // If limit is reached, calls again, changing the file so data can be written to new csv
         function recursor(){
@@ -65,10 +67,22 @@ function archiveEventsByDate(gameId, count, startProcess){
                     .then(function(outputs){
                         startDateTime = outputs[0];
                         eventCount += outputs[1];
+                        outData = outData.concat( outputs[2] );
+
                         queriesTillNewCSV--;
                         if(startDateTime !== endDateTime) {
                             existingFile = true;
                             if (queriesTillNewCSV === 0) {
+                                // Write current to CSV
+                                if( outData.length > 1 ) {
+                                    outData = outData.join("\n");
+                                    var dates = fileString.split( "-" );
+                                    this.serviceManager.awss3.putS3Object( "archives/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv", outData );
+                                    //Util.WriteToCSV(outData, file);
+                                    outData = [];
+                                }
+
+                                // Start the next part
                                 queriesTillNewCSV = maxCSVQueries;
                                 part++;
                                 file = fileString + "_part" + part + ".csv";
@@ -82,9 +96,22 @@ function archiveEventsByDate(gameId, count, startProcess){
                                     reject(err);
                                 }.bind(this));
                         } else {
-                            resolve();
+                            // Once we're finished, write to CSV
+                            if( outData.length > 1 ) {
+                                outData = outData.join("\n");
+                                var dates = fileString.split( "-" );
+                                return this.serviceManager.awss3.putS3Object( "archives/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv", outData );
+                                //return Util.WriteToCSV(outData, file);
+                            }
+                            else {
+                                resolve();
+                            }
+                            //resolve();
                         }
-                    }.bind(this));
+                    }.bind(this))
+                    .then(function() {
+                        resolve();
+                    });
             }.bind(this));
         }
 
@@ -116,6 +143,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                     + '/../../../../../../../Desktop/'
                     + gameId
                     + "_" + formattedDate;
+                fileString = formattedDate;
                 file = fileString + "_part" + part + ".csv";
 
                 return this.store.getCsvDataByGameId(gameId);
@@ -205,7 +233,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, file, parsedS
                     console.log( "TOTAL EVENT: " + TOTALEVENTS );
                     return processEvents.call(this, parsedSchemaData, events, timeFormat, existingFile);
                 }.bind(this))
-                .then(function (outList) {
+                /*.then(function (outList) {
                     if(eventCount > 0){
                         if( eventsRemain ) {
                             outList.push("");
@@ -213,9 +241,9 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, file, parsedS
                         var outData = outList.join("\n");
                         return Util.WriteToCSV(outData, file);
                     }
-                }.bind(this))
-                .then(function(){
-                    resolve([updatedDateTime, eventCount]);
+                }.bind(this))*/
+                .then(function(outList){
+                    resolve([updatedDateTime, eventCount, outList]);
                 }.bind(this))
                 // catch all
                 .then(null, function (err) {
