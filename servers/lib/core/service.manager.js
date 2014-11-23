@@ -60,6 +60,8 @@ function ServiceManager(configFiles){
     global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
     this.stats            = new Util.Stats(this.options, "ServiceManager");
+    this.awss3            = new Util.S3Util(this.options);
+    //this.awss3.sample('test.csv', 'test data');
 
 
     try{
@@ -485,6 +487,7 @@ ServiceManager.prototype.internalRoute = function(routePath, method, args){
             args = [args, this];
         }
 
-        route.func.apply(route.service, args);
+        return route.func.apply(route.service, args);
     }
+    return when.reject('invalid route');
 };
