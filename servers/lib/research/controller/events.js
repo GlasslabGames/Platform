@@ -1,4 +1,5 @@
 
+var path      = require('path');
 var _         = require('lodash');
 var when      = require('when');
 var moment    = require('moment');
