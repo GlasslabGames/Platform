@@ -12,6 +12,11 @@ module.exports = S3Util;
 function S3Util(options){
     // Get the AWS config
     this.options = options;
+
+    // Set the AWS config
+    if( !this.options.awsAccess ) {
+        return;
+    }
     aws.config = this.options.awsAccess;
 
     // Set the S3 object
@@ -124,7 +129,6 @@ S3Util.prototype.putS3Object = function(key, data){
         var params = {};
         params.Bucket = this.bucket;
         params.Key = key;
-        //params.ContentLength = 0;
         params.Body = copiedData;
 
         this.s3.putObject(params, function(err, results){
