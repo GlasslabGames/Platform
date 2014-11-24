@@ -318,7 +318,7 @@ function archiveEventsByDate(gameId, count, startProcess){
             .catch(function(err){
                 if(err === 'up to date'){
                     console.log( "Archiving: returning because up to date" );
-                    return// resolve(true);
+                    return;
                 }
                 console.log( "Archiving: Archive Events By Date Error - ", err);
                 reject(err);
