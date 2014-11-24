@@ -87,6 +87,19 @@ function archiveEvents(req, res, next) {
     // Everything seems valid, return a response
     this.requestUtil.jsonResponse(res, {status:"archiving triggered"});
 
+    // Send a started email
+    var emailData = {
+        subject: "Data Archiving Started...",
+        to: "ben@glasslabgames.org",
+        data: { message: "started" },
+        host: req.protocol + "://" + req.headers.host
+    };
+    var email = new Util.Email(
+        this.options.auth.email,
+        path.join( __dirname, "../email-templates" ),
+        this.stats );
+    email.send( "archive-status", emailData );
+
     console.log( "Archiving: Beginning Archiving!" );
 
     // actual time wanted: new CronJob('0 0 0 * * *', function(){
@@ -120,31 +133,32 @@ function archiveEvents(req, res, next) {
                         var emailData = {
                             subject: "Data Archiving Failure!",
                             to: "ben@glasslabgames.org",
-                            data: err,
+                            data: { message: err },
                             host: req.protocol + "://" + req.headers.host
                         };
                         var email = new Util.Email(
                             this.options.auth.email,
                             path.join( __dirname, "../email-templates" ),
                             this.stats );
-                        email.send( "archive-failure", emailData );
+                        email.send( "archive-status", emailData );
 
                         reject();
                     }.bind(this));
             } else{
                 console.log( "Archiving: completed archiving job!" );
 
-                // Send a failure email
+                // Send a success email
                 var emailData = {
                     subject: "Data Archiving Successful!",
                     to: "ben@glasslabgames.org",
+                    data: { message: "success" },
                     host: req.protocol + "://" + req.headers.host
                 };
                 var email = new Util.Email(
                     this.options.auth.email,
                     path.join( __dirname, "../email-templates" ),
                     this.stats );
-                email.send( "archive-success", emailData );
+                email.send( "archive-status", emailData );
 
                 resolve();
                 // email success notification
