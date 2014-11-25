@@ -89,7 +89,7 @@ function archiveEvents(req, res, next) {
     var emailData = {
         subject: "Data Archiving Started...",
         to: "ben@glasslabgames.org",
-        data: { message: "started" },
+        data: { message: "started", manualSeconds: [] },
         host: req.protocol + "://" + req.headers.host
     };
     var email = new Util.Email(
@@ -119,7 +119,7 @@ function archiveEvents(req, res, next) {
                         eventCount = output[1];
                         if(output[2].length > 0){
                             output[2].forEach(function(second){
-                                manualSeconds.push(ids[index] + ': ' + second);
+                                manualSeconds.push(second);
                             }.bind(this));
                         }
                         if(upToDate){
@@ -136,11 +136,10 @@ function archiveEvents(req, res, next) {
                         var emailData = {
                             subject: "Data Archiving Failure!",
                             to: "ben@glasslabgames.org",
-                            data: { message: err.error, game: ids[index], date: err.date, manualSeconds: null },
+                            data: { message: err.error, game: ids[index], date: err.date, manualSeconds: manualSeconds },
                             host: req.protocol + "://" + req.headers.host
                         };
                         if(manualSeconds.length > 0){
-                            emailData.data.manualSeconds = manualSeconds;
                             console.log('seconds to pull manually:',manualSeconds);
                         }
                         var email = new Util.Email(
@@ -159,11 +158,10 @@ function archiveEvents(req, res, next) {
                 var emailData = {
                     subject: "Data Archiving Successful!",
                     to: "ben@glasslabgames.org",
-                    data: { message: "success", manualSeconds: null },
+                    data: { message: "success", manualSeconds: manualSeconds },
                     host: req.protocol + "://" + req.headers.host
                 };
                 if(manualSeconds.length > 0){
-                    emailData.data.manualSeconds = manualSeconds;
                     console.log('seconds to pull manually:',manualSeconds);
                 }
                 var email = new Util.Email(
@@ -220,7 +218,9 @@ function archiveEventsByDate(gameId, count, startProcess){
                         }
                         outData = outData.concat( outputs[2] );
                         if(outputs[3] !== null){
-                            manualSeconds.push(gameId + ': ' + outputs[3] + ' s3 file: ' + fileString + "_p" + part + ".csv");
+                            manualSeconds.push({game: 'game: ' + gameId,
+                                                second: 'second: ' + outputs[3],
+                                                file: 'file: ' + fileString + "_p" + part + ".csv"});
                             manualState = true;
                         }
 
@@ -367,7 +367,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
             console.log( "Archiving: in _archiveEventsByLimit with sdt: " + startDateTime + ", edt: " + endDateTime );
             var timeFormat = "MM/DD/YYYY HH:mm:ss";
             // query limit for couchbase.  the max number of elements in csv file is a multiple of this value
-            var limit = 40;
+            var limit = 2000;
             var updatedDateTime = startDateTime;
             var eventCount;
             var manualSecond = null;

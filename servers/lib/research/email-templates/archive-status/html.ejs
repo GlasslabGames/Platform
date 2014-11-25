@@ -1,5 +1,29 @@
 Archive status: {{= data.message }}
 <br />
 <br />
+{{ if(data.message !== 'started'){ }}
+    {{ if(data.message !== 'success'){ }}
+        Error occured for {{= data.game}} on {{= data.date}}
+        <br />
+        <br />
+    {{ } }}
+    {{ if(data.manualSeconds.length === 0){ }}
+        No seconds were skipped over.
+        <br />
+        <br />
+    {{ } else { }}
+        Events were skipped over.  Need to manually pull the following event groups:
+        <ul>
+        {{ data.manualSeconds.forEach(function(events){ }}
+            <li>{{= events.game }}</li>
+            <li>{{= events.second }}</li>
+            <li>{{= events.file }}</li>
+            <br />
+        {{ }) }}
+        </ul>
+        <br />
+    {{ } }}
+{{ } }}
+
 Sincerely,<br />
 Your New Best Friends at GlassLab
