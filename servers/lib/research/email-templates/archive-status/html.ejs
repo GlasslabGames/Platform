@@ -7,11 +7,7 @@ Archive status: {{= data.message }}
         <br />
         <br />
     {{ } }}
-    {{ if(data.manualSeconds.length === 0){ }}
-        No seconds were skipped over.
-        <br />
-        <br />
-    {{ } else { }}
+    {{ if(data.manualSeconds.length > 0){ }}
         Events were skipped over.  Need to manually pull the following event groups:
         <ul>
         {{ data.manualSeconds.forEach(function(events){ }}

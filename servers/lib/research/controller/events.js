@@ -89,7 +89,7 @@ function archiveEvents(req, res, next) {
     var emailData = {
         subject: "Data Archiving Started...",
         to: "ben@glasslabgames.org",
-        data: { message: "started", manualSeconds: [] },
+        data: { message: "started" },
         host: req.protocol + "://" + req.headers.host
     };
     var email = new Util.Email(
@@ -383,16 +383,13 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                     else {
                         // events found, limitParam reached
                         var lastEventTime = events[events.length - 1].serverTimeStamp;
-                        var lastSecond = new Date(lastEventTime);
-                        lastSecond.setMilliseconds(0);
-                        lastSecond = Date.parse(lastSecond);
+                        var lastSecond = Math.floor(lastEventTime/1000)*1000;
 
                         if (events[0].serverTimeStamp < lastSecond) {
                             while (lastEventTime >= lastSecond || events.length === 1) {
                                 events.pop();
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
                             }
-                            //lastEventTime++;
                         } else {
                             // if the first event selected occurred in the same second as the last
                             // then there is danger that some events may be excluded.
