@@ -129,7 +129,7 @@ function archiveEvents(req, res, next) {
                         }
                         archiveCheck.call(this);
                     }.bind(this))
-                    .catch(function(err){
+                    .then(null, function(err){
                         console.log( "Archiving: Error in archiving: " + err.error );
 
                         // Send a failure email
@@ -237,7 +237,24 @@ function archiveEventsByDate(gameId, count, startProcess){
                                     outData = outData.join("\n");
                                     var fileName = fileString + "_p" + part + ".csv";
                                     console.log( "Archiving: saving file: " + fileName );
-                                    //this.serviceManager.awss3.putS3Object( fileName, outData );
+                                    /*this.serviceManager.awss3.putS3Object( fileName, outData )
+                                        .then(function(){
+                                            outData = [];
+                                            // Start the next part
+                                             console.log( "Archiving: start the next part." );
+                                             queriesTillNewCSV = maxCSVQueries;
+                                             part++;
+                                             existingFile = false;
+
+                                             return recursor.call(this)
+                                        }.bind(this))
+                                        .then(function(){
+                                            resolve()
+                                        }.bind(this))
+                                        .then(null, function(err){
+                                            reject(err);
+                                        }.bind(this));
+                                    */
                                     outData = [];
                                 }
 
@@ -251,7 +268,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                                 .then(function () {
                                     resolve()
                                 }.bind(this))
-                                .catch(function (err) {
+                                .then(null, function (err) {
                                     reject(err);
                                 }.bind(this));
                         } else {
@@ -326,7 +343,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                 var upToDate = (thisDate === yesterdayDate);
                 resolve([upToDate, eventCount, manualSeconds]);
             }.bind(this))
-            .catch(function(err){
+            .then(null, function(err){
                 if(err === 'up to date'){
                     console.log( "Archiving: returning because up to date" );
                     resolve([true, null, manualSeconds]);
@@ -404,7 +421,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                     resolve([updatedDateTime, eventCount, outList, manualSecond]);
                 }.bind(this))
                 // catch all
-                .then(null, function (err) {
+                .then(null, function (err){
                     console.log( "Archiving: Process Events ERROR: " + err );
                     reject(err);
                 }.bind(this));

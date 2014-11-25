@@ -382,7 +382,7 @@ function releases(req, res, next, serviceManager) {
                 this.requestUtil.jsonResponse(res, releaseInfo );
             }
         }.bind(this) )
-        .catch(function(err){
+        .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this) );
 }
