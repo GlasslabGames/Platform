@@ -220,7 +220,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                         }
                         outData = outData.concat( outputs[2] );
                         if(outputs[3] !== null){
-                            manualSeconds.push(outputs[3]);
+                            manualSeconds.push(gameId + ': ' + outputs[3] + ' s3 file: ' + fileString + "_p" + part + ".csv");
                             manualState = true;
                         }
 
