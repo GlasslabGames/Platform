@@ -324,7 +324,7 @@ function updateUserData(req, res, next, serviceManager) {
             this.requestUtil.jsonResponse(res, userData);
         }.bind(this))
         // error
-        .catch(function(err){
+        .then(null, function(err){
             this.stats.increment("error", "Route.Update.User");
             console.error("Auth - updateUserRoute error:", err);
             //this.requestUtil.errorResponse(res, err, 400);
@@ -609,7 +609,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org Beta confirmation",
+                        subject: "GlassLabGames.org Beta confirmation",
                         to: this.options.auth.beta.email.to,
                         user: userData,
                         code: verifyCode,
@@ -661,7 +661,7 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org Developer confirmation",
+                        subject: "GlassLab Games Developer confirmation",
                         to: this.options.auth.developer.email.to,
                         user: userData,
                         code: verifyCode,
@@ -826,7 +826,7 @@ function sendVerifyEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org - Verify your email",
+                        subject: "GlassLab Games - Verify your email",
                         to:   userData.email,
                         user: userData,
                         code: verifyCode,
@@ -881,7 +881,7 @@ function sendDeveloperVerifyEmail(regData, protocol, host) {
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
                     var emailData = {
-                        subject: "Playfully.org - Verify your email",
+                        subject: "GlassLab Games - Verify your email",
                         to:   userData.email,
                         user: userData,
                         code: verifyCode,
@@ -1001,7 +1001,7 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
     // instructor, manager or admin (all require email)
     // 2) send email
     var emailData = {
-        subject: "Welcome to Playfully.org!",
+        subject: "Welcome to GlassLabGames.org!",
         to:   regData.email,
         user: regData,
         host: protocol+"://"+host
@@ -1028,7 +1028,7 @@ function sendDeveloperWelcomeEmail(emailOptions, regData, protocol, host){
     // instructor, manager or admin (all require email)
     // 2) send email
     var emailData = {
-        subject: "Welcome to Playfully.org Developer!",
+        subject: "Welcome to GlassLab Games Developer!",
         to:   regData.email,
         user: regData,
         host: protocol+"://"+host
@@ -1070,7 +1070,7 @@ function resetPasswordSend(req, res, next) {
                         //
                         // 2) send email
                         var emailData = {
-                            subject: "Your Playfully.org Password",
+                            subject: "Your GlassLabGames.org Password",
                             to:   userData.email,
                             user: userData,
                             code: resetCode,

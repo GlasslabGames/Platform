@@ -64,9 +64,7 @@ return when.promise(function(resolve, reject) {
 
         .then(function(){
             // Run the cron job
-            if( process.env.HYDRA_ENV == "prod" ) {
-                //this.cronJob();
-            }
+            //this.cronJob();
 
             // load csv file
             var dir = __dirname+'/parser_schema/';
@@ -138,7 +136,7 @@ ResearchService.prototype.cronJob = function(){
                         }
                         archiveCheck();
                     }.bind(this))
-                    .catch(function(err){
+                    .then(null, function(err){
                         if(err !== 'invalid route'){
                             // email failure notification
                             console.error('Cron Error -',err);
