@@ -372,7 +372,11 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
             var eventCount;
             var manualSecond = null;
 
-            this.store.getEventsByGameIdDate(gameId, startDateTime.toArray(), endDateTime.toArray(), limit)
+            var startArray = startDateTime.toArray();
+            var endArray = endDateTime.toArray()
+            console.log('Start before getEventsbyGameIdDate:', JSON.stringify(startArray));
+            console.log('End before getEventsByGameIdDate:', JSON.stringify(endArray));
+            this.store.getEventsByGameIdDate(gameId, startArray, endArray, limit)
                 .then(function (events) {
                     console.log( "Archiving: Running Filter: eventCount: " + events.length + ", limit: " + limit );
                     eventCount = events.length;
