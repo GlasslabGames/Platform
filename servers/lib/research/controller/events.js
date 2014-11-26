@@ -278,6 +278,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                                 var fileName = fileString + "_p" + part + ".csv";
                                 console.log( "Archiving: saving file: " + fileName );
                                 this.serviceManager.awss3.putS3Object( fileName, outData );
+                                outData = [];
                                 resolve();
                             }
                             else {
