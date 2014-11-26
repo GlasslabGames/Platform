@@ -14,6 +14,11 @@
         "maintenance": null,
         "shortName": "SimCityEDU",
         "longName": "SimCityEDU: Pollution Challenge!",
+        "price": "Premium Subscription",
+        "type": "Client Download",
+        "platform": "PC & Mac",
+        "subject": "21st Century Skills, Science, ELA",
+        "grades": "6 - 8",
         "shortDescription": "SimCityEDU: Pollution Challenge!",
         "description": "SimCityEDU: Pollution Challenge!",
         "settings" : {
@@ -34,11 +39,6 @@
         "play": {
             "type": "missions"
         },
-        "price": "Premium Subscription",
-        "type": "Client Download",
-        "platform": "PC & Mac",
-        "subject": "21st Century Skills, Science, ELA",
-        "grades": "6 - 8",
         "banners": {
             "product": "assets/game-banner-SC.jpg",
             "reports": "assets/game-banner-SC.jpg"
