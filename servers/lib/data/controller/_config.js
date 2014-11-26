@@ -30,7 +30,7 @@ function updateGameConfigs(req, res, next, serviceManager)
         .then(function(){
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
-        .catch(function(err){
+        .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this) );
 }

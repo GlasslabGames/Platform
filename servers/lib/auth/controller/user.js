@@ -324,7 +324,7 @@ function updateUserData(req, res, next, serviceManager) {
             this.requestUtil.jsonResponse(res, userData);
         }.bind(this))
         // error
-        .catch(function(err){
+        .then(null, function(err){
             this.stats.increment("error", "Route.Update.User");
             console.error("Auth - updateUserRoute error:", err);
             //this.requestUtil.errorResponse(res, err, 400);

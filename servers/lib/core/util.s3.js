@@ -12,6 +12,11 @@ module.exports = S3Util;
 function S3Util(options){
     // Get the AWS config
     this.options = options;
+
+    // Set the AWS config
+    if( !this.options.awsAccess ) {
+        return;
+    }
     aws.config = this.options.awsAccess;
 
     // Set the S3 object
@@ -47,7 +52,7 @@ S3Util.prototype.sample = function(key, data) {
                 }.bind(this));
                 resolve();
             }.bind(this))*/
-            .catch(function(err){
+            .then(null, function(err){
                 console.log('S3 Some Random - ', err);
                 reject();
             }.bind(this));
@@ -124,7 +129,6 @@ S3Util.prototype.putS3Object = function(key, data){
         var params = {};
         params.Bucket = this.bucket;
         params.Key = key;
-        //params.ContentLength = 0;
         params.Body = copiedData;
 
         this.s3.putObject(params, function(err, results){
@@ -169,7 +173,7 @@ S3Util.prototype.updateS3Object = function(key, data){
             .then(function(){
                 resolve();
             }.bind(this))
-            .catch(function(err){
+            .then(null, function(err){
                 reject('update');
             }.bind(this));
     }.bind(this));
