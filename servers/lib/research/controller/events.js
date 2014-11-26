@@ -237,8 +237,8 @@ function archiveEventsByDate(gameId, count, startProcess){
                                     outData = outData.join("\n");
                                     var fileName = fileString + "_p" + part + ".csv";
                                     console.log( "Archiving: saving file: " + fileName );
-                                    /*this.serviceManager.awss3.putS3Object( fileName, outData )
-                                        .then(function(){
+                                    this.serviceManager.awss3.putS3Object( fileName, outData );
+                                    /*    .then(function(){
                                             outData = [];
                                             // Start the next part
                                              console.log( "Archiving: start the next part." );
@@ -277,7 +277,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                                 outData = outData.join("\n");
                                 var fileName = fileString + "_p" + part + ".csv";
                                 console.log( "Archiving: saving file: " + fileName );
-                                //return this.serviceManager.awss3.putS3Object( fileName, outData );
+                                this.serviceManager.awss3.putS3Object( fileName, outData );
                                 resolve();
                             }
                             else {
@@ -316,7 +316,7 @@ function archiveEventsByDate(gameId, count, startProcess){
                 }
 
                 var dates = formattedDate.split( "-" );
-                fileString =  "archives/" + process.env.HYDRA_ENV + "/" + gameId + "/"
+                fileString =  "archives/" + this.options.env + "/" + gameId + "/"
                                 + dates[0] + "/" + dates[2] + "/" + gameId + "_" + formattedDate;
 
                 return this.store.getCsvDataByGameId(gameId);
