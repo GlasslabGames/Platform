@@ -372,11 +372,11 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
             var eventCount;
             var manualSecond = null;
 
-            var startArray = startDateTime.toArray();
-            var endArray = endDateTime.toArray()
+            var startDateTimeArray = startDateTime.toArray();
+            var endDateTimeArray = endDateTime.toArray();
             console.log('Start before getEventsbyGameIdDate:', JSON.stringify(startArray));
             console.log('End before getEventsByGameIdDate:', JSON.stringify(endArray));
-            this.store.getEventsByGameIdDate(gameId, startArray, endArray, limit)
+            this.store.getEventsByGameIdDate(gameId, startDateTimeArray, endDateTimeArray, limit)
                 .then(function (events) {
                     console.log( "Archiving: Running Filter: eventCount: " + events.length + ", limit: " + limit );
                     eventCount = events.length;
@@ -387,12 +387,21 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                     else {
                         // events found, limitParam reached
                         var lastEventTime = events[events.length - 1].serverTimeStamp;
+                        if(lastEventTime < 10000000000){
+                            lastEventTime *= 1000;
+                        }
                         var lastSecond = Math.floor(lastEventTime/1000)*1000;
-
-                        if (events[0].serverTimeStamp < lastSecond) {
+                        var firstEventTime = events[0].serverTimeStamp;
+                        if(firstEventTime < 10000000000){
+                            firstEventTime *= 1000;
+                        }
+                        if (firstEventTime < lastSecond) {
                             while (lastEventTime >= lastSecond || events.length === 1) {
                                 events.pop();
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
+                                if(lastEventTime < 10000000000){
+                                    lastEventTime *= 1000;
+                                }
                             }
                         } else {
                             // if the first event selected occurred in the same second as the last
