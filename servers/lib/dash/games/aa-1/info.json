@@ -131,7 +131,7 @@
         "buttons": [
             {
                 "name": "Getting Started Guide",
-                "authRequired": true,
+                "authRequired": false,
                 "type": "link",
                 "links": [
                     {
