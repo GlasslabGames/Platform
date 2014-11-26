@@ -506,6 +506,14 @@ module.exports = {
                 get: "archiveEvents"
             }
         },
+        {
+            api: "/api/v2/research/code/:code/archive/stop",
+            service: "research",
+            controller: "events",
+            method: {
+                get: "stopArchive"
+            }
+        },
     // ---------------------------------------------------
     // Version 1
     // ---------------------------------------------------

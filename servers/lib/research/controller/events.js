@@ -7,11 +7,13 @@ var csv       = require('csv');
 var Util      = require('../../core/util.js');
 
 var TOTALEVENTS = 0;
+var runningArchive = false;
 
 module.exports = {
     getEventsByDate: getEventsByDate,
     archiveEventsByGameId: archiveEventsByGameId,
-    archiveEvents: archiveEvents
+    archiveEvents: archiveEvents,
+    stopArchive: stopArchive
 };
 
 /*
@@ -35,6 +37,25 @@ module.exports = {
     dateRange
  */
 
+function stopArchive(req, res){
+    //0eebfae0-6d9b-ede9-41e1-f726be96e1b0
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    }
+
+    // If the code is not valid
+    if( req.params.code !== "0eebfae0-6d9b-ede9-41e1-f726be96e1b0" ) {
+        this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    } else if(runningArchive === true){
+        this.requestUtil.jsonResponse(res, {status:"archiving stopped"});
+        runningArchive = false;
+    } else{
+        this.requestUtil.jsonResponse(res, {status:"archive not running"});
+    }
+}
+
 function archiveEventsByGameId(req, res, next) {
 
 }
@@ -48,19 +69,24 @@ function archiveEvents(req, res, next) {
     }
 
     // If the code is not valid
-    if( req.params.code != "0eebfae0-6d9b-ede9-41e1-f726be96e1b0" ) {
+    if( req.params.code !== "0eebfae0-6d9b-ede9-41e1-f726be96e1b0" ) {
         this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    } else if(runningArchive === true){
+        this.requestUtil.jsonResponse(res, {status:"archive already in progress"});
+        return;
+    } else{
+        runningArchive = true;
     }
 
     // Check for game Id
-    var ids = [];
+    var gameIds = [];
     if( req.query.gameId ) {
-        ids.push( req.query.gameId );
+        gameIds.push( req.query.gameId );
     }
     else {
-        ids.push( "SC" );
-        ids.push( "AA-1" );
-        ids.push( "AW-1" );
+        gameIds.push( "SC" );
+        gameIds.push( "AA-1" );
+        gameIds.push( "AW-1" );
     }
 
 
@@ -74,6 +100,7 @@ function archiveEvents(req, res, next) {
     var startProcess;
     var upToDate;
     var manualSeconds = [];
+    var gameId;
 
     // Set the duration if it exists, other default to 1 hour
     var duration = 1;
@@ -111,8 +138,9 @@ function archiveEvents(req, res, next) {
             console.log( "Archiving: Checking for available time." );
             // duration in milliseconds, job runs from 12 am to 4 am pacific time normally,
             // but can be triggered at any time provided a valid code.
-            if(currentTime - startTime < duration && index < ids.length){
-                archiveEventsByDate.call( this, ids[index], eventCount, startProcess )
+            if(currentTime - startTime < duration && index < gameIds.length){
+                gameId = gameIds[index];
+                archiveEventsByDate.call( this, gameId, eventCount, startProcess )
                     .then(function(output){
                         console.log( "Archiving: archiveEventsByDate complete, checking up to date." );
                         upToDate = output[0];
@@ -130,13 +158,14 @@ function archiveEvents(req, res, next) {
                         archiveCheck.call(this);
                     }.bind(this))
                     .then(null, function(err){
-                        console.log( "Archiving: Error in archiving: " + err.error );
-
+                        var error = JSON.stringify(err.error);
+                        console.log( "Archiving: Error in archiving: " + error );
+                        runningArchive = false;
                         // Send a failure email
                         var emailData = {
                             subject: "Data Archiving Failure!",
                             to: "ben@glasslabgames.org",
-                            data: { message: err.error, game: ids[index], date: err.date, manualSeconds: manualSeconds },
+                            data: { message: error, game: gameId, date: err.date, manualSeconds: manualSeconds },
                             host: req.protocol + "://" + req.headers.host
                         };
                         if(manualSeconds.length > 0){
@@ -152,8 +181,7 @@ function archiveEvents(req, res, next) {
                     }.bind(this));
             } else{
                 console.log( "Archiving: completed archiving job!" );
-                console.log('TOTAL EVENTZ:', TOTALEVENTS);
-
+                runningArchive = false;
                 // Send a success email
                 var emailData = {
                     subject: "Data Archiving Successful!",
@@ -224,6 +252,13 @@ function archiveEventsByDate(gameId, count, startProcess){
                             manualState = true;
                         }
 
+                        if(!runningArchive){
+                            var stopTime = startDateTime.format("MM/DD/YYYY HH:mm:ss");
+                            var error = {'stop.archive': 'Call made to stop archive'};
+                            error.stopTime = stopTime;
+                            reject(error);
+                        }
+
                         console.log( "Archiving: finished _archiveEventsByLimit with startDateTime: " + startDateTime );
 
                         queriesTillNewCSV--;
@@ -284,7 +319,6 @@ function archiveEventsByDate(gameId, count, startProcess){
                             else {
                                 resolve();
                             }
-                            //resolve();
                         }
                     }.bind(this));
             }.bind(this));
@@ -373,11 +407,11 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
             var eventCount;
             var manualSecond = null;
 
-            var startArray = startDateTime.toArray();
-            var endArray = endDateTime.toArray()
-            console.log('Start before getEventsbyGameIdDate:', JSON.stringify(startArray));
-            console.log('End before getEventsByGameIdDate:', JSON.stringify(endArray));
-            this.store.getEventsByGameIdDate(gameId, startArray, endArray, limit)
+            var startDateTimeArray = startDateTime.toArray();
+            var endDateTimeArray = endDateTime.toArray();
+            console.log('Start before getEventsbyGameIdDate:', JSON.stringify(startDateTimeArray));
+            console.log('End before getEventsByGameIdDate:', JSON.stringify(endDateTimeArray));
+            this.store.getEventsByGameIdDate(gameId, startDateTimeArray, endDateTimeArray, limit)
                 .then(function (events) {
                     console.log( "Archiving: Running Filter: eventCount: " + events.length + ", limit: " + limit );
                     eventCount = events.length;
@@ -388,12 +422,21 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                     else {
                         // events found, limitParam reached
                         var lastEventTime = events[events.length - 1].serverTimeStamp;
+                        if(lastEventTime < 10000000000){
+                            lastEventTime *= 1000;
+                        }
                         var lastSecond = Math.floor(lastEventTime/1000)*1000;
-
-                        if (events[0].serverTimeStamp < lastSecond) {
+                        var firstEventTime = events[0].serverTimeStamp;
+                        if(firstEventTime < 10000000000){
+                            firstEventTime *= 1000;
+                        }
+                        if (firstEventTime < lastSecond) {
                             while (lastEventTime >= lastSecond || events.length === 1) {
                                 events.pop();
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
+                                if(lastEventTime < 10000000000){
+                                    lastEventTime *= 1000;
+                                }
                             }
                         } else {
                             // if the first event selected occurred in the same second as the last
@@ -665,7 +708,6 @@ function parseCSVSchema(csvData) {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var parsedSchemaData = { header: "", rows: {} };
-    //console.log('csvzz:', csvData, 'endzz');
     try {
         csv()
         .from(csvData, { delimiter: ',', escape: '"' })
