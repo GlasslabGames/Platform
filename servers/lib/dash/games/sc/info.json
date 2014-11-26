@@ -33,6 +33,15 @@
         },
         "play": {
             "type": "missions"
+        },
+        "price": "Premium Subscription",
+        "type": "Client Download",
+        "platform": "PC & Mac",
+        "subject": "21st Century Skills, Science, ELA",
+        "grades": "6 - 8",
+        "banners": {
+            "product": "assets/game-banner-SC.jpg",
+            "reports": "assets/game-banner-SC.jpg"
         }
     },
     "assessment": [
@@ -354,12 +363,14 @@
                 "authRequired": true,
                 "links": [
                     {
-                        "name": "Win",
+                        "name": "PC (1.0GB)",
+                        "OS": "Win",
                         "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.msi",
                         "target": "_blank"
                     },
                     {
-                        "name": "Mac",
+                        "name": "Mac (1.0GB)",
+                        "OS": "Mac",
                         "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.dmg",
                         "target": "_blank"
                     }

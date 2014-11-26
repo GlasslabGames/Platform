@@ -41,6 +41,15 @@
                     "height": 640
                 }
             }
+        },
+        "price": "Free",
+        "type": "Browser",
+        "platform": "Flash/Browser",
+        "subject": "Social Studies",
+        "grades": "6 - 10",
+        "banners": {
+            "product": "assets/game-banner-AW-1.jpg",
+            "reports": "assets/game-banner-AW-1.jpg"
         }
     },
     "assessment": [
