@@ -262,45 +262,46 @@ function archiveEventsByDate(gameId, count, startProcess){
                         if(startDateTime !== endDateTime) {
                             console.log( "Archiving: startDateTime and endDateTime are not equal" );
                             existingFile = true;
-                            if (queriesTillNewCSV === 0 || manualState) {
+                            if ((queriesTillNewCSV === 0 || manualState) && outData.length > 1) {
                                 // send current data to s3
                                 manualState = false;
-                                if( outData.length > 1 ) {
-                                    outData = outData.join("\n");
-                                    var fileName = fileString + "_p" + part + ".csv";
-                                    console.log( "Archiving: saving file: " + fileName );
-                                    this.serviceManager.awss3.putS3Object( fileName, outData )
-                                        .then(function(){
-                                            outData = [];
-                                            // Start the next part
-                                             console.log( "Archiving: start the next part." );
-                                             queriesTillNewCSV = maxCSVQueries;
-                                             part++;
-                                             existingFile = false;
+                                outData = outData.join("\n");
+                                var fileName = fileString + "_p" + part + ".csv";
+                                console.log( "Archiving: saving file: " + fileName );
+                                this.serviceManager.awss3.putS3Object( fileName, outData )
+                                    .then(function(){
+                                        outData = [];
+                                        // Start the next part
+                                         console.log( "Archiving: start the next part." );
+                                         queriesTillNewCSV = maxCSVQueries;
+                                         part++;
+                                         existingFile = false;
 
-                                             return recursor.call(this)
-                                        }.bind(this))
-                                        .then(function(){
-                                            resolve()
-                                        }.bind(this))
-                                        .then(null, function(err){
-                                            reject(err);
-                                        }.bind(this));
+                                         return recursor.call(this)
+                                    }.bind(this))
+                                    .then(function(){
+                                        resolve()
+                                    }.bind(this))
+                                    .then(null, function(err){
+                                        reject(err);
+                                    }.bind(this));
+                            } else{
+                                if(queriesTillNewCSV === 0 || manualState){
+                                    manualState = false;
+                                    // Start the next part, new s3 object
+                                    console.log("Archiving: start the next part.");
+                                    queriesTillNewCSV = maxCSVQueries;
+                                    part++;
+                                    existingFile = false;
                                 }
-
-                                // Start the next part, new s3 object
-                                console.log( "Archiving: start the next part." );
-                                queriesTillNewCSV = maxCSVQueries;
-                                part++;
-                                existingFile = false;
+                                recursor.call(this)
+                                    .then(function () {
+                                        resolve()
+                                    }.bind(this))
+                                    .then(null, function (err) {
+                                        reject(err);
+                                    }.bind(this));
                             }
-                            recursor.call(this)
-                                .then(function () {
-                                    resolve()
-                                }.bind(this))
-                                .then(null, function (err) {
-                                    reject(err);
-                                }.bind(this));
                         } else {
                             // Once we're finished, send to s3
                             if( outData.length > 1 ) {
