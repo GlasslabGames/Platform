@@ -42,7 +42,7 @@ function stopArchive(req, res){
     if( !(req.params.code &&
         _.isString(req.params.code) &&
         req.params.code.length) ) {
-        this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+        return this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
     }
 
     // If the code is not valid
@@ -319,7 +319,10 @@ function archiveEventsByDate(gameId, count, startProcess){
                                 resolve();
                             }
                         }
-                    }.bind(this));
+                    }.bind(this))
+                    .then( null, function( err ) {
+                        reject( err );
+                    });
             }.bind(this));
         }
 
@@ -413,6 +416,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                 .then(function (events) {
                     console.log( "Archiving: Running Filter: eventCount: " + events.length + ", limit: " + limit );
                     eventCount = events.length;
+
                     if(eventCount < limit){
                         // did not find events up to limit, so day's querying is done
                         updatedDateTime = endDateTime;
@@ -421,19 +425,22 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                         // limit reached
                         var lastEventTime = events[events.length - 1].serverTimeStamp;
                         if(lastEventTime < 10000000000){
+                            console.log( "Archiving: adding MS to lastEventTime before while!" );
                             lastEventTime *= 1000;
                         }
                         var lastSecond = Math.floor(lastEventTime/1000)*1000;
                         var firstEventTime = events[0].serverTimeStamp;
                         if(firstEventTime < 10000000000){
+                            console.log( "Archiving: adding MS to firstEventTime!" );
                             firstEventTime *= 1000;
                         }
                         if (firstEventTime < lastSecond) {
                             // remove events that occurred in last second of events array
-                            while (lastEventTime >= lastSecond || events.length === 1) {
+                            while (lastEventTime >= lastSecond && events.length > 1) {
                                 events.pop();
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
                                 if(lastEventTime < 10000000000){
+                                    console.log( "Archiving: adding MS to lastEventTime within while!" );
                                     lastEventTime *= 1000;
                                 }
                             }
