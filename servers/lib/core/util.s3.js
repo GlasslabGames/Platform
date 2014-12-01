@@ -57,14 +57,14 @@ S3Util.prototype.sample = function(key, data) {
                 reject();
             }.bind(this));
     }.bind(this));
-}
+};
 
 
 S3Util.prototype.getBucket = function(key) {
     return when.promise(function(resolve, reject) {
         var params = {};
     }.bind(this));
-}
+};
 
 S3Util.prototype.createS3Bucket = function( bucket ) {
     return when.promise( function( resolve, reject ) {
@@ -82,7 +82,7 @@ S3Util.prototype.createS3Bucket = function( bucket ) {
             }
         }.bind( this ) );
     }.bind( this ) );
-}
+};
 
 S3Util.prototype.createS3Object = function(key, data) {
     return when.promise(function(resolve, reject){
@@ -100,7 +100,7 @@ S3Util.prototype.createS3Object = function(key, data) {
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // gets s3 object from playfully bucket
 S3Util.prototype.getS3Object = function(key){
@@ -120,7 +120,7 @@ S3Util.prototype.getS3Object = function(key){
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // gets s3 object from playfully bucket
 S3Util.prototype.putS3Object = function(key, data){
@@ -141,7 +141,7 @@ S3Util.prototype.putS3Object = function(key, data){
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // deletes s3 object from playfully bucket
 S3Util.prototype.deleteS3Object = function(key){
@@ -160,15 +160,15 @@ S3Util.prototype.deleteS3Object = function(key){
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // updates s3 object from playfully bucket
 S3Util.prototype.updateS3Object = function(key, data){
     return when.promise(function(resolve, reject){
-        getS3Object(this.s3, key)
+        this.getS3Object(key)
             .then(function(object){
                 _.merge(object, data);
-                return createS3Object(this.s3, key, object);
+                return this.createS3Object(key, object);
             }.bind(this))
             .then(function(){
                 resolve();
@@ -177,14 +177,14 @@ S3Util.prototype.updateS3Object = function(key, data){
                 reject('update');
             }.bind(this));
     }.bind(this));
-}
+};
 
 // lists all the s3 objects in playfully bucket
-S3Util.prototype.listS3Objects = function(){
+S3Util.prototype.listS3Objects = function(prefix){
     return when.promise(function(resolve, reject){
         var params = {};
         params.Bucket = this.bucket;
-
+        params.Prefix = prefix;
         this.s3.listObjects(params, function(err, data){
             if(err){
                 console.error('S3 List Objects Error - ', err);
@@ -195,4 +195,44 @@ S3Util.prototype.listS3Objects = function(){
             }
         }.bind(this));
     }.bind(this));
-}
+};
+
+//getSignedUrl
+S3Util.prototype._getSignedUrl = function(key) {
+    var params = {};
+    params.Bucket = this.bucket;
+    params.Key = key;
+    return when.promise(function(resolve, reject){
+        this.s3.getSignedUrl('getObject', params, function (err, url) {
+            if (err) {
+                console.error('Get Signed Url Error - ', err);
+                reject('signedUrl');
+            } else {
+                console.log('S3 Url Get');
+                resolve(url);
+            }
+        }.bind(this));
+    }.bind(this));
+};
+
+S3Util.prototype.getSignedUrlsByGameId = function(gameId){
+    return when.promise(function(resolve, reject){
+        var prefix = 'archives/stage/' + gameId;
+        this.listS3Objects(prefix)
+            .then(function(list){
+                var signedUrlList = [];
+                list.forEach(function(object){
+                    var key = object.Key;
+                    signedUrlList.push(this._getSignedUrl(key));
+                }.bind(this))
+
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(signedUrlList){
+                resolve(signedUrlList);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+};
