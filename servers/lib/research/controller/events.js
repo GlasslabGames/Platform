@@ -109,6 +109,13 @@ function archiveEvents(req, res, next) {
     }
     duration *= ( 3600 * 1000 );
 
+    // Set the limit if it exists, otherwise default to 2000
+    // Also, don't allow the limit to be 0 or less
+    var limit = 2000;
+    if( req.query.limit ) {
+        limit = req.query.limit > 0 ? req.query.limit : limit;
+    }
+
     // Everything seems valid, return a response
     this.requestUtil.jsonResponse(res, {status:"archiving triggered"});
 
@@ -138,7 +145,7 @@ function archiveEvents(req, res, next) {
             // but can be triggered at any time provided a valid code.
             if(currentTime - startTime < duration && index < gameIds.length){
                 gameId = gameIds[index];
-                archiveEventsByDate.call( this, gameId, eventCount, startProcess )
+                archiveEventsByDate.call( this, gameId, eventCount, startProcess, limit )
                     .then(function(output){
                         console.log( "Archiving: archiveEventsByDate complete, checking up to date." );
                         upToDate = output[0];
@@ -204,11 +211,12 @@ function archiveEvents(req, res, next) {
 }
 
 
-function archiveEventsByDate(gameId, count, startProcess){
+function archiveEventsByDate(gameId, count, startProcess, limit){
     return when.promise(function(resolve, reject){
         // multiple of the limit in _archiveEventsByLimit, toggle as needed for testing
         // with the production query limit of 2000, maxCSVQueries would be 5, 5*2000 is 10000
-        var maxCSVQueries = 5;
+        var maxCSVQueries = Math.round( 10000 / limit );
+        console.log( "Archiving: maxCSVQueries is " + maxCSVQueries );
         var queriesTillNewCSV = maxCSVQueries;
 
         var startDateTime;
@@ -235,7 +243,7 @@ function archiveEventsByDate(gameId, count, startProcess){
         function recursor(){
             console.log( "Archiving: started recursor." );
             return when.promise(function(resolve, reject){
-                _archiveEventsByLimit.call(this, gameId, startDateTime, endDateTime, parsedSchemaData, existingFile)
+                _archiveEventsByLimit.call(this, gameId, startDateTime, endDateTime, parsedSchemaData, existingFile, limit)
                     .then(function(outputs){
                         startDateTime = outputs[0];
                         if(outputs[1] > 0){
@@ -398,13 +406,13 @@ function archiveEventsByDate(gameId, count, startProcess){
 }
 
 
-function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaData, existingFile){
+function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaData, existingFile, limit){
     return when.promise(function(resolve, reject) {
         try {
             console.log( "Archiving: in _archiveEventsByLimit with sdt: " + startDateTime + ", edt: " + endDateTime );
             var timeFormat = "MM/DD/YYYY HH:mm:ss";
             // query limit for couchbase.  the max number of elements in csv file is a multiple of this value
-            var limit = 2000;
+            //var limit = 2000;
             var updatedDateTime = startDateTime;
             var eventCount;
             var manualSecond = null;
