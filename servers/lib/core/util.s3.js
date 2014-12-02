@@ -2,7 +2,8 @@ var fs             = require('fs');
 var path           = require('path');
 var _              = require('lodash');
 var when           = require('when');
-var aws    = require('aws-sdk');
+var aws            = require('aws-sdk');
+var child          = require('child-process');
 
 module.exports = S3Util;
 
@@ -224,7 +225,7 @@ S3Util.prototype.getSignedUrlsByGameId = function(gameId){
                 list.forEach(function(object){
                     var key = object.Key;
                     signedUrlList.push(this._getSignedUrl(key));
-                }.bind(this))
+                }.bind(this));
 
                 return when.all(promiseList);
             }.bind(this))
@@ -234,5 +235,93 @@ S3Util.prototype.getSignedUrlsByGameId = function(gameId){
             .then(null, function(err){
                 reject(err);
             }.bind(this));
+    }.bind(this));
+};
+
+// only works if you have awscli installed and configured with aws credentials
+S3Util.prototype._mvS3Object = function(startKey, endKey){
+    return when.promise(function(resolve, reject){
+        var command = 'aws s3 mv ' + startKey + ' ' + endKey;
+        child.exec(command, function(err, stdout, stderr){
+            if(err){
+                reject(err);
+            }
+            var error = '';
+            stderr.on('data', function(data){
+                error += data;
+            });
+
+            stderr.on('close', function(){
+                reject({'stderr': error});
+            });
+
+            stdout.on('close', function(){
+                resolve(true);
+            });
+        });
+    }.bind(this));
+};
+
+S3Util.prototype._swapDateFormatInS3ObjectName = function(key){
+    return when.promise(function(resolve, reject){
+        try {
+            var keyParts = key.split("_");
+            var dates = keyParts[1].split("-");
+            var temp = dates[1];
+            dates[1] = dates[2];
+            dates[2] = temp;
+            keyParts[1] = dates.join("-");
+            var endKey = keyParts.join("_");
+            this._mvS3Object(key, endKey)
+                .then(function () {
+                    resolve();
+                }.bind(this))
+                .then(null, function (err) {
+                    reject(err);
+                }.bind(this));
+        } catch(err){
+            resolve(false);
+            console.log('parsing error directory not object - ', err);
+        }
+    }.bind(this));
+};
+
+// only works if you have awscli installed and configured with aws credentials
+S3Util.prototype.alterS3ObjectNameFormat = function(gameId, year, month, day){
+    return when.promise(function(resolve, reject){
+        var path = 'playfully/archives/dev/';
+        if(gameId){
+            path += gameId + '/';
+            if(year){
+                path += year;
+                if(month !== undefined){
+                    path += month + '/';
+                    if(day !== undefined){
+                        path += day + '/';
+                    }
+                }
+            }
+        }
+        this.listS3Objects(path)
+            .then(function(list){
+                var promiseList = [];
+                list.forEach(function(object){
+                    promiseList.push(this._swapDateFormatInS3ObjectName(object.Key));
+                }.bind(this));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(promiseList){
+                var state = promiseList.some(function(rename){
+                    return rename;
+                });
+                if(state){
+                    resolve();
+                } else{
+                    reject({'bad.path': "No names were changed"});
+                }
+            })
+            .then(null, function(err){
+                reject(err);
+            });
     }.bind(this));
 };
