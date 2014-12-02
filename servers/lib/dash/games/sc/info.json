@@ -16,11 +16,25 @@
         "longName": "SimCityEDU: Pollution Challenge!",
         "price": "Premium Subscription",
         "type": "Client Download",
-        "platform": "PC & Mac",
+        "platform": {
+            "type": "PC & Mac",
+            "icon": {
+                "small": "assets/platform-client.png",
+                "large": "assets/platform-client@2x.png"
+            }
+        },
         "subject": "21st Century Skills, Science, ELA",
         "grades": "6 - 8",
         "shortDescription": "SimCityEDU: Pollution Challenge!",
         "description": "SimCityEDU: Pollution Challenge!",
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab, Inc.",
+            "logo": {
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo2x.png"
+            }
+        },
         "settings" : {
             "missionProgressLock": false
         },
@@ -31,6 +45,10 @@
             "message": {
                 "invalid": "Coming Soon!"
             }
+        },
+        "card": {
+            "small": "assets/game-card-SC.jpg",
+            "large": "assets/game-card-SC@2x.jpg"
         },
         "thumbnail": {
             "small": "assets/thumb-game-SC.png",
