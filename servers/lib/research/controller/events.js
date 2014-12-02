@@ -4,7 +4,7 @@ var _         = require('lodash');
 var when      = require('when');
 var moment    = require('moment');
 var csv       = require('csv');
-var rConst    = require('./research.const.js');
+var rConst    = require('../research.const.js');
 var Util      = require('../../core/util.js');
 
 var TOTALEVENTS = 0;
@@ -419,7 +419,7 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
 
                 var dates = formattedDate.split( "-" );
                 fileString =  "archives/" + this.options.env + "/" + gameId + "/"
-                                + dates[0] + "/" + dates[2] + "/" + gameId + "_" + formattedDate;
+                                + dates[0] + "/" + dates[1] + "/" + gameId + "_" + formattedDate;
 
                 return this.store.getCsvDataByGameId(gameId);
             }.bind(this))
@@ -445,13 +445,6 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                 resolve([upToDate, eventCount, manualSeconds]);
             }.bind(this))
             .then(null, function(err){
-                //if(err["ahead.of.schedule"]){
-                //    // no need to error out, just send back
-                //    console.log( "Archiving: returning because up to date" );
-                //    resolve([true, null, manualSeconds]);
-                //    return;
-                //}
-
                 console.log( "Archiving: Archive Events By Date Error - ", err);
                 var error = {};
                 error.error = err;
@@ -572,7 +565,7 @@ function _initDates(date){
     var thisDate =  new Date(date);
     thisDate = thisDate.setHours(0,0,0,0);
 
-    var formattedDate = startDateTime.format("YYYY-DD-MM");
+    var formattedDate = startDateTime.format("YYYY-MM-DD");
 
     return [startDateTime, endDateTime, yesterdayDate, thisDate, formattedDate];
 }
