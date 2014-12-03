@@ -28,19 +28,10 @@ function S3Util(options){
 }
 
 // build the prefix param for s3, so operation can be done on all items that fall within this directory
-function _s3PrefixBuilder(environment, gameId, year, month){
-    var prefix = 'archives/';
-    if(environment){
-        prefix += environment + '/';
-        if(gameId){
-            prefix += gameId + '/';
-            if(year){
-                prefix += year + '/';
-                if(month !== undefined){
-                    prefix += month + '/';
-                }
-            }
-        }
+function _s3PrefixBuilder(pathParams){
+    var prefix = pathParams.join('/');
+    if(prefix.length > 0){
+        prefix += '/';
     }
     return prefix;
 }
@@ -209,8 +200,14 @@ S3Util.prototype.listS3Objects = function(prefix){
                 console.error('S3 List Objects Error - ', err);
                 reject('list');
             } else{
-                console.log('S3 Object Listed');
-                resolve(data.Contents);
+                var list = data.Contents;
+                var outList = [];
+                list.forEach(function(item){
+                    if(item.Key.indexOf('.') !== -1){
+                        outList.push(item);
+                    }
+                });
+                resolve(outList);
             }
         }.bind(this));
     }.bind(this));
@@ -234,16 +231,17 @@ S3Util.prototype._getSignedUrl = function(key) {
 };
 
 // grabs signed urls for all objects that fall within a particular prefix directory strutcure
-S3Util.prototype.getSignedUrls = function(environment, gameId, year, month){
+S3Util.prototype.getSignedUrls = function(docType, pathParams){
     return when.promise(function(resolve, reject){
-        var prefix = _s3PrefixBuilder(environment, gameId, year, month);
+        var prefix = _s3PrefixBuilder(pathParams);
         this.listS3Objects(prefix)
             .then(function(list){
                 var signedUrlList = [];
                 list.forEach(function(object){
                     var key = object.Key;
-                    var docType = key[key.length-3] + key[key.length-2] + key[key.length-1];
-                    if(docType === 'csv') {
+                    docType = docType || '*';
+                    var endType = key.slice(key.lastIndexOf('.')+1);
+                    if(endType === docType || docType === '*'){
                         signedUrlList.push(this._getSignedUrl(key));
                     }
                 }.bind(this));
@@ -279,22 +277,27 @@ function _mvS3Object(startKey, endKey){
 }
 
 // changes the names of all files that lie within a certain prefix, based on rules created in a formatter method
-S3Util.prototype.alterS3ObjectNames = function(formatter, environment, gameId, year, month){
+S3Util.prototype.alterS3ObjectNames = function(formatter, docType, pathParams){
     return when.promise(function(resolve, reject){
-        var prefix = _s3PrefixBuilder(environment, gameId, year, month);
+        if(docType === undefined){
+            return reject({'no.docType.present': 'Method needs a document type'});
+        }
+
+        pathParams = pathParams || [];
+        var prefix = _s3PrefixBuilder(pathParams);
         this.listS3Objects(prefix)
             .then(function(list){
                 var promiseList = [];
                 list.forEach(function(object){
                     var key = object.Key;
-                    var docType = key[key.length-3] + key[key.length-2] + key[key.length-1];
-                    if(docType === 'csv') {
+                    var endType = key.slice(key.lastIndexOf('.')+1);
+                    if(endType === docType){
                         var keys = formatter.call(this, key);
                         if(Array.isArray(keys)){
                             var startKey = keys[0];
                             var endKey = keys[1];
-                            console.log('start:', startKey,'end:',endKey);
-                            //promiseList.push(this._mvS3Object(startKey, endKey));
+                            //console.log('start:', startKey,'end:',endKey);
+                            promiseList.push(this._mvS3Object(startKey, endKey));
                         } else if(typeof keys !== 'string'){
                             // if not string, is an error
                             return reject(keys);
@@ -310,31 +313,4 @@ S3Util.prototype.alterS3ObjectNames = function(formatter, environment, gameId, y
                 reject(err);
             });
     }.bind(this));
-};
-
-// formatter method, intended to be used with alterS3ObjectNames
-// parses an s3 key and, if the month parameter is in the wrong spot in the file name, changes the file name
-S3Util.prototype.swapDateFormatForCSV = function(key){
-    try {
-        var pathStart = 's3://' + this.bucket + '/';
-        var paths = key.split('/');
-        var month = paths[4];
-        var fileName = paths[5];
-        var nameParts = fileName.split("_");
-        var dates = nameParts[1].split("-");
-        if (month !== dates[1]) {
-            var startKey = pathStart + key;
-            dates[2] = dates[1];
-            dates[1] = month;
-            nameParts[1] = dates.join("-");
-            paths[5] = nameParts.join("_");
-            key = paths.join('/');
-            var endKey = pathStart + key;
-            return [startKey, endKey];
-        } else {
-            return 'name is already properly date formatted';
-        }
-    } catch(err){
-        return err;
-    }
 };

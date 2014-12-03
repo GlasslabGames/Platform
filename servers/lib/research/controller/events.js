@@ -570,6 +570,33 @@ function _initDates(date){
     return [startDateTime, endDateTime, yesterdayDate, thisDate, formattedDate];
 }
 
+// to be passed as formatter argument with awss3.alterS3ObjectNames(formatter, docType, pathParams)
+// parses an s3 key and, if the month parameter is in the wrong spot in the file name, changes the file name
+function swapDateFormatForCSV(key){
+    try {
+        var pathStart = 's3://' + this.bucket + '/';
+        var paths = key.split('/');
+        var month = paths[4];
+        var fileName = paths[5];
+        var nameParts = fileName.split("_");
+        var dates = nameParts[1].split("-");
+        if (month !== dates[1]) {
+            var startKey = pathStart + key;
+            dates[2] = dates[1];
+            dates[1] = month;
+            nameParts[1] = dates.join("-");
+            paths[5] = nameParts.join("_");
+            key = paths.join('/');
+            var endKey = pathStart + key;
+            return [startKey, endKey];
+        } else {
+            return 'name is already properly date formatted';
+        }
+    } catch(err){
+        return err;
+    }
+}
+
 function getEventsByDate(req, res, next){
 
     try {
