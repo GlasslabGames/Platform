@@ -163,7 +163,8 @@
                 "header": {
                     "text": "Shout Out and Watch Out Report",
                     "image": "assets/game-banner-SC.jpg",
-                    "skinny": "assets/skinny-banner-SC.jpg"
+                    "skinny": "assets/skinny-banner-SC.jpg",
+                    "large": "assets/skinny-banner-SC@2x.jpg"
                 },
                 "table": {
                     "labels": [],

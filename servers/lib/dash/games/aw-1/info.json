@@ -98,7 +98,8 @@
                 "header": {
                     "text": "Shout Out and Watch Out Report",
                     "image": "assets/game-banner-AW-1.jpg",
-                    "skinny": "assets/skinny-banner-AW-1.jpg"
+                    "skinny": "assets/skinny-banner-AW-1.jpg",
+                    "large": "assets/skinny-banner-AW-1@2x.jpg"
                 },
                 "description": "Coming Soon!"
             },
@@ -109,7 +110,8 @@
                 "header": {
                     "text": "Learning Events & Time Played",
                     "image": "assets/game-banner-AW-1.jpg",
-                    "skinny": "assets/skinny-banner-AW-1.jpg"
+                    "skinny": "assets/skinny-banner-AW-1.jpg",
+                    "large": "assets/skinny-banner-AW-1@2x.jpg"
                 },
                 "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "groups": [

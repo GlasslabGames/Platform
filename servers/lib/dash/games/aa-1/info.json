@@ -90,7 +90,8 @@
                 "header": {
                     "text": "Learning Events & Time Played",
                     "image": "assets/game-banner-AA-1.png",
-                    "skinny": "assets/skinny-banner-AA-1.jpg"
+                    "skinny": "assets/skinny-banner-AA-1.jpg",
+                    "large": "assets/skinny-banner-AA-1@2x.jpg"
                 },
                 "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
@@ -103,7 +104,8 @@
                 "header": {
                     "text": "Shout Out and Watch Out Report",
                     "image": "assets/game-banner-AA-1.png",
-                    "skinny": "assets/skinny-banner-AA-1.jpg"
+                    "skinny": "assets/skinny-banner-AA-1.jpg",
+                    "large": "assets/skinny-banner-AA-1@2x.jpg"
                 },
                 "table": {
                     "labels": [],
