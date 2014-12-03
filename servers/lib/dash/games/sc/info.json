@@ -208,7 +208,7 @@
                     "image": "assets/game-banner-SC.jpg",
                     "skinny": "assets/skinny-banner-SC.jpg"
                 },
-                "description": "This report shows student's key achievements to date and total time played.",
+                "description": "This report shows students' progress through the game, the medals they have received, and total time played.",
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
