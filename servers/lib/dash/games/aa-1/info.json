@@ -170,7 +170,7 @@
             {
                 "name": "Download",
                 "type": "download",
-                "authRequired": true,
+                "authRequired": false,
                 "links": [
                     {
                         "target": "_blank",
