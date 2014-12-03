@@ -52,7 +52,7 @@ S3Util.prototype.sample = function(key, data) {
                 }.bind(this));
                 resolve();
             }.bind(this))*/
-            .catch(function(err){
+            .then(null, function(err){
                 console.log('S3 Some Random - ', err);
                 reject();
             }.bind(this));
@@ -173,7 +173,7 @@ S3Util.prototype.updateS3Object = function(key, data){
             .then(function(){
                 resolve();
             }.bind(this))
-            .catch(function(err){
+            .then(null, function(err){
                 reject('update');
             }.bind(this));
     }.bind(this));

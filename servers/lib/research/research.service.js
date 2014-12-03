@@ -136,7 +136,7 @@ ResearchService.prototype.cronJob = function(){
                         }
                         archiveCheck();
                     }.bind(this))
-                    .catch(function(err){
+                    .then(null, function(err){
                         if(err !== 'invalid route'){
                             // email failure notification
                             console.error('Cron Error -',err);

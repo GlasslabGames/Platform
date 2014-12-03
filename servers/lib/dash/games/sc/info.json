@@ -40,7 +40,7 @@
         },
         "license": {
             "type":      "loginType",
-            "loginType": "glasslabv2,clever,edmodo",
+            "loginType": "glasslabv2,icivics,clever,edmodo",
             "valid": false,
             "message": {
                 "invalid": "Coming Soon!"

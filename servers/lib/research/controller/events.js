@@ -7,11 +7,13 @@ var csv       = require('csv');
 var Util      = require('../../core/util.js');
 
 var TOTALEVENTS = 0;
+var runningArchive = false;
 
 module.exports = {
     getEventsByDate: getEventsByDate,
     archiveEventsByGameId: archiveEventsByGameId,
-    archiveEvents: archiveEvents
+    archiveEvents: archiveEvents,
+    stopArchive: stopArchive
 };
 
 /*
@@ -35,8 +37,24 @@ module.exports = {
     dateRange
  */
 
-// access data from a particular time period on the parser.  Write data to a csv (ultimately s3 bucket)
-// adapted from getEventsByDate, needs to further be integrated with s3, and have new limit logic
+function stopArchive(req, res){
+    //0eebfae0-6d9b-ede9-41e1-f726be96e1b0
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        return this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    }
+
+    // If the code is not valid
+    if( req.params.code !== "0eebfae0-6d9b-ede9-41e1-f726be96e1b0" ) {
+        this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    } else if(runningArchive === true){
+        this.requestUtil.jsonResponse(res, {status:"archiving stopped"});
+        runningArchive = false;
+    } else{
+        this.requestUtil.jsonResponse(res, {status:"archive not running"});
+    }
+}
 
 function archiveEventsByGameId(req, res, next) {
 
@@ -51,19 +69,24 @@ function archiveEvents(req, res, next) {
     }
 
     // If the code is not valid
-    if( req.params.code != "0eebfae0-6d9b-ede9-41e1-f726be96e1b0" ) {
+    if( req.params.code !== "0eebfae0-6d9b-ede9-41e1-f726be96e1b0" ) {
         this.requestUtil.errorResponse(res, {key:"research.access.invalid"}, 401);
+    } else if(runningArchive === true){
+        this.requestUtil.jsonResponse(res, {status:"archive already in progress"});
+        return;
+    } else{
+        runningArchive = true;
     }
 
     // Check for game Id
-    var ids = [];
+    var gameIds = [];
     if( req.query.gameId ) {
-        ids.push( req.query.gameId );
+        gameIds.push( req.query.gameId );
     }
     else {
-        ids.push( "SC" );
-        ids.push( "AA-1" );
-        ids.push( "AW-1" );
+        gameIds.push( "SC" );
+        gameIds.push( "AA-1" );
+        gameIds.push( "AW-1" );
     }
 
 
@@ -76,6 +99,8 @@ function archiveEvents(req, res, next) {
     var eventCount = 0;
     var startProcess;
     var upToDate;
+    var manualSeconds = [];
+    var gameId;
 
     // Set the duration if it exists, other default to 1 hour
     var duration = 1;
@@ -83,6 +108,13 @@ function archiveEvents(req, res, next) {
         duration = req.query.duration;
     }
     duration *= ( 3600 * 1000 );
+
+    // Set the limit if it exists, otherwise default to 2000
+    // Also, don't allow the limit to be 0 or less
+    var limit = 2000;
+    if( req.query.limit ) {
+        limit = req.query.limit > 0 ? req.query.limit : limit;
+    }
 
     // Everything seems valid, return a response
     this.requestUtil.jsonResponse(res, {status:"archiving triggered"});
@@ -113,12 +145,18 @@ function archiveEvents(req, res, next) {
             console.log( "Archiving: Checking for available time." );
             // duration in milliseconds, job runs from 12 am to 4 am pacific time normally,
             // but can be triggered at any time provided a valid code.
-            if(currentTime - startTime < duration && index < ids.length){
-                archiveEventsByDate.call( this, ids[index], eventCount, startProcess )
+            if(currentTime - startTime < duration && index < gameIds.length){
+                gameId = gameIds[index];
+                archiveEventsByDate.call( this, gameId, eventCount, startProcess, limit )
                     .then(function(output){
                         console.log( "Archiving: archiveEventsByDate complete, checking up to date." );
                         upToDate = output[0];
                         eventCount = output[1];
+                        if(output[2].length > 0){
+                            output[2].forEach(function(second){
+                                manualSeconds.push(second);
+                            }.bind(this));
+                        }
                         if(upToDate){
                             eventCount = 0;
                             index++;
@@ -126,16 +164,20 @@ function archiveEvents(req, res, next) {
                         }
                         archiveCheck.call(this);
                     }.bind(this))
-                    .catch(function(err){
-                        console.log( "Archiving: Error in archiving: " + err );
-
+                    .then(null, function(err){
+                        var error = JSON.stringify(err.error);
+                        console.log( "Archiving: Error in archiving: " + error );
+                        runningArchive = false;
                         // Send a failure email
                         var emailData = {
                             subject: "Data Archiving Failure!",
                             to: "ben@glasslabgames.org",
-                            data: { message: err },
+                            data: { message: error, game: gameId, date: err.date, manualSeconds: manualSeconds },
                             host: req.protocol + "://" + req.headers.host
                         };
+                        if(manualSeconds.length > 0){
+                            console.log('seconds to pull manually:',manualSeconds);
+                        }
                         var email = new Util.Email(
                             this.options.auth.email,
                             path.join( __dirname, "../email-templates" ),
@@ -146,14 +188,17 @@ function archiveEvents(req, res, next) {
                     }.bind(this));
             } else{
                 console.log( "Archiving: completed archiving job!" );
-
+                runningArchive = false;
                 // Send a success email
                 var emailData = {
                     subject: "Data Archiving Successful!",
                     to: "ben@glasslabgames.org",
-                    data: { message: "success" },
+                    data: { message: "success", manualSeconds: manualSeconds },
                     host: req.protocol + "://" + req.headers.host
                 };
+                if(manualSeconds.length > 0){
+                    console.log('seconds to pull manually:',manualSeconds);
+                }
                 var email = new Util.Email(
                     this.options.auth.email,
                     path.join( __dirname, "../email-templates" ),
@@ -169,11 +214,12 @@ function archiveEvents(req, res, next) {
 }
 
 
-function archiveEventsByDate(gameId, count, startProcess){
+function archiveEventsByDate(gameId, count, startProcess, limit){
     return when.promise(function(resolve, reject){
         // multiple of the limit in _archiveEventsByLimit, toggle as needed for testing
         // with the production query limit of 2000, maxCSVQueries would be 5, 5*2000 is 10000
-        var maxCSVQueries = 5;
+        var maxCSVQueries = Math.round( 10000 / limit );
+        console.log( "Archiving: maxCSVQueries is " + maxCSVQueries );
         var queriesTillNewCSV = maxCSVQueries;
 
         var startDateTime;
@@ -188,37 +234,70 @@ function archiveEventsByDate(gameId, count, startProcess){
         var fileString;
         var file;
         var existingFile = false;
+        var manualSeconds = [];
+        var manualState = false;
 
         var outData = [];
 
         console.log( "Archiving: beginning archiveEventsByDate" );
 
         // calls archiveEventsByLimit.
-        // If limit is reached, calls again, changing the file so data can be written to new csv
+        // If limit is reached, calls again, changing the fileName so data can be written to new csv
         function recursor(){
             console.log( "Archiving: started recursor." );
             return when.promise(function(resolve, reject){
-                _archiveEventsByLimit.call(this, gameId, startDateTime, endDateTime, file, parsedSchemaData, existingFile)
+                _archiveEventsByLimit.call(this, gameId, startDateTime, endDateTime, parsedSchemaData, existingFile, limit)
                     .then(function(outputs){
                         startDateTime = outputs[0];
-                        eventCount += outputs[1];
+                        if(outputs[1] > 0){
+                            eventCount += outputs[1];
+                        }
                         outData = outData.concat( outputs[2] );
+                        if(outputs[3] !== null){
+                            manualSeconds.push({game: 'game: ' + gameId,
+                                                second: 'second: ' + outputs[3],
+                                                file: 'file: ' + fileString + "_p" + part + ".csv"});
+                            manualState = true;
+                        }
+
+                        if(!runningArchive){
+                            var stopTime = startDateTime.format("MM/DD/YYYY HH:mm:ss");
+                            var error = {'stop.archive': 'Call made to stop archive'};
+                            error.stopTime = stopTime;
+                            reject(error);
+                        }
 
                         console.log( "Archiving: finished _archiveEventsByLimit with startDateTime: " + startDateTime );
 
                         queriesTillNewCSV--;
                         if(startDateTime !== endDateTime) {
-                            console.log( "Archiving: startDateTime and endDateTime are equal" );
+                            console.log( "Archiving: startDateTime and endDateTime are not equal" );
                             existingFile = true;
-                            if (queriesTillNewCSV === 0) {
+                            if (queriesTillNewCSV === 0 || manualState) {
                                 // Write current to CSV
+                                manualState = false;
                                 if( outData.length > 1 ) {
                                     outData = outData.join("\n");
-                                    var dates = fileString.split( "-" );
-                                    var fileName = "archives/" + process.env.HYDRA_ENV + "/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv";
+                                    var fileName = fileString + "_p" + part + ".csv";
                                     console.log( "Archiving: saving file: " + fileName );
                                     this.serviceManager.awss3.putS3Object( fileName, outData );
-                                    //Util.WriteToCSV(outData, file);
+                                    /*    .then(function(){
+                                            outData = [];
+                                            // Start the next part
+                                             console.log( "Archiving: start the next part." );
+                                             queriesTillNewCSV = maxCSVQueries;
+                                             part++;
+                                             existingFile = false;
+
+                                             return recursor.call(this)
+                                        }.bind(this))
+                                        .then(function(){
+                                            resolve()
+                                        }.bind(this))
+                                        .then(null, function(err){
+                                            reject(err);
+                                        }.bind(this));
+                                    */
                                     outData = [];
                                 }
 
@@ -226,34 +305,32 @@ function archiveEventsByDate(gameId, count, startProcess){
                                 console.log( "Archiving: start the next part." );
                                 queriesTillNewCSV = maxCSVQueries;
                                 part++;
-                                file = fileString + "_part" + part + ".csv";
                                 existingFile = false;
                             }
                             recursor.call(this)
                                 .then(function () {
                                     resolve()
                                 }.bind(this))
-                                .catch(function (err) {
+                                .then(null, function (err) {
                                     reject(err);
                                 }.bind(this));
                         } else {
                             // Once we're finished, write to CSV
                             if( outData.length > 1 ) {
                                 outData = outData.join("\n");
-                                var dates = fileString.split( "-" );
-                                var fileName = "archives/" + process.env.HYDRA_ENV + "/" + gameId + "/" + dates[0] + "/" + dates[2] + "/" + gameId + "_" + fileString + "_p" + part + ".csv";
+                                var fileName = fileString + "_p" + part + ".csv";
                                 console.log( "Archiving: saving file: " + fileName );
-                                return this.serviceManager.awss3.putS3Object( fileName, outData );
-                                //return Util.WriteToCSV(outData, file);
+                                this.serviceManager.awss3.putS3Object( fileName, outData );
+                                outData = [];
+                                resolve();
                             }
                             else {
                                 resolve();
                             }
-                            //resolve();
                         }
                     }.bind(this))
-                    .then(function() {
-                        resolve();
+                    .then( null, function( err ) {
+                        reject( err );
                     });
             }.bind(this));
         }
@@ -272,24 +349,21 @@ function archiveEventsByDate(gameId, count, startProcess){
                 var dateArr = dateObj.toJSON().split('-');
                 var date = dateArr[1] + '-' + dateArr[2].slice(0,2) + '-' + dateArr[0].slice(2,4);
 
-                var dates = _initDates(date);
-                startDateTime = dates[0];
-                endDateTime = dates[1];
-                yesterdayDate = dates[2];
-                thisDate = dates[3];
-                formattedDate = dates[4];
+                var dateVariables = _initDates(date);
+                startDateTime = dateVariables[0];
+                endDateTime = dateVariables[1];
+                yesterdayDate = dateVariables[2];
+                thisDate = dateVariables[3];
+                formattedDate = dateVariables[4];
 
                 if(thisDate > yesterdayDate){
                     console.log( "Archiving: rejecting because archiveInfo is up to date" );
                     return when.reject('up to date');
                 }
 
-                fileString = __dirname
-                    + '/../../../../../../../Desktop/'
-                    + gameId
-                    + "_" + formattedDate;
-                fileString = formattedDate;
-                file = fileString + "_part" + part + ".csv";
+                var dates = formattedDate.split( "-" );
+                fileString =  "archives/" + this.options.env + "/" + gameId + "/"
+                                + dates[0] + "/" + dates[2] + "/" + gameId + "_" + formattedDate;
 
                 return this.store.getCsvDataByGameId(gameId);
             }.bind(this))
@@ -313,61 +387,80 @@ function archiveEventsByDate(gameId, count, startProcess){
             }.bind(this))
             .then(function(){
                 var upToDate = (thisDate === yesterdayDate);
-                resolve([upToDate, eventCount]);
+                resolve([upToDate, eventCount, manualSeconds]);
             }.bind(this))
-            .catch(function(err){
+            .then(null, function(err){
                 if(err === 'up to date'){
                     console.log( "Archiving: returning because up to date" );
+                    resolve([true, null, manualSeconds]);
                     return;
                 }
                 console.log( "Archiving: Archive Events By Date Error - ", err);
-                reject(err);
+                var error = {};
+                error.error = err;
+                error.date = formattedDate;
+                error.manualSeconds = manualSeconds;
+                reject(error);
             }.bind(this));
 
     }.bind(this));
 }
 
 
-function _archiveEventsByLimit(gameId, startDateTime, endDateTime, file, parsedSchemaData, existingFile){
+function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaData, existingFile, limit){
     return when.promise(function(resolve, reject) {
         try {
             console.log( "Archiving: in _archiveEventsByLimit with sdt: " + startDateTime + ", edt: " + endDateTime );
             var timeFormat = "MM/DD/YYYY HH:mm:ss";
             // query limit for couchbase.  the max number of elements in csv file is a multiple of this value
-            var limit = 2000;
+            //var limit = 2000;
             var updatedDateTime = startDateTime;
             var eventCount;
-            var eventsRemain;
+            var manualSecond = null;
 
-            this.store.getEventsByGameIdDate(gameId, startDateTime.toArray(), endDateTime.toArray(), limit)
+            var startDateTimeArray = startDateTime.toArray();
+            var endDateTimeArray = endDateTime.toArray();
+            console.log('Start before getEventsbyGameIdDate:', JSON.stringify(startDateTimeArray));
+            console.log('End before getEventsByGameIdDate:', JSON.stringify(endDateTimeArray));
+            this.store.getEventsByGameIdDate(gameId, startDateTimeArray, endDateTimeArray, limit)
                 .then(function (events) {
                     console.log( "Archiving: Running Filter: eventCount: " + events.length + ", limit: " + limit );
                     eventCount = events.length;
+
                     if(eventCount < limit){
                         // did not find events up to limit, so day's querying is done
                         updatedDateTime = endDateTime;
-                        eventsRemain = false;
                     }
                     else {
                         // events found, limitParam reached
                         var lastEventTime = events[events.length - 1].serverTimeStamp;
-                        var lastSecond = new Date(lastEventTime);
-                        lastSecond.setMilliseconds(0);
-                        lastSecond = Date.parse(lastSecond);
-
-                        if (events[0].serverTimeStamp < lastSecond) {
-                            while (lastEventTime >= lastSecond || events.length === 1) {
+                        if(lastEventTime < 10000000000){
+                            console.log( "Archiving: adding MS to lastEventTime before while!" );
+                            lastEventTime *= 1000;
+                        }
+                        var lastSecond = Math.floor(lastEventTime/1000)*1000;
+                        var firstEventTime = events[0].serverTimeStamp;
+                        if(firstEventTime < 10000000000){
+                            console.log( "Archiving: adding MS to firstEventTime!" );
+                            firstEventTime *= 1000;
+                        }
+                        if (firstEventTime < lastSecond) {
+                            while (lastEventTime >= lastSecond && events.length > 1) {
                                 events.pop();
                                 lastEventTime = events[events.length - 1].serverTimeStamp;
+                                if(lastEventTime < 10000000000){
+                                    console.log( "Archiving: adding MS to lastEventTime within while!" );
+                                    lastEventTime *= 1000;
+                                }
                             }
-                            //lastEventTime++;
                         } else {
                             // if the first event selected occurred in the same second as the last
                             // then there is danger that some events may be excluded.
                             // if error occurs, refactor logic to avoid losses
-                            var timestamp = new Date(lastSecond).toJSON();
-                            console.log( "Archiving: Number of Events at this second >= query limit.  Data may be lost:", new Date(lastSecond).toJSON() );
-                            return when.reject( { "eventsAtSecondExceedLimit": timestamp } );
+                            manualSecond = new Date(lastSecond).toJSON();
+                            console.error( "Archiving: Number of Events at this second >= query limit:", manualSecond );
+                            events = [];
+                            //return when.reject( { "eventsAtSecondExceedLimit": timestamp } );
                         }
                         // I removed the lastEventTime++ because of Couchbase's non-inclusive start query
                         // fear of event occurring 1 ms after another event being excluded
@@ -375,26 +468,20 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, file, parsedS
                         updatedDateTime = moment(lastEventTime);
                         updatedDateTime = updatedDateTime.utc();
                         eventCount = events.length;
-                        eventsRemain = true;
+                        if(eventCount === 0){
+                            return;
+                        }
                     }
                     TOTALEVENTS += eventCount;
                     console.log( "Archiving: TOTAL EVENT: " + TOTALEVENTS );
                     return processEvents.call(this, parsedSchemaData, events, timeFormat, existingFile);
                 }.bind(this))
-                /*.then(function (outList) {
-                    if(eventCount > 0){
-                        if( eventsRemain ) {
-                            outList.push("");
-                        }
-                        var outData = outList.join("\n");
-                        return Util.WriteToCSV(outData, file);
-                    }
-                }.bind(this))*/
                 .then(function(outList){
-                    resolve([updatedDateTime, eventCount, outList]);
+                    outList = outList || [];
+                    resolve([updatedDateTime, eventCount, outList, manualSecond]);
                 }.bind(this))
                 // catch all
-                .then(null, function (err) {
+                .then(null, function (err){
                     console.log( "Archiving: Process Events ERROR: " + err );
                     reject(err);
                 }.bind(this));
@@ -636,7 +723,6 @@ function parseCSVSchema(csvData) {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     var parsedSchemaData = { header: "", rows: {} };
-    //console.log('csvzz:', csvData, 'endzz');
     try {
         csv()
         .from(csvData, { delimiter: ',', escape: '"' })
