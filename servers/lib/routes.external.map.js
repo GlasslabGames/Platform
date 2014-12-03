@@ -473,6 +473,16 @@ module.exports = {
     // ---------------------------------------------------
         {
             requireAuth: true,
+            api: "/api/v2/research/game/:gameId/parse-schema",
+            service: "research",
+            controller: "csv",
+            method: {
+                get: "getCsvParseSchema",
+                post: "updateCsvParseSchema"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/research/game/:gameId/events",
             service: "research",
             controller: "events",
@@ -482,12 +492,11 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/research/game/:gameId/parse-schema",
+            api: "/api/v2/research/game/:gameId/urls",
             service: "research",
-            controller: "csv",
+            controller: "events",
             method: {
-                get: "getCsvParseSchema",
-                post: "updateCsvParseSchema"
+                get: "getSignedUrlsByDate"
             }
         },
         {

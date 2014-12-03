@@ -14,7 +14,8 @@ module.exports = {
     getEventsByDate: getEventsByDate,
     archiveEventsByGameId: archiveEventsByGameId,
     archiveEvents: archiveEvents,
-    stopArchive: stopArchive
+    stopArchive: stopArchive,
+    getSignedUrlsByDate: getSignedUrlsByDate
 };
 
 /*
@@ -37,6 +38,116 @@ module.exports = {
     startEpoc
     dateRange
  */
+
+function getSignedUrlsByDate(req, res){
+    if( req.session &&
+        req.session.passport) {
+        var userData = req.session.passport.user;
+        // check user permission
+        if (!userData.permits.nav.parser) {
+            this.requestUtil.errorResponse(res, {key: "user.permit.invalid"});
+            return;
+        }
+    }
+
+    if(!req.query) {
+        this.requestUtil.errorResponse(res, {key: "research.arguments.missing"}, 401);
+        return;
+    }
+
+    if( !(req.params.gameId &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"research.gameId.missing"});
+        return
+    }
+
+    var gameId = req.params.gameId;
+    // gameId are not case sensitive
+    gameId = gameId.toUpperCase();
+
+    if(req.query.startDate) {
+        startDate = req.query.startDate;
+        // if starts with " then strip "s
+        if(startDate.charAt(0) == '"') {
+            startDate = startDate.substring(1, startDate.length-1);
+        }
+    }
+    if(!startDate) {
+        this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
+        return;
+    }
+    if(req.query.endDate) {
+        endDate = req.query.endDate;
+        // if starts with " then strip "s
+        if(endDate.charAt(0) == '"') {
+            endDate = endDate.substring(1, endDate.length-1);
+        }
+    }
+    if(!endDate) {
+        this.requestUtil.errorResponse(res, {key: "research.endDate.missing"}, 401);
+        return;
+    }
+    var startDates = startDate.split('-');
+    startDates.pop();
+    startDates[0] = parseInt(startDates[0], 10);
+    startDates[1] = parseInt(startDates[1], 10);
+    var endDates = endDate.split('-');
+    endDates.pop();
+    endDates[0] = parseInt(endDates[0], 10);
+    endDates[1] = parseInt(endDates[1], 10);
+    var yearsToGo = endDates[0] - startDates[0];
+    var monthsToGo;
+    if(yearsToGo === 0){
+        monthsToGo = endDates[1] - startDates[1];
+    } else{
+        var startYearMonths = 13 - startDates[1];
+        var endYearMonths = endDates[1];
+        if(yearsToGo === 1){
+            monthsToGo = startYearMonths + endYearMonths;
+        } else{
+            var midYearsMonths = (yearsToGo-1)*12;
+            monthsToGo = startYearMonths + midYearsMonths + endYearMonths;
+        }
+    }
+    var year = startDates[0];
+    var month = startDates[1];
+    var outList = [];
+
+    return when.promise(function(resolve, reject){
+        function getSignedUrlsForParser(){
+            var pathParams = ['archives', 'dev', gameId, year, month];
+            this.serviceManager.awss3.getSignedUrls('csv', pathParams)
+                .then(function(urls){
+                    urls.forEach(function(url){
+                        outList.push(url);
+                    });
+                    if(monthsToGo > 0){
+                        monthsToGo--;
+                        month++;
+                        if(month === 13){
+                            month = 1;
+                            year++;
+                        }
+                        getSignedUrlsForParser.call(this);
+                    } else{
+                        this.requestUtil.jsonResponse(res, {
+                            numCSVs: outList.length,
+                            data: outList
+                        });
+                        resolve();
+                    }
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                    this.requestUtil.errorResponse(res, err, 401);
+                }.bind(this));
+        }
+        getSignedUrlsForParser.call(this);
+    }.bind(this));
+}
+
+
 
 // changes runningArchive state to false, stopping archive
 function stopArchive(req, res){
@@ -614,13 +725,13 @@ function getEventsByDate(req, res, next){
         }
 
         if(!req.query) {
-            this.requestUtil.errorResponse(res, {error: "missing arguments"}, 401);
+            this.requestUtil.errorResponse(res, {key: "research.arguments.missing"}, 401);
             return;
         }
 
         if( !( req.params &&
             req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "missing game id"});
+            this.requestUtil.errorResponse(res, {key: "research.gameId.missing"});
             return;
         }
         var gameId = req.params.gameId;
@@ -647,7 +758,7 @@ function getEventsByDate(req, res, next){
             }
         }
         if(!startDate) {
-            this.requestUtil.errorResponse(res, {error: "missing startDate or startEpoc missing"}, 401);
+            this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
             return;
         }
         startDate = moment(startDate);

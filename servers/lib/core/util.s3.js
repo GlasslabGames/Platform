@@ -198,7 +198,7 @@ S3Util.prototype.listS3Objects = function(prefix){
         this.s3.listObjects(params, function(err, data){
             if(err){
                 console.error('S3 List Objects Error - ', err);
-                reject('list');
+                reject(err);
             } else{
                 var list = data.Contents;
                 var outList = [];
@@ -230,7 +230,7 @@ S3Util.prototype._getSignedUrl = function(key) {
     }.bind(this));
 };
 
-// grabs signed urls for all objects that fall within a particular prefix directory strutcure
+// grabs signed urls for all objects that fall within a particular prefix directory structure
 S3Util.prototype.getSignedUrls = function(docType, pathParams){
     return when.promise(function(resolve, reject){
         var prefix = _s3PrefixBuilder(pathParams);
