@@ -153,7 +153,13 @@
         "price": "Free",
         "releaseDate": "Sep 2, 2014",
         "type": "App",
-        "platform": "iPad",
+        "platform": {
+            "type": "iPad",
+            "icon": {
+                "small": "assets/platform-ipad.png",
+                "large": "assets/platform-ipad@2x.png"
+            }
+        },
         "subject": "ELA",
         "grades": "6 - 8",
         "applink": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8",

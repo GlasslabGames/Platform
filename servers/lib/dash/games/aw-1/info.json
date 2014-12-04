@@ -124,7 +124,13 @@
         "price": "Free",
         "releaseDate": "Aug 2010",
         "type": "Browser",
-        "platform": "Flash/Browser",
+        "platform": {
+            "type": "Flash/Browser",
+            "icon": {
+                "small": "assets/platform-browser.png",
+                "large": "assets/platform-browser@2x.png"
+            }
+        },
         "subject": "Social Studies",
         "grades": "6 - 10",
         "buttons": [
