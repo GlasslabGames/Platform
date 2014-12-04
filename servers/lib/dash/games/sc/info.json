@@ -208,7 +208,7 @@
                     "image": "assets/game-banner-SC.jpg",
                     "skinny": "assets/skinny-banner-SC.jpg"
                 },
-                "description": "This report shows student's key achievements to date and total time played.",
+                "description": "This report shows students' progress through the game, the medals they have received, and total time played.",
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
@@ -393,7 +393,7 @@
                 "video": "https://vimeo.com/102270816",
                 "brochure":"https://s3-us-west-1.amazonaws.com/playfully-games/SC/brochures/SIMCITYbrochure_v3small.pdf",
                 "curriculum": [
-                    "SimCityEDU: Pollution Challenge! is made of six different missions all centered on theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game aligns to Next Generation Science Standards, 21st Century Skills and, ELA Common Core Standards."
+                    "SimCityEDU: Pollution Challenge! is made of four different missions all centered on the theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game aligns to Next Generation Science Standards, Common Core Standards, 21st Century Skills, and Economics Standards."
                 ],
                 "slideshow": [
                     {
