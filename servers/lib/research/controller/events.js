@@ -15,7 +15,7 @@ module.exports = {
     archiveEventsByGameId: archiveEventsByGameId,
     archiveEvents: archiveEvents,
     stopArchive: stopArchive,
-    getSignedUrlsByDate: getSignedUrlsByDate
+    getSignedUrlsByDayRange: getSignedUrlsByDayRange
 };
 
 /*
@@ -39,7 +39,114 @@ module.exports = {
     dateRange
  */
 
-function getSignedUrlsByDate(req, res){
+// for a particular gameId, gets all aws signed urls between the designated days in the chosen month
+// defaulted to only get csv files within archives/dev
+function getSignedUrlsByDayRange(req, res){
+    if( req.session &&
+        req.session.passport) {
+        var userData = req.session.passport.user;
+        // check user permission
+        if (!userData.permits.nav.parser) {
+            this.requestUtil.errorResponse(res, {key: "user.permit.invalid"});
+            return;
+        }
+    }
+
+    if(!req.query) {
+        this.requestUtil.errorResponse(res, {key: "research.arguments.missing"}, 401);
+        return;
+    }
+
+    if( !(req.params.gameId &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"research.gameId.missing"});
+        return
+    }
+
+    var gameId = req.params.gameId;
+    // gameId are not case sensitive
+    gameId = gameId.toUpperCase();
+
+    if(req.query.startDate) {
+        startDate = req.query.startDate;
+        // if starts with " then strip "s
+        if(startDate.charAt(0) == '"') {
+            startDate = startDate.substring(1, startDate.length-1);
+        }
+    }
+    if(!startDate) {
+        this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
+        return;
+    }
+    if(req.query.endDate) {
+        endDate = req.query.endDate;
+        // if starts with " then strip "s
+        if(endDate.charAt(0) == '"') {
+            endDate = endDate.substring(1, endDate.length-1);
+        }
+    }
+    if(!endDate) {
+        this.requestUtil.errorResponse(res, {key: "research.endDate.missing"}, 401);
+        return;
+    }
+
+    var startDates = startDate.split('-');
+    var year = startDates[0];
+    var month = startDates[1];
+    startDates[2] = startDates[2].slice(0,2);
+    var day = parseInt(startDates[2], 10);
+    var endDates = endDate.split('-');
+    var endDay;
+    if(endDates[0] !== year || endDates[1] !== month){
+        endDay = 31;
+    } else{
+        endDates[2] = endDates[2].slice(0,2);
+        endDay = parseInt(endDates[2], 10);
+    }
+    // index used as prefix to easily access the day param in file names.
+    var fileString = gameId + '_' + year + '-' + month + '-';
+    var outList = [];
+
+    return when.promise(function(resolve, reject){
+        function getSignedUrlsForParser(){
+            var dayString;
+            if(day < 10){
+                dayString = "0" + day;
+            } else{
+                dayString = "" + day;
+            }
+            dayString = fileString + dayString;
+            var pathParams = ['archives', 'dev', gameId, year, month, dayString];
+            this.serviceManager.awss3.getSignedUrls('csv', pathParams, false)
+                .then(function(urls){
+                    urls.forEach(function(url){
+                        outList.push(url);
+                    });
+                    if(day < endDay){
+                        day++;
+                        getSignedUrlsForParser.call(this);
+                    } else{
+                        this.requestUtil.jsonResponse(res, {
+                            numCSVs: outList.length,
+                            data: outList
+                        });
+                        resolve();
+                    }
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                    this.requestUtil.errorResponse(res, err, 401);
+                }.bind(this));
+        }
+        getSignedUrlsForParser.call(this);
+    }.bind(this));
+}
+
+// for a particular gameId, gets all aws signed urls for a certain date range
+// defaulted to only get csv files within archive/dev
+// concern about researchers asking for too many files at once, don't use unless solution found
+function getSignedUrlsByMonthRange(req, res){
     if( req.session &&
         req.session.passport) {
         var userData = req.session.passport.user;
@@ -89,11 +196,9 @@ function getSignedUrlsByDate(req, res){
         return;
     }
     var startDates = startDate.split('-');
-    startDates.pop();
     startDates[0] = parseInt(startDates[0], 10);
     startDates[1] = parseInt(startDates[1], 10);
     var endDates = endDate.split('-');
-    endDates.pop();
     endDates[0] = parseInt(endDates[0], 10);
     endDates[1] = parseInt(endDates[1], 10);
     var yearsToGo = endDates[0] - startDates[0];
@@ -116,7 +221,13 @@ function getSignedUrlsByDate(req, res){
 
     return when.promise(function(resolve, reject){
         function getSignedUrlsForParser(){
-            var pathParams = ['archives', 'dev', gameId, year, month];
+            var monthString;
+            if(month < 10){
+                monthString = "0" + month;
+            } else{
+                monthString = "" + month;
+            }
+            var pathParams = ['archives', 'dev', gameId, year, monthString];
             this.serviceManager.awss3.getSignedUrls('csv', pathParams)
                 .then(function(urls){
                     urls.forEach(function(url){
@@ -146,8 +257,6 @@ function getSignedUrlsByDate(req, res){
         getSignedUrlsForParser.call(this);
     }.bind(this));
 }
-
-
 
 // changes runningArchive state to false, stopping archive
 function stopArchive(req, res){

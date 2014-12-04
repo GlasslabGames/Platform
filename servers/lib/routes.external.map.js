@@ -496,7 +496,7 @@ module.exports = {
             service: "research",
             controller: "events",
             method: {
-                get: "getSignedUrlsByDate"
+                get: "getSignedUrlsByDayRange"
             }
         },
         {
