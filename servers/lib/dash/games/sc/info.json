@@ -411,7 +411,13 @@
         "price": "Free",
         "releaseDate": "Nov. 2, 2013",
         "type": "Client Download",
-        "platform": "PC & Mac",
+        "platform": {
+            "type": "PC & Mac",
+            "icon": {
+                "small": "assets/platform-client.png",
+                "large": "assets/platform-client@2x.png"
+            }
+        },
         "subject": "21st Century Skills, Science, ELA",
         "grades": "6 - 8",
         "pages": {
