@@ -14,8 +14,27 @@
         "maintenance": null,
         "shortName": "SimCityEDU",
         "longName": "SimCityEDU: Pollution Challenge!",
-        "shortDescription": "SimCityEDU: Pollution Challenge!",
-        "description": "SimCityEDU: Pollution Challenge!",
+        "price": "Premium Subscription",
+        "type": "Client Download",
+        "platform": {
+            "type": "PC & Mac",
+            "icon": {
+                "small": "assets/platform-client.png",
+                "large": "assets/platform-client@2x.png"
+            }
+        },
+        "subject": "21st Century Skills, Science, ELA",
+        "grades": "6 - 8",
+        "shortDescription": "In SimCityEDU students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.",
+        "description": "In SimCityEDU students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.",
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab, Inc.",
+            "logo": {
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo2x.png"
+            }
+        },
         "settings" : {
             "missionProgressLock": false
         },
@@ -27,12 +46,20 @@
                 "invalid": "Coming Soon!"
             }
         },
+        "card": {
+            "small": "assets/game-card-SC.jpg",
+            "large": "assets/game-card-SC@2x.jpg"
+        },
         "thumbnail": {
             "small": "assets/thumb-game-SC.png",
             "large": "assets/thumb-game-SC.png"
         },
         "play": {
             "type": "missions"
+        },
+        "banners": {
+            "product": "assets/game-banner-SC.jpg",
+            "reports": "assets/game-banner-SC.jpg"
         }
     },
     "assessment": [
@@ -136,7 +163,8 @@
                 "header": {
                     "text": "Shout Out and Watch Out Report",
                     "image": "assets/game-banner-SC.jpg",
-                    "skinny": "assets/skinny-banner-SC.jpg"
+                    "skinny": "assets/skinny-banner-SC.jpg",
+                    "large": "assets/skinny-banner-SC@2x.jpg"
                 },
                 "table": {
                     "labels": [],
@@ -339,7 +367,7 @@
         "buttons": [
             {
                 "name": "Getting Started Guide",
-                "authRequired": true,
+                "authRequired": false,
                 "type": "link",
                 "links": [
                     {
@@ -354,12 +382,16 @@
                 "authRequired": true,
                 "links": [
                     {
-                        "name": "PC (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.msi"
+                        "name": "PC (1.0GB)",
+                        "OS": "Win",
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.msi",
+                        "target": "_blank"
                     },
                     {
-                        "name": "Mac (1.0 GB)",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.dmg"
+                        "name": "Mac (1.0GB)",
+                        "OS": "Mac",
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.dmg",
+                        "target": "_blank"
                     }
                 ]
             },

@@ -14,8 +14,27 @@
         "maintenance": null,
         "shortName": "Argument Wars",
         "longName": "Argument Wars",
+        "price": "Free",
+        "type": "Browser",
+        "platform": {
+            "type": "Flash/Browser",
+            "icon": {
+                "small": "assets/platform-browser.png",
+                "large": "assets/platform-browser@2x.png"
+            }
+        },
+        "subject": "Social Studies",
+        "grades": "6 - 10",
         "shortDescription": "Use your reasoning powers to argue landmark Supreme Court cases!",
         "description": "Try out your persuasive abilities by arguing a real Supreme Court case. The other lawyer is your competition. Whoever uses the strongest arguments wins!",
+        "developer": {
+            "id": "IC",
+            "name": "iCivics",
+            "logo": {
+                "small": "assets/icivics-logo.png",
+                "large": "assets/icivics-logo-2x.png"
+            }
+        },
         "settings": {
             "missionProgressLock": false
         },
@@ -27,9 +46,13 @@
                 "invalid": "Coming Soon!"
             }
         },
+        "card": {
+            "small": "assets/game-card-AW-1.jpg",
+            "large": "assets/game-card-AW-1@2x.jpg"
+        },
         "thumbnail": {
             "small": "assets/thumb-game-AW-1.png",
-            "large": "assets/thumb-game-AW-1.png"
+            "large": "assets/thumb-game-AW-1.jpg"
         },
         "play": {
             "type": "page",
@@ -41,6 +64,10 @@
                     "height": 640
                 }
             }
+        },
+        "banners": {
+            "product": "assets/game-banner-AW-1.jpg",
+            "reports": "assets/game-banner-AW-1.jpg"
         }
     },
     "assessment": [
@@ -71,7 +98,8 @@
                 "header": {
                     "text": "Shout Out and Watch Out Report",
                     "image": "assets/game-banner-AW-1.jpg",
-                    "skinny": "assets/skinny-banner-AW-1.jpg"
+                    "skinny": "assets/skinny-banner-AW-1.jpg",
+                    "large": "assets/skinny-banner-AW-1@2x.jpg"
                 },
                 "description": "Coming Soon!"
             },
@@ -82,7 +110,8 @@
                 "header": {
                     "text": "Learning Events & Time Played",
                     "image": "assets/game-banner-AW-1.jpg",
-                    "skinny": "assets/skinny-banner-AW-1.jpg"
+                    "skinny": "assets/skinny-banner-AW-1.jpg",
+                    "large": "assets/skinny-banner-AW-1@2x.jpg"
                 },
                 "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
                 "groups": [
