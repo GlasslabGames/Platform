@@ -283,7 +283,7 @@
                     "image": "assets/game-banner-SC.jpg",
                     "skinny": "assets/skinny-banner-SC.jpg"
                 },
-                "description": "This report shows most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from Gameplay or Learning Challenges",
+                "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from each mission assessed.",
                 "icons": {
                     "small": "assets/icon-plus-green.png",
                     "large": "assets/icon-plus-green@2x.png"
