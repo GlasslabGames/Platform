@@ -14,7 +14,7 @@
         "maintenance": null,
         "shortName": "SimCityEDU",
         "longName": "SimCityEDU: Pollution Challenge!",
-        "price": "Premium Subscription",
+        "price": "Free",
         "type": "Client Download",
         "platform": {
             "type": "PC & Mac",
@@ -408,7 +408,7 @@
             }
         ],
         "release": "live",
-        "price": "Premium Subscription",
+        "price": "Free",
         "releaseDate": "Nov. 2, 2013",
         "type": "Client Download",
         "platform": "PC & Mac",

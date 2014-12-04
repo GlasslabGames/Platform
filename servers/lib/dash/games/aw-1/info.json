@@ -129,6 +129,17 @@
         "grades": "6 - 10",
         "buttons": [
             {
+                "name": "Getting Started Guide",
+                "authRequired": false,
+                "type": "link",
+                "links": [
+                    {
+                        "target": "_blank",
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/AW-1/guides/AW+guide.pdf"
+                    }
+                ]
+            },
+            {
                 "name": "Play Game",
                 "type": "play",
                 "authRequired": true,
