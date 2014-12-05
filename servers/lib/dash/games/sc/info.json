@@ -230,9 +230,9 @@
                 "id": "mission-progress",
                 "assessmentId": "mission-progress",
                 "enabled": true,
-                "name": "Mission Progress Report",
+                "name": "Game Progress Report",
                  "header": {
-                    "text": "Mission Progress Report",
+                    "text": "Game Progress Report",
                     "image": "assets/game-banner-SC.jpg",
                     "skinny": "assets/skinny-banner-SC.jpg",
                      "large": "assets/skinny-banner-SC@2x.jpg"
