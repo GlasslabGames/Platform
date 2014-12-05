@@ -491,14 +491,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/research/game/:gameId/code/:code/archive",
-            service: "research",
-            controller: "events",
-            method: {
-                get: "archiveEventsByGameId"
-            }
-        },
-        {
             api: "/api/v2/research/code/:code/archive",
             service: "research",
             controller: "events",
