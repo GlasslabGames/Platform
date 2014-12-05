@@ -1,6 +1,7 @@
 .idea
 .DS_Store
 servers/.DS_Store
+servers/version.json
 node_modules
 servers/loadtest/locustfile.pyc
 servers/loadtest/reports/*
