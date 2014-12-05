@@ -129,7 +129,7 @@ function getSignedUrlsByDayRange(req, res){
                     } else{
                         this.requestUtil.jsonResponse(res, {
                             numCSVs: outList.length,
-                            data: outList
+                            urls: outList
                         });
                         resolve();
                     }
@@ -244,7 +244,7 @@ function getSignedUrlsByMonthRange(req, res){
                     } else{
                         this.requestUtil.jsonResponse(res, {
                             numCSVs: outList.length,
-                            data: outList
+                            urls: outList
                         });
                         resolve();
                     }
@@ -945,7 +945,7 @@ function getEventsByDate(req, res, next){
             timeFormat = req.query.timeFormat;
         }
 
-        var limit;
+        var limit = 10000;
         if(req.query.limit) {
             limit = req.query.limit;
         }
@@ -954,63 +954,66 @@ function getEventsByDate(req, res, next){
         if(req.query.saveToFile) {
             saveToFile = (req.query.saveToFile === "true" ? true : false);
         }
+        var outList;
+        return when.promise(function(resolve, reject) {
+            this.store.getCsvDataByGameId(gameId)
+                .then(function (csvData) {
+                    return parseCSVSchema(csvData);
+                }.bind(this))
 
-        this.store.getCsvDataByGameId(gameId)
-            .then(function(csvData){
-                return parseCSVSchema(csvData);
-            }.bind(this))
+                .then(function (_parsedSchemaData) {
+                    parsedSchemaData = _parsedSchemaData;
 
-            .then(function(_parsedSchemaData){
-                parsedSchemaData = _parsedSchemaData;
+                    console.log("Getting Events For Game:", gameId, "from", startDate.format("MM/DD/YYYY"), "to", endDate.format("MM/DD/YYYY"));
+                    return this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
+                }.bind(this))
 
-                console.log("Getting Events For Game:", gameId, "from", startDate.format("MM/DD/YYYY"), "to", endDate.format("MM/DD/YYYY"));
-                return this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
-            }.bind(this))
-
-            .then(function(events){
-
-                try {
+                .then(function (events) {
                     console.log("Running Filter...");
                     console.log("Processing", events.length, "Events...");
-
                     // process events
-                    var p = processEvents.call(this, parsedSchemaData, events, timeFormat);
-                    p.then(function(outList) {
-                        var outData = outList.join("\n");
+                    return processEvents.call(this, parsedSchemaData, events, timeFormat);
+                }.bind(this))
 
-                        if(saveToFile) {
+                .then(function (list) {
+                    outList = list;
+                    if (outList.length > limit) {
+                        return getSignedUrlsByDayRange.call(this, req, res);
+                    }
+                }.bind(this))
+
+                .then(function () {
+                    var outData = outList.join("\n");
+                    if(outList.length > limit){
+                        if (saveToFile) {
                             var file = gameId
-                                +"_"+startDate.format("YYYY-DD-MM")
-                                +"_"+endDate.format("YYYY-DD-MM")
-                                +".csv";
+                                + "_" + startDate.format("YYYY-DD-MM")
+                                + "_" + endDate.format("YYYY-DD-MM")
+                                + ".csv";
                             this.requestUtil.downloadResponse(res, outData, file, 'text/csv');
-
                             /*
-                            this.requestUtil.jsonResponse(res, {
-                                numEvents: outList.length - 1, // minus header
-                                data: outData
-                            });
-                            */
+                             this.requestUtil.jsonResponse(res, {
+                             numEvents: outList.length - 1, // minus header
+                             data: outData
+                             });
+                             */
                         } else {
                             this.requestUtil.jsonResponse(res, {
                                 numEvents: outList.length - 1, // minus header
                                 data: outData
                             });
                         }
-                    }.bind(this));
+                    }
+                    resolve();
+                }.bind(this))
 
-                } catch(err) {
+                // catch all
+                .then(null, function (err) {
                     console.trace("Research: Process Events -", err);
                     this.requestUtil.errorResponse(res, {error: err});
-                }
-
-            }.bind(this))
-
-            // catch all
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
+                    reject(err);
+                }.bind(this));
             }.bind(this));
-
     } catch(err) {
         console.trace("Research: Get User Data Error -", err);
         this.requestUtil.errorResponse(res, {error: err});
