@@ -237,7 +237,7 @@
                     "skinny": "assets/skinny-banner-SC.jpg",
                      "large": "assets/skinny-banner-SC@2x.jpg"
                 },
-                "description": "This report shows students' progress through the game, medals earned they received, and total time played.",
+                "description": "This report shows students' progress through the game, medals earned, and total time played.",
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
