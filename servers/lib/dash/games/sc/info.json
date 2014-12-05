@@ -234,7 +234,8 @@
                  "header": {
                     "text": "Mission Progress Report",
                     "image": "assets/game-banner-SC.jpg",
-                    "skinny": "assets/skinny-banner-SC.jpg"
+                    "skinny": "assets/skinny-banner-SC.jpg",
+                     "large": "assets/skinny-banner-SC@2x.jpg"
                 },
                 "description": "This report shows students' progress through the game, medals earned they received, and total time played.",
                 "icons": {
@@ -281,7 +282,8 @@
                 "header": {
                     "text": "Competency Levels: Complex Problem Solving",
                     "image": "assets/game-banner-SC.jpg",
-                    "skinny": "assets/skinny-banner-SC.jpg"
+                    "skinny": "assets/skinny-banner-SC.jpg",
+                    "large": "assets/skinny-banner-SC@2x.jpg"
                 },
                 "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from each mission assessed.",
                 "icons": {
