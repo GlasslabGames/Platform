@@ -34,7 +34,7 @@
             "type": "page",
             "page": {
                 "title": "Game Over Gopher",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/147/gog.swf",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/148/gog.swf",
                 "size": {
                     "width": 940,
                     "height": 640
