@@ -12,7 +12,6 @@ var runningArchive = false;
 
 module.exports = {
     getEventsByDate: getEventsByDate,
-    archiveEventsByGameId: archiveEventsByGameId,
     archiveEvents: archiveEvents,
     stopArchive: stopArchive,
     getSignedUrlsByDayRange: getSignedUrlsByDayRange
@@ -282,13 +281,7 @@ function stopArchive(req, res){
     }
 }
 
-function archiveEventsByGameId(req, res, next) {
-    // api method, archives events for one particular game
-    var gameId = req.params.gameId;
-    return archiveEvents.call(this, req, res, next, gameId);
-}
-
-function archiveEvents(req, res, next, id) {
+function archiveEvents(req, res, next) {
     if( !(req.params.code &&
         _.isString(req.params.code) &&
         req.params.code.length) ) {
@@ -311,9 +304,7 @@ function archiveEvents(req, res, next, id) {
 
     // Check if specific game Id given. else, archive for all games
     var gameIds = [];
-    if(id){
-        gameIds.push(id);
-    } else if( req.query.gameId ) {
+    if( req.query.gameId ) {
         gameIds.push( req.query.gameId );
     } else {
         // archive for all games
@@ -540,6 +531,7 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                             // still more time to check for events in the day
                             console.log( "Archiving: startDateTime and endDateTime are not equal" );
                             existingFile = true;
+                            // outData.length > 1 to account for files only with the header
                             if ((queriesTillNewCSV === 0 || manualState) && outData.length > 1) {
                                 // send current data to s3, if csv had enough queries or we saw a manualSecond
                                 manualState = false;
@@ -984,7 +976,7 @@ function getEventsByDate(req, res, next){
 
                 .then(function () {
                     var outData = outList.join("\n");
-                    if(outList.length > limit){
+                    if(outList.length <= limit){
                         if (saveToFile) {
                             var file = gameId
                                 + "_" + startDate.format("YYYY-DD-MM")

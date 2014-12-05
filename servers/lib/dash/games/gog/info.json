@@ -29,12 +29,151 @@
         "thumbnail": {
             "small": "assets/thumb-game-PVZ.png",
             "large": "assets/thumb-game-PVZ.png"
+        },
+        "play": {
+            "type": "page",
+            "page": {
+                "title": "Game Over Gopher",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/148/gog.swf",
+                "size": {
+                    "width": 940,
+                    "height": 640
+                }
+            }
         }
     },
     "assessment": [
+        {
+            "enabled": false,
+            "id": "sowo",
+            "dataProcessScope": "all",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "wo1": {
+                    "name": "Struggling with Level",
+                    "description": "This student has failed a level at least 3 times, and may be struggling to understand basic gameplay mechanics."
+                },
+                "wo2": {
+                    "name": "No Corn Silos",
+                    "description": "Player has not used the Corn Silo tool, and may be having trouble manipulating x and y coordinates to choose a location on the path."
+                },
+                "wo3": {
+                    "name": "No Iceberg Lettuce",
+                    "description": "Player has not used the Iceberg Lettuce tool, and may not be able to locate the origin (0,0)."
+                },
+                "wo4": {
+                    "name": "No Melon Strike",
+                    "description": "Player has not used the Melon Strike tool, and may not understand quadrant names."
+                },
+                "wo5": {
+                    "name": "No Wheatgrass Blaster",
+                    "description": "Player has not used the Wheatgrass Blaster tool, and may not understand how to create a vertical or horizontal line using x or y coordinates."
+                },
+                "wo6": {
+                    "name": "Struggling with Challenge Round",
+                    "description": "Player may not understand how to predict points on a graph, and have struggled with challenge level [n]."
+                },
+                "so1": {
+                    "name": "Challenge Round Skill",
+                    "description": "The player has successfully solved a challenge round in fewer than 5 guesses."
+                },
+                "so2": {
+                    "name": "Tool Expert",
+                    "description": "Player has successfully used every tool in Game Over Gopher."
+                },
+                "so3": {
+                    "name": "Challenge Round Expert",
+                    "description": "Player has completed all challenge rounds."
+                },
+                "so4": {
+                    "name": "Game Over Gopher Expert",
+                    "description": "Player has completed all 14 levels."
+                }
+            }
+        }
     ],
     "reports": {
         "list": [
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-AW-1.jpg",
+                    "skinny": "assets/skinny-banner-AW-1.jpg"
+                },
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "name": "Challenge Round Skill",
+                                    "description": "The player has successfully solved a challenge round in fewer than 5 guesses."
+                                },
+                                {
+                                    "id": "so2",
+                                    "name": "Tool Expert",
+                                    "description": "Player has successfully used every tool in Game Over Gopher."
+                                },
+                                {
+                                    "id": "so3",
+                                    "name": "Challenge Round Expert",
+                                    "description": "Player has completed all challenge rounds."
+                                },
+                                {
+                                    "id": "so4",
+                                    "name": "Game Over Gopher Expert",
+                                    "description": "Player has completed all 14 levels."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "name": "Struggling with Level",
+                                    "description": "This student has failed a level at least 3 times, and may be struggling to understand basic gameplay mechanics."
+                                },
+                                {
+                                    "id": "wo2",
+                                    "name": "No Corn Silos",
+                                    "description": "Player has not used the Corn Silo tool, and may be having trouble manipulating x and y coordinates to choose a location on the path."
+                                },
+                                {
+                                    "id": "wo3",
+                                    "name": "No Iceberg Lettuce",
+                                    "description": "Player has not used the Iceberg Lettuce tool, and may not be able to locate the origin (0,0)."
+                                },
+                                {
+                                    "id": "wo4",
+                                    "name": "No Melon Strike",
+                                    "description": "Player has not used the Melon Strike tool, and may not understand quadrant names."
+                                },
+                                {
+                                    "id": "wo5",
+                                    "name": "No Wheatgrass Blaster",
+                                    "description": "Player has not used the Wheatgrass Blaster tool, and may not understand how to create a vertical or horizontal line using x or y coordinates."
+                                },
+                                {
+                                    "id": "wo6",
+                                    "name": "Struggling with Challenge Round",
+                                    "description": "Player may not understand how to predict points on a graph, and have struggled with challenge level [n]."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "description": "Coming Soon!"
+            }
         ]
     },
     "details": {
@@ -46,6 +185,17 @@
         "subject": "TBD",
         "grades": "6 - 8",
         "buttons": [
+            {
+                "name": "Play Game",
+                "type": "play",
+                "authRequired": true,
+                "links": [
+                    {
+                        "name": "Play Game",
+                        "type": "play"
+                    }
+                ]
+            }
         ],
         "pages": {
         },
