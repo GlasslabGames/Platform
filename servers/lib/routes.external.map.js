@@ -200,7 +200,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/games/minimal",
+            api: "/api/v2/dash/games/active/minimal",
             service: "dash",
             controller: "games",
             method: {
@@ -208,11 +208,19 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/games/details",
+            api: "/api/v2/dash/games/active/details",
             service: "dash",
             controller: "games",
             method: {
                 get: "getGamesDetails"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/active",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getActiveGamesBasicInfo"
             }
         },
         {
@@ -488,14 +496,6 @@ module.exports = {
             method: {
                 get: "getCsvParseSchema",
                 post: "updateCsvParseSchema"
-            }
-        },
-        {
-            api: "/api/v2/research/game/:gameId/code/:code/archive",
-            service: "research",
-            controller: "events",
-            method: {
-                get: "archiveEventsByGameId"
             }
         },
         {
