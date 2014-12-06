@@ -137,6 +137,28 @@ DashService.prototype.getListOfVisibleGameIds = function() {
 };
 
 // TODO: replace this with DB lookup, return promise
+// returns an uppercase list of all game Ids, game Ids are ALWAYS uppercase
+// promise transition complete
+// 2 references in dash games, 1 in data events
+DashService.prototype.getListOfAllGameIds = function() {
+    return when.promise(function(resolve, reject){
+        var gameIds = [];
+        for(var g in this._games) {
+            if( this._games[g].info &&
+                this._games[g].info.basic &&
+                this._games[g].info.basic.gameId) {
+                gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
+            }
+        }
+        if(gameIds.length !== 0){
+            resolve(gameIds);
+        } else{
+            reject();
+        }
+    }.bind(this) );
+};
+
+// TODO: replace this with DB lookup, return promise
 // promise transition complete
 // 1 reference in dash game
 DashService.prototype.getGameReports = function(gameId) {

@@ -9,7 +9,7 @@
     },
     "basic": {
         "gameId": "PVZ",
-        "enabled": true,
+        "enabled": false,
         "visible": false,
         "maintenance": null,
         "shortName": "PvZ EDU",
