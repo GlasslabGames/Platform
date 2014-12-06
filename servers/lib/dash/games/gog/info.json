@@ -1,10 +1,10 @@
 {
     "developer": {
-        "id": "LGL",
-        "name": "The Learning Games Lab",
+        "id": "MS",
+        "name": "Math Snacks",
         "logo": {
-            "small": "assets/glasslab-logo.png",
-            "large": "assets/glasslab-logo-2x.png"
+            "small": "assets/mathsnacks-logo.jpg",
+            "large": "assets/mathsnacks-logo@2x.jpg"
         }
     },
     "basic": {
@@ -14,9 +14,28 @@
         "maintenance": null,
         "shortName": "Game Over Gopher",
         "longName": "Game Over Gopher",
-        "shortDescription": "Game Over Gopher",
-        "description": "Game Over Gopher by The Learning Games Lab at NMSU",
-        "settings" : {
+        "grades": "2 - 7",
+        "subject": "Math",
+        "type": "Browser",
+        "platform": {
+            "type": "Browser/Flash",
+            "icon": {
+                "small": "assets/platform-browser.png",
+                "large": "assets/platform-browser@2x.png"
+            }
+        },
+        "price": "Coming Soon",
+        "shortDescription": "Game Over Gopher is an exciting tower defense game built around the coordinate grid. To defend a prize carrot, the player selects various tools to “feed” the space gophers marching hungrily toward it. Game Over Gopher guides students in plotting. You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
+        "description": "Game Over Gopher is an exciting tower defense game built around the coordinate grid. To defend a prize carrot, the player selects various tools to “feed” the space gophers marching hungrily toward it. Game Over Gopher guides students in plotting. You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
+        "developer": {
+            "id": "MS",
+            "name": "Math Snacks",
+            "logo": {
+                "small": "assets/mathsnacks-logo.jpg",
+                "large": "assets/mathsnacks-logo@2x.jpg"
+            }
+        },
+        "settings": {
         },
         "license": {
             "type": "loginType",
@@ -27,14 +46,22 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-PVZ.png",
-            "large": "assets/thumb-game-PVZ.png"
+            "small": "assets/thumb-game-GOG.png",
+            "large": "assets/thumb-game-GOG.png"
+        },
+        "card": {
+            "small": "assets/game-card-GOG.jpg",
+            "large": "assets/game-card-GOG@2x.jpg"
+        },
+        "banners": {
+            "product": "assets/game-banner-GOG.png",
+            "reports": "assets/game-banner-GOG.png"
         },
         "play": {
             "type": "page",
             "page": {
                 "title": "Game Over Gopher",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/148/gog.swf",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/147/gog.swf",
                 "size": {
                     "width": 940,
                     "height": 640
