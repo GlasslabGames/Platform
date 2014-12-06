@@ -2,7 +2,8 @@ var fs             = require('fs');
 var path           = require('path');
 var _              = require('lodash');
 var when           = require('when');
-var aws    = require('aws-sdk');
+var aws            = require('aws-sdk');
+var child          = require('child_process');
 
 module.exports = S3Util;
 
@@ -24,6 +25,15 @@ function S3Util(options){
 
     // Set bucket variables
     this.bucket = "playfully";
+}
+
+// build the prefix param for s3, so operation can be done on all items that fall within this directory
+function _s3PrefixBuilder(pathParams){
+    var prefix = pathParams.join('/');
+    if(prefix.length > 0){
+        prefix += '/';
+    }
+    return prefix;
 }
 
 // demo method to test out s3 rest operations
@@ -57,14 +67,14 @@ S3Util.prototype.sample = function(key, data) {
                 reject();
             }.bind(this));
     }.bind(this));
-}
+};
 
 
 S3Util.prototype.getBucket = function(key) {
     return when.promise(function(resolve, reject) {
         var params = {};
     }.bind(this));
-}
+};
 
 S3Util.prototype.createS3Bucket = function( bucket ) {
     return when.promise( function( resolve, reject ) {
@@ -82,7 +92,7 @@ S3Util.prototype.createS3Bucket = function( bucket ) {
             }
         }.bind( this ) );
     }.bind( this ) );
-}
+};
 
 S3Util.prototype.createS3Object = function(key, data) {
     return when.promise(function(resolve, reject){
@@ -100,7 +110,7 @@ S3Util.prototype.createS3Object = function(key, data) {
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // gets s3 object from playfully bucket
 S3Util.prototype.getS3Object = function(key){
@@ -120,7 +130,7 @@ S3Util.prototype.getS3Object = function(key){
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // gets s3 object from playfully bucket
 S3Util.prototype.putS3Object = function(key, data){
@@ -141,7 +151,7 @@ S3Util.prototype.putS3Object = function(key, data){
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // deletes s3 object from playfully bucket
 S3Util.prototype.deleteS3Object = function(key){
@@ -160,15 +170,15 @@ S3Util.prototype.deleteS3Object = function(key){
             }
         }.bind(this));
     }.bind(this));
-}
+};
 
 // updates s3 object from playfully bucket
 S3Util.prototype.updateS3Object = function(key, data){
     return when.promise(function(resolve, reject){
-        getS3Object(this.s3, key)
+        this.getS3Object(key)
             .then(function(object){
                 _.merge(object, data);
-                return createS3Object(this.s3, key, object);
+                return this.createS3Object(key, object);
             }.bind(this))
             .then(function(){
                 resolve();
@@ -177,22 +187,130 @@ S3Util.prototype.updateS3Object = function(key, data){
                 reject('update');
             }.bind(this));
     }.bind(this));
-}
+};
 
 // lists all the s3 objects in playfully bucket
-S3Util.prototype.listS3Objects = function(){
+S3Util.prototype.listS3Objects = function(prefix){
     return when.promise(function(resolve, reject){
         var params = {};
         params.Bucket = this.bucket;
-
+        params.Prefix = prefix;
         this.s3.listObjects(params, function(err, data){
             if(err){
                 console.error('S3 List Objects Error - ', err);
                 reject('list');
             } else{
-                console.log('S3 Object Listed');
-                resolve(data.Contents);
+                var list = data.Contents;
+                var outList = [];
+                list.forEach(function(item){
+                    if(item.Key.indexOf('.') !== -1){
+                        outList.push(item);
+                    }
+                });
+                resolve(outList);
             }
         }.bind(this));
     }.bind(this));
+};
+
+// grabs url signed for get requests, for csv parser page
+S3Util.prototype._getSignedUrl = function(key) {
+    var params = {};
+    params.Bucket = this.bucket;
+    params.Key = key;
+    return when.promise(function(resolve, reject){
+        this.s3.getSignedUrl('getObject', params, function (err, url) {
+            if (err) {
+                console.error('Get Signed Url Error - ', err);
+                reject('signedUrl');
+            } else {
+                resolve(url);
+            }
+        }.bind(this));
+    }.bind(this));
+};
+
+// grabs signed urls for all objects that fall within a particular prefix directory strutcure
+S3Util.prototype.getSignedUrls = function(docType, pathParams){
+    return when.promise(function(resolve, reject){
+        var prefix = _s3PrefixBuilder(pathParams);
+        this.listS3Objects(prefix)
+            .then(function(list){
+                var signedUrlList = [];
+                list.forEach(function(object){
+                    var key = object.Key;
+                    docType = docType || '*';
+                    var endType = key.slice(key.lastIndexOf('.')+1);
+                    if(endType === docType || docType === '*'){
+                        signedUrlList.push(this._getSignedUrl(key));
+                    }
+                }.bind(this));
+                return when.all(signedUrlList);
+            }.bind(this))
+            .then(function(signedUrlList){
+                resolve(signedUrlList);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+};
+
+
+// only works if you have awscli installed and configured with aws credentials
+// can be used to move or rename an object in s3 just as mv would be used in the unix terminal
+function _mvS3Object(startKey, endKey){
+    return when.promise(function(resolve, reject){
+        var command = 'aws s3 mv ' + startKey + ' ' + endKey;
+        child.exec(command, function(err, stdout, stderr){
+            if(err){
+                reject(err);
+            } else if(stderr){
+                reject(stderr);
+            } else if(stdout){
+                resolve(stdout);
+            } else{
+                reject({'no.response': 'no response'});
+            }
+        });
+    });
 }
+
+// changes the names of all files that lie within a certain prefix, based on rules created in a formatter method
+S3Util.prototype.alterS3ObjectNames = function(formatter, docType, pathParams){
+    return when.promise(function(resolve, reject){
+        if(docType === undefined){
+            return reject({'no.docType.present': 'Method needs a document type'});
+        }
+
+        pathParams = pathParams || [];
+        var prefix = _s3PrefixBuilder(pathParams);
+        this.listS3Objects(prefix)
+            .then(function(list){
+                var promiseList = [];
+                list.forEach(function(object){
+                    var key = object.Key;
+                    var endType = key.slice(key.lastIndexOf('.')+1);
+                    if(endType === docType){
+                        var keys = formatter.call(this, key);
+                        if(Array.isArray(keys)){
+                            var startKey = keys[0];
+                            var endKey = keys[1];
+                            //console.log('start:', startKey,'end:',endKey);
+                            promiseList.push(this._mvS3Object(startKey, endKey));
+                        } else if(typeof keys !== 'string'){
+                            // if not string, is an error
+                            return reject(keys);
+                        }
+                    }
+                }.bind(this));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(promiseList) {
+                resolve(JSON.stringify(promiseList));
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};

@@ -8,8 +8,8 @@
         }
     },
     "basic": {
-        "gameId": "GOG",
-        "enabled": true,
+        "gameId": "WWF",
+        "enabled": false,
         "visible": false,
         "maintenance": null,
         "shortName": "Words With Friends EDU",

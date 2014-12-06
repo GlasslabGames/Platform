@@ -13,13 +13,32 @@
         "visible": true,
         "shortName": "Argubot Academy EDU",
         "longName": "Mars Generation One: Argubot Academy EDU",
-        "shortDescription": "Mars Generation One: Argubot Academy EDU",
-        "description": "Mars Generation One: Argubot Academy EDU is an engaging futuristic adventure game for iOS tablets. Aligned to the Common Core State Standards, the game brings STEM content into the English Language Arts classroom, and helps middle schoolers develop persuasion and reasoning skills. In Argubot Academy EDU, players take on the persona of a new student at Argubot Academy, the city’s middle school. There, each player will have to make very adult decisions about the building and governance of the city, for example: What type of food should the citizens cultivate? Players have to build sound arguments for every choice they make – but in this city on Mars, people settle their differences by equipping their robot assistants, called argubots, with claims and evidence, culminating in robot battles of the wits!",
+        "grades": "6 - 8",
+        "subject": "ELA",
+        "type": "App",
+        "platform": {
+            "type": "iPad",
+            "icon": {
+                "small": "assets/platform-ipad.png",
+                "large": "assets/platform-ipad@2x.png"
+            }
+        },
+        "price": "Free",
+        "shortDescription": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
+        "description": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
+        "developer": {
+            "id": "IC",
+            "name": "iCivics",
+            "logo": {
+                "small": "assets/icivics-logo.png",
+                "large": "assets/icivics-logo-2x.png"
+            }
+        },
         "settings": {
         },
         "license": {
             "type": "loginType",
-            "loginType": "glasslabv2,edmodo",
+            "loginType": "glasslabv2,icivics,edmodo",
             "valid": false,
             "message": {
                 "invalid": "Coming Soon!"
@@ -28,6 +47,14 @@
         "thumbnail": {
             "small": "assets/thumb-game-AA-1.png",
             "large": "assets/thumb-game-AA-1.png"
+        },
+        "card": {
+            "small": "assets/game-card-AA-1.jpg",
+            "large": "assets/game-card-AA-1@2x.jpg"
+        },
+        "banners": {
+            "product": "assets/game-banner-AA-1.png",
+            "reports": "assets/game-banner-AA-1.png"
         }
     },
     "assessment": [
@@ -63,9 +90,10 @@
                 "header": {
                     "text": "Learning Events & Time Played",
                     "image": "assets/game-banner-AA-1.png",
-                    "skinny": "assets/skinny-banner-AA-1.jpg"
+                    "skinny": "assets/skinny-banner-AA-1.jpg",
+                    "large": "assets/skinny-banner-AA-1@2x.jpg"
                 },
-                "description": "This report shows critical game accomplishments and how these achievements align to curriculum standards.",
+                "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
             },
             {
@@ -76,7 +104,8 @@
                 "header": {
                     "text": "Shout Out and Watch Out Report",
                     "image": "assets/game-banner-AA-1.png",
-                    "skinny": "assets/skinny-banner-AA-1.jpg"
+                    "skinny": "assets/skinny-banner-AA-1.jpg",
+                    "large": "assets/skinny-banner-AA-1@2x.jpg"
                 },
                 "table": {
                     "labels": [],
@@ -124,14 +153,20 @@
         "price": "Free",
         "releaseDate": "Sep 2, 2014",
         "type": "App",
-        "platform": "iPad",
+        "platform": {
+            "type": "iPad",
+            "icon": {
+                "small": "assets/platform-ipad.png",
+                "large": "assets/platform-ipad@2x.png"
+            }
+        },
         "subject": "ELA",
         "grades": "6 - 8",
         "applink": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8",
         "buttons": [
             {
                 "name": "Getting Started Guide",
-                "authRequired": true,
+                "authRequired": false,
                 "type": "link",
                 "links": [
                     {
@@ -143,7 +178,7 @@
             {
                 "name": "Download",
                 "type": "download",
-                "authRequired": true,
+                "authRequired": false,
                 "links": [
                     {
                         "target": "_blank",
@@ -163,7 +198,7 @@
                 "header": "Put your powers of persuasion to the ultimate test, on a whole new planet!",
                 "about": "Mars Generation One: Argubot Academy EDU is an engaging futuristic adventure game for iOS tablets. Aligned to the Common Core State Standards, the game brings STEM content into the English Language Arts classroom, and helps middle schoolers develop persuasion and reasoning skills. In Argubot Academy EDU, players take on the persona of a new student at Argubot Academy, the city’s middle school. There, each player will have to make very adult decisions about the building and governance of the city, for example: What type of food should the citizens cultivate? Players have to build sound arguments for every choice they make – but in this city on Mars, people settle their differences by equipping their robot assistants, called argubots, with claims and evidence, culminating in a robot battle of wits!",
                 "video": "https://vimeo.com/105931525",
-                "brochure":"https://s3-us-west-2.amazonaws.com/playfully/MGO+brochure_final.pdf",
+                "brochure":"https://s3-us-west-1.amazonaws.com/playfully-games/AA-1/brochures/AAEDU+brochure.pdf",
                 "curriculum": [
                     "Addresses critical Common Core standards in persuasion and reasoned thinking – a cornerstone of the standards for English Language Arts",
                     "Promotes interest in STEM content while developing the literacy and leadership skills that are essential for any 21st century career",

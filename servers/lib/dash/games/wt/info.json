@@ -8,8 +8,8 @@
         }
     },
     "basic": {
-        "gameId": "GOG",
-        "enabled": true,
+        "gameId": "WT",
+        "enabled": false,
         "visible": false,
         "maintenance": null,
         "shortName": "Wuzzit Trouble",
