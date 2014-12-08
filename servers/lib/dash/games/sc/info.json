@@ -385,7 +385,7 @@
                 "links": [
                     {
                         "name": "PC (1.0GB)",
-                        "OS": "Win",
+                        "OS": "Windows",
                         "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.msi",
                         "target": "_blank"
                     },
