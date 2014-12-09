@@ -10,7 +10,7 @@
     "basic": {
         "gameId": "GOG",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Game Over Gopher",
         "longName": "Game Over Gopher",
@@ -61,7 +61,7 @@
             "type": "page",
             "page": {
                 "title": "Game Over Gopher",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/147/gog.swf",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/148/gog.swf",
                 "size": {
                     "width": 940,
                     "height": 640
@@ -71,7 +71,7 @@
     },
     "assessment": [
         {
-            "enabled": false,
+            "enabled": true,
             "id": "sowo",
             "dataProcessScope": "all",
             "engine": "javascript",
