@@ -410,7 +410,7 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                 }
 
                 var dates = formattedDate.split( "-" );
-                fileString =  "archives/" + this.options.env + "_ben/" + gameId + "/"
+                fileString =  "archives/" + this.options.env + "/" + gameId + "/"
                                 + dates[0] + "/" + dates[1] + "/" + gameId + "_" + formattedDate;
 
                 return this.store.getCsvDataByGameId(gameId);
