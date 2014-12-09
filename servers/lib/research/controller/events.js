@@ -499,7 +499,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                                     addedMsCount++;
                                 }
                             }
-                            if(addedMs){
+                            if(addedMsCount > 0){
                                 console.log( "Archiving: added MS to " + addedMsCount + " Events within while loop!" );
                             }
                         } else {
