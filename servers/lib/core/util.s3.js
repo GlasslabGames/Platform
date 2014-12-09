@@ -28,9 +28,13 @@ function S3Util(options){
 }
 
 // build the prefix param for s3, so operation can be done on all items that fall within this directory
-function _s3PrefixBuilder(pathParams){
+function _s3PrefixBuilder(pathParams, isDirectory){
+    pathParams = pathParams || [];
+    if(isDirectory === undefined){
+        isDirectory = true;
+    }
     var prefix = pathParams.join('/');
-    if(prefix.length > 0){
+    if(prefix.length > 0 && isDirectory){
         prefix += '/';
     }
     return prefix;
@@ -198,7 +202,7 @@ S3Util.prototype.listS3Objects = function(prefix){
         this.s3.listObjects(params, function(err, data){
             if(err){
                 console.error('S3 List Objects Error - ', err);
-                reject('list');
+                reject(err);
             } else{
                 var list = data.Contents;
                 var outList = [];
@@ -230,10 +234,10 @@ S3Util.prototype._getSignedUrl = function(key) {
     }.bind(this));
 };
 
-// grabs signed urls for all objects that fall within a particular prefix directory strutcure
-S3Util.prototype.getSignedUrls = function(docType, pathParams){
+// grabs signed urls for all objects that fall within a particular prefix directory structure
+S3Util.prototype.getSignedUrls = function(docType, pathParams, isDirectory){
     return when.promise(function(resolve, reject){
-        var prefix = _s3PrefixBuilder(pathParams);
+        var prefix = _s3PrefixBuilder(pathParams, isDirectory);
         this.listS3Objects(prefix)
             .then(function(list){
                 var signedUrlList = [];
@@ -277,14 +281,12 @@ function _mvS3Object(startKey, endKey){
 }
 
 // changes the names of all files that lie within a certain prefix, based on rules created in a formatter method
-S3Util.prototype.alterS3ObjectNames = function(formatter, docType, pathParams){
+S3Util.prototype.alterS3ObjectNames = function(formatter, docType, pathParams, isDirectory){
     return when.promise(function(resolve, reject){
         if(docType === undefined){
             return reject({'no.docType.present': 'Method needs a document type'});
         }
-
-        pathParams = pathParams || [];
-        var prefix = _s3PrefixBuilder(pathParams);
+        var prefix = _s3PrefixBuilder(pathParams, isDirectory);
         this.listS3Objects(prefix)
             .then(function(list){
                 var promiseList = [];
