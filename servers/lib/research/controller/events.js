@@ -13,7 +13,8 @@ var runningArchive = false;
 module.exports = {
     getEventsByDate: getEventsByDate,
     archiveEvents: archiveEvents,
-    stopArchive: stopArchive
+    stopArchive: stopArchive,
+    getSignedUrlsByDayRange: getSignedUrlsByDayRange
 };
 
 /*
@@ -36,6 +37,225 @@ module.exports = {
     startEpoc
     dateRange
  */
+
+// for a particular gameId, gets all aws signed urls between the designated days in the chosen month
+// defaulted to only get csv files within archives/dev
+function getSignedUrlsByDayRange(req, res){
+    if( req.session &&
+        req.session.passport) {
+        var userData = req.session.passport.user;
+        // check user permission
+        if (!userData.permits.nav.parser) {
+            this.requestUtil.errorResponse(res, {key: "user.permit.invalid"});
+            return;
+        }
+    }
+
+    if(!req.query) {
+        this.requestUtil.errorResponse(res, {key: "research.arguments.missing"}, 401);
+        return;
+    }
+
+    if( !(req.params.gameId &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"research.gameId.missing"});
+        return
+    }
+
+    var gameId = req.params.gameId;
+    // gameId are not case sensitive
+    gameId = gameId.toUpperCase();
+
+    if(req.query.startDate) {
+        startDate = req.query.startDate;
+        // if starts with " then strip "s
+        if(startDate.charAt(0) == '"') {
+            startDate = startDate.substring(1, startDate.length-1);
+        }
+    }
+    if(!startDate) {
+        this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
+        return;
+    }
+    if(req.query.endDate) {
+        endDate = req.query.endDate;
+        // if starts with " then strip "s
+        if(endDate.charAt(0) == '"') {
+            endDate = endDate.substring(1, endDate.length-1);
+        }
+    }
+    if(!endDate) {
+        this.requestUtil.errorResponse(res, {key: "research.endDate.missing"}, 401);
+        return;
+    }
+
+    var startDates = startDate.split('-');
+    var year = startDates[0];
+    var month = startDates[1];
+    startDates[2] = startDates[2].slice(0,2);
+    var day = parseInt(startDates[2], 10);
+    var endDates = endDate.split('-');
+    var endDay;
+    if(endDates[0] !== year || endDates[1] !== month){
+        endDay = 31;
+    } else{
+        endDates[2] = endDates[2].slice(0,2);
+        endDay = parseInt(endDates[2], 10);
+    }
+    // index used as prefix to easily access the day param in file names.
+    var fileString = gameId + '_' + year + '-' + month + '-';
+    var outList = [];
+
+    return when.promise(function(resolve, reject){
+        function getSignedUrlsForParser(){
+            var dayString;
+            if(day < 10){
+                dayString = "0" + day;
+            } else{
+                dayString = "" + day;
+            }
+            dayString = fileString + dayString;
+            var pathParams = ['archives', 'dev', gameId, year, month, dayString];
+            this.serviceManager.awss3.getSignedUrls('csv', pathParams, false)
+                .then(function(urls){
+                    urls.forEach(function(url){
+                        outList.push(url);
+                    });
+                    if(day < endDay){
+                        day++;
+                        getSignedUrlsForParser.call(this);
+                    } else{
+                        this.requestUtil.jsonResponse(res, {
+                            numCSVs: outList.length,
+                            urls: outList
+                        });
+                        resolve();
+                    }
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                    this.requestUtil.errorResponse(res, err, 401);
+                }.bind(this));
+        }
+        getSignedUrlsForParser.call(this);
+    }.bind(this));
+}
+
+// for a particular gameId, gets all aws signed urls for a certain date range
+// defaulted to only get csv files within archive/dev
+// concern about researchers asking for too many files at once, don't use unless solution found
+function getSignedUrlsByMonthRange(req, res){
+    if( req.session &&
+        req.session.passport) {
+        var userData = req.session.passport.user;
+        // check user permission
+        if (!userData.permits.nav.parser) {
+            this.requestUtil.errorResponse(res, {key: "user.permit.invalid"});
+            return;
+        }
+    }
+
+    if(!req.query) {
+        this.requestUtil.errorResponse(res, {key: "research.arguments.missing"}, 401);
+        return;
+    }
+
+    if( !(req.params.gameId &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"research.gameId.missing"});
+        return
+    }
+
+    var gameId = req.params.gameId;
+    // gameId are not case sensitive
+    gameId = gameId.toUpperCase();
+
+    if(req.query.startDate) {
+        startDate = req.query.startDate;
+        // if starts with " then strip "s
+        if(startDate.charAt(0) == '"') {
+            startDate = startDate.substring(1, startDate.length-1);
+        }
+    }
+    if(!startDate) {
+        this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
+        return;
+    }
+    if(req.query.endDate) {
+        endDate = req.query.endDate;
+        // if starts with " then strip "s
+        if(endDate.charAt(0) == '"') {
+            endDate = endDate.substring(1, endDate.length-1);
+        }
+    }
+    if(!endDate) {
+        this.requestUtil.errorResponse(res, {key: "research.endDate.missing"}, 401);
+        return;
+    }
+    var startDates = startDate.split('-');
+    startDates[0] = parseInt(startDates[0], 10);
+    startDates[1] = parseInt(startDates[1], 10);
+    var endDates = endDate.split('-');
+    endDates[0] = parseInt(endDates[0], 10);
+    endDates[1] = parseInt(endDates[1], 10);
+    var yearsToGo = endDates[0] - startDates[0];
+    var monthsToGo;
+    if(yearsToGo === 0){
+        monthsToGo = endDates[1] - startDates[1];
+    } else{
+        var startYearMonths = 13 - startDates[1];
+        var endYearMonths = endDates[1];
+        if(yearsToGo === 1){
+            monthsToGo = startYearMonths + endYearMonths;
+        } else{
+            var midYearsMonths = (yearsToGo-1)*12;
+            monthsToGo = startYearMonths + midYearsMonths + endYearMonths;
+        }
+    }
+    var year = startDates[0];
+    var month = startDates[1];
+    var outList = [];
+
+    return when.promise(function(resolve, reject){
+        function getSignedUrlsForParser(){
+            var monthString;
+            if(month < 10){
+                monthString = "0" + month;
+            } else{
+                monthString = "" + month;
+            }
+            var pathParams = ['archives', 'dev', gameId, year, monthString];
+            this.serviceManager.awss3.getSignedUrls('csv', pathParams)
+                .then(function(urls){
+                    urls.forEach(function(url){
+                        outList.push(url);
+                    });
+                    if(monthsToGo > 0){
+                        monthsToGo--;
+                        month++;
+                        if(month === 13){
+                            month = 1;
+                            year++;
+                        }
+                        getSignedUrlsForParser.call(this);
+                    } else{
+                        this.requestUtil.jsonResponse(res, {
+                            numCSVs: outList.length,
+                            urls: outList
+                        });
+                        resolve();
+                    }
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                    this.requestUtil.errorResponse(res, err, 401);
+                }.bind(this));
+        }
+        getSignedUrlsForParser.call(this);
+    }.bind(this));
+}
 
 // changes runningArchive state to false, stopping archive
 function stopArchive(req, res){
@@ -365,8 +585,8 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                                 console.log( "Archiving: saving file: " + fileName );
                                 return this.serviceManager.awss3.putS3Object( fileName, outData )
                                     .then(function(){
-                                    resolve();
-                                }.bind(this))
+                                        resolve();
+                                    }.bind(this))
                                     .then(null, function(err){
                                         reject(err);
                                     }.bind(this));
@@ -410,7 +630,7 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                 }
 
                 var dates = formattedDate.split( "-" );
-                fileString =  "archives/" + this.options.env + "_ben/" + gameId + "/"
+                fileString =  "archives/" + this.options.env + "/" + gameId + "/"
                                 + dates[0] + "/" + dates[1] + "/" + gameId + "_" + formattedDate;
 
                 return this.store.getCsvDataByGameId(gameId);
@@ -499,7 +719,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                                     addedMsCount++;
                                 }
                             }
-                            if(addedMs){
+                            if(addedMsCount > 0){
                                 console.log( "Archiving: added MS to " + addedMsCount + " Events within while loop!" );
                             }
                         } else {
@@ -606,13 +826,13 @@ function getEventsByDate(req, res, next){
         }
 
         if(!req.query) {
-            this.requestUtil.errorResponse(res, {error: "missing arguments"}, 401);
+            this.requestUtil.errorResponse(res, {key: "research.arguments.missing"}, 401);
             return;
         }
 
         if( !( req.params &&
             req.params.hasOwnProperty("gameId") ) ) {
-            this.requestUtil.errorResponse(res, {error: "missing game id"});
+            this.requestUtil.errorResponse(res, {key: "research.gameId.missing"});
             return;
         }
         var gameId = req.params.gameId;
@@ -639,7 +859,7 @@ function getEventsByDate(req, res, next){
             }
         }
         if(!startDate) {
-            this.requestUtil.errorResponse(res, {error: "missing startDate or startEpoc missing"}, 401);
+            this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
             return;
         }
         startDate = moment(startDate);
@@ -717,7 +937,7 @@ function getEventsByDate(req, res, next){
             timeFormat = req.query.timeFormat;
         }
 
-        var limit;
+        var limit = 10000;
         if(req.query.limit) {
             limit = req.query.limit;
         }
@@ -726,63 +946,66 @@ function getEventsByDate(req, res, next){
         if(req.query.saveToFile) {
             saveToFile = (req.query.saveToFile === "true" ? true : false);
         }
+        var outList;
+        return when.promise(function(resolve, reject) {
+            this.store.getCsvDataByGameId(gameId)
+                .then(function (csvData) {
+                    return parseCSVSchema(csvData);
+                }.bind(this))
 
-        this.store.getCsvDataByGameId(gameId)
-            .then(function(csvData){
-                return parseCSVSchema(csvData);
-            }.bind(this))
+                .then(function (_parsedSchemaData) {
+                    parsedSchemaData = _parsedSchemaData;
 
-            .then(function(_parsedSchemaData){
-                parsedSchemaData = _parsedSchemaData;
+                    console.log("Getting Events For Game:", gameId, "from", startDate.format("MM/DD/YYYY"), "to", endDate.format("MM/DD/YYYY"));
+                    return this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
+                }.bind(this))
 
-                console.log("Getting Events For Game:", gameId, "from", startDate.format("MM/DD/YYYY"), "to", endDate.format("MM/DD/YYYY"));
-                return this.store.getEventsByGameIdDate(gameId, startDate.toArray(), endDate.toArray(), limit)
-            }.bind(this))
-
-            .then(function(events){
-
-                try {
+                .then(function (events) {
                     console.log("Running Filter...");
                     console.log("Processing", events.length, "Events...");
-
                     // process events
-                    var p = processEvents.call(this, parsedSchemaData, events, timeFormat);
-                    p.then(function(outList) {
-                        var outData = outList.join("\n");
+                    return processEvents.call(this, parsedSchemaData, events, timeFormat);
+                }.bind(this))
 
-                        if(saveToFile) {
+                .then(function (list) {
+                    outList = list;
+                    if (outList.length > limit) {
+                        return getSignedUrlsByDayRange.call(this, req, res);
+                    }
+                }.bind(this))
+
+                .then(function () {
+                    var outData = outList.join("\n");
+                    if(outList.length <= limit){
+                        if (saveToFile) {
                             var file = gameId
-                                +"_"+startDate.format("YYYY-DD-MM")
-                                +"_"+endDate.format("YYYY-DD-MM")
-                                +".csv";
+                                + "_" + startDate.format("YYYY-DD-MM")
+                                + "_" + endDate.format("YYYY-DD-MM")
+                                + ".csv";
                             this.requestUtil.downloadResponse(res, outData, file, 'text/csv');
-
                             /*
-                            this.requestUtil.jsonResponse(res, {
-                                numEvents: outList.length - 1, // minus header
-                                data: outData
-                            });
-                            */
+                             this.requestUtil.jsonResponse(res, {
+                             numEvents: outList.length - 1, // minus header
+                             data: outData
+                             });
+                             */
                         } else {
                             this.requestUtil.jsonResponse(res, {
                                 numEvents: outList.length - 1, // minus header
                                 data: outData
                             });
                         }
-                    }.bind(this));
+                    }
+                    resolve();
+                }.bind(this))
 
-                } catch(err) {
+                // catch all
+                .then(null, function (err) {
                     console.trace("Research: Process Events -", err);
                     this.requestUtil.errorResponse(res, {error: err});
-                }
-
-            }.bind(this))
-
-            // catch all
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
+                    reject(err);
+                }.bind(this));
             }.bind(this));
-
     } catch(err) {
         console.trace("Research: Get User Data Error -", err);
         this.requestUtil.errorResponse(res, {error: err});

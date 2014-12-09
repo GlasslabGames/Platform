@@ -81,5 +81,9 @@ module.exports = {
     "report.assessmentId.missing":          "Missing AssessmentId",
     "report.body.missing":                  "Missing Body",
     // research
-    "research.access.invalid":              "Invalid Access"
+    "research.access.invalid":              "Invalid Access",
+    "research.gameId.missing":              "Missing Game Id",
+    "research.startDate.missing":           "Missing startDate or startEpoc",
+    "research.arguments.missing":           "Missing Arguments",
+    "research.endDate.missing":             "Missing endDate"
 };
