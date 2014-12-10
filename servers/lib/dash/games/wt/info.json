@@ -1,21 +1,40 @@
 {
     "developer": {
         "id": "BQ",
-        "name": "BrainQuake",
+        "name": "BrainQuake Inc.",
         "logo": {
-            "small": "assets/glasslab-logo.png",
-            "large": "assets/glasslab-logo-2x.png"
+            "small": "assets/dev-logo-brainquake.jpg",
+            "large": "assets/dev-logo-brainquake@2x.jpg"
         }
     },
     "basic": {
         "gameId": "WT",
-        "enabled": false,
+        "enabled": true,
         "visible": false,
         "maintenance": null,
         "shortName": "Wuzzit Trouble",
         "longName": "Wuzzit Trouble",
-        "shortDescription": "Wuzzit Trouble",
-        "description": "Wuzzit Trouble by BrainQuake",
+        "grades": "2 - 7",
+        "subject": "Math",
+        "type": "App",
+        "platform": {
+            "type": "iPad",
+            "icon": {
+                "small": "assets/platform-ipad.png",
+                "large": "assets/platform-ipad@2x.png"
+            }
+        },
+        "price": "Coming Soon",
+        "shortDescription": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
+        "description": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
+        "developer": {
+            "id": "BQ",
+            "name": "BrainQuake Inc.",
+            "logo": {
+                "small": "assets/dev-logo-brainquake.jpg",
+                "large": "assets/dev-logo-brainquake@2x.jpg"
+            }
+        },
         "settings" : {
         },
         "license": {
@@ -27,8 +46,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-PVZ.png",
-            "large": "assets/thumb-game-PVZ.png"
+            "small": "assets/thumb-game-WT.png",
+            "large": "assets/thumb-game-WT.png"
+        },
+        "card": {
+            "small": "assets/game-card-WT.jpg",
+            "large": "assets/game-card-WT@2x.jpg"
+        },
+        "banners": {
+            "product": "assets/game-banner-WT.png",
+            "reports": "assets/game-banner-WT.png"
         }
     },
     "assessment": [
@@ -50,8 +77,8 @@
         "pages": {
         },
         "banners": {
-            "product": "assets/game-banner-AA-1.jpg",
-            "reports": "assets/game-banner-AA-1.jpg"
+            "product": "assets/game-banner-WT.jpg",
+            "reports": "assets/game-banner-WT.jpg"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",

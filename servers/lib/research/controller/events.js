@@ -410,7 +410,7 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                 }
 
                 var dates = formattedDate.split( "-" );
-                fileString =  "archives/" + this.options.env + "_ben/" + gameId + "/"
+                fileString =  "archives/" + this.options.env + "/" + gameId + "/"
                                 + dates[0] + "/" + dates[1] + "/" + gameId + "_" + formattedDate;
 
                 return this.store.getCsvDataByGameId(gameId);
@@ -499,7 +499,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                                     addedMsCount++;
                                 }
                             }
-                            if(addedMs){
+                            if(addedMsCount > 0){
                                 console.log( "Archiving: added MS to " + addedMsCount + " Events within while loop!" );
                             }
                         } else {
