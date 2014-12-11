@@ -9,8 +9,8 @@
     },
     "basic": {
         "gameId": "WPLUS",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Water Plus",
         "longName": "Water Plus",
