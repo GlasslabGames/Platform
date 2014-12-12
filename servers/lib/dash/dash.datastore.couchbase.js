@@ -126,7 +126,7 @@ DashDS_Couchbase.prototype.saveMessageCenterMessage = function( messageType, mes
     return when.promise(function(resolve, reject){
 
         // Set the timestamp in the message
-        message.timestamp = Util.GetTimeStamp();
+        messageData.timestamp = Util.GetTimeStamp();
 
         var key = tConst.dataStore.dataKey + "::" + tConst.dataStore.countKey + "::" + tConst.dataStore[ messageType + "Key" ];
         this.client.incr(key, {initial: 1}, function(err, data) {

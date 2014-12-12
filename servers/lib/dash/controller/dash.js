@@ -119,6 +119,9 @@ function postMessage(req, res, next) {
 
         // Set the message data
         var messageData = {};
+        messageData.subject = req.body.subject;
+        messageData.message = req.body.message;
+        messageData.icon = req.body.icon;
 
         // Get the messages
         this.dashCBStore.saveMessageCenterMessage( messageId, messageData )
