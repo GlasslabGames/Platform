@@ -185,12 +185,12 @@
                                 },
                                 {
                                     "id": "sierra_so1",
-                                    "title": "Smog Destroyer",
+                                    "title": "Smog Destroyer I",
                                     "description": "Sierra - Bulldoze the first coal plant AND no power outage/failure"
                                 },
                                 {
                                     "id": "jack_so1",
-                                    "title": "Smog Destroyer",
+                                    "title": "Smog Destroyer II",
                                     "description": "Jackson City - Bulldoze the first coal plant AND no power outage/failure"
                                 }
                             ]
@@ -206,13 +206,13 @@
                                 },
                                 {
                                     "id": "alex_wo1",
-                                    "title": "NoZoner",
-                                    "description": "Alexandria - Less than 15 zones (Commercial/Industrial) within a certain amount of time."
+                                    "title": "No Zoner",
+                                    "description": "Alexandria - Less than 15 zones (Commercial/Industrial) within a certain amount of time"
                                 },
                                 {
                                     "id": "sierra_wo1",
                                     "title": "Brown Out",
-                                    "description": "Sierra - More than two attempts AND no power outage/failure"
+                                    "description": "Sierra - The student has made multiple attempts but continues to run low on power for the city"
                                 },
                                 {
                                     "id": "jack_wo1",
