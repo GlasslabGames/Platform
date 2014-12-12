@@ -81,6 +81,7 @@ module.exports = {
     "report.assessmentId.missing":          "Missing AssessmentId",
     "report.body.missing":                  "Missing Body",
     // dash
+    "dash.permission.denied":               "You do not have permission to perform this operation.",
     "dash.messageId.invalid":               "Invalid messageId",
     "dash.messageId.missing":               "Missing messageId",
     "dash.icon.missing":                    "Missing icon when posting a new message",

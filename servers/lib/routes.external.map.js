@@ -246,7 +246,8 @@ module.exports = {
             service: "dash",
             controller: "dash",
             method: {
-                get: "getMessages"
+                get: "getMessages",
+                post: "postMessage"
             }
         },
         // ---------------------------------------------------

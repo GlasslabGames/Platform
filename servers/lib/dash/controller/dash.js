@@ -81,56 +81,55 @@ exampleIn.postMessage = {
 };
 function postMessage(req, res, next) {
 
-    // Validate the messageId
-    if (!req.params.messageId) {
-        this.requestUtil.errorResponse(res, {key:"dash.messageId.missing", error: "missing messageId"});
-        return;
-    }
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user) {
 
-    // Validate the icon
-    if (!req.body.icon) {
-        this.requestUtil.errorResponse(res, {key:"dash.icon.missing", error: "missing icon"});
-        return;
-    }
-    // Validate the subject
-    if (!req.body.subject) {
-        this.requestUtil.errorResponse(res, {key:"dash.subject.missing", error: "missing subject"});
-        return;
-    }
-    // Validate the message
-    if (!req.body.message) {
-        this.requestUtil.errorResponse(res, {key:"dash.message.missing", error: "missing message"});
-        return;
-    }
+        // Only allow admin users to proceed
+        if( !req.session.passport.user.role ||
+            req.session.passport.user.role != "admin" ) {
+            this.requestUtil.errorResponse(res, {key:"dash.permission.denied", error: "you do not have permission"});
+            return;
+        }
 
-    // Get the messageId
-    var messageId = req.params.messageId.toLowerCase();
+        // Validate the messageId
+        if (!req.params.messageId) {
+            this.requestUtil.errorResponse(res, {key:"dash.messageId.missing", error: "missing messageId"});
+            return;
+        }
 
-    // check if valid gameId
-    this.isValidGameId(gameId)
-        .then(function(state){
-            if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid"});
-            } else {
-                if(reportId == 'sowo') {
-                    _getSOWO.call(this, req, res, reportId, gameId, courseId);
-                }
-                else if(reportId == 'achievements') {
-                    _getAchievements.call(this, req, res, reportId, gameId, courseId);
-                }
-                else if(reportId == 'mission-progress') {
-                    _getMissionProgress.call(this, req, res, reportId, gameId, courseId);
-                }
-                else if(reportId == 'competency') {
-                    _getCompetency.call(this, req, res, reportId, gameId, courseId);
-                }
-                else {
-                    this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
-                }
-            }
-        }.bind(this) )
-        .catch(function(err){
-            console.trace("Reports: Get Reports Error -", err);
-            this.stats.increment("error", "getReport.Catch");
-        }.bind(this) );
+        // Validate the icon
+        if (!req.body.icon) {
+            this.requestUtil.errorResponse(res, {key:"dash.icon.missing", error: "missing icon"});
+            return;
+        }
+        // Validate the subject
+        if (!req.body.subject) {
+            this.requestUtil.errorResponse(res, {key:"dash.subject.missing", error: "missing subject"});
+            return;
+        }
+        // Validate the message
+        if (!req.body.message) {
+            this.requestUtil.errorResponse(res, {key:"dash.message.missing", error: "missing message"});
+            return;
+        }
+
+        // Get the messageId
+        var messageId = req.params.messageId.toLowerCase();
+
+        // Set the message data
+        var messageData = {};
+
+        // Get the messages
+        this.dashCBStore.saveMessageCenterMessage( messageId, messageData )
+            .then(function() {
+                this.requestUtil.jsonResponse(res, { "success": "successfully added a message to the message center" });
+            }.bind(this))
+            .then(null, function(err) {
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this));
+    }
+    else {
+        this.requestUtil.errorResponse( res, "not logged in" );
+    }
 }

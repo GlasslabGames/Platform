@@ -122,13 +122,13 @@ DashDS_Couchbase.prototype.getMessageCenterMessages = function(messageType, limi
     }.bind(this));
 };
 
-DashDS_Couchbase.prototype.saveMessageCenterMessage = function( message ) {
+DashDS_Couchbase.prototype.saveMessageCenterMessage = function( messageType, messageData ) {
     return when.promise(function(resolve, reject){
 
         // Set the timestamp in the message
         message.timestamp = Util.GetTimeStamp();
 
-        var key = tConst.dataStore.dataKey + "::" + tConst.dataStore.countKey + "::" + tConst.dataStore.messageKey;
+        var key = tConst.dataStore.dataKey + "::" + tConst.dataStore.countKey + "::" + tConst.dataStore[ messageType + "Key" ];
         this.client.incr(key, {initial: 1}, function(err, data) {
             if(err) {
                 console.error( "CouchBase DashStore: Incr Message Center Count Error -", err );
@@ -136,8 +136,8 @@ DashDS_Couchbase.prototype.saveMessageCenterMessage = function( message ) {
                 return;
             }
 
-            key = tConst.dataStore.dataKey + ":" + tConst.dataStore.messageCenterKey + ":" + tConst.dataStore.messageKey + ":" + data.value;
-            this.client.add(key, message, function(err, results){
+            key = tConst.dataStore.dataKey + ":" + tConst.dataStore.messageCenterKey + ":" + tConst.dataStore[ messageType + "Key" ] + ":" + data.value;
+            this.client.add(key, messageData, function(err, results){
                 if(err) {
                     console.error( "CouchBase DashStore: Set Message Center Message Error -", err );
                     reject(err);
