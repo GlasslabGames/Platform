@@ -19,13 +19,14 @@ module.exports = DashService;
 
 function DashService(options, serviceManager){
     try{
-        var TelmStore, LmsStore, DashStore, Errors;
+        var TelmStore, LmsStore, DashStore, DashDataStore, Errors;
 
         // Glasslab libs
         Util          = require('../core/util.js');
         TelmStore     = require('../data/data.js').Datastore.Couchbase;
         LmsStore      = require('../lms/lms.js').Datastore.MySQL;
         DashStore     = require('../dash/dash.js').Datastore.MySQL;
+        DashDataStore = require('../dash/dash.js').Datastore.Couchbase;
         Errors        = require('../errors.js');
 
         this.options = _.merge(
@@ -40,6 +41,7 @@ function DashService(options, serviceManager){
         this.telmStore   = new TelmStore(this.options.telemetry.datastore.couchbase);
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
         this.dashStore   = new DashStore(this.options.webapp.datastore.mysql);
+        this.dashCBStore = new DashDataStore(this.options.lms.datastore.couchbase);
 
         this.serviceManager = serviceManager;
 
@@ -62,12 +64,24 @@ return when.promise(function(resolve, reject) {
                 return this.telmStore.connect();
             }.bind(this))
         .then(function(){
-                console.log("DashService: Data DS Connected");
+                console.log("DashService: GameData DS Connected");
                 this.stats.increment("info", "TelemetryDS.Connect");
             }.bind(this),
             function(err){
                 console.trace("DashService: Data DS Error -", err);
                 this.stats.increment("error", "TelemetryDS.Connect");
+            }.bind(this))
+        .then(function(){
+                // test connection to couchbase dash store
+                return this.dashCBStore.connect();
+            }.bind(this))
+        .then(function(){
+                console.log("DashService: Dash DS Connected");
+                this.stats.increment("info", "DashDataStore.Connect");
+            }.bind(this),
+            function(err){
+                console.trace("DashService: Dash DS Error -", err);
+                this.stats.increment("error", "DashDataStore.Connect");
             }.bind(this))
 
         .then(resolve, reject);
@@ -75,6 +89,7 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
 
 // TODO: replace this with DB lookup, return promise
 // promise transition complete.

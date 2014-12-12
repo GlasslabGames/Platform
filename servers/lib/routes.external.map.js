@@ -240,6 +240,15 @@ module.exports = {
                 get: "getMyGames"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/message-center/:messageId",
+            service: "dash",
+            controller: "dash",
+            method: {
+                get: "getMessages"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
