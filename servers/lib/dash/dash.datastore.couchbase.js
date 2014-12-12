@@ -114,6 +114,9 @@ DashDS_Couchbase.prototype.getMessageCenterMessages = function(messageType, limi
                     resolve( results );
                 });
 
+            }.bind(this))
+            .then(null, function(err) {
+                reject( err  );
             }.bind(this));
 
     }.bind(this));
