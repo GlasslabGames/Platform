@@ -10,6 +10,7 @@ module.exports = {
         game:     require('./controller/game.js'),
         games:    require('./controller/games.js'),
         reports:  require('./controller/reports.js'),
+        dash:     require('./controller/dash.js'),
         // internal routes
         _game:     require('./controller/_game.js'),
         _reports:  require('./controller/_reports.js')
@@ -18,6 +19,7 @@ module.exports = {
     Const:       require('./dash.const.js'),
 
     Datastore: {
-        MySQL:   require('./dash.datastore.mysql.js')
+        MySQL:   require('./dash.datastore.mysql.js'),
+        Couchbase: require('./dash.datastore.couchbase.js')
     }
 }
