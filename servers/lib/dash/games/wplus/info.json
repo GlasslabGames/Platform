@@ -18,6 +18,7 @@
         "description": "Water Plus by Schell Games",
         "settings" : {
         },
+        "price": "Coming Soon",
         "license": {
             "type": "loginType",
             "loginType": "glasslabv2",
