@@ -16,6 +16,8 @@
         "grades": "6 - 8",
         "subject": "ELA",
         "type": "App",
+        "price": "Free",
+        "releaseDate": "Sep 2, 2014",
         "platform": {
             "type": "iPad",
             "icon": {
@@ -23,7 +25,6 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "price": "Free",
         "shortDescription": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "description": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "developer": {
