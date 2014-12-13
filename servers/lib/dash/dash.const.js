@@ -13,5 +13,12 @@ module.exports = {
             failed:     "failed",
             live:       "live"
         }
+    },
+    dataStore: {
+        dataKey: 'dd',
+        messageCenterKey: 'mc',
+        messageKey: 'm',
+        tweetKey: 't',
+        countKey: 'count'
     }
 };
