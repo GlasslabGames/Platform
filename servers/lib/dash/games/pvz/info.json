@@ -9,7 +9,7 @@
     },
     "basic": {
         "gameId": "PVZ",
-        "enabled": false,
+        "enabled": true,
         "visible": false,
         "maintenance": null,
         "shortName": "PvZ EDU",
@@ -18,7 +18,7 @@
         "description": "Battle the zombies with your army of plants... and learn!",
         "settings" : {
         },
-        "price": "Coming Soon",
+        "price": "TBD",
         "license": {
             "type": "loginType",
             "loginType": "glasslabv2",

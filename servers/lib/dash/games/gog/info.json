@@ -10,7 +10,7 @@
     "basic": {
         "gameId": "GOG",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Game Over Gopher",
         "longName": "Game Over Gopher",
