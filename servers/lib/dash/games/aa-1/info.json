@@ -233,7 +233,7 @@
             "standards": {
                 "order": 2,
                 "enabled": true,
-                "authRequired": true,
+                "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
                 "list": [
