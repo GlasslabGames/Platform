@@ -207,7 +207,8 @@
                                     "whatNow":
                                     {
                                         "intro": "Ask this student to think aloud and observe her/his gameplay to reveal the cause of their decision to place too many bus stops. Make sure the student understands the goals of this mission and how to check their progress toward those goals. ",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "What is the current number of enrolled students?",
                                             "How can we enroll more students in school?"
@@ -222,7 +223,8 @@
                                     "whatNow":
                                     {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision not to place enough job producing zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "What is the current number of jobs?",
                                             "What is the rate of job growth?",
@@ -238,7 +240,8 @@
                                     "whatNow":
                                     {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to remove too many power producing structures. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "How much pollution do you currently generate?",
                                             "Where is the pollution coming from?",
@@ -257,7 +260,8 @@
                                     "whatNow":
                                     {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to place residential zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "What is the current number of jobs?",
                                             "How can we create more jobs?",
