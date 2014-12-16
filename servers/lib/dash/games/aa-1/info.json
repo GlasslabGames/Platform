@@ -129,17 +129,68 @@
                                 {
                                     "id": "wo1",
                                     "title": "Contradictory Mechanic",
-                                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that contradicts their claim. More core construction practice is needed."
+                                    "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more contradictory pairs.",
+                                    "whatNow":
+                                    {
+                                        "intro": "In continued play by the student, support her/him in thinking aloud about choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                                        "actionPoints":
+                                        [
+                                            "talk through what contradictory evidence means",
+                                            "identify pieces of contradictory evidence in the current game level, or",
+                                            "use the contradictory evidence to equip a robot or fight a battle."
+                                        ],
+                                        "summary": "Use the gameplay context to tease out and change misconceptions about contradictory vs valid evidence."
+                                    }
                                 },
                                 {
                                     "id": "wo2",
                                     "title": "Irrelevant Mechanic",
-                                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that is irrelevant to their claim. More core construction practice is needed."
+                                    "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more pairs with irrelevant evidence.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Join the student during play, talking through his or her choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                                        "actionPoints":
+                                        [
+                                            "talk through what irrelevant evidence means",
+                                            "identify pieces of irrelevant evidence in the current game level, or",
+                                            "use the irrelevant evidence to equip a robot or fight a battle"
+                                        ],
+                                        "summary": "Use the gameplay context to tease out and change misconceptions about irrelevant vs valid evidence."
+                                    }
                                 },
                                 {
                                     "id": "wo3",
                                     "title": "Straggler",
-                                    "description": "Struggling with identifying strengths and weaknesses of claim-data pairs."
+                                    "description": "Student is having difficulty distinguishing between evidence that is 'not supporting' and 'not relevant' in opponent arguments.",
+                                    "whatNow":
+                                    {
+                                        "intro": "As the student continues play, engage her/him in chat about game progression. To help understand what the student knows, encourage discussion about kinds of evidence she/he is seeing anywhere in the current game level. Help the student:",
+                                        "actionPoints":
+                                        [
+                                            "Identify evidence that comes up, and support a think-aloud about what evidence is and what it means in the game scene.",
+                                            "Next, specifically talk through supporting and relevant evidence that comes up (e.g. during next gathering of evidence or claim core construction). ",
+                                            "If a game battle happens, discuss with the student what active arguments she/he is making (if possible, making reference to the idea of supporting and relevant evidence).",
+                                            "During the battle, as the student defends their bot, and can choose a way to critique an opponent's argument, take a moment to talk about the 'not supporting' and 'not relevant' options with the student. ",
+                                            "Continue to support the student throughout the battle, particularly during 'not supporting' and 'not relevant' choices during the 'critique opponent's argument' phase. "
+                                        ],
+                                        "summary": "Use gameplay context to tease out and change misconceptions about 'not supporting' and 'not relevant' argument critique."
+                                    }
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "",
+                                    "description": "Student is struggling with identifying correct reasons for different arg schemes. For example: attaches consequence/observation dataIds to Authoritron, consequence/authority dataIds to Observatron, or authority/observation dataIds to Consebot.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Join the student as she/he is playing, and encouraging think-alouds about game choices. Using the context of the game, help the player identify kinds of evidence they are seeing, and what kinds of argubots they notice, and what evidence fits with each argument scheme / argubot.",
+                                        "actionPoints":
+                                        [
+                                            "During the next gathering of evidence, talk through all three schemes of evidence the player sees. ",
+                                            "Also ask the student what she/he thinks about the names of the argubots and what they mean. ",
+                                            "Then, in the evidence matching process, help the student understand the kind of evidence they have in connection with the kind of droid she/he is building. "
+                                        ],
+                                        "summary": "Use gameplay context to tease out and correct misconceptions about argument schemes."
+                                    }
                                 }
                             ]
                         }
