@@ -365,7 +365,10 @@ function getTotalTimePlayed(req, res) {
 
                                             return totalTimePlayed;
                                         }
-                                    }.bind(this))
+                                    }.bind(this),
+                                function() {
+                                    return 0;
+                                })
                             }.bind(this))
                             .then(function (totalTimePlayed) {
                                 // create object, with userId and totalTimePlayed

@@ -56,6 +56,10 @@
         "banners": {
             "product": "assets/game-banner-AA-1.png",
             "reports": "assets/game-banner-AA-1.png"
+        },
+        "play": {
+            "type": "download",
+            "link": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8"
         }
     },
     "assessment": [
