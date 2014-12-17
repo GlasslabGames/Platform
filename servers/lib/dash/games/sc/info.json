@@ -203,22 +203,79 @@
                                 {
                                     "id": "park_wo1",
                                     "title": "Crazy Plopper",
-                                    "description": "Parktown - Places too many bus stops"
+                                    "description": "Parktown - Places too many bus stops",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask this student to think aloud and observe her/his gameplay to reveal the cause of their decision to place too many bus stops. Make sure the student understands the goals of this mission and how to check their progress toward those goals. ",
+                                        "actionPoints":
+                                        [
+                                            "What are the goals of this mission?",
+                                            "What is the current number of enrolled students?",
+                                            "How can we enroll more students in school?"
+                                        ],
+                                        "summary": "If they are not checking the bus coverage on the map, ask what the education and residential tools do, and how they alter the map. If they are placing a lot of stops to increase the number of enrolled students, ask them how many students they currently have enrolled, and how many total students their number of stops can accommodate. If they don't seem to be taking cost into consideration, ask how much it costs to install/maintain bus stops. "
+                                    }
                                 },
                                 {
                                     "id": "alex_wo1",
                                     "title": "No Zoner",
-                                    "description": "Alexandria - Less than 15 zones (Commercial/Industrial) within a certain amount of time"
+                                    "description": "Alexandria - Less than 15 zones (Commercial/Industrial) within a certain amount of time",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision not to place enough job producing zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
+                                        "actionPoints":
+                                        [
+                                            "What are the goals of this mission?",
+                                            "What is the current number of jobs?",
+                                            "What is the rate of job growth?",
+                                            "How can we create more jobs?"
+                                        ],
+                                        "summary": "If they don't seem to be using the zoning tool, ask them what it is and what it does. If they are placing residential zones, ask them why, and where the new citizens are going to work."
+                                    }
                                 },
                                 {
                                     "id": "sierra_wo1",
                                     "title": "Brown Out",
-                                    "description": "Sierra - The student has made multiple attempts but continues to run low on power for the city"
+                                    "description": "Sierra - The student has made multiple attempts but continues to run low on power for the city",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to remove too many power producing structures. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
+                                        "actionPoints":
+                                        [
+                                            "What are the goals of this mission?",
+                                            "How much pollution do you currently generate?",
+                                            "Where is the pollution coming from?",
+                                            "How much power do you currently produce?",
+                                            "Where is the power coming from?",
+                                            "How can we reduce pollution?",
+                                            "How can we produce more power?"
+                                        ],
+                                        "summary": "If they are removing pollution-generating structures and running low on power, ask them what else those structures produce and how they can replace those services before removing the structures."
+                                    }
                                 },
                                 {
                                     "id": "jack_wo1",
                                     "title": "Home Builder",
-                                    "description": "Jackson City - Misunderstanding: zone residential to bring in more people for increased jobs"
+                                    "description": "Jackson City - Misunderstanding: zone residential to bring in more people for increased jobs",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to place residential zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
+                                        "actionPoints":
+                                        [
+                                            "What are the goals of this mission?",
+                                            "What is the current number of jobs?",
+                                            "How can we create more jobs?",
+                                            "How much pollution do you currently generate?",
+                                            "Where is the pollution coming from?",
+                                            "How much power do you currently produce?",
+                                            "Where is the power coming from?",
+                                            "How can we reduce pollution?",
+                                            "How can we produce more power?",
+                                            "How much is the population currently changing?",
+                                            "How much are your simoleons currently changing?"
+                                        ],
+                                        "summary": "If they don't seem to be using the zoning tool, ask them what it is and what it does. If they are placing residential zones, ask them why, and where the new citizens are going to work."
+                                    }
                                 }
                             ]
                         }
@@ -462,7 +519,7 @@
             "standards": {
                 "order": 2,
                 "enabled": true,
-                "authRequired": true,
+                "authRequired": false,
                 "id": "standards",
                 "title": "Standards Alignment",
                 "list": [
