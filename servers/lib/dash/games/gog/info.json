@@ -62,10 +62,10 @@
             "type": "page",
             "page": {
                 "title": "Game Over Gopher",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/150/gog.swf",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/151/gog.swf",
                 "size": {
-                    "width": 940,
-                    "height": 640
+                    "width": 800,
+                    "height": 600
                 }
             }
         }
@@ -254,7 +254,7 @@
                 "title": "Product Description",
                 "header": "PLACEHOLDER HEADER",
                 "about": "PLACEHOLDER ABOUT",
-                "video": "",
+                "video": "https://www.youtube.com/embed/3AWu9Ln7s6E",
                 "brochure":"",
                 "curriculum": [
                     "PLACEHOLDER CURRICULUM"
@@ -318,8 +318,12 @@
                         "category": "Videos",
                         "list": [
                             {
-                                "name": "PLACEHOLDER NAME",
-                                "link": ""
+                                "name": "Gameplay",
+                                "link": "https://www.youtube.com/watch?feature=player_embedded&v=LL0yO5_2CUo"
+                            },
+                            {
+                                "name": "Teaching with Game Over Gopher",
+                                "link": "https://www.youtube.com/embed/3AWu9Ln7s6E"
                             }
                         ]
                     }
