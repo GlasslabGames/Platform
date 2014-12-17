@@ -28,11 +28,11 @@
         "shortDescription": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "description": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "developer": {
-            "id": "IC",
-            "name": "iCivics",
+            "id": "GL",
+            "name": "GlassLab, Inc.",
             "logo": {
-                "small": "assets/icivics-logo.png",
-                "large": "assets/icivics-logo-2x.png"
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
             }
         },
         "settings": {
