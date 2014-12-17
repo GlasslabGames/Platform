@@ -86,9 +86,10 @@ function postMessage(req, res, next) {
         req.session.passport.user) {
 
         // Only allow admin users to proceed
-        if( !req.session.passport.user.role ||
-            req.session.passport.user.role != "admin" ) {
-            this.requestUtil.errorResponse(res, {key:"dash.permission.denied", error: "you do not have permission"});
+
+        if (!req.session.passport.user.role ||
+            req.session.passport.user.role != "admin") {
+            this.requestUtil.errorResponse(res, {key: "dash.permission.denied", error: "you do not have permission"});
             return;
         }
 
