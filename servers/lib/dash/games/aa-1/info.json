@@ -28,11 +28,11 @@
         "shortDescription": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "description": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "developer": {
-            "id": "IC",
-            "name": "iCivics",
+            "id": "GL",
+            "name": "GlassLab, Inc.",
             "logo": {
-                "small": "assets/icivics-logo.png",
-                "large": "assets/icivics-logo-2x.png"
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
             }
         },
         "settings": {
@@ -56,6 +56,10 @@
         "banners": {
             "product": "assets/game-banner-AA-1.png",
             "reports": "assets/game-banner-AA-1.png"
+        },
+        "play": {
+            "type": "download",
+            "link": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8"
         }
     },
     "assessment": [
@@ -174,22 +178,6 @@
                                             "Continue to support the student throughout the battle, particularly during 'not supporting' and 'not relevant' choices during the 'critique opponent's argument' phase. "
                                         ],
                                         "summary": "Use gameplay context to tease out and change misconceptions about 'not supporting' and 'not relevant' argument critique."
-                                    }
-                                },
-                                {
-                                    "id": "wo4",
-                                    "title": "",
-                                    "description": "Student is struggling with identifying correct reasons for different arg schemes. For example: attaches consequence/observation dataIds to Authoritron, consequence/authority dataIds to Observatron, or authority/observation dataIds to Consebot.",
-                                    "whatNow":
-                                    {
-                                        "intro": "Join the student as she/he is playing, and encouraging think-alouds about game choices. Using the context of the game, help the player identify kinds of evidence they are seeing, and what kinds of argubots they notice, and what evidence fits with each argument scheme / argubot.",
-                                        "actionPoints":
-                                        [
-                                            "During the next gathering of evidence, talk through all three schemes of evidence the player sees. ",
-                                            "Also ask the student what she/he thinks about the names of the argubots and what they mean. ",
-                                            "Then, in the evidence matching process, help the student understand the kind of evidence they have in connection with the kind of droid she/he is building. "
-                                        ],
-                                        "summary": "Use gameplay context to tease out and correct misconceptions about argument schemes."
                                     }
                                 }
                             ]
