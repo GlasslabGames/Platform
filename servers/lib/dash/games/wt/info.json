@@ -5,7 +5,8 @@
         "logo": {
             "small": "assets/dev-logo-brainquake.jpg",
             "large": "assets/dev-logo-brainquake@2x.jpg"
-        }
+        },
+        "description": ""
     },
     "basic": {
         "gameId": "WT",
@@ -33,7 +34,8 @@
             "logo": {
                 "small": "assets/dev-logo-brainquake.jpg",
                 "large": "assets/dev-logo-brainquake@2x.jpg"
-            }
+            },
+            "description": ""
         },
         "settings" : {
         },
