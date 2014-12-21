@@ -5,7 +5,8 @@
         "logo": {
             "small": "assets/dev-logo-mathsnacks.png",
             "large": "assets/dev-logo-mathsnacks@2x.png"
-        }
+        },
+        "description": "Funded by the National Science Foundation, Math Snacks is a suite of interactive educational learning modules including games, animations, apps, and supplementary teacher/learner materials.<br /><br />Regardless of socio-economic status, grade level, type of school, or education level of parents, research shows students consistently struggle with the same content in mathematics learning. Facilitating math and science learning for youth is a social and economic justice issue. Without solid math skills, many fields of study, including science, are inaccessible. This affects minorities and low-income populations disproportionately. Math education is cumulative, in that each grade builds on concepts taught in the previous grades. Gaps in math knowledge in 6th grade learners profoundly influence their performance in high school and college.<br /><br />Math Snacks focuses on developing educational media to help students grasp frequently misunderstood core mathematics concepts that constrain their math achievement as early as middle school and impact lifelong career choices and achievement. Mathematics educators, mathematicians, learning specialists and game developers collaborated to develop games and media tools that are easy to access and use. Although each module is a small \"mathematical snack\" in itself, together they provide rich nourishment for the middle school curriculum."
     },
     "basic": {
         "gameId": "GOG",
@@ -34,7 +35,8 @@
             "logo": {
                 "small": "assets/dev-logo-mathsnacks.png",
                 "large": "assets/dev-logo-mathsnacks@2x.png"
-            }
+            },
+            "description": "Funded by the National Science Foundation, Math Snacks is a suite of interactive educational learning modules including games, animations, apps, and supplementary teacher/learner materials.<br /><br />Regardless of socio-economic status, grade level, type of school, or education level of parents, research shows students consistently struggle with the same content in mathematics learning. Facilitating math and science learning for youth is a social and economic justice issue. Without solid math skills, many fields of study, including science, are inaccessible. This affects minorities and low-income populations disproportionately. Math education is cumulative, in that each grade builds on concepts taught in the previous grades. Gaps in math knowledge in 6th grade learners profoundly influence their performance in high school and college.<br /><br />Math Snacks focuses on developing educational media to help students grasp frequently misunderstood core mathematics concepts that constrain their math achievement as early as middle school and impact lifelong career choices and achievement. Mathematics educators, mathematicians, learning specialists and game developers collaborated to develop games and media tools that are easy to access and use. Although each module is a small \"mathematical snack\" in itself, together they provide rich nourishment for the middle school curriculum."
         },
         "settings": {
         },

@@ -5,7 +5,8 @@
         "logo": {
             "small": "assets/glasslab-logo.png",
             "large": "assets/glasslab-logo-2x.png"
-        }
+        },
+        "description": ""
     },
     "basic": {
         "gameId": "SLFR",

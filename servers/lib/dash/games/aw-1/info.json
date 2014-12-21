@@ -5,7 +5,8 @@
         "logo": {
             "small": "assets/dev-logo-icivics.png",
             "large": "assets/dev-logo-icivics@2x.png"
-        }
+        },
+        "description": "iCivics is a non-profit organization dedicated to reinvigorating civic learning through interactive and engaging learning resources. Our educational resources empower teachers and prepare the next generation of students to become knowledgeable and engaged citizens. Founded and led by Justice Sandra Day O'Connor, iCivics provides students with the tools they need for active participation and democratic action, and teachers with the materials and support to achieve this. A growing base of more than 40,000 educators and three million students relies on iCivics to provide a high quality civics curriculum each year. iCivics games have been played more than ten million times by students across the country. iCivics.org was awarded the American Library Association's Best Websites for Teaching & Learning, which recognizes sites that foster the qualities of innovation, creativity, active participation and collaboration."
     },
     "basic": {
         "gameId": "AW-1",
@@ -34,7 +35,8 @@
             "logo": {
                 "small": "assets/dev-logo-icivics.png",
                 "large": "assets/dev-logo-icivics@2x.png"
-            }
+            },
+            "description": "iCivics is a non-profit organization dedicated to reinvigorating civic learning through interactive and engaging learning resources. Our educational resources empower teachers and prepare the next generation of students to become knowledgeable and engaged citizens. Founded and led by Justice Sandra Day O'Connor, iCivics provides students with the tools they need for active participation and democratic action, and teachers with the materials and support to achieve this. A growing base of more than 40,000 educators and three million students relies on iCivics to provide a high quality civics curriculum each year. iCivics games have been played more than ten million times by students across the country. iCivics.org was awarded the American Library Association's Best Websites for Teaching & Learning, which recognizes sites that foster the qualities of innovation, creativity, active participation and collaboration."
         },
         "settings": {
             "missionProgressLock": false
