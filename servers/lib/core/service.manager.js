@@ -141,7 +141,6 @@ return when.promise(function(resolve, reject) {
                     }, this.options.services.session.cookie),
                     store:  this.exsStore
                 }));
-
                 resolve();
             }.bind(this))
         }.bind(this))
@@ -217,8 +216,15 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         // server up index
         //console.log("defaultRoute:", req.originalUrl);
         //res.redirect("/");
-        var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
-        res.sendfile( fullPath );
+
+        // If the route ends with .png or .jpg, default to 404
+        /*if( req.originalUrl.indexOf( ".png" ) != -1 || req.originalUrl.indexOf( ".jpg" ) != -1 ) {
+            res.send( "File not found!", 404 );
+        }
+        else {*/
+            var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
+            res.sendfile( fullPath );
+        //}
     }.bind(this));
 }
 

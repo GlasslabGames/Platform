@@ -5,12 +5,13 @@
         "logo": {
             "small": "assets/dev-logo-brainquake.jpg",
             "large": "assets/dev-logo-brainquake@2x.jpg"
-        }
+        },
+        "description": ""
     },
     "basic": {
         "gameId": "WT",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Wuzzit Trouble",
         "longName": "Wuzzit Trouble",
@@ -33,7 +34,8 @@
             "logo": {
                 "small": "assets/dev-logo-brainquake.jpg",
                 "large": "assets/dev-logo-brainquake@2x.jpg"
-            }
+            },
+            "description": ""
         },
         "settings" : {
         },

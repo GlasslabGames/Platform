@@ -3,14 +3,15 @@
         "id": "MS",
         "name": "Math Snacks",
         "logo": {
-            "small": "assets/dev-logo-mathsnacks.jpg",
-            "large": "assets/dev-logo-mathsnacks@2x.jpg"
-        }
+            "small": "assets/dev-logo-mathsnacks.png",
+            "large": "assets/dev-logo-mathsnacks@2x.png"
+        },
+        "description": "Funded by the National Science Foundation, Math Snacks is a suite of interactive educational learning modules including games, animations, apps, and supplementary teacher/learner materials.<br /><br />Regardless of socio-economic status, grade level, type of school, or education level of parents, research shows students consistently struggle with the same content in mathematics learning. Facilitating math and science learning for youth is a social and economic justice issue. Without solid math skills, many fields of study, including science, are inaccessible. This affects minorities and low-income populations disproportionately. Math education is cumulative, in that each grade builds on concepts taught in the previous grades. Gaps in math knowledge in 6th grade learners profoundly influence their performance in high school and college.<br /><br />Math Snacks focuses on developing educational media to help students grasp frequently misunderstood core mathematics concepts that constrain their math achievement as early as middle school and impact lifelong career choices and achievement. Mathematics educators, mathematicians, learning specialists and game developers collaborated to develop games and media tools that are easy to access and use. Although each module is a small \"mathematical snack\" in itself, together they provide rich nourishment for the middle school curriculum."
     },
     "basic": {
         "gameId": "GOG",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Game Over Gopher",
         "longName": "Game Over Gopher",
@@ -24,34 +25,36 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Coming Soon",
-        "shortDescription": "Placeholder short description. Change Me!",
+        "price": "Free",
+        "releaseDate": "Dec 17, 2014",
+        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
         "description": "Game Over Gopher is an exciting tower defense game built around the coordinate grid. To defend a prize carrot, the player selects various tools to “feed” the space gophers marching hungrily toward it. Game Over Gopher guides students in plotting.",
         "developer": {
             "id": "MS",
             "name": "Math Snacks",
             "logo": {
-                "small": "assets/dev-logo-mathsnacks.jpg",
-                "large": "assets/dev-logo-mathsnacks@2x.jpg"
-            }
+                "small": "assets/dev-logo-mathsnacks.png",
+                "large": "assets/dev-logo-mathsnacks@2x.png"
+            },
+            "description": "Funded by the National Science Foundation, Math Snacks is a suite of interactive educational learning modules including games, animations, apps, and supplementary teacher/learner materials.<br /><br />Regardless of socio-economic status, grade level, type of school, or education level of parents, research shows students consistently struggle with the same content in mathematics learning. Facilitating math and science learning for youth is a social and economic justice issue. Without solid math skills, many fields of study, including science, are inaccessible. This affects minorities and low-income populations disproportionately. Math education is cumulative, in that each grade builds on concepts taught in the previous grades. Gaps in math knowledge in 6th grade learners profoundly influence their performance in high school and college.<br /><br />Math Snacks focuses on developing educational media to help students grasp frequently misunderstood core mathematics concepts that constrain their math achievement as early as middle school and impact lifelong career choices and achievement. Mathematics educators, mathematicians, learning specialists and game developers collaborated to develop games and media tools that are easy to access and use. Although each module is a small \"mathematical snack\" in itself, together they provide rich nourishment for the middle school curriculum."
         },
         "settings": {
         },
         "license": {
             "type": "loginType",
-            "loginType": "glasslabv2",
+            "loginType": "glasslabv2,icivics,edmodo",
             "valid": false,
             "message": {
-                "invalid": "In Development"
+                "invalid": "Coming Soon!"
             }
         },
         "thumbnail": {
             "small": "assets/thumb-game-GOG.png",
-            "large": "assets/thumb-game-GOG.png"
+            "large": "assets/thumb-game-GOG@2x.png"
         },
         "card": {
-            "small": "assets/game-card-GOG.jpg",
-            "large": "assets/game-card-GOG@2x.jpg"
+            "small": "assets/game-card-GOG.png",
+            "large": "assets/game-card-GOG@2x.png"
         },
         "banners": {
             "product": "assets/game-banner-GOG.png",
@@ -61,10 +64,10 @@
             "type": "page",
             "page": {
                 "title": "Game Over Gopher",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/148/gog.swf",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/151/gog.swf",
                 "size": {
-                    "width": 940,
-                    "height": 640
+                    "width": 800,
+                    "height": 600
                 }
             }
         }
@@ -129,9 +132,9 @@
                 "name": "Learning Events & Time Played",
                 "header": {
                     "text": "Learning Events & Time Played",
-                    "image": "assets/game-banner-AA-1.png",
-                    "skinny": "assets/skinny-banner-AA-1.jpg",
-                    "large": "assets/skinny-banner-AA-1@2x.jpg"
+                    "image": "assets/game-banner-GOG.png",
+                    "skinny": "assets/skinny-banner-GOG.png",
+                    "large": "assets/skinny-banner-GOG@2x.png"
                 },
                 "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
@@ -143,8 +146,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-AW-1.jpg",
-                    "skinny": "assets/skinny-banner-AW-1.jpg"
+                    "image": "assets/game-banner-GOG.png",
+                    "skinny": "assets/skinny-banner-GOG.png",
+                    "large": "assets/skinny-banner-GOG@2x.png"
                 },
                 "table": {
                     "labels": [],
@@ -213,18 +217,24 @@
                         }
                     ]
                 },
-                "description": "Coming Soon!"
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             }
         ]
     },
     "details": {
-        "release": "dev",
-        "price": "TBD",
-        "releaseDate": "TBD",
-        "type": "TBD",
-        "platform": "TBD",
-        "subject": "TBD",
-        "grades": "6 - 8",
+        "release": "live",
+        "price": "Free",
+        "releaseDate": "Dec 17, 2014",
+        "grades": "2 - 7",
+        "subject": "Math",
+        "type": "Browser",
+        "platform": {
+            "type": "Browser/Flash",
+            "icon": {
+                "small": "assets/platform-browser.png",
+                "large": "assets/platform-browser@2x.png"
+            }
+        },
         "buttons": [
             {
                 "name": "Play Game",
@@ -239,10 +249,191 @@
             }
         ],
         "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "Game Over Gopher is an exciting tower defense game built around the coordinate grid. To defend a prize carrot, the player selects various tools to \"feed\" the space gophers marching hungrily toward it. Game Over Gopher guides students in plotting coordinate pairs, differentiating negative coordinates from positive coordinates, and identifying the four quadrants. It helps establish the fundamentals of plotting functions on a grid. We recommend it for students who are struggling to understand the coordinate grid or those who just want to become more comfortable with graphing.<br ><br >Funded by the National Science Foundation and developed by the Learning Games Lab at New Mexico State University, Game Over Gopher is a game in the Math Snacks suite of interactive educational learning modules, and prepares students to better understand mathematics concepts crucial for 6th-grade math. Aligned to Common Core standards, it has been used effectively with students in 2nd through 7th grades learning to graph coordinates and track locations on a grid.",
+                "video": "https://www.youtube.com/embed/3AWu9Ln7s6E",
+                "brochure":"",
+                "curriculum": [
+                    "Addresses Common Core standards related to application of coordinates, ordered pairs, and absolute value to solving real-world and mathematical problems",
+                    "Offers interactive modules and short animations intended to creatively and visually help learners better understand the concepts behind difficult mathematics concepts"
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "assets/GOG-carousel_1.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/GOG-carousel_2.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/GOG-carousel_3.png"
+                    }
+                ]
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards",
+                "list": [
+                    {
+                        "category": "Common Core Math",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "CCSS.Math.Content.6.G.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/6/G/A/3/",
+                                        "description": "Draw polygons in the coordinate plane given coordinates for the vertices; use coordinates to find the length of a side joining points with the same first coordinate or the same second coordinate. Apply these techniques in the context of solving real-world and mathematical problems."
+                                    },
+                                    {
+                                        "name": "CCSS.Math.Content.6.NS.C.6.b",
+                                        "link": "http://www.corestandards.org/Math/Content/6/NS/C/6/b/",
+                                        "description": "Understand signs of numbers in ordered pairs as indicating locations in quadrants of the coordinate plane; recognize that when two ordered pairs differ only by signs, the locations of the points are related by reflections across one or both axes."
+                                    },
+                                    {
+                                        "name": "CCSS.Math.Content.6.NS.C.6.c",
+                                        "link": "http://www.corestandards.org/Math/Content/6/NS/C/6/c/",
+                                        "description": "Find and position integers and other rational numbers on a horizontal or vertical number line diagram; find and position pairs of integers and other rational numbers on a coordinate plane."
+                                    },
+                                    {
+                                        "name": "CCSS.Math.Content.6.NS.C.8",
+                                        "link": "http://www.corestandards.org/Math/Content/6/NS/C/8/",
+                                        "description": "Solve real-world and mathematical problems by graphing points in all four quadrants of the coordinate plane. Include use of coordinates and absolute value to find distances between points with the same first coordinate or the same second coordinate."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Lesson Plans",
+                        "list": [
+                            {
+                                "name": "Here are some simple strategies for using Math Snacks games in your classroom:",
+                                "link": "",
+                                "description": ""
+                            },
+                            {
+                                "name": "",
+                                "link": "",
+                                "description": "We know you may not have time to play the game all the way through. Play through at least the first level, and watch the Gameplay video for each one, to get an understanding of what changes from level to level."
+                            },
+                            {
+                                "name": "",
+                                "link": "",
+                                "description": "Watch the Teaching video for each game. Each is shorter than 10 minutes, and gives really important strategies for teaching with the game, and engaging students in follow up activities to help them apply what they've learned."
+                            },
+                            {
+                                "name": "",
+                                "link": "",
+                                "description": "Secure lab time and secure the proper number of computers or iPads for students. All games and animations are available online. Ratio Rumble, and Pearl Diver are also on the iPad. Most games will take 2-3 hours for students to play."
+                            },
+                            {
+                                "name": "",
+                                "link": "",
+                                "description": "Games can be played in different ways: students can play individually, in pairs, in small groups or in one large group using a Smartboard, depending on the technology available in your classroom or computer lab."
+                            },
+                            {
+                                "name": "",
+                                "link": "",
+                                "description": "Don't be afraid to let the game teach. Math Snacks games aren’t designed to measure what your students already know, but to give students the chance go understand concepts. They won’t succeed at every level their first time playing, and they aren't supposed to. Let your students make mistakes, talk with each other, create strategies and learn from those mistakes."
+                            },
+                            {
+                                "name": "Game Over Gopher Teacher Guide",
+                                "link": "http://mathsnacks.com/media/print/gameovergopher_teachingwith.pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "Teaching with Game Over Gopher",
+                                "link": "https://www.youtube.com/embed/3AWu9Ln7s6E"
+                            },
+                            {
+                                "name": "Game Over Gopher Gameplay",
+                                "link": "https://www.youtube.com/watch?feature=player_embedded&v=LL0yO5_2CUo"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                    {
+                        "category": "Research Articles",
+                        "list": [
+                            {
+                                "name": "Bridging research and game development: A Learning Games Design Model for multi-game projects",
+                                "link": "https://books.google.com/books?id=-RaXBQAAQBAJ&pg=PA151&dq=bridging+research+and+game+development&hl=en&sa=X&ei=w92RVPX3FcTwoATXwYG4CA&ved=0CCgQ6AEwAA#v=onepage&q=bridging%20research%20and%20game%20development&f=false"
+                            },
+                            {
+                                "name": "The role of animations and manipulatives in supporting learning and communication in Mathematics classrooms",
+                                "link": "http://www.irma-international.org/viewtitle/74216/"
+                            },
+                            {
+                                "name": "Math Snacks: Using animations and games to fill the gaps in mathematics",
+                                "link": "http://www.sciedu.ca/journal/index.php/jct/article/view/3389/2165"
+                            },
+                            {
+                                "name": "Teachers learn how to effectively integrate mobile technology by teaching students using Math Snacks animations and games",
+                                "link": "http://www.igi-global.com/chapter/teachers-learn-effectively-integrate-mobile/74907"
+                            },
+                            {
+                                "name": "The learning games design model: Immersion, collaboration, and outcomes-driven development",
+                                "link": ""
+                            },
+                            {
+                                "name": "21st Century learning: The role of serious games",
+                                "link": "http://www.igi-global.com/chapter/21st-century-learning/64285"
+                            },
+                            {
+                                "name": "Collaboration, engagement & fun: How youth preferences in video gaming can inform 21st Century education",
+                                "link": "http://link.springer.com/article/10.1007%2Fs11528-011-0541-5#page-1"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": false,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                    {
+                        "reviewer": "PLACEHOLDER REVIEWER",
+                        "review": "PLACEHOLDER REVIEW"
+                    }
+                ]
+            }
         },
         "banners": {
-            "product": "assets/game-banner-AA-1.jpg",
-            "reports": "assets/game-banner-AA-1.jpg"
+            "product": "assets/game-banner-GOG.png",
+            "reports": "assets/game-banner-GOG.png"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",

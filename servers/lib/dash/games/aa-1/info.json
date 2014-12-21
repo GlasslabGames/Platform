@@ -5,7 +5,8 @@
         "logo": {
             "small": "assets/glasslab-logo.png",
             "large": "assets/glasslab-logo-2x.png"
-        }
+        },
+        "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
     },
     "basic": {
         "gameId": "AA-1",
@@ -28,12 +29,13 @@
         "shortDescription": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "description": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "developer": {
-            "id": "IC",
-            "name": "iCivics",
+            "id": "GL",
+            "name": "GlassLab, Inc.",
             "logo": {
-                "small": "assets/icivics-logo.png",
-                "large": "assets/icivics-logo-2x.png"
-            }
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
+            },
+            "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
         "settings": {
         },
@@ -56,6 +58,10 @@
         "banners": {
             "product": "assets/game-banner-AA-1.png",
             "reports": "assets/game-banner-AA-1.png"
+        },
+        "play": {
+            "type": "download",
+            "link": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8"
         }
     },
     "assessment": [
@@ -129,17 +135,52 @@
                                 {
                                     "id": "wo1",
                                     "title": "Contradictory Mechanic",
-                                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that contradicts their claim. More core construction practice is needed."
+                                    "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more contradictory pairs.",
+                                    "whatNow":
+                                    {
+                                        "intro": "In continued play by the student, support her/him in thinking aloud about choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                                        "actionPoints":
+                                        [
+                                            "talk through what contradictory evidence means",
+                                            "identify pieces of contradictory evidence in the current game level, or",
+                                            "use the contradictory evidence to equip a robot or fight a battle."
+                                        ],
+                                        "summary": "Use the gameplay context to tease out and change misconceptions about contradictory vs valid evidence."
+                                    }
                                 },
                                 {
                                     "id": "wo2",
                                     "title": "Irrelevant Mechanic",
-                                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that is irrelevant to their claim. More core construction practice is needed."
+                                    "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more pairs with irrelevant evidence.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Join the student during play, talking through his or her choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                                        "actionPoints":
+                                        [
+                                            "talk through what irrelevant evidence means",
+                                            "identify pieces of irrelevant evidence in the current game level, or",
+                                            "use the irrelevant evidence to equip a robot or fight a battle"
+                                        ],
+                                        "summary": "Use the gameplay context to tease out and change misconceptions about irrelevant vs valid evidence."
+                                    }
                                 },
                                 {
                                     "id": "wo3",
                                     "title": "Straggler",
-                                    "description": "Struggling with identifying strengths and weaknesses of claim-data pairs."
+                                    "description": "Student is having difficulty distinguishing between evidence that is 'not supporting' and 'not relevant' in opponent arguments.",
+                                    "whatNow":
+                                    {
+                                        "intro": "As the student continues play, engage her/him in chat about game progression. To help understand what the student knows, encourage discussion about kinds of evidence she/he is seeing anywhere in the current game level. Help the student:",
+                                        "actionPoints":
+                                        [
+                                            "Identify evidence that comes up, and support a think-aloud about what evidence is and what it means in the game scene.",
+                                            "Next, specifically talk through supporting and relevant evidence that comes up (e.g. during next gathering of evidence or claim core construction). ",
+                                            "If a game battle happens, discuss with the student what active arguments she/he is making (if possible, making reference to the idea of supporting and relevant evidence).",
+                                            "During the battle, as the student defends their bot, and can choose a way to critique an opponent's argument, take a moment to talk about the 'not supporting' and 'not relevant' options with the student. ",
+                                            "Continue to support the student throughout the battle, particularly during 'not supporting' and 'not relevant' choices during the 'critique opponent's argument' phase. "
+                                        ],
+                                        "summary": "Use gameplay context to tease out and change misconceptions about 'not supporting' and 'not relevant' argument critique."
+                                    }
                                 }
                             ]
                         }
@@ -233,7 +274,7 @@
             "standards": {
                 "order": 2,
                 "enabled": true,
-                "authRequired": true,
+                "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
                 "list": [

@@ -1,7 +1,7 @@
 {
     "developer": {
-        "id": "SG",
-        "name": "Schell Games",
+        "id": "UL",
+        "name": "Ululab",
         "logo": {
             "small": "assets/glasslab-logo.png",
             "large": "assets/glasslab-logo-2x.png"
@@ -9,14 +9,14 @@
         "description": ""
     },
     "basic": {
-        "gameId": "WPLUS",
+        "gameId": "SLFR",
         "enabled": true,
         "visible": true,
         "maintenance": null,
-        "shortName": "Water Plus",
-        "longName": "Water Plus",
+        "shortName": "Slice Fractions",
+        "longName": "Slice Fractions",
         "shortDescription": "Water Plus",
-        "description": "Water Plus by Schell Games",
+        "description": "Slice Fractions by Ululab",
         "settings" : {
         },
         "price": "TBD",
@@ -46,7 +46,7 @@
         "type": "TBD",
         "platform": "TBD",
         "subject": "TBD",
-        "grades": "6 - 8",
+        "grades": "TBD",
         "buttons": [
         ],
         "pages": {

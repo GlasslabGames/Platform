@@ -18,6 +18,8 @@ module.exports = {
     "missing":              "user.login.missing",
     "missing.data":         "Game data missing",
 
+    // general
+    "general.notFound":                     "Page not found!",
     // new
     "course.general":                       "We encountered an error. Please try again.",
     "course.locked":                        "Course Registration is Locked at the moment. Please try again later.",
