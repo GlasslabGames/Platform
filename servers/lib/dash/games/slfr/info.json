@@ -10,8 +10,8 @@
     },
     "basic": {
         "gameId": "SLFR",
-        "enabled": true,
-        "visible": true,
+        "enabled": false,
+        "visible": false,
         "maintenance": null,
         "shortName": "Slice Fractions",
         "longName": "Slice Fractions",
