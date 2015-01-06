@@ -518,10 +518,10 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
                         for (var i = 0; i < list.length; i++) {
                             if (_.isObject(list[i]) &&
                                 list[i].id === 'achievements') {
-                                this._games[gameId].info.reports.list[i].achievements = achievements[index];
+                                this._games[gameId].info.reports.list[i].achievements = achievements[index++];
+                                break;
                             }
                         }
-                        index++;
                     }.bind(this));
 
                     resolve();
