@@ -498,6 +498,12 @@ return when.promise(function(resolve, reject) {
                     sessionDataChanged = true;
                 }
             }
+            if(userData.ftue_checklist !== dbUserData.ftue_checklist) {
+                if(isSelf) {
+                    loginUserSessionData.ftue_checklist = userData.ftue_checklist;
+                    sessionDataChanged = true;
+                }
+            }
 
             return this._service.getAuthStore().updateUserDBData(userData);
         }.bind(this))

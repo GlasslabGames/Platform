@@ -89,7 +89,8 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 institution_id as institution, \
                 collect_Telemetry > 0 as collectTelemetry, \
                 enabled > 0 as enabled, \
-                login_Type as loginType \
+                login_Type as loginType, \
+                ftue_checklist as ftue\
             FROM GL_USER  \
             WHERE id="+ this.ds.escape(id);
         this.ds.query(Q)
