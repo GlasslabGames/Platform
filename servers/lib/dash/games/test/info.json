@@ -9,7 +9,7 @@
     },
     "basic": {
         "gameId": "TEST",
-        "enabled": false,
+        "enabled": true,
         "visible": false,
         "maintenance": null,
         "shortName": "TEST",
