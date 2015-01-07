@@ -59,6 +59,7 @@ return when.promise(function(resolve, reject) {
             var hasSSOData = false;
             var hasState = false;
             var hasSchool = false;
+            var hasFtueChecklist = false;
 
             var promiseList = [];
             var Q = "";
@@ -85,6 +86,10 @@ return when.promise(function(resolve, reject) {
                 }
                 if (results[i]['Field'] == 'SCHOOL') {
                     hasSchool = true;
+                }
+
+                if (results[i]['Field'] == "ftue_checklist"){
+                    hasFtueChecklist = true;
                 }
             }
 
@@ -120,15 +125,34 @@ return when.promise(function(resolve, reject) {
                 promiseList.push(this.ds.query(Q));
             }
 
+            if(!hasFtueChecklist) {
+                updating = true;
+                Q = "ALTER TABLE GL_USER \
+                           ADD COLUMN ftue_checklist TINYINT(1) DEFAULT NULL AFTER SCHOOL";
+                promiseList.push(this.ds.query(Q));
+            }
+
             if(promiseList.length) {
                 when.all(promiseList)
                     .then(function(results) {
                         //console.log(results);
-                        resolve(true);
-                    }.bind(this),
-                    function(err) {
+                        if (!hasFtueChecklist) {
+                            Q = "UPDATE GL_USER \
+                                    SET ftue_checklist = 3 WHERE SYSTEM_ROLE = 'instructor'";
+                            return this.ds.query(Q);
+                        }
+                        return true;
+                    }.bind(this))
+                    .then(function(complete){
+                        if(!!complete){
+                            resolve(true);
+                        } else{
+                            reject()
+                        }
+                    })
+                    .then(null, function(err) {
                         reject({"error": "failure", "exception": err}, 500);
-                    }.bind(this) );
+                    }.bind(this));
             }
 
             if(!updating) {
@@ -320,7 +344,12 @@ return when.promise(function(resolve, reject) {
         verify_code_status: "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
+        ftue_checklist: "NULL"
     };
+
+    if(userData.role === "instructor"){
+        data.ftue_checklist = 0;
+    }
 
     var keys   = _.keys(data);
     var values = _.values(data);

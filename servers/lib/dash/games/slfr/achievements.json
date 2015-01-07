@@ -1,0 +1,70 @@
+[
+    {
+        "id": "a",
+        "description": "Common Core Standards",
+        "title": "Standards",
+        "subGroups": [
+            {
+                "id": "a",
+                "title": "CCSS Math 2.G.A.3",
+                "name": "",
+                "description": "Partition circles and rectangles into two, three, or four equal shares, describe the shares using the words halves, thirds, half of, a third of, etc., and describe the whole as two halves, three thirds, four fourths. Recognize that equal shares of identical wholes need not have the same shape.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "Badges of Gameplay, Equal Sharing & Slicing!",
+                        "title": "Badges of Gameplay, Equal Sharing & Slicing!",
+                        "info": "Students understand how the game works and can split groups or shapes into equal shares."
+                    }
+                ]
+            },
+            {
+                "id": "b",
+                "title": "CCSS Math 3.NF.A.1",
+                "name": "",
+                "description": "Understand a fraction 1/b as the quantity formed by 1 part when a whole is partitioned into b equal parts; understand a fraction a/b as the quantity formed by a parts of size 1/b.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "Badges of the Denominator, Numerator & Circles!",
+                        "title": "Badges of the Denominator, Numerator & Circles!",
+                        "info": "Students understand what changing the numerator and the denominator mean in a fraction."
+                    }
+                ]
+            },
+            {
+                "id": "c",
+                "title": "CCSS Math 3.NF.A.3",
+                "name": "",
+                "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3 and can compare different fractions by reasoning about their size.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "Badges of Size Comparison, Equivalent Fractions and Advanced Equivalent Fractions!",
+                        "title": "Badges of Size Comparison, Equivalent Fractions and Advanced Equivalent Fractions!",
+                        "info": "Students understand what an equivalent fraction is, by comparing shapes of different sizes together."
+                    },
+                    {
+                        "id": "Badges of Fractions Ordering & Question Marks!",
+                        "title": "Badges of Fractions Ordering & Question Marks!",
+                        "info": "Students can deduct fraction values based on the information at hand."
+                    }
+                ]
+            },
+            {
+                "id": "d",
+                "title": "CCSS Math 3.NF.B.3",
+                "name": "",
+                "description": "Understand subtraction of fractions as separating parts referring to the same whole.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "Badge of Subtracting!",
+                        "title": "Badge of Subtracting!",
+                        "info": "Students can subtract fractions from 1."
+                    }
+                ]
+            }
+        ]
+    }
+]
