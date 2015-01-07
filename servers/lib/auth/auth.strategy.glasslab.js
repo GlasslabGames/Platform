@@ -454,7 +454,16 @@ return when.promise(function(resolve, reject) {
                 return Util.PromiseContinue();
             }
         }.bind(this))
-
+        // check if ftue is same
+        .then(function () {
+            if (userData.ftue !== dbUserData.ftue) {
+                if (isSelf) {
+                    loginUserSessionData.ftue = userData.ftue;
+                    sessionDataChanged = true;
+                }
+            }
+            return this._service.getAuthStore().updateUserDBData(userData);
+        }.bind(this))
         // verify password if needed
         .then(function(){
             if(userData.password) {
@@ -495,12 +504,6 @@ return when.promise(function(resolve, reject) {
                 if(isSelf) {
                     // update session data
                     loginUserSessionData.lastName = userData.lastName;
-                    sessionDataChanged = true;
-                }
-            }
-            if(userData.ftue_checklist !== dbUserData.ftue_checklist) {
-                if(isSelf) {
-                    loginUserSessionData.ftue_checklist = userData.ftue_checklist;
                     sessionDataChanged = true;
                 }
             }
