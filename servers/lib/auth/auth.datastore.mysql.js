@@ -128,7 +128,7 @@ return when.promise(function(resolve, reject) {
             if (!hasFtueChecklist) {
                 updating = true;
                 Q = "ALTER TABLE GL_USER \
-                           ADD COLUMN ftue_checklist TINYINT(1) DEFAULT NULL AFTER SCHOOL";
+                           ADD COLUMN ftue_checklist TINYINT(1) DEFAULT 0 AFTER SCHOOL";
                 promiseList.push(this.ds.query(Q));
             }
             if (promiseList.length) {
@@ -140,10 +140,9 @@ return when.promise(function(resolve, reject) {
                     function (err) {
                         reject({"error": "failure", "exception": err}, 500);
                     }.bind(this));
-
-                if (!updating) {
-                    resolve(false);
-                }
+            }
+            if (!updating) {
+                resolve(false);
             }
         }.bind(this),
         function (err) {
