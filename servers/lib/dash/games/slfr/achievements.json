@@ -12,55 +12,69 @@
                 "info": "",
                 "items": [
                     {
-                        "id": "Badges of Gameplay, Equal Sharing & Slicing!",
-                        "title": "Badges of Gameplay, Equal Sharing & Slicing!",
+                        "id": "achievement1",
+                        "title": "Completed concepts: \"How to Play\", \"Split Groups\" & \"Slice Shapes\"",
                         "info": "Students understand how the game works and can split groups or shapes into equal shares."
                     }
                 ]
             },
             {
                 "id": "b",
+                "title": "Symbolic notation",
+                "name": "",
+                "description": "Students can read symbolic fractions and are starting to understand how they relate to numerical fractions.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "achievement2",
+                        "title": "Completed concepts: \"Common Whole\", \"Symbolic Numerator\" & \"Fractions Reading\"",
+                        "info": "Students understand how a fractions is written."
+                    }
+                ]
+            },
+            {
+                "id": "c",
                 "title": "CCSS Math 3.NF.A.1",
                 "name": "",
                 "description": "Understand a fraction 1/b as the quantity formed by 1 part when a whole is partitioned into b equal parts; understand a fraction a/b as the quantity formed by a parts of size 1/b.",
                 "info": "",
                 "items": [
                     {
-                        "id": "Badges of the Denominator, Numerator & Circles!",
-                        "title": "Badges of the Denominator, Numerator & Circles!",
+                        "id": "achievement3",
+                        "title": "Completed concepts: \"Denominator\", \"Numerator\" & \"Pie Charts\"",
                         "info": "Students understand what changing the numerator and the denominator mean in a fraction."
                     }
                 ]
             },
             {
-                "id": "c",
+                "id": "d",
                 "title": "CCSS Math 3.NF.A.3",
                 "name": "",
                 "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3 and can compare different fractions by reasoning about their size.",
                 "info": "",
                 "items": [
                     {
-                        "id": "Badges of Size Comparison, Equivalent Fractions and Advanced Equivalent Fractions!",
-                        "title": "Badges of Size Comparison, Equivalent Fractions and Advanced Equivalent Fractions!",
+                        "id": "achievement4",
+                        "title": "Completed concepts: \"Size Comparison\", \"Equivalent Fractions (A)\" & \"Equivalent Fractions (B)\"",
                         "info": "Students understand what an equivalent fraction is, by comparing shapes of different sizes together."
                     },
                     {
-                        "id": "Badges of Fractions Ordering & Question Marks!",
-                        "title": "Badges of Fractions Ordering & Question Marks!",
+                        "id": "achievement5",
+                        "title": "Completed concepts: \"Fractions Ordering\" & \"Question Marks\"",
                         "info": "Students can deduct fraction values based on the information at hand."
                     }
                 ]
             },
             {
-                "id": "d",
-                "title": "CCSS Math 3.NF.B.3",
+                "id": "e",
+                "title": "CCSS Math 4.NF.B.3",
                 "name": "",
                 "description": "Understand subtraction of fractions as separating parts referring to the same whole.",
                 "info": "",
                 "items": [
                     {
-                        "id": "Badge of Subtracting!",
-                        "title": "Badge of Subtracting!",
+                        "id": "achievement6",
+                        "title": "Completed concept: \"Subtraction\"",
                         "info": "Students can subtract fractions from 1."
                     }
                 ]
