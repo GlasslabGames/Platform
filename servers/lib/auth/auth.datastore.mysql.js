@@ -59,21 +59,22 @@ return when.promise(function(resolve, reject) {
             var hasSSOData = false;
             var hasState = false;
             var hasSchool = false;
+            var hasFtueChecklist = false;
 
             var promiseList = [];
             var Q = "";
 
-            for(var i = 0; i < results.length; i++) {
-                if(results[i]['Field'] == 'ssoData') {
+            for (var i = 0; i < results.length; i++) {
+                if (results[i]['Field'] == 'ssoData') {
                     hasSSOData = true;
                 }
 
-                if( (results[i]['Field'] == 'PASSWORD') &&
-                    (results[i]['Type'] == 'varchar(255)') ) {
+                if ((results[i]['Field'] == 'PASSWORD') &&
+                    (results[i]['Type'] == 'varchar(255)')) {
                     passwordLength255 = true;
                 }
 
-                if(results[i]['Field'] == 'VERIFY_CODE') {
+                if (results[i]['Field'] == 'VERIFY_CODE') {
                     hasVerifyCode = true;
                 }
 
@@ -86,24 +87,28 @@ return when.promise(function(resolve, reject) {
                 if (results[i]['Field'] == 'SCHOOL') {
                     hasSchool = true;
                 }
+
+                if (results[i]['Field'] == "ftue_checklist") {
+                    hasFtueChecklist = true;
+                }
             }
 
-            if(passwordLength255 && !hasVerifyCode) {
+            if (passwordLength255 && !hasVerifyCode) {
                 updating = true;
                 Q = "ALTER TABLE `GL_USER` \
                             CHANGE COLUMN `PASSWORD` `PASSWORD` TEXT NOT NULL , \
                             ADD COLUMN `VERIFY_CODE` VARCHAR(255) NULL DEFAULT NULL AFTER `LOGIN_TYPE`, \
                             ADD COLUMN `VERIFY_CODE_EXPIRATION` BIGINT(20) NULL DEFAULT NULL AFTER `VERIFY_CODE`,   \
                             ADD COLUMN `VERIFY_CODE_STATUS` VARCHAR(11) NULL DEFAULT NULL AFTER `VERIFY_CODE_EXPIRATION`";
-                promiseList.push( this.ds.query(Q) );
+                promiseList.push(this.ds.query(Q));
             }
 
-            if(!hasSSOData) {
+            if (!hasSSOData) {
                 updating = true;
                 Q = "ALTER TABLE `GL_USER` \
                            ADD COLUMN `ssoUsername` VARCHAR(255) NULL AFTER `LOGIN_TYPE`, \
                            ADD COLUMN `ssoData` TEXT NULL AFTER `ssoUsername` ";
-                promiseList.push( this.ds.query(Q) );
+                promiseList.push(this.ds.query(Q));
             }
 
             if (!hasState) {
@@ -120,31 +125,107 @@ return when.promise(function(resolve, reject) {
                 promiseList.push(this.ds.query(Q));
             }
 
-            if(promiseList.length) {
+            if (!hasFtueChecklist) {
+                updating = true;
+                Q = "ALTER TABLE GL_USER \
+                           ADD COLUMN ftue_checklist TINYINT(1) DEFAULT NULL AFTER SCHOOL";
+                promiseList.push(this.ds.query(Q));
+            }
+            if (promiseList.length) {
                 when.all(promiseList)
                     .then(function(results) {
-                        //console.log(results);
+                        if (!hasFtueChecklist) {
+                            return this.setInstructorsFtueStatuses();
+                        }
+                    }.bind(this))
+                    .then(function(){
                         resolve(true);
-                    }.bind(this),
-                    function(err) {
+                    })
+                    .then(null, function(err) {
                         reject({"error": "failure", "exception": err}, 500);
-                    }.bind(this) );
+                    }.bind(this));
             }
-
-            if(!updating) {
+            if (!updating) {
                 resolve(false);
             }
         }.bind(this),
-        function(err) {
+        function (err) {
             reject({"error": "failure", "exception": err}, 500);
-        }.bind(this)
-    );
+        }.bind(this));
 
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
 
+Auth_MySQL.prototype.setInstructorsFtueStatuses = function(){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT id FROM GL_USER WHERE SYSTEM_ROLE = 'instructor';";
+        return this.ds.query(Q)
+            .then(function(results){
+                var id;
+                var instructorFtues = [];
+                results.forEach(function(result){
+                    id = result.id;
+                    instructorFtues.push(this.setInstructorFtue(id));
+                }.bind(this));
+                return when.all(instructorFtues);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Auth_MySQL.prototype.setInstructorFtue = function(id){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + id + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length === 0){
+                    return 0
+                } else{
+                    var courses = [];
+                    var courseId;
+                    var preQ = "SELECT user_id FROM GL_MEMBERSHIP WHERE course_id = ";
+                    results.forEach(function(course){
+                        courseId = course.course_id;
+                        Q = preQ + courseId + ";";
+                        courses.push(this.ds.query(Q));
+                    }.bind(this));
+                    return when.all(courses);
+                }
+            }.bind(this))
+            .then(function(courses){
+                var value;
+                if(courses === 0){
+                    value = 0;
+                } else{
+                    var hasStudent = courses.some(function(course){
+                        if(course.length > 1){
+                            return true;
+                        }
+                    });
+                    if(hasStudent){
+                        value = 4;
+                    } else{
+                        value = 2;
+                    }
+                }
+                Q = "UPDATE GL_USER SET ftue_checklist = " + value + " WHERE id = " + id + ";";
+                return this.ds.query(Q);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
 
 Auth_MySQL.prototype.findUser = function(type, value) {
 // add promise wrapper
@@ -320,7 +401,12 @@ return when.promise(function(resolve, reject) {
         verify_code_status: "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
+        ftue_checklist: "NULL"
     };
+
+    if(userData.role === "instructor"){
+        data.ftue_checklist = 0;
+    }
 
     var keys   = _.keys(data);
     var values = _.values(data);
@@ -401,6 +487,13 @@ return when.promise(function(resolve, reject) {
             data.verify_code_status = "NULL";
         } else {
             data.verify_code_status = this.ds.escape(userData.verifyCodeStatus);
+        }
+    }
+    if(userData.ftue) {
+        if (userData.ftue == "NULL") {
+            data.ftue_checklist = "NULL";
+        } else {
+            data.ftue_checklist = this.ds.escape(userData.ftue);
         }
     }
 
