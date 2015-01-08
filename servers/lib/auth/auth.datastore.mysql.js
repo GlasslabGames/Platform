@@ -128,16 +128,20 @@ return when.promise(function(resolve, reject) {
             if (!hasFtueChecklist) {
                 updating = true;
                 Q = "ALTER TABLE GL_USER \
-                           ADD COLUMN ftue_checklist TINYINT(1) DEFAULT 0 AFTER SCHOOL";
+                           ADD COLUMN ftue_checklist TINYINT(1) DEFAULT NULL AFTER SCHOOL";
                 promiseList.push(this.ds.query(Q));
             }
             if (promiseList.length) {
                 when.all(promiseList)
-                    .then(function (results) {
-                        //console.log(results);
+                    .then(function(results) {
+                        if (!hasFtueChecklist) {
+                            return this.setInstructorsFtueStatuses();
+                        }
+                    }.bind(this))
+                    .then(function(){
                         resolve(true);
-                    }.bind(this),
-                    function (err) {
+                    })
+                    .then(null, function(err) {
                         reject({"error": "failure", "exception": err}, 500);
                     }.bind(this));
             }
@@ -154,6 +158,74 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Auth_MySQL.prototype.setInstructorsFtueStatuses = function(){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT id FROM GL_USER WHERE SYSTEM_ROLE = 'instructor';";
+        return this.ds.query(Q)
+            .then(function(results){
+                var id;
+                var instructorFtues = [];
+                results.forEach(function(result){
+                    id = result.id;
+                    instructorFtues.push(this.setInstructorFtue(id));
+                }.bind(this));
+                return when.all(instructorFtues);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Auth_MySQL.prototype.setInstructorFtue = function(id){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + id + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length === 0){
+                    return 0
+                } else{
+                    var courses = [];
+                    var courseId;
+                    var preQ = "SELECT user_id FROM GL_MEMBERSHIP WHERE course_id = ";
+                    results.forEach(function(course){
+                        courseId = course.course_id;
+                        Q = preQ + courseId + ";";
+                        courses.push(this.ds.query(Q));
+                    }.bind(this));
+                    return when.all(courses);
+                }
+            }.bind(this))
+            .then(function(courses){
+                var value;
+                if(courses === 0){
+                    value = 0;
+                } else{
+                    var hasStudent = courses.some(function(course){
+                        if(course.length > 1){
+                            return true;
+                        }
+                    });
+                    if(hasStudent){
+                        value = 4;
+                    } else{
+                        value = 2;
+                    }
+                }
+                Q = "UPDATE GL_USER SET ftue_checklist = " + value + " WHERE id = " + id + ";";
+                return this.ds.query(Q);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
 
 Auth_MySQL.prototype.findUser = function(type, value) {
 // add promise wrapper
