@@ -64,17 +64,17 @@ return when.promise(function(resolve, reject) {
             var promiseList = [];
             var Q = "";
 
-            for(var i = 0; i < results.length; i++) {
-                if(results[i]['Field'] == 'ssoData') {
+            for (var i = 0; i < results.length; i++) {
+                if (results[i]['Field'] == 'ssoData') {
                     hasSSOData = true;
                 }
 
-                if( (results[i]['Field'] == 'PASSWORD') &&
-                    (results[i]['Type'] == 'varchar(255)') ) {
+                if ((results[i]['Field'] == 'PASSWORD') &&
+                    (results[i]['Type'] == 'varchar(255)')) {
                     passwordLength255 = true;
                 }
 
-                if(results[i]['Field'] == 'VERIFY_CODE') {
+                if (results[i]['Field'] == 'VERIFY_CODE') {
                     hasVerifyCode = true;
                 }
 
@@ -88,27 +88,27 @@ return when.promise(function(resolve, reject) {
                     hasSchool = true;
                 }
 
-                if (results[i]['Field'] == "ftue_checklist"){
+                if (results[i]['Field'] == "ftue_checklist") {
                     hasFtueChecklist = true;
                 }
             }
 
-            if(passwordLength255 && !hasVerifyCode) {
+            if (passwordLength255 && !hasVerifyCode) {
                 updating = true;
                 Q = "ALTER TABLE `GL_USER` \
                             CHANGE COLUMN `PASSWORD` `PASSWORD` TEXT NOT NULL , \
                             ADD COLUMN `VERIFY_CODE` VARCHAR(255) NULL DEFAULT NULL AFTER `LOGIN_TYPE`, \
                             ADD COLUMN `VERIFY_CODE_EXPIRATION` BIGINT(20) NULL DEFAULT NULL AFTER `VERIFY_CODE`,   \
                             ADD COLUMN `VERIFY_CODE_STATUS` VARCHAR(11) NULL DEFAULT NULL AFTER `VERIFY_CODE_EXPIRATION`";
-                promiseList.push( this.ds.query(Q) );
+                promiseList.push(this.ds.query(Q));
             }
 
-            if(!hasSSOData) {
+            if (!hasSSOData) {
                 updating = true;
                 Q = "ALTER TABLE `GL_USER` \
                            ADD COLUMN `ssoUsername` VARCHAR(255) NULL AFTER `LOGIN_TYPE`, \
                            ADD COLUMN `ssoData` TEXT NULL AFTER `ssoUsername` ";
-                promiseList.push( this.ds.query(Q) );
+                promiseList.push(this.ds.query(Q));
             }
 
             if (!hasState) {
@@ -125,14 +125,13 @@ return when.promise(function(resolve, reject) {
                 promiseList.push(this.ds.query(Q));
             }
 
-            if(!hasFtueChecklist) {
+            if (!hasFtueChecklist) {
                 updating = true;
                 Q = "ALTER TABLE GL_USER \
                            ADD COLUMN ftue_checklist TINYINT(1) DEFAULT NULL AFTER SCHOOL";
                 promiseList.push(this.ds.query(Q));
             }
-
-            if(promiseList.length) {
+            if (promiseList.length) {
                 when.all(promiseList)
                     .then(function(results) {
                         if (!hasFtueChecklist) {
@@ -146,15 +145,13 @@ return when.promise(function(resolve, reject) {
                         reject({"error": "failure", "exception": err}, 500);
                     }.bind(this));
             }
-
-            if(!updating) {
+            if (!updating) {
                 resolve(false);
             }
         }.bind(this),
-        function(err) {
+        function (err) {
             reject({"error": "failure", "exception": err}, 500);
-        }.bind(this)
-    );
+        }.bind(this));
 
 // ------------------------------------------------
 }.bind(this));
@@ -490,6 +487,13 @@ return when.promise(function(resolve, reject) {
             data.verify_code_status = "NULL";
         } else {
             data.verify_code_status = this.ds.escape(userData.verifyCodeStatus);
+        }
+    }
+    if(userData.ftue) {
+        if (userData.ftue == "NULL") {
+            data.ftue_checklist = "NULL";
+        } else {
+            data.ftue_checklist = this.ds.escape(userData.ftue);
         }
     }
 
