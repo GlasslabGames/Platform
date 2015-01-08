@@ -40,7 +40,9 @@ module.exports = {
         dsInfoKey: 'dataSchemaInfo',
         eventsKey: 'events',
         scoreKey: 'GL_Scenario_Score',
-        versions: require('./data.const.game_versions')
+        versions: require('./data.const.game_versions'),
+        gameInfoKey: 'gi',
+        gameAchievementKey: 'ga'
     },
     webapp: {
         api: '/api',
