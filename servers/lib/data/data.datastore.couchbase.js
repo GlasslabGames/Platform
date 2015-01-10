@@ -2586,7 +2586,7 @@ return when.promise(function(resolve, reject) {
 // getGameBasicInfo, getGameAssessmentInfo, getGameReportInfo, getGameReleases, getListOfAchievements
 // refer to the comments above these DashService methods to see where they are being used
 // isAchievement used to determine whether to use a ga or gi code for the couchbase lookup
-TelemDS_Couchbase.prototype._getGameInformation = function(gameId, isAchievement){
+TelemDS_Couchbase.prototype._getGameInformation = function(gameId, isAchievement, test){
     return when.promise(function(resolve, reject){
 
         // game names are not case sensitive
@@ -2599,8 +2599,11 @@ TelemDS_Couchbase.prototype._getGameInformation = function(gameId, isAchievement
         }
         // get data
         this.client.get(key, function(err, results) {
-            if(err){
+            if(err && !test){
                 console.error("Couchbase TelemetryStore: Get Game Information Error -", err);
+                reject(err);
+                return;
+            } else if(err){
                 reject(err);
                 return;
             }
@@ -2661,8 +2664,9 @@ TelemDS_Couchbase.prototype._updateGameInformation = function(gameId, data, isAc
 };
 
 // getter method for gi:gameId.  Returns a promise
-TelemDS_Couchbase.prototype.getGameInformation = function(gameId){
-    return this._getGameInformation(gameId, false);
+TelemDS_Couchbase.prototype.getGameInformation = function(gameId, test){
+    test = test || false;
+    return this._getGameInformation(gameId, false, test);
 };
 
 // create method for gi:gameId.  Returns a promise.  No preexisting key needed.
