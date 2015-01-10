@@ -353,7 +353,7 @@ DashService.prototype._migrateGameFiles = function() {
             // checking to see if this particular key exists, as a sign for if migration has happened
             // if key does not exist, error will be thrown, but that's ok. Just means key needs to be created
             // if key exists, but is initialized to a default or empty value, run migration and populate the keys
-            this.telmStore.getGameInformation('AA-1')
+            this.telmStore.getGameInformation('AA-1', true)
                 .then(
                 function(data){
                     return JSON.stringify(data);
@@ -441,7 +441,7 @@ DashService.prototype._loadGameFiles = function(){
                 console.log('DashService: Loaded Game Files');
                 resolve();
             }.bind(this))
-            .catch(function(err){
+            .then(null, function(err){
                 console.error("DashService: Load Game Files Error -", err);
                 reject(err);
             }.bind(this));
@@ -527,10 +527,10 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
                     resolve();
                 }.bind(this))
                 .then(null, function(err){
-                    console.error("DashService: Load Game Files Error -", err);
+                    reject(err);
                 }.bind(this));
         } catch(err) {
-            console.error("DashService: Load Game Files Error -", err);
+            reject(err)
         }
     }.bind(this));
 };
