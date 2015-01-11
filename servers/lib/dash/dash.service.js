@@ -425,10 +425,9 @@ DashService.prototype._loadGameFiles = function() {
                             for(var i = 0; i < list.length; i++) {
                                 if( _.isObject(list[i]) &&
                                     list[i].id == 'achievements') {
-                                    this._games[gameId].info.reports.list[i].achievements = gameAchievements[index];
+                                    this._games[gameId].info.reports.list[i].achievements = gameAchievements[index++];
                                 }
                             }
-                            index++;
                         }
                     }.bind(this));
 
