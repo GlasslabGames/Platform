@@ -10,8 +10,8 @@
     },
     "basic": {
         "gameId": "PVZ",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "PvZ EDU",
         "longName": "Plants vs. Zombies EDU",
