@@ -7,7 +7,8 @@ var Util      = require('../../core/util.js');
 module.exports = {
     getAssessmentDefinitions: getAssessmentDefinitions,
     getAssessmentResults:     getAssessmentResults,
-    saveAssessmentResults:    saveAssessmentResults
+    saveAssessmentResults:    saveAssessmentResults,
+    migrateInfoFiles:          migrateInfoFiles
 };
 
 var exampleIn = {};
@@ -38,7 +39,7 @@ function getAssessmentDefinitions(req, res){
         .then(function(assessmentInfo){
             this.requestUtil.jsonResponse(res, assessmentInfo);
         }.bind(this) )
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Get Assessment Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "GetAchievements.Catch");
@@ -146,9 +147,21 @@ function saveAssessmentResults(req, res){
             this.requestUtil.jsonResponse(res, {});
         }.bind(this) )
         // error
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Save Assessment Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
         }.bind(this) );
+}
+
+function migrateInfoFiles(req, res){
+    this._migrateGameFiles(true)
+        .then(function(){
+            console.log("Migration complete");
+        })
+        .then(null, function(err){
+            console.trace("Dash: Migrate Info Error -", err);
+            this.stats.increment("error", "MigrateInfo.Catch");
+        }.bind(this));
+    res.end('{"migration": "triggered"}');
 }

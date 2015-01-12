@@ -250,6 +250,14 @@ module.exports = {
                 post: "postMessage"
             }
         },
+        {
+            api: "/api/v2/dash/migrate",
+            service: "dash",
+            controller: "_game",
+            method: {
+                get: "migrateInfoFiles"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,

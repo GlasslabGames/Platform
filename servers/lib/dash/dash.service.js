@@ -61,7 +61,7 @@ return when.promise(function(resolve, reject) {
     this.telmStore.connect()
         .then(function(){
                 // test connection to telemetry store
-            return this._migrateGameFiles();
+            return this._migrateGameFiles(false);
         }.bind(this))
         .then(function(){
             return this._loadGameFiles();
@@ -112,7 +112,7 @@ DashService.prototype.isValidGameId = function(gameId) {
         .then(function(){
             return true;
         })
-        .catch(function(){
+        .then(null,function(){
             return false;
         });
 };
@@ -347,7 +347,7 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
 
 // migrates info.json and achievement.json files to couchbase
 // format is gi:gameId for info.json and ga:gameId for achievements.json
-DashService.prototype._migrateGameFiles = function() {
+DashService.prototype._migrateGameFiles = function(forceMigrate) {
     return when.promise(function(resolve, reject){
         try {
             // checking to see if this particular key exists, as a sign for if migration has happened
@@ -356,6 +356,9 @@ DashService.prototype._migrateGameFiles = function() {
             this.telmStore.getGameInformation('AA-1', true)
                 .then(
                 function(data){
+                    if(forceMigrate){
+                        return '{}';
+                    }
                     return JSON.stringify(data);
                 }, function() {
                     return '{}';
