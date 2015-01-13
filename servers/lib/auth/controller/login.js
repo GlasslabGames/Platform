@@ -134,14 +134,16 @@ return when.promise(function(resolve, reject) {
                 }.bind(this));
         }
         else if( user.role == lConst.role.developer ) {
-            User.getDeveloperGames(user.id)
-                .then(function(games){
-                    this.stats.increment("info", "Route.Login.Auth.Developer.Done");
-                    resolve( user, games );
-                }.bind(this))
-                .then(null, function(err){
-                    reject(err);
-                });
+            //User.getDeveloperGames(user.id)
+            //    .then(function(games){
+            //        this.stats.increment("info", "Route.Login.Auth.Developer.Done");
+            //        resolve( user, games );
+            //    }.bind(this))
+            //    .then(null, function(err){
+            //        reject(err);
+            //    });
+            this.stats.increment("info", "Route.Login.Auth.Developer.Done");
+            resolve( user );
         }
         else {
             this.stats.increment("error", "Route.Login.Auth.LogIn.InvalidRole");

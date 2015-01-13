@@ -251,7 +251,8 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/migrate",
+            requireAuth: true,
+            api: "/api/v2/dash/migrate/:code",
             service: "dash",
             controller: "games",
             method: {
@@ -259,7 +260,8 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/reload",
+            requireAuth: true,
+            api: "/api/v2/dash/reload/:code",
             service: "dash",
             controller: "games",
             method: {

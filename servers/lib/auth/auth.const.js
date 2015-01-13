@@ -57,7 +57,7 @@ module.exports = {
         keys: {
             user: "u",
             device: "d",
-            developer: "di:user:"
+            developer: "di"
         }
     },
     permits: {

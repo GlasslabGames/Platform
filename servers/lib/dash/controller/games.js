@@ -3,14 +3,15 @@ var _         = require('lodash');
 var when      = require('when');
 //
 var Util      = require('../../core/util.js');
+var dConst    = require('../dash.const.js');
 
 module.exports = {
     getActiveGamesBasicInfo: getActiveGamesBasicInfo,
-    getGamesBasicInfo: getGamesBasicInfo,
+    getGamesBasicInfo:       getGamesBasicInfo,
     getActiveGamesDetails:   getActiveGamesDetails,
-    getMyGames:        getMyGames,
-    reloadGameFiles:   reloadGameFiles,
-    migrateInfoFiles:  migrateInfoFiles
+    getMyGames:              getMyGames,
+    reloadGameFiles:         reloadGameFiles,
+    migrateInfoFiles:        migrateInfoFiles
 };
 
 var exampleIn = {};
@@ -340,6 +341,20 @@ function getMyGames(req, res) {
 }
 
 function migrateInfoFiles(req, res){
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
     this._migrateGameFiles(true)
         .then(function(){
             return this._loadGameFiles();
@@ -359,6 +374,20 @@ function migrateInfoFiles(req, res){
 }
 
 function reloadGameFiles(req, res){
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
     this._loadGameFiles()
         .then(function(){
             res.end('{"status": "complete"}');

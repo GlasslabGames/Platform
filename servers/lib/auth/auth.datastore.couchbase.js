@@ -64,7 +64,7 @@ return when.promise(function(resolve, reject) {
 
 AuthDS_Couchbase.prototype.getDeveloperProfile = function(userId){
     return when.promise(function(resolve, reject){
-        var key = aConst.datastore.keys.developer + userId;
+        var key = aConst.datastore.keys.developer + ":" + aConst.datastore.keys.user + ":" + userId;
         this.telmStore.client.get(key, function(err, results) {
             if(err){
                 console.error("Authorization Error - " + err);
