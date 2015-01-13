@@ -3,7 +3,7 @@ var _      = require('lodash');
 var when   = require('when');
 var Util   = require('../../core/util.js');
 var lConst = require('../../lms/lms.const.js');
-var User   = require('../user.js');
+var User   = require('./user.js');
 
 module.exports = {
     logout:   logout,
