@@ -7,8 +7,7 @@ var Util      = require('../../core/util.js');
 module.exports = {
     getAssessmentDefinitions: getAssessmentDefinitions,
     getAssessmentResults:     getAssessmentResults,
-    saveAssessmentResults:    saveAssessmentResults,
-    migrateInfoFiles:          migrateInfoFiles
+    saveAssessmentResults:    saveAssessmentResults
 };
 
 var exampleIn = {};
@@ -152,16 +151,4 @@ function saveAssessmentResults(req, res){
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
         }.bind(this) );
-}
-
-function migrateInfoFiles(req, res){
-    this._migrateGameFiles(true)
-        .then(function(){
-            console.log("Migration complete");
-        })
-        .then(null, function(err){
-            console.trace("Dash: Migrate Info Error -", err);
-            this.stats.increment("error", "MigrateInfo.Catch");
-        }.bind(this));
-    res.end('{"migration": "triggered"}');
 }

@@ -19,7 +19,7 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
-    getDeveloperProfile:   getDeveloperProfile
+    getDeveloperGames:   getDeveloperGames
 };
 
 var exampleIn = {};
@@ -1206,7 +1206,7 @@ function resetPasswordUpdate(req, res, next) {
     }
 }
 
-function getDeveloperProfile(userId){
+function getDeveloperGames(userId){
     return when.promise(function(resolve, reject){
         this.authStore.getDeveloperProfile(userId)
             .then(function(values){

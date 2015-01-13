@@ -43,7 +43,7 @@ function AuthService(options, serviceManager){
         Auth          = require('./auth.js');
         Errors        = require('../errors.js');
         aConst        = Auth.Const;
-        TelmStore = require('../../data/data.js').Datastore.Couchbase;
+        TelmStore = require('../data/data.js').Datastore.Couchbase;
         Accounts      = Auth.Accounts;
         AuthStore     = Auth.Datastore.MySQL;
 

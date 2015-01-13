@@ -253,9 +253,17 @@ module.exports = {
         {
             api: "/api/v2/dash/migrate",
             service: "dash",
-            controller: "_game",
+            controller: "games",
             method: {
                 get: "migrateInfoFiles"
+            }
+        },
+        {
+            api: "/api/v2/dash/reload",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "reloadGameFiles"
             }
         },
         // ---------------------------------------------------

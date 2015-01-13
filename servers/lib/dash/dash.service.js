@@ -61,7 +61,7 @@ return when.promise(function(resolve, reject) {
     this.telmStore.connect()
         .then(function(){
                 // test connection to telemetry store
-            return this._migrateGameFiles(false);
+            return this._migrateGameFiles(true);
         }.bind(this))
         .then(function(){
             return this._loadGameFiles();
@@ -387,6 +387,7 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
                                     var filePath = path.join(dir, gameName, file);
                                     var gameData;
                                     try {
+                                        delete require.cache[filePath];
                                         gameData = require(filePath);
                                     } catch(err) {
                                         console.error("migrateGameFiles filePath:", filePath, ", Error:", err);
