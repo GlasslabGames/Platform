@@ -49,7 +49,7 @@ function getUserGameAchievements(req, res){
                     }.bind(this) );
             }
         }.bind(this) )
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Get Achievements Error -", err);
             this.stats.increment("error", "GetAchievements.Catch");
         }.bind(this) );
@@ -83,7 +83,7 @@ function getGameDetails(req, res){
         .then(function(gameDetails){
             this.requestUtil.jsonResponse(res, gameDetails);
         }.bind(this) )
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Get Game Info Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "GetGameInfo.Catch");
@@ -119,7 +119,7 @@ function getGameReports(req, res){
         .then(function(gameReports){
             this.requestUtil.jsonResponse(res, gameReports);
         }.bind(this))
-        .catch(function(err){
+        .then(null,function(err){
             this.requestUtil.errorResponse(res, err);
             console.trace("Reports: Get Game Reports Error -", err);
             this.stats.increment("error", "GetGameReports.Catch");
@@ -205,7 +205,7 @@ function getGameMissions(req, res){
                 this.requestUtil.jsonResponse(res, {});
             }
         }.bind(this) )
-        .catch(function(err) {
+        .then(null,function(err) {
             console.trace("Reports: Get Game Missions Error -", err);
             this.stats.increment("error", "GetGameInfo.Catch");
             if(err.key == "report.gameId.invalid"){
@@ -257,7 +257,7 @@ function saveAssessmentResults(req, res){
             this.requestUtil.jsonResponse(res, {});
         }.bind(this) )
         // error
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Save Assessment Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
