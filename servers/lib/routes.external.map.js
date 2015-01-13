@@ -199,24 +199,24 @@ module.exports = {
                 get: "getGameDetails"
             }
         },
-        {
-            api: "/api/v2/dash/games/active/minimal",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "getGamesBasicInfo"
-            }
-        },
+        //{
+        //    api: "/api/v2/dash/games/active/minimal",
+        //    service: "dash",
+        //    controller: "games",
+        //    method: {
+        //        get: "getGamesBasicInfo"
+        //    }
+        //},
         {
             api: "/api/v2/dash/games/active/details",
             service: "dash",
             controller: "games",
             method: {
-                get: "getGamesDetails"
+                get: "getActiveGamesDetails"
             }
         },
         {
-            api: "/api/v2/dash/games/active",
+            api: "/api/v2/dash/games/active/basic",
             service: "dash",
             controller: "games",
             method: {
@@ -248,6 +248,22 @@ module.exports = {
             method: {
                 get: "getMessages",
                 post: "postMessage"
+            }
+        },
+        {
+            api: "/api/v2/dash/migrate",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "migrateInfoFiles"
+            }
+        },
+        {
+            api: "/api/v2/dash/reload",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "reloadGameFiles"
             }
         },
         // ---------------------------------------------------
