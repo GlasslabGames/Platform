@@ -7,7 +7,7 @@ var Util      = require('../../core/util.js');
 module.exports = {
     getActiveGamesBasicInfo: getActiveGamesBasicInfo,
     getGamesBasicInfo: getGamesBasicInfo,
-    getGamesDetails:   getGamesDetails,
+    getActiveGamesDetails:   getActiveGamesDetails,
     getMyGames:        getMyGames,
     reloadGameFiles:   reloadGameFiles,
     migrateInfoFiles:  migrateInfoFiles
@@ -172,7 +172,7 @@ function getGamesBasicInfo(req, res){
 }
 
 
-function getGamesDetails(req, res){
+function getActiveGamesDetails(req, res){
     try {
         var loginType = "guest";
         var promise = null;
