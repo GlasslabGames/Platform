@@ -471,15 +471,15 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
                 // remove all enabled=false objects
                 this._filterDisabledGameInfo(this._games[gameId]);
 
-                // add developer to game details and reports
-                if (this._games[gameId].info &&
-                    this._games[gameId].info.developer &&
-                    this._games[gameId].info.basic &&
-                    this._games[gameId].info.details &&
-                    this._games[gameId].info.reports) {
-
-                    this._games[gameId].info.basic.developer = this._games[gameId].info.developer;
-                }
+                //// add developer to game details and reports
+                //if (this._games[gameId].info &&
+                //    this._games[gameId].info.developer &&
+                //    this._games[gameId].info.basic &&
+                //    this._games[gameId].info.details &&
+                //    this._games[gameId].info.reports) {
+                //
+                //    this._games[gameId].info.basic.developer = this._games[gameId].info.developer;
+                //}
 
                 // add game info(basic) to game details and reports
                 if (this._games[gameId].info &&

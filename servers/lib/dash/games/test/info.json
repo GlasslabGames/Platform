@@ -1,12 +1,4 @@
 {
-    "developer": {
-        "id": "GL",
-        "name": "GlassLab, Inc.",
-        "logo": {
-            "small": "assets/glasslab-logo.png",
-            "large": "assets/glasslab-logo-2x.png"
-        }
-    },
     "basic": {
         "gameId": "TEST",
         "enabled": true,
@@ -14,9 +6,19 @@
         "maintenance": null,
         "shortName": "TEST",
         "longName": "TEST game",
+        "release": "dev",
+        "releaseDate": "TBD",
         "shortDescription": "TEST game",
         "description": "For developers without a game ID.",
-        "settings" : {
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab, Inc.",
+            "logo": {
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
+            }
+        },
+        "settings": {
         },
         "license": {
             "type": "loginType",
@@ -29,30 +31,25 @@
         "thumbnail": {
             "small": "assets/thumb-game-PVZ.png",
             "large": "assets/thumb-game-PVZ.png"
-        }
-    },
-    "assessment": [
-    ],
-    "reports": {
-        "list": [
-        ]
-    },
-    "details": {
-        "release": "dev",
-        "price": "TBD",
-        "releaseDate": "TBD",
-        "type": "App",
-        "platform": "iPad",
-        "subject": "TBD",
-        "grades": "6 - 8",
-        "buttons": [
-        ],
-        "pages": {
         },
         "banners": {
             "product": "assets/game-banner-AA-1.jpg",
             "reports": "assets/game-banner-AA-1.jpg"
+        }
+    },
+    "details": {
+
+        "assessment": [
+        ],
+        "reports": {
+            "list": [
+            ]
         },
+        "buttons": [
+        ],
+        "pages": {
+        },
+
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",
