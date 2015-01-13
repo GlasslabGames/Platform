@@ -3,15 +3,15 @@
         "id": "UL",
         "name": "Ululab",
         "logo": {
-            "small": "assets/glasslab-logo.png",
-            "large": "assets/glasslab-logo-2x.png"
+            "small": "assets/dev-logo-placeholder.jpg",
+            "large": "assets/dev-logo-placeholder@2x.jpg"
         },
         "description": "TBD"
     },
     "basic": {
         "gameId": "SLFR",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Slice Fractions",
         "longName": "Slice Fractions",
@@ -25,7 +25,7 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "TBD",
+        "price": "Coming Soon",
         "releaseDate": "TBD",
         "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
         "description": "Slice Fractions by Ululab",
@@ -33,8 +33,8 @@
             "id": "UL",
             "name": "Ululab",
             "logo": {
-                "small": "assets/dev-logo-ululab.png",
-                "large": "assets/dev-logo-ululab@2x.png"
+                "small": "assets/dev-logo-placeholder.jpg",
+                "large": "assets/dev-logo-placeholder@2x.jpg"
             },
             "description": "TBD"
         },
@@ -53,8 +53,8 @@
             "large": "assets/thumb-game-SLFR@2x.png"
         },
         "card": {
-            "small": "assets/game-card-SLFR.png",
-            "large": "assets/game-card-SLFR@2x.png"
+            "small": "assets/game-card-PLACEHOLDER.jpg",
+            "large": "assets/game-card-PLACEHOLDER@2x.jpg"
         },
         "banners": {
             "product": "assets/game-banner-SLFR.png",
@@ -64,7 +64,7 @@
             "type": "page",
             "page": {
                 "title": "Slice Fractions",
-                "embed": "",
+                "embed": "http://partners.ululab.com/glasslab/SliceFractionsSchoolEdition.swf",
                 "size": {
                     "width": 800,
                     "height": 600

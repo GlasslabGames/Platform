@@ -7,8 +7,10 @@ var Util      = require('../../core/util.js');
 module.exports = {
     getActiveGamesBasicInfo: getActiveGamesBasicInfo,
     getGamesBasicInfo: getGamesBasicInfo,
-    getGamesDetails:   getGamesDetails,
-    getMyGames:        getMyGames
+    getActiveGamesDetails:   getActiveGamesDetails,
+    getMyGames:        getMyGames,
+    reloadGameFiles:   reloadGameFiles,
+    migrateInfoFiles:  migrateInfoFiles
 };
 
 var exampleIn = {};
@@ -170,7 +172,7 @@ function getGamesBasicInfo(req, res){
 }
 
 
-function getGamesDetails(req, res){
+function getActiveGamesDetails(req, res){
     try {
         var loginType = "guest";
         var promise = null;
@@ -335,4 +337,39 @@ function getMyGames(req, res) {
         console.trace("Reports: Get MyGames Error -", err);
         this.stats.increment("error", "GetMyGames.Catch");
     }
+}
+
+function migrateInfoFiles(req, res){
+    this._migrateGameFiles(true)
+        .then(function(){
+            return this._loadGameFiles();
+        }.bind(this))
+        .then(function(){
+            res.end('{"migration": "complete"}');
+        })
+        .then(null, function(err){
+            console.trace("Dash: Migrate Info Error -", err);
+            var error = {
+                migration: "failed",
+                error: err
+            };
+            res.end(JSON.stringify(error));
+            this.stats.increment("error", "MigrateInfo.Catch");
+        }.bind(this));
+}
+
+function reloadGameFiles(req, res){
+    this._loadGameFiles()
+        .then(function(){
+            res.end('{"status": "complete"}');
+        })
+        .then(null, function(err){
+            console.trace("Dash: Reload Game Files Error -", err);
+            var error = {
+                status: 'failed',
+                error: err
+            };
+            res.end(JSON.stringify(error));
+            this.stats.increment("error", "ReloadGameFiles.Catch");
+        }.bind(this));
 }

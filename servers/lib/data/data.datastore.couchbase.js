@@ -265,6 +265,37 @@ var gdv_getLastDeviceIdByGameId = function (doc, meta)
         emit( values[2], doc['lastDevice'] );
     }
 };
+
+var gdv_getAllGameInformation = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] == 'gi' ) &&
+        (meta.type == 'json') )
+    {
+        emit( meta.id );
+    }
+};
+
+var gdv_getAllGameAchievements = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] === 'ga' ) &&
+        (meta.type === 'json') )
+    {
+        emit( meta.id );
+    }
+};
+
+var gdv_getAllGameInformationAndGameAchievements = function(doc, meta)
+{
+    var values = meta.id.split(':');
+    if( ((values[0] === 'gi') ||
+        (values[0] === 'ga')) &&
+        (meta.type === 'json') )
+    {
+        emit( meta.id );
+    }
+};
 // ------------------------------------
 
     this.telemDDoc = {
@@ -292,6 +323,15 @@ var gdv_getLastDeviceIdByGameId = function (doc, meta)
             },
             getLastDeviceIdByGameId: {
                 map: gdv_getLastDeviceIdByGameId
+            },
+            getAllGameInformation: {
+                map: gdv_getAllGameInformation
+            },
+            getAllGameAchievements: {
+                map: gdv_getAllGameAchievements
+            },
+            getAllGameInformationAndGameAchievements: {
+                map: gdv_getAllGameInformationAndGameAchievements
             }
         }
     };
@@ -2537,4 +2577,186 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+// gets game information
+// after preliminary research, I have found the only function that directly accesses the info.json or achievement.json files is DashService._loadGameFiles
+// results are built into DashService._games, which is used in various DashService methods
+// _isValidGameId, getListOfVisibleGameIds, geGameAchievements, getGameDetails, getGameMissions,
+// getGameBasicInfo, getGameAssessmentInfo, getGameReportInfo, getGameReleases, getListOfAchievements
+// refer to the comments above these DashService methods to see where they are being used
+// isAchievement used to determine whether to use a ga or gi code for the couchbase lookup
+TelemDS_Couchbase.prototype._getGameInformation = function(gameId, isAchievement, test){
+    return when.promise(function(resolve, reject){
+
+        // game names are not case sensitive
+        gameId = gameId.toUpperCase();
+        var key;
+        if(isAchievement){
+            key = tConst.game.gameAchievementKey+":"+gameId;
+        } else{
+            key = tConst.game.gameInfoKey+":"+gameId;
+        }
+        // get data
+        this.client.get(key, function(err, results) {
+            if(err && !test){
+                console.error("Couchbase TelemetryStore: Get Game Information Error -", err);
+                reject(err);
+                return;
+            } else if(err){
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        }.bind(this) );
+    }.bind(this) );
+};
+
+// internal method to create new gi and ga game files in couchbase.  Used in migration.
+TelemDS_Couchbase.prototype._createGameInformation = function(gameId, data, isAchievement){
+    return when.promise(function(resolve, reject){
+        var key;
+
+        if(isAchievement){
+            key = tConst.game.gameAchievementKey+":"+gameId;
+        } else{
+            key = tConst.game.gameInfoKey+":"+gameId;
+        }
+
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("Couchbase TelemetryStore: Create Game Information Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(data);
+        }.bind(this));
+    }.bind(this));
+};
+
+// retrieves game information, merges with past data, and writes to couchbase
+// isAssessment used to determine whether to use a ga or gi code for the couchbase lookup
+TelemDS_Couchbase.prototype._updateGameInformation = function(gameId, data, isAchievement){
+    return when.promise(function(resolve, reject){
+        //get data
+        return this._getGameInformation(gameId, isAchievement)
+            .then(function(results){
+                // game names are not case sensitive
+                gameId = gameId.toUpperCase();
+                var key;
+                if(isAchievement){
+                    key = tConst.game.gameAchievementKey+":"+gameId;
+                } else{
+                    key = tConst.game.gameInfoKey+":"+gameId;
+                }
+
+                data = _.merge(results, data);
+                this.client.set(key, data, function(err, results){
+                    if(err){
+                        console.error("Couchbase TelemetryStore: Update Game Information Error -", err);
+                        reject(err);
+                        return;
+                    }
+                    resolve(data);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+// getter method for gi:gameId.  Returns a promise
+TelemDS_Couchbase.prototype.getGameInformation = function(gameId, test){
+    test = test || false;
+    return this._getGameInformation(gameId, false, test);
+};
+
+// create method for gi:gameId.  Returns a promise.  No preexisting key needed.
+TelemDS_Couchbase.prototype.createGameInformation = function(gameId, data){
+    return this._createGameInformation(gameId, data, false);
+};
+
+// update method for gi:gameId.  Returns a promise
+TelemDS_Couchbase.prototype.updateGameInformation = function(gameId, data) {
+    return this._updateGameInformation(gameId, data, false)
+};
+
+// getter method for ga:gameId.  Returns a promise
+TelemDS_Couchbase.prototype.getGameAchievements = function(gameId){
+    return this._getGameInformation(gameId, true);
+};
+
+// create method for ga:gameId.  Returns a promise.  No preexisting key needed.
+TelemDS_Couchbase.prototype.createGameAchievements = function(gameId, data){
+    return this._createGameInformation(gameId, data, true);
+};
+
+// update method for ga:gameId.  Returns a promise
+TelemDS_Couchbase.prototype.updateGameAchievements = function(gameId, data){
+    return this._updateGameInformation(gameId, data, true);
+};
+
+// queries a particular view for a list of couchbase ids
+// returns all the document data from those ids
+TelemDS_Couchbase.prototype._getAllGameInformation = function(type){
+    return when.promise(function(resolve, reject){
+        var map;
+        if(type === "Information"){
+            map = "getAllGameInformation";
+        } else if (type === "Achievements"){
+            map = "getAllGameAchievements";
+        } else if (type === "Both"){
+            map = "getAllGameInformationAndGameAchievements"
+        }
+        this.client.view("telemetry", map).query(
+            {
+            },
+            function(err, results) {
+                if(err) {
+                    console.error("Couchbase TelemetryStore: Get Game " + type + " Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function(err, results){
+                    if(err) {
+                        if(err.code == 4101) {
+                            var errors = [];
+                            for(var r in results) {
+                                if(results[r].error) {
+                                    errors.push( results[r].error );
+                                }
+                            }
+                            console.error("CouchBase TelemetryStore: Get Game " + type + " Errors -", errors);
+                            reject(err);
+                            return;
+                        } else {
+                            console.error("CouchBase TelemetryStore: Get Game " + type + " Error -", err);
+                            reject(err);
+                            return;
+                        }
+                    }
+
+                    var information = {};
+                    _.forEach(results, function(game, gameId){
+                        information[gameId] = game.value;
+                    }.bind(this));
+                    resolve(information);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+// gets all couchbase data from the 'gi' files
+TelemDS_Couchbase.prototype.getAllGameInformation = function(){
+    return this._getAllGameInformation('Information');
+};
+
+// gets all couchbase data from the 'ga' files
+TelemDS_Couchbase.prototype.getAllGameAchievements = function(){
+    return this._getAllGameInformation('Achievements');
+};
+
+// gets all couchbase data from the 'gi' and 'ga' files
+TelemDS_Couchbase.prototype.getAllGameInformationAndGameAchievements = function(){
+    return this._getAllGameInformation('Both');
 };
