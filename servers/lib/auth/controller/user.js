@@ -19,6 +19,7 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
+    getDeveloperProfile:   getDeveloperProfile
 };
 
 var exampleIn = {};
@@ -1205,4 +1206,18 @@ function resetPasswordUpdate(req, res, next) {
     }
 }
 
-
+function getDeveloperProfile(userId){
+    return when.promise(function(resolve, reject){
+        this.authStore.getDeveloperProfile(userId)
+            .then(function(values){
+                var games = [];
+                _(values).forEach(function(key){
+                    games.push(key);
+                });
+                resolve(games);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}

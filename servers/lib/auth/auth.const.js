@@ -56,7 +56,8 @@ module.exports = {
     datastore: {
         keys: {
             user: "u",
-            device: "d"
+            device: "d",
+            developer: "di:user:"
         }
     },
     permits: {

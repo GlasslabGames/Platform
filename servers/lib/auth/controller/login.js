@@ -3,6 +3,7 @@ var _      = require('lodash');
 var when   = require('when');
 var Util   = require('../../core/util.js');
 var lConst = require('../../lms/lms.const.js');
+var User   = require('../user.js');
 
 module.exports = {
     logout:   logout,
@@ -133,8 +134,14 @@ return when.promise(function(resolve, reject) {
                 }.bind(this));
         }
         else if( user.role == lConst.role.developer ) {
-            this.stats.increment("info", "Route.Login.Auth.Developer.Done");
-            resolve( user );
+            User.getDeveloperGames(user.id)
+                .then(function(games){
+                    this.stats.increment("info", "Route.Login.Auth.Developer.Done");
+                    resolve( user, games );
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                });
         }
         else {
             this.stats.increment("error", "Route.Login.Auth.LogIn.InvalidRole");

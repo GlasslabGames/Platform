@@ -24,7 +24,7 @@ var check      = require('validator').check;
 var mailChimp  = require('mailchimp').MailChimpAPI;
 
 // load at runtime
-var Util, aConst, lConst;
+var Util, aConst, lConst, TelmStore;
 
 module.exports = AuthService;
 
@@ -43,6 +43,7 @@ function AuthService(options, serviceManager){
         Auth          = require('./auth.js');
         Errors        = require('../errors.js');
         aConst        = Auth.Const;
+        TelmStore = require('../../data/data.js').Datastore.Couchbase;
         Accounts      = Auth.Accounts;
         AuthStore     = Auth.Datastore.MySQL;
 
@@ -52,6 +53,7 @@ function AuthService(options, serviceManager){
         this.accountsManager  = new Accounts.Manager(this.options, this);
         this.glassLabStrategy = this.accountsManager.get("Glasslab");
         this.serviceManager   = serviceManager;
+        this.telmStore        = new TelmStore(this.options.telemetry.datastore.couchbase);
 
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
         WebStore      = require('../dash/dash.js').Datastore.MySQL;

@@ -62,3 +62,17 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+AuthDS_Couchbase.prototype.getDeveloperProfile = function(userId){
+    return when.promise(function(resolve, reject){
+        var key = aConst.datastore.keys.developer + userId;
+        this.client.get(key, function(err, results) {
+            if(err){
+                console.error("Authorization Error - " + err);
+                reject(err);
+            }
+            resolve(results.value);
+        }.bind(this))
+    }.bind(this));
+};
+
+
