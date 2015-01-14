@@ -275,6 +275,15 @@ module.exports = {
                 get: "getDeveloperProfile"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/:userId/info",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getDeveloperGamesInfo"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
