@@ -1,13 +1,4 @@
 {
-    "developer": {
-        "id": "ZY",
-        "name": "Zynga",
-        "logo": {
-            "small": "assets/glasslab-logo.png",
-            "large": "assets/glasslab-logo-2x.png"
-        },
-        "description": ""
-    },
     "basic": {
         "gameId": "WWF",
         "enabled": false,
@@ -15,9 +6,25 @@
         "maintenance": null,
         "shortName": "Words With Friends EDU",
         "longName": "Words With Friends EDU",
+        "release": "dev",
+        "price": "TBD",
+        "releaseDate": "TBD",
+        "type": "TBD",
+        "platform": "TBD",
+        "subject": "TBD",
+        "grades": "6 - 8",
         "shortDescription": "Words With Friends EDU",
         "description": "Words With Friends EDU by Zynga",
-        "settings" : {
+        "developer": {
+            "id": "ZY",
+            "name": "Zynga",
+            "logo": {
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
+            },
+            "description": ""
+        },
+        "settings": {
         },
         "license": {
             "type": "loginType",
@@ -30,6 +37,10 @@
         "thumbnail": {
             "small": "assets/thumb-game-PVZ.png",
             "large": "assets/thumb-game-PVZ.png"
+        },
+        "banners": {
+            "product": "assets/game-banner-AA-1.jpg",
+            "reports": "assets/game-banner-AA-1.jpg"
         }
     },
     "assessment": [
@@ -39,20 +50,9 @@
         ]
     },
     "details": {
-        "release": "dev",
-        "price": "TBD",
-        "releaseDate": "TBD",
-        "type": "TBD",
-        "platform": "TBD",
-        "subject": "TBD",
-        "grades": "6 - 8",
         "buttons": [
         ],
         "pages": {
-        },
-        "banners": {
-            "product": "assets/game-banner-AA-1.jpg",
-            "reports": "assets/game-banner-AA-1.jpg"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
