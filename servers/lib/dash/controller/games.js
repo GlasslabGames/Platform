@@ -11,7 +11,8 @@ module.exports = {
     getActiveGamesDetails:   getActiveGamesDetails,
     getMyGames:              getMyGames,
     reloadGameFiles:         reloadGameFiles,
-    migrateInfoFiles:        migrateInfoFiles
+    migrateInfoFiles:        migrateInfoFiles,
+    getDeveloperProfile:     getDeveloperProfile
 };
 
 var exampleIn = {};
@@ -401,4 +402,35 @@ function reloadGameFiles(req, res){
             res.end(JSON.stringify(error));
             this.stats.increment("error", "ReloadGameFiles.Catch");
         }.bind(this));
+}
+
+function getDeveloperProfile(req, res){
+    var userId = req.params.userId;
+    if(userId !== ''+ req.user.id){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+    this.telmStore.getDeveloperProfile(userId)
+        .then(function(values){
+            var output = JSON.stringify(_buildDeveloperProfile(values));
+            console.log(output);
+            res.end(output);
+        }.bind(this))
+        .then(null, function(err){
+            console.trace("Dash: Get Developer Profile Error -", err);
+            this.requestUtil.errorResponse(res, err);
+            this.stats.increment("error", "GetDeveloperProfile.Catch");
+        }.bind(this));
+}
+
+function _buildDeveloperProfile(values){
+    var games = [];
+    _(values).forEach(function(value, key){
+        games.push(key);
+    });
+    return games;
 }

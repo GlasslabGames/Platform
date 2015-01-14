@@ -2760,3 +2760,18 @@ TelemDS_Couchbase.prototype.getAllGameAchievements = function(){
 TelemDS_Couchbase.prototype.getAllGameInformationAndGameAchievements = function(){
     return this._getAllGameInformation('Both');
 };
+
+TelemDS_Couchbase.prototype.getDeveloperProfile = function(userId, test){
+    return when.promise(function(resolve, reject){
+        var key = tConst.datastore.keys.developer + ":" + tConst.datastore.keys.user + ":" + userId;
+        this.client.get(key, function(err, results) {
+            if(err && !test){
+                console.error("DashDS Error - " + err);
+                reject(err);
+            } else if (err){
+                resolve("no profile");
+            }
+            resolve(results.value);
+        }.bind(this));
+    }.bind(this));
+};

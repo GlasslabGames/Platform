@@ -266,6 +266,15 @@ module.exports = {
                 get: "reloadGameFiles"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/:userId/games",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getDeveloperProfile"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
