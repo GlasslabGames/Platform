@@ -65,12 +65,26 @@ return when.promise(function(resolve, reject) {
 AuthDS_Couchbase.prototype.getDeveloperProfile = function(userId){
     return when.promise(function(resolve, reject){
         var key = aConst.datastore.keys.developer + ":" + aConst.datastore.keys.user + ":" + userId;
-        this.telmStore.client.get(key, function(err, results) {
+        this.client.get(key, function(err, results) {
             if(err){
                 console.error("Authorization Error - " + err);
                 reject(err);
             }
             resolve(results.value);
+        }.bind(this));
+    }.bind(this));
+};
+
+AuthDS_Couchbase.prototype.createDeveloperProfile = function(userId, data){
+    return when.promise(function(resolve, reject){
+        var key = aConst.datastore.keys.developer + ":" + aConst.datastore.keys.user + ":" + userId;
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("Couchbase AuthDataStore: Create Developer Profile Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(data);
         }.bind(this));
     }.bind(this));
 };
