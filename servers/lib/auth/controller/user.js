@@ -466,11 +466,11 @@ function registerUserV2(req, res, next, serviceManager) {
         this.requestUtil.errorResponse(res, err, code);
     }.bind(this);
 
-
+    var userID;
     var register = function(regData, courseId) {
-        this.registerUser(regData)
+        return this.registerUser(regData)
             .then(function(userId){
-
+                userID = userId;
                 // if student
                 if( regData.role == lConst.role.student) {
 
@@ -557,7 +557,16 @@ function registerUserV2(req, res, next, serviceManager) {
     // instructor
     if( regData.role == lConst.role.instructor ||
         regData.role == lConst.role.developer ) {
-        register(regData);
+        register(regData)
+            //.then(function(){
+            //    if(regData.role === lConst.role.developer){
+            //        var data = JSON.stringify({"AA-1":{}});
+            //        return this.AuthDataStore.createDeveloperProfile(userID, data);
+            //    }
+            //}.bind(this))
+            .then(null, function(err){
+                console.log("Registration Error -",err);
+            });
     }
     // else student
     else if(regData.role == lConst.role.student) {
@@ -1208,10 +1217,10 @@ function resetPasswordUpdate(req, res, next) {
 
 function getDeveloperGames(userId){
     return when.promise(function(resolve, reject){
-        this.authStore.getDeveloperProfile(userId)
+        this.authDataStore.getDeveloperProfile(userId)
             .then(function(values){
                 var games = [];
-                _(values).forEach(function(key){
+                _(values).forEach(function(value, key){
                     games.push(key);
                 });
                 resolve(games);

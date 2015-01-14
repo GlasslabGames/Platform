@@ -46,14 +46,15 @@ function AuthService(options, serviceManager){
         TelmStore = require('../data/data.js').Datastore.Couchbase;
         Accounts      = Auth.Accounts;
         AuthStore     = Auth.Datastore.MySQL;
+        AuthDataStore = Auth.Datastore.Couchbase;
 
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options, Errors);
         this.authStore        = new AuthStore(this.options.auth.datastore.mysql);
+        this.authDataStore    = new AuthDataStore(this.options.telemetry.datastore.couchbase);
         this.accountsManager  = new Accounts.Manager(this.options, this);
         this.glassLabStrategy = this.accountsManager.get("Glasslab");
         this.serviceManager   = serviceManager;
-        this.telmStore        = new TelmStore(this.options.telemetry.datastore.couchbase);
 
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
         WebStore      = require('../dash/dash.js').Datastore.MySQL;
@@ -124,6 +125,18 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
 
+        // connect to authDataStore
+        .then(function(){
+            return this.authDataStore.connect();
+        }.bind(this))
+        .then(function(){
+            console.log("AuthDataStore: Couchbase Connected");
+            this.stats.increment("info", "Couchbase.Connect");
+        }.bind(this),
+        function(err){
+            console.trace("AuthDataStore: Couchbase Error -", err);
+            this.stats.increment("error", "Couchbase.Connect");
+        }.bind(this))
         // connect to lmsStore
         .then(function(){
             return this.lmsStore.connect();

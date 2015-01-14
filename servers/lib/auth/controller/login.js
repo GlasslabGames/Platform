@@ -134,10 +134,12 @@ return when.promise(function(resolve, reject) {
                 }.bind(this));
         }
         else if( user.role == lConst.role.developer ) {
-            //User.getDeveloperGames(user.id)
+            ////add games/access info to developer
+            //User.getDeveloperGames.call(this, user.id)
             //    .then(function(games){
             //        this.stats.increment("info", "Route.Login.Auth.Developer.Done");
-            //        resolve( user, games );
+            //        user.developerProfile = games;
+            //        resolve( user );
             //    }.bind(this))
             //    .then(null, function(err){
             //        reject(err);
