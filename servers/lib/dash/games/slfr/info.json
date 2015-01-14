@@ -26,8 +26,8 @@
             "id": "UL",
             "name": "Ululab",
             "logo": {
-                "small": "assets/dev-logo-placeholder.jpg",
-                "large": "assets/dev-logo-placeholder@2x.jpg"
+                "small": "assets/dev-logo-ululab.png",
+                "large": "assets/dev-logo-ululab@2x.png"
             },
             "description": "TBD"
         },
@@ -46,8 +46,8 @@
             "large": "assets/thumb-game-SLFR@2x.png"
         },
         "card": {
-            "small": "assets/game-card-PLACEHOLDER.jpg",
-            "large": "assets/game-card-PLACEHOLDER@2x.jpg"
+            "small": "assets/game-card-SLFR.png",
+            "large": "assets/game-card-SLFR@2x.png"
         },
         "banners": {
             "product": "assets/game-banner-SLFR.png",
