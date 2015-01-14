@@ -18,8 +18,7 @@ module.exports = {
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
-    resetPasswordUpdate: resetPasswordUpdate,
-    getDeveloperGames:   getDeveloperGames
+    resetPasswordUpdate: resetPasswordUpdate
 };
 
 var exampleIn = {};
@@ -558,12 +557,12 @@ function registerUserV2(req, res, next, serviceManager) {
     if( regData.role == lConst.role.instructor ||
         regData.role == lConst.role.developer ) {
         register(regData)
-            //.then(function(){
-            //    if(regData.role === lConst.role.developer){
-            //        var data = JSON.stringify({"AA-1":{}});
-            //        return this.AuthDataStore.createDeveloperProfile(userID, data);
-            //    }
-            //}.bind(this))
+            .then(function(){
+                if(regData.role === lConst.role.developer){
+                    var data = {};
+                    return this.authDataStore.createDeveloperProfile(userID, data);
+                }
+            }.bind(this))
             .then(null, function(err){
                 console.log("Registration Error -",err);
             });
@@ -1213,20 +1212,4 @@ function resetPasswordUpdate(req, res, next) {
     } else {
         this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.missing"}, 401);
     }
-}
-
-function getDeveloperGames(userId){
-    return when.promise(function(resolve, reject){
-        this.authDataStore.getDeveloperProfile(userId)
-            .then(function(values){
-                var games = [];
-                _(values).forEach(function(value, key){
-                    games.push(key);
-                });
-                resolve(games);
-            }.bind(this))
-            .then(null, function(err){
-                reject(err);
-            });
-    }.bind(this));
 }

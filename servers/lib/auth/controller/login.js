@@ -134,16 +134,6 @@ return when.promise(function(resolve, reject) {
                 }.bind(this));
         }
         else if( user.role == lConst.role.developer ) {
-            ////add games/access info to developer
-            //User.getDeveloperGames.call(this, user.id)
-            //    .then(function(games){
-            //        this.stats.increment("info", "Route.Login.Auth.Developer.Done");
-            //        user.developerProfile = games;
-            //        resolve( user );
-            //    }.bind(this))
-            //    .then(null, function(err){
-            //        reject(err);
-            //    });
             this.stats.increment("info", "Route.Login.Auth.Developer.Done");
             resolve( user );
         }
