@@ -38,7 +38,7 @@ function getAssessmentDefinitions(req, res){
         .then(function(assessmentInfo){
             this.requestUtil.jsonResponse(res, assessmentInfo);
         }.bind(this) )
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Get Assessment Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "GetAchievements.Catch");
@@ -146,7 +146,7 @@ function saveAssessmentResults(req, res){
             this.requestUtil.jsonResponse(res, {});
         }.bind(this) )
         // error
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Save Assessment Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
