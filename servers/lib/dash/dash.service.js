@@ -544,7 +544,7 @@ DashService.prototype._oldLoadGameFiles = function() {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        try{
+        try {
             var dir = path.join(__dirname, "games");
             var files = fs.readdirSync(dir);
             var gameId;

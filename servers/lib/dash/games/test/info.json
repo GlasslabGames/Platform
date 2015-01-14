@@ -37,19 +37,17 @@
             "reports": "assets/game-banner-AA-1.jpg"
         }
     },
+    "assessment": [
+    ],
+    "reports": {
+        "list": [
+        ]
+    },
     "details": {
-
-        "assessment": [
-        ],
-        "reports": {
-            "list": [
-            ]
-        },
         "buttons": [
         ],
         "pages": {
         },
-
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",

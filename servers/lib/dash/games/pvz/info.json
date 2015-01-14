@@ -49,11 +49,11 @@
             }
         }
     ],
+    "reports": {
+        "list": [
+        ]
+    },
     "details": {
-        "reports": {
-            "list": [
-            ]
-        },
         "buttons": [
         ],
         "pages": {
