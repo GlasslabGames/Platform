@@ -13,7 +13,8 @@ module.exports = {
     reloadGameFiles:         reloadGameFiles,
     migrateInfoFiles:        migrateInfoFiles,
     getDeveloperProfile:     getDeveloperProfile,
-    getDeveloperGamesInfo:   getDeveloperGamesInfo
+    getDeveloperGamesInfo:   getDeveloperGamesInfo,
+    getDeveloperGameIds:     getDeveloperGameIds
 };
 
 var exampleIn = {};
@@ -406,17 +407,15 @@ function reloadGameFiles(req, res){
 }
 
 function getDeveloperProfile(req, res){
-    var userId = req.params.userId;
-    if(userId !== ''+ req.user.id || req.user.role !== "developer"){
+    var userId = req.user.id;
+    if(req.user.role !== "developer"){
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
-    this.telmStore.getDeveloperProfile(userId)
-        .then(function(values){
-            var output = JSON.stringify(_grabDeveloperGameIds(values));
-            console.log(output);
-            res.end(output);
-        }.bind(this))
+    getDeveloperGameIds.call(this,userId)
+        .then(function(output){
+            res.end(JSON.stringify(output));
+        })
         .then(null, function(err){
             console.trace("Dash: Get Developer Profile Error -", err);
             this.requestUtil.errorResponse(res, err);
@@ -424,26 +423,33 @@ function getDeveloperProfile(req, res){
         }.bind(this));
 }
 
-function _grabDeveloperGameIds(values){
-    var games = [];
-    _(values).forEach(function(value, key){
-        games.push(key);
-    });
-    return games;
+function getDeveloperGameIds(userId){
+    return when.promise(function(resolve, reject){
+        this.telmStore.getDeveloperProfile(userId)
+            .then(function(values){
+                var gameIds = {};
+                _(values).forEach(function(value, key){
+                    gameIds[key] = {};
+                });
+                resolve(gameIds);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            }.bind(this));
+    }.bind(this));
 }
 
 function getDeveloperGamesInfo(req, res){
-    var userId = req.params.userId;
-    if(userId !== ''+ req.user.id || req.user.role !== "developer"){
+    var userId = req.user.id;
+    if(req.user.role !== "developer"){
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
-    this.telmStore.getDeveloperProfile(userId)
-        .then(function(values){
-            var gameIds = _grabDeveloperGameIds(values);
+    getDeveloperGameIds.call(this,userId)
+        .then(function(gameIds){
             var basic;
             var basicGameInfo = {};
-            gameIds.forEach(function(gameId){
+            _(gameIds).forEach(function(value, gameId){
                 basic = this._games[gameId].info.basic;
                 basicGameInfo[gameId] = basic;
             }.bind(this));

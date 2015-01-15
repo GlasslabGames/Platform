@@ -18,7 +18,8 @@ module.exports = {
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
-    resetPasswordUpdate: resetPasswordUpdate
+    resetPasswordUpdate: resetPasswordUpdate,
+    requestDeveloperGameAccess: requestDeveloperGameAccess
 };
 
 var exampleIn = {};
@@ -466,6 +467,7 @@ function registerUserV2(req, res, next, serviceManager) {
     }.bind(this);
 
     var userID;
+    var gameId = req.body.gameId.toUpperCase();
     var register = function(regData, courseId) {
         return this.registerUser(regData)
             .then(function(userId){
@@ -558,8 +560,18 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.role == lConst.role.developer ) {
         register(regData)
             .then(function(){
+                if(regData.role === lConst.role.developer && gameId){
+                    var dashService = this.serviceManager.get("dash").service;
+                    return dashService.telmStore.getGameInformation(gameId, true);
+                }
+            }.bind(this))
+            .then(function(found){
                 if(regData.role === lConst.role.developer){
                     var data = {};
+                    // email messaging if requests access to nonexistant game
+                    if(found && found !== "no object"){
+                        data[gameId] = {};
+                    }
                     return this.authDataStore.createDeveloperProfile(userID, data);
                 }
             }.bind(this))
@@ -1212,4 +1224,24 @@ function resetPasswordUpdate(req, res, next) {
     } else {
         this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.missing"}, 401);
     }
+}
+
+function requestDeveloperGameAccess(req, res){
+    var userId = req.user.id;
+    var gameId = req.params.gameId.toUpperCase();
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"auth.access.invalid"},401);
+        return;
+    }
+    var dashService = this.serviceManager.get("dash").service;
+    dashService.telmStore.getGameInformation(gameId, true)
+        .then(function(found){
+            if(found === "no object"){
+                this.requestUtil.errorResponse(res, {key:"user.developer.game.not.present"}, 401)
+            }
+
+        }.bind(this))
+        .then(null, function(err){
+
+        }.bind(this));
 }

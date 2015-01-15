@@ -38,6 +38,24 @@ module.exports = {
     dateRange
  */
 
+function _checkForGameAccess(userId, gameId){
+    return when.promise(function(resolve, reject){
+        var dashGames = this.serviceManager.get("dash").games;
+        dashGames.getDeveloperGameIds(userId)
+            .then(function(gameIds){
+                var state = _(gameIds).some(function(value, id){
+                    if(gameId === id){
+                        return true;
+                    }
+                });
+                resolve(state);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
+
 // for a particular gameId, gets all aws signed urls between the designated days in the chosen month
 // defaulted to only get csv files within archives/dev
 function getSignedUrlsByDayRange(req, res){
