@@ -12,7 +12,8 @@ module.exports = {
     getMyGames:              getMyGames,
     reloadGameFiles:         reloadGameFiles,
     migrateInfoFiles:        migrateInfoFiles,
-    getDeveloperProfile:     getDeveloperProfile
+    getDeveloperProfile:     getDeveloperProfile,
+    getDeveloperGamesInfo:   getDeveloperGamesInfo
 };
 
 var exampleIn = {};
@@ -406,17 +407,13 @@ function reloadGameFiles(req, res){
 
 function getDeveloperProfile(req, res){
     var userId = req.params.userId;
-    if(userId !== ''+ req.user.id){
-        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
-        return;
-    }
-    if(req.user.role !== "developer"){
+    if(userId !== ''+ req.user.id || req.user.role !== "developer"){
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
     this.telmStore.getDeveloperProfile(userId)
         .then(function(values){
-            var output = JSON.stringify(_buildDeveloperProfile(values));
+            var output = JSON.stringify(_grabDeveloperGameIds(values));
             console.log(output);
             res.end(output);
         }.bind(this))
@@ -427,10 +424,35 @@ function getDeveloperProfile(req, res){
         }.bind(this));
 }
 
-function _buildDeveloperProfile(values){
+function _grabDeveloperGameIds(values){
     var games = [];
     _(values).forEach(function(value, key){
         games.push(key);
     });
     return games;
+}
+
+function getDeveloperGamesInfo(req, res){
+    var userId = req.params.userId;
+    if(userId !== ''+ req.user.id || req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+    this.telmStore.getDeveloperProfile(userId)
+        .then(function(values){
+            var gameIds = _grabDeveloperGameIds(values);
+            var basic;
+            var basicGameInfo = {};
+            gameIds.forEach(function(gameId){
+                basic = this._games[gameId].info.basic;
+                basicGameInfo[gameId] = basic;
+            }.bind(this));
+            var output = JSON.stringify(basicGameInfo);
+            res.end(output);
+        }.bind(this))
+        .then(null, function(err){
+            console.trace("Dash: Get Developer Profile Error -", err);
+            this.requestUtil.errorResponse(res, err);
+            this.stats.increment("error", "GetDeveloperGamesInfo.Catch");
+        }.bind(this));
 }
