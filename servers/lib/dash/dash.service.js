@@ -354,17 +354,12 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
             // if key does not exist, error will be thrown, but that's ok. Just means key needs to be created
             // if key exists, but is initialized to a default or empty value, run migration and populate the keys
             this.telmStore.getGameInformation('AA-1', true)
-                .then(
-                function(data){
-                    if(forceMigrate){
+                .then(function(data){
+                    if(forceMigrate || data === 'no object'){
                         return '{}';
                     }
                     return JSON.stringify(data);
-                }, function() {
-                    return '{}';
-                    console.log('Get Game Information Error: signals need for migration');
-                }
-            )
+                })
                 .then(function(data){
                     if(data !== '{}' && data !== '{"click":"to edit","new in 2.0":"there are no reserved field names"}'){
                         // files have already been migrated, end process

@@ -2604,7 +2604,7 @@ TelemDS_Couchbase.prototype._getGameInformation = function(gameId, isAchievement
                 reject(err);
                 return;
             } else if(err){
-                reject(err);
+                resolve("no object");
                 return;
             }
             resolve(results.value);

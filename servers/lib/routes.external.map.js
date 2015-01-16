@@ -268,7 +268,7 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/dash/developer/:userId/games",
+            api: "/api/v2/dash/developer/profile",
             service: "dash",
             controller: "games",
             method: {
@@ -277,7 +277,7 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/dash/developer/:userId/info",
+            api: "/api/v2/dash/developer/info",
             service: "dash",
             controller: "games",
             method: {
@@ -518,6 +518,15 @@ module.exports = {
             controller: "login",
             method: {
                 post: "logout"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/developer/:gameId/request",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "requestDeveloperGameAccess"
             }
         },
     // ---------------------------------------------------

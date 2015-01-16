@@ -67,6 +67,8 @@ module.exports = {
     "user.verifyEmail.user.emailNotExist":  "This email address does not exist in our system.",
     "user.verifyEmail.alreadyValidated":    "You have already validated your email, please sign in using the \"Sign In\" button above.",
     "user.welcomeEmail.general":            "We encountered an error sending your welcome email. Please try again",
+    "user.gameId.invalid":                  "Invalid gameId",
+    "user.has.access":                      "Developer already has access",
     // config
     "data.gameId.general":                  "We encountered an error. Please try again.",
     "data.gameId.missing":                  "This game Id does not exist in our system",

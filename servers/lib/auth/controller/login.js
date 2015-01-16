@@ -139,7 +139,8 @@ return when.promise(function(resolve, reject) {
                 .then(function(result) {
                     if (result === "no profile") {
                         var data = {};
-                        return this.authDataStore.createDeveloperProfile(user.id, data);
+                        // create new developer profile on couchbase
+                        return this.authDataStore.setDeveloperProfile(user.id, data);
                     }
                 }.bind(this))
                 .then(function(){
