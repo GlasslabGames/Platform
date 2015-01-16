@@ -284,6 +284,15 @@ module.exports = {
                 get: "getDeveloperGamesInfo"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/info/game/:gameId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "updateDeveloperGameInfo"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
