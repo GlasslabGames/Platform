@@ -438,13 +438,13 @@
                     {
                         "name": "PC (1.0GB)",
                         "OS": "Windows",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.msi",
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.msi",
                         "target": "_blank"
                     },
                     {
                         "name": "Mac (1.0GB)",
                         "OS": "Mac",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.dmg",
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.dmg",
                         "target": "_blank"
                     }
                 ]
