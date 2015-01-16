@@ -520,15 +520,15 @@ module.exports = {
                 post: "logout"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/auth/developer/:gameId/request",
-        //    service: "auth",
-        //    controller: "user",
-        //    method: {
-        //        post: "requestDeveloperGameAccess"
-        //    }
-        //},
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/developer/:gameId/request",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "requestDeveloperGameAccess"
+            }
+        },
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------

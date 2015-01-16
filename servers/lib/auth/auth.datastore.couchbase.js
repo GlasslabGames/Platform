@@ -62,7 +62,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-AuthDS_Couchbase.prototype.createDeveloperProfile = function(userId, data){
+AuthDS_Couchbase.prototype.setDeveloperProfile = function(userId, data){
     return when.promise(function(resolve, reject){
         var key = aConst.datastore.keys.developer + ":" + aConst.datastore.keys.user + ":" + userId;
         this.client.set(key, data, function(err, results){

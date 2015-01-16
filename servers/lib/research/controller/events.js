@@ -40,14 +40,14 @@ module.exports = {
 
 function _checkForGameAccess(userId, gameId){
     return when.promise(function(resolve, reject){
-        var dashGames = this.serviceManager.get("dash").games;
-        dashGames.getDeveloperGameIds(userId)
+        var dashGames = this.serviceManager.get("dash").lib.Controller.games;
+        var dashService = this.serviceManager.get("dash").service;
+        dashGames.getDeveloperGameIds.call(dashService, userId)
             .then(function(gameIds){
-                var state = _(gameIds).some(function(value, id){
-                    if(gameId === id){
-                        return true;
-                    }
-                });
+                var state = false;
+                if(!!gameIds[gameId]){
+                    state = true;
+                }
                 resolve(state);
             }.bind(this))
             .then(null, function(err){
@@ -966,12 +966,24 @@ function getEventsByDate(req, res, next){
         }
         var outList;
         return when.promise(function(resolve, reject) {
-            this.store.getCsvDataByGameId(gameId)
+            _checkForGameAccess.call(this, req.user.id, gameId)
+                .then(function(state){
+                    if(state){
+                        return this.store.getCsvDataByGameId(gameId);
+                    }
+                    return "invalid";
+                }.bind(this))
                 .then(function (csvData) {
+                    if(csvData === "invalid"){
+                        return csvData;
+                    }
                     return parseCSVSchema(csvData);
                 }.bind(this))
 
                 .then(function (_parsedSchemaData) {
+                    if(_parsedSchemaData === "invalid"){
+                        return _parsedSchemaData;
+                    }
                     parsedSchemaData = _parsedSchemaData;
 
                     console.log("Getting Events For Game:", gameId, "from", startDate.format("MM/DD/YYYY"), "to", endDate.format("MM/DD/YYYY"));
@@ -979,6 +991,9 @@ function getEventsByDate(req, res, next){
                 }.bind(this))
 
                 .then(function (events) {
+                    if(events === "invalid"){
+                        return events;
+                    }
                     console.log("Running Filter...");
                     console.log("Processing", events.length, "Events...");
                     // process events
@@ -986,13 +1001,20 @@ function getEventsByDate(req, res, next){
                 }.bind(this))
 
                 .then(function (list) {
+                    if(list === "invalid"){
+                        return "invalid";
+                    }
                     outList = list;
                     if (outList.length > limit) {
                         return getSignedUrlsByDayRange.call(this, req, res);
                     }
                 }.bind(this))
 
-                .then(function () {
+                .then(function (state) {
+                    if(state === "invalid"){
+                        this.requestUtil.errorResponse(res, {key: "research.access.invalid"}, 401);
+                        return;
+                    }
                     var outData = outList.join("\n");
                     if(outList.length <= limit){
                         if (saveToFile) {
