@@ -2650,8 +2650,8 @@ TelemDS_Couchbase.prototype._updateGameInformation = function(gameId, data, isAc
                     key = tConst.game.gameInfoKey+":"+gameId;
                 }
 
-                data = _.merge(results, data);
-                this.client.set(key, data, function(err, results){
+                var mergedData = _.merge(results, data);
+                this.client.set(key, mergedData, function(err, results){
                     if(err){
                         console.error("Couchbase TelemetryStore: Update Game Information Error -", err);
                         reject(err);
