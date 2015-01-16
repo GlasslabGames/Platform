@@ -19,6 +19,7 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
+    requestDeveloperGameAccess: requestDeveloperGameAccess
 };
 
 var exampleIn = {};
@@ -465,11 +466,12 @@ function registerUserV2(req, res, next, serviceManager) {
         this.requestUtil.errorResponse(res, err, code);
     }.bind(this);
 
-
+    var userID;
+    var gameId = req.body.gameId.toUpperCase();
     var register = function(regData, courseId) {
-        this.registerUser(regData)
+        return this.registerUser(regData)
             .then(function(userId){
-
+                userID = userId;
                 // if student
                 if( regData.role == lConst.role.student) {
 
@@ -556,7 +558,27 @@ function registerUserV2(req, res, next, serviceManager) {
     // instructor
     if( regData.role == lConst.role.instructor ||
         regData.role == lConst.role.developer ) {
-        register(regData);
+        register(regData)
+            .then(function(){
+                if(regData.role === lConst.role.developer && gameId){
+                    var dashService = this.serviceManager.get("dash").service;
+                    return dashService.telmStore.getGameInformation(gameId, true);
+                }
+            }.bind(this))
+            .then(function(found){
+                if(regData.role === lConst.role.developer){
+                    var data = {};
+                    // email messaging if requests access to nonexistant game
+                    if(found && found !== "no object"){
+                        data[gameId] = {};
+                    }
+                    // create new developer profile on couchbase
+                    return this.authDataStore.setDeveloperProfile(userID, data);
+                }
+            }.bind(this))
+            .then(null, function(err){
+                console.log("Registration Error -",err);
+            });
     }
     // else student
     else if(regData.role == lConst.role.student) {
@@ -1205,4 +1227,45 @@ function resetPasswordUpdate(req, res, next) {
     }
 }
 
-
+function requestDeveloperGameAccess(req, res){
+    var userId = req.user.id;
+    var gameId = req.params.gameId.toUpperCase();
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"auth.access.invalid"},401);
+        return;
+    }
+    var dashService = this.serviceManager.get("dash").service;
+    dashService.telmStore.getGameInformation(gameId, true)
+        .then(function(found){
+            if(found === "no object"){
+                return found;
+            }
+            // fix check access flow.  perhaps use helper method in events. reorganize.
+            var dashGames = this.serviceManager.get("dash").lib.Controller.games;
+            var dashService = this.serviceManager.get("dash").service;
+            return dashGames.getDeveloperGameIds.call(dashService, userId)
+        }.bind(this))
+        .then(function(data){
+            if(data === "no object"){
+                return data;
+            } else if(!!data[gameId]){
+                return "already has";
+            } else{
+                data[gameId] = {};
+                return this.authDataStore.setDeveloperProfile(userId, data);
+            }
+        }.bind(this))
+        .then(function(state){
+            if(state === "no object"){
+                this.requestUtil.errorResponse(res, {key:"user.invalid.gameId"}, 401);
+            } else if(state === "already has"){
+                this.requestUtil.errorResponse(res, {key:"user.has.access"}, 401);
+            } else{
+                res.end('{"status": "updated"}');
+            }
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err, 401);
+            console.trace(err);
+        }.bind(this));
+}
