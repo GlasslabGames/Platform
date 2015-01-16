@@ -38,8 +38,15 @@ module.exports = {
     dateRange
  */
 
-function _checkForGameAccess(userId, gameId){
+function _checkForGameAccess(userId, gameId, role){
     return when.promise(function(resolve, reject){
+        if(role === "admin"){
+            resolve(true);
+            return;
+        } else if(role !== "developer"){
+            resolve(false);
+            return;
+        }
         var dashGames = this.serviceManager.get("dash").lib.Controller.games;
         var dashService = this.serviceManager.get("dash").service;
         dashGames.getDeveloperGameIds.call(dashService, userId)
@@ -966,7 +973,7 @@ function getEventsByDate(req, res, next){
         }
         var outList;
         return when.promise(function(resolve, reject) {
-            _checkForGameAccess.call(this, req.user.id, gameId)
+            _checkForGameAccess.call(this, req.user.id, gameId, req.user.role)
                 .then(function(state){
                     if(state){
                         return this.store.getCsvDataByGameId(gameId);
