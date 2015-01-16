@@ -1261,6 +1261,21 @@ function requestDeveloperGameAccess(req, res){
             } else if(state === "already has"){
                 this.requestUtil.errorResponse(res, {key:"user.has.access"}, 401);
             } else{
+                // send email to developers telling them that we will need to approve their request for access.
+                // game added to couchbase gets a status of "pending"
+                // perhaps three levels of status, "pending", "approved", and "denied"
+                // maybe analogous to
+                //sendDeveloperConfirmEmail.call( this, regData, req.protocol, req.headers.host )
+                //    .then(function(){
+                //        this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
+                //        this.requestUtil.jsonResponse(res, {});
+                //    }.bind(this))
+                //    // error
+                //    .then(null, function(err){
+                //        this.stats.increment("error", "Route.Register.User.sendRegisterEmail");
+                //        console.error("Auth: RegisterUserV2 - Error", err);
+                //        this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
+                //    }.bind(this))
                 res.end('{"status": "updated"}');
             }
         }.bind(this))
