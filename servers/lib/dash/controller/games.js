@@ -430,7 +430,9 @@ function getDeveloperGameIds(userId){
             .then(function(values){
                 var gameIds = {};
                 _(values).forEach(function(value, key){
-                    gameIds[key] = {};
+                    if(value.status === "approved"){
+                        gameIds[key] = {};
+                    }
                 });
                 resolve(gameIds);
             }.bind(this))
@@ -479,9 +481,15 @@ function updateDeveloperGameInfo(req, res){
         this.requestUtil.errorResponse(res, {key:"dash.info.missing"},401);
         return;
     }
-    this.telmStore.getGameInformation(gameId, true)
+    getDeveloperGameIds.call(this,userId)
+        .then(function(gameIds){
+            if(gameIds[gameId]){
+                return this.telmStore.getGameInformation(gameId, true);
+            }
+            return "no access"
+        }.bind(this))
         .then(function(results){
-            if(results === "no object"){
+            if(typeof results === "string"){
                 return results;
             }
             var basic = results.basic;
@@ -498,7 +506,7 @@ function updateDeveloperGameInfo(req, res){
             return this.telmStore.updateGameInformation(gameId, data);
         }.bind(this))
         .then(function(status){
-            if(status !== "no object"){
+            if(status !== "no object" && status !== "no access"){
                 this._games[gameId].info.basic = data.basic;
                 res.end('{"update":"complete"}');
             } else{

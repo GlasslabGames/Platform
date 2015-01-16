@@ -570,7 +570,9 @@ function registerUserV2(req, res, next, serviceManager) {
                     var data = {};
                     // email messaging if requests access to nonexistant game
                     if(found && found !== "no object"){
-                        data[gameId] = {};
+                        data[gameId] = {
+                            status: "pending"
+                        };
                     }
                     // create new developer profile on couchbase
                     return this.authDataStore.setDeveloperProfile(userID, data);
@@ -1251,7 +1253,9 @@ function requestDeveloperGameAccess(req, res){
             } else if(!!data[gameId]){
                 return "already has";
             } else{
-                data[gameId] = {};
+                data[gameId] = {
+                    status: "pending"
+                };
                 return this.authDataStore.setDeveloperProfile(userId, data);
             }
         }.bind(this))
