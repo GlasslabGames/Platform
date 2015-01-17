@@ -144,12 +144,109 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 }
                 profile.password = "-";
 
-                done(null, profile);
+                // if teacher, create all students in all classes, create classes, add students to class
+                if(false) {//profile.role === lConst.role.instructor) {
+                    this._getGroups("https://api.edmodo.com/groups", accessToken, profile, done);
+                } else {
+                    done(null, profile);
+                }
             } catch (err) {
                 done(err);
             }
         }
     }.bind(this));
+};
+
+Strategy.prototype._getGroups = function(url, accessToken, profile, done) {
+    this._oauth2.get(url, accessToken, function (err, body, res) {
+        if (err) { return done(new InternalOAuthError('failed to fetch group info', err)); }
+
+        // check if contains a "url" property
+        if( res.statusCode == 200 ) {
+            try {
+                var tmp = JSON.parse(body);
+                // contains url and url is NOT the same as the one just tried
+                if( tmp.hasOwnProperty('url') &&
+                    (url != tmp.url) ) {
+                    console.log("Edmodo Strategy: Redirecting to", tmp.url);
+                    this._getGroups(tmp.url, accessToken, done);
+                    return;
+                }
+            } catch(err) {
+                // this is ok
+            }
+        }
+
+        // check for redirects
+        if( res.statusCode == 302 &&
+            res.headers &&
+            res.headers.location) {
+            console.log("Edmodo Strategy: Redirecting to", res.headers.location);
+            this._getGroups(res.headers.location, accessToken, done);
+            return;
+        } else {
+            try {
+                var json = JSON.parse(body);
+
+                profile.courses = {};
+
+                for( var group in json ) {
+                    profile.course[group] = {
+                        type: aConst.login.type.edmodo,
+                        title: group.title,
+                        grade: ['start_level_interp', 'end_level_interp'],
+                        games: [],
+                        users: [],
+                        archived: false,
+                        archivedDate: null,
+                        lmsType: lConst.course.type.edmodo,
+                        lmsId: '{' + lConst.course.type.edmodo + '}.' + group.id,
+                        labels: "",
+                        meta: JSON.stringify( group )
+                    };
+                }
+
+                done( null, profile );
+            } catch (err) {
+                done(err);
+            }
+        }
+    }.bind(this));
+
+    /*var data = { uid: parseInt(uid) };
+    //console.error("ICivics - teacher getMembers data:", data);
+    this._oauth.post(url, token, tokenSecret, data, function (err, body, res) {
+        if (err) {
+            return done(new InternalOAuthError('failed to fetch user members', err));
+        }
+
+        if(body) {
+            var json = null;
+            try{
+                json = JSON.parse(body);
+            } catch(err){
+                return done(new InternalOAuthError('failed to fetch user members', err));
+            }
+
+            // add users to courses
+            //console.log("ICivics - teacher getMembers json:", JSON.stringify(json, null, 2));
+            for(var courseId in json){
+                for(var userId in json[courseId].members){
+                    // valid memeber and userId not teacher
+                    if( json[courseId].members[userId] &&
+                        parseInt(userId) != parseInt(userData.uid)
+                        ) {
+                        // normalize input
+                        profile.courses[courseId].users.push( this._getProfileData(json[courseId].members[userId]) );
+                    }
+                }
+            }
+
+            done(null, profile);
+        } else {
+            return done(new InternalOAuthError('failed to fetch user members - no body'));
+        }
+    }.bind(this));*/
 };
 
 /**
