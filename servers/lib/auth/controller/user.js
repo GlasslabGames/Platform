@@ -468,8 +468,6 @@ function registerUserV2(req, res, next, serviceManager) {
     }.bind(this);
 
     var userID;
-    var email = regData.email;
-    var gameId = req.body.gameId.toUpperCase();
     var register = function(regData, courseId) {
         return this.registerUser(regData)
             .then(function(userId){
@@ -556,31 +554,36 @@ function registerUserV2(req, res, next, serviceManager) {
             .then(null, registerErr);
     }.bind(this);
 
-    var developerProfile;
+    //var gameId;
+    //if(req.body.gameId){
+    //    gameId = req.body.gameId.toUpperCase();
+    //}
+    //var email = regData.email;
+    //var developerProfile;
     // instructor
     if( regData.role == lConst.role.instructor ||
         regData.role == lConst.role.developer ) {
         register(regData)
-            .then(function(){
-                if(regData.role === lConst.role.developer && gameId){
-                    var dashService = this.serviceManager.get("dash").service;
-                    return dashService.telmStore.getGameInformation(gameId, true);
-                }
-            }.bind(this))
-            .then(function(found){
+            //.then(function(){
+                //if(regData.role === lConst.role.developer && gameId){
+                //    var dashService = this.serviceManager.get("dash").service;
+                //    return dashService.telmStore.getGameInformation(gameId, true);
+                //}
+            //}.bind(this))
+            .then(function(/*found*/){
                 if(regData.role === lConst.role.developer){
                     developerProfile = {};
                     // email messaging if requests access to nonexistant game
-                    if(found && found !== "no object"){
-                        developerProfile[gameId] = {};
-                    }
+                    //if(found && found !== "no object"){
+                    //    developerProfile[gameId] = {};
+                    //}
                     // create new developer profile on couchbase
                     return this.authDataStore.setDeveloperProfile(userID, developerProfile);
                 }
             }.bind(this))
-            .then(function(){
-                return sendDeveloperGameConfirmEmail.call(this, userID, email, gameId, developerProfile, req.protocol, req.headers.host);
-            }.bind(this))
+            //.then(function(){
+            //    return sendDeveloperGameConfirmEmail.call(this, userID, email, gameId, developerProfile, req.protocol, req.headers.host);
+            //}.bind(this))
             .then(null, function(err){
                 console.log("Registration Error -",err);
             });
@@ -687,6 +690,7 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
             userData.verifyCodeStatus     = aConst.verifyCode.status.approve;
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
+
                     var emailData = {
                         subject: "GlassLab Games Developer confirmation",
                         to: this.options.auth.developer.email.to,
