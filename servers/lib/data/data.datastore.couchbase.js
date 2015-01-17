@@ -296,6 +296,15 @@ var gdv_getAllGameInformationAndGameAchievements = function(doc, meta)
         emit( meta.id );
     }
 };
+
+var gdv_getAllDeveloperProfiles = function(doc, meta)
+{
+    var values = meta.id.split(':');
+    if((values[0] === 'di') &&
+        (values[1] === 'u')){
+        emit( meta.id );
+    }
+};
 // ------------------------------------
 
     this.telemDDoc = {
@@ -332,6 +341,9 @@ var gdv_getAllGameInformationAndGameAchievements = function(doc, meta)
             },
             getAllGameInformationAndGameAchievements: {
                 map: gdv_getAllGameInformationAndGameAchievements
+            },
+            getAllDeveloperProfiles: {
+                map: gdv_getAllDeveloperProfiles
             }
         }
     };
@@ -2719,7 +2731,7 @@ TelemDS_Couchbase.prototype._getAllGameInformation = function(type){
                 var keys = _.pluck(results, 'id');
                 this._chunk_getMulti(keys, {}, function(err, results){
                     if(err) {
-                        if(err.code == 4101) {
+                        if(err.code == 401) {
                             var errors = [];
                             for(var r in results) {
                                 if(results[r].error) {
@@ -2773,5 +2785,40 @@ TelemDS_Couchbase.prototype.getDeveloperProfile = function(userId, test){
             }
             resolve(results.value);
         }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllDeveloperProfiles = function(){
+    return when.promise(function(resolve, reject){
+        var map = "getAllDeveloperProfiles";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results) {
+                if (err) {
+                    console.error("Couchbase TelemetryStore: Get Developer Profiles Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function (err, results) {
+                    if (err) {
+                        console.error("CouchBase TelemetryStore: Get Game " + type + " Errors -", errors);
+                        reject(err);
+                        return;
+                    }
+                    var devProfiles = {};
+                    _.forEach(results, function (developer, key) {
+                        var value = developer.value;
+                        if(typeof developer.value === "string"){
+                            value = JSON.parse(value)
+                        }
+                        devProfiles[key] = value;
+                    });
+                    resolve(devProfiles);
+                }.bind(this));
+            }.bind(this));
     }.bind(this));
 };
