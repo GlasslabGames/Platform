@@ -67,6 +67,8 @@ module.exports = {
     "user.verifyEmail.user.emailNotExist":  "This email address does not exist in our system.",
     "user.verifyEmail.alreadyValidated":    "You have already validated your email, please sign in using the \"Sign In\" button above.",
     "user.welcomeEmail.general":            "We encountered an error sending your welcome email. Please try again",
+    "user.gameId.invalid":                  "Invalid gameId",
+    "user.has.access":                      "Developer already has access",
     // config
     "data.gameId.general":                  "We encountered an error. Please try again.",
     "data.gameId.missing":                  "This game Id does not exist in our system",
@@ -89,6 +91,7 @@ module.exports = {
     "dash.icon.missing":                    "Missing icon when posting a new message",
     "dash.subject.missing":                 "Missing subject when posting a new message",
     "dash.message.missing":                 "Missing message when posting a new message",
+    "dash.info.missing":                    "Missing information content when posting an update",
     // research
     "research.access.invalid":              "Invalid Access",
     "research.gameId.missing":              "Missing Game Id",

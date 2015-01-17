@@ -1,14 +1,21 @@
-
 var _         = require('lodash');
 var when      = require('when');
 //
 var Util      = require('../../core/util.js');
+var dConst    = require('../dash.const.js');
+var fs = require('fs');
 
 module.exports = {
     getActiveGamesBasicInfo: getActiveGamesBasicInfo,
-    getGamesBasicInfo: getGamesBasicInfo,
-    getGamesDetails:   getGamesDetails,
-    getMyGames:        getMyGames
+    getGamesBasicInfo:       getGamesBasicInfo,
+    getActiveGamesDetails:   getActiveGamesDetails,
+    getMyGames:              getMyGames,
+    reloadGameFiles:         reloadGameFiles,
+    migrateInfoFiles:        migrateInfoFiles,
+    getDeveloperProfile:     getDeveloperProfile,
+    getDeveloperGameIds:     getDeveloperGameIds,
+    getDeveloperGamesInfo:   getDeveloperGamesInfo,
+    updateDeveloperGameInfo: updateDeveloperGameInfo
 };
 
 var exampleIn = {};
@@ -170,7 +177,7 @@ function getGamesBasicInfo(req, res){
 }
 
 
-function getGamesDetails(req, res){
+function getActiveGamesDetails(req, res){
     try {
         var loginType = "guest";
         var promise = null;
@@ -335,4 +342,201 @@ function getMyGames(req, res) {
         console.trace("Reports: Get MyGames Error -", err);
         this.stats.increment("error", "GetMyGames.Catch");
     }
+}
+
+function migrateInfoFiles(req, res){
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+    this._migrateGameFiles(true)
+        .then(function(){
+            return this._loadGameFiles();
+        }.bind(this))
+        .then(function(){
+            res.end('{"migration": "complete"}');
+        })
+        .then(null, function(err){
+            console.trace("Dash: Migrate Info Error -", err);
+            var error = {
+                migration: "failed",
+                error: err
+            };
+            res.end(JSON.stringify(error));
+            this.stats.increment("error", "MigrateInfo.Catch");
+        }.bind(this));
+}
+
+function reloadGameFiles(req, res){
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+    this._loadGameFiles()
+        .then(function(){
+            res.end('{"status": "complete"}');
+        })
+        .then(null, function(err){
+            console.trace("Dash: Reload Game Files Error -", err);
+            var error = {
+                status: 'failed',
+                error: err
+            };
+            res.end(JSON.stringify(error));
+            this.stats.increment("error", "ReloadGameFiles.Catch");
+        }.bind(this));
+}
+
+function getDeveloperProfile(req, res){
+    var userId = req.user.id;
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+    getDeveloperGameIds.call(this,userId)
+        .then(function(output){
+            res.end(JSON.stringify(output));
+        })
+        .then(null, function(err){
+            console.trace("Dash: Get Developer Profile Error -", err);
+            this.requestUtil.errorResponse(res, err);
+            this.stats.increment("error", "GetDeveloperProfile.Catch");
+        }.bind(this));
+}
+
+function getDeveloperGameIds(userId, hidden){
+    return when.promise(function(resolve, reject){
+        this.telmStore.getDeveloperProfile(userId)
+            .then(function(values){
+                var gameIds = {};
+                if(hidden){
+                    resolve(values);
+                    return;
+                }
+                _(values).forEach(function(value, key){
+                    if(value.verifyCodeStatus === "verified"){
+                        gameIds[key] = {};
+                    }
+                });
+                resolve(gameIds);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
+function getDeveloperGamesInfo(req, res){
+    var userId = req.user.id;
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+    getDeveloperGameIds.call(this,userId)
+        .then(function(gameIds){
+            var basic;
+            var basicGameInfo = {};
+            _(gameIds).forEach(function(value, gameId){
+                basic = this._games[gameId].info.basic;
+                basicGameInfo[gameId] = basic;
+            }.bind(this));
+            var output = JSON.stringify(basicGameInfo);
+            res.end(output);
+        }.bind(this))
+        .then(null, function(err){
+            console.trace("Dash: Get Developer Profile Error -", err);
+            this.requestUtil.errorResponse(res, err);
+            this.stats.increment("error", "GetDeveloperGamesInfo.Catch");
+        }.bind(this));
+}
+
+function updateDeveloperGameInfo(req, res){
+    var userId = req.user.id;
+    var gameId = req.params.gameId;
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+    var data = {
+        basic: req.body.basic
+    };
+
+    if(!data.basic){
+        this.requestUtil.errorResponse(res, {key:"dash.info.missing"},401);
+        return;
+    }
+    getDeveloperGameIds.call(this,userId)
+        .then(function(gameIds){
+            if(gameIds[gameId]){
+                return this.telmStore.getGameInformation(gameId, true);
+            }
+            return "no access"
+        }.bind(this))
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
+            }
+            var basic = results.basic;
+            if(JSON.stringify(basic) === JSON.stringify(data.basic)){
+                return "no change";
+            }
+            results.basic = data.basic;
+            return _writeToInfoJSONFiles(gameId, JSON.stringify(results, null, 4));
+        })
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return this.telmStore.updateGameInformation(gameId, data);
+        }.bind(this))
+        .then(function(status){
+            if(status !== "no object" && status !== "no access"){
+                this._games[gameId].info.basic = data.basic;
+                res.end('{"update":"complete"}');
+            } else{
+                this.requestUtil.errorResponse(res, {key:"dash.access.invalid"});
+            }
+        }.bind(this))
+        .then(null, function(err){
+            var error = {
+                update: "failed",
+                error: err
+            };
+            error = JSON.stringify(error);
+            console.trace("Dash: Update Developer Game Info Error -", err);
+            this.requestUtil.errorResponse(res, error, 401);
+            this.stats.increment("error", "UpdateDeveloperGameInfo.Catch");
+        }.bind(this));
+}
+
+function _writeToInfoJSONFiles(gameId, data){
+    return when.promise(function(resolve, reject){
+        fs.writeFile(__dirname + "/../games/" + gameId.toLowerCase() + "/info.json", data, function(err){
+            if(err){
+                reject(err);
+                return;
+            }
+            resolve();
+        });
+    });
 }

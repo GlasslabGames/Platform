@@ -19,6 +19,8 @@ module.exports = {
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
+    requestDeveloperGameAccess: requestDeveloperGameAccess,
+    approveDeveloperGameAccess: approveDeveloperGameAccess
 };
 
 var exampleIn = {};
@@ -465,11 +467,11 @@ function registerUserV2(req, res, next, serviceManager) {
         this.requestUtil.errorResponse(res, err, code);
     }.bind(this);
 
-
+    var userID;
     var register = function(regData, courseId) {
-        this.registerUser(regData)
+        return this.registerUser(regData)
             .then(function(userId){
-
+                userID = userId;
                 // if student
                 if( regData.role == lConst.role.student) {
 
@@ -552,11 +554,39 @@ function registerUserV2(req, res, next, serviceManager) {
             .then(null, registerErr);
     }.bind(this);
 
-
+    //var gameId;
+    //if(req.body.gameId){
+    //    gameId = req.body.gameId.toUpperCase();
+    //}
+    //var email = regData.email;
+    //var developerProfile;
     // instructor
     if( regData.role == lConst.role.instructor ||
         regData.role == lConst.role.developer ) {
-        register(regData);
+        register(regData)
+            //.then(function(){
+                //if(regData.role === lConst.role.developer && gameId){
+                //    var dashService = this.serviceManager.get("dash").service;
+                //    return dashService.telmStore.getGameInformation(gameId, true);
+                //}
+            //}.bind(this))
+            .then(function(/*found*/){
+                if(regData.role === lConst.role.developer){
+                    developerProfile = {};
+                    // email messaging if requests access to nonexistant game
+                    //if(found && found !== "no object"){
+                    //    developerProfile[gameId] = {};
+                    //}
+                    // create new developer profile on couchbase
+                    return this.authDataStore.setDeveloperProfile(userID, developerProfile);
+                }
+            }.bind(this))
+            //.then(function(){
+            //    return sendDeveloperGameConfirmEmail.call(this, userID, email, gameId, developerProfile, req.protocol, req.headers.host);
+            //}.bind(this))
+            .then(null, function(err){
+                console.log("Registration Error -",err);
+            });
     }
     // else student
     else if(regData.role == lConst.role.student) {
@@ -660,6 +690,7 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
             userData.verifyCodeStatus     = aConst.verifyCode.status.approve;
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
+
                     var emailData = {
                         subject: "GlassLab Games Developer confirmation",
                         to: this.options.auth.developer.email.to,
@@ -1205,4 +1236,180 @@ function resetPasswordUpdate(req, res, next) {
     }
 }
 
+function requestDeveloperGameAccess(req, res){
+    var userId = req.user.id;
+    var gameId = req.params.gameId.toUpperCase();
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"auth.access.invalid"},401);
+        return;
+    }
+    var developerProfile;
+    var dashService = this.serviceManager.get("dash").service;
+    dashService.telmStore.getGameInformation(gameId, true)
+        .then(function(found){
+            if(found === "no object"){
+                return found;
+            }
+            // fix check access flow.  perhaps use helper method in events. reorganize.
+            var dashGames = this.serviceManager.get("dash").lib.Controller.games;
+            var dashService = this.serviceManager.get("dash").service;
+            return dashGames.getDeveloperGameIds.call(dashService, userId, true);
+        }.bind(this))
+        .then(function(data){
+            developerProfile = data;
+            if(developerProfile === "no object"){
+                return developerProfile;
+            } else if(!!developerProfile[gameId]){
+                return "already has";
+            } else{
+                developerProfile[gameId] = {};
+                return this.authStore.getUserEmail(userId);
+            }
+        }.bind(this))
+        .then(function(state){
+            if(state !== "no object" && state !== "already has"){
+                var email = state;
+                return sendDeveloperGameConfirmEmail.call(this, userId, email, gameId, developerProfile, req.protocol, req.headers.host);
+            }
+            return state;
+        }.bind(this))
+        .then(function(state){
+            if(state === "no object"){
+                this.requestUtil.errorResponse(res, {key:"user.invalid.gameId"}, 401);
+            } else if(state === "already has"){
+                this.requestUtil.errorResponse(res, {key:"user.has.access"}, 401);
+            } else{
+                // send email to developers telling them that we will need to approve their request for access.
+                // game added to couchbase gets a status of "pending"
+                // perhaps three levels of status, "pending", "approved", and "denied"
+                res.end('{"status": "needs admin approval"}');
+            }
+        }.bind(this))
+        .then(null, function(err){
+            if(err !== "errorResponse"){
+                this.requestUtil.errorResponse(res, err, 401);
+                console.trace(err);
+            }
+        }.bind(this));
+}
 
+function sendDeveloperGameConfirmEmail(userId, devEmail, gameId, developerProfile, protocol, host) {
+    return when.promise(function(resolve, reject){
+        var verifyCode = Util.CreateUUID();
+        developerProfile[gameId].verifyCode = verifyCode;
+        developerProfile[gameId].verifyCodeStatus = aConst.verifyCode.status.approve;
+        this.authDataStore.setDeveloperProfile(userId, developerProfile)
+            .then(function() {
+                var emailData = {
+                    subject: "GlassLab Games Developer confirmation",
+                    to: this.options.auth.developer.email.to,
+                    devEmail: devEmail,
+                    gameId: gameId,
+                    code: verifyCode,
+                    host: protocol + "://" + host
+                };
+                var email = new Util.Email(
+                    this.options.auth.developer.email,
+                    path.join(__dirname, "../email-templates"),
+                    this.stats);
+                return email.send('developer-request-game-verify', emailData);
+            }.bind(this))
+            .then(function(){
+                resolve();
+                // all ok
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                console.error("AuthService: sendDeveloperGameConfirmEmail Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyGameEmail.general"}, 400);
+                reject("errorResponse");
+            }.bind(this))
+    }.bind(this));
+}
+
+function approveDeveloperGameAccess(req, res){
+    var userId;
+    var devEmail;
+    var gameId = req.params.gameId;
+    var code = req.params.code;
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyGameEmail.code.missing"}, 401);
+    }
+    _getDeveloperByCode.call(this, code, gameId)
+        .then(function(id) {
+            userId = id;
+            return this.getAuthStore().findUser("id", userId);
+        }.bind(this))
+        .then(function(userData){
+            devEmail = userData.email;
+            var dashService = this.serviceManager.get("dash").service;
+            return dashService.telmStore.getDeveloperProfile(userId);
+        }.bind(this))
+        .then(function(profile){
+            profile[gameId].verifyCodeStatus = aConst.verifyCode.status.verified;
+            return this.authDataStore.setDeveloperProfile(userId, profile);
+        }.bind(this))
+        .then(function(){
+            return sendDeveloperGameApprovalEmail.call(this, devEmail, gameId, req.protocol, req.headers.host);
+        }.bind(this))
+        .then(function(){
+            this.requestUtil.jsonResponse(res, {"text": "Approved Game for Developer. Notification email sent to the Developer", "statusCode":200});
+        }.bind(this))
+        .then(function(err){
+            this.requestUtil.errorResponse(res, {key:"user.verifyGameEmail.general"});
+        }.bind(this));
+}
+
+function sendDeveloperGameApprovalEmail(devEmail, gameId, protocol, host) {
+    if( !(devEmail &&
+        _.isString(devEmail) &&
+        devEmail.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyGameEmail.user.emailNotExist"}, 401);
+    }
+    return when.promise(function(resolve, reject){
+        this.getAuthStore().findUser('email', devEmail)
+            .then(function(userData){
+                var emailData = {
+                    subject: "GlassLab Games - Game request approval",
+                    to: devEmail,
+                    user: userData,
+                    gameId: gameId,
+                    host: protocol + "://" + host
+                };
+                var email = new Util.Email(
+                    this.options.auth.email,
+                    path.join(__dirname, "../email-templates"),
+                    this.stats);
+                return email.send('developer-game-approved', emailData);
+            }.bind(this))
+            .then(function(){
+                resolve()
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _getDeveloperByCode(code, gameId){
+    return when.promise(function(resolve, reject){
+        var dashService = this.serviceManager.get('dash').service;
+        dashService.telmStore.getAllDeveloperProfiles()
+            .then(function(devProfiles){
+                var developerId;
+                _(devProfiles).some(function(profile, key){
+                    if(profile[gameId].verifyCode === code){
+                        var components = key.split(':');
+                        developerId = components[2];
+                        return true;
+                    }
+                });
+                resolve(developerId);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}

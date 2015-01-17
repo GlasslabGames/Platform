@@ -517,3 +517,17 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+Auth_MySQL.prototype.getUserEmail = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT email FROM GL_USER WHERE id = " + userId;
+
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0].email);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+};

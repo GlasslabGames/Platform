@@ -74,7 +74,7 @@ function getReport(req, res, next) {
                 }
             }
         }.bind(this) )
-        .catch(function(err){
+        .then(null,function(err){
             console.trace("Reports: Get Reports Error -", err);
             this.stats.increment("error", "getReport.Catch");
         }.bind(this) );
@@ -174,7 +174,7 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                         outList.push(outAssessmentData);
 
                     }.bind(this))
-                    .catch(function(){
+                    .then(null,function(){
                         console.error("Get SOWO Error - Key is not defined in database");
                     }.bind(this));
 
@@ -428,7 +428,7 @@ function getReportInfo(req, res){
         .then(function(reportInfo){
                 this.requestUtil.jsonResponse(res, reportInfo);
         }.bind(this) )
-        .catch(function(err){
+        .then(null,function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this) );
 }
@@ -535,7 +535,7 @@ return when.promise(function(resolve, reject) {
             userData.totalTimePlayed = playInfo.totalTimePlayed;
             resolve(userData);
         }.bind(this))
-        .catch(function(err){
+        .then(null,function(err){
             console.error("getMissionTimePlayed Error:", err);
             this.requestUtil.errorResponse(res, {key:"report.general"});
         }.bind(this));
@@ -602,7 +602,7 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                         }
                         return outAssessmentData;
                     }.bind(this))
-                    .catch(function(err){
+                    .then(null,function(err){
                         console.error("Get Competency Error - Key is not defined in database");
                         p = 'reject';
                     });

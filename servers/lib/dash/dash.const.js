@@ -20,5 +20,6 @@ module.exports = {
         messageKey: 'm',
         tweetKey: 't',
         countKey: 'count'
-    }
+    },
+    code: "KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R"
 };
