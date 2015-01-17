@@ -424,13 +424,17 @@ function getDeveloperProfile(req, res){
         }.bind(this));
 }
 
-function getDeveloperGameIds(userId){
+function getDeveloperGameIds(userId, hidden){
     return when.promise(function(resolve, reject){
         this.telmStore.getDeveloperProfile(userId)
             .then(function(values){
                 var gameIds = {};
+                if(hidden){
+                    resolve(values);
+                    return;
+                }
                 _(values).forEach(function(value, key){
-                    if(value.status === "approved"){
+                    if(value.verifyCodeStatus === "verified"){
                         gameIds[key] = {};
                     }
                 });

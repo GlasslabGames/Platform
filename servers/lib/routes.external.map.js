@@ -538,6 +538,14 @@ module.exports = {
                 get: "requestDeveloperGameAccess"
             }
         },
+        {
+            api: "/api/v2/auth/developer/:gameId/request/:code/approve",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "approveDeveloperGameAccess"
+            }
+        },
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------
