@@ -434,7 +434,7 @@ function getDeveloperGameIds(userId, hidden){
                     return;
                 }
                 _(values).forEach(function(value, key){
-                    if(value.verifyCodeStatus === "verified"){
+                    if(value.verifyCodeStatus === "verified") {
                         gameIds[key] = {};
                     }
                 });

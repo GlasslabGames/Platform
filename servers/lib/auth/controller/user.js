@@ -1257,27 +1257,35 @@ function requestDeveloperGameAccess(req, res){
         }.bind(this))
         .then(function(data){
             developerProfile = data;
-            if(developerProfile === "no object"){
+            if(developerProfile === "no object") {
                 return developerProfile;
-            } else if(!!developerProfile[gameId]){
-                return "already has";
+            } else if(!!developerProfile[gameId] &&
+                developerProfile[gameId].verifyCodeStatus) {
+                if( developerProfile[gameId].verifyCodeStatus === "approve" ) {
+                    return "already requested";
+                }
+                else {
+                    return "already has";
+                }
             } else{
                 developerProfile[gameId] = {};
                 return this.authStore.getUserEmail(userId);
             }
         }.bind(this))
         .then(function(state){
-            if(state !== "no object" && state !== "already has"){
+            if(state !== "no object" && state !== "already has" && state !== "already requested") {
                 var email = state;
                 return sendDeveloperGameConfirmEmail.call(this, userId, email, gameId, developerProfile, req.protocol, req.headers.host);
             }
             return state;
         }.bind(this))
         .then(function(state){
-            if(state === "no object"){
-                this.requestUtil.errorResponse(res, {key:"user.invalid.gameId"}, 401);
-            } else if(state === "already has"){
-                this.requestUtil.errorResponse(res, {key:"user.has.access"}, 401);
+            if(state === "no object") {
+                this.requestUtil.errorResponse(res, {key:"user.invalid.gameId", error: "This is an invalid game Id."}, 401);
+            } else if(state === "already has") {
+                this.requestUtil.errorResponse(res, {key:"user.has.access", error: "You have already have access to this game."}, 401);
+            } else if(state === "already requested") {
+                this.requestUtil.errorResponse(res, {key:"user.has.requested", error: "You have already requested access to this game. Please wait for admin approval."}, 401);
             } else{
                 // send email to developers telling them that we will need to approve their request for access.
                 // game added to couchbase gets a status of "pending"
