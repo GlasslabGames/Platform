@@ -1,23 +1,17 @@
 {
-    "developer": {
-        "id": "BQ",
-        "name": "BrainQuake Inc.",
-        "logo": {
-            "small": "assets/dev-logo-brainquake.jpg",
-            "large": "assets/dev-logo-brainquake@2x.jpg"
-        },
-        "description": ""
-    },
     "basic": {
         "gameId": "WT",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Wuzzit Trouble",
         "longName": "Wuzzit Trouble",
         "grades": "2 - 7",
         "subject": "Math",
         "type": "App",
+        "release": "dev",
+        "price": "TBD",
+        "releaseDate": "TBD",
         "platform": {
             "type": "iPad",
             "icon": {
@@ -37,7 +31,7 @@
             },
             "description": ""
         },
-        "settings" : {
+        "settings": {
         },
         "license": {
             "type": "loginType",
@@ -67,13 +61,6 @@
         ]
     },
     "details": {
-        "release": "dev",
-        "price": "TBD",
-        "releaseDate": "TBD",
-        "type": "TBD",
-        "platform": "TBD",
-        "subject": "TBD",
-        "grades": "6 - 8",
         "buttons": [
         ],
         "pages": {

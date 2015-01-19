@@ -199,24 +199,24 @@ module.exports = {
                 get: "getGameDetails"
             }
         },
-        {
-            api: "/api/v2/dash/games/active/minimal",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "getGamesBasicInfo"
-            }
-        },
+        //{
+        //    api: "/api/v2/dash/games/active/minimal",
+        //    service: "dash",
+        //    controller: "games",
+        //    method: {
+        //        get: "getGamesBasicInfo"
+        //    }
+        //},
         {
             api: "/api/v2/dash/games/active/details",
             service: "dash",
             controller: "games",
             method: {
-                get: "getGamesDetails"
+                get: "getActiveGamesDetails"
             }
         },
         {
-            api: "/api/v2/dash/games/active",
+            api: "/api/v2/dash/games/active/basic",
             service: "dash",
             controller: "games",
             method: {
@@ -248,6 +248,49 @@ module.exports = {
             method: {
                 get: "getMessages",
                 post: "postMessage"
+            }
+        },
+        {
+            api: "/api/v2/dash/migrate/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "migrateInfoFiles"
+            }
+        },
+        {
+            api: "/api/v2/dash/reload/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "reloadGameFiles"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/profile",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getDeveloperProfile"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/info",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getDeveloperGamesInfo"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/info/game/:gameId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "updateDeveloperGameInfo"
             }
         },
         // ---------------------------------------------------
@@ -484,6 +527,23 @@ module.exports = {
             controller: "login",
             method: {
                 post: "logout"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/developer/:gameId/request",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "requestDeveloperGameAccess"
+            }
+        },
+        {
+            api: "/api/v2/auth/developer/:gameId/request/:code/approve",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "approveDeveloperGameAccess"
             }
         },
     // ---------------------------------------------------

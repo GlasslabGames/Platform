@@ -3,6 +3,7 @@ var _      = require('lodash');
 var when   = require('when');
 var Util   = require('../../core/util.js');
 var lConst = require('../../lms/lms.const.js');
+var User   = require('./user.js');
 
 module.exports = {
     logout:   logout,
@@ -133,8 +134,23 @@ return when.promise(function(resolve, reject) {
                 }.bind(this));
         }
         else if( user.role == lConst.role.developer ) {
-            this.stats.increment("info", "Route.Login.Auth.Developer.Done");
-            resolve( user );
+            var dashService = this.serviceManager.get("dash").service;
+            dashService.telmStore.getDeveloperProfile(user.id, true)
+                .then(function(result) {
+                    if (result === "no profile") {
+                        var data = {};
+                        // create new developer profile on couchbase
+                        return this.authDataStore.setDeveloperProfile(user.id, data);
+                    }
+                }.bind(this))
+                .then(function(){
+                    this.stats.increment("info", "Route.Login.Auth.Developer.Done");
+                    resolve( user );
+                }.bind(this))
+                .then(null, function(err){
+                    console.log("Developer Couchbase Error - ", err);
+                    reject(err);
+                }.bind(this))
         }
         else {
             this.stats.increment("error", "Route.Login.Auth.LogIn.InvalidRole");
