@@ -58,11 +58,14 @@ DashService.prototype.start = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    this._loadGameFiles()
+    this.telmStore.connect()
         .then(function(){
                 // test connection to telemetry store
-                return this.telmStore.connect();
-            }.bind(this))
+            return this._migrateGameFiles(true);
+        }.bind(this))
+        .then(function(){
+            return this._loadGameFiles();
+        }.bind(this))
         .then(function(){
                 console.log("DashService: GameData DS Connected");
                 this.stats.increment("info", "TelemetryDS.Connect");
@@ -109,7 +112,7 @@ DashService.prototype.isValidGameId = function(gameId) {
         .then(function(){
             return true;
         })
-        .catch(function(){
+        .then(null,function(){
             return false;
         });
 };
@@ -342,13 +345,201 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
     return achievementsList;
 };
 
+// migrates info.json and achievement.json files to couchbase
+// format is gi:gameId for info.json and ga:gameId for achievements.json
+DashService.prototype._migrateGameFiles = function(forceMigrate) {
+    return when.promise(function(resolve, reject){
+        try {
+            // checking to see if this particular key exists, as a sign for if migration has happened
+            // if key does not exist, error will be thrown, but that's ok. Just means key needs to be created
+            // if key exists, but is initialized to a default or empty value, run migration and populate the keys
+            this.telmStore.getGameInformation('AA-1', true)
+                .then(function(data){
+                    if(forceMigrate || data === 'no object'){
+                        return '{}';
+                    }
+                    return JSON.stringify(data);
+                })
+                .then(function(data){
+                    if(data !== '{}' && data !== '{"click":"to edit","new in 2.0":"there are no reserved field names"}'){
+                        // files have already been migrated, end process
+                        return;
+                    }
+                    console.log("Migrating info.json and achievements.json files to Couchbase");
+                    var dir = path.join(__dirname, "games");
+                    var files = fs.readdirSync(dir);
+                    var gameId;
+                    var promiseList = [];
+                    files.forEach(function(gameName){
+                        if(gameName.charAt(0) !== '.'){
+                            gameId = gameName.toUpperCase();
+
+                            var gameFiles = fs.readdirSync( path.join(dir, gameName) );
+
+                            gameFiles.forEach(function(file){
+                                if(file.charAt(0) !== '.'){
+                                    var name = path.basename(file, path.extname(file));
+                                    var filePath = path.join(dir, gameName, file);
+                                    var gameData;
+                                    try {
+                                        delete require.cache[filePath];
+                                        gameData = require(filePath);
+                                    } catch(err) {
+                                        console.error("migrateGameFiles filePath:", filePath, ", Error:", err);
+                                    }
+                                    if(name === 'info'){
+                                        promiseList.push(this.telmStore.createGameInformation(gameId, gameData));
+                                    } else if(name === 'achievements'){
+                                        promiseList.push(this.telmStore.createGameAchievements(gameId, gameData));
+                                    }
+                                }
+                            }.bind(this));
+                        }
+                    }.bind(this));
+                    return when.all(promiseList);
+                }.bind(this))
+                .then(function(){
+                    resolve();
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                }.bind(this));
+        } catch(err) {
+            console.error("DashService: Migrate Game Files Error -", err);
+            reject(err);
+        }
+    }.bind(this));
+};
+
+// now builds up _games from couchbase gi and ga documents, instead of from json files
+// couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
+DashService.prototype._loadGameFiles = function(){
+    return when.promise(function(resolve, reject){
+
+        this.telmStore.getAllGameInformationAndGameAchievements()
+            .then(function(results){
+                var ids;
+                var type;
+                var gameId;
+                var gameInformation = {};
+                var gameAchievements = {};
+                _.forEach(results, function(data, couchId){
+                    ids = couchId.split(':');
+                    type = ids[0];
+                    gameId = ids[1];
+                    if(type === 'gi'){
+                        gameInformation[gameId] = data;
+                    } else{
+                        gameAchievements[gameId] = data;
+                    }
+                }.bind(this));
+
+                return this._buildGamesObject(gameInformation, gameAchievements);
+            }.bind(this))
+            .then(function(){
+                console.log('DashService: Loaded Game Files');
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("DashService: Load Game Files Error -", err);
+                reject(err);
+            }.bind(this));
+
+    }.bind(this));
+};
+
+// receives information gained from couchbase gi and ga documents
+// properly inserts data into _games object
+DashService.prototype._buildGamesObject = function(gameInformation, gameAchievements){
+    return when.promise(function(resolve, reject){
+        try {
+            var gameId;
+            var index = 0;
+            var achievements = [];
+            var gameIds = [];
+            _.forEach(gameInformation, function (data, gameId) {
+
+                gameIds.push(gameId);
+                this._games[gameId] = {};
+                this._games[gameId].info = data;
+
+                if(gameAchievements[gameId] !== undefined){
+                    this._games[gameId].achievements = gameAchievements[gameId];
+                }
+
+                // remove all enabled=false objects
+                this._filterDisabledGameInfo(this._games[gameId]);
+
+                //// add developer to game details and reports
+                //if (this._games[gameId].info &&
+                //    this._games[gameId].info.developer &&
+                //    this._games[gameId].info.basic &&
+                //    this._games[gameId].info.details &&
+                //    this._games[gameId].info.reports) {
+                //
+                //    this._games[gameId].info.basic.developer = this._games[gameId].info.developer;
+                //}
+
+                // add game info(basic) to game details and reports
+                if (this._games[gameId].info &&
+                    this._games[gameId].info.basic &&
+                    this._games[gameId].info.details &&
+                    this._games[gameId].info.reports) {
+
+                    this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
+                    this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
+                }
+
+                var state = false;
+
+                var list = this._games[gameId].info.reports.list;
+
+                for (var i = 0; i < list.length; i++) {
+                    if (_.isObject(list[i]) &&
+                        list[i].id === 'achievements') {
+                        state = true;
+                        break;
+                    }
+                }
+                if (state) {
+                    achievements.push(this.getGameAchievements(gameId));
+                }
+
+            }.bind(this));
+            when.all(achievements)
+                .then(function (achievements) {
+                    var index = 0;
+                    var list;
+                    gameIds.forEach(function (gameId) {
+                        list = this._games[gameId].info.reports.list;
+
+                        // add achievements to 'achievements' reports
+                        for (var i = 0; i < list.length; i++) {
+                            if (_.isObject(list[i]) &&
+                                list[i].id === 'achievements') {
+                                this._games[gameId].info.reports.list[i].achievements = achievements[index++];
+                                break;
+                            }
+                        }
+                    }.bind(this));
+
+                    resolve();
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                }.bind(this));
+        } catch(err) {
+            reject(err)
+        }
+    }.bind(this));
+};
 
 // TODO: replace this with DB lookup
-DashService.prototype._loadGameFiles = function() {
+DashService.prototype._oldLoadGameFiles = function() {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        try{
+        try {
             var dir = path.join(__dirname, "games");
             var files = fs.readdirSync(dir);
             var gameId;
@@ -425,10 +616,9 @@ DashService.prototype._loadGameFiles = function() {
                             for(var i = 0; i < list.length; i++) {
                                 if( _.isObject(list[i]) &&
                                     list[i].id == 'achievements') {
-                                    this._games[gameId].info.reports.list[i].achievements = gameAchievements[index];
+                                    this._games[gameId].info.reports.list[i].achievements = gameAchievements[index++];
                                 }
                             }
-                            index++;
                         }
                     }.bind(this));
 
