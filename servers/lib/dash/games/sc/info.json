@@ -1,13 +1,4 @@
 {
-    "developer": {
-        "id": "GL",
-        "name": "GlassLab, Inc.",
-        "logo": {
-            "small": "assets/glasslab-logo.png",
-            "large": "assets/glasslab-logo-2x.png"
-        },
-        "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
-    },
     "basic": {
         "gameId": "SC",
         "enabled": true,
@@ -16,6 +7,7 @@
         "shortName": "SimCityEDU",
         "longName": "SimCityEDU: Pollution Challenge!",
         "price": "Free",
+        "release": "live",
         "releaseDate": "Nov 2, 2013",
         "type": "Client Download",
         "platform": {
@@ -38,11 +30,11 @@
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
-        "settings" : {
+        "settings": {
             "missionProgressLock": false
         },
         "license": {
-            "type":      "loginType",
+            "type": "loginType",
             "loginType": "glasslabv2,icivics,clever,edmodo",
             "valid": false,
             "message": {
@@ -446,13 +438,13 @@
                     {
                         "name": "PC (1.0GB)",
                         "OS": "Windows",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.msi",
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.msi",
                         "target": "_blank"
                     },
                     {
                         "name": "Mac (1.0GB)",
                         "OS": "Mac",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1128/SimCityEDU_setup.dmg",
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.dmg",
                         "target": "_blank"
                     }
                 ]
@@ -469,19 +461,6 @@
                 ]
             }
         ],
-        "release": "live",
-        "price": "Free",
-        "releaseDate": "Nov. 2, 2013",
-        "type": "Client Download",
-        "platform": {
-            "type": "PC & Mac",
-            "icon": {
-                "small": "assets/platform-client.png",
-                "large": "assets/platform-client@2x.png"
-            }
-        },
-        "subject": "21st Century Skills, Science, ELA",
-        "grades": "6 - 8",
         "pages": {
             "product": {
                 "order": 1,
@@ -789,10 +768,6 @@
                 "id": "check",
                 "title": "System Requirements"
             }
-        },
-        "banners": {
-            "product": "assets/game-banner-SC.jpg",
-            "reports": "assets/game-banner-SC.jpg"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",

@@ -24,7 +24,7 @@ var check      = require('validator').check;
 var mailChimp  = require('mailchimp').MailChimpAPI;
 
 // load at runtime
-var Util, aConst, lConst;
+var Util, aConst, lConst, TelmStore;
 
 module.exports = AuthService;
 
@@ -45,10 +45,12 @@ function AuthService(options, serviceManager){
         aConst        = Auth.Const;
         Accounts      = Auth.Accounts;
         AuthStore     = Auth.Datastore.MySQL;
+        AuthDataStore = Auth.Datastore.Couchbase;
 
         this.stats            = new Util.Stats(this.options, "Auth");
         this.requestUtil      = new Util.Request(this.options, Errors);
         this.authStore        = new AuthStore(this.options.auth.datastore.mysql);
+        this.authDataStore    = new AuthDataStore(this.options.telemetry.datastore.couchbase);
         this.accountsManager  = new Accounts.Manager(this.options, this);
         this.glassLabStrategy = this.accountsManager.get("Glasslab");
         this.serviceManager   = serviceManager;
@@ -122,6 +124,18 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
 
+        // connect to authDataStore
+        .then(function(){
+            return this.authDataStore.connect();
+        }.bind(this))
+        .then(function(){
+            console.log("AuthDataStore: Couchbase Connected");
+            this.stats.increment("info", "Couchbase.Connect");
+        }.bind(this),
+        function(err){
+            console.trace("AuthDataStore: Couchbase Error -", err);
+            this.stats.increment("error", "Couchbase.Connect");
+        }.bind(this))
         // connect to lmsStore
         .then(function(){
             return this.lmsStore.connect();

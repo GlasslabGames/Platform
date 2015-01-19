@@ -1,6 +1,6 @@
 {
   "name": "Platform-Services",
-  "version": "0.8.5",
+  "version": "0.8.7",
   "private": true,
   "dependencies": {
     "aws-sdk": "2.0.x",

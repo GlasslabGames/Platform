@@ -18,7 +18,7 @@ module.exports = AuthDS_Couchbase;
 
 function AuthDS_Couchbase(options){
     // Glasslab libs
-    Util   = require('../core/util.js')
+    Util   = require('../core/util.js');
     aConst = require('./auth.const.js');
 
     this.options = _.merge(
@@ -62,3 +62,16 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+AuthDS_Couchbase.prototype.setDeveloperProfile = function(userId, data){
+    return when.promise(function(resolve, reject){
+        var key = aConst.datastore.keys.developer + ":" + aConst.datastore.keys.user + ":" + userId;
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("Couchbase AuthDataStore: Create Developer Profile Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(data);
+        }.bind(this));
+    }.bind(this));
+};

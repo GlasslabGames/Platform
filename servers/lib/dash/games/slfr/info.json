@@ -1,13 +1,4 @@
 {
-    "developer": {
-        "id": "UL",
-        "name": "Ululab",
-        "logo": {
-            "small": "assets/glasslab-logo.png",
-            "large": "assets/glasslab-logo-2x.png"
-        },
-        "description": "TBD"
-    },
     "basic": {
         "gameId": "SLFR",
         "enabled": true,
@@ -25,7 +16,9 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "TBD",
+
+        "release": "dev",
+        "price": "Coming Soon",
         "releaseDate": "TBD",
         "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
         "description": "Slice Fractions by Ululab",
@@ -38,7 +31,7 @@
             },
             "description": "TBD"
         },
-        "settings" : {
+        "settings": {
         },
         "license": {
             "type": "loginType",
@@ -64,7 +57,7 @@
             "type": "page",
             "page": {
                 "title": "Slice Fractions",
-                "embed": "",
+                "embed": "http://partners.ululab.com/glasslab/SliceFractionsSchoolEdition.swf",
                 "size": {
                     "width": 800,
                     "height": 600
@@ -93,19 +86,6 @@
         ]
     },
     "details": {
-        "release": "dev",
-        "price": "TBD",
-        "releaseDate": "TBD",
-        "grades": "TBD",
-        "subject": "Math",
-        "type": "TBD",
-        "platform": {
-            "type": "Browser/Flash",
-            "icon": {
-                "small": "assets/platform-browser.png",
-                "large": "assets/platform-browser@2x.png"
-            }
-        },
         "buttons": [
             {
                 "name": "Play Game",
@@ -120,10 +100,6 @@
             }
         ],
         "pages": {
-        },
-        "banners": {
-            "product": "assets/game-banner-SLFR.jpg",
-            "reports": "assets/game-banner-SLFR.jpg"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
