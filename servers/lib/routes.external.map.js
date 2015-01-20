@@ -531,7 +531,7 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/auth/developer/:gameId/request",
+            api: "/api/v2/auth/developer/game/:gameId/request",
             service: "auth",
             controller: "user",
             method: {
@@ -539,7 +539,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/auth/developer/:gameId/request/:code/approve",
+            api: "/api/v2/auth/developer/game/:gameId/request/:code/approve",
             service: "auth",
             controller: "user",
             method: {
