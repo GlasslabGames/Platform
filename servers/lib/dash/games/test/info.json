@@ -1,7 +1,7 @@
 {
     "basic": {
         "gameId": "TEST",
-        "enabled": true,
+        "enabled": false,
         "visible": false,
         "maintenance": null,
         "shortName": "TEST",
