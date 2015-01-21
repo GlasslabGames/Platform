@@ -150,6 +150,15 @@ module.exports = {
                 post: "updateMatches"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/multiplayer/game/:gameId/matches",
+            service: "data",
+            controller: "game",
+            method: {
+                get: "pollMatches"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,

@@ -305,6 +305,14 @@ var gdv_getAllDeveloperProfiles = function(doc, meta)
         emit( meta.id );
     }
 };
+
+var gdv_getAllMatches = function(doc, meta){
+    var values = meta.id.split(':');
+    if((values[0] === 'gd') &&
+        (values[1] === 'm')){
+        emit( meta.id );
+    }
+};
 // ------------------------------------
 
     this.telemDDoc = {
@@ -344,6 +352,9 @@ var gdv_getAllDeveloperProfiles = function(doc, meta)
             },
             getAllDeveloperProfiles: {
                 map: gdv_getAllDeveloperProfiles
+            },
+            getAllMatches: {
+                map: gdv_getAllMatches
             }
         }
     };
@@ -2805,14 +2816,14 @@ TelemDS_Couchbase.prototype.getAllDeveloperProfiles = function(){
                 var keys = _.pluck(results, 'id');
                 this._chunk_getMulti(keys, {}, function (err, results) {
                     if (err) {
-                        console.error("CouchBase TelemetryStore: Get Game " + type + " Errors -", errors);
+                        console.error("CouchBase TelemetryStore: Get Developer Profiles Error -", err);
                         reject(err);
                         return;
                     }
                     var devProfiles = {};
                     _.forEach(results, function (developer, key) {
                         var value = developer.value;
-                        if(typeof developer.value === "string"){
+                        if(typeof value === "string"){
                             value = JSON.parse(value)
                         }
                         devProfiles[key] = value;
@@ -2874,5 +2885,54 @@ TelemDS_Couchbase.prototype.updateMatch = function(gameId, matchId, matchData){
             }
             resolve(results.value);
         })
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId){
+    return when.promise(function(resolve, reject){
+
+        var map = "getAllMatches";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results){
+                if(err){
+                    console.error("CouchBase TelemetryStore: Get Game Matches Error - ", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = [];
+                var id;
+                results.forEach(function(result){
+                    id = result.id;
+                    var components = id.split(":");
+                    if(gameId === components[2]){
+                        keys.push(id);
+                    }
+                });
+                this._chunk_getMulti(keys, {}, function(err, results){
+                    if(err){
+                        console.error("CouchBase TelemetryStore: Get Game Matches Error -", err);
+                        reject(err);
+                        return;
+                    }
+                    var gameMatches = {};
+                    _.forEach(results, function(match, key){
+                        var value = match.value;
+                        if(typeof value === "string"){
+                            value = JSON.parse(value);
+                        }
+                        var players = value.players;
+                        if(_(players).contains(userId)){
+                            var components = key.split(":");
+                            var matchId = components[3];
+                            gameMatches[matchId] = value;
+                        }
+                    });
+                    resolve(gameMatches);
+                }.bind(this));
+            }.bind(this));
     }.bind(this));
 };

@@ -17,7 +17,8 @@ module.exports = {
     postGameAchievement: postGameAchievement,
     releases: releases,
     createMatch: createMatch,
-    updateMatches: updateMatches
+    updateMatches: updateMatches,
+    pollMatches: pollMatches
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -500,4 +501,41 @@ function _updateMatch(gameId, matchId, turns){
                 reject(err);
             });
     }.bind(this));
+}
+
+function pollMatches(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+    var userId = req.user.id;
+
+    this.cbds.getGameInformation(gameId, true)
+        .then(function(info){
+            if(info === "no object") {
+                return info;
+            } else if(!info.basic.settings.canCreateMatches){
+                return "cannot create matches";
+            }
+            return this.cbds.getAllGameMatchesByUserId(gameId, userId);
+        }.bind(this))
+        .then(function(matches){
+            if(matches === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(matches === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, matches);
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }
