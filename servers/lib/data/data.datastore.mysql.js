@@ -594,3 +594,17 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+TelemDS_Mysql.prototype.getUsersByIds = function(ids){
+    return when.promise(function(resolve, reject){
+        var idsString = ids.join(',');
+        var Q = "SELECT * FROM GL_USER WHERE id in (" + idsString +  ");";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};

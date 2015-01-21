@@ -15,7 +15,10 @@ module.exports = {
     getGamePlayInfo: getGamePlayInfo,
     postTotalTimePlayed: postTotalTimePlayed,
     postGameAchievement: postGameAchievement,
-    releases: releases
+    releases: releases,
+    createMatch: createMatch,
+    updateMatches: updateMatches,
+    pollMatches: pollMatches
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -385,4 +388,154 @@ function releases(req, res, next, serviceManager) {
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this) );
+}
+
+function createMatch(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.params.userId && req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+    var userId = req.user.id;
+    var invitedUserId = parseInt(req.params.userId);
+
+    this.myds.getUsersByIds([userId, invitedUserId])
+        .then(function(results){
+            if(results.length !== 2){
+                return "invalid userId";
+            }
+            return this.cbds.getGameInformation(gameId, true);
+        }.bind(this))
+        .then(function(result){
+            if(typeof result === "string"){
+                return result;
+            } else if(!result.basic.settings.canCreatMatches){
+                return "cannot create matches";
+            }
+            var data = {
+                players: [userId,invitedUserId],
+                status: "pending",
+                turns: [],
+                meta: {}
+            };
+            return this.cbds.createMatch(gameId, data);
+        }.bind(this))
+        .then(function(state){
+            if(state === "invalid userId"){
+                this.requestUtil.errorResponse(res, {key: "data.user.invalid"});
+                return;
+            }
+            if(state === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(state === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err){
+            console.error(err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function updateMatches(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.body.turnData && Array.isArray(req.body.turnData))){
+        this.requestUtil.errorResponse(res, {key: "data.turnData.missing"});
+        return;
+    }
+
+    var gameId = req.params.gameId;
+    var turnData = req.body.turnData;
+
+    this.cbds.getGameInformation(gameId, true)
+        .then(function(info){
+            if(info === "no object") {
+                return info;
+            } else if(!info.basic.settings.canCreateMatches){
+                return "cannot create matches";
+            }
+            var matchesToUpdate = [];
+            _(turnData).forEach(function(turns, matchId){
+                matchesToUpdate.push(_updateMatch.call(this, gameId, matchId, turns));
+            }.bind(this));
+            return when.all(matchesToUpdate)
+        }.bind(this))
+        .then(function(result){
+            if(result === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(result === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function _updateMatch(gameId, matchId, turns){
+    return when.promise(function(resolve, reject){
+        this.cbds.getMatch(gameId, matchId)
+            .then(function(match){
+                match.turns = match.turns.concat(turns);
+                return this.cbds.updateMatch(gameId, matchId, match);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function pollMatches(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+    var userId = req.user.id;
+
+    this.cbds.getGameInformation(gameId, true)
+        .then(function(info){
+            if(info === "no object") {
+                return info;
+            } else if(!info.basic.settings.canCreateMatches){
+                return "cannot create matches";
+            }
+            return this.cbds.getAllGameMatchesByUserId(gameId, userId);
+        }.bind(this))
+        .then(function(matches){
+            if(matches === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(matches === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, matches);
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }
