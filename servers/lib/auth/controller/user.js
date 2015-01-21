@@ -1309,7 +1309,7 @@ function sendDeveloperGameConfirmEmail(userId, devEmail, gameId, developerProfil
         this.authDataStore.setDeveloperProfile(userId, developerProfile)
             .then(function() {
                 var emailData = {
-                    subject: "GlassLab Games Developer confirmation",
+                    subject: "GlassLab Games - Developer Game Request",
                     to: this.options.auth.developer.email.to,
                     devEmail: devEmail,
                     gameId: gameId,
