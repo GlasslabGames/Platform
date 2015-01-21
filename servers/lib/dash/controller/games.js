@@ -483,6 +483,7 @@ function updateDeveloperGameInfo(req, res){
         this.requestUtil.errorResponse(res, {key:"dash.info.missing"},401);
         return;
     }
+    var infoData;
     getDeveloperGameIds.call(this,userId)
         .then(function(gameIds){
             if(gameIds[gameId]){
@@ -505,17 +506,20 @@ function updateDeveloperGameInfo(req, res){
             _(details).forEach(function(value, property){
                 details[property] = data[property];
             });
-            return _writeToInfoJSONFiles(gameId, JSON.stringify(results, null, 4));
+            results.basic = basic;
+            results.details = details;
+            infoData = results;
+            return _writeToInfoJSONFiles(gameId, JSON.stringify(infoData, null, 4));
         })
         .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
-            return this.telmStore.updateGameInformation(gameId, data);
+            return this.telmStore.updateGameInformation(gameId, infoData);
         }.bind(this))
         .then(function(status){
             if(status !== "no object" && status !== "no access" && status !== "malformed object"){
-                this.buildGameForGamesObject(status, gameId);
+                this.buildGameForGamesObject(infoData, gameId);
                 res.end('{"update":"complete"}');
             } else if(status === "malformed object"){
                 this.requestUtil.errorResponse(res, {key:"dash.info.malformed"});
