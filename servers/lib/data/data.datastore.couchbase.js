@@ -2823,13 +2823,13 @@ TelemDS_Couchbase.prototype.getAllDeveloperProfiles = function(){
     }.bind(this));
 };
 
-TelemDS_Couchbase.prototype.createMultiplayerMatch = function(gameId, matchData) {
+TelemDS_Couchbase.prototype.createMatch = function(gameId, matchData) {
     return when.promise(function (resolve, reject) {
 
         var key = tConst.game.dataKey + "::" + tConst.game.matchKey + "::" + gameId;
         this.client.incr(key, {initial: 1}, function (err, data) {
             if (err) {
-                console.error("CouchBase DataStore: Incr Multiplayer Match Count Error -", err);
+                console.error("CouchBase DataStore: Incr Match Count Error -", err);
                 reject(err);
                 return;
             }
@@ -2837,12 +2837,42 @@ TelemDS_Couchbase.prototype.createMultiplayerMatch = function(gameId, matchData)
             key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + data.value;
             this.client.add(key, matchData, function (err, results) {
                 if (err) {
-                    console.error("CouchBase DataStore: Set Multiplayer Match Error -", err);
+                    console.error("CouchBase DataStore: Create Match Error -", err);
                     reject(err);
                     return;
                 }
-                resolve(results);
+                resolve(results.value);
             }.bind(this));
         }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getMatch = function(gameId, matchId){
+    return when.promise(function(resolve, reject){
+
+        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+        this.client.get(key, function(err, results){
+            if(err){
+                console.error("CouchBase DataStore: Get Match Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        });
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.updateMatch = function(gameId, matchId, matchData){
+    return when.promise(function(resolve, reject){
+
+        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+        this.client.set(key, matchData, function(err, results){
+            if(err){
+                console.error("CouchBase DataStore: Create Match Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        })
     }.bind(this));
 };

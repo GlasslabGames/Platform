@@ -138,7 +138,16 @@ module.exports = {
             service: "data",
             controller: "game",
             method: {
-                get: "createMultiplayerMatch"
+                get: "createMatch"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/multiplayer/game/:gameId/update",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "updateMatches"
             }
         },
         // ---------------------------------------------------
