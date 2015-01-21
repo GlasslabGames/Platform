@@ -2822,3 +2822,27 @@ TelemDS_Couchbase.prototype.getAllDeveloperProfiles = function(){
             }.bind(this));
     }.bind(this));
 };
+
+TelemDS_Couchbase.prototype.createMultiplayerMatch = function(gameId, matchData) {
+    return when.promise(function (resolve, reject) {
+
+        var key = tConst.game.dataKey + "::" + tConst.game.matchKey + "::" + gameId;
+        this.client.incr(key, {initial: 1}, function (err, data) {
+            if (err) {
+                console.error("CouchBase DataStore: Incr Multiplayer Match Count Error -", err);
+                reject(err);
+                return;
+            }
+
+            key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + data.value;
+            this.client.add(key, matchData, function (err, results) {
+                if (err) {
+                    console.error("CouchBase DataStore: Set Multiplayer Match Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve(results);
+            }.bind(this));
+        }.bind(this));
+    }.bind(this));
+};

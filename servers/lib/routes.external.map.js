@@ -132,6 +132,15 @@ module.exports = {
                 "delete": "deleteGameData"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/multiplayer/game/:gameId/invite/user/:userId",
+            service: "data",
+            controller: "game",
+            method: {
+                get: "createMultiplayerMatch"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,

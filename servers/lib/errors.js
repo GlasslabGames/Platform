@@ -75,6 +75,8 @@ module.exports = {
     "data.gameId.missing":                  "This game Id does not exist in our system",
     "data.gameId.invalid":                  "This game Id is not in our list of valid games",
     "data.gameConfig.missing":              "You did not input game config",
+    "data.userId.missing":                  "Missing UserId",
+    "data.userId.invalid":                  "Invalid UserId",
     // report
     "report.general":                       "There is a problem with this report",
     "report.access.invalid":                "Invalid Access",

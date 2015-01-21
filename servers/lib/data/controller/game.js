@@ -15,7 +15,8 @@ module.exports = {
     getGamePlayInfo: getGamePlayInfo,
     postTotalTimePlayed: postTotalTimePlayed,
     postGameAchievement: postGameAchievement,
-    releases: releases
+    releases: releases,
+    createMultiplayerMatch: createMultiplayerMatch
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -385,4 +386,51 @@ function releases(req, res, next, serviceManager) {
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this) );
+}
+
+function createMultiplayerMatch(req, res){
+    if(!(req.params && req.params.userId && req.params.gameId && req.user && req.user.id)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+    }
+    if(!(req.params.userId && req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+    }
+    var gameId = req.params.gameId;
+    var userId = req.user.id;
+    var invitedUserId = req.params.userId;
+    
+    this.myds.getUsersByIds([userId, invitedUserId])
+        .then(function(results){
+            if(results.length !== 2){
+                return "invalid userId";
+            }
+            return this.cbds.getGameInformation(gameId, true);
+        }.bind(this))
+        .then(function(state){
+            if(typeof state === "string"){
+                return state;
+            }
+            var data = {
+                players: [userId,invitedUserId],
+                status: "pending",
+                turns: [],
+                meta: {}
+            };
+            return this.cbds.createMultiplayerMatch(gameId, data);
+        }.bind(this))
+        .then(function(state){
+            if(state === "invalid userId"){
+                this.requestUtil.errorResponse(res, {key: "data.user.invalid"});
+                return;
+            }
+            if(state === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err){
+            console.error(err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }
