@@ -31,6 +31,7 @@
             "description": "TBD"
         },
         "settings": {
+            "canCreateMatches": false
         },
         "license": {
             "type": "loginType",

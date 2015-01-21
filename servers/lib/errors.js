@@ -77,6 +77,7 @@ module.exports = {
     "data.gameConfig.missing":              "You did not input game config",
     "data.userId.missing":                  "Missing UserId",
     "data.userId.invalid":                  "Invalid UserId",
+    "data.gameId.match":                    "Game cannot create a match",
     // report
     "report.general":                       "There is a problem with this report",
     "report.access.invalid":                "Invalid Access",

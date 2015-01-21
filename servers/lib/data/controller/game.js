@@ -397,8 +397,8 @@ function createMultiplayerMatch(req, res){
     }
     var gameId = req.params.gameId;
     var userId = req.user.id;
-    var invitedUserId = req.params.userId;
-    
+    var invitedUserId = parseInt(req.params.userId);
+
     this.myds.getUsersByIds([userId, invitedUserId])
         .then(function(results){
             if(results.length !== 2){
@@ -406,9 +406,11 @@ function createMultiplayerMatch(req, res){
             }
             return this.cbds.getGameInformation(gameId, true);
         }.bind(this))
-        .then(function(state){
-            if(typeof state === "string"){
-                return state;
+        .then(function(result){
+            if(typeof result === "string"){
+                return result;
+            } else if(!result.basic.settings.canCreatMatches){
+                return "cannot create matches";
             }
             var data = {
                 players: [userId,invitedUserId],
@@ -425,6 +427,10 @@ function createMultiplayerMatch(req, res){
             }
             if(state === "no object"){
                 this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(state === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: "ok" });
