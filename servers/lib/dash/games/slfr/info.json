@@ -16,7 +16,6 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-
         "release": "dev",
         "price": "Coming Soon",
         "releaseDate": "TBD",
@@ -32,6 +31,7 @@
             "description": "TBD"
         },
         "settings": {
+            "canCreateMatches": false
         },
         "license": {
             "type": "loginType",

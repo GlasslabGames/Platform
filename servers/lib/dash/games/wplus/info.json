@@ -9,6 +9,7 @@
         "shortDescription": "Water Plus",
         "description": "Water Plus by Schell Games",
         "settings": {
+            "canCreateMatches": false
         },
         "release": "dev",
         "releaseDate": "TBD",

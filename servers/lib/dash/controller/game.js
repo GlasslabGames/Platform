@@ -262,4 +262,4 @@ function saveAssessmentResults(req, res){
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
         }.bind(this) );
-};
+}

@@ -10,6 +10,7 @@
         "release": "dev",
         "description": "Battle the zombies with your army of plants... and learn!",
         "settings": {
+            "canCreateMatches": false
         },
         "developer": {
             "id": "GL",
