@@ -97,6 +97,7 @@ module.exports = {
     "dash.subject.missing":                 "Missing subject when posting a new message",
     "dash.message.missing":                 "Missing message when posting a new message",
     "dash.info.missing":                    "Missing information content when posting an update",
+    "dash.info.malformed":                  "The info document has been corrupted",
     // research
     "research.access.invalid":              "Invalid Access",
     "research.gameId.missing":              "Missing Game Id",

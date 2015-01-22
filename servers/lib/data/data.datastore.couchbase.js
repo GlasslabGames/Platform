@@ -2680,7 +2680,7 @@ TelemDS_Couchbase.prototype._updateGameInformation = function(gameId, data, isAc
                         reject(err);
                         return;
                     }
-                    resolve(data);
+                    resolve(mergedData);
                 }.bind(this));
             }.bind(this));
     }.bind(this));

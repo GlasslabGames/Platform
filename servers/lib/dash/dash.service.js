@@ -461,34 +461,11 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
 
                 gameIds.push(gameId);
                 this._games[gameId] = {};
-                this._games[gameId].info = data;
-
                 if(gameAchievements[gameId] !== undefined){
                     this._games[gameId].achievements = gameAchievements[gameId];
                 }
 
-                // remove all enabled=false objects
-                this._filterDisabledGameInfo(this._games[gameId]);
-
-                //// add developer to game details and reports
-                //if (this._games[gameId].info &&
-                //    this._games[gameId].info.developer &&
-                //    this._games[gameId].info.basic &&
-                //    this._games[gameId].info.details &&
-                //    this._games[gameId].info.reports) {
-                //
-                //    this._games[gameId].info.basic.developer = this._games[gameId].info.developer;
-                //}
-
-                // add game info(basic) to game details and reports
-                if (this._games[gameId].info &&
-                    this._games[gameId].info.basic &&
-                    this._games[gameId].info.details &&
-                    this._games[gameId].info.reports) {
-
-                    this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
-                    this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
-                }
+                this.buildGameForGamesObject(data, gameId);
 
                 var state = false;
 
@@ -533,6 +510,24 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
         }
     }.bind(this));
 };
+
+DashService.prototype.buildGameForGamesObject = function(data, gameId){
+    this._games[gameId].info = data;
+
+    //remove all enabled=false objects
+    this._filterDisabledGameInfo(this._games[gameId]);
+
+    // add game info(basic) to game details and reports
+    if (this._games[gameId].info &&
+        this._games[gameId].info.basic &&
+        this._games[gameId].info.details &&
+        this._games[gameId].info.reports) {
+
+        this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
+        this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
+    }
+};
+
 
 // TODO: replace this with DB lookup
 DashService.prototype._oldLoadGameFiles = function() {
