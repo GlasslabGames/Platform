@@ -1407,8 +1407,9 @@ function _getDeveloperByCode(code, gameId){
         dashService.telmStore.getAllDeveloperProfiles()
             .then(function(devProfiles){
                 var developerId;
-                _(devProfiles).some(function(profile, key){
-                    if(profile[gameId].verifyCode === code){
+                _(devProfiles).some(function(profile, key) {
+                    if( profile[gameId] &&
+                        profile[gameId].verifyCode === code ) {
                         var components = key.split(':');
                         developerId = components[2];
                         return true;
