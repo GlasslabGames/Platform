@@ -2844,15 +2844,19 @@ TelemDS_Couchbase.prototype.createMatch = function(gameId, matchData) {
                 reject(err);
                 return;
             }
-
-            key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + data.value;
-            this.client.add(key, matchData, function (err, results) {
+            var matchId = data.value;
+            var match = {
+                id: matchId,
+                data: matchData
+            };
+            key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+            this.client.add(key, match, function (err, results) {
                 if (err) {
                     console.error("CouchBase DataStore: Create Match Error -", err);
                     reject(err);
                     return;
                 }
-                resolve(results.value);
+                resolve(match);
             }.bind(this));
         }.bind(this));
     }.bind(this));

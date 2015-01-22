@@ -413,31 +413,36 @@ function createMatch(req, res){
         .then(function(result){
             if(typeof result === "string"){
                 return result;
-            } else if(!result.basic.settings.canCreatMatches){
-                return "cannot create matches";
+            } else {
+                var canCreateMatches = result.basic.settings.canCreateMatches;
+                if (!canCreateMatches) {
+                    return "cannot create matches";
+                }
             }
             var data = {
                 players: [userId,invitedUserId],
-                status: "pending",
+                status: "active",
                 turns: [],
-                meta: {}
+                meta: {
+                    playerTurn: userId
+                }
             };
             return this.cbds.createMatch(gameId, data);
         }.bind(this))
-        .then(function(state){
-            if(state === "invalid userId"){
+        .then(function(match){
+            if(match === "invalid userId"){
                 this.requestUtil.errorResponse(res, {key: "data.user.invalid"});
                 return;
             }
-            if(state === "no object"){
+            if(match === "no object"){
                 this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
                 return;
             }
-            if(state === "cannot create matches"){
+            if(match === "cannot create matches"){
                 this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
                 return;
             }
-            this.requestUtil.jsonResponse(res, { status: "ok" });
+            this.requestUtil.jsonResponse(res, match);
         }.bind(this))
         .then(null, function(err){
             console.error(err);
@@ -466,6 +471,7 @@ function updateMatches(req, res){
                 return "cannot create matches";
             }
             var matchesToUpdate = [];
+            // each turn mentions the current user doing the turn, data about the turn, and who's turn is next?
             _(turnData).forEach(function(turns, matchId){
                 matchesToUpdate.push(_updateMatch.call(this, gameId, matchId, turns));
             }.bind(this));
@@ -533,7 +539,13 @@ function pollMatches(req, res){
                 this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
                 return;
             }
-            this.requestUtil.jsonResponse(res, matches);
+            var activeMatches = {};
+            _(matches).forEach(function(match, matchId){
+                if(match.status === "active"){
+                    activeMatches[matchId] = match;
+                }
+            });
+            this.requestUtil.jsonResponse(res, activeMatches);
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
