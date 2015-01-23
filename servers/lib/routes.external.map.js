@@ -134,16 +134,16 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/data/multiplayer/game/:gameId/invite/user/:userId",
+            api: "/api/v2/data/multiplayer/game/:gameId/create",
             service: "data",
             controller: "game",
             method: {
-                get: "createMatch"
+                post: "createMatch"
             }
         },
         {
             requireAuth: true,
-            api: "/api/v2/data/multiplayer/game/:gameId/update",
+            api: "/api/v2/data/multiplayer/game/:gameId/submit",
             service: "data",
             controller: "game",
             method: {
