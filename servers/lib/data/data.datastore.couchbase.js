@@ -32,8 +32,10 @@ function TelemDS_Couchbase(options,serviceManager){
             password: "",
             gameSessionExpire:   1*1*60, //24*60*60 // in seconds
             multiGetChunkSize:   2000,
+            multiSetChunkSize:   10,
             multiViewChunkSize:  20,
-            multiGetParallelNum: 2
+            multiGetParallelNum: 2,
+            multiSetParallelNum: 1
         },
         options
     );
@@ -2862,34 +2864,69 @@ TelemDS_Couchbase.prototype.createMatch = function(gameId, matchData) {
     }.bind(this));
 };
 
-TelemDS_Couchbase.prototype.getMatch = function(gameId, matchId){
+TelemDS_Couchbase.prototype.multiGetMatches = function(gameId, matchIds){
     return when.promise(function(resolve, reject){
-
-        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
-        this.client.get(key, function(err, results){
+        var keys = [];
+        var key;
+        matchIds.forEach(function(matchId){
+            key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+            keys.push(key);
+        });
+        this._chunk_getMulti(keys, {}, function(err, results){
             if(err){
-                console.error("CouchBase DataStore: Get Match Error -", err);
+                console.error("CouchBase DataStore: Get Matches Error -", err);
                 reject(err);
                 return;
             }
-            resolve(results.value);
-        });
+            resolve(results);
+        }.bind(this));
     }.bind(this));
 };
 
-TelemDS_Couchbase.prototype.updateMatch = function(gameId, matchId, matchData){
+TelemDS_Couchbase.prototype.multiSetMatches = function(matches){
     return when.promise(function(resolve, reject){
-
-        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
-        this.client.set(key, matchData, function(err, results){
+        this._chunk_setMulti(matches, {}, function(err, results){
             if(err){
-                console.error("CouchBase DataStore: Create Match Error -", err);
+                console.error("CouchBase DataStore: Update Matches Error -", err);
                 reject(err);
                 return;
             }
             resolve(results.value);
-        })
+        }.bind(this));
     }.bind(this));
+};
+
+TelemDS_Couchbase.prototype._chunk_setMulti = function(kv, options, callback){
+    // create buckets of keys with each one having a max size of ChunckSize
+    var keyList = Object.keys(kv);
+    var taskList = Util.Reshape(keyList, this.options.multiGetChunkSize);
+
+    var guardedAsyncOperation = guard(guard.n(this.options.multiSetParallelNum), function (all, ckeys){
+        return when.promise(function(resolve, reject) {
+            var setKVs = {};
+            ckeys.forEach(function(key){
+                setKVs[key] = kv[key];
+            });
+            //console.log(JSON.stringify(this.client.setMulti));
+            this.client.setMulti(setKVs, options, function(err, results){
+                if(err) {
+                    reject( { error: err, results: results } );
+                    return;
+                }
+
+                // merge two objects
+                all = _.merge(all, results);
+                resolve(all);
+            }.bind(this));
+        }.bind(this));
+    }.bind(this));
+
+    when.reduce(taskList, guardedAsyncOperation, {})
+        .then(function(all){
+            callback(null, all);
+        }, function(err){
+            callback(err.error, err.results);
+        });
 };
 
 TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId){
@@ -2922,20 +2959,24 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
                         reject(err);
                         return;
                     }
-                    var gameMatches = {};
+                    var output = {};
+                    var value;
+                    var players;
+                    var matchId;
+                    var components;
                     _.forEach(results, function(match, key){
-                        var value = match.value;
+                        value = match.value;
                         if(typeof value === "string"){
                             value = JSON.parse(value);
                         }
-                        var players = value.players;
+                        players = value.data.players;
                         if(_(players).contains(userId)){
-                            var components = key.split(":");
-                            var matchId = components[3];
-                            gameMatches[matchId] = value;
+                            components = key.split(":");
+                            matchId = components[3];
+                            output[matchId] = value;
                         }
                     });
-                    resolve(gameMatches);
+                    resolve(output);
                 }.bind(this));
             }.bind(this));
     }.bind(this));

@@ -395,17 +395,21 @@ function createMatch(req, res){
         this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
         return;
     }
-    if(!(req.params.userId && req.user && req.user.id)){
+    if(!(req.user && req.user.id && req.body.invitedUsers)){
         this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
         return;
     }
     var gameId = req.params.gameId;
-    var userId = req.user.id;
-    var invitedUserId = parseInt(req.params.userId);
+    var userIds = req.body.invitedUsers;
+    if(!Array.isArray(userIds)){
+        userIds = [userIds];
+    }
+    var firstUserId = req.user.id;
+    userIds.push(firstUserId);
 
-    this.myds.getUsersByIds([userId, invitedUserId])
+    this.myds.getUsersByIds(userIds)
         .then(function(results){
-            if(results.length !== 2){
+            if(results.length < userIds.length){
                 return "invalid userId";
             }
             return this.cbds.getGameInformation(gameId, true);
@@ -420,11 +424,11 @@ function createMatch(req, res){
                 }
             }
             var data = {
-                players: [userId,invitedUserId],
+                players: userIds,
                 status: "active",
-                turns: [],
+                history: [],
                 meta: {
-                    playerTurn: userId
+                    playerTurn: firstUserId
                 }
             };
             return this.cbds.createMatch(gameId, data);
@@ -455,14 +459,29 @@ function updateMatches(req, res){
         this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
         return;
     }
-    if(!(req.body.turnData && Array.isArray(req.body.turnData))){
-        this.requestUtil.errorResponse(res, {key: "data.turnData.missing"});
+    var gameId = req.params.gameId;
+
+    if(!(req.body && req.body.turnHistory && typeof req.body.turnHistory === "object")){
+        this.requestUtil.errorResponse(res, {key: "data.turnHistory.missing"});
+        return;
+    }
+    var turnHistory = req.body.turnHistory;
+    if(!Array.isArray(turnHistory)){
+        turnHistory = [turnHistory];
+    }
+
+    var userId;
+    if(req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.session.passport.user.id) {
+        userId = req.session.passport.user.id;
+    } else {
+        this.requestUtil.errorResponse(res, { status: "error", error: "not logged in", key: "invalid.access"});
         return;
     }
 
-    var gameId = req.params.gameId;
-    var turnData = req.body.turnData;
-
+    var matchesToUpdate;
     this.cbds.getGameInformation(gameId, true)
         .then(function(info){
             if(info === "no object") {
@@ -470,12 +489,35 @@ function updateMatches(req, res){
             } else if(!info.basic.settings.canCreateMatches){
                 return "cannot create matches";
             }
-            var matchesToUpdate = [];
-            // each turn mentions the current user doing the turn, data about the turn, and who's turn is next?
-            _(turnData).forEach(function(turns, matchId){
-                matchesToUpdate.push(_updateMatch.call(this, gameId, matchId, turns));
+            matchesToUpdate = {};
+            var matchId;
+            var matchIds = [];
+            turnHistory.forEach(function(item){
+                matchId = item.matchId;
+                if(!matchesToUpdate[matchId]){
+                    matchesToUpdate[matchId] = {};
+                    matchesToUpdate[matchId].turns = [];
+                    matchIds.push(matchId);
+                }
+                matchesToUpdate[matchId].nextPlayer = item.nextPlayer;
+                matchesToUpdate[matchId].turns.push(item.turn);
             }.bind(this));
-            return when.all(matchesToUpdate)
+            return this.cbds.multiGetMatches(gameId, matchIds);
+        }.bind(this))
+        .then(function(matches){
+            if(typeof matches === "string"){
+                return matches;
+            }
+            var data;
+            _(matches).forEach(function(item, key){
+                delete item.cas;
+                delete item.flags;
+                match = item.value;
+                data = match.data;
+                data.history = data.history.concat(matchesToUpdate[match.id].turns);
+                data.meta.playerTurn = matchesToUpdate[match.id].nextPlayer;
+            });
+            return this.cbds.multiSetMatches(matches);
         }.bind(this))
         .then(function(result){
             if(result === "no object"){
@@ -491,22 +533,6 @@ function updateMatches(req, res){
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
-}
-
-function _updateMatch(gameId, matchId, turns){
-    return when.promise(function(resolve, reject){
-        this.cbds.getMatch(gameId, matchId)
-            .then(function(match){
-                match.turns = match.turns.concat(turns);
-                return this.cbds.updateMatch(gameId, matchId, match);
-            }.bind(this))
-            .then(function(){
-                resolve();
-            })
-            .then(null, function(err){
-                reject(err);
-            });
-    }.bind(this));
 }
 
 function pollMatches(req, res){
@@ -541,8 +567,8 @@ function pollMatches(req, res){
             }
             var activeMatches = {};
             _(matches).forEach(function(match, matchId){
-                if(match.status === "active"){
-                    activeMatches[matchId] = match;
+                if(match.data.status === "active"){
+                    activeMatches[matchId] = match.data;
                 }
             });
             this.requestUtil.jsonResponse(res, activeMatches);
