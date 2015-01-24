@@ -68,7 +68,7 @@
     },
     "assessment": [
         {
-            "enabled": false,
+            "enabled": true,
             "id": "sowo",
             "dataProcessScope": "gameSession",
             "engine": "javascript",
@@ -80,7 +80,7 @@
                 },
                 "wo2": {
                     "name": "",
-                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first five moves of the last case played."
+                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first three moves of the last case played."
                 },
                 "wo3": {
                     "name": "",
@@ -121,7 +121,7 @@
         "list": [
             {
                 "id": "sowo",
-                "enabled": false,
+                "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
