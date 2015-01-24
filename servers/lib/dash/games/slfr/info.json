@@ -57,7 +57,7 @@
             "type": "page",
             "page": {
                 "title": "Slice Fractions",
-                "embed": "http://partners.ululab.com/glasslab/SliceFractionsSchoolEdition.swf",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/SLFR/game/SliceFractionsSchoolEdition.swf",
                 "size": {
                     "width": 800,
                     "height": 600
