@@ -15,7 +15,10 @@ module.exports = {
     getGamePlayInfo: getGamePlayInfo,
     postTotalTimePlayed: postTotalTimePlayed,
     postGameAchievement: postGameAchievement,
-    releases: releases
+    releases: releases,
+    createMatch: createMatch,
+    updateMatches: updateMatches,
+    pollMatches: pollMatches
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -385,4 +388,205 @@ function releases(req, res, next, serviceManager) {
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this) );
+}
+
+function createMatch(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+
+    var userId;
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.session.passport.user.id ) {
+        userId = req.session.passport.user.id;
+    } else {
+        this.requestUtil.errorResponse(res, { status: "error", error: "not logged in", key: "invalid.access"});
+        return;
+    }
+
+    var gameId = req.params.gameId;
+    var userIds = req.body.invitedUsers;
+    if(!Array.isArray(userIds)){
+        userIds = [userIds];
+    }
+    var firstUserId = userId;
+    userIds.push(firstUserId);
+
+    this.myds.getUsersByIds(userIds)
+        .then(function(results){
+            if(results.length < userIds.length){
+                return "invalid userId";
+            }
+            return this.cbds.getGameInformation(gameId, true);
+        }.bind(this))
+        .then(function(result){
+            if(typeof result === "string"){
+                return result;
+            } else {
+                var canCreateMatches = result.basic.settings.canCreateMatches;
+                if (!canCreateMatches) {
+                    return "cannot create matches";
+                }
+            }
+            var data = {
+                players: userIds,
+                status: "active",
+                history: [],
+                meta: {
+                    playerTurn: firstUserId
+                }
+            };
+            return this.cbds.createMatch(gameId, data);
+        }.bind(this))
+        .then(function(match){
+            if(match === "invalid userId"){
+                this.requestUtil.errorResponse(res, {key: "data.user.invalid"});
+                return;
+            }
+            if(match === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(match === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, match);
+        }.bind(this))
+        .then(null, function(err){
+            console.error(err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function updateMatches(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+
+    if(!(req.body && typeof req.body === "object")){
+        this.requestUtil.errorResponse(res, {key: "data.turnData.missing"});
+        return;
+    }
+    var matchUpdates = req.body;
+    if(!Array.isArray(matchUpdates)){
+        matchUpdates = [matchUpdates];
+    }
+
+    var userId;
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.session.passport.user.id ) {
+        userId = req.session.passport.user.id;
+    } else {
+        this.requestUtil.errorResponse(res, { status: "error", error: "not logged in", key: "invalid.access"});
+        return;
+    }
+
+    var matchesToUpdate;
+    this.cbds.getGameInformation(gameId, true)
+        .then(function(info){
+            if(info === "no object") {
+                return info;
+            } else if(!info.basic.settings.canCreateMatches){
+                return "cannot create matches";
+            }
+            matchesToUpdate = {};
+            var matchId;
+            var matchIds = [];
+            matchUpdates.forEach(function(item){
+                matchId = item.matchId;
+                if(!matchesToUpdate[matchId]){
+                    matchesToUpdate[matchId] = {};
+                    matchesToUpdate[matchId].turns = [];
+                    item.turnData.playerId = userId;
+                    matchIds.push(matchId);
+                }
+                matchesToUpdate[matchId].nextPlayer = item.nextPlayer;
+                matchesToUpdate[matchId].turns.push(item.turnData);
+            }.bind(this));
+            return this.cbds.multiGetMatches(gameId, matchIds);
+        }.bind(this))
+        .then(function(matches){
+            if(typeof matches === "string"){
+                return matches;
+            }
+            var data;
+            _(matches).forEach(function(item, key){
+                delete item.cas;
+                delete item.flags;
+
+                // Only continue if the playerTurn matches the userId
+                if( item.value.data.meta.playerTurn === userId ) {
+                    match = item.value;
+                    data = match.data;
+                    data.history = data.history.concat(matchesToUpdate[match.id].turns);
+                    data.meta.playerTurn = matchesToUpdate[match.id].nextPlayer;
+                }
+            });
+            return this.cbds.multiSetMatches(matches);
+        }.bind(this))
+        .then(function(result){
+            if(result === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(result === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function pollMatches(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+    var userId = req.user.id;
+
+    this.cbds.getGameInformation(gameId, true)
+        .then(function(info){
+            if(info === "no object") {
+                return info;
+            } else if(!info.basic.settings.canCreateMatches){
+                return "cannot create matches";
+            }
+            return this.cbds.getAllGameMatchesByUserId(gameId, userId);
+        }.bind(this))
+        .then(function(matches){
+            if(matches === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(matches === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            var activeMatches = {};
+            _(matches).forEach(function(match, matchId){
+                if(match.data.status === "active"){
+                    activeMatches[matchId] = match.data;
+                }
+            });
+            this.requestUtil.jsonResponse(res, activeMatches);
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }

@@ -130,7 +130,16 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.urlencoded());
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
-                this.app.use(cors());
+                var whitelist = ['http://localhost:8080'];
+                var corsOptions = {
+                    origin: function( origin, callback ) {
+                        var originIsWhitelisted = whitelist.indexOf( origin ) !== -1;
+                        callback( null, originIsWhitelisted );
+                    },
+                    credentials: true
+                };
+                //this.app.use(cors({origin:"http://stage.playfully.org; http://localhost:8080", credentials: true}));
+                this.app.use( cors(corsOptions) );
 
                 this.app.use(express.session({
                     secret: this.options.services.session.secret || "keyboard kitty",

@@ -477,14 +477,13 @@ function updateDeveloperGameInfo(req, res){
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
-    var data = {
-        basic: req.body.basic
-    };
+    var data = req.body.data;
 
     if(!data.basic){
         this.requestUtil.errorResponse(res, {key:"dash.info.missing"},401);
         return;
     }
+    var infoData;
     getDeveloperGameIds.call(this,userId)
         .then(function(gameIds){
             if(gameIds[gameId]){
@@ -497,22 +496,33 @@ function updateDeveloperGameInfo(req, res){
                 return results;
             }
             var basic = results.basic;
-            if(JSON.stringify(basic) === JSON.stringify(data.basic)){
-                return "no change";
+            var details = results.details;
+            if(!(basic && details)){
+                return "malformed object";
             }
-            results.basic = data.basic;
-            return _writeToInfoJSONFiles(gameId, JSON.stringify(results, null, 4));
+            _(basic).forEach(function(value, property){
+                basic[property] = data[property];
+            });
+            _(details).forEach(function(value, property){
+                details[property] = data[property];
+            });
+            results.basic = basic;
+            results.details = details;
+            infoData = results;
+            return _writeToInfoJSONFiles(gameId, JSON.stringify(infoData, null, 4));
         })
         .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
-            return this.telmStore.updateGameInformation(gameId, data);
+            return this.telmStore.updateGameInformation(gameId, infoData);
         }.bind(this))
         .then(function(status){
-            if(status !== "no object" && status !== "no access"){
-                this._games[gameId].info.basic = data.basic;
+            if(status !== "no object" && status !== "no access" && status !== "malformed object"){
+                this.buildGameForGamesObject(infoData, gameId);
                 res.end('{"update":"complete"}');
+            } else if(status === "malformed object"){
+                this.requestUtil.errorResponse(res, {key:"dash.info.malformed"});
             } else{
                 this.requestUtil.errorResponse(res, {key:"dash.access.invalid"});
             }

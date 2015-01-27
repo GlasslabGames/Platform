@@ -43,6 +43,7 @@ module.exports = {
         versions: require('./data.const.game_versions'),
         gameInfoKey: 'gi',
         gameAchievementKey: 'ga',
+        matchKey: 'm'
     },
     datastore: {
       keys: {
