@@ -113,6 +113,20 @@
     "reports": {
         "list": [
             {
+                "id": "achievements",
+                "assessmentId": "none",
+                "enabled": true,
+                "name": "Learning Events & Time Played",
+                "header": {
+                    "text": "Learning Events & Time Played",
+                    "image": "assets/game-banner-WT.png",
+                    "skinny": "assets/skinny-banner-WT.png",
+                    "large": "assets/skinny-banner-WT@2x.png"
+                },
+                "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
+                "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
+            },
+            {
                 "id": "sowo",
                 "assessmentId": "sowo",
                 "enabled": true,
