@@ -8,7 +8,8 @@ var lConst = require('../lic.const.js');
 module.exports = {
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
-    getLicenses:     getLicenses
+    getLicenses:     getLicenses,
+    getSubscriptionPackages: getSubscriptionPackages
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -22,7 +23,8 @@ exampleOut.verifyLicense =
     licenseKey: "ABCD-12345-EF67"
 };
 function verifyLicense(req, res, next) {
-
+    res.end('api no longer used');
+    return;
     if( req.params &&
         req.params.licenseKey) {
         var licenseKey = req.params.licenseKey;
@@ -79,7 +81,8 @@ exampleOut.getLicenses =
 ];
 
 function getLicenses(req, res, next) {
-
+    res.end('api no longer used');
+    return;
     if( req.session &&
         req.session.passport) {
         var userData = req.session.passport.user;
@@ -139,6 +142,8 @@ exampleIn.registerLicense = {
     "key": "ZQRD-NC7F4-W7LR"
 };
 function registerLicense(req, res, next) {
+    res.end('api no longer user');
+    return;
     if( req.body &&
         req.body.key &&
         _.isString(req.body.key)) {
@@ -179,5 +184,25 @@ function registerLicense(req, res, next) {
 
     } else {
         this.requestUtil.errorResponse(res, {error:"missing license", key:"license.missing"}, 404);
+    }
+}
+
+function getSubscriptionPackages(req, res){
+    try{
+        var plans = [];
+        _(lConst.plan).forEach(function(value){
+            plans.push(value);
+        });
+        var seats = [];
+        _(lConst.seats).forEach(function(value){
+            seats.push(value);
+        });
+        var output = {
+            plans: plans,
+            seats: seats
+        };
+        this.requestUtil.jsonResponse(res, output);
+    } catch(err){
+        this.requestUtil.errorResponse(res, err, 500)
     }
 }

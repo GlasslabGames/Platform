@@ -429,6 +429,14 @@ module.exports = {
                 post: "registerLicense"
             }
         },
+        {
+            api: "/api/v2/license/packages",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getSubscriptionPackages"
+            }
+        },
         // ---------------------------------------------------
         {
             api: "/api/v2/auth/user/register",
