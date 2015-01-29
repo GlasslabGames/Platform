@@ -13,6 +13,7 @@ module.exports = {
     Const:   require('./lic.const.js'),
 
     Datastore: {
-        MySQL:  require('./lic.datastore.mysql.js')
+        MySQL:  require('./lic.datastore.mysql.js'),
+        Couchbase: require('./lic.datastore.couchbase.js')
     }
 }

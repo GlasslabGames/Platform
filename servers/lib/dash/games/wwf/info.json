@@ -1,11 +1,11 @@
 {
     "basic": {
         "gameId": "WWF",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
-        "shortName": "Words With Friends EDU",
-        "longName": "Words With Friends EDU",
+        "shortName": "Unannounced Game",
+        "longName": "Unannounced Game",
         "release": "dev",
         "price": "TBD",
         "releaseDate": "TBD",
@@ -13,11 +13,11 @@
         "platform": "TBD",
         "subject": "TBD",
         "grades": "6 - 8",
-        "shortDescription": "Words With Friends EDU",
-        "description": "Words With Friends EDU by Zynga",
+        "shortDescription": "Unannounced Game",
+        "description": "Unannounced Game",
         "developer": {
             "id": "ZY",
-            "name": "Zynga",
+            "name": "Unannounced Developer",
             "logo": {
                 "small": "assets/glasslab-logo.png",
                 "large": "assets/glasslab-logo-2x.png"
@@ -25,6 +25,7 @@
             "description": ""
         },
         "settings": {
+            "canCreateMatches": true
         },
         "license": {
             "type": "loginType",

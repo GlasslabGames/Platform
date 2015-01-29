@@ -1,0 +1,84 @@
+[
+    {
+        "id": "a",
+        "description": "Common Core Standards",
+        "title": "Standards",
+        "subGroups": [
+            {
+                "id": "a",
+                "title": "CCSS Math 2.OA.A.1",
+                "name": "",
+                "description": "Use addition and subtraction within 100 to solve one- and two-step word problems involving situations of adding to, taking from, putting together, taking apart, and comparing, with unknowns in all positions, e.g., by using drawings and equations with a symbol for the unknown number to represent the problem.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "WT_ach_1_aa",
+                        "title": "Beginning basic skills",
+                        "info": "The student shows beginning development of basic integer addition and multiplication skills."
+                    }
+                ]
+            },
+            {
+                "id": "b",
+                "title": "CCSS Math 4.OA.C.5",
+                "name": "",
+                "description": "Generate a number or shape pattern that follows a given rule. Identify apparent features of the pattern that were not explicit in the rule itself. For example, given the rule \"Add 3\" and the starting number 1, generate terms in the resulting sequence and observe that the terms appear to alternate between odd and even numbers. Explain informally why the numbers will continue to alternate in this way.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "WT_ach_2_ab",
+                        "title": "Basic skills secure",
+                        "info": "The student shows competency in basic integer addition and multiplication skills."
+                    }
+                ]
+            },
+            {
+                "id": "c",
+                "title": "CCSS Math 5.OA.B.3",
+                "name": "",
+                "description": "Generate two numerical patterns using two given rules. Identify apparent relationships between corresponding terms. Form ordered pairs consisting of corresponding terms from the two patterns, and graph the ordered pairs on a coordinate plane. For example, given the rule \"Add 3\" and the starting number 0, and given the rule \"Add 6\" and the starting number 0, generate terms in the resulting sequences, and observe that the terms in one sequence are twice the corresponding terms in the other sequence. Explain informally why this is so.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "WT_ach_3_ac",
+                        "title": "Arithmetic fluency",
+                        "info": "The student shows arithmetic fluency with regards to addition and multiplication."
+                    }
+                ]
+            },
+            {
+                "id": "d",
+                "title": "CCSS Math 6.NS.C.5",
+                "name": "",
+                "description": "Understand that positive and negative numbers are used together to describe quantities having opposite directions or values (e.g., temperature above/below zero, elevation above/below sea level, credits/debits, positive/negative electric charge); use positive and negative numbers to represent quantities in real-world contexts, explaining the meaning of 0 in each situation.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "WT_ach_4_ad",
+                        "title": "Problem solver",
+                        "info": "The student exihibts good problem solving skills involving algebraic and algorithmic reasoning."
+                    }
+                ]
+            },
+            {
+                "id": "e",
+                "title": "CCSS Math 6.NS.C.6",
+                "name": "",
+                "description": "Understand a rational number as a point on the number line. Extend number line diagrams and coordinate axes familiar from previous grades to represent points on the line and in the plane with negative number coordinates.",
+                "info": "",
+                "items": [
+                    {
+                        "id": "WT_ach_5_ae",
+                        "title": "Mathematical promise",
+                        "info": "The student exhibits mathematical promise that should be encouraged and further developed."
+                    },
+                    {
+                        "id": "WT_ach_6_ae",
+                        "title": "Mathematical talent",
+                        "info": "The student exhibits mathematical talent that should be encouraged and further developed."
+                    }
+                ]
+            }
+        ]
+    }
+]

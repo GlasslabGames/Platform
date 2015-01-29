@@ -75,6 +75,10 @@ module.exports = {
     "data.gameId.missing":                  "This game Id does not exist in our system",
     "data.gameId.invalid":                  "This game Id is not in our list of valid games",
     "data.gameConfig.missing":              "You did not input game config",
+    "data.userId.missing":                  "Missing UserId",
+    "data.userId.invalid":                  "Invalid UserId",
+    "data.gameId.match":                    "Game cannot create a match",
+    "data.turnData.missing":                "Turn data is missing",
     // report
     "report.general":                       "There is a problem with this report",
     "report.access.invalid":                "Invalid Access",
@@ -93,6 +97,7 @@ module.exports = {
     "dash.subject.missing":                 "Missing subject when posting a new message",
     "dash.message.missing":                 "Missing message when posting a new message",
     "dash.info.missing":                    "Missing information content when posting an update",
+    "dash.info.malformed":                  "The info document has been corrupted",
     // research
     "research.access.invalid":              "Invalid Access",
     "research.gameId.missing":              "Missing Game Id",

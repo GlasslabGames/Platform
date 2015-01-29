@@ -1309,7 +1309,7 @@ function sendDeveloperGameConfirmEmail(userId, devEmail, gameId, developerProfil
         this.authDataStore.setDeveloperProfile(userId, developerProfile)
             .then(function() {
                 var emailData = {
-                    subject: "GlassLab Games Developer confirmation",
+                    subject: "GlassLab Games - Developer Game Request",
                     to: this.options.auth.developer.email.to,
                     devEmail: devEmail,
                     gameId: gameId,
@@ -1407,8 +1407,9 @@ function _getDeveloperByCode(code, gameId){
         dashService.telmStore.getAllDeveloperProfiles()
             .then(function(devProfiles){
                 var developerId;
-                _(devProfiles).some(function(profile, key){
-                    if(profile[gameId].verifyCode === code){
+                _(devProfiles).some(function(profile, key) {
+                    if( profile[gameId] &&
+                        profile[gameId].verifyCode === code ) {
                         var components = key.split(':');
                         developerId = components[2];
                         return true;

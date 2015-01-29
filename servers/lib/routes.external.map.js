@@ -132,6 +132,33 @@ module.exports = {
                 "delete": "deleteGameData"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/:gameId/create",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "createMatch"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/:gameId/submit",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "updateMatches"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/:gameId/matches",
+            service: "data",
+            controller: "game",
+            method: {
+                get: "pollMatches"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
@@ -402,6 +429,14 @@ module.exports = {
                 post: "registerLicense"
             }
         },
+        {
+            api: "/api/v2/license/packages",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getSubscriptionPackages"
+            }
+        },
         // ---------------------------------------------------
         {
             api: "/api/v2/auth/user/register",
@@ -531,7 +566,7 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/auth/developer/:gameId/request",
+            api: "/api/v2/auth/developer/game/:gameId/request",
             service: "auth",
             controller: "user",
             method: {
@@ -539,7 +574,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/auth/developer/:gameId/request/:code/approve",
+            api: "/api/v2/auth/developer/game/:gameId/request/:code/approve",
             service: "auth",
             controller: "user",
             method: {
