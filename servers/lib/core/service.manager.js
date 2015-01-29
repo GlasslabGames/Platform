@@ -130,7 +130,7 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.urlencoded());
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
-                var whitelist = ['http://localhost:8080'];
+                var whitelist = [ "http://new.wwf.local" ];
                 var corsOptions = {
                     origin: function( origin, callback ) {
                         var originIsWhitelisted = whitelist.indexOf( origin ) !== -1;
