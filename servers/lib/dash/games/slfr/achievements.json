@@ -1,84 +1,114 @@
-[
-    {
-        "id": "a",
-        "description": "Common Core Standards",
-        "title": "Standards",
-        "subGroups": [
-            {
-                "id": "a",
-                "title": "CCSS Math 2.G.A.3",
-                "name": "",
-                "description": "Partition circles and rectangles into two, three, or four equal shares, describe the shares using the words halves, thirds, half of, a third of, etc., and describe the whole as two halves, three thirds, four fourths. Recognize that equal shares of identical wholes need not have the same shape.",
-                "info": "",
-                "items": [
-                    {
-                        "id": "achievement1",
-                        "title": "Completed concepts: \"How to Play\", \"Split Groups\" & \"Slice Shapes\"",
-                        "info": "Students understand how the game works and can split groups or shapes into equal shares."
-                    }
-                ]
-            },
-            {
-                "id": "b",
-                "title": "Symbolic notation",
-                "name": "",
-                "description": "Students can read symbolic fractions and are starting to understand how they relate to numerical fractions.",
-                "info": "",
-                "items": [
-                    {
-                        "id": "achievement2",
-                        "title": "Completed concepts: \"Common Whole\", \"Symbolic Numerator\" & \"Fractions Reading\"",
-                        "info": "Students understand how a fractions is written."
-                    }
-                ]
-            },
-            {
-                "id": "c",
-                "title": "CCSS Math 3.NF.A.1",
-                "name": "",
-                "description": "Understand a fraction 1/b as the quantity formed by 1 part when a whole is partitioned into b equal parts; understand a fraction a/b as the quantity formed by a parts of size 1/b.",
-                "info": "",
-                "items": [
-                    {
-                        "id": "achievement3",
-                        "title": "Completed concepts: \"Denominator\", \"Numerator\" & \"Pie Charts\"",
-                        "info": "Students understand what changing the numerator and the denominator mean in a fraction."
-                    }
-                ]
-            },
-            {
-                "id": "d",
-                "title": "CCSS Math 3.NF.A.3",
-                "name": "",
-                "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3 and can compare different fractions by reasoning about their size.",
-                "info": "",
-                "items": [
-                    {
-                        "id": "achievement4",
-                        "title": "Completed concepts: \"Size Comparison\", \"Equivalent Fractions (A)\" & \"Equivalent Fractions (B)\"",
-                        "info": "Students understand what an equivalent fraction is, by comparing shapes of different sizes together."
-                    },
-                    {
-                        "id": "achievement5",
-                        "title": "Completed concepts: \"Fractions Ordering\" & \"Question Marks\"",
-                        "info": "Students can deduct fraction values based on the information at hand."
-                    }
-                ]
-            },
-            {
-                "id": "e",
-                "title": "CCSS Math 4.NF.B.3",
-                "name": "",
-                "description": "Understand subtraction of fractions as separating parts referring to the same whole.",
-                "info": "",
-                "items": [
-                    {
-                        "id": "achievement6",
-                        "title": "Completed concept: \"Subtraction\"",
-                        "info": "Students can subtract fractions from 1."
-                    }
-                ]
-            }
-        ]
-    }
-]
+{
+    "groups": [
+        {
+            "id": "a",
+            "description": "Common Core Standards",
+            "title": "Standards",
+            "subGroups": [
+                {
+                    "id": "a",
+                    "title": "CCSS Math 2.G.A.3",
+                    "name": "",
+                    "description": "Partition circles and rectangles into two, three, or four equal shares, describe the shares using the words halves, thirds, half of, a third of, etc., and describe the whole as two halves, three thirds, four fourths. Recognize that equal shares of identical wholes need not have the same shape.",
+                    "info": ""
+                },
+                {
+                    "id": "b",
+                    "title": "Symbolic notation",
+                    "name": "",
+                    "description": "Students can read symbolic fractions and are starting to understand how they relate to numerical fractions.",
+                    "info": ""
+                },
+                {
+                    "id": "c",
+                    "title": "CCSS Math 3.NF.A.1",
+                    "name": "",
+                    "description": "Understand a fraction 1/b as the quantity formed by 1 part when a whole is partitioned into b equal parts; understand a fraction a/b as the quantity formed by a parts of size 1/b.",
+                    "info": ""
+                },
+                {
+                    "id": "d",
+                    "title": "CCSS Math 3.NF.A.3",
+                    "name": "",
+                    "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3 and can compare different fractions by reasoning about their size.",
+                    "info": ""
+                },
+                {
+                    "id": "e",
+                    "title": "CCSS Math 4.NF.B.3",
+                    "name": "",
+                    "description": "Understand subtraction of fractions as separating parts referring to the same whole.",
+                    "info": ""
+                }
+            ]
+        }
+    ],
+    "achievements": [
+        {
+            "id": "achievement1",
+            "title": "Completed concepts: \"How to Play\", \"Split Groups\" & \"Slice Shapes\"",
+            "info": "Students understand how the game works and can split groups or shapes into equal shares.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "a"
+                }
+            ]
+        },
+        {
+            "id": "achievement2",
+            "title": "Completed concepts: \"Common Whole\", \"Symbolic Numerator\" & \"Fractions Reading\"",
+            "info": "Students understand how a fractions is written.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "b"
+                }
+            ]
+        },
+        {
+            "id": "achievement3",
+            "title": "Completed concepts: \"Denominator\", \"Numerator\" & \"Pie Charts\"",
+            "info": "Students understand what changing the numerator and the denominator mean in a fraction.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "c"
+                }
+            ]
+        },
+        {
+            "id": "achievement4",
+            "title": "Completed concepts: \"Size Comparison\", \"Equivalent Fractions (A)\" & \"Equivalent Fractions (B)\"",
+            "info": "Students understand what an equivalent fraction is, by comparing shapes of different sizes together.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "d"
+                }
+            ]
+        },
+        {
+            "id": "achievement5",
+            "title": "Completed concepts: \"Fractions Ordering\" & \"Question Marks\"",
+            "info": "Students can deduct fraction values based on the information at hand.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "d"
+                }
+            ]
+        },
+        {
+            "id": "achievement6",
+            "title": "Completed concept: \"Subtraction\"",
+            "info": "Students can subtract fractions from 1.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "e"
+                }
+            ]
+        }
+    ]
+}

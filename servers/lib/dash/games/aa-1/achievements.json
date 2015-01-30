@@ -1,102 +1,158 @@
-[
-    {
-        "id": "CCSS.ELA-Literacy.WHST.6-8.1",
-        "description": "Common Core Standards",
-        "title": "Standards",
-        "subGroups": [
-            {
-                "id": "a",
-                "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
-                "name": "Organizing Claims",
-                "description": "Write arguments focused on discipline-specific content",
-                "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically.",
-                "items": [
-                    {
-                        "id": "Bot Champion",
-                        "title": "Bot Champion",
-                        "info": "Student has won three argubot battles in a row!"
-                    },
-                    {
-                        "id": "Evidence Cadet",
-                        "title": "Evidence Cadet",
-                        "info": "Great detective work! Student has collected a wide range of evidence."
-                    }
-                ]
-            },
-            {
-                "id": "b",
-                "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
-                "name": "Supporting Claims",
-                "description": "Write arguments to support claims with clear reasons and relevant evidence",
-                "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources.",
-                "items": [
-                    {
-                        "id": "Bot Defender",
-                        "title": "Bot Defender",
-                        "info": "Student dominated a battle by successfully critiquing an opposing argument while defending his/her own."
-                    },
-                    {
-                        "id": "Core Champion",
-                        "title": "Core Champion",
-                        "info": "Student has 100% accuracy at identifying strengths and weaknesses of claim-data pairs for his/her 5 most recent attempts."
-                    },
-                    {
-                        "id": "Core Cadet",
-                        "title": "Core Cadet",
-                        "info": "Student has completed greater than 15 Claim Cores with a high success rate!"
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "id": "21st.Century.Skills",
-        "description": "21st Century Skills",
-        "title": "21st Century Skills",
-        "subGroups": [
-            {
-                "id": "a",
-                "title": "Problem Solving",
-                "name": "Problem Solving",
-                "description": "Distinguish among fact, opinion, and reasoned judgement in a text",
-                "info": "Experimentation of new and familiar concepts while processing￼information until a viable solution is reached.",
-                "items": [
-                    {
-                        "id": "Deliberate",
-                        "title": "Deliberate",
-                        "info": "Gathered 100% evidence before equipping an argubot."
-                    },
-                    {
-                        "id": "Bold",
-                        "title": "Bold",
-                        "info": "Student is taking the initiative to change positions at difficult times in order to make a better argument."
-                    },
-                    {
-                        "id": "Persistent",
-                        "title": "Persistent",
-                        "info": "After failing a battle, immediately selects the option to try again."
-                    }
-                ]
-            },
-            {
-                "id": "b",
-                "title": "Citizenship",
-                "name": "Citizenship",
-                "description": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
-                "info": "Demonstration of proper technology use, global awareness, and moral capacity in and outside of the classroom.",
-                "items": [
-                    {
-                        "id": "Curious",
-                        "title": "Curious",
-                        "info": "Touches all the objects in a scene before leaving the room."
-                    },
-                    {
-                        "id": "Empathetic",
-                        "title": "Empathetic",
-                        "info": "The student is choosing empathetic dialogue when speaking with other characters."
-                    }
-                ]
-            }
-        ]
-    }
-]
+{
+    "groups": [
+        {
+            "id": "CCSS.ELA-Literacy.WHST.6-8.1",
+            "description": "Common Core Standards",
+            "title": "Standards",
+            "subGroups": [
+                {
+                    "id": "a",
+                    "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
+                    "name": "Organizing Claims",
+                    "description": "Write arguments focused on discipline-specific content",
+                    "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically."
+                },
+                {
+                    "id": "b",
+                    "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
+                    "name": "Supporting Claims",
+                    "description": "Write arguments to support claims with clear reasons and relevant evidence",
+                    "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources."
+                }
+            ]
+        },
+        {
+            "id": "21st.Century.Skills",
+            "description": "21st Century Skills",
+            "title": "21st Century Skills",
+            "subGroups": [
+                {
+                    "id": "a",
+                    "title": "Problem Solving",
+                    "name": "Problem Solving",
+                    "description": "Distinguish among fact, opinion, and reasoned judgement in a text",
+                    "info": "Experimentation of new and familiar concepts while processing￼information until a viable solution is reached."
+                },
+                {
+                    "id": "b",
+                    "title": "Citizenship",
+                    "name": "Citizenship",
+                    "description": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
+                    "info": "Demonstration of proper technology use, global awareness, and moral capacity in and outside of the classroom."
+                }
+            ]
+        }
+    ],
+    "achievements": [
+        {
+            "id": "Bot Champion",
+            "title": "Bot Champion",
+            "info": "Student has won three argubot battles in a row!",
+            "standards": [
+                {
+                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
+                    "subGroup": "a"
+                }
+            ]
+        },
+        {
+            "id": "Evidence Cadet",
+            "title": "Evidence Cadet",
+            "info": "Great detective work! Student has collected a wide range of evidence.",
+            "standards": [
+                {
+                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
+                    "subGroup": "a"
+                }
+            ]
+        },
+        {
+            "id": "Bot Defender",
+            "title": "Bot Defender",
+            "info": "Student dominated a battle by successfully critiquing an opposing argument while defending his/her own.",
+            "standards": [
+                {
+                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
+                    "subGroup": "b"
+                }
+            ]
+        },
+        {
+            "id": "Core Champion",
+            "title": "Core Champion",
+            "info": "Student has 100% accuracy at identifying strengths and weaknesses of claim-data pairs for his/her 5 most recent attempts.",
+            "standards": [
+                {
+                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
+                    "subGroup": "b"
+                }
+            ]
+        },
+        {
+            "id": "Core Cadet",
+            "title": "Core Cadet",
+            "info": "Student has completed greater than 15 Claim Cores with a high success rate!",
+            "standards": [
+                {
+                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
+                    "subGroup": "b"
+                }
+            ]
+        },
+        {
+            "id": "Deliberate",
+            "title": "Deliberate",
+            "info": "Gathered 100% evidence before equipping an argubot.",
+            "standards": [
+                {
+                    "group": "21st.Century.Skills",
+                    "subGroup": "a"
+                }
+            ]
+        },
+        {
+            "id": "Bold",
+            "title": "Bold",
+            "info": "Student is taking the initiative to change positions at difficult times in order to make a better argument.",
+            "standards": [
+                {
+                    "group": "21st.Century.Skills",
+                    "subGroup": "a"
+                }
+            ]
+        },
+        {
+            "id": "Persistent",
+            "title": "Persistent",
+            "info": "After failing a battle, immediately selects the option to try again.",
+            "standards": [
+                {
+                    "group": "21st.Century.Skills",
+                    "subGroup": "a"
+                }
+            ]
+        },
+        {
+            "id": "Curious",
+            "title": "Curious",
+            "info": "Touches all the objects in a scene before leaving the room.",
+            "standards": [
+                {
+                    "group": "21st.Century.Skills",
+                    "subGroup": "b"
+                }
+            ]
+        },
+        {
+            "id": "Empathetic",
+            "title": "Empathetic",
+            "info": "The student is choosing empathetic dialogue when speaking with other characters.",
+            "standards": [
+                {
+                    "group": "21st.Century.Skills",
+                    "subGroup": "b"
+                }
+            ]
+        }
+    ]
+}
