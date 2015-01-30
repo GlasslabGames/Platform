@@ -288,7 +288,7 @@
                         "category": "ELA Common Core",
                         "groups": [
                             {
-                                "name": "CCSS.ELA-Literacy.RI.6.8",
+                                "name": "CCSS.ELA-Literacy.RST.6.8",
                                 "link": "http://www.corestandards.org/ELA-Literacy/RST/6-8/1/",
                                 "description": "Evaluate arguments and claims; distinguish claims supported by reasons and evidence."
                             },
@@ -303,7 +303,7 @@
                                 "description": "Cite several pieces of textual evidence to support analysis"
                             },
                             {
-                                "name": "CCSS.ELA-Literacy.RI.6-8.10",
+                                "name": "CCSS.ELA-Literacy.RH.6-8.10",
                                 "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/",
                                 "description": "Proficiently read and comprehend literary nonfiction"
                             },
