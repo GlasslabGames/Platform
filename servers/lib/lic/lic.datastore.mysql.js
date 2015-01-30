@@ -55,6 +55,157 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Lic_MySQL.prototype.getUsersByIds = function(ids){
+    return when.promise(function(resolve, reject){
+        var idsString = ids.join(',');
+        var Q = "SELECT * FROM GL_USER WHERE id in (" + idsString + ");";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this))
+};
+
+Lic_MySQL.prototype.getLicenseByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT license_id FROM GL_LICENSE_MAP WHERE status in ('active','pending') and user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                var output = [];
+                results.forEach(function(row){
+                    if(row["status"] === "active" || row["status"] === "pending"){
+                        output.push(row);
+                    }
+                });
+                resolve(output);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                var output = [];
+                var id;
+                results.forEach(function(course){
+                    id = course.id;
+                    output.push(id);
+                });
+                resolve(output);
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getCourseTeacherJoinByLicense = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT m.course_id,m.user_id,teachers.username FROM glasslab_dev.GL_MEMBERSHIP as m" +
+            "JOIN " +
+            "(SELECT id,username FROM glasslab_dev.GL_USER as u" +
+                "JOIN" +
+                    "(SELECT user_id FROM glasslab_dev.GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm" +
+                    "ON lm.user_id = u.id" +
+            ") as teachers" +
+            "ON teachers.id = m.user_id";
+
+        this.ds.query(Q)
+            .then(function(courses){
+                var courseTeacherMap = {};
+                var map;
+                courses.forEach(function(course){
+                    map = courseTeacherMap[course["courseId"]] = {};
+                    map["userId"] = course["userId"];
+                    map["username"] = course["username"];
+                });
+                resolve(courseTeacherMap);
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.createLicenseTable = function() {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        var Q = "CREATE TABLE GL_LICENSE(" +
+            "id BIGINT(20) NULL AUTO_INCREMENT," +
+            "user_id BIGINT(20) NULL," +
+            "license_key VARCHAR(20) NULL," +
+            "package_type VARCHAR(20) NULL," +
+            "package_size_tier VARCHAR(20) NULL," +
+            "expiration_date DATE," +
+            "active TINYINT(1)," +
+            "educator_seats_remaining INT(10) NULL," +
+            "student_seats_remaining INT(10) NULL," +
+            "promo VARCHAR(20) NULL," +
+            "PRIMARY KEY (id)," +
+            "INDEX fk_user_id_idx (user_id ASC)," +
+            "CONSTRAINT fk_admin_id" +
+                "FOREIGN KEY (user_id)" +
+                "REFERENCES GL_USER (id)" +
+                "ON DELETE NO ACTION" +
+                "ON UPDATE NO ACTION" +
+        ");";
+
+        this.ds.query(Q)
+            .then(function() {
+                resolve()
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+Lic_MySQL.prototype.createLicenseMapTable = function(){
+    return when.promise(function(resolve, reject){
+
+        // IF NOT EXIST
+        var Q = "CREATE TABLE GL_LICENSE_MAP(" +
+            "id BIGINT(20) NULL AUTO_INCREMENT," +
+            "user_id BIGINT(20) NULL," +
+            "license_id BIGINT(20) NULL," +
+            "status VARCHAR(20) NULL," +
+            "PRIMARY KEY (id)," +
+            "INDEX fk_user_id_idx (user_id ASC)," +
+            "INDEX fk_license_id_idx (license_id ASC)," +
+            "UNIQUE INDEX uq_user_license (user_id ASC, license_id ASC)," +
+            "CONSTRAINT fk_educator_id" +
+                "FOREIGN KEY (license_id)" +
+                "REFERENCES GL_USER (id)" +
+                "ON DELETE NO ACTION" +
+                "ON UPDATE NO ACTION," +
+            "CONSTRAINT fk_license_id" +
+                "FOREIGN KEY (license_id)" +
+                "REFERENCES GL_LICENSE (id)" +
+                "ON DELETE NO ACTION" +
+                "ON UPDATE NO ACTION" +
+        ");";
+        this.ds.query(Q)
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                reject(err);
+            })
+    }.bind(this));
+};
+
 
 // add lic map table and add game_id to license table
 Lic_MySQL.prototype.updateLicenseTable = function() {

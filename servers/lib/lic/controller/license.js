@@ -6,11 +6,113 @@ var Util   = require('../../core/util.js');
 var lConst = require('../lic.const.js');
 
 module.exports = {
+    getSubscriptionPackages: getSubscriptionPackages,
+    getStudentsInLicense: getStudentsInLicense,
+    // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
-    getLicenses:     getLicenses,
-    getSubscriptionPackages: getSubscriptionPackages
+    getLicenses:     getLicenses
 };
+
+// must build
+function getStudentsInLicense(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var licenseRole = req.user.licenseRole;
+    var licenseId = req.user.licenseId;
+    var students;
+    var studentToTeacher;
+    this.myds.getLicenseByInstructor(userId)
+        .then(function(results){
+            if(results.length === 0){
+                return "access absent";
+            }
+            else if(results.length > 1){
+                return "invalid records";
+            } else if(results[0]['license_id'] !== licenseId){
+                return "inconsistent";
+            }
+
+            return this.cbds.getStudentList(licenseId);
+        }.bind(this))
+        .then(function(activeStudents) {
+            students = activeStudents;
+            if (typeof students === 'string') {
+                return students;
+            }
+            return this.myds.getCourseTeacherJoinByLicense(licenseId);
+        }.bind(this))
+        .then(function(courseTeacherMap){
+            if(typeof courseTeacherMap === "string"){
+                return courseTeacherMap;
+            }
+            studentToTeacher = {};
+            var teacher;
+            var outputStudents = {};
+            _(students).forEach(function(premiumCourses, student){
+                _(premiumCourses).forEach(function(isEnrolled, courseId){
+                    if(isEnrolled){
+                        teacher = courseTeacherMap[courseId];
+                        studentToTeacher[student][teacher.username] = true;
+                        if(teacher.id === userId){
+                            outputStudents[student] = true;
+                        }
+                    }
+                });
+            });
+            this.myds.getUsersByIds(outputStudents);
+        }.bind(this))
+        .then(function(studentsInfo){
+            if(studentsInfo === "access absent"){
+                this.requestUtil.errorResponse(res, {key: "lic.access.absent"},500);
+                return;
+            } else if(studentsInfo === "invalid records"){
+                this.requestUtil.errorResponse(res, {key: "lic.records.invalid"}, 500);
+                return;
+            } else if (studentsInfo === "inconsistent"){
+                this.requestUtil.errorResponse(res, {key: "lic.records.inconsistent"}, 500);
+            }
+            var output = [];
+            var studentOutput;
+            var teachers;
+            studentsInfo.forEach(function(student){
+                studentOutput = {};
+                studentOutput.firstName = student['firstName'];
+                studentOutput.lastInitial = student['lastName'][0];
+                studentOutput.username = student['username'];
+                teachers = Object.keys(studentToTeacher[student['id']]);
+                studentOutput.educators = teachers;
+                output.push(studentOutput);
+            });
+            this.requestUtil.jsonResponse(res, output);
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
+function getSubscriptionPackages(req, res){
+    try{
+        var plans = [];
+        _(lConst.plan).forEach(function(value){
+            plans.push(value);
+        });
+        var seats = [];
+        _(lConst.seats).forEach(function(value){
+            seats.push(value);
+        });
+        var output = {
+            plans: plans,
+            seats: seats
+        };
+        this.requestUtil.jsonResponse(res, output);
+    } catch(err){
+        this.requestUtil.errorResponse(res, err, 500)
+    }
+}
 
 var exampleOut = {}, exampleIn = {};
 
@@ -184,25 +286,5 @@ function registerLicense(req, res, next) {
 
     } else {
         this.requestUtil.errorResponse(res, {error:"missing license", key:"license.missing"}, 404);
-    }
-}
-
-function getSubscriptionPackages(req, res){
-    try{
-        var plans = [];
-        _(lConst.plan).forEach(function(value){
-            plans.push(value);
-        });
-        var seats = [];
-        _(lConst.seats).forEach(function(value){
-            seats.push(value);
-        });
-        var output = {
-            plans: plans,
-            seats: seats
-        };
-        this.requestUtil.jsonResponse(res, output);
-    } catch(err){
-        this.requestUtil.errorResponse(res, err, 500)
     }
 }

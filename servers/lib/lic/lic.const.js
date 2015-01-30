@@ -11,9 +11,12 @@ module.exports = {
         'GL-SC-120': 'SimCityEDU School Pack',
         'GL-SC-250': 'SimCityEDU Site Unlimited'
     },
+    datastore: {
+        licenseKey: "lic"
+    },
     plan: {
         chromebook: {
-            name: 'Chromebook',
+            name: 'Chromebook/Web',
             description: 'Contains games playable on chromebooks',
             pricePerSeat: 2,
             browserGames: ['GOG','AW-1'],
@@ -54,7 +57,7 @@ module.exports = {
         class: {
             name: 'Class',
             studentSeats: 30,
-            educatorSeats: 2
+            educatorSeats: 1
         },
         multiclass: {
             name: 'Multi-Class',
