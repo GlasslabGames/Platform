@@ -412,11 +412,29 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/plan",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getCurrentPlan"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/students",
             service: "lic",
             controller: "license",
             method: {
                 get: "getStudentsInLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/invite",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "addTeachersToLicense"
             }
         },
         {

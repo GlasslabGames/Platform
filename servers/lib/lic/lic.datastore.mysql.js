@@ -43,6 +43,7 @@ return when.promise(function(resolve, reject) {
         .then(function(updated){
             if(updated) {
                 console.log("Lic MySQL: Updated Course Table!");
+                console.trace("change this!!!!!!!!!!!!!");
             }
             resolve();
         }.bind(this),
@@ -53,6 +54,21 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+
+
+Lic_MySQL.prototype.getLicenseById = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE WHERE id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
 };
 
 Lic_MySQL.prototype.getUsersByIds = function(ids){
@@ -85,6 +101,22 @@ Lic_MySQL.prototype.getLicenseByInstructor = function(userId){
             .then(null, function(err){
                 reject(err);
             }.bind(this));
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT u.first_name,u.last_name,u.email,lm.status FROM GL_USER as u" +
+            "JOIN GL_LICENSE_MAP as lm" +
+            "ON lm.user_id = u.id" +
+            "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending');";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                reject(err);
+            })
     }.bind(this));
 };
 
@@ -128,6 +160,20 @@ Lic_MySQL.prototype.getCourseTeacherJoinByLicense = function(licenseId){
                     map["username"] = course["username"];
                 });
                 resolve(courseTeacherMap);
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getUsersByEmail = function(emails){
+    return when.promise(function(resolve, reject){
+        var emailsString = emails.join(',');
+        var Q = "SELECT * FROM GL_USER WHERE email in (" + emailsString + ");";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
             })
             .then(null, function(err){
                 reject(err);

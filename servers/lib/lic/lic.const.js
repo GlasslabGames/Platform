@@ -51,21 +51,25 @@ module.exports = {
     seats: {
         group: {
             name: 'Group',
+            size: "10 seats + 1 educator user",
             studentSeats: 10,
             educatorSeats: 1
         },
         class: {
             name: 'Class',
+            size: "30 seats + 1 educator user",
             studentSeats: 30,
             educatorSeats: 1
         },
         multiclass: {
             name: 'Multi-Class',
+            size: "120 seats + 4 educator users",
             studentSeats: 120,
             educatorSeats: 4
         },
         school: {
             name: 'School',
+            size: "500 seats + 15 educator users",
             studentSeats: 500,
             educatorSeats: 15
         }

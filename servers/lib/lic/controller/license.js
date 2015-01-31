@@ -7,14 +7,82 @@ var lConst = require('../lic.const.js');
 
 module.exports = {
     getSubscriptionPackages: getSubscriptionPackages,
+    getCurrentPlan: getCurrentPlan,
     getStudentsInLicense: getStudentsInLicense,
+    addTeachersToLicense: addTeachersToLicense,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
     getLicenses:     getLicenses
 };
 
-// must build
+function getSubscriptionPackages(req, res){
+    try{
+        var plans = [];
+        _(lConst.plan).forEach(function(value){
+            plans.push(value);
+        });
+        var seats = [];
+        _(lConst.seats).forEach(function(value){
+            seats.push(value);
+        });
+        var output = {
+            plans: plans,
+            seats: seats
+        };
+        this.requestUtil.jsonResponse(res, output);
+    } catch(err){
+        this.requestUtil.errorResponse(res, err, 500)
+    }
+}
+
+function getCurrentPlan(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var licenseRole = req.user.licenseRole;
+    var licenseId = req.user.licenseId;
+    var output = {};
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(state){
+            if(typeof state === "string"){
+                return state;
+            }
+            return this.myds.getLicenseById(licenseId);
+        }.bind(this))
+        .then(function(license){
+            if(typeof license === "string"){
+                return license;
+            }
+            license = license[0];
+            output["studentSeatsRemaining"] = license["studentSeatsRemaining"];
+            output["educatorSeatsRemaining"] = license["educatorSeatsRemaining"];
+            output["expirationDate"] = license["expirationDate"];
+            var type = license["packageType"];
+            var size = license["packageSizeTier"];
+            var typeDetails = lConst.plan[type];
+            var sizeDetails = lConst.size[size];
+            var packageDetails = {};
+            _(packageDetails).merge(sizeDetails, typeDetails);
+            output["packageDetails"] = packageDetails;
+            return this.getInstructorsDetailsByLicense(licenseId);
+        }.bind(this))
+        .then(function(instructors){
+            if(typeof instructors === "string"){
+                _errorResponseForLicensing.call(this, res, status);
+                return;
+            }
+            output['educatorList'] = instructors;
+            this.requestUtil.jsonResponse(res, output, 200);
+        }.bind(this))
+        .then(null, function(err){
+            console.error(err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
 function getStudentsInLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
@@ -25,17 +93,11 @@ function getStudentsInLicense(req, res){
     var licenseId = req.user.licenseId;
     var students;
     var studentToTeacher;
-    this.myds.getLicenseByInstructor(userId)
-        .then(function(results){
-            if(results.length === 0){
-                return "access absent";
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(state){
+            if(typeof state === 'string'){
+                return state;
             }
-            else if(results.length > 1){
-                return "invalid records";
-            } else if(results[0]['license_id'] !== licenseId){
-                return "inconsistent";
-            }
-
             return this.cbds.getStudentList(licenseId);
         }.bind(this))
         .then(function(activeStudents) {
@@ -63,17 +125,18 @@ function getStudentsInLicense(req, res){
                     }
                 });
             });
-            this.myds.getUsersByIds(outputStudents);
+            var output;
+            if(licenseRole === "admin"){
+                output = Object.keys(students);
+            } else{
+                output = Object.keys(outputStudents);
+            }
+            this.myds.getUsersByIds(output);
         }.bind(this))
         .then(function(studentsInfo){
-            if(studentsInfo === "access absent"){
-                this.requestUtil.errorResponse(res, {key: "lic.access.absent"},500);
+            if(typeof studentsInfo === "string") {
+                _errorResponseForLicensing.call(this, res, status);
                 return;
-            } else if(studentsInfo === "invalid records"){
-                this.requestUtil.errorResponse(res, {key: "lic.records.invalid"}, 500);
-                return;
-            } else if (studentsInfo === "inconsistent"){
-                this.requestUtil.errorResponse(res, {key: "lic.records.inconsistent"}, 500);
             }
             var output = [];
             var studentOutput;
@@ -94,23 +157,109 @@ function getStudentsInLicense(req, res){
         }.bind(this));
 }
 
-function getSubscriptionPackages(req, res){
-    try{
-        var plans = [];
-        _(lConst.plan).forEach(function(value){
-            plans.push(value);
-        });
-        var seats = [];
-        _(lConst.seats).forEach(function(value){
-            seats.push(value);
-        });
-        var output = {
-            plans: plans,
-            seats: seats
-        };
-        this.requestUtil.jsonResponse(res, output);
-    } catch(err){
-        this.requestUtil.errorResponse(res, err, 500)
+function addTeachersToLicense(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    var licenseRole = req.user.licenseRole;
+    var teacherEmails = req.body.teacherEmails;
+    if(licenseRole !== 'admin'){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var teacherUserIds = [];
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(state){
+            if(typeof state === 'string'){
+                return state;
+            }
+            return this.myds.getUsersByEmail(teacherEmails);
+        }.bind(this))
+        .then(function(teachers){
+            if(typeof teachers === 'string'){
+                return teachers;
+            }
+            var createTeachers = [];
+            var newInstructors = {};
+            teacherEmails.forEach(function(email){
+                newInstructors[email] = true;
+            });
+            teachers.forEach(function(teacher){
+                newInstructors[teacher.email] = false;
+                teacherUserIds.push(teacher.id);
+            });
+            _(newInstructors).forEach(function(state, instructor){
+                if(state){
+                    createTeachers.push(instructor)
+                }
+            });
+            // how should we deal with teachers who are invited to a license but do not have an account?
+            // also, how do we deal with rejections?
+            //_createNewTeacherAccount
+            if(createTeachers.length > 0){
+                return this.multiInsertUsersByEmail(createTeachers);
+            }
+            return [];
+        }.bind(this))
+        .then(function(results){
+            if(typeof results === 'string'){
+                return results;
+            }
+            results.forEach(function(item){
+                teacherUserIds.push(item.id);
+            });
+            // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
+            return this.multiInsertLicenseMap(licenseId, teacherUserIds);
+        }.bind(this))
+        .then(function(state){
+            if(typeof state === "string"){
+                _errorResponseForLicensing.call(this, res, status);
+                return;
+            }
+            this.serviceManager.internalRoute('/api/v2/auth/license/plan', 'get',[req,res]);
+        }.bind(this))
+        .then(function(err){
+            console.error("Add Teachers to License Error - ",err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
+function _validateLicenseInstructorAccess(userId, licenseId){
+    // user .call to pass context to this method
+    return when.promise(function(resolve, reject){
+        this.myds.getLicenseByInstructor(userId)
+            .then(function(results) {
+                var state;
+                if (results.length === 0) {
+                    state = "access absent";
+                }
+                else if (results.length > 1) {
+                    state = "invalid records";
+                } else if (results[0]['license_id'] !== licenseId) {
+                    state = "inconsistent";
+                }
+                resolve(state);
+            })
+            .then(null, function(err){
+                console.error('Validate License Instructor Access Error - ',err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _errorResponseForLicensing(res, status){
+    if(state === "access absent"){
+        this.requestUtil.errorResponse(res, {key: "lic.access.absent"},500);
+    } else if(state === "invalid records"){
+        this.requestUtil.errorResponse(res, {key: "lic.records.invalid"}, 500);
+    } else if (state === "inconsistent"){
+        this.requestUtil.errorResponse(res, {key: "lic.records.inconsistent"}, 500);
+    } else{
+        console.trace('unexpected error status:' + status);
+        this.requestUtil.errorResponse(res, {key: "lic.acces.invalid"}, 500);
     }
 }
 
