@@ -56,8 +56,6 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-
-
 Lic_MySQL.prototype.getLicenseById = function(licenseId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_LICENSE WHERE id = " + licenseId + ";";
@@ -175,6 +173,51 @@ Lic_MySQL.prototype.getUsersByEmail = function(emails){
             .then(function(results){
                 resolve(results);
             })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
+    return when.promise(function(resolve, reject){
+        var Q = "INSERT INTO glasslab_dev.GL_USER (email,username,version,date_created,enabled,first_name,last_name,last_updated," +
+            "password,system_role,collect_telemetry,login_type) VALUES ";
+        var values = [];
+        emails.forEach(function(email){
+            values.push(_insertUserValueWithEmail(email));
+        });
+        Q += values.join(",") + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+function _insertTempUserValueWithEmail(email){
+    var value = "(" + email + "," + email + ",0,NOW(),1,'temp','temp',NOW()," +
+    "'pass','instructor',0,'glasslabv2');";
+    return value;
+}
+
+Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
+    return when.promise(function(resolve, reject){
+        var inputs = [];
+        var startValues = "(" + licenseId;
+        userIds.forEach(function(id){
+            inputs.push(startValues + id + ")")
+        });
+        var insertValues = inputs.join(',');
+
+        var Q = "INSERT INTO GL_LICENSE_MAP (license_id,user_id) VALUES " + insertValues + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            }.bind(this))
             .then(null, function(err){
                 reject(err);
             });

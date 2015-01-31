@@ -198,9 +198,12 @@ function addTeachersToLicense(req, res){
             });
             // how should we deal with teachers who are invited to a license but do not have an account?
             // also, how do we deal with rejections?
-            //_createNewTeacherAccount
+            // when i make this change, what do?
+            // change login procedure to reflect users in table who are not actually registered
+            // change user registration process so that an existing account can have info updated based on forms
+            // add field such that invited teachers who are not real users do not screw up other portions of the app
             if(createTeachers.length > 0){
-                return this.multiInsertUsersByEmail(createTeachers);
+                return this.multiInsertTempUsersByEmail(createTeachers);
             }
             return [];
         }.bind(this))
