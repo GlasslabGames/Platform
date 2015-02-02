@@ -137,13 +137,13 @@ Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
     }.bind(this));
 };
 
-Lic_MySQL.prototype.getCourseTeacherJoinByLicense = function(licenseId){
+Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT m.course_id,m.user_id,teachers.username FROM glasslab_dev.GL_MEMBERSHIP as m\n" +
+        var Q = "SELECT m.course_id,m.user_id,teachers.username FROM GL_MEMBERSHIP as m\n" +
             "JOIN\n" +
-            "(SELECT id,username FROM glasslab_dev.GL_USER as u\n" +
+            "(SELECT id,username FROM GL_USER as u\n" +
                 "JOIN\n" +
-                    "(SELECT user_id FROM glasslab_dev.GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm\n" +
+                    "(SELECT user_id FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm\n" +
                     "ON lm.user_id = u.id\n" +
             ") as teachers\n" +
             "ON teachers.id = m.user_id;";
@@ -153,8 +153,8 @@ Lic_MySQL.prototype.getCourseTeacherJoinByLicense = function(licenseId){
                 var courseTeacherMap = {};
                 var map;
                 courses.forEach(function(course){
-                    map = courseTeacherMap[course["courseId"]] = {};
-                    map["userId"] = course["userId"];
+                    map = courseTeacherMap[course["course_id"]] = {};
+                    map["userId"] = course["user_id"];
                     map["username"] = course["username"];
                 });
                 resolve(courseTeacherMap);

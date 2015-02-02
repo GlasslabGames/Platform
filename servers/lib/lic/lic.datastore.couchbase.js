@@ -1,5 +1,6 @@
 var _      = require('lodash');
 var when   = require('when');
+var couchbase = require('couchbase');
 var Util;
 var lConst;
 
@@ -21,7 +22,7 @@ function Lic_Couchbase(options){
     );
 }
 
-Lic_Couchbase.prototype.connect = function(myds){
+Lic_Couchbase.prototype.connect = function(){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -29,8 +30,8 @@ Lic_Couchbase.prototype.connect = function(myds){
             host:     this.options.host,
             bucket:   this.options.bucket,
             password: this.options.password,
-            connectionTimeout: this.options.timeout || 5000,
-            operationTimeout:  this.options.timeout || 5000
+            connectionTimeout: this.options.timeout || 6000,
+            operationTimeout:  this.options.timeout || 6000
         }, function(err) {
             console.error("[Lic] CouchBase LicDataStore: Error -", err);
 
@@ -43,14 +44,7 @@ Lic_Couchbase.prototype.connect = function(myds){
         }.bind(this));
 
         this.client.on('connect', function () {
-            // if design doc changes, auto update design doc
-            this.setupDocsAndViews()
-                .then(function(){
-                    if(myds) {
-                        return this.migrateDataAuto(myds);
-                    }
-                }.bind(this))
-                .then( resolve, reject );
+            resolve();
         }.bind(this));
 
 // ------------------------------------------------
@@ -61,7 +55,7 @@ Lic_Couchbase.prototype.connect = function(myds){
 Lic_Couchbase.prototype.getActiveStudentList = function(licenseId){
     return when.promise(function(resolve, reject){
         // lic:licenseId
-        var key = lConst.licenseKey + ":" + licenseId;
+        var key = lConst.datastore.licenseKey + ":" + licenseId;
         this.client.get(key, function(err, results){
             if(err){
                 console.error("Couchbase LicStore: Get Student List Error -", err);

@@ -37,16 +37,14 @@ function getSubscriptionPackages(req, res){
 }
 
 function getCurrentPlan(req, res){
-    //if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
-    //    this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
-    //    return;
-    //}
-    //var userId = req.user.id;
-    //var licenseRole = req.user.licenseRole;
-    //var licenseId = req.user.licenseId;
-    var userId = 269;
-    var licenseRole = "admin";
-    var licenseId = 1;
+    if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    //var userId = 269;
+    //var licenseId = 1;
     var output = {};
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(state){
@@ -94,6 +92,9 @@ function getStudentsInLicense(req, res){
     var userId = req.user.id;
     var licenseRole = req.user.licenseRole;
     var licenseId = req.user.licenseId;
+    //var userId = 275;
+    //var licenseRole = "admin";
+    //var licenseId = 1;
     var students;
     var studentToTeacher;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
@@ -101,14 +102,14 @@ function getStudentsInLicense(req, res){
             if(typeof state === 'string'){
                 return state;
             }
-            return this.cbds.getStudentList(licenseId);
+            return this.cbds.getActiveStudentList(licenseId);
         }.bind(this))
         .then(function(activeStudents) {
             students = activeStudents;
             if (typeof students === 'string') {
                 return students;
             }
-            return this.myds.getCourseTeacherJoinByLicense(licenseId);
+            return this.myds.getCourseTeacherMapByLicense(licenseId);
         }.bind(this))
         .then(function(courseTeacherMap){
             if(typeof courseTeacherMap === "string"){
@@ -119,10 +120,11 @@ function getStudentsInLicense(req, res){
             var outputStudents = {};
             _(students).forEach(function(premiumCourses, student){
                 _(premiumCourses).forEach(function(isEnrolled, courseId){
+                    studentToTeacher[student] = {};
                     if(isEnrolled){
                         teacher = courseTeacherMap[courseId];
                         studentToTeacher[student][teacher.username] = true;
-                        if(teacher.id === userId){
+                        if(teacher.userId === userId){
                             outputStudents[student] = true;
                         }
                     }
@@ -134,7 +136,10 @@ function getStudentsInLicense(req, res){
             } else{
                 output = Object.keys(outputStudents);
             }
-            this.myds.getUsersByIds(output);
+            if(output.length === 0){
+                return [];
+            }
+            return this.myds.getUsersByIds(output);
         }.bind(this))
         .then(function(studentsInfo){
             if(typeof studentsInfo === "string") {
@@ -146,9 +151,9 @@ function getStudentsInLicense(req, res){
             var teachers;
             studentsInfo.forEach(function(student){
                 studentOutput = {};
-                studentOutput.firstName = student['firstName'];
-                studentOutput.lastInitial = student['lastName'][0];
-                studentOutput.username = student['username'];
+                studentOutput.firstName = student['FIRST_NAME'];
+                studentOutput.lastInitial = student['LAST_NAME'][0];
+                studentOutput.username = student['USERNAME'];
                 teachers = Object.keys(studentToTeacher[student['id']]);
                 studentOutput.educators = teachers;
                 output.push(studentOutput);
