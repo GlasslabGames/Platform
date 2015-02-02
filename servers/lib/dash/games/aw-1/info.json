@@ -68,7 +68,7 @@
     },
     "assessment": [
         {
-            "enabled": false,
+            "enabled": true,
             "id": "sowo",
             "dataProcessScope": "gameSession",
             "engine": "javascript",
@@ -121,7 +121,7 @@
         "list": [
             {
                 "id": "sowo",
-                "enabled": false,
+                "enabled": true,
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
