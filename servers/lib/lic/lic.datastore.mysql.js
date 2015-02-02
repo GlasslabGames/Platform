@@ -85,7 +85,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
 
 Lic_MySQL.prototype.getLicenseByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT license_id FROM GL_LICENSE_MAP WHERE status in ('active','pending') and user_id = " + userId + ";";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending') and user_id = " + userId + ";";
         this.ds.query(Q)
             .then(function(results){
                 var output = [];
@@ -104,9 +104,9 @@ Lic_MySQL.prototype.getLicenseByInstructor = function(userId){
 
 Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT u.first_name,u.last_name,u.email,lm.status FROM GL_USER as u" +
-            "JOIN GL_LICENSE_MAP as lm" +
-            "ON lm.user_id = u.id" +
+        var Q = "SELECT u.first_name,u.last_name,u.email,lm.status FROM GL_USER as u\n" +
+            "JOIN GL_LICENSE_MAP as lm\n" +
+            "ON lm.user_id = u.id\n" +
             "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending');";
         this.ds.query(Q)
             .then(function(results){
@@ -139,14 +139,14 @@ Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
 
 Lic_MySQL.prototype.getCourseTeacherJoinByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT m.course_id,m.user_id,teachers.username FROM glasslab_dev.GL_MEMBERSHIP as m" +
-            "JOIN " +
-            "(SELECT id,username FROM glasslab_dev.GL_USER as u" +
-                "JOIN" +
-                    "(SELECT user_id FROM glasslab_dev.GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm" +
-                    "ON lm.user_id = u.id" +
-            ") as teachers" +
-            "ON teachers.id = m.user_id";
+        var Q = "SELECT m.course_id,m.user_id,teachers.username FROM glasslab_dev.GL_MEMBERSHIP as m\n" +
+            "JOIN\n" +
+            "(SELECT id,username FROM glasslab_dev.GL_USER as u\n" +
+                "JOIN\n" +
+                    "(SELECT user_id FROM glasslab_dev.GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm\n" +
+                    "ON lm.user_id = u.id\n" +
+            ") as teachers\n" +
+            "ON teachers.id = m.user_id;";
 
         this.ds.query(Q)
             .then(function(courses){
@@ -200,20 +200,20 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
 
 function _insertTempUserValueWithEmail(email){
     var value = "(" + email + "," + email + ",0,NOW(),1,'temp','temp',NOW()," +
-    "'pass','instructor',0,'glasslabv2');";
+    "'pass','instructor',0,'glasslabv2')";
     return value;
 }
 
 Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
     return when.promise(function(resolve, reject){
         var inputs = [];
-        var startValues = "(" + licenseId;
+        var startValues = "('pending'," + licenseId;
         userIds.forEach(function(id){
             inputs.push(startValues + id + ")")
         });
         var insertValues = inputs.join(',');
 
-        var Q = "INSERT INTO GL_LICENSE_MAP (license_id,user_id) VALUES " + insertValues + ";";
+        var Q = "INSERT INTO GL_LICENSE_MAP (status,license_id,user_id) VALUES " + insertValues + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -229,24 +229,24 @@ Lic_MySQL.prototype.createLicenseTable = function() {
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var Q = "CREATE TABLE GL_LICENSE(" +
-            "id BIGINT(20) NULL AUTO_INCREMENT," +
-            "user_id BIGINT(20) NULL," +
-            "license_key VARCHAR(20) NULL," +
-            "package_type VARCHAR(20) NULL," +
-            "package_size_tier VARCHAR(20) NULL," +
-            "expiration_date DATE," +
-            "active TINYINT(1)," +
-            "educator_seats_remaining INT(10) NULL," +
-            "student_seats_remaining INT(10) NULL," +
-            "promo VARCHAR(20) NULL," +
-            "PRIMARY KEY (id)," +
-            "INDEX fk_user_id_idx (user_id ASC)," +
-            "CONSTRAINT fk_admin_id" +
-                "FOREIGN KEY (user_id)" +
-                "REFERENCES GL_USER (id)" +
-                "ON DELETE NO ACTION" +
-                "ON UPDATE NO ACTION" +
+        var Q = "CREATE TABLE GL_LICENSE(\n" +
+            "id BIGINT(20) NULL AUTO_INCREMENT,\n" +
+            "user_id BIGINT(20) NULL,\n" +
+            "license_key VARCHAR(20) NULL,\n" +
+            "package_type VARCHAR(20) NULL,\n" +
+            "package_size_tier VARCHAR(20) NULL,\n" +
+            "expiration_date DATETIME,\n" +
+            "active TINYINT(1),\n" +
+            "educator_seats_remaining INT(10) NULL,\n" +
+            "student_seats_remaining INT(10) NULL,\n" +
+            "promo VARCHAR(20) NULL,\n" +
+            "PRIMARY KEY (id),\n" +
+            "INDEX fk_user_id_idx (user_id ASC),\n" +
+            "CONSTRAINT fk_admin_id\n" +
+                "FOREIGN KEY (user_id)\n" +
+                "REFERENCES GL_USER (id)\n" +
+                "ON DELETE NO ACTION\n" +
+                "ON UPDATE NO ACTION\n" +
         ");";
 
         this.ds.query(Q)
@@ -265,25 +265,25 @@ Lic_MySQL.prototype.createLicenseMapTable = function(){
     return when.promise(function(resolve, reject){
 
         // IF NOT EXIST
-        var Q = "CREATE TABLE GL_LICENSE_MAP(" +
-            "id BIGINT(20) NULL AUTO_INCREMENT," +
-            "user_id BIGINT(20) NULL," +
-            "license_id BIGINT(20) NULL," +
-            "status VARCHAR(20) NULL," +
-            "PRIMARY KEY (id)," +
-            "INDEX fk_user_id_idx (user_id ASC)," +
-            "INDEX fk_license_id_idx (license_id ASC)," +
-            "UNIQUE INDEX uq_user_license (user_id ASC, license_id ASC)," +
-            "CONSTRAINT fk_educator_id" +
-                "FOREIGN KEY (license_id)" +
-                "REFERENCES GL_USER (id)" +
-                "ON DELETE NO ACTION" +
-                "ON UPDATE NO ACTION," +
-            "CONSTRAINT fk_license_id" +
-                "FOREIGN KEY (license_id)" +
-                "REFERENCES GL_LICENSE (id)" +
-                "ON DELETE NO ACTION" +
-                "ON UPDATE NO ACTION" +
+        var Q = "CREATE TABLE GL_LICENSE_MAP(\n" +
+            "id BIGINT(20) NULL AUTO_INCREMENT,\n" +
+            "user_id BIGINT(20) NULL,\n" +
+            "license_id BIGINT(20) NULL,\n" +
+            "status VARCHAR(20) NULL,\n" +
+            "PRIMARY KEY (id),\n" +
+            "INDEX fk_user_id_idx (user_id ASC),\n" +
+            "INDEX fk_license_id_idx (license_id ASC),\n" +
+            "UNIQUE INDEX uq_user_license (user_id ASC, license_id ASC),\n" +
+            "CONSTRAINT fk_educator_id\n" +
+                "FOREIGN KEY (license_id)\n" +
+                "REFERENCES GL_USER (id)\n" +
+                "ON DELETE NO ACTION\n" +
+                "ON UPDATE NO ACTION,\n" +
+            "CONSTRAINT fk_license_id\n" +
+                "FOREIGN KEY (license_id)\n" +
+                "REFERENCES GL_LICENSE (id)\n" +
+                "ON DELETE NO ACTION\n" +
+                "ON UPDATE NO ACTION\n" +
         ");";
         this.ds.query(Q)
             .then(function(){
@@ -301,7 +301,7 @@ Lic_MySQL.prototype.updateLicenseTable = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-
+    return resolve();
     // IF NOT EXISTS
     var Q = "CREATE TABLE GL_LICENSE_MAP (" +
         "`id` BIGINT(20) NULL AUTO_INCREMENT," +

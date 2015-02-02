@@ -37,13 +37,16 @@ function getSubscriptionPackages(req, res){
 }
 
 function getCurrentPlan(req, res){
-    if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
-        return;
-    }
-    var userId = req.user.id;
-    var licenseRole = req.user.licenseRole;
-    var licenseId = req.user.licenseId;
+    //if(!(req && req.user && req.user.id && req.user.licenseRole && req.user.licenseId)){
+    //    this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+    //    return;
+    //}
+    //var userId = req.user.id;
+    //var licenseRole = req.user.licenseRole;
+    //var licenseId = req.user.licenseId;
+    var userId = 269;
+    var licenseRole = "admin";
+    var licenseId = 1;
     var output = {};
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(state){
@@ -57,21 +60,21 @@ function getCurrentPlan(req, res){
                 return license;
             }
             license = license[0];
-            output["studentSeatsRemaining"] = license["studentSeatsRemaining"];
-            output["educatorSeatsRemaining"] = license["educatorSeatsRemaining"];
-            output["expirationDate"] = license["expirationDate"];
-            var type = license["packageType"];
-            var size = license["packageSizeTier"];
+            output["studentSeatsRemaining"] = license["student_seats_remaining"];
+            output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
+            output["expirationDate"] = license["expiration_date"];
+            var type = license["package_type"];
+            var seats = license["package_size_tier"];
             var typeDetails = lConst.plan[type];
-            var sizeDetails = lConst.size[size];
+            var seatsDetails = lConst.seats[seats];
             var packageDetails = {};
-            _(packageDetails).merge(sizeDetails, typeDetails);
+            _(packageDetails).merge(seatsDetails, typeDetails);
             output["packageDetails"] = packageDetails;
-            return this.getInstructorsDetailsByLicense(licenseId);
+            return this.myds.getInstructorsByLicense(licenseId);
         }.bind(this))
         .then(function(instructors){
             if(typeof instructors === "string"){
-                _errorResponseForLicensing.call(this, res, status);
+                _errorResponseForLicensing.call(this, res, instructors);
                 return;
             }
             output['educatorList'] = instructors;
@@ -217,6 +220,10 @@ function addTeachersToLicense(req, res){
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
             return this.multiInsertLicenseMap(licenseId, teacherUserIds);
         }.bind(this))
+        .then(function(){
+            // design emails language, methods, and templates
+            _inviteEmailsForAdminsInstructors.call(this,adminEmail,usersEmail,nonUsersEmail);
+        }.bind(this))
         .then(function(state){
             if(typeof state === "string"){
                 _errorResponseForLicensing.call(this, res, status);
@@ -228,6 +235,12 @@ function addTeachersToLicense(req, res){
             console.error("Add Teachers to License Error - ",err);
             this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
+}
+
+function _inviteEmailsForAdminsInstructors(admin, users, nonUsers){
+    return when.promise(function(resolve, reject){
+
+    }.bind(this));
 }
 
 function _validateLicenseInstructorAccess(userId, licenseId){
@@ -254,11 +267,11 @@ function _validateLicenseInstructorAccess(userId, licenseId){
 }
 
 function _errorResponseForLicensing(res, status){
-    if(state === "access absent"){
+    if(status === "access absent"){
         this.requestUtil.errorResponse(res, {key: "lic.access.absent"},500);
-    } else if(state === "invalid records"){
+    } else if(status === "invalid records"){
         this.requestUtil.errorResponse(res, {key: "lic.records.invalid"}, 500);
-    } else if (state === "inconsistent"){
+    } else if (status === "inconsistent"){
         this.requestUtil.errorResponse(res, {key: "lic.records.inconsistent"}, 500);
     } else{
         console.trace('unexpected error status:' + status);
