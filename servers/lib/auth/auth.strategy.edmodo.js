@@ -48,6 +48,7 @@ var aConst, lConst;
 function Strategy(options, verify) {
     options.authorizationURL = 'https://api.edmodo.com/oauth/authorize';
     options.tokenURL         = 'https://api.edmodo.com/oauth/token';
+    options.scope            = 'basic read_groups';
 
     lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
@@ -145,7 +146,7 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 profile.password = "-";
 
                 // if teacher, create all students in all classes, create classes, add students to class
-                if(false) {//profile.role === lConst.role.instructor) {
+                if(profile.role === lConst.role.instructor) {
                     this._getGroups("https://api.edmodo.com/groups", accessToken, profile, done);
                 } else {
                     done(null, profile);
@@ -188,13 +189,37 @@ Strategy.prototype._getGroups = function(url, accessToken, profile, done) {
             try {
                 var json = JSON.parse(body);
 
+                var gradeMap = {
+                    "pre-kindergarten": "Pre-K",
+                    "kindergarten": "K",
+                    "first": "1",
+                    "second": "2",
+                    "third": "3",
+                    "fourth": "4",
+                    "fifth": "5",
+                    "sixth": "6",
+                    "seventh": "7",
+                    "eighth": "8",
+                    "ninth": "9",
+                    "tenth": "10",
+                    "eleventh": "11",
+                    "twelfth": "12",
+                    "higher_education": "Higher-Education"
+                };
+
                 profile.courses = {};
 
-                for( var group in json ) {
-                    profile.course[group] = {
+                for( var i = 0; i < json.length; i++ ) {
+                    var group = json[i];
+                    var grade = [gradeMap[ group.start_level ]];
+                    if( group.start_level !== group.end_level ) {
+                        grade.push( gradeMap[ group.end_level ] );
+                    }
+
+                    profile.courses[group] = {
                         type: aConst.login.type.edmodo,
                         title: group.title,
-                        grade: ['start_level_interp', 'end_level_interp'],
+                        grade: grade,
                         games: [],
                         users: [],
                         archived: false,

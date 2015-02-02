@@ -305,14 +305,39 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
     }
 
     var achievementsList = [];
-    var a = _.cloneDeep(this._games[gameId].achievements);
+    var a = _.cloneDeep(this._games[gameId].achievements.achievements);
     //console.log("a:", a);
 
     for(var i = 0; i < a.length; i++) {
         // if not object skip to next
         if( !_.isObject(a[i]) ) continue;
 
-        var groupId = a[i].id;
+        var itemId = a[i].id;
+
+        for( var j = 0; j < a[i].standards.length; j++ ) {
+            var standard = a[i].standards[j];
+
+            var achievement = {
+                "group":    standard.group,
+                "subGroup": standard.subGroup,
+                "item":     itemId,
+                "won":      false
+            };
+
+            // playerAchievement stored as tree
+            // get won or not from tree
+            if( playerAchievement.groups &&
+                playerAchievement.groups.hasOwnProperty(standard.group) &&
+                playerAchievement.groups[standard.group].subGroups.hasOwnProperty(standard.subGroup) &&
+                playerAchievement.groups[standard.group].subGroups[standard.subGroup].items.hasOwnProperty(itemId) &&
+                playerAchievement.groups[standard.group].subGroups[standard.subGroup].items[itemId].won) {
+                achievement.won = true;
+            }
+
+            achievementsList.push(achievement);
+        }
+
+        /*var groupId = a[i].id;
 
         for(var j = 0; j < a[i].subGroups.length; j++) {
             var subGroupId = a[i].subGroups[j].id;
@@ -339,7 +364,7 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
 
                 achievementsList.push(achievement);
             }
-        }
+        }*/
     }
 
     return achievementsList;
@@ -461,34 +486,11 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
 
                 gameIds.push(gameId);
                 this._games[gameId] = {};
-                this._games[gameId].info = data;
-
                 if(gameAchievements[gameId] !== undefined){
                     this._games[gameId].achievements = gameAchievements[gameId];
                 }
 
-                // remove all enabled=false objects
-                this._filterDisabledGameInfo(this._games[gameId]);
-
-                //// add developer to game details and reports
-                //if (this._games[gameId].info &&
-                //    this._games[gameId].info.developer &&
-                //    this._games[gameId].info.basic &&
-                //    this._games[gameId].info.details &&
-                //    this._games[gameId].info.reports) {
-                //
-                //    this._games[gameId].info.basic.developer = this._games[gameId].info.developer;
-                //}
-
-                // add game info(basic) to game details and reports
-                if (this._games[gameId].info &&
-                    this._games[gameId].info.basic &&
-                    this._games[gameId].info.details &&
-                    this._games[gameId].info.reports) {
-
-                    this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
-                    this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
-                }
+                this.buildGameForGamesObject(data, gameId);
 
                 var state = false;
 
@@ -533,6 +535,24 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
         }
     }.bind(this));
 };
+
+DashService.prototype.buildGameForGamesObject = function(data, gameId){
+    this._games[gameId].info = data;
+
+    //remove all enabled=false objects
+    this._filterDisabledGameInfo(this._games[gameId]);
+
+    // add game info(basic) to game details and reports
+    if (this._games[gameId].info &&
+        this._games[gameId].info.basic &&
+        this._games[gameId].info.details &&
+        this._games[gameId].info.reports) {
+
+        this._games[gameId].info.details = _.merge(this._games[gameId].info.details, this._games[gameId].info.basic);
+        this._games[gameId].info.reports = _.merge(this._games[gameId].info.reports, this._games[gameId].info.basic);
+    }
+};
+
 
 // TODO: replace this with DB lookup
 DashService.prototype._oldLoadGameFiles = function() {

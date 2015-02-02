@@ -2,11 +2,11 @@
     "basic": {
         "gameId": "SLFR",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Slice Fractions",
-        "longName": "Slice Fractions",
-        "grades": "TBD",
+        "longName": "Slice Fractions: School Edition",
+        "grades": "2 - 4",
         "subject": "Math",
         "type": "Browser",
         "platform": {
@@ -18,9 +18,9 @@
         },
         "release": "dev",
         "price": "Coming Soon",
-        "releaseDate": "TBD",
-        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
-        "description": "Slice Fractions by Ululab",
+        "releaseDate": "Feb 6, 2014",
+        "shortDescription": "Slice through ice and lava to clear the mammoth’s path! We’ve teamed up with university education experts to craft an incredibly fun way to explore important fractions concepts. Discover the school version of this popular award-winning game!",
+        "description": "Slice through ice and lava to clear the mammoth’s path! We’ve teamed up with university education experts to craft an incredibly fun way to explore important fractions concepts. Discover the school version of this popular award-winning game!",
         "developer": {
             "id": "UL",
             "name": "Ululab",
@@ -28,9 +28,10 @@
                 "small": "assets/dev-logo-ululab.png",
                 "large": "assets/dev-logo-ululab@2x.png"
             },
-            "description": "TBD"
+            "description": "Slice Fractions: School Edition is a fun problem solving game that guides students to intuitively and effectively learn fractions through critical concepts. In this puzzling world, players must slice the right amount of ice and lava to clear the mammoth's path. <br /><br />The game is the fruit of multiple years of research and development by Ululab with the help of math learning experts from the University of Quebec in Montreal (UQAM). It has a smooth progression designed for kids who are new to fractions or who have not yet understood its basic concepts. The environment is free of written instructions, which lets students dive into math reasoning without being obstructed by their literacy level."
         },
         "settings": {
+            "canCreateMatches": false
         },
         "license": {
             "type": "loginType",
@@ -56,7 +57,7 @@
             "type": "page",
             "page": {
                 "title": "Slice Fractions",
-                "embed": "http://partners.ululab.com/glasslab/SliceFractionsSchoolEdition.swf",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/SLFR/game/3/SliceFractionsSchoolEdition.swf",
                 "size": {
                     "width": 800,
                     "height": 600
@@ -65,6 +66,135 @@
         }
     },
     "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "all",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "wo1": {
+                    "name": "How to Play concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes the basic game rules."
+                },
+                "wo2": {
+                    "name": "Split Groups concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes how to divide a group of blocks into equal parts."
+                },
+                "wo3": {
+                    "name": "Slice Shapes concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes how to divide various shapes into equal parts."
+                },
+                "wo4": {
+                    "name": "Shape Comparison concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes how to compare parts to their whole."
+                },
+                "wo5": {
+                    "name": "Symbolic Numerator concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions through symbols."
+                },
+                "wo6": {
+                    "name": "Fractions Reading concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions by comparing it to a symbolic representation."
+                },
+                "wo7": {
+                    "name": "Denominator concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores different ways to divide a whole into equal parts."
+                },
+                "wo8": {
+                    "name": "Numerator concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores the impact different numerators have on the quantity of ice or lava."
+                },
+                "wo9": {
+                    "name": "Pie Charts concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores ways to divide a shape that resembles a pie chart."
+                },
+                "wo10": {
+                    "name": "Size Comparison concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores how to compare fractions to each other to determine which represents the largest quantity and in what proportion."
+                },
+                "wo11": {
+                    "name": "Equivalent Fractions (A) concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that have students manipulate fractions with different denominators to find out which ones are equivalent."
+                },
+                "wo12": {
+                    "name": "Equivalent Fractions (B) concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that offers different contexts in which to use equivalent fractions."
+                },
+                "wo13": {
+                    "name": "Fractions Ordering concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that asks players to place fractions in ascending order."
+                },
+                "wo14": {
+                    "name": "Question Marks concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that makes students deduct the value of the parts of a whole based on the information that is available to them."
+                },
+                "wo15": {
+                    "name": "Subtraction concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores the notion of subtracting quantities from 1."
+                },
+                "so1": {
+                    "name": "How to Play concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that establishes the basic game rules."
+                },
+                "so2": {
+                    "name": "Split Groups concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that establishes how to divide a group of blocks into equal parts."
+                },
+                "so3": {
+                    "name": "Slice Shapes concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that establishes how to divide various shapes into equal parts."
+                },
+                "so4": {
+                    "name": "Shape Comparison concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that establishes how to compare parts to their whole."
+                },
+                "so5": {
+                    "name": "Symbolic Numerator concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that introduces the numerical representation of fractions through symbols."
+                },
+                "so6": {
+                    "name": "Fractions Reading concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that introduces the numerical representation of fractions by comparing it to a symbolic representation."
+                },
+                "so7": {
+                    "name": "Denominator concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that explores different ways to divide a whole into equal parts."
+                },
+                "so8": {
+                    "name": "Numerator concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that explores the impact different numerators have on the quantity of ice or lava."
+                },
+                "so9": {
+                    "name": "Pie Charts concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that explores ways to divide a shape that resembles a pie chart."
+                },
+                "so10": {
+                    "name": "Size Comparison concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that explores how to compare fractions to each other to determine which represents the largest quantity and in what proportion."
+                },
+                "so11": {
+                    "name": "Equivalent Fractions (A) concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that have students manipulate fractions with different denominators to find out which ones are equivalent."
+                },
+                "so12": {
+                    "name": "Equivalent Fractions (B) concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that offers different contexts in which to use equivalent fractions."
+                },
+                "so13": {
+                    "name": "Fractions Ordering concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that asks players to place fractions in ascending order."
+                },
+                "so14": {
+                    "name": "Question Marks concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that makes students deduct the value of the parts of a whole based on the information that is available to them."
+                },
+                "so15": {
+                    "name": "Subtraction concept - Great planner!",
+                    "description": "Student completed every level, without retrying once, in a series that explores the notion of subtracting quantities from 1."
+                }
+            }
+        }
     ],
     "reports": {
         "list": [
@@ -81,6 +211,186 @@
                 },
                 "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
+            },
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-SLFR.png",
+                    "skinny": "assets/skinny-banner-SLFR.png",
+                    "large": "assets/skinny-banner-SLFR@2x.png"
+                },
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "title": "How to Play concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that establishes the basic game rules."
+                                },
+                                {
+                                    "id": "so2",
+                                    "title": "Split Groups concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that establishes how to divide a group of blocks into equal parts."
+                                },
+                                {
+                                    "id": "so3",
+                                    "title": "Slice Shapes concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that establishes how to divide various shapes into equal parts."
+                                },
+                                {
+                                    "id": "so4",
+                                    "title": "Shape Comparison concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that establishes how to compare parts to their whole."
+                                },
+                                {
+                                    "id": "so5",
+                                    "title": "Symbolic Numerator concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that introduces the numerical representation of fractions through symbols."
+                                },
+                                {
+                                    "id": "so6",
+                                    "title": "Fractions Reading concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that introduces the numerical representation of fractions by comparing it to a symbolic representation."
+                                },
+                                {
+                                    "id": "so7",
+                                    "title": "Denominator concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that explores different ways to divide a whole into equal parts."
+                                },
+                                {
+                                    "id": "so8",
+                                    "title": "Numerator concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that explores the impact different numerators have on the quantity of ice or lava."
+                                },
+                                {
+                                    "id": "so9",
+                                    "title": "Pie Charts concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that explores ways to divide a shape that resembles a pie chart."
+                                },
+                                {
+                                    "id": "so10",
+                                    "title": "Size Comparison concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that explores how to compare fractions to each other to determine which represents the largest quantity and in what proportion."
+                                },
+                                {
+                                    "id": "so11",
+                                    "title": "Equivalent Fractions (A) concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that have students manipulate fractions with different denominators to find out which ones are equivalent."
+                                },
+                                {
+                                    "id": "so12",
+                                    "title": "Equivalent Fractions (B) concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that offers different contexts in which to use equivalent fractions."
+                                },
+                                {
+                                    "id": "so13",
+                                    "title": "Fractions Ordering concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that asks players to place fractions in ascending order."
+                                },
+                                {
+                                    "id": "so14",
+                                    "title": "Question Marks concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that makes students deduct the value of the parts of a whole based on the information that is available to them."
+                                },
+                                {
+                                    "id": "so15",
+                                    "title": "Subtraction concept - Great planner!",
+                                    "description": "Student completed every level, without retrying once, in a series that explores the notion of subtracting quantities from 1."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "title": "How to Play concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that establishes the basic game rules."
+                                },
+                                {
+                                    "id": "wo2",
+                                    "title": "Split Groups concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that establishes how to divide a group of blocks into equal parts."
+                                },
+                                {
+                                    "id": "wo3",
+                                    "title": "Slice Shapes concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that establishes how to divide various shapes into equal parts."
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "Shape Comparison concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that establishes how to compare parts to their whole."
+                                },
+                                {
+                                    "id": "wo5",
+                                    "title": "Symbolic Numerator concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions through symbols."
+                                },
+                                {
+                                    "id": "wo6",
+                                    "title": "Fractions Reading concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions by comparing it to a symbolic representation."
+                                },
+                                {
+                                    "id": "wo7",
+                                    "title": "Denominator concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that explores different ways to divide a whole into equal parts."
+                                },
+                                {
+                                    "id": "wo8",
+                                    "title": "Numerator concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that explores the impact different numerators have on the quantity of ice or lava."
+                                },
+                                {
+                                    "id": "wo9",
+                                    "title": "Pie Charts concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that explores ways to divide a shape that resembles a pie chart."
+                                },
+                                {
+                                    "id": "wo10",
+                                    "title": "Size Comparison concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that explores how to compare fractions to each other to determine which represents the largest quantity and in what proportion."
+                                },
+                                {
+                                    "id": "wo11",
+                                    "title": "Equivalent Fractions (A) concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that have students manipulate fractions with different denominators to find out which ones are equivalent."
+                                },
+                                {
+                                    "id": "wo12",
+                                    "title": "Equivalent Fractions (B) concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that offers different contexts in which to use equivalent fractions."
+                                },
+                                {
+                                    "id": "wo13",
+                                    "title": "Fractions Ordering concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that asks players to place fractions in ascending order."
+                                },
+                                {
+                                    "id": "wo14",
+                                    "title": "Question Marks concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that makes students deduct the value of the parts of a whole based on the information that is available to them."
+                                },
+                                {
+                                    "id": "wo15",
+                                    "title": "Subtraction concept - retrying a level often",
+                                    "description": "A student repeated a particular level often in a series that explores the notion of subtracting quantities from 1."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             }
         ]
     },
@@ -99,11 +409,273 @@
             }
         ],
         "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "Slice Fractions: School Edition - the award-winning game that will get your students excited about their next math discovery!",
+                "about": "Slice Fractions: School Edition is a fun problem solving game that guides students to intuitively and effectively learn fractions through critical concepts. In this puzzling world, players must slice the right amount of ice and lava to clear the mammoth’s path. The game is the fruit of multiple years of research and development by Ululab with the help of math learning experts from the University of Quebec in Montreal (UQAM). It has a smooth progression designed for kids who are new to fractions or who have not yet understood its basic concepts. The environment is free of written instructions, which lets students dive into math reasoning without being obstructed by their literacy level.",
+                "video": "http://youtu.be/wVY0dA0T9q8",
+                "brochure": "",
+                "curriculum": [
+                    "Addresses critical concepts, such as Part-whole partitioning, Numerator / Denominator notation, Fraction equivalence, Fraction ordering and Fraction subtraction.",
+                    "Triggers specific common math misconceptions and causes players to reconsider what they thought they knew about fractions.",
+                    "Students will let go of their fear of fractions and will instead gain interest in their complexity."
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "assets/SliceFractions-carousel-1.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/SliceFractions-carousel-2.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/SliceFractions-carousel-3.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/SliceFractions-carousel-4.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/SliceFractions-carousel-5.png"
+                    }
+                ]
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards",
+                "list": [
+                    {
+                        "category": "Geometry",
+                        "groups": [
+                            {
+                                "name": "Split groups",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.G.A.2",
+                                        "link": "http://www.corestandards.org/Math/Content/2/G/A/2/",
+                                        "description": "Split groups into equal shares"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Slice shapes",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.G.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/2/G/A/3/",
+                                        "description": "Slice shapes into equal shares"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Denominator",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
+                                        "description": "Use the denominator"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Numerator",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
+                                        "description": "Use the numerator"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Pie charts",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
+                                        "description": "Solving fraction values based on the information at hand"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Question marks",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
+                                        "description": "Use pie charts to represent fraction values"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Size comparison",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
+                                        "description": "Know that one fraction is X times bigger than 1"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Equivalent Fractions (A)",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
+                                        "description": "Understand equivalent fractions"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Equivalent Fractions (B)",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
+                                        "description": "Master equivalent fractions"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Equivalent fractions (C)",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
+                                        "description": "Find new ways to use equivalent fractions"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Fractions ordering",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
+                                        "description": "Compare fractions successfully"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Size comparison",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
+                                        "description": "Know that one fraction is X times bigger than 1"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "Subtraction",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NF.B.3.A",
+                                        "link": "http://www.corestandards.org/Math/Content/4/NF/B/3/a/",
+                                        "description": "Subtract fractions from 1"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": false,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Lesson Plans",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "Trailer",
+                                "link": "http://youtu.be/wVY0dA0T9q8"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": false,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                    {
+                        "category": "   ",
+                        "list": [
+                            {
+                                "name": "A preliminary efficacy study of Slice Fractions done by the University of Quebec in Montreal (UQAM) is showing promising results. UQAM professors are now performing a complete study in 2015 to understand how Slice Fractions changes students’ comprehension of important fractions concepts. The results will be posted here, so stay tuned!",
+                                "link": "#"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": true,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                    {
+                        "reviewer": "Children’s Technology Review",
+                        "review": "Combine “Cut the Rope” style problem solving with a side scrolling venue that gets progressively harder, and you get the idea of Slice Fractions — an app that gently introduces some deep mathematical ideas, like equivalency, part-whole partitioning and numerator/denominator notation. Solving each level requires some higher order 2 and 3 step logical problem solving."
+                    },
+                    {
+                        "reviewer": "USA Today",
+                        "review": "This app uses slicing mechanics similar to that of the mega-popular puzzler Cut the Rope, so you know kids will like to play it. The result is an engaging physics puzzler that feels like a game but which also hones kids' math skills in working with fractions."
+                    },
+                    {
+                        "reviewer": "MacLife",
+                        "review": "Slice Fractions does a really great job of teaching without making it feel like a lesson, though it also dynamically gives hints if it senses you're stuck. The controls are straightforward and easy to use. "
+                    },
+                    {
+                        "reviewer": "Gintahar, US",
+                        "review": "I am a special education teacher and I was looking for a fractions app for my students. This app is fabulous. I just finished playing it and wow it made me think. It is a combination of physics and fractions most appropriate for fourth or fifth grade students. I cannot wait to have my students try it."
+                    },
+                    {
+                        "reviewer": "MelUDeM, Canada",
+                        "review": "Intelligent and well-designed application. Ideal to discover the step by step fraction concepts. Incorporates notions of physics and angles discreetly. Great graphics and sounds qualities. Kudos to the designers and educators who created this application!"
+                    },
+                    {
+                        "reviewer": "Resourceful teacher, US",
+                        "review": "I have been using this app as an added resource for teaching fractions to my special education students! It was so much fun they didn't even realize they were doing math! It is great for identifying, simplifying, adding, and subtracting fractions. Hope they add more levels soon!!"
+                    },
+                    {
+                        "reviewer": "amberzak83, UK",
+                        "review": "This game is amazing. I am a maths tutor and I've recommended it to all my clients. One boy I tutor is hooked on it. I will be looking out for other games by this developer"
+                    }
+                ]
+            }
         },
         "social": {
-            "facebook": "http://facebook.com/glasslabgames",
-            "twitter": "http://twitter.com/glasslabgames",
-            "google": "https://plus.google.com/117864084582459836584/posts"
+            "facebook": "http://facebook.com/",
+            "twitter": "http://twitter.com/",
+            "google": "https://plus.google.com/"
         }
     }
 }

@@ -2,7 +2,7 @@
     "basic": {
         "gameId": "WT",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Wuzzit Trouble",
         "longName": "Wuzzit Trouble",
@@ -32,6 +32,7 @@
             "description": ""
         },
         "settings": {
+            "canCreateMatches": false
         },
         "license": {
             "type": "loginType",
@@ -55,9 +56,161 @@
         }
     },
     "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "wo1": {
+                    "name": "No negative rotate",
+                    "description": "This is the fifth puzzle that requires a negative rotation. Confirm student has realized the gear can be rotated counter-clockwise and understands how to count backwards to solve puzzles."
+                },
+                "wo2": {
+                    "name": "No multi-rotate",
+                    "description": "This is the tenth puzzle that requires multi-rotation. Confirm student has realized the gear can be rotated in a multiplicative fashion and understands how to use multiplication to solve puzzles more efficiently."
+                },
+                "wo3": {
+                    "name": "No strategy",
+                    "description": "The student has not shown signs of the strategic thinking required to obtain a multi-step solution. The more advanced puzzles in this room (and all later puzzles) require algebraic and algorithmic thinking."
+                },
+                "wo4": {
+                    "name": "No combinations",
+                    "description": "The player seems unable to decompose an integer into a sum of two multiples. This is a crucial skill for algebra."
+                },
+                "so1": {
+                    "name": "Multi-rotate",
+                    "description": "Player has discovered multi-rotation and used it successfully."
+                },
+                "so2": {
+                    "name": "Negative rotate",
+                    "description": "Player has discovered negative-rotation and used it successfully."
+                },
+                "so3": {
+                    "name": "Multi-negative",
+                    "description": "Player has successfully used negative multi-rotation."
+                },
+                "so4": {
+                    "name": "Positive and negative",
+                    "description": "Player has successfully combined positive and negative rotations."
+                },
+                "so5": {
+                    "name": "Strategy",
+                    "description": "Player has exhibited good strategic thinking."
+                },
+                "so6": {
+                    "name": "Two cogs",
+                    "description": "Player has demonstrated the ability to decompose an integer into a sum of two multiples."
+                },
+                "so7": {
+                    "name": "Better solution",
+                    "description": "Player has solved the problem in fewer moves than the target threshold. This shows considerable creative mathematical thinking ability."
+                }
+            }
+        }
     ],
     "reports": {
         "list": [
+            {
+                "id": "achievements",
+                "assessmentId": "none",
+                "enabled": true,
+                "name": "Learning Events & Time Played",
+                "header": {
+                    "text": "Learning Events & Time Played",
+                    "image": "assets/game-banner-WT.png",
+                    "skinny": "assets/skinny-banner-WT.png",
+                    "large": "assets/skinny-banner-WT@2x.png"
+                },
+                "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
+                "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
+            },
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-WT.png",
+                    "skinny": "assets/skinny-banner-WT.png",
+                    "large": "assets/skinny-banner-WT@2x.png"
+                },
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "title": "Multi-rotate",
+                                    "description": "Player has discovered multi-rotation and used it successfully."
+                                },
+                                {
+                                    "id": "so2",
+                                    "title": "Negative rotate",
+                                    "description": "Player has discovered negative-rotation and used it successfully."
+                                },
+                                {
+                                    "id": "so3",
+                                    "title": "Multi-negative",
+                                    "description": "Player has successfully used negative multi-rotation."
+                                },
+                                {
+                                    "id": "so4",
+                                    "title": "Positive and negative",
+                                    "description": "Player has successfully combined positive and negative rotations."
+                                },
+                                {
+                                    "id": "so5",
+                                    "title": "Strategy",
+                                    "description": "Player has exhibited good strategic thinking."
+                                },
+                                {
+                                    "id": "so6",
+                                    "title": "Two cogs",
+                                    "description": "Player has demonstrated the ability to decompose an integer into a sum of two multiples."
+                                },
+                                {
+                                    "id": "so7",
+                                    "title": "Better solution",
+                                    "description": "Player has solved the problem in fewer moves than the target threshold. This shows considerable creative mathematical thinking ability."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "title": "No negative rotate",
+                                    "description": "This is the fifth puzzle that requires a negative rotation. Confirm student has realized the gear can be rotated counter-clockwise and understands how to count backwards to solve puzzles."
+                                },
+                                {
+                                    "id": "wo2",
+                                    "title": "No multi-rotate",
+                                    "description": "This is the tenth puzzle that requires multi-rotation. Confirm student has realized the gear can be rotated in a multiplicative fashion and understands how to use multiplication to solve puzzles more efficiently."
+                                },
+                                {
+                                    "id": "wo3",
+                                    "title": "No strategy",
+                                    "description": "The student has not shown signs of the strategic thinking required to obtain a multi-step solution. The more advanced puzzles in this room (and all later puzzles) require algebraic and algorithmic thinking."
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "No combinations",
+                                    "description": "The player seems unable to decompose an integer into a sum of two multiples. This is a crucial skill for algebra."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+            }
         ]
     },
     "details": {

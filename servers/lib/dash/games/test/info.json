@@ -1,7 +1,7 @@
 {
     "basic": {
         "gameId": "TEST",
-        "enabled": false,
+        "enabled": true,
         "visible": false,
         "maintenance": null,
         "shortName": "TEST",
@@ -19,6 +19,7 @@
             }
         },
         "settings": {
+            "canCreateMatches": false
         },
         "license": {
             "type": "loginType",
