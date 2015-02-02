@@ -57,3 +57,26 @@ Lic_Couchbase.prototype.connect = function(myds){
     }.bind(this));
 // end promise wrapper
 };
+
+Lic_Couchbase.prototype.getActiveStudentList = function(licenseId){
+    return when.promise(function(resolve, reject){
+        // lic:licenseId
+        var key = lConst.licenseKey + ":" + licenseId;
+        this.client.get(key, function(err, results){
+            if(err){
+                console.error("Couchbase LicStore: Get Student List Error -", err);
+                reject(err);
+                return;
+            }
+            var activeStudents = {};
+            var students = results.value.students;
+            _(students).forEach(function(premiumCourses, student){
+                var courseList = Object.keys(premiumCourses);
+                if(courseList.length > 0){
+                    activeStudents[student] = premiumCourses;
+                }
+            });
+            resolve(activeStudents);
+        }.bind(this));
+    }.bind(this));
+};
