@@ -2,7 +2,7 @@
     "basic": {
         "gameId": "SLFR",
         "enabled": true,
-        "visible": true,
+        "visible": false,
         "maintenance": null,
         "shortName": "Slice Fractions",
         "longName": "Slice Fractions: School Edition",
