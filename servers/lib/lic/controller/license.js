@@ -54,10 +54,12 @@ function getCurrentPlan(req, res){
         }.bind(this))
         .then(function(instructors){
             output['educatorList'] = instructors;
-            return this.myds.getUsername(licenseOwnerId);
+            return this.myds.getUserById(licenseOwnerId);
         }.bind(this))
-        .then(function(ownerName){
-            output.ownerUsername = ownerName;
+        .then(function(owner){
+            var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
+            output.ownerName = ownerName;
+            output.teachersToReject = req.teachersToReject || [];
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
         .then(null, function(err){
@@ -85,12 +87,14 @@ function getStudentsInLicense(req, res){
             studentToTeacher = {};
             var teacher;
             var outputStudents = {};
+            var teacherName;
             _(students).forEach(function(premiumCourses, student){
                 studentToTeacher[student] = {};
                 _(premiumCourses).forEach(function(isEnrolled, courseId){
                     if(isEnrolled){
                         teacher = courseTeacherMap[courseId];
-                        studentToTeacher[student][teacher.username] = true;
+                        teacherName = teacher.firstName + " " + teacher.lastName;
+                        studentToTeacher[student][teacher.username] = teacherName;
                         if(teacher.userId === userId){
                             outputStudents[student] = true;
                         }
@@ -117,7 +121,10 @@ function getStudentsInLicense(req, res){
                 studentOutput.firstName = student['FIRST_NAME'];
                 studentOutput.lastInitial = student['LAST_NAME'][0];
                 studentOutput.username = student['USERNAME'];
-                teachers = Object.keys(studentToTeacher[student['id']]);
+                teachers = [];
+                _(studentToTeacher[student['id']]).forEach(function(teacher){
+                    teachers.push(teacher);
+                });
                 studentOutput.educators = teachers;
                 output.push(studentOutput);
             });
@@ -129,19 +136,18 @@ function getStudentsInLicense(req, res){
 }
 
 function addTeachersToLicense(req, res){
-    //if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-    //    this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
-    //    return;
-    //}
-    //var userId = req.user.id;
-    //var licenseId = req.user.licenseId;
-    //var licenseOwnerId = req.user.licenseOwnerId;
-    //var teacherEmails = req.body.teacherEmails;
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    var licenseOwnerId = req.user.licenseOwnerId;
+    var teacherEmails = req.body.teacherEmails;
     if(licenseOwnerId !== userId){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
         return;
     }
-    var teacherUserIds = [];
     this.myds.getUsersByEmail(teacherEmails)
         .then(function(teachers){
             var createTeachers = [];
@@ -149,6 +155,7 @@ function addTeachersToLicense(req, res){
             teacherEmails.forEach(function(email){
                 newInstructors[email] = true;
             });
+            var teacherUserIds = [];
             teachers.forEach(function(teacher){
                 newInstructors[teacher.email] = false;
                 teacherUserIds.push(teacher.id);
@@ -164,20 +171,34 @@ function addTeachersToLicense(req, res){
             // change login procedure to reflect users in table who are not actually registered
             // change user registration process so that an existing account can have info updated based on forms
             // add field such that invited teachers who are not real users do not screw up other portions of the app
+            var promiseList = [multiHasLicense.call(this, teacherUserIds)];
             if(createTeachers.length > 0){
-                return this.multiInsertTempUsersByEmail(createTeachers);
+                promiseList.push(this.multiInsertTempUsersByEmail(createTeachers));
             }
-            return [];
+            return when.all(promiseList);
         }.bind(this))
         .then(function(results){
-            results.forEach(function(item){
-                teacherUserIds.push(item.id);
+            var hasLicenseObject = results[0];
+            var newUsers = results[1];
+            newUsers.forEach(function(user){
+                hasLicenseObject[user.id] = false;
             });
+            var teachersToApprove = [];
+            var teachersToReject = [];
+            _(hasLicenseObject).forEach(function(value, key){
+                if(value === false){
+                    teachersToApprove.push(key);
+                } else{
+                    teachersToReject.push(key);
+                }
+            });
+            req.teachersToReject = teachersToReject;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
-            return this.multiInsertLicenseMap(licenseId, teacherUserIds);
+            return this.multiInsertLicenseMap(licenseId, teacherToApprove);
         }.bind(this))
         .then(function(){
             // design emails language, methods, and templates
+            // method currently is empty
             return _inviteEmailsForOwnerInstructors.call(this,ownerEmail,usersEmail,nonUsersEmail);
         }.bind(this))
         .then(function(state){
@@ -189,9 +210,28 @@ function addTeachersToLicense(req, res){
         }.bind(this));
 }
 
+function multiHasLicense(userIds){
+    return when.promise(function(resolve, reject){
+        this.myds.getLicenseMapByInstructors(userIds)
+            .then(function(licenseMaps){
+                var output = {};
+                userIds.forEach(function(id){
+                    output[id] = false;
+                });
+                licenseMaps.forEach(function(map){
+                    output[map["user_id"]] = true;
+                });
+                resolve(output);
+            })
+            .then(null, function(err){
+                reject(err);
+            })
+    }.bind(this));
+}
+
 function _inviteEmailsForOwnerInstructors(owner, users, nonUsers){
     return when.promise(function(resolve, reject){
-
+        resolve();
     }.bind(this));
 }
 
