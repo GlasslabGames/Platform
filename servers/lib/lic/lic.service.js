@@ -56,7 +56,7 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
         .then(function(){
-            this.cbds.connect()
+            return this.cbds.connect();
         }.bind(this))
             .then(function(){
                 console.log("LicService: Couchbase DS Connected");
