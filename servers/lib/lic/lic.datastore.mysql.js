@@ -83,18 +83,13 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
     }.bind(this))
 };
 
-Lic_MySQL.prototype.getLicenseByInstructor = function(userId){
+Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending') and user_id = " + userId + ";";
+        var userIdsString = userIds.join(",");
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending') and user_id in (" + userIdsString + ");";
         this.ds.query(Q)
             .then(function(results){
-                var output = [];
-                results.forEach(function(row){
-                    if(row["status"] === "active" || row["status"] === "pending"){
-                        output.push(row);
-                    }
-                });
-                resolve(output);
+                resolve(results);
             }.bind(this))
             .then(null, function(err){
                 reject(err);
@@ -139,9 +134,9 @@ Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
 
 Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT m.course_id,m.user_id,teachers.username FROM GL_MEMBERSHIP as m\n" +
+        var Q = "SELECT m.course_id,m.user_id,teachers.username,teachers.first_name,teachers.last_name FROM GL_MEMBERSHIP as m\n" +
             "JOIN\n" +
-            "(SELECT id,username FROM GL_USER as u\n" +
+            "(SELECT id,username,first_name,last_name FROM GL_USER as u\n" +
                 "JOIN\n" +
                     "(SELECT user_id FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm\n" +
                     "ON lm.user_id = u.id\n" +
@@ -156,6 +151,8 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
                     map = courseTeacherMap[course["course_id"]] = {};
                     map["userId"] = course["user_id"];
                     map["username"] = course["username"];
+                    map["firstName"] = course["first_name"];
+                    map["lastName"] = course["last_name"];
                 });
                 resolve(courseTeacherMap);
             })
@@ -224,6 +221,19 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getUserById = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_USER WHERE id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.createLicenseTable = function() {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -242,7 +252,7 @@ Lic_MySQL.prototype.createLicenseTable = function() {
             "promo VARCHAR(20) NULL,\n" +
             "PRIMARY KEY (id),\n" +
             "INDEX fk_user_id_idx (user_id ASC),\n" +
-            "CONSTRAINT fk_admin_id\n" +
+            "CONSTRAINT fk_owner_id\n" +
                 "FOREIGN KEY (user_id)\n" +
                 "REFERENCES GL_USER (id)\n" +
                 "ON DELETE NO ACTION\n" +

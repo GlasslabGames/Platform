@@ -15,63 +15,181 @@ module.exports = {
         licenseKey: "lic"
     },
     plan: {
-        chromebook: {
+        chromebookgroup: {
+            name: 'Chromebook/Web',
+            description: 'Contains games playable on chromebooks',
+            pricePerSeat: 2,
+            size: "10 seats + 1 educator user",
+            studentSeats: 10,
+            educatorSeats: 1,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: [],
+            downloadableGames: []
+        },
+        chromebookclass: {
+            name: 'Chromebook/Web',
+            description: 'Contains games playable on chromebooks',
+            pricePerSeat: 2,
+            size: "30 seats + 1 educator user",
+            studentSeats: 30,
+            educatorSeats: 1,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: [],
+            downloadableGames: []
+        },
+        chromebookmulticlass: {
+            name: 'Chromebook/Web',
+            description: 'Contains games playable on chromebooks',
+            pricePerSeat: 2,
+            size: "120 seats + 4 educator users",
+            studentSeats: 120,
+            educatorSeats: 4,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: [],
+            downloadableGames: []
+        },
+        chromebookschool: {
             name: 'Chromebook/Web',
             description: 'Contains games playable on chromebooks',
             pricePerSeat: 2,
             browserGames: ['GOG','AW-1'],
+            size: "500 seats + 15 educator users",
+            studentSeats: 500,
+            educatorSeats: 15,
             ipadGames: [],
             downloadableGames: []
         },
-        ipad: {
+        ipadgroup: {
             name: 'Ipad',
             description: 'Contains games playable on ipads',
             pricePerSeat: 2,
+            size: "10 seats + 1 educator user",
+            studentSeats: 10,
+            educatorSeats: 1,
             browserGames: [],
             ipadGames: ['AA-1','SLFR','WT','PVZ'],
             downloadableGames: []
         },
-        pcMac: {
+        ipadclass: {
+            name: 'Ipad',
+            description: 'Contains games playable on ipads',
+            pricePerSeat: 2,
+            size: "30 seats + 1 educator user",
+            studentSeats: 30,
+            educatorSeats: 1,
+            browserGames: [],
+            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            downloadableGames: []
+        },
+        ipadmulticlass: {
+            name: 'Ipad',
+            description: 'Contains games playable on ipads',
+            pricePerSeat: 2,
+            size: "120 seats + 4 educator users",
+            studentSeats: 120,
+            educatorSeats: 4,
+            browserGames: [],
+            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            downloadableGames: []
+        },
+        ipadschool: {
+            name: 'Ipad',
+            description: 'Contains games playable on ipads',
+            pricePerSeat: 2,
+            size: "500 seats + 15 educator users",
+            studentSeats: 500,
+            educatorSeats: 15,
+            browserGames: [],
+            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            downloadableGames: []
+        },
+        pcmacgroup: {
             name: 'PC/MAC',
             description: 'Contains games playable on PCs/Macs.  Also contains all chromebook games',
             pricePerSeat: 3,
+            size: "10 seats + 1 educator user",
+            studentSeats: 10,
+            educatorSeats: 1,
             browserGames: ['GOG','AW-1'],
             ipadGames: [],
             downloadableGames: ['SC']
         },
-        allGames: {
+        pcmacclass: {
+            name: 'PC/MAC',
+            description: 'Contains games playable on PCs/Macs.  Also contains all chromebook games',
+            pricePerSeat: 3,
+            size: "30 seats + 1 educator user",
+            studentSeats: 30,
+            educatorSeats: 1,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: [],
+            downloadableGames: ['SC']
+        },
+        pcmacmulticlass: {
+            name: 'PC/MAC',
+            description: 'Contains games playable on PCs/Macs.  Also contains all chromebook games',
+            pricePerSeat: 3,
+            size: "120 seats + 4 educator users",
+            studentSeats: 120,
+            educatorSeats: 4,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: [],
+            downloadableGames: ['SC']
+        },
+        pcmacschool: {
+            name: 'PC/MAC',
+            description: 'Contains games playable on PCs/Macs.  Also contains all chromebook games',
+            pricePerSeat: 3,
+            size: "500 seats + 15 educator users",
+            studentSeats: 500,
+            educatorSeats: 15,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: [],
+            downloadableGames: ['SC']
+        },
+        allgamesgroup: {
             name: 'All Games',
             description: 'Contains all Glass Lab games',
             pricePerSeat: 5,
+            size: "10 seats + 1 educator user",
+            studentSeats: 10,
+            educatorSeats: 1,
             browserGames: ['GOG','AW-1'],
             ipadGames: ['AA-1','SLFR','WT','PVZ'],
             downloadableGames: ['SC']
-        }
-    },
-    seats: {
-        group: {
-            name: 'Group',
-            size: "10 seats + 1 educator user",
-            studentSeats: 10,
-            educatorSeats: 1
         },
-        class: {
-            name: 'Class',
+        allgamesclass: {
+            name: 'All Games',
+            description: 'Contains all Glass Lab games',
+            pricePerSeat: 5,
             size: "30 seats + 1 educator user",
             studentSeats: 30,
-            educatorSeats: 1
+            educatorSeats: 1,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            downloadableGames: ['SC']
         },
-        multiclass: {
-            name: 'Multi-Class',
+        allgamesmulticlass: {
+            name: 'All Games',
+            description: 'Contains all Glass Lab games',
+            pricePerSeat: 5,
             size: "120 seats + 4 educator users",
             studentSeats: 120,
-            educatorSeats: 4
+            educatorSeats: 4,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            downloadableGames: ['SC']
         },
-        school: {
-            name: 'School',
+        allgamesschool: {
+            name: 'All Games',
+            description: 'Contains all Glass Lab games',
+            pricePerSeat: 5,
             size: "500 seats + 15 educator users",
             studentSeats: 500,
-            educatorSeats: 15
+            educatorSeats: 15,
+            browserGames: ['GOG','AW-1'],
+            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            downloadableGames: ['SC']
         }
     }
 };

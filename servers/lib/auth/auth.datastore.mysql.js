@@ -267,11 +267,12 @@ return when.promise(function(resolve, reject) {
     }
 
     //console.log("Q:", Q);
+    var user;
     this.ds.query(Q)
         .then( function(data){
             // convert to usable userdata
             if(data.length > 0) {
-                var user = [];
+                user = [];
                 for(var i = 0; i < data.length; i++) {
                     user[i] = data[i];
                     user[i].collectTelemetry = user[i].collectTelemetry ? true : false;
@@ -290,11 +291,24 @@ return when.promise(function(resolve, reject) {
                 if(!_.isArray(value)) {
                     user = user[0];
                 }
-                resolve(user);
+                if(user.role === "instructor"){
+                    return this.getLicenseInfoByInstructor(user.id);
+                }
+                return [];
             } else {
                 reject({"error": "user not found"});
             }
-        }.bind(this), reject);
+        }.bind(this))
+        .then(function(license){
+            if(typeof license === "string"){
+                reject({"error": "user not found"});
+            }
+            if(!Array.isArray(license)){
+                user.licenseId = license["id"];
+                user.licenseOwnerId = license["user_id"];
+            }
+            resolve(user);
+        });
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -528,6 +542,32 @@ Auth_MySQL.prototype.getUserEmail = function(userId){
             })
             .then(function(err){
                 reject(err);
+            });
+    }.bind(this));
+};
+
+Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lic.id,lic.user_id FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id FROM GL_LICENSE_MAP\n" +
+            "WHERE status in ('active','pending') and user_id = " + userId+ ") as lm\n" +
+            "ON lic.id = lm.license_id;";
+
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length > 1){
+                    reject({
+                        key: "lic.records.invalid",
+                        code: 500
+                    });
+                    return;
+                } else if(results.length === 0){
+                    resolve([]);
+                }
+                resolve(results[0]);
+            })
+            .then(null, function(err){
+               reject(err);
             });
     }.bind(this));
 };
