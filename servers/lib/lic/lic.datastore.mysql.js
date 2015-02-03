@@ -224,6 +224,19 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getUsername = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT username FROM GL_USER WHERE id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0].username);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.createLicenseTable = function() {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -242,7 +255,7 @@ Lic_MySQL.prototype.createLicenseTable = function() {
             "promo VARCHAR(20) NULL,\n" +
             "PRIMARY KEY (id),\n" +
             "INDEX fk_user_id_idx (user_id ASC),\n" +
-            "CONSTRAINT fk_admin_id\n" +
+            "CONSTRAINT fk_owner_id\n" +
                 "FOREIGN KEY (user_id)\n" +
                 "REFERENCES GL_USER (id)\n" +
                 "ON DELETE NO ACTION\n" +
