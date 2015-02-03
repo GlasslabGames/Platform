@@ -16,7 +16,7 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Free",
+        "price": "TBD",
         "release": "dev",
         "releaseDate": "TBD",
         "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
@@ -42,8 +42,8 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-PRIMA.png",
-            "large": "assets/thumb-game-PRIMA@2x.png"
+            "small": "assets/thumb-game-PLACEHOLDER.png",
+            "large": "assets/thumb-game-PLACEHOLDER@2x.png"
         },
         "card": {
             "small": "assets/game-card-PRIMA.png",
