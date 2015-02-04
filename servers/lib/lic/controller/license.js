@@ -150,8 +150,7 @@ function addTeachersToLicense(req, res){
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
-    //var teacherEmails = req.body.teacherEmails;
-    var teacherEmails = ["luke+teachTest1@glasslabgames.org", "luke+1@glasslabgames.org", "luke@glasslabgames.org", "luke+teachTest2@glasslabgames.org"];
+    var teacherEmails = req.body.teacherEmails;
     if(licenseOwnerId !== userId){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
         return;
@@ -166,7 +165,7 @@ function addTeachersToLicense(req, res){
                 return "not enough seats";
             }
             var seatsTier = license[0]["package_size_tier"].toLowerCase();
-            licenseSeats = lConst[seats][seatsTier];
+            licenseSeats = lConst.seats[seatsTier].educatorSeats;
             return this.myds.getUsersByEmail(teacherEmails);
         }.bind(this))
         .then(function(teachers){
@@ -240,9 +239,9 @@ function addTeachersToLicense(req, res){
             if (status === "not enough seats") {
                 return status;
             }
-            return this.myds.updateEducatorSeatsRemaining(licenseId, licenseSeats);
+            return _updateEducatorSeatsRemaining.call(this,licenseId, licenseSeats);
         }.bind(this))
-        .then(function(){
+        .then(function(status){
             if (status === "not enough seats") {
                 return status;
             }
