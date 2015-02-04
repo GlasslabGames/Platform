@@ -208,10 +208,11 @@ return when.promise(function(resolve, reject) {
             return;
         }
     }
-
+    var existingId;
     this._service.getAuthStore().checkUserEmailUnique(userData.email)
         // check UserName
-        .then(function(){
+        .then(function(id){
+            existingId = id;
             return this._service.getAuthStore().checkUserNameUnique(userData.username);
         }.bind(this))
         // encrypt password
@@ -222,8 +223,12 @@ return when.promise(function(resolve, reject) {
         .then(function(password){
             userData.password  = password;
             userData.loginType = aConst.login.type.glassLabV2;
-
-            return this._service.getAuthStore().addUser(userData);
+            if(typeof existingId === "number"){
+                // need to test this
+                return this._service.getAuthStore().updateTempUser(userData, existingId);
+            } else{
+                return this._service.getAuthStore().addUser(userData);
+            }
         }.bind(this))
         // added user
         .then(function(userId){
