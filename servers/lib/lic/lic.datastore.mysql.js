@@ -70,6 +70,20 @@ Lic_MySQL.prototype.getLicenseById = function(licenseId){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.countEducatorSeatsByLicense = function(licenseId, seats){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]["COUNT(*)"]);
+            })
+            .then(null, function(err){
+                console.error("Update Educator Sears Remaining Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.updateLicenseById = function(licenseId, updateFields){
     return when.promise(function(resolve, reject){
         var updateString = updateFields.join(",");
