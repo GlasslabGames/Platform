@@ -64,6 +64,22 @@ Lic_MySQL.prototype.getLicenseById = function(licenseId){
                 resolve(results);
             })
             .then(null, function(err){
+                console.error("Get License By Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.updateLicenseById = function(licenseId, updateFields){
+    return when.promise(function(resolve, reject){
+        var updateString = updateFields.join(",");
+        var Q = "UPDATE GL_LICENSE SET " + updateString + " WHERE id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Update License By Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -78,6 +94,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
                 resolve(results);
             })
             .then(null, function(err){
+                console.error("Get Users BY Ids Error -",err);
                 reject(err);
             });
     }.bind(this))
@@ -92,6 +109,7 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
+                console.error("Get License Map By Instructors Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -108,6 +126,7 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
                 resolve(results);
             })
             .then(null, function(err){
+                console.error("Get Instructors By License Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -127,6 +146,7 @@ Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
                 resolve(output);
             })
             .then(null, function(err){
+                console.error("Get Courses By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -157,6 +177,7 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
                 resolve(courseTeacherMap);
             })
             .then(null, function(err){
+                console.error("Get Course Teacher Map By License Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -164,13 +185,18 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
 
 Lic_MySQL.prototype.getUsersByEmail = function(emails){
     return when.promise(function(resolve, reject){
-        var emailsString = emails.join(',');
+        var emailsStringified = [];
+        emails.forEach(function(email){
+            emailsStringified.push("'" + email + "'");
+        });
+        var emailsString = emailsStringified.join(',');
         var Q = "SELECT * FROM GL_USER WHERE email in (" + emailsString + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
             })
             .then(null, function(err){
+                console.error("Get Users By Email Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -179,10 +205,10 @@ Lic_MySQL.prototype.getUsersByEmail = function(emails){
 Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
     return when.promise(function(resolve, reject){
         var Q = "INSERT INTO glasslab_dev.GL_USER (email,username,version,date_created,enabled,first_name,last_name,last_updated," +
-            "password,system_role,collect_telemetry,login_type) VALUES ";
+            "password,system_role,collect_telemetry,login_type,verify_code_status) VALUES ";
         var values = [];
         emails.forEach(function(email){
-            values.push(_insertUserValueWithEmail(email));
+            values.push(_insertTempUserValueWithEmail(email));
         });
         Q += values.join(",") + ";";
         this.ds.query(Q)
@@ -190,21 +216,22 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
                 resolve(results);
             })
             .then(null, function(err){
+                console.error("Multi Insert Temp Users By Email Error -",err);
                 reject(err);
             });
     }.bind(this));
 };
 
 function _insertTempUserValueWithEmail(email){
-    var value = "(" + email + "," + email + ",0,NOW(),1,'temp','temp',NOW()," +
-    "'pass','instructor',0,'glasslabv2')";
+    var value = "('" + email + "','" + email + "',0,NOW(),1,'temp','temp',NOW()," +
+    "'pass','instructor',0,'glasslabv2','invited')";
     return value;
 }
 
 Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
     return when.promise(function(resolve, reject){
         var inputs = [];
-        var startValues = "('pending'," + licenseId;
+        var startValues = "('pending'," + licenseId + ",";
         userIds.forEach(function(id){
             inputs.push(startValues + id + ")")
         });
@@ -216,6 +243,7 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
+                console.error("Multi Insert License Map Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -228,7 +256,8 @@ Lic_MySQL.prototype.getUserById = function(userId){
             .then(function(results){
                 resolve(results[0]);
             })
-            .then(function(err){
+            .then(null, function(err){
+                console.error("Get User By Id Error -",err);
                 reject(err);
             });
     }.bind(this));

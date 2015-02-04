@@ -290,9 +290,11 @@ return when.promise(function(resolve, reject) {
                 // if input not array then return a single user
                 if(!_.isArray(value)) {
                     user = user[0];
-                }
-                if(user.role === "instructor"){
-                    return this.getLicenseInfoByInstructor(user.id);
+                    if(user["verifyCodeStatus"] === "invited"){
+                        return "tempUser";
+                    } else if(user.role === "instructor"){
+                        return this.getLicenseInfoByInstructor(user.id);
+                    }
                 }
                 return [];
             } else {
@@ -342,7 +344,7 @@ return when.promise(function(resolve, reject) {
         .then(
         function(data){
             if(data.length !== 0) {
-                if(data[0]["VERIFY_CODE_STATUS"] === "invited"){
+                if(data[0]["verify_code_status"] === "invited"){
                     resolve(data[0].id);
                 } else{
                     reject({"key": "user.notUnique.email", statusCode: 400});
@@ -370,7 +372,7 @@ return when.promise(function(resolve, reject) {
             if(data.length !== 0) {
                 if(noErrorOnFound) {
                     resolve(data[0].id);
-                } else if(data[0]["VERIFY_CODE_STATUS"] === "invited") {
+                } else if(data[0]["verify_code_status"] === "invited") {
                     resolve(data[0].id);
                 } else{
                     reject({key:"user.notUnique.screenName"});
@@ -450,31 +452,31 @@ Auth_MySQL.prototype.updateTempUser = function(userData, existingId){
     return when.promise(function(resolve, reject){
         var updateFields = [
             'version = 0',
-            'date_created = "NOW()"',
+            'date_created = NOW()',
             'enabled = 1',
             'first_name = ' + this.ds.escape(userData.firstName),
             'last_name = ' + this.ds.escape(userData.lastName),
             'institution_id = ' + (userData.institutionId ? this.ds.escape(userData.institutionId) : "NULL"),
-            'last_updated = "NOW()"',
+            'last_updated = NOW()',
             'password = ' + this.ds.escape(userData.password),
-            'reset_code = "NULL"',
-            'reset_code_expiration = "NULL"',
-            'reset_code_status = "NULL"',
+            'reset_code = NULL',
+            'reset_code_expiration = NULL',
+            'reset_code_status = NULL',
             'system_role = ' + this.ds.escape(userData.role),
-            'user_type = "NULL"',
+            'user_type = NULL',
             'collect_telemetry = 0',
             'login_type = ' + this.ds.escape(userData.loginType),
             'ssoUsername = ' + this.ds.escape(userData.ssoUsername || ""),
             'ssoData = ' + this.ds.escape(userData.ssoData || ""),
-            'verify_code = "NULL"',
-            'verify_code_expiration = "NULL"',
-            'verify_code_status = "NULL"',
+            'verify_code = NULL',
+            'verify_code_expiration = NULL',
+            'verify_code_status = NULL',
             'state = ' + this.ds.escape(userData.state),
             'school = ' + this.ds.escape(userData.school),
             'ftue_checklist = 0'
         ];
 
-        var updateFieldsString = changedFields.join(", ");
+        var updateFieldsString = updateFields.join(", ");
 
         var Q = "UPDATE GL_USER SET " + updateFieldsString + " WHERE id = " + existingId + ";";
         this.ds.query(Q)
@@ -482,6 +484,7 @@ Auth_MySQL.prototype.updateTempUser = function(userData, existingId){
                 resolve(data.insertId);
             }.bind(this))
             .then(null, function(err) {
+                console.error("Update Temp User Error -",err);
                 reject({"error": "failure", "exception": err}, 500);
             }.bind(this));
     }.bind(this));

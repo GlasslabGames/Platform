@@ -12,7 +12,7 @@ var Util, lConst;
 
 module.exports = LicService;
 
-function LicService(options){
+function LicService(options, serviceManager){
     try{
         var LicStore, Errors;
 
@@ -33,6 +33,7 @@ function LicService(options){
         this.myds        = new LicStore(this.options.lic.datastore.mysql);
         this.cbds        = new LicDataStore(this.options.lic.datastore.couchbase);
         this.stats       = new Util.Stats(this.options, "LMS");
+        this.serviceManager = serviceManager;
 
     } catch(err){
         console.trace("LicService: Error -", err);

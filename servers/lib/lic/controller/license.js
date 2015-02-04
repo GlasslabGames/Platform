@@ -22,8 +22,13 @@ function getSubscriptionPackages(req, res){
         _(lConst.plan).forEach(function(value){
             plans.push(value);
         });
+        var seats = [];
+        _(lConst.seats).forEach(function(value){
+            seats.push(value);
+        });
         var output = {
-            plans: plans
+            plans: plans,
+            seats: seats
         };
         this.requestUtil.jsonResponse(res, output);
     } catch(err){
@@ -39,16 +44,18 @@ function getCurrentPlan(req, res){
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
     var output = {};
-   this.myds.getLicenseById(licenseId)
+    this.myds.getLicenseById(licenseId)
         .then(function(license){
             license = license[0];
             output["studentSeatsRemaining"] = license["student_seats_remaining"];
             output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
             output["expirationDate"] = license["expiration_date"];
-            var type = license["package_type"];
-            var seats = license["package_size_tier"];
-            var plan = (type + seats).toLowerCase();
-            var packageDetails = lConst.plan[plan];
+            var packageType = license["package_type"];
+            var packageSize = license["package_size_tier"];
+            var packageDetails = {};
+            var plans = lConst.plan[packageType.toLowerCase()];
+            var seats = lConst.seats[packageSize.toLowerCase()];
+            _(packageDetails).merge(plans,seats);
             output["packageDetails"] = packageDetails;
             return this.myds.getInstructorsByLicense(licenseId);
         }.bind(this))
@@ -143,21 +150,35 @@ function addTeachersToLicense(req, res){
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
-    var teacherEmails = req.body.teacherEmails;
+    //var teacherEmails = req.body.teacherEmails;
+    var teacherEmails = ["luke+teachTest1@glasslabgames.org", "luke+1@glasslabgames.org", "luke@glasslabgames.org", "luke+teachTest2@glasslabgames.org"];
     if(licenseOwnerId !== userId){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
         return;
     }
-    this.myds.getUsersByEmail(teacherEmails)
+    var hasLicenseObject;
+    var createTeachers;
+    var educatorSeatsRemaining;
+    this.myds.getLicenseById(licenseId)
+        .then(function(license){
+            educatorSeatsRemaining = license[0]["educator_seats_remaining"];
+            if(teacherEmails.length > educatorSeatsRemaining){
+                return "not enough seats";
+            }
+            return this.myds.getUsersByEmail(teacherEmails);
+        }.bind(this))
         .then(function(teachers){
-            var createTeachers = [];
+            if(teachers === "not enough seats"){
+                return teachers;
+            }
+            createTeachers = [];
             var newInstructors = {};
             teacherEmails.forEach(function(email){
                 newInstructors[email] = true;
             });
             var teacherUserIds = [];
             teachers.forEach(function(teacher){
-                newInstructors[teacher.email] = false;
+                newInstructors[teacher["EMAIL"]] = false;
                 teacherUserIds.push(teacher.id);
             });
             _(newInstructors).forEach(function(state, instructor){
@@ -168,21 +189,36 @@ function addTeachersToLicense(req, res){
             // how should we deal with teachers who are invited to a license but do not have an account?
             // also, how do we deal with rejections?
             // when i make this change, what do?
-            // change login procedure to reflect users in table who are not actually registered
-            // change user registration process so that an existing account can have info updated based on forms
-            // add field such that invited teachers who are not real users do not screw up other portions of the app
-            var promiseList = [multiHasLicense.call(this, teacherUserIds)];
-            if(createTeachers.length > 0){
-                promiseList.push(this.multiInsertTempUsersByEmail(createTeachers));
+            // change login procedure to reflect users in table who are not actually registered |tested and passed
+            // change user registration process so that a temp user account can have info updated based on registration flow |tested and passed
+            // add field such that invited teachers who are not real users do not screw up other portions of the app | verify_code_status of invited
+            if(teacherUserIds.length > 0){
+                return _multiHasLicense.call(this, teacherUserIds);
             }
-            return when.all(promiseList);
+            return {};
+        }.bind(this))
+        .then(function(licenseObject){
+            if(licenseObject === "not enough seats"){
+                return licenseObject;
+            }
+            hasLicenseObject = licenseObject;
+            if(createTeachers.length > 0) {
+                return this.myds.multiInsertTempUsersByEmail(createTeachers);
+            }
+            return {};
         }.bind(this))
         .then(function(results){
-            var hasLicenseObject = results[0];
-            var newUsers = results[1];
-            newUsers.forEach(function(user){
-                hasLicenseObject[user.id] = false;
-            });
+            if(results === "not enough seats"){
+                return results;
+            }
+            var newUsers = results;
+            var id;
+            var affectedRows = newUsers.affectedRows || 0;
+            var firstInsertId = newUsers.insertId;
+            for(var i = 0; i < affectedRows; i++){
+                id = firstInsertId + i;
+                hasLicenseObject[id] = false;
+            }
             var teachersToApprove = [];
             var teachersToReject = [];
             _(hasLicenseObject).forEach(function(value, key){
@@ -194,23 +230,42 @@ function addTeachersToLicense(req, res){
             });
             req.teachersToReject = teachersToReject;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
-            return this.multiInsertLicenseMap(licenseId, teacherToApprove);
+            if(teachersToApprove.length > 0){
+                educatorSeatsRemaining -= teachersToApprove.length;
+                return this.myds.multiInsertLicenseMap(licenseId, teachersToApprove);
+            }
+        }.bind(this))
+        .then(function(status) {
+            if (status === "not enough seats") {
+                return status;
+            }
+            var updateFields = ["educator_seats_remaining = " + educatorSeatsRemaining];
+            return this.myds.updateLicenseById(licenseId, updateFields);
         }.bind(this))
         .then(function(){
+            if (status === "not enough seats") {
+                return status;
+            }
             // design emails language, methods, and templates
             // method currently is empty
+            var ownerEmail = [];
+            var usersEmail = [];
+            var nonUsersEmail = [];
             return _inviteEmailsForOwnerInstructors.call(this,ownerEmail,usersEmail,nonUsersEmail);
         }.bind(this))
-        .then(function(state){
-            this.serviceManager.internalRoute('/api/v2/auth/license/plan', 'get',[req,res]);
+        .then(function(status){
+            if(status === "not enough seats"){
+                this.requestUtil.errorResponse(res, {key:"lic.educators.full"}, 500);
+            }
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
-        .then(function(err){
+        .then(null, function(err){
             console.error("Add Teachers to License Error - ",err);
             this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
 }
 
-function multiHasLicense(userIds){
+function _multiHasLicense(userIds){
     return when.promise(function(resolve, reject){
         this.myds.getLicenseMapByInstructors(userIds)
             .then(function(licenseMaps){
