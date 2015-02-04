@@ -16,6 +16,7 @@ function S3Util(options){
 
     // Set the AWS config
     if( !this.options.awsAccess ) {
+        console.error( "AWS Utility Error - you do not have AWS configured!" );
         return;
     }
     aws.config = this.options.awsAccess;
