@@ -85,7 +85,7 @@ function getStudentsInLicense(req, res){
     var licenseId = req.user.licenseId;
     var students;
     var studentToTeacher;
-    this.cbds.getActiveStudentList(licenseId)
+    this.cbds.getActiveStudentsByLicense(licenseId)
         .then(function(activeStudents) {
             students = activeStudents;
             return this.myds.getCourseTeacherMapByLicense(licenseId);
@@ -150,21 +150,22 @@ function addTeachersToLicense(req, res){
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
-    //var teacherEmails = req.body.teacherEmails;
-    var teacherEmails = ["luke+teachTest1@glasslabgames.org", "luke+1@glasslabgames.org", "luke@glasslabgames.org", "luke+teachTest2@glasslabgames.org"];
+    var teacherEmails = req.body.teacherEmails;
     if(licenseOwnerId !== userId){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
         return;
     }
     var hasLicenseObject;
     var createTeachers;
-    var educatorSeatsRemaining;
+    var licenseSeats;
     this.myds.getLicenseById(licenseId)
         .then(function(license){
-            educatorSeatsRemaining = license[0]["educator_seats_remaining"];
+            var educatorSeatsRemaining = license[0]["educator_seats_remaining"];
             if(teacherEmails.length > educatorSeatsRemaining){
                 return "not enough seats";
             }
+            var seatsTier = license[0]["package_size_tier"].toLowerCase();
+            licenseSeats = lConst.seats[seatsTier].educatorSeats;
             return this.myds.getUsersByEmail(teacherEmails);
         }.bind(this))
         .then(function(teachers){
@@ -231,7 +232,6 @@ function addTeachersToLicense(req, res){
             req.teachersToReject = teachersToReject;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
             if(teachersToApprove.length > 0){
-                educatorSeatsRemaining -= teachersToApprove.length;
                 return this.myds.multiInsertLicenseMap(licenseId, teachersToApprove);
             }
         }.bind(this))
@@ -239,10 +239,9 @@ function addTeachersToLicense(req, res){
             if (status === "not enough seats") {
                 return status;
             }
-            var updateFields = ["educator_seats_remaining = " + educatorSeatsRemaining];
-            return this.myds.updateLicenseById(licenseId, updateFields);
+            return _updateEducatorSeatsRemaining.call(this,licenseId, licenseSeats);
         }.bind(this))
-        .then(function(){
+        .then(function(status){
             if (status === "not enough seats") {
                 return status;
             }
@@ -287,6 +286,44 @@ function _multiHasLicense(userIds){
 function _inviteEmailsForOwnerInstructors(owner, users, nonUsers){
     return when.promise(function(resolve, reject){
         resolve();
+    }.bind(this));
+}
+
+function _updateEducatorSeatsRemaining(licenseId, seats){
+    return when.promise(function(resolve, reject){
+        this.myds.countEducatorSeatsByLicense(licenseId)
+            .then(function(count){
+                var seatsRemaining = seats - count;
+                var seatsRemainingString = "educator_seats_remaining = " + seatsRemaining;
+                var updateFields = [seatsRemainingString];
+                return this.myds.updateLicenseById(licenseId, updateFields);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Update Educator Seats Remaining Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _updateStudentSeatsRemaining(licenseId, seats){
+    return when.promise(function(resolve, reject){
+        this.cbds.countActiveStudentsByLicense(licenseId)
+            .then(function(count){
+                var seatsRemaining = seats - count;
+                var seatsRemainingString = "student_seats_remaining = " + seatsRemaining;
+                var updateFields = [seatsRemainingString];
+                return this.myds.updateLicenseById(licenseId, updateFields);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null,function(err){
+                console.error("Update Student Seats Remaining Error -",err);
+                reject(err);
+            });
     }.bind(this));
 }
 

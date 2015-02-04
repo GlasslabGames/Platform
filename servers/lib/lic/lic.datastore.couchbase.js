@@ -52,7 +52,7 @@ Lic_Couchbase.prototype.connect = function(){
 // end promise wrapper
 };
 
-Lic_Couchbase.prototype.getActiveStudentList = function(licenseId){
+Lic_Couchbase.prototype.getActiveStudentsByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
         // lic:licenseId
         var key = lConst.datastore.licenseKey + ":" + licenseId;
@@ -71,6 +71,29 @@ Lic_Couchbase.prototype.getActiveStudentList = function(licenseId){
                 }
             });
             resolve(activeStudents);
+        }.bind(this));
+    }.bind(this));
+};
+
+Lic_Couchbase.prototype.countActiveStudentsByLicense = function(licenseId){
+    return when.promise(function(resolve, reject){
+        // lic:licenseId
+        var key = lConst.datastore.licenseKey + ":" + licenseId;
+        this.client.get(key, function(err, results){
+            if(err){
+                console.error("Couchbase LicStore: Get Student List Error -", err);
+                reject(err);
+                return;
+            }
+            var students = results.value.students;
+            var count = 0;
+            _(students).forEach(function(premiumCourses, student){
+                var courseList = Object.keys(premiumCourses);
+                if(courseList.length > 0){
+                    count++;
+                }
+            });
+            resolve(count);
         }.bind(this));
     }.bind(this));
 };
