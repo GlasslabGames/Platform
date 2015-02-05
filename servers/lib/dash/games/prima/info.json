@@ -1,0 +1,97 @@
+{
+    "basic": {
+        "gameId": "PRIMA",
+        "enabled": true,
+        "visible": true,
+        "maintenance": null,
+        "shortName": "Prima",
+        "longName": "Prima",
+        "grades": "TBD",
+        "subject": "TBD",
+        "type": "Browser",
+        "platform": {
+            "type": "Browser",
+            "icon": {
+                "small": "assets/platform-browser.png",
+                "large": "assets/platform-browser@2x.png"
+            }
+        },
+        "price": "TBD",
+        "release": "dev",
+        "releaseDate": "TBD",
+        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
+        "description": "TBD",
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab, Inc.",
+            "logo": {
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
+            },
+            "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
+        },
+        "settings": {
+            "canCreateMatches": false
+        },
+        "license": {
+            "type": "loginType",
+            "loginType": "glasslabv2,icivics,edmodo",
+            "valid": false,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
+        },
+        "thumbnail": {
+            "small": "assets/thumb-game-PLACEHOLDER.png",
+            "large": "assets/thumb-game-PLACEHOLDER@2x.png"
+        },
+        "card": {
+            "small": "assets/game-card-PRIMA.png",
+            "large": "assets/game-card-PRIMA@2x.png"
+        },
+        "banners": {
+            "product": "assets/game-banner-PRIMA.png",
+            "reports": "assets/game-banner-PRIMA.png"
+        },
+        "play": {
+            "type": "page",
+            "page": {
+                "title": "Prima",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/1/index.html",
+                "format": "html",
+                "size": {
+                    "width": 800,
+                    "height": 600
+                }
+            }
+        }
+    },
+    "assessment": [
+    ],
+    "reports": {
+        "list": [
+        ]
+    },
+    "details": {
+        "buttons": [
+            {
+                "name": "Play Game",
+                "type": "play",
+                "authRequired": true,
+                "links": [
+                    {
+                        "name": "Play Game",
+                        "type": "play"
+                    }
+                ]
+            }
+        ],
+        "pages": {
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "https://plus.google.com/117864084582459836584/posts"
+        }
+    }
+}

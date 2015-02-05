@@ -58,6 +58,7 @@
             "page": {
                 "title": "Slice Fractions",
                 "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/SLFR/game/3/SliceFractionsSchoolEdition.swf",
+                "format": "swf",
                 "size": {
                     "width": 800,
                     "height": 600

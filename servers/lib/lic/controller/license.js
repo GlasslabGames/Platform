@@ -10,6 +10,7 @@ module.exports = {
     getCurrentPlan: getCurrentPlan,
     getStudentsInLicense: getStudentsInLicense,
     addTeachersToLicense: addTeachersToLicense,
+    removeTeacherFromLicense: removeTeacherFromLicense,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -188,8 +189,6 @@ function addTeachersToLicense(req, res){
                 }
             });
             // how should we deal with teachers who are invited to a license but do not have an account?
-            // also, how do we deal with rejections?
-            // when i make this change, what do?
             // change login procedure to reflect users in table who are not actually registered |tested and passed
             // change user registration process so that a temp user account can have info updated based on registration flow |tested and passed
             // add field such that invited teachers who are not real users do not screw up other portions of the app | verify_code_status of invited
@@ -247,10 +246,10 @@ function addTeachersToLicense(req, res){
             }
             // design emails language, methods, and templates
             // method currently is empty
-            var ownerEmail = [];
+            var licenseOwnerEmail;
             var usersEmail = [];
             var nonUsersEmail = [];
-            return _inviteEmailsForOwnerInstructors.call(this,ownerEmail,usersEmail,nonUsersEmail);
+            return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmail,nonUsersEmail);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
@@ -262,6 +261,131 @@ function addTeachersToLicense(req, res){
             console.error("Add Teachers to License Error - ",err);
             this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
+}
+
+function removeTeacherFromLicense(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    var licenseOwnerId = req.user.licenseOwnerId;
+    var teacherEmail = [req.body.teacherEmail];
+    var teacherId;
+    if(licenseOwnerId === userId){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    //find out instructor's user_id,
+    var promiseList = [this.myds.getInstructorsByLicense(licenseId),this.myds.getUsersByEmail(teacherEmail),this.myds.getLicenseById(licenseId)];
+    var packageSize;
+    when.all(promiseList)
+        .then(function(results){
+            var licenseMap = results[0];
+            var state = false;
+            licenseMap.some(function(instructor){
+                if(instructor.email === teacherEmail[0]){
+                    state = true;
+                    return true;
+                }
+            });
+            if(!state){
+                return "email not in license";
+            }
+            var teacher = results[1][0];
+            teacherId = teacher.id;
+            var license = results[2][0];
+            packageSize = license["package_size_tier"];
+            var studentSeats = lConst.size[packageSize].studentSeats;
+            //find out which premium courses that instructor is a part of
+            //lock each of those premium courses (with utility method)
+            return _unassignInstructorPremiumCourses.call(this, teacherId, licenseId, studentSeats);
+        }.bind(this))
+        .then(function(state){
+            if(state === "email not in license"){
+                return state;
+            }
+            //remove instructor from premium license
+            var updateFields = ["status = 'inactive'"];
+            return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [teacherId], updateFields);
+        }.bind(this))
+        .then(function(state){
+            if(state === "email not in license"){
+                return state;
+            }
+            // update educator count
+            var educatorSeats = lConst.size[packageSize].educatorSeats;
+            return _updateEducatorSeatsRemaining.call(this, licenseId, educatorSeats);
+        }.bind(this))
+        .then(function(state){
+            if(state === "email not in license"){
+                return state;
+            }
+            //email notification, need logic to define licenseOwnerEmail, and also need to write email methods and text
+            var licenseOwnerEmail;
+            return _removeInstructorEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
+        }.bind(this))
+        .then(function(state){
+            if(state === "email not in license"){
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"}, 500);
+                return;
+            }
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err, 500);
+            console.error("Remove Teacher From License Error -",err);
+        }.bind(this));
+}
+
+function _unassignInstructorPremiumCourses(userId, licenseId, studentSeats){
+    return when.promise(function(resolve, reject){
+        var promiseList = [this.myds.getCoursesByInstructor(userId), this.cbds.getActiveStudentsByLicense(licenseId)];
+        var studentList;
+        when.all(promiseList)
+            .then(function(results){
+                var courseIds = results[0];
+                var courseObj = {};
+                var premiumCourses = [];
+                courseIds.forEach(function(id){
+                    courseObj[id] = true;
+                });
+                studentList = results[1];
+                _(studentList).forEach(function(student){
+                    _(student).forEach(function(premiumCourse, courseId, courseList){
+                        if(premiumCourse && courseObj[courseId]){
+                            courseList[courseId] = false;
+                            premiumCourses.push(courseId);
+                        }
+                    })
+                });
+                if(premiumCourses.length > 0){
+                    return this.myds.unassignPremiumCourses(premiumCourses);
+                }
+                return "continue";
+            }.bind(this))
+            .then(function(status){
+                if(status === "continue"){
+                    return status;
+                }
+                var licenseStudentList = { students: studentList};
+                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
+            }.bind(this))
+            .then(function(status){
+                if(status === "continue"){
+                    return status;
+                }
+                return _updateStudentSeatsRemaining.call(this, licenseId, studentSeats);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Unassign Instructor Premium Courses Error -",err);
+                reject(err);
+            })
+    }.bind(this));
 }
 
 function _multiHasLicense(userIds){
@@ -287,6 +411,12 @@ function _inviteEmailsForOwnerInstructors(owner, users, nonUsers){
     return when.promise(function(resolve, reject){
         resolve();
     }.bind(this));
+}
+
+function _removeInstructorEmailNotification(owner, users, nonUsers){
+    return when.promise(function(resolve, reject){
+        resolve();
+    });
 }
 
 function _updateEducatorSeatsRemaining(licenseId, seats){
