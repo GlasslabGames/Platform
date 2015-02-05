@@ -111,3 +111,19 @@ Lic_Couchbase.prototype.updateActiveStudentsByLicense = function(licenseId, data
         });
     }.bind(this));
 };
+
+Lic_Couchbase.prototype.createLicenseStudentObject = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var key = lConst.datastore.licenseKey + ":" + licenseId;
+        var data = {};
+        data.students = {};
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("Couchbase LicStore: Create License Student Object Error -",err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        });
+    }.bind(this));
+};
