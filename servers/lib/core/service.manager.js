@@ -79,17 +79,26 @@ function ServiceManager(configFiles){
             cvc: 123
         },
         description: "Customer for Ben Dapkiewicz",
-        email: "ben+dev4@glasslabgames.org",
-        plan: 'test_ipad',
-        quantity: 900
+        email: "ben@glasslabgames.org",
+        plan: 'test_chromebook',
+        quantity: 12475
     });*/
-    //this.stripe.retrieveCustomer( "cus_5dvnWd0fs5Icru" );
+    //this.stripe.retrieveCustomer( "cus_5eBOgRMql5L1yF" );
     /*this.stripe.updateCustomer( "cus_5dvnWd0fs5Icru", {
         description: "Customer for Ben Dapkiewicz"
     });*/
 
     // test subscription APIs
-
+    /*this.stripe.createSubscription("cus_5eBOgRMql5L1yF", {
+        card: {
+            number: 4242424242424242,
+            exp_month: 1,
+            exp_year: 2020,
+            cvc: 123
+        },
+        plan: 'test_chromebook',
+        quantity: 12475
+    });*/
 
     // test plan APIs
     //this.stripe.listPlans();
