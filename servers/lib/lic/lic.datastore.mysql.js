@@ -56,6 +56,40 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Lic_MySQL.prototype.insertToLicenseTable = function(values){
+    return when.promise(function(resolve, reject){
+        var valuesString = values.join(",");
+        var Q = "INSERT INTO GL_LICENSE\n" +
+            "(user_id,license_key,package_type,package_size_tier,expiration_date," +
+            "active,educator_seats_remaining,student_seats_remaining,promo)\n" +
+            "VALUES (" + valuesString + ");";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results.insertId);
+            })
+            .then(null, function(err){
+                console.error("Insert To License Table Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.insertToLicenseMapTable = function(values){
+    return when.promise(function(resolve, reject){
+        var valuesString = values.join(",");
+        var Q = "INSERT INTO GL_LICENSE_MAP (user_id,license_id,status)\n" +
+            "VALUES (" + valuesString + ");";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Insert To License Map Table Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.getLicenseById = function(licenseId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_LICENSE WHERE id = " + licenseId + ";";
