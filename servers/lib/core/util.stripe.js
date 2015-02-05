@@ -26,11 +26,8 @@ function StripeUtil(options){
 /*
  * Customer APIs
  */
-StripeUtil.prototype.createCustomer = function() {
+StripeUtil.prototype.createCustomer = function( params ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe params
-        var params = {};
-
         // Call the Stripe customers.create API
         this.stripe.customers.create( params, function( err, result ) {
             if( err ) {
@@ -45,11 +42,8 @@ StripeUtil.prototype.createCustomer = function() {
     }.bind(this));
 };
 
-StripeUtil.prototype.retrieveCustomer = function() {
+StripeUtil.prototype.retrieveCustomer = function( customerId ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe customer Id
-        var customerId = "";
-
         // Call the Stripe customers.retrieve API
         this.stripe.customers.retrieve( customerId, function( err, result ) {
             if( err ) {
@@ -64,12 +58,8 @@ StripeUtil.prototype.retrieveCustomer = function() {
     }.bind(this));
 };
 
-StripeUtil.prototype.updateCustomer = function() {
+StripeUtil.prototype.updateCustomer = function( customerId, params ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe customer Id and params
-        var customerId = "";
-        var params = {};
-
         // Call the Stripe customers.update API
         this.stripe.customers.update( customerId, params, function( err, result ) {
             if( err ) {
@@ -87,12 +77,8 @@ StripeUtil.prototype.updateCustomer = function() {
 /*
  * Subscription APIs
  */
-StripeUtil.prototype.createSubscription = function() {
+StripeUtil.prototype.createSubscription = function( customerId, params ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe customer Id and params
-        var customerId = "";
-        var params = {};
-
         // Call the Stripe customers.createSubscription API
         this.stripe.customers.createSubscription( customerId, params, function( err, result ) {
             if( err ) {
@@ -107,12 +93,8 @@ StripeUtil.prototype.createSubscription = function() {
     }.bind(this));
 };
 
-StripeUtil.prototype.retrieveSubscription = function() {
+StripeUtil.prototype.retrieveSubscription = function( customerId, subscriptionId ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe customer Id and subscription Id
-        var customerId = "";
-        var subscriptionId = "";
-
         // Call the Stripe customers.retrieveSubscription API
         this.stripe.customers.retrieveSubscription( customerId, subscriptionId, function( err, result ) {
             if( err ) {
@@ -127,13 +109,8 @@ StripeUtil.prototype.retrieveSubscription = function() {
     }.bind(this));
 };
 
-StripeUtil.prototype.updateSubscription = function() {
+StripeUtil.prototype.updateSubscription = function( customerId, subscriptionId, params ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe customer Id, subscription Id, and params
-        var customerId = "";
-        var subscriptionId = "";
-        var params = {};
-
         // Call the Stripe customers.updateSubscription API
         this.stripe.customers.updateSubscription( customerId, subscriptionId, params, function( err, result ) {
             if( err ) {
@@ -148,14 +125,10 @@ StripeUtil.prototype.updateSubscription = function() {
     }.bind(this));
 };
 
-StripeUtil.prototype.cancelSubscription = function() {
+StripeUtil.prototype.cancelSubscription = function( customerId, subscriptionId ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe customer Id and subscription Id
-        var customerId = "";
-        var subscriptionId = "";
-
         // Call the Stripe customers.cancelSubscription API
-        this.stripe.customers.cancelSubscription( customerId, subscriptionId, function( err, result ) {
+        this.stripe.customers.cancelSubscription( customerId, subscriptionId, { at_period_end: true }, function( err, result ) {
             if( err ) {
                 console.error( "Stripe Utility Error - failed to cancel the subscription: ", customerId, subscriptionId, err );
                 reject( err );
@@ -168,14 +141,27 @@ StripeUtil.prototype.cancelSubscription = function() {
     }.bind(this));
 };
 
+StripeUtil.prototype.listSubscriptions = function( customerId ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe customers.cancelSubscription API
+        this.stripe.customers.listSubscriptions( customerId, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to list the active subscription: ", customerId, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully listed the Active Subscriptions: ", customerId, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
 /*
  * Plan APIs
  */
-StripeUtil.prototype.retrievePlan = function() {
+StripeUtil.prototype.retrievePlan = function( planId ) {
     return when.promise(function(resolve, reject) {
-        // Setup the Stripe plan Id
-        var planId = "";
-
         // Call the Stripe plans.retrieve API
         this.stripe.plans.retrieve( planId, function( err, result ) {
             if( err ) {

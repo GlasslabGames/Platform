@@ -64,6 +64,38 @@ function ServiceManager(configFiles){
     this.stripe           = new Util.StripeUtil(this.options);
 
 
+    // test customer APIs
+    /*this.stripe.createCustomer({
+        card: "tok_15SG1TKpKFgczHmqa4GUNm7j",
+        description: "Customer for ben@glasslabgames.org",
+        email: "ben@glasslabgames.org"
+    });*/
+    /*this.stripe.createCustomer({
+        //card: "tok_15SG1TKpKFgczHmqa4GUNm7j",
+        card: {
+            number: 4242424242424242,
+            exp_month: 1,
+            exp_year: 2020,
+            cvc: 123
+        },
+        description: "Customer for Ben Dapkiewicz",
+        email: "ben+dev4@glasslabgames.org",
+        plan: 'test_ipad',
+        quantity: 900
+    });*/
+    //this.stripe.retrieveCustomer( "cus_5dvnWd0fs5Icru" );
+    /*this.stripe.updateCustomer( "cus_5dvnWd0fs5Icru", {
+        description: "Customer for Ben Dapkiewicz"
+    });*/
+
+    // test subscription APIs
+
+
+    // test plan APIs
+    //this.stripe.listPlans();
+    //this.stripe.retrievePlan( 'test_pcmac' );
+
+
     try{
         this.routesMap = require('../routes.map.js');
     } catch(err){
