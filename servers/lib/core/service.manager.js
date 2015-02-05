@@ -61,6 +61,7 @@ function ServiceManager(configFiles){
     process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
     this.stats            = new Util.Stats(this.options, "ServiceManager");
     this.awss3            = new Util.S3Util(this.options);
+    this.stripe           = new Util.StripeUtil(this.options);
 
 
     try{

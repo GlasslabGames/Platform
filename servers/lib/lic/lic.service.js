@@ -12,7 +12,7 @@ var Util, lConst;
 
 module.exports = LicService;
 
-function LicService(options, serviceManager){
+function LicService(options, serviceManager) {
     try{
         var LicStore, Errors;
 
