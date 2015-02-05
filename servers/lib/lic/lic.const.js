@@ -20,15 +20,15 @@ module.exports = {
             description: 'Contains games playable on chromebooks',
             pricePerSeat: 2,
             browserGames: ['GOG','AW-1'],
-            ipadGames: [],
+            iPadGames: [],
             downloadableGames: []
         },
-        ipad: {
-            name: 'Ipad',
+        iPad: {
+            name: 'iPad',
             description: 'Contains games playable on ipads',
             pricePerSeat: 2,
             browserGames: [],
-            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            iPadGames: ['AA-1','SLFR','WT','PVZ'],
             downloadableGames: []
         },
         pcmac: {
@@ -39,12 +39,12 @@ module.exports = {
             ipadGames: [],
             downloadableGames: ['SC']
         },
-        allgamesmulticlass: {
+        allGames: {
             name: 'All Games',
             description: 'Contains all Glass Lab games',
             pricePerSeat: 5,
             browserGames: ['GOG','AW-1'],
-            ipadGames: ['AA-1','SLFR','WT','PVZ'],
+            iPadGames: ['AA-1','SLFR','WT','PVZ'],
             downloadableGames: ['SC']
         }
     },
