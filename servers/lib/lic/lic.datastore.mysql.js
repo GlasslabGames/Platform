@@ -277,6 +277,38 @@ Lic_MySQL.prototype.getUserById = function(userId){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, userIds, updateFields){
+  return when.promise(function(resolve, reject){
+      var updateFieldsString = updateFields.join(", ");
+      var userIdsString = userIds.join(",");
+      var Q = "UPDATE GL_LICENSE_MAP SET " + updateFieldsString + "\n" +
+          "WHERE user_id IN (" + userIdsString + ") and license_id = " + licenseId +";";
+      this.ds.query(Q)
+          .then(function(results){
+              resolve(results);
+          }.bind(this))
+          .then(null, function(err){
+              console.error("Update License Map By License Instructor Error -",err);
+              reject(err);
+          });
+  }.bind(this));
+};
+
+Lic_MySQL.prototype.unassignPremiumCourses = function(courses){
+    return when.promise(function(resolve, reject){
+        var coursesString = coursers.join(",");
+        var Q = "UPDATE GL_COURSE SET premium_games_assigned = FALSE WHERE id in (" + coursesString + ");";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Unassign Premium Courses Error -", err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.createLicenseTable = function() {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -348,6 +380,9 @@ Lic_MySQL.prototype.createLicenseMapTable = function(){
     }.bind(this));
 };
 
+///////////////////////////////////////////
+/////////////OUTDATED METHODS/////////////
+/////////////////////////////////////////
 
 // add lic map table and add game_id to license table
 Lic_MySQL.prototype.updateLicenseTable = function() {

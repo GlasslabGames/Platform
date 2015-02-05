@@ -434,7 +434,16 @@ module.exports = {
             service: "lic",
             controller: "license",
             method: {
-                get: "addTeachersToLicense"
+                post: "addTeachersToLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/remove",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "removeTeacherFromLicense"
             }
         },
         {
