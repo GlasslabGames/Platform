@@ -434,7 +434,7 @@ module.exports = {
             service: "lic",
             controller: "license",
             method: {
-                get: "subscribeToLicense"
+                post: "subscribeToLicense"
             }
         },
         {

@@ -149,22 +149,18 @@ function subscribeToLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
         return;
     }
-    //if(!(req.body && req.body.stripeInfo && req.body.planInfo)){
-    //    this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
-    //    return;
-    //}
+    if(!(req.body && req.body.stripeInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
     if(req.user.licenseId){
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"}, 500);
         return;
     }
     var userId = req.user.id;
-    //var stripeInfo = req.body.stripeInfo;
-    //var planInfo = req.body.planInfo;
-    var stripeInfo;
-    var planInfo = {
-        seats: "school",
-        type: "chromebook"
-    };
+    var stripeInfo = req.body.stripeInfo;
+    var planInfo = req.body.planInfo;
+
     _carryOutStripeTransaction.call(this, stripeInfo, planInfo)
         .then(function(){
             return _createLicense.call(this, userId, planInfo)
