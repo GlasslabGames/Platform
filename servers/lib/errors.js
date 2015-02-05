@@ -109,5 +109,6 @@ module.exports = {
     "lic.records.invalid":                  "User tied to to more than one license",
     "lic.access.absent":                    "Only instructors who are part of an active license should have access",
     "lic.records.inconsistent":             "The license records from the client and server do not match.  Update client records",
-    "lic.educators.full":                   "There are not enough seats in the license for this list of educators"
+    "lic.educators.full":                   "There are not enough seats in the license for this list of educators",
+    "lic.create.denied":                    "An instructor currently on a license cannot create a new license"
 };

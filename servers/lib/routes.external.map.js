@@ -430,6 +430,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/subscribe",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "subscribeToLicense"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/invite",
             service: "lic",
             controller: "license",

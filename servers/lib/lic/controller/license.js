@@ -9,6 +9,7 @@ module.exports = {
     getSubscriptionPackages: getSubscriptionPackages,
     getCurrentPlan: getCurrentPlan,
     getStudentsInLicense: getStudentsInLicense,
+    subscribeToLicense: subscribeToLicense,
     addTeachersToLicense: addTeachersToLicense,
     removeTeacherFromLicense: removeTeacherFromLicense,
     // vestigial apis
@@ -143,6 +144,50 @@ function getStudentsInLicense(req, res){
         }.bind(this));
 }
 
+function subscribeToLicense(req, res){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    //if(!(req.body && req.body.stripeInfo && req.body.planInfo)){
+    //    this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+    //    return;
+    //}
+    if(req.user.licenseId){
+        this.requestUtil.errorResponse(res, {key: "lic.create.denied"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    //var stripeInfo = req.body.stripeInfo;
+    //var planInfo = req.body.planInfo;
+    var stripeInfo;
+    var planInfo = {
+        seats: "school",
+        type: "chromebook"
+    };
+    _carryOutStripeTransaction.call(this, stripeInfo, planInfo)
+        .then(function(){
+            return _createLicense.call(this, userId, planInfo)
+        }.bind(this))
+        .then(function(licenseId){
+            req.user.licenseId = licenseId;
+            req.user.licenseOwnerId = userId;
+            return this.cbds.createLicenseStudentObject(licenseId);
+        }.bind(this))
+        .then(function(){
+            // get users email address and build below method
+            var ownerEmail;
+            return _createLicenseEmailResponse.call(this, ownerEmail);
+        }.bind(this))
+        .then(function(){
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Subscribe To License Error -",err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
 function addTeachersToLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
@@ -165,12 +210,15 @@ function addTeachersToLicense(req, res){
             if(teacherEmails.length > educatorSeatsRemaining){
                 return "not enough seats";
             }
+            if(license.active === 0 || license.active === false ){
+                return "inactive license";
+            }
             var seatsTier = license[0]["package_size_tier"].toLowerCase();
             licenseSeats = lConst.seats[seatsTier].educatorSeats;
             return this.myds.getUsersByEmail(teacherEmails);
         }.bind(this))
         .then(function(teachers){
-            if(teachers === "not enough seats"){
+            if(typeof teachers === "string"){
                 return teachers;
             }
             createTeachers = [];
@@ -180,6 +228,10 @@ function addTeachersToLicense(req, res){
             });
             var teacherUserIds = [];
             teachers.forEach(function(teacher){
+                if(teacher["SYSTEM_ROLE"] !== 'instructor'){
+                    delete newInstructors[teacher["EMAIL"]];
+                    return;
+                }
                 newInstructors[teacher["EMAIL"]] = false;
                 teacherUserIds.push(teacher.id);
             });
@@ -198,7 +250,7 @@ function addTeachersToLicense(req, res){
             return {};
         }.bind(this))
         .then(function(licenseObject){
-            if(licenseObject === "not enough seats"){
+            if(typeof licenseObject === "string"){
                 return licenseObject;
             }
             hasLicenseObject = licenseObject;
@@ -208,7 +260,7 @@ function addTeachersToLicense(req, res){
             return {};
         }.bind(this))
         .then(function(results){
-            if(results === "not enough seats"){
+            if(typeof results === "string"){
                 return results;
             }
             var newUsers = results;
@@ -235,13 +287,13 @@ function addTeachersToLicense(req, res){
             }
         }.bind(this))
         .then(function(status) {
-            if (status === "not enough seats") {
+            if (typeof status === "string") {
                 return status;
             }
             return _updateEducatorSeatsRemaining.call(this,licenseId, licenseSeats);
         }.bind(this))
         .then(function(status){
-            if (status === "not enough seats") {
+            if (typeof status === "string") {
                 return status;
             }
             // design emails language, methods, and templates
@@ -254,6 +306,11 @@ function addTeachersToLicense(req, res){
         .then(function(status){
             if(status === "not enough seats"){
                 this.requestUtil.errorResponse(res, {key:"lic.educators.full"}, 500);
+                return;
+            }
+            if(status === "inactive license"){
+                this.requestUtil.errorResponse(res, {key:"lic.access.invalid"}, 500);
+                return;
             }
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
@@ -339,6 +396,62 @@ function removeTeacherFromLicense(req, res){
         }.bind(this));
 }
 
+function _carryOutStripeTransaction(stripeInfo, planInfo){
+    return when.promise(function(resolve, reject){
+        resolve();
+    });
+}
+
+function _createLicense(userId, planInfo){
+    return when.promise(function(resolve, reject){
+        var seatsTier = planInfo.seats;
+        var type = planInfo.type;
+        var licenseKey;
+        if(planInfo.licenseKey){
+            licenseKey = "'" + planInfo.licenseKey + "'";
+        } else{
+            licenseKey = 'NULL';
+        }
+        var promo;
+        if(planInfo.promo){
+            promo = "'" + planInfo.promo + "'";
+        } else{
+            promo = 'NULL';
+        }
+        var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        var educatorSeatsRemaining = lConst.seats[seatsTier].educatorSeats;
+        var studentSeatsRemaining = lConst.seats[seatsTier].studentSeats;
+        var values = [];
+        values.push(userId);
+        values.push(licenseKey);
+        values.push("'" + type + "'");
+        values.push("'" + seatsTier + "'");
+        values.push("'" + date + "'");
+        values.push(1);
+        values.push(educatorSeatsRemaining);
+        values.push(studentSeatsRemaining);
+        values.push(promo);
+        var licenseId;
+        this.myds.insertToLicenseTable(values)
+            .then(function(insertId){
+                licenseId = insertId;
+                values = [];
+                values.push(userId);
+                values.push(licenseId);
+                values.push("'active'");
+
+                return this.myds.insertToLicenseMapTable(values);
+            }.bind(this))
+            .then(function(){
+                resolve(licenseId);
+            })
+            .then(null, function(err){
+                console.error("Create License Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
 function _unassignInstructorPremiumCourses(userId, licenseId, studentSeats){
     return when.promise(function(resolve, reject){
         var promiseList = [this.myds.getCoursesByInstructor(userId), this.cbds.getActiveStudentsByLicense(licenseId)];
@@ -404,6 +517,12 @@ function _multiHasLicense(userIds){
             .then(null, function(err){
                 reject(err);
             })
+    }.bind(this));
+}
+
+function _createLicenseEmailResponse(owner){
+    return when.promise(function(resolve, reject){
+        resolve();
     }.bind(this));
 }
 
