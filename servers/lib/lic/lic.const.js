@@ -50,25 +50,25 @@ module.exports = {
     },
     seats: {
         group: {
-            size: "10 seats + 1 educator user",
+            size: "group",
             studentSeats: 10,
             educatorSeats: 1,
             discount: 0
         },
         class: {
-            size: "30 seats + 1 educator user",
+            size: "class",
             studentSeats: 30,
             educatorSeats: 1,
             discount: 20
         },
         multiclass: {
-            size: "120 seats + 4 educator users",
+            size: "multiclass",
             studentSeats: 120,
             educatorSeats: 4,
             discount: 25
         },
         school: {
-            size: "500 seats + 15 educator users",
+            size: "school",
             studentSeats: 500,
             educatorSeats: 15,
             discount: 30
