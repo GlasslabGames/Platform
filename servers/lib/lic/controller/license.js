@@ -62,6 +62,12 @@ function getCurrentPlan(req, res){
             return this.myds.getInstructorsByLicense(licenseId);
         }.bind(this))
         .then(function(instructors){
+            instructors.forEach(function(instructor){
+                instructor.firstName = instructor.first_name;
+                instructor.lastName = instructor.last_name;
+                delete instructor.first_name;
+                delete instructor.last_name;
+            });
             output['educatorList'] = instructors;
             return this.myds.getUserById(licenseOwnerId);
         }.bind(this))
