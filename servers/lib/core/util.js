@@ -187,23 +187,24 @@ function reshape(array, n){
 }
 
 module.exports = {
-    Request: require('./util.request.js'),
-    Stats:   require('./util.stats.js'),
-    Email:   require('./util.email.js'),
-    S3Util:   require('./util.s3.js'),
-    ConvertToString:  convertToString,
-    PromiseContinue:  promiseContinue,
-    PromiseError:     promiseError,
-    GetExpressLogger: getExpressLogger,
-    GetTimeStamp:     getTimeStamp,
-    CheckTimeStamp:   checkTimeStamp,
-    BuildURI:         buildUri,
-    CreateUUID:       createUUID,
+    Request:            require('./util.request.js'),
+    Stats:              require('./util.stats.js'),
+    Email:              require('./util.email.js'),
+    S3Util:             require('./util.s3.js'),
+    StripeUtil:         require('./util.stripe.js'),
+    ConvertToString:    convertToString,
+    PromiseContinue:    promiseContinue,
+    PromiseError:       promiseError,
+    GetExpressLogger:   getExpressLogger,
+    GetTimeStamp:       getTimeStamp,
+    CheckTimeStamp:     checkTimeStamp,
+    BuildURI:           buildUri,
+    CreateUUID:         createUUID,
     String: {
-        capitalize: capitalize
+        capitalize:     capitalize
     },
-    Reshape: reshape,
-    WriteToCSV: writeToCSV
+    Reshape:            reshape,
+    WriteToCSV:         writeToCSV
 };
 
 // writes data to a chosen file

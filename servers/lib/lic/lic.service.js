@@ -12,7 +12,7 @@ var Util, lConst;
 
 module.exports = LicService;
 
-function LicService(options){
+function LicService(options, serviceManager) {
     try{
         var LicStore, Errors;
 
@@ -23,14 +23,17 @@ function LicService(options){
         );
 
         // Glasslab libs
-        LicStore   = require('./lic.js').Datastore.MySQL;
-        Util       = require('../core/util.js');
-        lConst     = require('./lic.js').Const;
-        Errors     = require('../errors.js');
+        LicStore     = require('./lic.js').Datastore.MySQL;
+        LicDataStore = require('./lic.js').Datastore.Couchbase;
+        Util         = require('../core/util.js');
+        lConst       = require('./lic.js').Const;
+        Errors       = require('../errors.js');
 
         this.requestUtil = new Util.Request(this.options, Errors);
-        this.myds        = new LicStore(this.options.lms.datastore.mysql);
+        this.myds        = new LicStore(this.options.lic.datastore.mysql);
+        this.cbds        = new LicDataStore(this.options.lic.datastore.couchbase);
         this.stats       = new Util.Stats(this.options, "LMS");
+        this.serviceManager = serviceManager;
 
     } catch(err){
         console.trace("LicService: Error -", err);
@@ -53,7 +56,17 @@ return when.promise(function(resolve, reject) {
                 console.trace("LicService: MySQL Error -", err);
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
-
+        .then(function(){
+            return this.cbds.connect();
+        }.bind(this))
+            .then(function(){
+                console.log("LicService: Couchbase DS Connected");
+                this.stats.increment("info", "Couchbase.Connect");
+            }.bind(this),
+            function(err){
+                console.trace("LicService: Couchbase Error -", err);
+                this.stats.increment("error", "Couchbase.Connect");
+            }.bind(this))
         .then(resolve, reject);
 // ------------------------------------------------
 }.bind(this));

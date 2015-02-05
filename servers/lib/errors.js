@@ -103,5 +103,11 @@ module.exports = {
     "research.gameId.missing":              "Missing Game Id",
     "research.startDate.missing":           "Missing startDate or startEpoc",
     "research.arguments.missing":           "Missing Arguments",
-    "research.endDate.missing":             "Missing endDate"
+    "research.endDate.missing":             "Missing endDate",
+    // lic
+    "lic.access.invalid":                   "Invalid Access",
+    "lic.records.invalid":                  "User tied to to more than one license",
+    "lic.access.absent":                    "Only instructors who are part of an active license should have access",
+    "lic.records.inconsistent":             "The license records from the client and server do not match.  Update client records",
+    "lic.educators.full":                   "There are not enough seats in the license for this list of educators"
 };

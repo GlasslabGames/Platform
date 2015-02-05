@@ -267,11 +267,12 @@ return when.promise(function(resolve, reject) {
     }
 
     //console.log("Q:", Q);
+    var user;
     this.ds.query(Q)
         .then( function(data){
             // convert to usable userdata
             if(data.length > 0) {
-                var user = [];
+                user = [];
                 for(var i = 0; i < data.length; i++) {
                     user[i] = data[i];
                     user[i].collectTelemetry = user[i].collectTelemetry ? true : false;
@@ -289,12 +290,27 @@ return when.promise(function(resolve, reject) {
                 // if input not array then return a single user
                 if(!_.isArray(value)) {
                     user = user[0];
+                    if(user["verifyCodeStatus"] === "invited"){
+                        return "tempUser";
+                    } else if(user.role === "instructor"){
+                        return this.getLicenseInfoByInstructor(user.id);
+                    }
                 }
-                resolve(user);
+                return [];
             } else {
                 reject({"error": "user not found"});
             }
-        }.bind(this), reject);
+        }.bind(this))
+        .then(function(license){
+            if(typeof license === "string"){
+                reject({"error": "user not found"});
+            }
+            if(!Array.isArray(license)){
+                user.licenseId = license["id"];
+                user.licenseOwnerId = license["user_id"];
+            }
+            resolve(user);
+        });
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -323,15 +339,18 @@ return when.promise(function(resolve, reject) {
     // if email blank, then return ok
     if(!email || !email.length ) resolve();
 
-    var Q = "SELECT id FROM GL_USER WHERE LOWER(email)=LOWER("+this.ds.escape(email)+")";
+    var Q = "SELECT id,verify_code_status FROM GL_USER WHERE LOWER(email)=LOWER("+this.ds.escape(email)+")";
     this.ds.query(Q)
         .then(
         function(data){
-            if(data.length != 0) {
-                reject({"key": "user.notUnique.email", statusCode: 400});
-            } else {
-                resolve();
+            if(data.length !== 0) {
+                if(data[0]["verify_code_status"] === "invited"){
+                    resolve(data[0].id);
+                } else{
+                    reject({"key": "user.notUnique.email", statusCode: 400});
+                }
             }
+            resolve();
         }.bind(this),
         function(err) {
             reject({"error": "failure", "exception": err, statusCode: 500});
@@ -346,14 +365,16 @@ Auth_MySQL.prototype.checkUserNameUnique = function(username, noErrorOnFound){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    var Q = "SELECT id FROM GL_USER WHERE LOWER(username)=LOWER("+this.ds.escape(username)+")";
+    var Q = "SELECT id,verify_code_status FROM GL_USER WHERE LOWER(username)=LOWER("+this.ds.escape(username)+")";
     this.ds.query(Q)
         .then(
         function(data){
-            if(data.length != 0) {
+            if(data.length !== 0) {
                 if(noErrorOnFound) {
                     resolve(data[0].id);
-                } else {
+                } else if(data[0]["verify_code_status"] === "invited") {
+                    resolve(data[0].id);
+                } else{
                     reject({key:"user.notUnique.screenName"});
                 }
             } else {
@@ -427,6 +448,47 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Auth_MySQL.prototype.updateTempUser = function(userData, existingId){
+    return when.promise(function(resolve, reject){
+        var updateFields = [
+            'version = 0',
+            'date_created = NOW()',
+            'enabled = 1',
+            'first_name = ' + this.ds.escape(userData.firstName),
+            'last_name = ' + this.ds.escape(userData.lastName),
+            'institution_id = ' + (userData.institutionId ? this.ds.escape(userData.institutionId) : "NULL"),
+            'last_updated = NOW()',
+            'password = ' + this.ds.escape(userData.password),
+            'reset_code = NULL',
+            'reset_code_expiration = NULL',
+            'reset_code_status = NULL',
+            'system_role = ' + this.ds.escape(userData.role),
+            'user_type = NULL',
+            'collect_telemetry = 0',
+            'login_type = ' + this.ds.escape(userData.loginType),
+            'ssoUsername = ' + this.ds.escape(userData.ssoUsername || ""),
+            'ssoData = ' + this.ds.escape(userData.ssoData || ""),
+            'verify_code = NULL',
+            'verify_code_expiration = NULL',
+            'verify_code_status = NULL',
+            'state = ' + this.ds.escape(userData.state),
+            'school = ' + this.ds.escape(userData.school),
+            'ftue_checklist = 0'
+        ];
+
+        var updateFieldsString = updateFields.join(", ");
+
+        var Q = "UPDATE GL_USER SET " + updateFieldsString + " WHERE id = " + existingId + ";";
+        this.ds.query(Q)
+            .then(function(data){
+                resolve(data.insertId);
+            }.bind(this))
+            .then(null, function(err) {
+                console.error("Update Temp User Error -",err);
+                reject({"error": "failure", "exception": err}, 500);
+            }.bind(this));
+    }.bind(this));
+};
 
 Auth_MySQL.prototype.updateUserDBData = function(userData){
 // add promise wrapper
@@ -528,6 +590,32 @@ Auth_MySQL.prototype.getUserEmail = function(userId){
             })
             .then(function(err){
                 reject(err);
+            });
+    }.bind(this));
+};
+
+Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lic.id,lic.user_id FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id FROM GL_LICENSE_MAP\n" +
+            "WHERE status in ('active','pending') and user_id = " + userId+ ") as lm\n" +
+            "ON lic.id = lm.license_id;";
+
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length > 1){
+                    reject({
+                        key: "lic.records.invalid",
+                        code: 500
+                    });
+                    return;
+                } else if(results.length === 0){
+                    resolve([]);
+                }
+                resolve(results[0]);
+            })
+            .then(null, function(err){
+               reject(err);
             });
     }.bind(this));
 };
