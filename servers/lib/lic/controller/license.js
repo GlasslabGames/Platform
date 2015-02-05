@@ -145,7 +145,7 @@ function getStudentsInLicense(req, res){
 }
 
 function subscribeToLicense(req, res){
-    if(!(req && req.user && req.user.id)){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
         return;
     }
@@ -157,7 +157,6 @@ function subscribeToLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"}, 500);
         return;
     }
-    if(req.user.role !== "instructor")
     var userId = req.user.id;
     //var stripeInfo = req.body.stripeInfo;
     //var planInfo = req.body.planInfo;
@@ -407,21 +406,31 @@ function _createLicense(userId, planInfo){
     return when.promise(function(resolve, reject){
         var seatsTier = planInfo.seats;
         var type = planInfo.type;
-        var licenseKey = planInfo.licenseKey || null;
-        var promo = planInfo.promo || null;
+        var licenseKey;
+        if(planInfo.licenseKey){
+            licenseKey = "'" + planInfo.licenseKey + "'";
+        } else{
+            licenseKey = 'NULL';
+        }
+        var promo;
+        if(planInfo.promo){
+            promo = "'" + planInfo.promo + "'";
+        } else{
+            promo = 'NULL';
+        }
         var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
         var educatorSeatsRemaining = lConst.seats[seatsTier].educatorSeats;
         var studentSeatsRemaining = lConst.seats[seatsTier].studentSeats;
         var values = [];
         values.push(userId);
-        values.push("'" +licenseKey + "'");
+        values.push(licenseKey);
         values.push("'" + type + "'");
         values.push("'" + seatsTier + "'");
         values.push("'" + date + "'");
         values.push(1);
         values.push(educatorSeatsRemaining);
         values.push(studentSeatsRemaining);
-        values.push("'" + promo + "'");
+        values.push(promo);
         var licenseId;
         this.myds.insertToLicenseTable(values)
             .then(function(insertId){
