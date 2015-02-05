@@ -16,6 +16,7 @@ module.exports = {
     },
     plan: {
         chromebook: {
+            strip_planId: 'test_chromebook',
             name: 'Chromebook/Web',
             description: 'Contains games playable on chromebooks',
             pricePerSeat: 2,
@@ -24,6 +25,7 @@ module.exports = {
             downloadableGames: []
         },
         ipad: {
+            strip_planId: 'test_ipad',
             name: 'Ipad',
             description: 'Contains games playable on ipads',
             pricePerSeat: 2,
@@ -32,6 +34,7 @@ module.exports = {
             downloadableGames: []
         },
         pcmac: {
+            strip_planId: 'test_pcmac',
             name: 'PC/MAC',
             description: 'Contains games playable on PCs/Macs.  Also contains all chromebook games',
             pricePerSeat: 3,
@@ -40,6 +43,7 @@ module.exports = {
             downloadableGames: ['SC']
         },
         allgamesmulticlass: {
+            strip_planId: 'test_all',
             name: 'All Games',
             description: 'Contains all Glass Lab games',
             pricePerSeat: 5,
@@ -73,5 +77,11 @@ module.exports = {
             educatorSeats: 15,
             discount: 30
         }
+    },
+    stripeTestCard: {
+        number: 4242424242424242,
+        exp_month: 1,
+        exp_year: 2020,
+        cvc: 123
     }
 };

@@ -400,7 +400,43 @@ function removeTeacherFromLicense(req, res){
 
 function _carryOutStripeTransaction(stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
-        resolve();
+        //resolve();
+
+        var stripePlan = lConst.plan[ planInfo.plan ].stripe_planId;
+        var stripeQuantity = lConst.plan[ planInfo.plan ].pricePerSeat * lConst.seat[ planInfo.seat ].studentSeats;
+
+        Util.StripeUtil.createCustomer({
+            card: lConst.stripeTestCard,
+            email: "---",
+            description: "---",
+            plan: stripePlan,
+            quantity: stripeQuantity
+        })
+            .then(function(customer) {
+                /*
+                id, --> customerId
+                subscriptions: {
+                    data: [
+                        {
+                            id, --> subscriptionId
+                            current_period_end,
+                            current_period_start,
+                            customer,
+                            status, == "active"
+                            trial_end,
+                            trial_start,
+                            plan: {
+                                amount,
+                                id,
+                                interval,
+                                interval_count,
+                                name
+                            }
+                        }
+                    ]
+                 }
+                 */
+            }.bind(this));
     });
 }
 
