@@ -176,7 +176,8 @@ WebStore_MySQL.prototype.getLicensedGameIdsFromUserId = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-
+    resolve( {} );
+    return;
     var Q = "SELECT DISTINCT(game_id) as gameId \
              FROM GL_LICENSE l  \
              JOIN GL_LICENSE_MAP lm on lm.license_id=l.id \
