@@ -18,7 +18,7 @@ module.exports = {
         chromeBook: {
             strip_planId: 'test_chromebook',
             name: 'Chromebook/Web',
-            description: 'All Games in this package are optimized to work on iPads.',
+            description: 'All Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
             browserGames: ['GOG','AW-1'],
             iPadGames: [],
@@ -27,7 +27,7 @@ module.exports = {
         ipad: {
             strip_planId: 'test_ipad',
             name: 'iPad',
-            description: 'Games in this package run on PC or Mac computers.',
+            description: 'All Games in this package are optimized to work on iPads.',
             pricePerSeat: 3.5,
             browserGames: [],
             iPadGames: ['AA-1','SLFR','WT','PVZ'],
@@ -36,7 +36,7 @@ module.exports = {
         pcmac: {
             strip_planId: 'test_pcmac',
             name: 'PC/MAC',
-            description: 'All Games in this package are optimized to work on Chromebooks.',
+            description: 'Games in this package run on PC or Mac computers.',
             pricePerSeat: 2.5,
             browserGames: ['GOG','AW-1'],
             iPadGames: [],
