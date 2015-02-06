@@ -39,17 +39,7 @@ Lic_MySQL.prototype.connect = function(){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    this.updateLicenseTable()
-        .then(function(updated){
-            if(updated) {
-                console.log("Lic MySQL: Updated Course Table!");
-                console.trace("change this!!!!!!!!!!!!!");
-            }
-            resolve();
-        }.bind(this),
-        function(err){
-            reject(err);
-        }.bind(this));
+    resolve();
 
 // ------------------------------------------------
 }.bind(this));
