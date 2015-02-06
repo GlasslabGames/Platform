@@ -167,21 +167,31 @@ function subscribeToLicense(req, res){
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
 
-    _carryOutStripeTransaction.call(this, stripeInfo, planInfo)
-        .then(function(){
-            return _createLicense.call(this, userId, planInfo)
+    _carryOutStripeTransaction.call(this, req, stripeInfo, planInfo)
+        .then(function(stripeData){
+            return _createLicenseSQL.call(this, userId, planInfo, stripeData);
         }.bind(this))
         .then(function(licenseId){
+            if(typeof licenseId === "string"){
+                return licenseId;
+            }
             req.user.licenseId = licenseId;
             req.user.licenseOwnerId = userId;
             return this.cbds.createLicenseStudentObject(licenseId);
         }.bind(this))
-        .then(function(){
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
             // get users email address and build below method
             var ownerEmail;
             return _createLicenseEmailResponse.call(this, ownerEmail);
         }.bind(this))
-        .then(function(){
+        .then(function(status){
+            if(status === "duplicate customer account"){
+                this.requestUtil.errorResponse(res,{key:lic.records.invalid},500);
+                return;
+            }
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -398,21 +408,34 @@ function removeTeacherFromLicense(req, res){
         }.bind(this));
 }
 
-function _carryOutStripeTransaction(stripeInfo, planInfo){
+function _carryOutStripeTransaction(req, stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
-        //resolve();
-
-        var stripePlan = lConst.plan[ planInfo.plan ].stripe_planId;
-        var stripeQuantity = lConst.plan[ planInfo.plan ].pricePerSeat * lConst.seat[ planInfo.seat ].studentSeats;
-
-        Util.StripeUtil.createCustomer({
-            card: lConst.stripeTestCard,
-            email: "---",
-            description: "---",
+        stripeInfo.card = lConst.stripeTestCard;
+        var card = stripeInfo.card;
+        var plan = planInfo.type.toLowerCase();
+        var seats = planInfo.seats.toLowerCase();
+        var stripePlan = lConst.plan[plan]["strip_planId"];
+        var stripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
+        var email = req.user.email;
+        var name = req.user.firstName + " " + req.user.lastName;
+        var description = "Customer for " + name;
+        this.serviceManager.stripe.createCustomer({
+            card: card,
+            email: email,
+            description: description,
             plan: stripePlan,
             quantity: stripeQuantity
         })
             .then(function(customer) {
+                var output = {};
+                output.customerId = customer.id;
+                var subscription = customer.subscriptions.data[0];
+                if(!customer.delinquent && subscription && subscription.status === "active"){
+                    output.subscriptionId = subscription.id;
+                    var msDate = subscription["current_period_end"] * 1000;
+                    output.expirationDate = new Date(msDate).toISOString().slice(0, 19).replace('T', ' ');
+                }
+                resolve(output);
                 /*
                 id, --> customerId
                 subscriptions: {
@@ -436,14 +459,18 @@ function _carryOutStripeTransaction(stripeInfo, planInfo){
                     ]
                  }
                  */
-            }.bind(this));
-    });
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Carry Out Stripe Transaction Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
-function _createLicense(userId, planInfo){
+function _createLicenseSQL(userId, planInfo, stripeData){
     return when.promise(function(resolve, reject){
         var seatsTier = planInfo.seats;
-        var type = planInfo.type;
+        var type = "'" + planInfo.type + "'";
         var licenseKey;
         if(planInfo.licenseKey){
             licenseKey = "'" + planInfo.licenseKey + "'";
@@ -456,31 +483,49 @@ function _createLicense(userId, planInfo){
         } else{
             promo = 'NULL';
         }
-        var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        var expirationDate = "'" + stripeData.expirationDate + "'";
         var educatorSeatsRemaining = lConst.seats[seatsTier].educatorSeats;
         var studentSeatsRemaining = lConst.seats[seatsTier].studentSeats;
+        seatsTier = "'" + seatsTier + "'";
+        var subscriptionId = "'" + stripeData.subscriptionId + "'";
         var values = [];
         values.push(userId);
         values.push(licenseKey);
-        values.push("'" + type + "'");
-        values.push("'" + seatsTier + "'");
-        values.push("'" + date + "'");
+        values.push(type);
+        values.push(seatsTier);
+        values.push(expirationDate);
         values.push(1);
         values.push(educatorSeatsRemaining);
         values.push(studentSeatsRemaining);
         values.push(promo);
+        values.push(subscriptionId);
         var licenseId;
-        this.myds.insertToLicenseTable(values)
-            .then(function(insertId){
-                licenseId = insertId;
+        var promiseList = [];
+        promiseList.push(this.myds.insertToLicenseTable(values));
+        promiseList.push(this.myds.getCustomerIdByUserId(userId));
+        when.all(promiseList)
+            .then(function(results){
+                licenseId = results[0];
                 values = [];
                 values.push(userId);
                 values.push(licenseId);
                 values.push("'active'");
+                var nextPromiseList = [];
 
-                return this.myds.insertToLicenseMapTable(values);
+                var customerId = results[1];
+                if(!customerId){
+                    nextPromiseList.push(this.myds.setCustomerIdByUserId(userId, stripeData.customerId));
+                } else if(customerId !== stripeData.customerId){
+                    return "duplicate customer account";
+                }
+                nextPromiseList.push(this.myds.insertToLicenseMapTable(values));
+                return when.all(nextPromiseList);
             }.bind(this))
-            .then(function(){
+            .then(function(state){
+                if(typeof state === "string"){
+                    resolve(state);
+                    return;
+                }
                 resolve(licenseId);
             })
             .then(null, function(err){
