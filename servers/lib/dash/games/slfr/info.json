@@ -679,9 +679,8 @@
             }
         },
         "social": {
-            "facebook": "http://facebook.com/",
-            "twitter": "http://twitter.com/",
-            "google": "https://plus.google.com/"
+            "facebook": "https://www.facebook.com/Ululab",
+            "twitter": "https://twitter.com/Ululab"
         }
     }
 }
