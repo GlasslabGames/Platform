@@ -18,34 +18,34 @@ module.exports = {
         chromeBook: {
             strip_planId: 'test_chromebook',
             name: 'Chromebook/Web',
-            description: 'Contains games playable on chromebooks',
-            pricePerSeat: 2,
+            description: 'All Games in this package are optimized to work on iPads.',
+            pricePerSeat: 2.5,
             browserGames: ['GOG','AW-1'],
             iPadGames: [],
             downloadableGames: []
         },
-        iPad: {
-            strip_planId: 'test_iad',
+        ipad: {
+            strip_planId: 'test_ipad',
             name: 'iPad',
-            description: 'Contains games playable on ipads',
-            pricePerSeat: 2,
+            description: 'Games in this package run on PC or Mac computers.',
+            pricePerSeat: 3.5,
             browserGames: [],
             iPadGames: ['AA-1','SLFR','WT','PVZ'],
             downloadableGames: []
         },
-        pcMac: {
+        pcmac: {
             strip_planId: 'test_pcmac',
             name: 'PC/MAC',
-            description: 'Contains games playable on PCs/Macs.  Also contains all chromebook games',
-            pricePerSeat: 3,
+            description: 'All Games in this package are optimized to work on Chromebooks.',
+            pricePerSeat: 2.5,
             browserGames: ['GOG','AW-1'],
-            ipadGames: [],
+            iPadGames: [],
             downloadableGames: ['SC']
         },
         allGames: {
             strip_planId: 'test_all',
             name: 'All Games',
-            description: 'Contains all Glass Lab games',
+            description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
             browserGames: ['GOG','AW-1'],
             iPadGames: ['AA-1','SLFR','WT','PVZ'],
@@ -54,25 +54,25 @@ module.exports = {
     },
     seats: {
         group: {
-            size: "group",
+            size: "Group",
             studentSeats: 10,
             educatorSeats: 1,
             discount: 0
         },
         class: {
-            size: "class",
+            size: "Class",
             studentSeats: 30,
             educatorSeats: 1,
             discount: 20
         },
         multiclass: {
-            size: "multiclass",
+            size: "Multi Class",
             studentSeats: 120,
             educatorSeats: 4,
             discount: 25
         },
         school: {
-            size: "school",
+            size: "School",
             studentSeats: 500,
             educatorSeats: 15,
             discount: 30
