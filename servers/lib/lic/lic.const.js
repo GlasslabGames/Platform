@@ -15,7 +15,7 @@ module.exports = {
         licenseKey: "lic"
     },
     plan: {
-        chromeBook: {
+        chromebook: {
             strip_planId: 'test_chromebook',
             name: 'Chromebook/Web',
             description: 'All Games in this package are optimized to work on Chromebooks.',
@@ -42,7 +42,7 @@ module.exports = {
             iPadGames: [],
             downloadableGames: ['SC']
         },
-        allGames: {
+        allgames: {
             strip_planId: 'test_all',
             name: 'All Games',
             description: 'This package includes all games available on this site.',

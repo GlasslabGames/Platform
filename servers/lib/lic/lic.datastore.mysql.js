@@ -61,7 +61,7 @@ Lic_MySQL.prototype.insertToLicenseTable = function(values){
         var valuesString = values.join(",");
         var Q = "INSERT INTO GL_LICENSE\n" +
             "(user_id,license_key,package_type,package_size_tier,expiration_date," +
-            "active,educator_seats_remaining,student_seats_remaining,promo)\n" +
+            "active,educator_seats_remaining,student_seats_remaining,promo,subscription_id)\n" +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -99,6 +99,34 @@ Lic_MySQL.prototype.getLicenseById = function(licenseId){
             })
             .then(null, function(err){
                 console.error("Get License By Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getCustomerIdByUserId = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT customer_id as customerId FROM GL_USER WHERE id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0].customerId);
+            })
+            .then(null, function(err){
+                console.error("Get Customer Id By User Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.setCustomerIdByUserId = function(userId, customerId){
+    return when.promise(function(resolve, reject){
+        var Q = "UPDATE GL_USER SET customer_id = '" + customerId + "' WHERE id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Set Customer Id By User Id Error -",err);
                 reject(err);
             });
     }.bind(this));
