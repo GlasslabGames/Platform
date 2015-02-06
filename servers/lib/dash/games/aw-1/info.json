@@ -55,6 +55,7 @@
             "page": {
                 "title": "Argument Wars",
                 "embed": "//cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5-Staging/Main.swf",
+                "format": "swf",
                 "size": {
                     "width": 940,
                     "height": 640

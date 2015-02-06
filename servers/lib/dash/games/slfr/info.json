@@ -58,6 +58,7 @@
             "page": {
                 "title": "Slice Fractions",
                 "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/SLFR/game/3/SliceFractionsSchoolEdition.swf",
+                "format": "swf",
                 "size": {
                     "width": 800,
                     "height": 600
@@ -475,12 +476,17 @@
                                         "description": "Slice shapes into equal shares"
                                     }
                                 ]
-                            },
+                            }
+                        ]
+                    },
+                    {
+                      "category": "Fractions",
+                        "groups": [
                             {
                                 "name": "Denominator",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
                                         "description": "Use the denominator"
                                     }
@@ -490,7 +496,7 @@
                                 "name": "Numerator",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
                                         "description": "Use the numerator"
                                     }
@@ -500,7 +506,7 @@
                                 "name": "Pie charts",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
                                         "description": "Solving fraction values based on the information at hand"
                                     }
@@ -510,7 +516,7 @@
                                 "name": "Question marks",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
                                         "description": "Use pie charts to represent fraction values"
                                     }
@@ -520,7 +526,7 @@
                                 "name": "Size comparison",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Know that one fraction is X times bigger than 1"
                                     }
@@ -530,7 +536,7 @@
                                 "name": "Equivalent Fractions (A)",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Understand equivalent fractions"
                                     }
@@ -540,7 +546,7 @@
                                 "name": "Equivalent Fractions (B)",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Master equivalent fractions"
                                     }
@@ -550,7 +556,7 @@
                                 "name": "Equivalent fractions (C)",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Find new ways to use equivalent fractions"
                                     }
@@ -560,7 +566,7 @@
                                 "name": "Fractions ordering",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Compare fractions successfully"
                                     }
@@ -570,7 +576,7 @@
                                 "name": "Size comparison",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.2.NF.A.3",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Know that one fraction is X times bigger than 1"
                                     }
@@ -592,7 +598,7 @@
             },
             "lessonPlans": {
                 "order": 3,
-                "enabled": false,
+                "enabled": true,
                 "authRequired": true,
                 "id": "lessonPlans",
                 "title": "Lesson Plans & Videos",
@@ -601,8 +607,8 @@
                         "category": "Lesson Plans",
                         "list": [
                             {
-                                "name": "",
-                                "link": ""
+                                "name": "Teacher's Guide",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SLFR/brochures/Teacher+Guide+-+Slice+Fractions.pdf"
                             }
                         ]
                     },
@@ -673,9 +679,8 @@
             }
         },
         "social": {
-            "facebook": "http://facebook.com/",
-            "twitter": "http://twitter.com/",
-            "google": "https://plus.google.com/"
+            "facebook": "https://www.facebook.com/Ululab",
+            "twitter": "https://twitter.com/Ululab"
         }
     }
 }

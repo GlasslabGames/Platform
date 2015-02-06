@@ -61,7 +61,8 @@ Lic_MySQL.prototype.updateLicenseTable = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-
+    resolve( {} );
+    return;
     // IF NOT EXISTS
     var Q = "CREATE TABLE GL_LICENSE_MAP (" +
         "`id` BIGINT(20) NULL AUTO_INCREMENT," +

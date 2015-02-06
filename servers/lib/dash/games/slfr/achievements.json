@@ -28,16 +28,37 @@
                 },
                 {
                     "id": "d",
-                    "title": "CCSS Math 3.NF.A.3",
+                    "title": "CCSS Math 3.NF.A.3b",
                     "name": "",
-                    "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3 and can compare different fractions by reasoning about their size.",
+                    "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3. Explain why the fractions are equivalent, e.g., by using a visual fraction model.",
                     "info": ""
                 },
                 {
                     "id": "e",
-                    "title": "CCSS Math 4.NF.B.3",
+                    "title": "CCSS Math 4.NF.B.3a",
                     "name": "",
                     "description": "Understand subtraction of fractions as separating parts referring to the same whole.",
+                    "info": ""
+                },
+                {
+                    "id": "f",
+                    "title": "CCSS Math 2.G.A.2",
+                    "name": "",
+                    "description": "Partition a rectangle into rows and columns of same-size squares and count to find the total number of them.",
+                    "info": ""
+                },
+                {
+                    "id": "g",
+                    "title": "CCSS Math 3.NF.A.3a",
+                    "name": "",
+                    "description": "Understand two fractions as equivalent (equal) if they are the same size, or the same point on a number line.",
+                    "info": ""
+                },
+                {
+                    "id": "h",
+                    "title": "CCSS Math 3.NF.A.3d",
+                    "name": "",
+                    "description": "Compare two fractions with the same numerator or the same denominator by reasoning about their size. Recognize that comparisons are valid only when the two fractions refer to the same whole. Record the results of comparisons with the symbols >, =, or <, and justify the conclusions, e.g., by using a visual fraction model.",
                     "info": ""
                 }
             ]
@@ -52,6 +73,10 @@
                 {
                     "group": "a",
                     "subGroup": "a"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "f"
                 }
             ]
         },
@@ -85,6 +110,10 @@
                 {
                     "group": "a",
                     "subGroup": "d"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "g"
                 }
             ]
         },
@@ -95,7 +124,11 @@
             "standards": [
                 {
                     "group": "a",
-                    "subGroup": "d"
+                    "subGroup": "h"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "c"
                 }
             ]
         },
