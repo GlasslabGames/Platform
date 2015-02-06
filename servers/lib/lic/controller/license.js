@@ -75,6 +75,7 @@ function getCurrentPlan(req, res){
             var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
             output.ownerName = ownerName;
             output.teachersToReject = req.teachersToReject || [];
+            delete output["strip_planId"];
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
         .then(null, function(err){
