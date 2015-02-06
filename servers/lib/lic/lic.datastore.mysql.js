@@ -109,7 +109,7 @@ Lic_MySQL.prototype.getCustomerIdByUserId = function(userId){
         var Q = "SELECT customer_id as customerId FROM GL_USER WHERE id = " + userId + ";";
         this.ds.query(Q)
             .then(function(results){
-                resolve(results[0].customeId);
+                resolve(results[0].customerId);
             })
             .then(null, function(err){
                 console.error("Get Customer Id By User Id Error -",err);
