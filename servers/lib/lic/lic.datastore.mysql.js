@@ -325,6 +325,36 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.multiGetLicenseMap = function(licenseId, userIds){
+    return when.promise(function(resolve, reject){
+        var userIdsString = userIds.join(",");
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id in (" + userIds + ") and license_id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Multi Get License Map Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.multiUpdateLicenseMap = function(licenseId, userIds){
+    return when.promise(function(resolve, reject){
+        var userIdsString = userIds.join(',');
+        var Q = "UPDATE GL_LICENSE_MAP SET status = 'pending' WHERE user_id in(" + userIdsString + ");"
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Multi Update License Map Error -",err);
+                reject(err);
+            })
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.getUserById = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_USER WHERE id = " + userId + ";";

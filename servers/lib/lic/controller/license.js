@@ -219,6 +219,7 @@ function addTeachersToLicense(req, res){
     var hasLicenseObject;
     var createTeachers;
     var licenseSeats;
+    var teachersToApprove;
     this.myds.getLicenseById(licenseId)
         .then(function(license){
             var educatorSeatsRemaining = license[0]["educator_seats_remaining"];
@@ -259,26 +260,21 @@ function addTeachersToLicense(req, res){
             // change login procedure to reflect users in table who are not actually registered |tested and passed
             // change user registration process so that a temp user account can have info updated based on registration flow |tested and passed
             // add field such that invited teachers who are not real users do not screw up other portions of the app | verify_code_status of invited
+            var promiseList = [{},{}];
             if(teacherUserIds.length > 0){
-                return _multiHasLicense.call(this, teacherUserIds);
+                promiseList[0] = _multiHasLicense.call(this, teacherUserIds);
             }
-            return {};
-        }.bind(this))
-        .then(function(licenseObject){
-            if(typeof licenseObject === "string"){
-                return licenseObject;
+            if(createTeachers.length > 0){
+                promiseList[1] = this.myds.multiInsertTempUsersByEmail(createTeachers);
             }
-            hasLicenseObject = licenseObject;
-            if(createTeachers.length > 0) {
-                return this.myds.multiInsertTempUsersByEmail(createTeachers);
-            }
-            return {};
+            return when.all(promiseList);
         }.bind(this))
         .then(function(results){
             if(typeof results === "string"){
                 return results;
             }
-            var newUsers = results;
+            hasLicenseObject = results[0];
+            var newUsers = results[1];
             var id;
             var affectedRows = newUsers.affectedRows || 0;
             var firstInsertId = newUsers.insertId;
@@ -286,7 +282,7 @@ function addTeachersToLicense(req, res){
                 id = firstInsertId + i;
                 hasLicenseObject[id] = false;
             }
-            var teachersToApprove = [];
+            teachersToApprove = [];
             var teachersToReject = [];
             _(hasLicenseObject).forEach(function(value, key){
                 if(value === false){
@@ -298,8 +294,34 @@ function addTeachersToLicense(req, res){
             req.teachersToReject = teachersToReject;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
             if(teachersToApprove.length > 0){
-                return this.myds.multiInsertLicenseMap(licenseId, teachersToApprove);
+                return this.myds.multiGetLicenseMap(licenseId, teachersToApprove);
             }
+        }.bind(this))
+        .then(function(licenseMap){
+            if(typeof licenseMap === "string"){
+                return licenseMap;
+            }
+            var map = {};
+            licenseMap.forEach(function(teacher){
+                map[teacher.id] = true;
+            });
+            var teachersToInsert = [];
+            var teachersToUpdate = [];
+            teachersToApprove.forEach(function(teacherId){
+                if(map[teacherId]){
+                    teachersToInsert.push(teacherId);
+                } else{
+                    teachersToUpdate.push(teacherId);
+                }
+            });
+            var promiseList = [{},{}];
+            if(teachersToInsert.length > 0){
+                promiseList[0] = this.myds.multiInsertLicenseMap(licenseId, teachersToInsert);
+            }
+            if(teachersToUpdate.length > 0){
+                promiseList[1] = this.myds.multiUpdateLicenseMap(licenseId, teachersToUpdate);
+            }
+            return when.all(promiseList);
         }.bind(this))
         .then(function(status) {
             if (typeof status === "string") {
@@ -316,7 +338,7 @@ function addTeachersToLicense(req, res){
             var licenseOwnerEmail;
             var usersEmail = [];
             var nonUsersEmail = [];
-            return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmail,nonUsersEmail);
+            return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmails,nonUsersEmails, rejectedEmails);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
