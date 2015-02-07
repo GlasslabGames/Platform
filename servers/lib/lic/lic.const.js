@@ -50,6 +50,15 @@ module.exports = {
             browserGames: ['AW-1','GOG','SLFR'],
             iPadGames: ['AA-1','PVZ','WT'],
             downloadableGames: ['SC']
+        },
+        trial: {
+            strip_planId: 'test_trial',
+            name: 'Trial',
+            description: 'This trial includes all games available on this site.',
+            pricePerSeat: 1/30,
+            browserGames: ['AW-1','GOG','SLFR'],
+            iPadGames: ['AA-1','PVZ','WT'],
+            downloadableGames: ['SC']
         }
     },
     seats: {
