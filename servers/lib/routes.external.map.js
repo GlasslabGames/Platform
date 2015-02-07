@@ -439,6 +439,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/leave",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "teacherLeavesLicense"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/invite",
             service: "lic",
             controller: "license",

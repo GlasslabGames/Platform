@@ -12,6 +12,7 @@ module.exports = {
     subscribeToLicense: subscribeToLicense,
     addTeachersToLicense: addTeachersToLicense,
     removeTeacherFromLicense: removeTeacherFromLicense,
+    teacherLeavesLicense: teacherLeavesLicense,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -62,12 +63,6 @@ function getCurrentPlan(req, res){
             return this.myds.getInstructorsByLicense(licenseId);
         }.bind(this))
         .then(function(instructors){
-            instructors.forEach(function(instructor){
-                instructor.firstName = instructor.first_name;
-                instructor.lastName = instructor.last_name;
-                delete instructor.first_name;
-                delete instructor.last_name;
-            });
             output['educatorList'] = instructors;
             return this.myds.getUserById(licenseOwnerId);
         }.bind(this))
@@ -224,6 +219,7 @@ function addTeachersToLicense(req, res){
     var hasLicenseObject;
     var createTeachers;
     var licenseSeats;
+    var teachersToApprove;
     this.myds.getLicenseById(licenseId)
         .then(function(license){
             var educatorSeatsRemaining = license[0]["educator_seats_remaining"];
@@ -264,26 +260,21 @@ function addTeachersToLicense(req, res){
             // change login procedure to reflect users in table who are not actually registered |tested and passed
             // change user registration process so that a temp user account can have info updated based on registration flow |tested and passed
             // add field such that invited teachers who are not real users do not screw up other portions of the app | verify_code_status of invited
+            var promiseList = [{},{}];
             if(teacherUserIds.length > 0){
-                return _multiHasLicense.call(this, teacherUserIds);
+                promiseList[0] = _multiHasLicense.call(this, teacherUserIds);
             }
-            return {};
-        }.bind(this))
-        .then(function(licenseObject){
-            if(typeof licenseObject === "string"){
-                return licenseObject;
+            if(createTeachers.length > 0){
+                promiseList[1] = this.myds.multiInsertTempUsersByEmail(createTeachers);
             }
-            hasLicenseObject = licenseObject;
-            if(createTeachers.length > 0) {
-                return this.myds.multiInsertTempUsersByEmail(createTeachers);
-            }
-            return {};
+            return when.all(promiseList);
         }.bind(this))
         .then(function(results){
             if(typeof results === "string"){
                 return results;
             }
-            var newUsers = results;
+            hasLicenseObject = results[0];
+            var newUsers = results[1];
             var id;
             var affectedRows = newUsers.affectedRows || 0;
             var firstInsertId = newUsers.insertId;
@@ -291,7 +282,7 @@ function addTeachersToLicense(req, res){
                 id = firstInsertId + i;
                 hasLicenseObject[id] = false;
             }
-            var teachersToApprove = [];
+            teachersToApprove = [];
             var teachersToReject = [];
             _(hasLicenseObject).forEach(function(value, key){
                 if(value === false){
@@ -303,8 +294,34 @@ function addTeachersToLicense(req, res){
             req.teachersToReject = teachersToReject;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
             if(teachersToApprove.length > 0){
-                return this.myds.multiInsertLicenseMap(licenseId, teachersToApprove);
+                return this.myds.multiGetLicenseMap(licenseId, teachersToApprove);
             }
+        }.bind(this))
+        .then(function(licenseMap){
+            if(typeof licenseMap === "string"){
+                return licenseMap;
+            }
+            var map = {};
+            licenseMap.forEach(function(teacher){
+                map[teacher.id] = true;
+            });
+            var teachersToInsert = [];
+            var teachersToUpdate = [];
+            teachersToApprove.forEach(function(teacherId){
+                if(map[teacherId]){
+                    teachersToInsert.push(teacherId);
+                } else{
+                    teachersToUpdate.push(teacherId);
+                }
+            });
+            var promiseList = [{},{}];
+            if(teachersToInsert.length > 0){
+                promiseList[0] = this.myds.multiInsertLicenseMap(licenseId, teachersToInsert);
+            }
+            if(teachersToUpdate.length > 0){
+                promiseList[1] = this.myds.multiUpdateLicenseMap(licenseId, teachersToUpdate);
+            }
+            return when.all(promiseList);
         }.bind(this))
         .then(function(status) {
             if (typeof status === "string") {
@@ -321,7 +338,7 @@ function addTeachersToLicense(req, res){
             var licenseOwnerEmail;
             var usersEmail = [];
             var nonUsersEmail = [];
-            return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmail,nonUsersEmail);
+            return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmails,nonUsersEmails, rejectedEmails);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
@@ -349,59 +366,20 @@ function removeTeacherFromLicense(req, res){
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
     var teacherEmail = [req.body.teacherEmail];
-    var teacherId;
-    if(licenseOwnerId === userId){
+    if(licenseOwnerId !== userId){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
         return;
     }
-    //find out instructor's user_id,
-    var promiseList = [this.myds.getInstructorsByLicense(licenseId),this.myds.getUsersByEmail(teacherEmail),this.myds.getLicenseById(licenseId)];
-    var packageSize;
-    when.all(promiseList)
-        .then(function(results){
-            var licenseMap = results[0];
-            var state = false;
-            licenseMap.some(function(instructor){
-                if(instructor.email === teacherEmail[0]){
-                    state = true;
-                    return true;
-                }
-            });
-            if(!state){
-                return "email not in license";
-            }
-            var teacher = results[1][0];
-            teacherId = teacher.id;
-            var license = results[2][0];
-            packageSize = license["package_size_tier"];
-            var studentSeats = lConst.size[packageSize].studentSeats;
-            //find out which premium courses that instructor is a part of
-            //lock each of those premium courses (with utility method)
-            return _unassignInstructorPremiumCourses.call(this, teacherId, licenseId, studentSeats);
-        }.bind(this))
-        .then(function(state){
-            if(state === "email not in license"){
-                return state;
-            }
-            //remove instructor from premium license
-            var updateFields = ["status = NULL"];
-            return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [teacherId], updateFields);
-        }.bind(this))
-        .then(function(state){
-            if(state === "email not in license"){
-                return state;
-            }
-            // update educator count
-            var educatorSeats = lConst.size[packageSize].educatorSeats;
-            return _updateEducatorSeatsRemaining.call(this, licenseId, educatorSeats);
-        }.bind(this))
-        .then(function(state){
-            if(state === "email not in license"){
-                return state;
+
+    _removeInstructorFromLicense.call(this, licenseId, teacherEmail, licenseOwnerId)
+        .then(function(emails){
+            if(emails === "email not in license"){
+                return emails;
             }
             //email notification, need logic to define licenseOwnerEmail, and also need to write email methods and text
-            var licenseOwnerEmail;
-            return _removeInstructorEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
+            var licenseOwnerEmail = emails[0];
+            var teacherEmail = emails[1];
+            return _removeTeacherEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
         }.bind(this))
         .then(function(state){
             if(state === "email not in license"){
@@ -413,6 +391,43 @@ function removeTeacherFromLicense(req, res){
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err, 500);
             console.error("Remove Teacher From License Error -",err);
+        }.bind(this));
+}
+
+function teacherLeavesLicense(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    var licenseOwnerId = req.user.licenseOwnerId;
+    var teacherEmail = [req.user.email];
+    if(licenseOwnerId === userId){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+
+    _removeInstructorFromLicense.call(this, licenseId, teacherEmail, licenseOwnerId)
+        .then(function(emails){
+            if(emails === "email not in license"){
+                return emails;
+            }
+            //email notification, need logic to define licenseOwnerEmail, and also need to write email methods and text
+            var licenseOwnerEmail = emails[0];
+            var teacherEmail = emails[1];
+            return _teacherLeavesEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
+        }.bind(this))
+        .then(function(state){
+            if(state === "email not in license"){
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"}, 500);
+                return;
+            }
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err, 500);
+            console.error("Teacher Leaves License Error -",err);
         }.bind(this));
 }
 
@@ -541,6 +556,83 @@ function _createLicenseSQL(userId, planInfo, stripeData){
     }.bind(this));
 }
 
+function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
+    return when.promise(function(resolve, reject){
+        var promiseList = [];
+        promiseList.push(this.myds.getInstructorsByLicense(licenseId));
+        promiseList.push(this.myds.getUsersByEmail(teacherEmail));
+        promiseList.push(this.myds.getLicenseById(licenseId));
+        var packageSize;
+        var teacherId;
+        when.all(promiseList)
+            .then(function(results){
+                var licenseMap = results[0];
+                var state = false;
+                licenseMap.some(function(instructor){
+                    if(instructor.email === teacherEmail[0]){
+                        state = true;
+                        return true;
+                    }
+                });
+                if(!state){
+                    return "email not in license";
+                }
+                var teacher = results[1][0];
+                teacherId = teacher.id;
+                var license = results[2][0];
+                packageSize = license["package_size_tier"];
+                var studentSeats = lConst.seats[packageSize].studentSeats;
+                //find out which premium courses that instructor is a part of
+                //lock each of those premium courses (with utility method)
+                return _unassignInstructorPremiumCourses.call(this, teacherId, licenseId, studentSeats);
+            }.bind(this))
+            .then(function(state){
+                if(state === "email not in license"){
+                    return state;
+                }
+                //remove instructor from premium license
+                var updateFields = ["status = NULL"];
+                return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [teacherId], updateFields);
+            }.bind(this))
+            .then(function(state){
+                if(state === "email not in license"){
+                    return state;
+                }
+                // update educator count
+                var educatorSeats = lConst.seats[packageSize].educatorSeats;
+                return _updateEducatorSeatsRemaining.call(this, licenseId, educatorSeats);
+            }.bind(this))
+            .then(function(state){
+                if(state === "email not in license"){
+                    return state;
+                }
+                var ids = [licenseOwnerId,teacherId];
+                return this.myds.getUsersByIds(ids);
+            }.bind(this))
+            .then(function(users){
+                if(users === "email not in license"){
+                    resolve(users);
+                    return;
+                }
+                var licenseOwnerEmail;
+                var teacherEmail;
+                users.forEach(function(user){
+                    if(licenseOwnerId === user.id){
+                        licenseOwnerEmail = user["EMAIL"];
+                    } else{
+                        teacherEmail = user["EMAIL"];
+                    }
+                });
+                var emails = [licenseOwnerEmail,teacherEmail];
+                resolve(emails);
+            })
+            .then(null, function(err){
+                console.error("Remove Instructor From License Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
 function _unassignInstructorPremiumCourses(userId, licenseId, studentSeats){
     return when.promise(function(resolve, reject){
         var promiseList = [this.myds.getCoursesByInstructor(userId), this.cbds.getActiveStudentsByLicense(licenseId)];
@@ -621,7 +713,13 @@ function _inviteEmailsForOwnerInstructors(owner, users, nonUsers){
     }.bind(this));
 }
 
-function _removeInstructorEmailNotification(owner, users, nonUsers){
+function _removeTeacherEmailNotification(licenseOwnerEmail, teacherEmail){
+    return when.promise(function(resolve, reject){
+        resolve();
+    });
+}
+
+function _teacherLeavesEmailNotification(licenseOwnerEmail, teacherEmail){
     return when.promise(function(resolve, reject){
         resolve();
     });

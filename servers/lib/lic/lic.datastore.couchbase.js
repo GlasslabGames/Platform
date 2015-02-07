@@ -87,11 +87,15 @@ Lic_Couchbase.prototype.countActiveStudentsByLicense = function(licenseId){
             }
             var students = results.value.students;
             var count = 0;
+            var premiumClassCount;
             _(students).forEach(function(premiumCourses, student){
-                var courseList = Object.keys(premiumCourses);
-                if(courseList.length > 0){
-                    count++;
-                }
+                premiumClassCount = 0;
+                _(premiumCourses).some(function(isEnrolled, courseId){
+                    if(isEnrolled){
+                        count++;
+                        return true;
+                    }
+                });
             });
             resolve(count);
         });

@@ -39,17 +39,7 @@ Lic_MySQL.prototype.connect = function(){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    this.updateLicenseTable()
-        .then(function(updated){
-            if(updated) {
-                console.log("Lic MySQL: Updated Course Table!");
-                console.trace("change this!!!!!!!!!!!!!");
-            }
-            resolve();
-        }.bind(this),
-        function(err){
-            reject(err);
-        }.bind(this));
+    resolve();
 
 // ------------------------------------------------
 }.bind(this));
@@ -134,7 +124,7 @@ Lic_MySQL.prototype.setCustomerIdByUserId = function(userId, customerId){
 
 Lic_MySQL.prototype.countEducatorSeatsByLicense = function(licenseId, seats){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ";";
+        var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP WHERE status in ('active','pending') and license_id = " + licenseId + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]["COUNT(*)"]);
@@ -193,7 +183,7 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
 
 Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT u.first_name,u.last_name,u.email,lm.status FROM GL_USER as u\n" +
+        var Q = "SELECT u.first_name as firstName,u.last_name as lastName,u.email,lm.status FROM GL_USER as u\n" +
             "JOIN GL_LICENSE_MAP as lm\n" +
             "ON lm.user_id = u.id\n" +
             "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending');";
@@ -215,8 +205,8 @@ Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
             .then(function(results){
                 var output = [];
                 var id;
-                results.forEach(function(course){
-                    id = course.id;
+                results.forEach(function(membership){
+                    id = membership["course_id"];
                     output.push(id);
                 });
                 resolve(output);
@@ -325,6 +315,36 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.multiGetLicenseMap = function(licenseId, userIds){
+    return when.promise(function(resolve, reject){
+        var userIdsString = userIds.join(",");
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id in (" + userIds + ") and license_id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Multi Get License Map Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.multiUpdateLicenseMap = function(licenseId, userIds){
+    return when.promise(function(resolve, reject){
+        var userIdsString = userIds.join(',');
+        var Q = "UPDATE GL_LICENSE_MAP SET status = 'pending' WHERE user_id in(" + userIdsString + ");"
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Multi Update License Map Error -",err);
+                reject(err);
+            })
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.getUserById = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_USER WHERE id = " + userId + ";";
@@ -358,7 +378,7 @@ Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, us
 
 Lic_MySQL.prototype.unassignPremiumCourses = function(courses){
     return when.promise(function(resolve, reject){
-        var coursesString = coursers.join(",");
+        var coursesString = courses.join(",");
         var Q = "UPDATE GL_COURSE SET premium_games_assigned = FALSE WHERE id in (" + coursesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -451,7 +471,9 @@ Lic_MySQL.prototype.updateLicenseTable = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    return resolve();
+    resolve( {} );
+    return;
+
     // IF NOT EXISTS
     var Q = "CREATE TABLE GL_LICENSE_MAP (" +
         "`id` BIGINT(20) NULL AUTO_INCREMENT," +
