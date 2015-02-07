@@ -439,15 +439,6 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/license/leave",
-            service: "lic",
-            controller: "license",
-            method: {
-                post: "teacherLeavesLicense"
-            }
-        },
-        {
-            requireAuth: true,
             api: "/api/v2/license/invite",
             service: "lic",
             controller: "license",
@@ -464,6 +455,26 @@ module.exports = {
                 post: "removeTeacherFromLicense"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/leave",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "teacherLeavesLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/trial",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "subscribeToTrialLicense"
+            }
+        },
+
+        // old api methods, not in use
         {
             requireAuth: true,
             api: "/api/v2/license/:licenseKey/verify",

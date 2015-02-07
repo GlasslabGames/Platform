@@ -13,6 +13,7 @@ module.exports = {
     addTeachersToLicense: addTeachersToLicense,
     removeTeacherFromLicense: removeTeacherFromLicense,
     teacherLeavesLicense: teacherLeavesLicense,
+    subscribeToTrialLicense: subscribeToTrialLicense,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -163,27 +164,13 @@ function subscribeToLicense(req, res){
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
 
-    _carryOutStripeTransaction.call(this, req, userId, stripeInfo, planInfo)
-        .then(function(stripeData){
-            if(typeof stripeData === "string"){
-                return stripeData;
-            }
-            return _createLicenseSQL.call(this, userId, planInfo, stripeData);
-        }.bind(this))
-        .then(function(licenseId){
-            if(typeof licenseId === "string"){
-                return licenseId;
-            }
-            req.user.licenseId = licenseId;
-            req.user.licenseOwnerId = userId;
-            return this.cbds.createLicenseStudentObject(licenseId);
-        }.bind(this))
+    _createSubscription.call(this, req, userId, stripeInfo, planInfo)
         .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
             // get users email address and build below method
-            var ownerEmail;
+            var ownerEmail = req.user.email;
             return _createLicenseEmailResponse.call(this, ownerEmail);
         }.bind(this))
         .then(function(status){
@@ -199,6 +186,57 @@ function subscribeToLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To License Error -",err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
+function subscribeToTrialLicense(req, res){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    if(req.user.licenseId){
+        this.requestUtil.errorResponse(res, {key: "lic.create.denied"}, 500);
+        return;
+    }
+    var userId = req.user.id;
+    var stripeInfo = {};
+    var planInfo = {
+        seats: "class",
+        type: "trial"
+    };
+    this.myds.getLicenseMapByUser(userId)
+        .then(function(results){
+            if(results.length > 0){
+                return "no trial"
+            }
+            return _createSubscription.call(this, req, userId, stripeInfo, planInfo);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            // get users email address and build below method
+            var ownerEmail = req.user.email;
+            return _createTrialLicenseEmailResponse.call(this, ownerEmail);
+        }.bind(this))
+        .then(function(status){
+            if(status === "duplicate customer account"){
+                this.requestUtil.errorResponse(res,{key:"lic.records.invalid"},500);
+                return;
+            }
+            if(status === "account inactive"){
+                this.requestUtil.errorResponse(res,{key:"lic.account.inactive"},500);
+                return;
+            }
+            if(status === "no trial"){
+                this.requestUtil.errorResponse(res, { key: "lic.trial.expired"}, 500);
+                return;
+            }
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Subscribe To Trial License Error -",err);
             this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
 }
@@ -423,7 +461,7 @@ function teacherLeavesLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"}, 500);
                 return;
             }
-            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+            this.requestUtil.jsonResponse(res, { status: success }, 200);
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err, 500);
@@ -431,14 +469,46 @@ function teacherLeavesLicense(req, res){
         }.bind(this));
 }
 
-function _carryOutStripeTransaction(req, userId, stripeInfo, planInfo){
+function _createSubscription(req, userId, stripeInfo, planInfo){
+    return when.promise(function(resolve, reject){
+        var email = req.user.email;
+        var name = req.user.firstName + " " + req.user.lastName;
+        _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo)
+            .then(function(stripeData){
+                if(typeof stripeData === "string"){
+                    return stripeData;
+                }
+                return _createLicenseSQL.call(this, userId, planInfo, stripeData);
+            }.bind(this))
+            .then(function(licenseId){
+                if(typeof licenseId === "string"){
+                    return licenseId;
+                }
+                req.user.licenseId = licenseId;
+                req.user.licenseOwnerId = userId;
+                return this.cbds.createLicenseStudentObject(licenseId);
+            }.bind(this))
+            .then(function(state){
+                resolve(state);
+            })
+            .then(null, function(err){
+                console.error("Create Subscription Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
         var customerId;
         var output;
         this.myds.getCustomerIdByUserId(userId)
             .then(function(id){
                 customerId = id;
-                var params = _buildStripeParams(req, stripeInfo, planInfo, customerId);
+                var params = _buildStripeParams(email, name, stripeInfo, planInfo, customerId);
+                if(!stripeInfo.card){
+                    delete params.card;
+                }
                 if(customerId){
                     return this.serviceManager.stripe.createSubscription(customerId, params);
                 }
@@ -457,7 +527,7 @@ function _carryOutStripeTransaction(req, userId, stripeInfo, planInfo){
                     subscription = results;
                 }
                 output.customerId = customerId;
-                if(subscription && subscription.status === "active"){
+                if(subscription && (subscription.status === "active" || subscription.status === "trialing")){
                     output.subscriptionId = subscription.id;
                     var msDate = subscription["current_period_end"] * 1000;
                     output.expirationDate = new Date(msDate).toISOString().slice(0, 19).replace('T', ' ');
@@ -478,7 +548,7 @@ function _carryOutStripeTransaction(req, userId, stripeInfo, planInfo){
     }.bind(this));
 }
 
-function _buildStripeParams(req, stripeInfo, planInfo, customerId){
+function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
     stripeInfo.card = lConst.stripeTestCard;
     var card = stripeInfo.card;
     var plan = planInfo.type.toLowerCase();
@@ -491,8 +561,6 @@ function _buildStripeParams(req, stripeInfo, planInfo, customerId){
     params.quantity = stripeQuantity;
 
     if(!customerId){
-        var email = req.user.email;
-        var name = req.user.firstName + " " + req.user.lastName;
         var description = "Customer for " + name;
         params.email = email;
         params.description = description;
@@ -701,30 +769,6 @@ function _multiHasLicense(userIds){
     }.bind(this));
 }
 
-function _createLicenseEmailResponse(owner){
-    return when.promise(function(resolve, reject){
-        resolve();
-    }.bind(this));
-}
-
-function _inviteEmailsForOwnerInstructors(owner, users, nonUsers){
-    return when.promise(function(resolve, reject){
-        resolve();
-    }.bind(this));
-}
-
-function _removeTeacherEmailNotification(licenseOwnerEmail, teacherEmail){
-    return when.promise(function(resolve, reject){
-        resolve();
-    });
-}
-
-function _teacherLeavesEmailNotification(licenseOwnerEmail, teacherEmail){
-    return when.promise(function(resolve, reject){
-        resolve();
-    });
-}
-
 function _updateEducatorSeatsRemaining(licenseId, seats){
     return when.promise(function(resolve, reject){
         this.myds.countEducatorSeatsByLicense(licenseId)
@@ -761,6 +805,36 @@ function _updateStudentSeatsRemaining(licenseId, seats){
                 reject(err);
             });
     }.bind(this));
+}
+
+function _createLicenseEmailResponse(licenseOwnerEmail){
+    return when.promise(function(resolve, reject){
+        resolve();
+    }.bind(this));
+}
+
+function _createTrialLicenseEmailResponse(licenseOwnerEmail){
+    return when.promise(function(resolve, reject){
+        resolve();
+    }.bind(this));
+}
+
+function _inviteEmailsForOwnerInstructors(licenseOwnerEmail, usersEmails, nonUsersEmails, rejectedEmails){
+    return when.promise(function(resolve, reject){
+        resolve();
+    }.bind(this));
+}
+
+function _removeTeacherEmailNotification(licenseOwnerEmail, teacherEmail){
+    return when.promise(function(resolve, reject){
+        resolve();
+    });
+}
+
+function _teacherLeavesEmailNotification(licenseOwnerEmail, teacherEmail){
+    return when.promise(function(resolve, reject){
+        resolve();
+    });
 }
 
 var exampleOut = {}, exampleIn = {};
