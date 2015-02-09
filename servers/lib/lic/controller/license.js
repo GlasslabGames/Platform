@@ -23,8 +23,11 @@ module.exports = {
 function getSubscriptionPackages(req, res){
     try{
         var plans = [];
-        _(lConst.plan).forEach(function(value){
-            plans.push(value);
+        _(lConst.plan).forEach(function(value, key){
+            if(key !== 'trial'){
+                delete value['strip_planId'];
+                plans.push(value);
+            }
         });
         var seats = [];
         _(lConst.seats).forEach(function(value){
