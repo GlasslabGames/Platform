@@ -1,0 +1,190 @@
+{
+    "groups": [
+        {
+            "id": "a",
+            "description": "Common Core Standards",
+            "title": "Standards",
+            "subGroups": [
+                {
+                    "id": "a",
+                    "title": "Identify System Functions",
+                    "name": "",
+                    "description": "Describe the overall behavior of the system.",
+                    "info": ""
+                },
+                {
+                    "id": "b",
+                    "title": "Distinguish System Goals",
+                    "name": "",
+                    "description": "What is the system intentionally designed to do?",
+                    "info": ""
+                },
+                {
+                    "id": "c",
+                    "title": "Identify Behaviors",
+                    "name": "",
+                    "description": "What are the actions or roles that each component of the system displays under various conditions?",
+                    "info": ""
+                },
+                {
+                    "id": "d",
+                    "title": "Design a System",
+                    "name": "",
+                    "description": "Thinking deeply about the state of an envisioned system and how the particular components that are available might need to interconnect for that state to be realized.",
+                    "info": ""
+                },
+                {
+                    "id": "e",
+                    "title": "Identify Interconnections",
+                    "name": "",
+                    "description": "The different ways that a system’s parts, or components, interact with each other through their behaviors and change the behaviors of other components through those interactions.",
+                    "info": ""
+                },
+                {
+                    "id": "f",
+                    "title": "Perceive Dynamics",
+                    "name": "",
+                    "description": "How do the components come together to perform a function (not necessarily the same thing as a goal)?",
+                    "info": ""
+                },
+                {
+                    "id": "g",
+                    "title": "Consider the Role of System Structure",
+                    "name": "",
+                    "description": "How are the components set up in relation to one another? This gives insight into the behavior of components. A system's structure affects the behaviors of its components and the overall dynamics of a system.",
+                    "info": ""
+                },
+                {
+                    "id": "h",
+                    "title": "Limited Resources",
+                    "name": "",
+                    "description": "In any system, it is important to understand which resources are finite, ones that will run out at a certain point?",
+                    "info": ""
+                },
+                {
+                    "id": "i",
+                    "title": "Fixes That Fail",
+                    "name": "",
+                    "description": "Any kind of solution to a problem that fixes the problem temporarily but fails fix it in the long term, and might even make it worse over time.",
+                    "info": ""
+                },
+                {
+                    "id": "j",
+                    "title": "Unintended Consequences",
+                    "name": "",
+                    "description": "The unexpected result of an action taken in a system. Unintended consequences are often the result of fixes that fail or someone aiming to find a leverage point in a system but not considering long-term implications to those actions.",
+                    "info": ""
+                },
+                {
+                    "id": "k",
+                    "title": "Leverage Points",
+                    "name": "",
+                    "description": "Particular places within a system where a small shift in one thing can produce big changes in everything.",
+                    "info": ""
+                }
+            ]
+        }
+    ],
+    "achievements": [
+        {
+            "id": "SystemsBasics",
+            "title": "Systems Novice",
+            "info": "Student has shown proficiency at interconnecting the most basic pieces.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "a"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "b"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "c"
+                }
+            ]
+        },
+        {
+            "id": "SystemsDesigner",
+            "title": "Systems Designer",
+            "info": "Student has solved levels that require moderately difficult problem solving and mixing colors.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "d"
+                }
+            ]
+        },
+        {
+            "id": "Interconnector",
+            "title": "Interconnector",
+            "info": "Student has mastered basic pieces as well as splitters and blenders and used them in conjunction to design tricky systems.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "e"
+                }
+            ]
+        },
+        {
+            "id": "DynamicsDesigner",
+            "title": "Dynamics Designer",
+            "info": "Student has completed all basic levels and has a good grasp of how to leverage the abilities of all components.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "f"
+                }
+            ]
+        },
+        {
+            "id": "SystemsFixer",
+            "title": "Systems Fixer",
+            "info": "Student has shown proficiency at solving levels taht are pre-populated with incorrect solutions.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "j"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "i"
+                }
+            ]
+        },
+        {
+            "id": "LeverageMaster",
+            "title": "Leverage Master",
+            "info": "Student has shown proficiency at fixing incorrect solutions by finding the system's leverage point(s).",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "k"
+                }
+            ]
+        },
+        {
+            "id": "StructureDesigner",
+            "title": "Structure Master",
+            "info": "Student has designed systems that negotiate 3D space efficiently.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "g"
+                }
+            ]
+        },
+        {
+            "id": "ResourceManager",
+            "title": "Resource Manager",
+            "info": "Student has solved a considerable amount of the game's limited pieces levels.",
+            "standards": [
+                {
+                    "group": "a",
+                    "subGroup": "h"
+                }
+            ]
+        }
+    ]
+}
