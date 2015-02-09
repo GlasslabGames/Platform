@@ -35,7 +35,7 @@
         },
         "license": {
             "type": "loginType",
-            "loginType": "glasslabv2",
+            "loginType": "glasslabv2,icivics,edmodo",
             "valid": false,
             "message": {
                 "invalid": "In Development"
