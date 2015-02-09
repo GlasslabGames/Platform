@@ -7,8 +7,15 @@
             "subGroups": [
                 {
                     "id": "a",
-                    "title": "CCSS.ELA-Literacy.RI.6-8",
-                    "name": "Argumentation",
+                    "title": "CCSS.ELA-Literacy.RH.6-8.8",
+                    "name": "Argumentation RH",
+                    "description": "Distinguish among fact, opinion, and reasoned judgment in a text.",
+                    "info": ""
+                },
+                {
+                    "id": "b",
+                    "title": "CCSS.ELA-Literacy.RI.6-8.8",
+                    "name": "Argumentation RI",
                     "description": "Trace and evaluate the argument and specific claims in a text, distinguishing claims that are supported by reasons and evidence from claims that are not.",
                     "info": ""
                 }
@@ -24,6 +31,10 @@
                 {
                     "group": "a",
                     "subGroup": "a"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -35,6 +46,10 @@
                 {
                     "group": "a",
                     "subGroup": "a"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -46,6 +61,10 @@
                 {
                     "group": "a",
                     "subGroup": "a"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -57,6 +76,10 @@
                 {
                     "group": "a",
                     "subGroup": "a"
+                },
+                {
+                    "group": "a",
+                    "subGroup": "b"
                 }
             ]
         }

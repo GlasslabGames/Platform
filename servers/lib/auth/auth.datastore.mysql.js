@@ -308,6 +308,7 @@ return when.promise(function(resolve, reject) {
             if(!Array.isArray(license)){
                 user.licenseId = license["id"];
                 user.licenseOwnerId = license["user_id"];
+                user.licenseStatus = license["status"];
             }
             resolve(user);
         });
@@ -596,23 +597,34 @@ Auth_MySQL.prototype.getUserEmail = function(userId){
 
 Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT lic.id,lic.user_id FROM GL_LICENSE as lic JOIN\n" +
-            "(SELECT license_id FROM GL_LICENSE_MAP\n" +
+        var Q = "SELECT lic.id,lic.user_id,lm.status FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
             "WHERE status in ('active','pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
-
+        var licenseInfo;
         this.ds.query(Q)
             .then(function(results){
                 if(results.length > 1){
-                    reject({
-                        key: "lic.records.invalid",
-                        code: 500
-                    });
-                    return;
+                    return "lic.records.invalid";
                 } else if(results.length === 0){
-                    resolve([]);
+                    return[];
                 }
-                resolve(results[0]);
+                licenseInfo = results[0];
+                if(licenseInfo.status === "pending"){
+                    Q = "UPDATE GL_LICENSE_MAP SET status = 'active' WHERE user_id = " + userId + ";";
+                    return this.ds.query(Q);
+                }
+            }.bind(this))
+            .then(function(results){
+                if(results === "lic.records.invalid"){
+                    reject({key: "lic.records.invalid"});
+                    return;
+                }
+                if(results && results.length === 0){
+                    resolve([]);
+                    return;
+                }
+                resolve(licenseInfo);
             })
             .then(null, function(err){
                reject(err);

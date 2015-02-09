@@ -106,7 +106,7 @@ return when.promise(function(resolve, reject) {
             reject(err);
         });
 }.bind(this));
-}
+};
 
 Glasslab_Strategy.prototype._verify = function(username, password, done){
 // add promise wrapper
@@ -179,7 +179,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-}
+};
 
 Glasslab_Strategy.prototype.registerUser = function(userData){
 // add promise wrapper

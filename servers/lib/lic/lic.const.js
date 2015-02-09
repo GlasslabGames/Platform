@@ -15,12 +15,12 @@ module.exports = {
         licenseKey: "lic"
     },
     plan: {
-        chromeBook: {
+        chromebook: {
             strip_planId: 'test_chromebook',
             name: 'Chromebook/Web',
             description: 'All Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
-            browserGames: ['GOG','AW-1'],
+            browserGames: ['AW-1','GOG','SLFR'],
             iPadGames: [],
             downloadableGames: []
         },
@@ -30,7 +30,7 @@ module.exports = {
             description: 'All Games in this package are optimized to work on iPads.',
             pricePerSeat: 3.5,
             browserGames: [],
-            iPadGames: ['AA-1','SLFR','WT','PVZ'],
+            iPadGames: ['AA-1','PVZ','WT'],
             downloadableGames: []
         },
         pcmac: {
@@ -38,17 +38,26 @@ module.exports = {
             name: 'PC/MAC',
             description: 'Games in this package run on PC or Mac computers.',
             pricePerSeat: 2.5,
-            browserGames: ['GOG','AW-1'],
+            browserGames: ['AW-1','GOG','SLFR'],
             iPadGames: [],
             downloadableGames: ['SC']
         },
-        allGames: {
+        allgames: {
             strip_planId: 'test_all',
             name: 'All Games',
             description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
-            browserGames: ['GOG','AW-1'],
-            iPadGames: ['AA-1','SLFR','WT','PVZ'],
+            browserGames: ['AW-1','GOG','SLFR'],
+            iPadGames: ['AA-1','PVZ','WT'],
+            downloadableGames: ['SC']
+        },
+        trial: {
+            strip_planId: 'test_trial',
+            name: 'Trial',
+            description: 'This trial includes all games available on this site.',
+            pricePerSeat: 1/30,
+            browserGames: ['AW-1','GOG','SLFR'],
+            iPadGames: ['AA-1','PVZ','WT'],
             downloadableGames: ['SC']
         }
     },
