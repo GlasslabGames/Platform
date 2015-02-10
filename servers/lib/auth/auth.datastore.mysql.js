@@ -605,29 +605,18 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
         this.ds.query(Q)
             .then(function(results){
                 if(results.length > 1){
-                    return "lic.records.invalid";
-                } else if(results.length === 0){
-                    return[];
-                }
-                licenseInfo = results[0];
-                if(licenseInfo.status === "pending"){
-                    Q = "UPDATE GL_LICENSE_MAP SET status = 'active' WHERE user_id = " + userId + ";";
-                    return this.ds.query(Q);
-                }
-            }.bind(this))
-            .then(function(results){
-                if(results === "lic.records.invalid"){
                     reject({key: "lic.records.invalid"});
                     return;
-                }
-                if(results && results.length === 0){
-                    resolve([]);
+                } else if(results.length === 0){
+                    resolve();
                     return;
                 }
+                licenseInfo = results[0];
                 resolve(licenseInfo);
-            })
+            }.bind(this))
             .then(null, function(err){
-               reject(err);
+                console.error("Get License Info By Instructor Error -",err);
+                reject(err);
             });
     }.bind(this));
 };

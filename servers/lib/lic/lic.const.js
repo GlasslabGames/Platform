@@ -16,7 +16,7 @@ module.exports = {
     },
     plan: {
         chromebook: {
-            strip_planId: 'test_chromebook',
+            stripe_planId: 'test_chromebook',
             name: 'Chromebook/Web',
             description: 'All Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
@@ -25,7 +25,7 @@ module.exports = {
             downloadableGames: []
         },
         ipad: {
-            strip_planId: 'test_ipad',
+            stripe_planId: 'test_ipad',
             name: 'iPad',
             description: 'All Games in this package are optimized to work on iPads.',
             pricePerSeat: 3.5,
@@ -34,7 +34,7 @@ module.exports = {
             downloadableGames: []
         },
         pcmac: {
-            strip_planId: 'test_pcmac',
+            stripe_planId: 'test_pcmac',
             name: 'PC/MAC',
             description: 'Games in this package run on PC or Mac computers.',
             pricePerSeat: 2.5,
@@ -43,7 +43,7 @@ module.exports = {
             downloadableGames: ['SC']
         },
         allgames: {
-            strip_planId: 'test_all',
+            stripe_planId: 'test_all',
             name: 'All Games',
             description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
@@ -52,7 +52,7 @@ module.exports = {
             downloadableGames: ['SC']
         },
         trial: {
-            strip_planId: 'test_trial',
+            stripe_planId: 'test_trial',
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1/30,

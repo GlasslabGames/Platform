@@ -47,24 +47,24 @@ function eventsCount(req, res, next, serviceManager){
         var dash = serviceManager.get("dash").service;
 
         dash.getListOfVisibleGameIds()
-            .then(function(gameIds){
-                when.reduce(gameIds, function(eventCount, gameId) {
+            .then(function(gameIds) {
+                return when.reduce(gameIds, function (eventCount, gameId) {
                     return this.cbds.getEventCount(gameId)
-                        .then(function(count){
+                        .then(function (count) {
                             return eventCount + count;
-                        }.bind(this) );
-                }.bind(this), 0)
-                    .then(function(eventCount){
-                        if(!eventCount) {
-                            eventCount = 0;
-                        }
-                        this.requestUtil.jsonResponse(res, {eventCount: eventCount});
-                    }.bind(this) )
+                        }.bind(this));
+                }.bind(this), 0);
+            }.bind(this))
+            .then(function(eventCount){
+                if(!eventCount) {
+                    eventCount = 0;
+                }
+                this.requestUtil.jsonResponse(res, {eventCount: eventCount});
+            }.bind(this) )
                     //
-                    .then(null, function(err){
-                        this.requestUtil.errorResponse(res, err);
-                    }.bind(this) );
-
+            .then(null, function(err){
+                err = err || {};
+                this.requestUtil.errorResponse(res, err);
             }.bind(this) );
 
     } catch(err) {

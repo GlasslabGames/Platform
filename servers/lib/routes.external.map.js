@@ -439,11 +439,29 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/trial",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "subscribeToTrialLicense"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/invite",
             service: "lic",
             controller: "license",
             method: {
                 post: "addTeachersToLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/activate",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "setLicenseMapStatusToActive"
             }
         },
         {
@@ -462,15 +480,6 @@ module.exports = {
             controller: "license",
             method: {
                 post: "teacherLeavesLicense"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/license/trial",
-            service: "lic",
-            controller: "license",
-            method: {
-                post: "subscribeToTrialLicense"
             }
         },
 
