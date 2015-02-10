@@ -11,6 +11,7 @@ module.exports = {
     getStudentsInLicense: getStudentsInLicense,
     subscribeToLicense: subscribeToLicense,
     addTeachersToLicense: addTeachersToLicense,
+    setLicenseMapStatusToActive: setLicenseMapStatusToActive,
     removeTeacherFromLicense: removeTeacherFromLicense,
     teacherLeavesLicense: teacherLeavesLicense,
     subscribeToTrialLicense: subscribeToTrialLicense,
@@ -25,7 +26,7 @@ function getSubscriptionPackages(req, res){
         var plans = [];
         _(lConst.plan).forEach(function(value, key){
             if(key !== 'trial'){
-                delete value['strip_planId'];
+                delete value['stripe_planId'];
                 plans.push(value);
             }
         });
@@ -74,7 +75,7 @@ function getCurrentPlan(req, res){
             var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
             output.ownerName = ownerName;
             output.teachersToReject = req.teachersToReject || [];
-            delete output["strip_planId"];
+            delete output["stripe_planId"];
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
         .then(null, function(err){
@@ -398,6 +399,30 @@ function addTeachersToLicense(req, res){
         }.bind(this));
 }
 
+function setLicenseMapStatusToActive(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    if(req.user.licenseStatus === "active"){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userIds = [req.user.id];
+    var licenseId = req.user.licenseId;
+    var status = "status = 'active'";
+    var updateFields = [status];
+
+    this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIds,updateFields)
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "success" }, 200);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Set License Map Status to Active Error -",err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
 function removeTeacherFromLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
@@ -556,7 +581,7 @@ function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
     var card = stripeInfo.card;
     var plan = planInfo.type.toLowerCase();
     var seats = planInfo.seats.toLowerCase();
-    var stripePlan = lConst.plan[plan]["strip_planId"];
+    var stripePlan = lConst.plan[plan]["stripe_planId"];
     var stripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
     var params = {};
     params.card = card;
@@ -573,8 +598,8 @@ function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
 
 function _createLicenseSQL(userId, planInfo, stripeData){
     return when.promise(function(resolve, reject){
-        var seatsTier = planInfo.seats;
-        var type = "'" + planInfo.type + "'";
+        var seatsTier = planInfo.seats.toLowerCase();
+        var type = "'" + planInfo.type.toLowerCase() + "'";
         var licenseKey;
         if(planInfo.licenseKey){
             licenseKey = "'" + planInfo.licenseKey + "'";

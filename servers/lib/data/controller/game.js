@@ -361,13 +361,14 @@ function releases(req, res, next, serviceManager) {
     var gameId = req.params.gameId;
 
     var dash = serviceManager.get("dash").service;
+    var outType;
     // TODO: replace this with DB lookup, return promise
     dash.isValidGameId(gameId)
         .then(function(state) {
             if (!state) {
                 return when.reject({error: "invalid gameId"});
             }
-            var outType = '.ini';
+            outType = '.ini';
             if (req.params && req.params.hasOwnProperty("type")) {
                 outType = req.params.type;
             }

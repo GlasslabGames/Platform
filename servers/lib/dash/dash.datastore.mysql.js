@@ -93,21 +93,36 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 ftue_checklist as ftue\
             FROM GL_USER  \
             WHERE id="+ this.ds.escape(id);
+
+        var user;
         this.ds.query(Q)
             .then(function(results) {
                 if(results.length > 0) {
                     results = results[0];
                     results.collectTelemetry = results.collectTelemetry ? true : false;
                     results.enabled          = results.enabled ? true : false;
-                    resolve(results);
+                    user = results;
+                    if(results.role === "instructor"){
+                        return this.getLicenseInfoByInstructor(id);
+                    }
                 } else {
-                    reject({"error": "none found"}, 500);
+                    return "none";
                 }
-            }.bind(this),
-                function(err) {
+            }.bind(this))
+            .then(function(license){
+                if(license === "none"){
+                    reject({"error": "none found"}, 500);
+                    return;
+                } else if(license){
+                    //user.licenseId = license["id"];
+                    //user.licenseOwnerId = license["user_id"];
+                    user.licenseStatus = license["status"];
+                }
+                resolve(user);
+            }.bind(this))
+            .then(null, function(err) {
                     reject({"error": "failure", "exception": err}, 500);
-                }.bind(this)
-            );
+            }.bind(this));
 
 // ------------------------------------------------
     }.bind(this));
@@ -210,4 +225,30 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lic.id,lic.user_id,lm.status FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
+            "WHERE status in ('active','pending') and user_id = " + userId+ ") as lm\n" +
+            "ON lic.id = lm.license_id;";
+        var licenseInfo;
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length > 1){
+                    reject({key: "lic.records.invalid"});
+                    return;
+                } else if(results.length === 0){
+                    resolve();
+                    return;
+                }
+                licenseInfo = results[0];
+                resolve(licenseInfo);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Get License Info By Instructor Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 };
