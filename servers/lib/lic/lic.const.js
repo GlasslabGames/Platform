@@ -71,13 +71,13 @@ module.exports = {
         class: {
             size: "Class",
             studentSeats: 30,
-            educatorSeats: 1,
+            educatorSeats: 2,
             discount: 20
         },
         multiclass: {
             size: "Multi Class",
             studentSeats: 120,
-            educatorSeats: 4,
+            educatorSeats: 8,
             discount: 25
         },
         school: {
