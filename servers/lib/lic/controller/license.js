@@ -11,6 +11,7 @@ module.exports = {
     getStudentsInLicense: getStudentsInLicense,
     subscribeToLicense: subscribeToLicense,
     addTeachersToLicense: addTeachersToLicense,
+    setLicenseMapStatusToActive: setLicenseMapStatusToActive,
     removeTeacherFromLicense: removeTeacherFromLicense,
     teacherLeavesLicense: teacherLeavesLicense,
     subscribeToTrialLicense: subscribeToTrialLicense,
@@ -395,6 +396,30 @@ function addTeachersToLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Add Teachers to License Error - ",err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
+function setLicenseMapStatusToActive(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    if(req.user.licenseStatus === "active"){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        return;
+    }
+    var userIds = [req.user.id];
+    var licenseId = req.user.licenseId;
+    var status = "status = 'active'";
+    var updateFields = [status];
+
+    this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIds,updateFields)
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "success" }, 200);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Set License Map Status to Active Error -",err);
             this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
 }
