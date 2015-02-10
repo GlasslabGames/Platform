@@ -351,9 +351,9 @@ function addTeachersToLicense(req, res){
             var teachersToUpdate = [];
             teachersToApprove.forEach(function(teacherId){
                 if(map[teacherId]){
-                    teachersToInsert.push(teacherId);
-                } else{
                     teachersToUpdate.push(teacherId);
+                } else{
+                    teachersToInsert.push(teacherId);
                 }
             });
             var promiseList = [{},{}];
@@ -378,8 +378,9 @@ function addTeachersToLicense(req, res){
             // design emails language, methods, and templates
             // method currently is empty
             var licenseOwnerEmail;
-            var usersEmail = [];
-            var nonUsersEmail = [];
+            var usersEmails = [];
+            var nonUsersEmails = [];
+            var rejectedEmails = [];
             return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmails,nonUsersEmails, rejectedEmails);
         }.bind(this))
         .then(function(status){
