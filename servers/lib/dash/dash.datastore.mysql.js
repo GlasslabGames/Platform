@@ -114,8 +114,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     reject({"error": "none found"}, 500);
                     return;
                 } else if(license){
-                    //user.licenseId = license["id"];
-                    //user.licenseOwnerId = license["user_id"];
+                    user.licenseOwnerId = license["user_id"];
                     user.licenseStatus = license["status"];
                 }
                 resolve(user);

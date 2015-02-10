@@ -415,7 +415,7 @@ function setLicenseMapStatusToActive(req, res){
 
     this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIds,updateFields)
         .then(function(){
-            this.requestUtil.jsonResponse(res, { status: "success" }, 200);
+            this.requestUtil.jsonResponse(res, { status: "ok" }, 200);
         }.bind(this))
         .then(null, function(err){
             console.error("Set License Map Status to Active Error -",err);
