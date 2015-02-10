@@ -25,7 +25,7 @@ function getSubscriptionPackages(req, res){
         var plans = [];
         _(lConst.plan).forEach(function(value, key){
             if(key !== 'trial'){
-                delete value['strip_planId'];
+                delete value['stripe_planId'];
                 plans.push(value);
             }
         });
@@ -74,7 +74,7 @@ function getCurrentPlan(req, res){
             var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
             output.ownerName = ownerName;
             output.teachersToReject = req.teachersToReject || [];
-            delete output["strip_planId"];
+            delete output["stripe_planId"];
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
         .then(null, function(err){
@@ -350,9 +350,9 @@ function addTeachersToLicense(req, res){
             var teachersToUpdate = [];
             teachersToApprove.forEach(function(teacherId){
                 if(map[teacherId]){
-                    teachersToInsert.push(teacherId);
-                } else{
                     teachersToUpdate.push(teacherId);
+                } else{
+                    teachersToInsert.push(teacherId);
                 }
             });
             var promiseList = [{},{}];
@@ -377,8 +377,9 @@ function addTeachersToLicense(req, res){
             // design emails language, methods, and templates
             // method currently is empty
             var licenseOwnerEmail;
-            var usersEmail = [];
-            var nonUsersEmail = [];
+            var usersEmails = [];
+            var nonUsersEmails = [];
+            var rejectedEmails = [];
             return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmails,nonUsersEmails, rejectedEmails);
         }.bind(this))
         .then(function(status){
@@ -556,7 +557,7 @@ function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
     var card = stripeInfo.card;
     var plan = planInfo.type.toLowerCase();
     var seats = planInfo.seats.toLowerCase();
-    var stripePlan = lConst.plan[plan]["strip_planId"];
+    var stripePlan = lConst.plan[plan]["stripe_planId"];
     var stripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
     var params = {};
     params.card = card;
@@ -573,8 +574,8 @@ function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
 
 function _createLicenseSQL(userId, planInfo, stripeData){
     return when.promise(function(resolve, reject){
-        var seatsTier = planInfo.seats;
-        var type = "'" + planInfo.type + "'";
+        var seatsTier = planInfo.seats.toLowerCase();
+        var type = "'" + planInfo.type.toLowerCase() + "'";
         var licenseKey;
         if(planInfo.licenseKey){
             licenseKey = "'" + planInfo.licenseKey + "'";
