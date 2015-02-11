@@ -608,7 +608,7 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                     reject({key: "lic.records.invalid"});
                     return;
                 } else if(results.length === 0){
-                    resolve();
+                    resolve([]);
                     return;
                 }
                 licenseInfo = results[0];
