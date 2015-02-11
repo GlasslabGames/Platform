@@ -448,6 +448,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/customer",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getCustomerId"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/cancel",
             service: "lic",
             controller: "license",
