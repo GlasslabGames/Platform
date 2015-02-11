@@ -270,7 +270,7 @@ function cancelLicense(req, res){
             return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
         }.bind(this))
         .then(function(){
-            this.requestUtil.jsonResponse(res, { status: "ok"}, 200);
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
             console.error("Cancel License Error -",err);
