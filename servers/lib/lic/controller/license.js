@@ -11,6 +11,7 @@ module.exports = {
     getStudentsInLicense: getStudentsInLicense,
     subscribeToLicense: subscribeToLicense,
     subscribeToTrialLicense: subscribeToTrialLicense,
+    getCustomerId: getCustomerId,
     cancelLicense: cancelLicense,
     addTeachersToLicense: addTeachersToLicense,
     setInstructorLicenseStatusToActive: setInstructorLicenseStatusToActive,
@@ -25,10 +26,12 @@ module.exports = {
 function getSubscriptionPackages(req, res){
     try{
         var plans = [];
+        var plan;
         _(lConst.plan).forEach(function(value, key){
             if(key !== 'trial'){
-                delete value['stripe_planId'];
-                plans.push(value);
+                plan = _.clone(value);
+                delete plan["stripe_planId"];
+                plans.push(plan);
             }
         });
         var seats = [];
@@ -77,7 +80,7 @@ function getCurrentPlan(req, res){
             output.ownerName = ownerName;
             output.ownerEmail = owner['EMAIL'];
             output.teachersToReject = req.teachersToReject || [];
-            delete output["stripe_planId"];
+            delete output["packageDetails"]["stripe_planId"];
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
         .then(null, function(err){
@@ -245,6 +248,28 @@ function subscribeToTrialLicense(req, res){
             console.error("Subscribe To Trial License Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
+}
+
+function getCustomerId(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+
+    var userId = req.user.id;
+    this.myds.getUserById(userId)
+        .then(function(user){
+            var customerId = user["customer_id"];
+            this.requestUtil.jsonResponse(res, { id: customerId });
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Customer Id Error -",err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this))
 }
 
 function cancelLicense(req, res){

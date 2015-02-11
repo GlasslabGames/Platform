@@ -68,6 +68,7 @@ exampleOutput.getUserInfo = {
             }
         ]
 };
+
 WebStore_MySQL.prototype.getUserInfoById = function(id) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -117,6 +118,12 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     //user.licenseId = license["id"];
                     user.licenseOwnerId = license["user_id"];
                     user.licenseStatus = license["status"];
+                    var packageType = license["package_type"];
+                    if(packageType === "trial"){
+                        user.isTrial = true;
+                    } else{
+                        user.isTrial = false;
+                    }
                 }
                 resolve(user);
             }.bind(this))
@@ -181,7 +188,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-}
+};
 
 
 exampleOut.getLicensedGameIdsFromUserId = {
@@ -229,7 +236,7 @@ return when.promise(function(resolve, reject) {
 
 WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT lic.id,lic.user_id,lm.status FROM GL_LICENSE as lic JOIN\n" +
+        var Q = "SELECT lic.id,lic.user_id,lic.package_type,lm.status FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
             "WHERE status in ('active','pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
