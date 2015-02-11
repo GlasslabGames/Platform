@@ -448,6 +448,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/cancel",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelLicense"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/invite",
             service: "lic",
             controller: "license",
@@ -461,7 +470,7 @@ module.exports = {
             service: "lic",
             controller: "license",
             method: {
-                post: "setLicenseMapStatusToActive"
+                post: "setInstructorLicenseStatusToActive"
             }
         },
         {
