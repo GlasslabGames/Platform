@@ -115,7 +115,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     return;
                 } else if(license){
                     //user.licenseId = license["id"];
-                    //user.licenseOwnerId = license["user_id"];
+                    user.licenseOwnerId = license["user_id"];
                     user.licenseStatus = license["status"];
                 }
                 resolve(user);

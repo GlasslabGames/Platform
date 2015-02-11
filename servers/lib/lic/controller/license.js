@@ -74,6 +74,7 @@ function getCurrentPlan(req, res){
         .then(function(owner){
             var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
             output.ownerName = ownerName;
+            output.ownerEmail = owner['EMAIL'];
             output.teachersToReject = req.teachersToReject || [];
             delete output["stripe_planId"];
             this.requestUtil.jsonResponse(res, output, 200);
@@ -345,7 +346,7 @@ function addTeachersToLicense(req, res){
             }
             var map = {};
             licenseMap.forEach(function(teacher){
-                map[teacher.id] = true;
+                map[teacher.user_id] = true;
             });
             var teachersToInsert = [];
             var teachersToUpdate = [];
