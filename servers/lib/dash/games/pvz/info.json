@@ -41,7 +41,7 @@
     },
     "assessment": [
         {
-            "enabled": false,
+            "enabled": true,
             "id": "competency",
             "dataProcessScope": "gameSession",
             "engine": "netica",
