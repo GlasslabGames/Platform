@@ -26,10 +26,16 @@ module.exports = {
 function getSubscriptionPackages(req, res){
     try{
         var plans = [];
+        var plan;
         _(lConst.plan).forEach(function(value, key){
             if(key !== 'trial'){
-                delete value['stripe_planId'];
-                plans.push(value);
+                plan = {};
+                _(value).forEach(function(data, field){
+                    if(field !== 'stripe_planId'){
+                        plan[field] = data;
+                    }
+                });
+                plans.push(plan);
             }
         });
         var seats = [];
@@ -77,7 +83,7 @@ function getCurrentPlan(req, res){
             var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
             output.ownerName = ownerName;
             output.teachersToReject = req.teachersToReject || [];
-            delete output["stripe_planId"];
+            delete output["packageDetails"]["stripe_planId"];
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
         .then(null, function(err){
