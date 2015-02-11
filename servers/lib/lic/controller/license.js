@@ -29,12 +29,8 @@ function getSubscriptionPackages(req, res){
         var plan;
         _(lConst.plan).forEach(function(value, key){
             if(key !== 'trial'){
-                plan = {};
-                _(value).forEach(function(data, field){
-                    if(field !== 'stripe_planId'){
-                        plan[field] = data;
-                    }
-                });
+                plan = _.clone(value);
+                delete plan["stripe_planId"];
                 plans.push(plan);
             }
         });
