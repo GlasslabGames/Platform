@@ -416,7 +416,7 @@ function setLicenseMapStatusToActive(req, res){
 
     this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIds,updateFields)
         .then(function(){
-            this.requestUtil.jsonResponse(res, { status: "success" }, 200);
+            this.requestUtil.jsonResponse(res, { status: "ok" }, 200);
         }.bind(this))
         .then(null, function(err){
             console.error("Set License Map Status to Active Error -",err);
@@ -578,8 +578,7 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
 }
 
 function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
-    stripeInfo.card = lConst.stripeTestCard;
-    var card = stripeInfo.card;
+    var card = stripeInfo.id;
     var plan = planInfo.type.toLowerCase();
     var seats = planInfo.seats.toLowerCase();
     var stripePlan = lConst.plan[plan]["stripe_planId"];

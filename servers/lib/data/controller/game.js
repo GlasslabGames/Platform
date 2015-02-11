@@ -470,7 +470,7 @@ function updateMatches(req, res){
     }
     var gameId = req.params.gameId;
 
-    if(!(req.body && typeof req.body === "object")){
+    if(!(req.body && typeof req.body === "object" && Object.keys(req.body).length > 0)){
         this.requestUtil.errorResponse(res, {key: "data.turnData.missing"});
         return;
     }
