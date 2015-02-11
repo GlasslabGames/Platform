@@ -10,11 +10,12 @@ module.exports = {
     getCurrentPlan: getCurrentPlan,
     getStudentsInLicense: getStudentsInLicense,
     subscribeToLicense: subscribeToLicense,
+    subscribeToTrialLicense: subscribeToTrialLicense,
+    cancelLicense: cancelLicense,
     addTeachersToLicense: addTeachersToLicense,
-    setLicenseMapStatusToActive: setLicenseMapStatusToActive,
+    setInstructorLicenseStatusToActive: setInstructorLicenseStatusToActive,
     removeTeacherFromLicense: removeTeacherFromLicense,
     teacherLeavesLicense: teacherLeavesLicense,
-    subscribeToTrialLicense: subscribeToTrialLicense,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -40,13 +41,13 @@ function getSubscriptionPackages(req, res){
         };
         this.requestUtil.jsonResponse(res, output);
     } catch(err){
-        this.requestUtil.errorResponse(res, err, 500)
+        this.requestUtil.errorResponse(res, err)
     }
 }
 
 function getCurrentPlan(req, res){
     if(!(req && req.user && req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var licenseId = req.user.licenseId;
@@ -81,13 +82,13 @@ function getCurrentPlan(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error(err);
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
 
 function getStudentsInLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
@@ -148,21 +149,21 @@ function getStudentsInLicense(req, res){
             this.requestUtil.jsonResponse(res, output);
         }.bind(this))
         .then(null, function(err){
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
 
 function subscribeToLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     if(!(req.body && req.body.stripeInfo && req.body.planInfo)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     if(req.user.licenseId){
-        this.requestUtil.errorResponse(res, {key: "lic.create.denied"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
     var userId = req.user.id;
@@ -180,28 +181,28 @@ function subscribeToLicense(req, res){
         }.bind(this))
         .then(function(status){
             if(status === "duplicate customer account"){
-                this.requestUtil.errorResponse(res,{key:lic.records.invalid},500);
+                this.requestUtil.errorResponse(res,{key:lic.records.invalid});
                 return;
             }
             if(status === "account inactive"){
-                this.requestUtil.errorResponse(res,{key:lic.account.inactive},500);
+                this.requestUtil.errorResponse(res,{key:lic.account.inactive});
                 return;
             }
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To License Error -",err);
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
 
 function subscribeToTrialLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     if(req.user.licenseId){
-        this.requestUtil.errorResponse(res, {key: "lic.create.denied"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
     var userId = req.user.id;
@@ -227,28 +228,60 @@ function subscribeToTrialLicense(req, res){
         }.bind(this))
         .then(function(status){
             if(status === "duplicate customer account"){
-                this.requestUtil.errorResponse(res,{key:"lic.records.invalid"},500);
+                this.requestUtil.errorResponse(res,{key:"lic.records.invalid"});
                 return;
             }
             if(status === "account inactive"){
-                this.requestUtil.errorResponse(res,{key:"lic.account.inactive"},500);
+                this.requestUtil.errorResponse(res,{key:"lic.account.inactive"});
                 return;
             }
             if(status === "no trial"){
-                this.requestUtil.errorResponse(res, { key: "lic.trial.expired"}, 500);
+                this.requestUtil.errorResponse(res, { key: "lic.trial.expired"});
                 return;
             }
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To Trial License Error -",err);
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function cancelLicense(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    var promiseList = [];
+    promiseList.push(this.myds.getUserById(userId));
+    promiseList.push(this.myds.getLicenseById(licenseId));
+
+    when.all(promiseList)
+        .then(function(results){
+            var user = results[0];
+            var customerId = user["customer_id"];
+            var license = results[1][0];
+            var subscriptionId = license["subscription_id"];
+            return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+        }.bind(this))
+        .then(function(){
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Cancel License Error -",err);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
 
 function addTeachersToLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
@@ -256,7 +289,7 @@ function addTeachersToLicense(req, res){
     var licenseOwnerId = req.user.licenseOwnerId;
     var teacherEmails = req.body.teacherEmails;
     if(licenseOwnerId !== userId){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var hasLicenseObject;
@@ -386,28 +419,28 @@ function addTeachersToLicense(req, res){
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
-                this.requestUtil.errorResponse(res, {key:"lic.educators.full"}, 500);
+                this.requestUtil.errorResponse(res, {key:"lic.educators.full"});
                 return;
             }
             if(status === "inactive license"){
-                this.requestUtil.errorResponse(res, {key:"lic.access.invalid"}, 500);
+                this.requestUtil.errorResponse(res, {key:"lic.access.invalid"});
                 return;
             }
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
             console.error("Add Teachers to License Error - ",err);
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
 
-function setLicenseMapStatusToActive(req, res){
+function setInstructorLicenseStatusToActive(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     if(req.user.licenseStatus === "active"){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userIds = [req.user.id];
@@ -421,13 +454,13 @@ function setLicenseMapStatusToActive(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Set License Map Status to Active Error -",err);
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
 
 function removeTeacherFromLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
@@ -435,7 +468,7 @@ function removeTeacherFromLicense(req, res){
     var licenseOwnerId = req.user.licenseOwnerId;
     var teacherEmail = [req.body.teacherEmail];
     if(licenseOwnerId !== userId){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
 
@@ -451,20 +484,20 @@ function removeTeacherFromLicense(req, res){
         }.bind(this))
         .then(function(state){
             if(state === "email not in license"){
-                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"}, 500);
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
                 return;
             }
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
             console.error("Remove Teacher From License Error -",err);
         }.bind(this));
 }
 
 function teacherLeavesLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
@@ -472,7 +505,7 @@ function teacherLeavesLicense(req, res){
     var licenseOwnerId = req.user.licenseOwnerId;
     var teacherEmail = [req.user.email];
     if(licenseOwnerId === userId){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
 
@@ -488,13 +521,13 @@ function teacherLeavesLicense(req, res){
         }.bind(this))
         .then(function(state){
             if(state === "email not in license"){
-                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"}, 500);
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: success }, 200);
         }.bind(this))
         .then(null, function(err){
-            this.requestUtil.errorResponse(res, err, 500);
+            this.requestUtil.errorResponse(res, err);
             console.error("Teacher Leaves License Error -",err);
         }.bind(this));
 }
