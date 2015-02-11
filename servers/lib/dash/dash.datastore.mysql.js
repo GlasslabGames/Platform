@@ -113,7 +113,8 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 if(license === "none"){
                     reject({"error": "none found"}, 500);
                     return;
-                } else if(license){
+                } else if(!Array.isArray(license)){
+                    //user.licenseId = license["id"];
                     user.licenseOwnerId = license["user_id"];
                     user.licenseStatus = license["status"];
                 }
@@ -239,7 +240,7 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                     reject({key: "lic.records.invalid"});
                     return;
                 } else if(results.length === 0){
-                    resolve();
+                    resolve([]);
                     return;
                 }
                 licenseInfo = results[0];

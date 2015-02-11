@@ -578,8 +578,7 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
 }
 
 function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
-    stripeInfo.card = lConst.stripeTestCard;
-    var card = stripeInfo.card;
+    var card = stripeInfo.id;
     var plan = planInfo.type.toLowerCase();
     var seats = planInfo.seats.toLowerCase();
     var stripePlan = lConst.plan[plan]["stripe_planId"];
