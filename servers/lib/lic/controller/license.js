@@ -1,4 +1,3 @@
-
 var _      = require('lodash');
 var when   = require('when');
 var moment = require('moment');
@@ -181,7 +180,8 @@ function subscribeToLicense(req, res){
             }
             // get users email address and build below method
             var ownerEmail = req.user.email;
-            return _createLicenseEmailResponse.call(this, ownerEmail);
+            var subscriptionData = {};
+            return _createLicenseEmailResponse.call(this, ownerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "duplicate customer account"){
@@ -232,7 +232,8 @@ function subscribeToTrialLicense(req, res){
             }
             // get users email address and build below method
             var ownerEmail = req.user.email;
-            return _createTrialLicenseEmailResponse.call(this, ownerEmail);
+            var subscriptionData = {};
+            return _createTrialLicenseEmailResponse.call(this, ownerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "duplicate customer account"){
@@ -298,7 +299,12 @@ function cancelLicense(req, res){
             var customerId = user["customer_id"];
             var license = results[1][0];
             var subscriptionId = license["subscription_id"];
-            return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+            this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+        }.bind(this))
+        .then(function(){
+            var licenseOwnerEmail = req.user.email;
+            var subscriptionData = {};
+            return _cancelLicenseEmailResponse.call(this, licenseOwnerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -466,8 +472,8 @@ function addTeachersToLicense(req, res){
             });
             req.rejectedTeachers = rejectedTeachersOutput;
             req.approvedTeachers = approvedTeachers;
-
-            return _inviteEmailsForOwnerInstructors.call(this, usersEmails, nonUsersEmails);
+            var subscriptionData = {};
+            return _inviteInstructorsEmailResponse.call(this, usersEmails, nonUsersEmails, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
@@ -529,10 +535,9 @@ function removeTeacherFromLicense(req, res){
             if(emails === "email not in license"){
                 return emails;
             }
-            //email notification, need logic to define licenseOwnerEmail, and also need to write email methods and text
-            var licenseOwnerEmail = emails[0];
             var teacherEmail = emails[1];
-            return _removeTeacherEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
+            var subscriptionData = {};
+            return _removeTeacherEmailResponse.call(this, teacherEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(state){
             if(state === "email not in license"){
@@ -566,10 +571,9 @@ function teacherLeavesLicense(req, res){
             if(emails === "email not in license"){
                 return emails;
             }
-            //email notification, need logic to define licenseOwnerEmail, and also need to write email methods and text
             var licenseOwnerEmail = emails[0];
-            var teacherEmail = emails[1];
-            return _teacherLeavesEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
+            var subscriptionData = {};
+            return _teacherLeavesEmailResponse.call(this, licenseOwnerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(state){
             if(state === "email not in license"){
@@ -969,31 +973,58 @@ function _updateStudentSeatsRemaining(licenseId, seats){
     }.bind(this));
 }
 
-function _createLicenseEmailResponse(licenseOwnerEmail){
+function _createLicenseEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
+    return when.promise(function(resolve, reject){
+        // early prototype, needs development
+        resolve();
+        return;
+        var emailData = {
+            subject: "Welcome to GlassLab Games Premium!",
+            to: licenseOwnerEmail,
+            data: subscriptionData,
+            //host: req.protocol + "://" + req.headers.host
+            host: protocol + "://" + host
+        };
+        var email = new Util.Email(
+            this.options.lic.email,
+            path.join( __dirname, "../email-templates" ),
+            this.stats );
+        email.send( "owner-subscribe-credit-card", emailData )
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Create License Email Response Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _cancelLicenseEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     }.bind(this));
 }
 
-function _createTrialLicenseEmailResponse(licenseOwnerEmail){
+function _createTrialLicenseEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     }.bind(this));
 }
 
-function _inviteEmailsForOwnerInstructors(licenseOwnerEmail, usersEmails, nonUsersEmails, rejectedEmails){
+function _inviteInstructorsEmailResponse(usersEmails, nonUsersEmails, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     }.bind(this));
 }
 
-function _removeTeacherEmailNotification(licenseOwnerEmail, teacherEmail){
+function _removeTeacherEmailResponse(teacherEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     });
 }
 
-function _teacherLeavesEmailNotification(licenseOwnerEmail, teacherEmail){
+function _teacherLeavesEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     });

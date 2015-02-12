@@ -159,6 +159,20 @@
         }
     },
     "lic":{
+      "email": {
+        "mailChimp" : {
+          "apiKey": "0919cea5366647bf6dba467244c5a330-us8",
+          "mailListName": "GlassLab Games"
+        },
+        "from": "<accounts@glasslabgames.org>",
+        "transport": {
+          "service": "Gmail",
+          "auth": {
+            "user": "--ReplaceInCustomConfig--",
+            "pass": "--ReplaceInCustomConfig--"
+          }
+        }
+      },
       "datastore":{
         "mysql": {
           "host"    : "localhost",
