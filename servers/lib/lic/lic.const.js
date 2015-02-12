@@ -35,7 +35,8 @@ module.exports = {
             downloadableGames: [],
             planId: 'ipad'
         },
-        "pcMac": {
+
+        pcMac: {
             stripe_planId: 'test_pcmac',
             name: 'PC/MAC',
             description: 'Games in this package run on PC or Mac computers.',
@@ -81,7 +82,7 @@ module.exports = {
             discount: 20,
             seatId: "class"
         },
-        "multiClass": {
+        multiClass: {
             size: "Multi Class",
             studentSeats: 120,
             educatorSeats: 8,

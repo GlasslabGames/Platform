@@ -65,8 +65,8 @@ function getCurrentPlan(req, res){
             var packageType = license["package_type"];
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
-            var plans = lConst.plan[packageType.toLowerCase()];
-            var seats = lConst.seats[packageSize.toLowerCase()];
+            var plans = lConst.plan[packageType];
+            var seats = lConst.seats[packageSize];
             _(packageDetails).merge(plans,seats);
             output["packageDetails"] = packageDetails;
             return this.myds.getInstructorsByLicense(licenseId);
@@ -79,7 +79,8 @@ function getCurrentPlan(req, res){
             var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
             output.ownerName = ownerName;
             output.ownerEmail = owner['EMAIL'];
-            output.teachersToReject = req.teachersToReject || [];
+            output.rejectedTeachers = req.rejectedTeachers || [];
+            output.approvedTeachers = req.approvedTeachers || [];
             delete output["packageDetails"]["stripe_planId"];
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
@@ -319,8 +320,10 @@ function addTeachersToLicense(req, res){
     }
     var hasLicenseObject;
     var createTeachers;
+    var existingTeachers;
     var licenseSeats;
-    var teachersToApprove;
+    var approvedTeachers;
+    var rejectedTeachers = {};
     this.myds.getLicenseById(licenseId)
         .then(function(license){
             var educatorSeatsRemaining = license[0]["educator_seats_remaining"];
@@ -330,7 +333,7 @@ function addTeachersToLicense(req, res){
             if(license.active === 0 || license.active === false ){
                 return "inactive license";
             }
-            var seatsTier = license[0]["package_size_tier"].toLowerCase();
+            var seatsTier = license[0]["package_size_tier"];
             licenseSeats = lConst.seats[seatsTier].educatorSeats;
             return this.myds.getUsersByEmail(teacherEmails);
         }.bind(this))
@@ -343,14 +346,15 @@ function addTeachersToLicense(req, res){
             teacherEmails.forEach(function(email){
                 newInstructors[email] = true;
             });
-            var teacherUserIds = [];
+            existingTeachers = [];
             teachers.forEach(function(teacher){
                 if(teacher["SYSTEM_ROLE"] !== 'instructor'){
                     delete newInstructors[teacher["EMAIL"]];
+                    rejectedTeachers[teacher.id] = "user role not instructor";
                     return;
                 }
                 newInstructors[teacher["EMAIL"]] = false;
-                teacherUserIds.push(teacher.id);
+                existingTeachers.push(teacher.id);
             });
             _(newInstructors).forEach(function(state, instructor){
                 if(state){
@@ -362,8 +366,8 @@ function addTeachersToLicense(req, res){
             // change user registration process so that a temp user account can have info updated based on registration flow |tested and passed
             // add field such that invited teachers who are not real users do not screw up other portions of the app | verify_code_status of invited
             var promiseList = [{},{}];
-            if(teacherUserIds.length > 0){
-                promiseList[0] = _multiHasLicense.call(this, teacherUserIds);
+            if(existingTeachers.length > 0){
+                promiseList[0] = _multiHasLicense.call(this, existingTeachers);
             }
             if(createTeachers.length > 0){
                 promiseList[1] = this.myds.multiInsertTempUsersByEmail(createTeachers);
@@ -383,20 +387,26 @@ function addTeachersToLicense(req, res){
                 id = firstInsertId + i;
                 hasLicenseObject[id] = false;
             }
-            teachersToApprove = [];
-            var teachersToReject = [];
+            approvedTeachers = [];
             _(hasLicenseObject).forEach(function(value, key){
                 if(value === false){
-                    teachersToApprove.push(key);
+                    approvedTeachers.push(key);
                 } else{
-                    teachersToReject.push(key);
+                    rejectedTeachers[key] = "user already on a license";
                 }
             });
-            req.teachersToReject = teachersToReject;
+            var approvedExistingTeachers = [];
+            existingTeachers.forEach(function(id){
+                if(!rejectedTeachers[id]){
+                    approvedExistingTeachers.push(id);
+                }
+            });
+            existingTeachers = approvedExistingTeachers;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
-            if(teachersToApprove.length > 0){
-                return this.myds.multiGetLicenseMap(licenseId, teachersToApprove);
+            if(approvedTeachers.length > 0){
+                return this.myds.multiGetLicenseMap(licenseId, approvedTeachers);
             }
+            return "reject all";
         }.bind(this))
         .then(function(licenseMap){
             if(typeof licenseMap === "string"){
@@ -408,7 +418,7 @@ function addTeachersToLicense(req, res){
             });
             var teachersToInsert = [];
             var teachersToUpdate = [];
-            teachersToApprove.forEach(function(teacherId){
+            approvedTeachers.forEach(function(teacherId){
                 if(map[teacherId]){
                     teachersToUpdate.push(teacherId);
                 } else{
@@ -425,22 +435,35 @@ function addTeachersToLicense(req, res){
             return when.all(promiseList);
         }.bind(this))
         .then(function(status) {
-            if (typeof status === "string") {
+            if (typeof status === "string" && status !== "reject all") {
                 return status;
             }
-            return _updateEducatorSeatsRemaining.call(this,licenseId, licenseSeats);
+            var promiseList = [];
+            var rejectedIds = Object.keys(rejectedTeachers);
+            promiseList.push(_grabInstructorEmailsByType.call(this, existingTeachers, createTeachers, rejectedIds));
+            promiseList.push(_updateEducatorSeatsRemaining.call(this, licenseId, licenseSeats));
+            return when.all(promiseList);
         }.bind(this))
         .then(function(status){
             if (typeof status === "string") {
                 return status;
             }
+            var emails = status[0];
             // design emails language, methods, and templates
             // method currently is empty
-            var licenseOwnerEmail;
-            var usersEmails = [];
-            var nonUsersEmails = [];
-            var rejectedEmails = [];
-            return _inviteEmailsForOwnerInstructors.call(this,licenseOwnerEmail,usersEmails,nonUsersEmails, rejectedEmails);
+            var usersEmails = emails[0];
+            var nonUsersEmails = emails[1];
+            var rejectedEmails = emails[2];
+            var rejectedTeachersOutput = [];
+            var email;
+            _(rejectedTeachers).forEach(function(value, key){
+                email = rejectedEmails[key];
+                rejectedTeachersOutput.push([email, value]);
+            });
+            req.rejectedTeachers = rejectedTeachersOutput;
+            req.approvedTeachers = approvedTeachers;
+
+            return _inviteEmailsForOwnerInstructors.call(this, usersEmails, nonUsersEmails);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
@@ -638,8 +661,8 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
 
 function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
     var card = stripeInfo.id;
-    var plan = planInfo.type.toLowerCase();
-    var seats = planInfo.seats.toLowerCase();
+    var plan = planInfo.type;
+    var seats = planInfo.seats;
     var stripePlan = lConst.plan[plan]["stripe_planId"];
     var stripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
     var params = {};
@@ -657,8 +680,8 @@ function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
 
 function _createLicenseSQL(userId, planInfo, stripeData){
     return when.promise(function(resolve, reject){
-        var seatsTier = planInfo.seats.toLowerCase();
-        var type = "'" + planInfo.type.toLowerCase() + "'";
+        var seatsTier = planInfo.seats;
+        var type = "'" + planInfo.type + "'";
         var licenseKey;
         if(planInfo.licenseKey){
             licenseKey = "'" + planInfo.licenseKey + "'";
@@ -706,6 +729,73 @@ function _createLicenseSQL(userId, planInfo, stripeData){
             })
             .then(null, function(err){
                 console.error("Create License Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _multiHasLicense(userIds){
+    return when.promise(function(resolve, reject){
+        this.myds.getLicenseMapByInstructors(userIds)
+            .then(function(licenseMaps){
+                var output = {};
+                userIds.forEach(function(id){
+                    output[id] = false;
+                });
+                licenseMaps.forEach(function(map){
+                    output[map["user_id"]] = true;
+                });
+                resolve(output);
+            })
+            .then(null, function(err){
+                reject(err);
+            })
+    }.bind(this));
+}
+
+function _grabInstructorEmailsByType(approvedUserIds, approvedNonUserIds, rejectedUserIds){
+    return when.promise(function(resolve, reject){
+        var promiseList = [[],[],[]];
+        if(approvedUserIds.length > 0){
+            promiseList[0] = this.myds.getUsersByIds(approvedUserIds);
+        }
+        if(approvedNonUserIds.length > 0){
+            promiseList[1] = this.myds.getUsersByIds(approvedNonUserIds);
+        }
+        if(rejectedUserIds.length > 0){
+            promiseList[2] = this.myds.getUsersByIds(rejectedUserIds);
+        }
+        return when.all(promiseList)
+            .then(function(results){
+                var output = [];
+                var emails = [];
+                var email;
+                var approvedUsers = results[0];
+                approvedUsers.forEach(function(user){
+                    email = user["EMAIL"];
+                    emails.push(email);
+                });
+                output.push(emails);
+
+                var approvedNonUsers = results[1];
+                emails = [];
+                approvedNonUsers.forEach(function(user){
+                    email = user["EMAIL"];
+                    emails.push(email);
+                });
+                output.push(emails);
+
+                var rejectedUsers = results[2];
+                emails = {};
+                rejectedUsers.forEach(function(user){
+                    emails[user.id] = user["EMAIL"];
+                });
+                output.push(emails);
+
+                resolve(output);
+            })
+            .then(null, function(err){
+                console.log("Grab Instruct Emails By Type Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -832,25 +922,6 @@ function _unassignInstructorPremiumCourses(userId, licenseId, studentSeats){
             })
             .then(null, function(err){
                 console.error("Unassign Instructor Premium Courses Error -",err);
-                reject(err);
-            })
-    }.bind(this));
-}
-
-function _multiHasLicense(userIds){
-    return when.promise(function(resolve, reject){
-        this.myds.getLicenseMapByInstructors(userIds)
-            .then(function(licenseMaps){
-                var output = {};
-                userIds.forEach(function(id){
-                    output[id] = false;
-                });
-                licenseMaps.forEach(function(map){
-                    output[map["user_id"]] = true;
-                });
-                resolve(output);
-            })
-            .then(null, function(err){
                 reject(err);
             })
     }.bind(this));
