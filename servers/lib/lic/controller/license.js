@@ -1,4 +1,3 @@
-
 var _      = require('lodash');
 var when   = require('when');
 var moment = require('moment');
@@ -9,9 +8,10 @@ module.exports = {
     getSubscriptionPackages: getSubscriptionPackages,
     getCurrentPlan: getCurrentPlan,
     getStudentsInLicense: getStudentsInLicense,
+    getCustomerId: getCustomerId,
     subscribeToLicense: subscribeToLicense,
     subscribeToTrialLicense: subscribeToTrialLicense,
-    getCustomerId: getCustomerId,
+    upgradeLicense: upgradeLicense,
     cancelLicense: cancelLicense,
     addTeachersToLicense: addTeachersToLicense,
     setInstructorLicenseStatusToActive: setInstructorLicenseStatusToActive,
@@ -157,6 +157,28 @@ function getStudentsInLicense(req, res){
         }.bind(this));
 }
 
+function getCustomerId(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+
+    var userId = req.user.id;
+    this.myds.getUserById(userId)
+        .then(function(user){
+            var customerId = user["customer_id"];
+            this.requestUtil.jsonResponse(res, { id: customerId });
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Customer Id Error -",err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this))
+}
+
 function subscribeToLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -181,7 +203,8 @@ function subscribeToLicense(req, res){
             }
             // get users email address and build below method
             var ownerEmail = req.user.email;
-            return _createLicenseEmailResponse.call(this, ownerEmail);
+            var subscriptionData = {};
+            return _createLicenseEmailResponse.call(this, ownerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "duplicate customer account"){
@@ -209,6 +232,10 @@ function subscribeToTrialLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
+    if(req.user.email.indexOf("+") !== -1){
+        this.requestUtil.errorResponse(res, {key: "lic.email.invalid"});
+        return;
+    }
     var userId = req.user.id;
     var stripeInfo = {};
     var planInfo = {
@@ -228,7 +255,8 @@ function subscribeToTrialLicense(req, res){
             }
             // get users email address and build below method
             var ownerEmail = req.user.email;
-            return _createTrialLicenseEmailResponse.call(this, ownerEmail);
+            var subscriptionData = {};
+            return _createTrialLicenseEmailResponse.call(this, ownerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "duplicate customer account"){
@@ -251,26 +279,50 @@ function subscribeToTrialLicense(req, res){
         }.bind(this));
 }
 
-function getCustomerId(req, res){
+function upgradeLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id)){
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
 
     var userId = req.user.id;
-    this.myds.getUserById(userId)
-        .then(function(user){
+    var licenseId = req.user.licenseId;
+    var planInfo = req.body.planInfo;
+    var promiseList = [];
+    promiseList.push(this.myds.getUserById(userId));
+    promiseList.push(this.myds.getLicenseById(licenseId));
+    when.all(promiseList)
+        .then(function(results){
+            var user = results[0];
             var customerId = user["customer_id"];
-            this.requestUtil.jsonResponse(res, { id: customerId });
+            var license = results[1];
+            var subscriptionId = license[0]["subscription_id"];
+            var params = _buildStripeParams(planInfo, customerId, {});
+            delete params.card;
+            return this.serviceManager.stripe.updateSubscription(customerId, subscriptionId, params);
+        }.bind(this))
+        .then(function(){
+            var packageType = "package_type = '" +  planInfo.type + "'";
+            var packageSizeTier = "package_size_tier = '" + planInfo.seats + "'";
+            var updateFields = [packageType, packageSizeTier];
+            return this.myds.updateLicenseById(licenseId, updateFields);
+        }.bind(this))
+        .then(function(){
+            var licenseOwnerEmail = req.user.email;
+            var subscriptionData = {};
+            return _upgradeLicenseEmailResponse.call(this, licenseOwnerEmail, subscriptionData, req.protocol, req.headers.host);
+        }.bind(this))
+        .then(function(){
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Customer Id Error -",err);
+            console.error("Upgrade License Error -",err);
             this.requestUtil.errorResponse(res, err);
-        }.bind(this))
+        }.bind(this));
 }
 
 function cancelLicense(req, res){
@@ -294,7 +346,12 @@ function cancelLicense(req, res){
             var customerId = user["customer_id"];
             var license = results[1][0];
             var subscriptionId = license["subscription_id"];
-            return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+            this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+        }.bind(this))
+        .then(function(){
+            var licenseOwnerEmail = req.user.email;
+            var subscriptionData = {};
+            return _cancelLicenseEmailResponse.call(this, licenseOwnerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -462,8 +519,8 @@ function addTeachersToLicense(req, res){
             });
             req.rejectedTeachers = rejectedTeachersOutput;
             req.approvedTeachers = approvedTeachers;
-
-            return _inviteEmailsForOwnerInstructors.call(this, usersEmails, nonUsersEmails);
+            var subscriptionData = {};
+            return _inviteInstructorsEmailResponse.call(this, usersEmails, nonUsersEmails, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
@@ -525,10 +582,9 @@ function removeTeacherFromLicense(req, res){
             if(emails === "email not in license"){
                 return emails;
             }
-            //email notification, need logic to define licenseOwnerEmail, and also need to write email methods and text
-            var licenseOwnerEmail = emails[0];
             var teacherEmail = emails[1];
-            return _removeTeacherEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
+            var subscriptionData = {};
+            return _removeTeacherEmailResponse.call(this, teacherEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(state){
             if(state === "email not in license"){
@@ -562,10 +618,9 @@ function teacherLeavesLicense(req, res){
             if(emails === "email not in license"){
                 return emails;
             }
-            //email notification, need logic to define licenseOwnerEmail, and also need to write email methods and text
             var licenseOwnerEmail = emails[0];
-            var teacherEmail = emails[1];
-            return _teacherLeavesEmailNotification.call(this, licenseOwnerEmail, teacherEmail);
+            var subscriptionData = {};
+            return _teacherLeavesEmailResponse.call(this, licenseOwnerEmail, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(state){
             if(state === "email not in license"){
@@ -616,7 +671,7 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
         this.myds.getCustomerIdByUserId(userId)
             .then(function(id){
                 customerId = id;
-                var params = _buildStripeParams(email, name, stripeInfo, planInfo, customerId);
+                var params = _buildStripeParams(planInfo, customerId, stripeInfo, email, name);
                 if(!stripeInfo.card){
                     delete params.card;
                 }
@@ -659,7 +714,7 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
     }.bind(this));
 }
 
-function _buildStripeParams(email, name, stripeInfo, planInfo, customerId){
+function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     var card = stripeInfo.id;
     var plan = planInfo.type;
     var seats = planInfo.seats;
@@ -965,31 +1020,64 @@ function _updateStudentSeatsRemaining(licenseId, seats){
     }.bind(this));
 }
 
-function _createLicenseEmailResponse(licenseOwnerEmail){
+function _createLicenseEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
+    return when.promise(function(resolve, reject){
+        // early prototype, needs development
+        resolve();
+        return;
+        var emailData = {
+            subject: "Welcome to GlassLab Games Premium!",
+            to: licenseOwnerEmail,
+            data: subscriptionData,
+            //host: req.protocol + "://" + req.headers.host
+            host: protocol + "://" + host
+        };
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join( __dirname, "../email-templates" ),
+            this.stats );
+        email.send( "owner-subscribe-credit-card", emailData )
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Create License Email Response Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _upgradeLicenseEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     }.bind(this));
 }
 
-function _createTrialLicenseEmailResponse(licenseOwnerEmail){
+function _cancelLicenseEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     }.bind(this));
 }
 
-function _inviteEmailsForOwnerInstructors(licenseOwnerEmail, usersEmails, nonUsersEmails, rejectedEmails){
+function _createTrialLicenseEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     }.bind(this));
 }
 
-function _removeTeacherEmailNotification(licenseOwnerEmail, teacherEmail){
+function _inviteInstructorsEmailResponse(usersEmails, nonUsersEmails, subscriptionData, protocol, host){
+    return when.promise(function(resolve, reject){
+        resolve();
+    }.bind(this));
+}
+
+function _removeTeacherEmailResponse(teacherEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     });
 }
 
-function _teacherLeavesEmailNotification(licenseOwnerEmail, teacherEmail){
+function _teacherLeavesEmailResponse(licenseOwnerEmail, subscriptionData, protocol, host){
     return when.promise(function(resolve, reject){
         resolve();
     });
