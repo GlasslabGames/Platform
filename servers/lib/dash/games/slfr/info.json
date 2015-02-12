@@ -627,7 +627,7 @@
                                 "name": "Denominator",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.1",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
                                         "description": "Use the denominator"
                                     }
@@ -637,7 +637,7 @@
                                 "name": "Numerator",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.1",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
                                         "description": "Use the numerator"
                                     }
@@ -647,9 +647,9 @@
                                 "name": "Pie charts",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.1",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
-                                        "description": "Solving fraction values based on the information at hand"
+                                        "description": "Use pie charts to represent fraction values
                                     }
                                 ]
                             },
@@ -657,9 +657,9 @@
                                 "name": "Question marks",
                                 "list": [
                                     {
-                                        "name": "CCSS.MATH.CONTENT.3.NF.A",
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.1",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/1/",
-                                        "description": "Use pie charts to represent fraction values"
+                                        "description": "Solving fraction values based on the information at hand""
                                     }
                                 ]
                             },
@@ -690,16 +690,6 @@
                                         "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Master equivalent fractions"
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "Equivalent fractions (C)",
-                                "list": [
-                                    {
-                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
-                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
-                                        "description": "Find new ways to use equivalent fractions"
                                     }
                                 ]
                             },
