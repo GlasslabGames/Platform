@@ -25,8 +25,8 @@
             "id": "BQ",
             "name": "BrainQuake Inc.",
             "logo": {
-                "small": "assets/dev-logo-brainquake.jpg",
-                "large": "assets/dev-logo-brainquake@2x.jpg"
+                "small": "assets/dev-logo-brainquake.png",
+                "large": "assets/dev-logo-brainquake@2x.png"
             },
             "description": ""
         },
@@ -43,11 +43,11 @@
         },
         "thumbnail": {
             "small": "assets/thumb-game-WT.png",
-            "large": "assets/thumb-game-WT.png"
+            "large": "assets/thumb-game-WT@2x.png"
         },
         "card": {
-            "small": "assets/game-card-WT.jpg",
-            "large": "assets/game-card-WT@2x.jpg"
+            "small": "assets/game-card-WT.png",
+            "large": "assets/game-card-WT@2x.png"
         },
         "banners": {
             "product": "assets/game-banner-WT.png",
@@ -218,8 +218,8 @@
         "pages": {
         },
         "banners": {
-            "product": "assets/game-banner-WT.jpg",
-            "reports": "assets/game-banner-WT.jpg"
+            "product": "assets/game-banner-WT.png",
+            "reports": "assets/game-banner-WT.png"
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
