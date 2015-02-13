@@ -449,7 +449,7 @@ function addTeachersToLicense(req, res){
                 if(value === false){
                     approvedTeachers.push(key);
                 } else{
-                    rejectedTeachers[key] = "user already on a license";
+                    rejectedTeachers[key] = "user already on another license";
                 }
             });
             var approvedExistingTeachers = [];
@@ -508,7 +508,7 @@ function addTeachersToLicense(req, res){
             var emails = status[0];
             // design emails language, methods, and templates
             // method currently is empty
-            var usersEmails = emails[0];
+            var approvedEmails = emails[0];
             var nonUsersEmails = emails[1];
             var rejectedEmails = emails[2];
             var rejectedTeachersOutput = [];
@@ -518,9 +518,9 @@ function addTeachersToLicense(req, res){
                 rejectedTeachersOutput.push([email, value]);
             });
             req.rejectedTeachers = rejectedTeachersOutput;
-            req.approvedTeachers = approvedTeachers;
+            req.approvedTeachers = approvedEmails;
             var subscriptionData = {};
-            return _inviteInstructorsEmailResponse.call(this, usersEmails, nonUsersEmails, subscriptionData, req.protocol, req.headers.host);
+            return _inviteInstructorsEmailResponse.call(this, approvedEmails, nonUsersEmails, subscriptionData, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
