@@ -220,6 +220,43 @@ exampleOut.getEnrolledCourses_WithMembers =[
         "users": []
     }
 ];
+
+/*
+ GET
+ http://localhost:8001/api/v2/lms/courses?showMembers=1&game=WWF
+ */
+exampleOut.getEnrolledCourses_WithMembers_ForGame =[
+    {
+        "id": 8,
+        "dateCreated": 123456789,
+        "title": "test2",
+        "grade": "9,10",
+        "lockedRegistration": false,
+        "archived": false,
+        "archivedDate": null,
+        "institution": 10,
+        "code": "YD8WV",
+        "games": [
+            { "id": "SC",   "settings": {"missionProgressLock": true } },
+            { "id": "WWF", "settings": {} }
+        ],
+        "studentCount": 2,
+        "users": [
+            {
+                "id": 175,
+                "lastName": "test2_s1",
+                "firstName": "test2_s1",
+                "username": "test2_s1",
+            },
+            {
+                "id": 176,
+                "lastName": "test2_s2",
+                "firstName": "test2_s2",
+                "username": "test2_s2",
+            }
+        ]
+    }
+];
 function getEnrolledCourses(req, res, next) {
 
     if( req.session &&
@@ -229,24 +266,20 @@ function getEnrolledCourses(req, res, next) {
         this.myds.getEnrolledCourses(userData.id)
             .then(function(courses){
                 var showMembers = false;
-                var showTeacher = false;
+                var gameFilter;
 
-                if( userData.role == lConst.role.instructor ||
-                    userData.role == lConst.role.manager ||
-                    userData.role == lConst.role.admin
-                  ) {
-                    if( req.query.hasOwnProperty("showMembers") ) {
-                        showMembers = parseInt(req.query.showMembers);
-                        // in case showMembers is a string "true"
-                        if(_.isNaN(showMembers)) {
-                            showMembers = (req.query.showMembers === "true") ? true : false;
-                        }
+                if( req.query.hasOwnProperty("showMembers") ) {
+                    showMembers = parseInt(req.query.showMembers);
+                    // in case showMembers is a string "true"
+                    if(_.isNaN(showMembers)) {
+                        showMembers = (req.query.showMembers === "true") ? true : false;
                     }
-                } else {
-                    showTeacher = true;
+                }
+                if( req.query.hasOwnProperty("game") ) {
+                    gameFilter = req.query.game;
                 }
 
-                this.getCoursesDetails(courses, showMembers, showTeacher)
+                this.getCoursesDetails(courses, userData.role, showMembers, gameFilter)
                     .then(function(courses){
                             this.requestUtil.jsonResponse(res, courses);
                         }.bind(this),
@@ -356,21 +389,18 @@ function getCourse(req, res, next) {
 
             // check if enrolled in course
             var showMembers = false;
-            var showTeacher = false;
-            if( userData.role == lConst.role.instructor ||
-                userData.role == lConst.role.manager ||
-                userData.role == lConst.role.admin ) {
-                // only show members if not student
-                if( req.query.hasOwnProperty("showMembers") ) {
-                    showMembers = parseInt(req.query.showMembers);
+            var gameFilter;
 
-                    // in case showMembers is a string "true"
-                    if(_.isNaN(showMembers)) {
-                        showMembers = (req.query.showMembers === "true") ? true : false;
-                    }
+            if( req.query.hasOwnProperty("showMembers") ) {
+                showMembers = parseInt(req.query.showMembers);
+                // in case showMembers is a string "true"
+                if(_.isNaN(showMembers)) {
+                    showMembers = (req.query.showMembers === "true") ? true : false;
                 }
-            } else {
-                showTeacher = true;
+            }
+
+            if( req.query.hasOwnProperty("game") ) {
+                gameFilter = req.query.game;
             }
 
             // check if enrolled
@@ -393,7 +423,7 @@ function getCourse(req, res, next) {
                     var courses    = [];
                     courses.push(course); // add course
 
-                    this.getCoursesDetails(courses, showMembers, showTeacher)
+                    this.getCoursesDetails(courses, userData.role, showMembers, gameFilter)
                         .then(function(courses){
                             if( courses &&
                                 courses.length > 0) {
