@@ -368,9 +368,9 @@
                             "description": "Not Mastered"
                         },
                         {
-                            "id": "not-enough-info",
-                            "title": "Not Enough Info",
-                            "description": "Not Enough Info"
+                            "id": "not-enough-data",
+                            "title": "Not Enough Data",
+                            "description": "Not Enough Data"
                         },
                         {
                             "id": "not-covered",

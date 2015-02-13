@@ -41,17 +41,85 @@
     },
     "assessment": [
         {
-            "enabled": false,
+            "enabled": true,
             "id": "competency",
             "dataProcessScope": "gameSession",
             "engine": "netica",
-            "trigger": "endSession",
-            "missions": {
-            }
+            "trigger": "endSession"
         }
     ],
     "reports": {
         "list": [
+            {
+                "id": "competency",
+                "assessmentId": "competency",
+                "enabled": true,
+                "name": "Competency Levels: Complex Problem Solving",
+                "header": {
+                    "text": "Competency Levels: Complex Problem Solving",
+                    "image": "assets/game-banner-PVZ.jpg",
+                    "skinny": "assets/skinny-banner-PVZ.jpg",
+                    "large": "assets/skinny-banner-PVZ@2x.jpg"
+                },
+                "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving.",
+                "icons": {
+                    "small": "assets/icon-plus-green.png",
+                    "large": "assets/icon-plus-green@2x.png"
+                },
+                "table": {
+                    "headers": {
+                        "facets": [
+                            {
+                                "id": "facet_analyze_constraints",
+                                "title": "Analyze givens/constraints",
+                                "description": ""
+                            },
+                            {
+                                "id": "facet_plan_solution_pathway",
+                                "title": "Plan a solution pathway",
+                                "description": ""
+                            },
+                            {
+                                "id": "facet_effective_tool_use",
+                                "title": "Effective/efficient tools/resources use",
+                                "description": ""
+                            },
+                            {
+                                "id": "facet_monitor_progress",
+                                "title": "Monitor/evaluate progress",
+                                "description": ""
+                            }
+                        ],
+                        "competency": {
+                            "id": "competency_problem_solving",
+                            "title": "Problem Solving Ability Overall",
+                            "description": ""
+                        }
+                    },
+                    "labels": [
+                        {
+                            "id": "mastered",
+                            "title": "Mastered",
+                            "description": "Mastered"
+                        },
+                        {
+                            "id": "approaching-mastery",
+                            "title": "Approaching Mastery",
+                            "description": "Approaching Mastery"
+                        },
+                        {
+                            "id": "not-mastered",
+                            "title": "Not Mastered",
+                            "description": "Not Mastered"
+                        },
+                        {
+                            "id": "not-enough-data",
+                            "title": "Not Enough Data",
+                            "description": "Not Enough Data"
+                        }
+                    ]
+                }
+            }
         ]
     },
     "details": {
