@@ -511,19 +511,22 @@ function addTeachersToLicense(req, res){
             var emails = status[0];
             // design emails language, methods, and templates
             // method currently is empty
-            var approvedEmails = emails[0];
+            var usersEmails = emails[0];
             var nonUsersEmails = emails[1];
             var rejectedEmails = emails[2];
+
+            var approvedTeachersOutput = usersEmails.concat(nonUsersEmails);
             var rejectedTeachersOutput = [];
             var email;
             _(rejectedTeachers).forEach(function(value, key){
                 email = rejectedEmails[key];
                 rejectedTeachersOutput.push([email, value]);
             });
+            req.approvedTeachers = approvedTeachersOutput;
             req.rejectedTeachers = rejectedTeachersOutput;
-            req.approvedTeachers = approvedEmails;
-            var subscriptionData = {};
-            return _inviteInstructorsEmailResponse.call(this, approvedEmails, nonUsersEmails, subscriptionData, req.protocol, req.headers.host);
+
+            var data = {};
+            return _inviteInstructorsEmailResponse.call(this, usersEmails, nonUsersEmails, data, req.protocol, req.headers.host);
         }.bind(this))
         .then(function(status){
             if(status === "not enough seats"){
