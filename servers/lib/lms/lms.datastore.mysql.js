@@ -197,6 +197,7 @@ return when.promise(function(resolve, reject) {
             c.grade,    \
             c.locked > 0 as locked,      \
             c.archived > 0 as archived,  \
+            c.premium_games_assigned > 0 as premiumGamesAssigned,\
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
@@ -211,6 +212,7 @@ return when.promise(function(resolve, reject) {
                 results = results[0];
                 results.archived = results.archived ? true : false;
                 results.locked   = results.locked   ? true : false;
+                results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
 
                 // convert string to array
                 results.grade = this._splitGrade(results.grade);
@@ -775,6 +777,7 @@ return when.promise(function(resolve, reject) {
                 values.lmsId   = courseData.lmsId ? this.ds.escape(courseData.lmsId) : "NULL";   // lmsId for sso lms
                 values.labels  = courseData.labels ? this.ds.escape(courseData.labels) : "NULL"; // labels
                 values.meta    = courseData.meta ? this.ds.escape(courseData.meta) : "NULL";     // meta data
+                values.premium_games_assigned = courseData.premium_games_assigned ? 1 : 0;
 
                 if(!courseData.institutionId ||
                     courseData.institutionId === "NULL"

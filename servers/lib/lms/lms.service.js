@@ -332,17 +332,18 @@ return when.promise(function(resolve, reject) {
         userData.role == lConst.role.admin ) {
 
         var courseData = {
-            id:            _courseData.id,
-            title:         _courseData.title,
-            grade:         _courseData.grade,
-            institutionId: _courseData.institutionId || _courseData.institution,
-            archived:      _courseData.archived,
-            locked:        _courseData.lockedRegistration || _courseData.locked,
-            games:         _courseData.games,
-            lmsType:       _courseData.lmsType || 'glasslab',
-            lmsId:         _courseData.lmsId,
-            labels:        _courseData.labels || "",
-            meta:          _courseData.meta || ""
+            id:                     _courseData.id,
+            title:                  _courseData.title,
+            grade:                  _courseData.grade,
+            institutionId:          _courseData.institutionId || _courseData.institution,
+            archived:               _courseData.archived,
+            locked:                 _courseData.lockedRegistration || _courseData.locked,
+            premium_games_assigned: _courseData.premiumGamesAssigned,
+            games:                  _courseData.games,
+            lmsType:                _courseData.lmsType || 'glasslab',
+            lmsId:                  _courseData.lmsId,
+            labels:                 _courseData.labels || "",
+            meta:                   _courseData.meta || ""
         };
 
         if(courseData.archived) {
