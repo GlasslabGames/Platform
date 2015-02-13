@@ -121,7 +121,7 @@ exampleOut.getCoursesDetails = {
     "studentCount": 0,
     "users": []
 };
-LMSService.prototype.getCoursesDetails = function(courses, showMembers, showTeacher){
+LMSService.prototype.getCoursesDetails = function(courses, requestingRole, showMembers, gameFilter){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -134,29 +134,55 @@ return when.promise(function(resolve, reject) {
 
                 // convert showMembers to int and then check it's value
                 var p;
-                if( showMembers ) {
-                    // init user
-                    course.users = [];
+                if( requestingRole == lConst.role.student ) {
+                    if( showMembers ) {
+                        // init user
+                        course.users = [];
 
-                    p = this.getStudentsOfCourse(course.id)
-                        .then(function(studentList){
-                            course.users = _.clone(studentList);
-
-                            return this.telmStore.getGamesForCourse(course.id);
-                        }.bind(this))
-                }
-                else if( showTeacher ) {
-                    p = this.myds.getTeacherOfCourse(course.id)
-                        .then(function(teacherInfo) {
-                            course.teacher = _.clone(teacherInfo);
-                            return this.telmStore.getGamesForCourse(course.id);
-                        }.bind(this));
+                        p = this.getStudentsOfCourse(course.id)
+                            .then(function(studentList){
+                                course.users = _.clone(studentList);
+                                course.users = _.map(course.users, function(user) {
+                                    return _.pick(user, 'id', 'username', 'firstName', 'lastName');
+                                });
+                                return this.myds.getTeacherOfCourse(course.id);
+                            }.bind(this))
+                            .then(function(teacherInfo) {
+                                course.teacher = _.clone(teacherInfo);
+                                return this.telmStore.getGamesForCourse(course.id);
+                            }.bind(this));
+                    }
+                    else {
+                        p = this.myds.getTeacherOfCourse(course.id)
+                            .then(function(teacherInfo) {
+                                course.teacher = _.clone(teacherInfo);
+                                return this.telmStore.getGamesForCourse(course.id);
+                            }.bind(this));
+                    }
                 }
                 else {
-                    p = this.telmStore.getGamesForCourse(course.id);
+                    if( showMembers ) {
+                        // init user
+                        course.users = [];
+
+                        p = this.getStudentsOfCourse(course.id)
+                            .then(function(studentList){
+                                course.users = _.clone(studentList);
+
+                                return this.telmStore.getGamesForCourse(course.id);
+                            }.bind(this))
+                    }
+                    else {
+                        p = this.telmStore.getGamesForCourse(course.id);
+                    }
                 }
 
                 p.then(function(games) {
+                    // If we are filtering for games, filter this course out at the end
+                    if( gameFilter ) {
+                        course.filterOut = true;
+                    }
+
                     // create games object if one does not exist
                     if(!_.isArray(course.games)) {
                         course.games = [];
@@ -169,6 +195,11 @@ return when.promise(function(resolve, reject) {
                             id:       g,
                             settings: games[g].settings || {}
                         } );
+
+                        // Don't filter this game if it matches the filter
+                        if( g == gameFilter ) {
+                            course.filterOut = false;
+                        }
                     }
 
                     // need to return something for reduce to continue
@@ -184,6 +215,15 @@ return when.promise(function(resolve, reject) {
 
             .done(function(){
                 //console.log("done");
+                // Filter out courses for certain games
+                if( gameFilter ) {
+                    courses = _.filter(courses, function(course) {
+                        if( !course.filterOut ) {
+                            return course;
+                        }
+                    });
+                }
+
                 resolve(courses);
             }.bind(this))
     } else {
