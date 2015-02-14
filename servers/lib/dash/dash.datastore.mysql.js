@@ -106,6 +106,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     if(results.role === "instructor"){
                         return this.getLicenseInfoByInstructor(id);
                     }
+                    return [];
                 } else {
                     return "none";
                 }

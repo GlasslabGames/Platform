@@ -480,15 +480,22 @@ function updateCourseInfo(req, res, next, serviceManager)
         }
         var courseData = req.body;
         courseData.id = req.params.courseId;
+        var premiumGamesAssignedChanged = courseData.premiumGamesAssigned !== undefined;
 
         // check if enrolled
         this.myds.isEnrolledInCourse(userData.id, courseData.id)
             .then(function(isEnrolled){
-                if(isEnrolled) {
-                    return this.updateCourse(userData, courseData);
-                } else {
+                if(isEnrolled && premiumGamesAssignedChanged) {
+                    //add class type method here
+                    return;
+                } else if(isEnrolled){
+                    return;
+                } else{
                     return when.reject({key:"course.general"});
                 }
+            }.bind(this))
+            .then(function(){
+                    return this.updateCourse(userData, courseData);
             }.bind(this))
             .then(function(){
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);
