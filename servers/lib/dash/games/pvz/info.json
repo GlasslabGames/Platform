@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "PVZ",
-        "enabled": true,
-        "visible": true,
+        "enabled": false,
+        "visible": false,
         "maintenance": null,
         "shortName": "PvZ EDU",
         "longName": "Plants vs. Zombies EDU",
@@ -53,7 +53,7 @@
             {
                 "id": "competency",
                 "assessmentId": "competency",
-                "enabled": true,
+                "enabled": false,
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": {
                     "text": "Competency Levels: Complex Problem Solving",
