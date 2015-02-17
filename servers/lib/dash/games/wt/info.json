@@ -28,7 +28,7 @@
                 "small": "assets/dev-logo-brainquake.png",
                 "large": "assets/dev-logo-brainquake@2x.png"
             },
-            "description": ""
+            "description": "The tools people have to develop and assess their math proficiency are outdated.  Most people misunderstand their own math proficiency because it’s based on the wrong data. BrainQuake builds the right tools to provide our players with the right data, because in a data-driven world, math gets people jobs. Our core products create learning opportunities and provide incredibly powerful analysis, insight and opportunities to improve math proficiency."
         },
         "settings": {
             "canCreateMatches": false
@@ -213,9 +213,149 @@
         ]
     },
     "details": {
+        "applink": "https://itunes.apple.com/us/app/eduwuzzittrouble/id954869252",
         "buttons": [
+            {
+                "name": "Download",
+                "type": "download",
+                "authRequired": false,
+                "links": [
+                    {
+                        "target": "_blank",
+                        "name": "iPad",
+                        "link": "https://itunes.apple.com/us/app/eduwuzzittrouble/id954869252",
+                        "type": "ios-appstore"
+                    }
+                ]
+            }
         ],
         "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "about": "Wuzzit Trouble is a seemingly simple game that will challenge and engage your students – and even you – like never before! While saving the trapped Wuzzits, your students will engage in completing complex performance tasks that aren’t just aligned to the Common Core, but that develop number sense and the ability to use mathematics as a problem-solving language. Featuring a casual game look and feel, don’t be surprised if your students start playing at home, too!",
+                "curriculum": [
+                    "Addresses Common Core Operations & Algebraic Thinking, Number & Operations in Base Ten and Standards for Mathematical Practice",
+                    "Simultaneously addresses and calls upon multiple Common Core standards, just as mathematical thinking is used in the real world",
+                    "Provides children with opportunities to demonstrate math proficiency via authentic, embedded complex performance tasks that develop conceptual mathematical thinking skills",
+                    "Improves readiness to learn mathematics, disposition to mathematics and mathematical confidence"
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "assets/WT-carousel_1.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WT-carousel_2.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WT-carousel_3.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WT-carousel_4.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WT-carousel_5.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WT-carousel_6.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WT-carousel_7.png"
+                    }
+                ]
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards",
+                "list": [
+                    {
+                        "category": "Common Core Math",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.OA.B.2",
+                                        "link": "http://www.corestandards.org/Math/Content/2/OA/#CCSS.Math.Content.2.OA.B.2",
+                                        "description": "Fluently add and subtract within 20 using mental strategies.2 By end of Grade 2, know from memory all sums of two one-digit numbers."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NBT.A.2",
+                                        "link": "http://www.corestandards.org/Math/Content/2/NBT/#CCSS.Math.Content.2.NBT.A.2",
+                                        "description": "Count within 1000; skip-count by 5s, 10s, and 100s."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.2.NBT.B.8",
+                                        "link": "http://www.corestandards.org/Math/Content/2/NBT/B/8/",
+                                        "description": "Mentally add 10 or 100 to a given number 100-900, and mentally subtract 10 or 100 from a given number 100-900."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.3.OA.A.1",
+                                        "link": "http://www.corestandards.org/Math/Content/3/OA/A/1/",
+                                        "description": "Interpret products of whole numbers, e.g., interpret 5 × 7 as the total number of objects in 5 groups of 7 objects each. For example, describe a context in which a total number of objects can be expressed as 5 × 7."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.3.OA.A.4",
+                                        "link": "http://www.corestandards.org/Math/Content/3/OA/A/4/",
+                                        "description": "Determine the unknown whole number in a multiplication or division equation relating three whole numbers. For example, determine the unknown number that makes the equation true in each of the equations 8 × ? = 48, 5 = _ ÷ 3, 6 × 6 = ?"
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.3.OA.D.9",
+                                        "link": "http://www.corestandards.org/Math/Content/3/OA/D/9/",
+                                        "description": "Identify arithmetic patterns (including patterns in the addition table or multiplication table), and explain them using properties of operations. For example, observe that 4 times a number is always even, and explain why 4 times a number can be decomposed into two equal addends."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.3.NBT.A.2",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NBT/A/2/",
+                                        "description": "Fluently add and subtract within 1000 using strategies and algorithms based on place value, properties of operations, and/or the relationship between addition and subtraction."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.4.OA.C.5",
+                                        "link": "http://www.corestandards.org/Math/Content/4/OA/C/5/",
+                                        "description": "Generate a number or shape pattern that follows a given rule. Identify apparent features of the pattern that were not explicit in the rule itself. For example, given the rule \"Add 3\" and the starting number 1, generate terms in the resulting sequence and observe that the terms appear to alternate between odd and even numbers. Explain informally why the numbers will continue to alternate in this way."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.5.OA.B.3",
+                                        "link": "http://www.corestandards.org/Math/Content/5/OA/B/3/",
+                                        "description": "Generate two numerical patterns using two given rules. Identify apparent relationships between corresponding terms. Form ordered pairs consisting of corresponding terms from the two patterns, and graph the ordered pairs on a coordinate plane. For example, given the rule \"Add 3\" and the starting number 0, and given the rule \"Add 6\" and the starting number 0, generate terms in the resulting sequences, and observe that the terms in one sequence are twice the corresponding terms in the other sequence. Explain informally why this is so."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.NS.C.5",
+                                        "link": "http://www.corestandards.org/Math/Content/6/NS/C/5/",
+                                        "description": "Understand that positive and negative numbers are used together to describe quantities having opposite directions or values (e.g., temperature above/below zero, elevation above/below sea level, credits/debits, positive/negative electric charge); use positive and negative numbers to represent quantities in real-world contexts, explaining the meaning of 0 in each situation."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.NS.C.6",
+                                        "link": "http://www.corestandards.org/Math/Content/6/NS/#CCSS.Math.Content.6.NS.C.6",
+                                        "description": "Understand a rational number as a point on the number line. Extend number line diagrams and coordinate axes familiar from previous grades to represent points on the line and in the plane with negative number coordinates."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.NS.C.6.A",
+                                        "link": "http://www.corestandards.org/Math/Content/6/NS/C/6/a/",
+                                        "description": "Recognize opposite signs of numbers as indicating locations on opposite sides of 0 on the number line; recognize that the opposite of the opposite of a number is the number itself, e.g., -(-3) = 3, and that 0 is its own opposite."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.NS.C.6.C",
+                                        "link": "http://www.corestandards.org/Math/Content/6/NS/C/6/c/",
+                                        "description": "Find and position integers and other rational numbers on a horizontal or vertical number line diagram; find and position pairs of integers and other rational numbers on a coordinate plane."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         "banners": {
             "product": "assets/game-banner-WT.png",
