@@ -72,3 +72,165 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, userId){
+    return when.promise(function(resolve, reject){
+        var studentSeats;
+        var studentList;
+        var promiseList = [];
+        if(!Array.isArray(courseIds)){
+            courseIds = [courseIds];
+        }
+        promiseList.push(this.myds.getLicenseById(licenseId));
+        promiseList.push(this.cbds.getActiveStudentsByLicense(licenseId));
+        when.all(promiseList)
+            .then(function(results){
+                var courseObj = {};
+                var premiumCourses = {};
+                courseIds.forEach(function(id){
+                    courseObj[id] = true;
+                });
+                var license = results[0][0];
+                var packageSize = license["package_size_tier"];
+                studentSeats = lConst.seats[packageSize].studentSeats;
+                studentList = results[1];
+                _(studentList).forEach(function(student){
+                    _(student).forEach(function(premiumCourse, courseId, courseList){
+                        if(premiumCourse && courseObj[courseId]){
+                            courseList[courseId] = false;
+                            premiumCourses[courseId] = true;
+                        }
+                    })
+                });
+                premiumCourses = Object.keys(premiumCourses);
+                if(premiumCourses.length > 0){
+                    return this.myds.unassignPremiumCourses(premiumCourses);
+                }
+                return "continue";
+            }.bind(this))
+            .then(function(status){
+                if(status === "continue"){
+                    return status;
+                }
+                var licenseStudentList = { students: studentList};
+                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
+            }.bind(this))
+            .then(function(status){
+                if(status === "continue"){
+                    return status;
+                }
+                return this.updateStudentSeatsRemaining(licenseId, studentSeats);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Unassign Instructor Premium Courses Error -",err);
+                reject(err);
+            })
+    }.bind(this));
+};
+
+LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
+    return when.promise(function(resolve, reject){
+        var license;
+        var activeStudents;
+        var promiseList = [];
+        var lmsService = this.serviceManager.get("lms").service;
+        promiseList.push(lmsService.myds.getStudentIdsForCourse(courseId));
+        promiseList.push(this.cbds.getActiveStudentsByLicense(licenseId));
+        promiseList.push(this.myds.getLicenseById(licenseId));
+        when.all(promiseList)
+            .then(function(results){
+                // get an id list of all students in a course and all students in license
+                var students = results[0];
+                var studentIds = _.pluck(students, "id");
+                activeStudents = results[1];
+                // from activeStudentMap, determine which students would newly be added to the license, and count them
+                var newPremiumStudents = [];
+                studentIds.forEach(function(id){
+                    if(!activeStudents[id]){
+                        newPremiumStudents.push(id);
+                        // add any students not already in the license to the activeStudentMap in couchbase
+                        activeStudents[id] = {};
+                        activeStudents[id][courseId] = true;
+                    }
+                });
+
+                // check number of student seats remaining in license
+                license = results[2][0];
+                var studentSeatsRemaining = license["student_seats_remaining"];
+                // if not enough seats
+                // return proper error message, informing teacher that there are not enough license seats left
+                if(newPremiumStudents.length > studentSeatsRemaining){
+                    return "not enough seats";
+                }
+                // if math adds up correctly, then assign the students
+                return this.myds.assignPremiumCourse(courseId, licenseId);
+                // change the student_count_remaining field in the license table
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
+                var licenseStudentList = { students: activeStudents};
+                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
+                var size = license["package_size_tier"];
+                var studentSeats = lConst.seats[size].studentSeats;
+                return this.updateStudentSeatsRemaining(licenseId, studentSeats);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Assign Premium Course Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+LicService.prototype.updateEducatorSeatsRemaining = function(licenseId, seats){
+    return when.promise(function(resolve, reject){
+        this.myds.countEducatorSeatsByLicense(licenseId)
+            .then(function(count){
+                var seatsRemaining = seats - count +1;
+                var seatsRemainingString = "educator_seats_remaining = " + seatsRemaining;
+                var updateFields = [seatsRemainingString];
+                return this.myds.updateLicenseById(licenseId, updateFields);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Update Educator Seats Remaining Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+LicService.prototype.updateStudentSeatsRemaining = function(licenseId, seats){
+    return when.promise(function(resolve, reject){
+        this.cbds.countActiveStudentsByLicense(licenseId)
+            .then(function(count){
+                var seatsRemaining = seats - count;
+                var seatsRemainingString = "student_seats_remaining = " + seatsRemaining;
+                var updateFields = [seatsRemainingString];
+                return this.myds.updateLicenseById(licenseId, updateFields);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null,function(err){
+                console.error("Update Student Seats Remaining Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
