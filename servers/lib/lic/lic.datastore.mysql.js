@@ -391,6 +391,20 @@ Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, us
   }.bind(this));
 };
 
+Lic_MySQL.prototype.assignPremiumCourse = function(courseId){
+    return when.promise(function(resolve, reject){
+        var Q = "UPDATE GL_COURSE SET premium_games_assigned = TRUE WHERE id = " + courseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Assign Premium Course Error -", err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.unassignPremiumCourses = function(courses){
     return when.promise(function(resolve, reject){
         var coursesString = courses.join(",");
