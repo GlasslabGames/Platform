@@ -191,3 +191,38 @@ StripeUtil.prototype.listPlans = function() {
         });
     }.bind(this));
 };
+
+/*
+ * Card APIs
+ */
+StripeUtil.prototype.retrieveCard = function( customerId, cardId ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe customers.retrieveCard API
+        this.stripe.customers.retrieveCard( customerId, cardId, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to retrieve the card: ", customerId, cardId, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully retrieved the Card: ", customerId, cardId, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
+StripeUtil.prototype.updateCard = function( customerId, cardId, params ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe customers.updateCard API
+        this.stripe.customers.updateCard( customerId, cardId, params, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to update the card: ", customerId, cardId, params, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully updated the Card: ", customerId, cardId, params, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};

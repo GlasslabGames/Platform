@@ -35,7 +35,7 @@ function getUserProfileData(req, res, next) {
         var userData = req.session.passport.user;
         // check perms before returning user info
         this.webstore.getUserInfoById(userData.id)
-            // ok, send data
+            // ok, send mdata
             .then(function(userData){
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
