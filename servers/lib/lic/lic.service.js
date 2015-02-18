@@ -78,12 +78,15 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
         var studentSeats;
         var studentList;
         var promiseList = [];
+        if(!Array.isArray(courseIds)){
+            courseIds = [courseIds];
+        }
         promiseList.push(this.myds.getLicenseById(licenseId));
         promiseList.push(this.cbds.getActiveStudentsByLicense(licenseId));
         when.all(promiseList)
             .then(function(results){
                 var courseObj = {};
-                var premiumCourses = [];
+                var premiumCourses = {};
                 courseIds.forEach(function(id){
                     courseObj[id] = true;
                 });
@@ -95,10 +98,11 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
                     _(student).forEach(function(premiumCourse, courseId, courseList){
                         if(premiumCourse && courseObj[courseId]){
                             courseList[courseId] = false;
-                            premiumCourses.push(courseId);
+                            premiumCourses[courseId] = true;
                         }
                     })
                 });
+                premiumCourses = Object.keys(premiumCourses);
                 if(premiumCourses.length > 0){
                     return this.myds.unassignPremiumCourses(premiumCourses);
                 }
@@ -127,8 +131,22 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
     }.bind(this));
 };
 
-LicService.prototype.assignPremiumCourses = function(courseIds){
+LicService.prototype.assignPremiumCourses = function(courseIds, licenseId){
+    return when.promise(function(resolve, reject){
+        resolve();
+        return;
+        // 1. get an id list of all students in a course
+        // 2. from activeStudentMap, determine which students would newly be added to the license, and count them
+        // 2. check number of student seats remaining in license
+        // if math adds up correctly, then assign the course
+        // a. add any students not already in the license to the activeStudentMap in couchbase
+        // b. change the student_count_remaining field in the license table
+        // if not enough seats
+        // return proper error message, informing teacher that there are not enough license seats left
 
+        //this.myds.getLicenseById(licenseId)
+        //    .then(function())
+    }.bind(this));
 };
 
 LicService.prototype.updateEducatorSeatsRemaining = function(licenseId, seats){

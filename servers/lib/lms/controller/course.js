@@ -490,9 +490,9 @@ function updateCourseInfo(req, res, next, serviceManager)
                     var licService = this.serviceManager.get("lic").service;
                     var licenseId = req.user.licenseId;
                     if(courseData.premiumGamesAssigned){
-                        return licService.assignPremiumCourses([courseId], licenseId);
+                        return licService.assignPremiumCourses(courseId, licenseId);
                     } else {
-                        return licService.unassignPremiumCourses([courseId], licenseId);
+                        return licService.unassignPremiumCourses(courseId, licenseId);
                     }
                 } else if(isEnrolled){
                     return;
@@ -521,8 +521,9 @@ function updateCourseInfo(req, res, next, serviceManager)
  POST http://localhost:8001/api/v2/lms/course/107/games
  */
 exampleIn.updateGamesInCourse = [
-    { "id": "SC",   "settings": {"missionProgressLock": true } },
-    { "id": "AA-1", "settings": {} }
+    { "id": "SC",   "settings": {"Price": "Free", "assigned": true} },
+    { "id": "AA-1", "settings": {"Price": "Premium", "assigned": true} },
+    { "id": "PRIMA", "settings": { "Price": "Premium", "assigned": false } }
 ];
 function updateGamesInCourse(req, res, next, serviceManager)
 {
@@ -540,8 +541,13 @@ function updateGamesInCourse(req, res, next, serviceManager)
         courseData.id = req.params.courseId;
         courseData.games = req.body;
 
-        // check if enrolled
-        this.myds.isEnrolledInCourse(userData.id, courseData.id)
+        var licenseId = req.user.licenseId;
+
+        _changePremiumGamesAssignedStatus.call(this, courseData.id, courseData.games, licenseId)
+            .then(function(){
+                // check if enrolled
+                return this.myds.isEnrolledInCourse(userData.id, courseData.id);
+            }.bind(this))
             .then(function(isEnrolled){
                 if(isEnrolled) {
                     return this.updateGamesInCourse(userData, courseData);
@@ -561,6 +567,39 @@ function updateGamesInCourse(req, res, next, serviceManager)
         //this.requestUtil.errorResponse(res, "missing arguments or invalid");
         this.requestUtil.errorResponse(res, {key:"course.general"});
     }
+}
+
+function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
+    return when.promise(function(resolve, reject){
+        if(!licenseId){
+            resolve();
+            return;
+        }
+        var isPremium = games.some(function(game){
+            var settings = game.settings;
+            if(settings.Price === "Premium" && settings.assigned === true){
+                return true;
+            }
+        });
+        var licService = this.serviceManager.get("lic").service;
+        this.myds.getCourse(courseId)
+            .then(function(course){
+                if(course.premiumGamesAssigned && !isPremium){
+                    // if database says premium course, but no premium games, unassign course
+                    return licService.unassignPremiumCourses(courseId, licenseId);
+                } else if(!course.premiumGamesAssigned && isPremium){
+                    // if database says not premium course, but there are premium games, assign course
+                    return licService.assignPremiumCourses(courseId, licenseId);
+                }
+            })
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Change Course Assignment Status Error -", err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 /*
