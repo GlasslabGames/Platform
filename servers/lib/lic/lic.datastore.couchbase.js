@@ -66,8 +66,7 @@ Lic_Couchbase.prototype.getActiveStudentsByLicense = function(licenseId){
             var courseList;
             var students = results.value.students;
             _(students).forEach(function(premiumCourses, student){
-                 courseList = Object.keys(premiumCourses);
-                courseList.some(function(state){
+                _(premiumCourses).some(function(state){
                     if(state === true){
                         activeStudents[student] = premiumCourses;
                     }
