@@ -1116,7 +1116,7 @@ function _unassignInstructorPremiumCourses(userId, licenseId, studentSeats){
 
 function _validateLicenseInstructorAccess(userId, licenseId) {
     return when.promise(function (resolve, reject) {
-        this.myds.getLicenseMapByUser(userId)
+        this.myds.getLicenseMapByInstructors([userId])
             .then(function (results) {
                 var state;
                 if (results.length === 0) {

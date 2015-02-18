@@ -309,6 +309,12 @@ return when.promise(function(resolve, reject) {
                 user.licenseId = license["id"];
                 user.licenseOwnerId = license["user_id"];
                 user.licenseStatus = license["status"];
+                var packageType = license["package_type"];
+                if (packageType === "trial") {
+                    user.isTrial = true;
+                } else {
+                    user.isTrial = false;
+                }
             }
             resolve(user);
         });
