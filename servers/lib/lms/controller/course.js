@@ -479,15 +479,21 @@ function updateCourseInfo(req, res, next, serviceManager)
             return;
         }
         var courseData = req.body;
-        courseData.id = req.params.courseId;
+        var courseId = courseData.id = req.params.courseId;
         var premiumGamesAssignedChanged = courseData.premiumGamesAssigned !== undefined;
 
         // check if enrolled
-        this.myds.isEnrolledInCourse(userData.id, courseData.id)
+        this.myds.isEnrolledInCourse(userData.id, courseId)
             .then(function(isEnrolled){
                 if(isEnrolled && premiumGamesAssignedChanged) {
                     //add class type method here
-                    return;
+                    var licService = this.serviceManager.get("lic").service;
+                    var licenseId = req.user.licenseId;
+                    if(courseData.premiumGamesAssigned){
+                        return licService.assignPremiumCourses([courseId], licenseId);
+                    } else {
+                        return licService.unassignPremiumCourses([courseId], licenseId);
+                    }
                 } else if(isEnrolled){
                     return;
                 } else{

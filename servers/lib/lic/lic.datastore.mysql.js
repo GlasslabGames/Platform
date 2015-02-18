@@ -181,12 +181,13 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     }.bind(this));
 };
 
-Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
+Lic_MySQL.prototype.userHasLicenseMap = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + userId + ";";
         this.ds.query(Q)
             .then(function(results){
-                resolve(results);
+                var state = results.length > 0;
+                resolve(state);
             })
             .then(null, function(err){
                 console.error("Get License Map By User Error -",error);
