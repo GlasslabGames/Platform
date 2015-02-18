@@ -131,21 +131,69 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
     }.bind(this));
 };
 
-LicService.prototype.assignPremiumCourses = function(courseIds, licenseId){
+LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
     return when.promise(function(resolve, reject){
-        resolve();
-        return;
-        // 1. get an id list of all students in a course
-        // 2. from activeStudentMap, determine which students would newly be added to the license, and count them
-        // 2. check number of student seats remaining in license
-        // if math adds up correctly, then assign the course
-        // a. add any students not already in the license to the activeStudentMap in couchbase
-        // b. change the student_count_remaining field in the license table
-        // if not enough seats
-        // return proper error message, informing teacher that there are not enough license seats left
+        var license;
+        var activeStudents;
+        var promiseList = [];
+        var lmsService = this.serviceManager.get("lms").service;
+        promiseList.push(lmsService.myds.getStudentIdsForCourse(courseId));
+        promiseList.push(this.cbds.getActiveStudentsByLicense(licenseId));
+        promiseList.push(this.myds.getLicenseById(licenseId));
+        when.all(promiseList)
+            .then(function(results){
+                // get an id list of all students in a course and all students in license
+                var students = results[0];
+                var studentIds = _.pluck(students, "id");
+                activeStudents = results[1];
+                // from activeStudentMap, determine which students would newly be added to the license, and count them
+                var newPremiumStudents = [];
+                studentIds.forEach(function(id){
+                    if(!activeStudents[id]){
+                        newPremiumStudents.push(id);
+                        // add any students not already in the license to the activeStudentMap in couchbase
+                        activeStudents[id] = {};
+                        activeStudents[id][courseId] = true;
+                    }
+                });
 
-        //this.myds.getLicenseById(licenseId)
-        //    .then(function())
+                // check number of student seats remaining in license
+                license = results[2][0];
+                var studentSeatsRemaining = license["student_seats_remaining"];
+                // if not enough seats
+                // return proper error message, informing teacher that there are not enough license seats left
+                if(newPremiumStudents.length > studentSeatsRemaining){
+                    return "not enough seats";
+                }
+                // if math adds up correctly, then assign the students
+                return this.myds.assignPremiumCourse(courseId, licenseId);
+                // change the student_count_remaining field in the license table
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
+                var licenseStudentList = { students: activeStudents};
+                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
+                var size = license["package_size_tier"];
+                var studentSeats = lConst.seats[size].studentSeats;
+                return this.updateStudentSeatsRemaining(licenseId, studentSeats);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Assign Premium Course Error -",err);
+                reject(err);
+            });
     }.bind(this));
 };
 

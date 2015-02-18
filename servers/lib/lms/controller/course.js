@@ -490,7 +490,7 @@ function updateCourseInfo(req, res, next, serviceManager)
                     var licService = this.serviceManager.get("lic").service;
                     var licenseId = req.user.licenseId;
                     if(courseData.premiumGamesAssigned){
-                        return licService.assignPremiumCourses(courseId, licenseId);
+                        return licService.assignPremiumCourse(courseId, licenseId);
                     } else {
                         return licService.unassignPremiumCourses(courseId, licenseId);
                     }
@@ -589,7 +589,7 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
                     return licService.unassignPremiumCourses(courseId, licenseId);
                 } else if(!course.premiumGamesAssigned && isPremium){
                     // if database says not premium course, but there are premium games, assign course
-                    return licService.assignPremiumCourses(courseId, licenseId);
+                    return licService.assignPremiumCourse(courseId, licenseId);
                 }
             })
             .then(function(){
