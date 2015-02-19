@@ -181,12 +181,13 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     }.bind(this));
 };
 
-Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
+Lic_MySQL.prototype.userHasLicenseMap = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + userId + ";";
         this.ds.query(Q)
             .then(function(results){
-                resolve(results);
+                var state = results.length > 0;
+                resolve(state);
             })
             .then(null, function(err){
                 console.error("Get License Map By User Error -",error);
@@ -388,6 +389,20 @@ Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, us
               reject(err);
           });
   }.bind(this));
+};
+
+Lic_MySQL.prototype.assignPremiumCourse = function(courseId){
+    return when.promise(function(resolve, reject){
+        var Q = "UPDATE GL_COURSE SET premium_games_assigned = TRUE WHERE id = " + courseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Assign Premium Course Error -", err);
+                reject(err);
+            });
+    }.bind(this));
 };
 
 Lic_MySQL.prototype.unassignPremiumCourses = function(courses){

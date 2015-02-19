@@ -63,12 +63,14 @@ Lic_Couchbase.prototype.getActiveStudentsByLicense = function(licenseId){
                 return;
             }
             var activeStudents = {};
+            var courseList;
             var students = results.value.students;
             _(students).forEach(function(premiumCourses, student){
-                var courseList = Object.keys(premiumCourses);
-                if(courseList.length > 0){
-                    activeStudents[student] = premiumCourses;
-                }
+                _(premiumCourses).some(function(state){
+                    if(state === true){
+                        activeStudents[student] = premiumCourses;
+                    }
+                });
             });
             resolve(activeStudents);
         });

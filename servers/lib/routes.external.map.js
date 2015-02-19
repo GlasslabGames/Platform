@@ -431,11 +431,12 @@ module.exports = {
 
         {
             requireAuth: true,
-            api: "/api/v2/license/customer",
+            api: "/api/v2/license/billing",
             service: "lic",
             controller: "license",
             method: {
-                get: "getCustomerId"
+                get: "getBillingInfo",
+                post: "updateBillingInfo"
             }
         },
         {

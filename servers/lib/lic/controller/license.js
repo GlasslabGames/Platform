@@ -9,7 +9,8 @@ module.exports = {
     getSubscriptionPackages: getSubscriptionPackages,
     getCurrentPlan: getCurrentPlan,
     getStudentsInLicense: getStudentsInLicense,
-    getCustomerId: getCustomerId,
+    getBillingInfo: getBillingInfo,
+    updateBillingInfo: updateBillingInfo,
     subscribeToLicense: subscribeToLicense,
     subscribeToTrialLicense: subscribeToTrialLicense,
     upgradeLicense: upgradeLicense,
@@ -192,7 +193,7 @@ function getStudentsInLicense(req, res){
         }.bind(this));
 }
 
-function getCustomerId(req, res){
+function getBillingInfo(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
@@ -204,6 +205,7 @@ function getCustomerId(req, res){
 
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
+    var customerId;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -213,16 +215,67 @@ function getCustomerId(req, res){
         }.bind(this))
         .then(function(user){
             if(typeof user === "string"){
-                _errorLicensingAccess.call(this, res, user);
+                return user;
+            }
+            customerId = user["customer_id"];
+            return this.serviceManager.stripe.retrieveCustomer(customerId);
+        }.bind(this))
+        .then(function(customer){
+            if(typeof cardData === "string"){
+                _errorLicensingAccess.call(this, res, cardData);
                 return;
             }
-            var customerId = user["customer_id"];
-            this.requestUtil.jsonResponse(res, { id: customerId });
+            var cardData = customer.cards.data[0];
+            var billingInfo = _buildBillingInfo(cardData);
+            this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
             console.error("Get Customer Id Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this))
+}
+
+function updateBillingInfo(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.card)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    var params = {};
+    params.card = req.body.card;
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    var customerId;
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return this.myds.getUserById(userId);
+        }.bind(this))
+        .then(function(user){
+            if(typeof user === "string"){
+                return user;
+            }
+            customerId = user["customer_id"];
+            return this.serviceManager.stripe.updateCustomer(customerId, params);
+        }.bind(this))
+        .then(function(customer){
+            if(typeof customer === "string"){
+                this.requestUtil.errorResponse(res, customer);
+                return;
+            }
+            var cardData = customer.cards.data[0];
+            var billingInfo = _buildBillingInfo(cardData);
+            this.requestUtil.jsonResponse(res, billingInfo);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Update Billing Info Error -",err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }
 
 function subscribeToLicense(req, res){
@@ -287,9 +340,9 @@ function subscribeToTrialLicense(req, res){
         seats: "class",
         type: "trial"
     };
-    this.myds.getLicenseMapByUser(userId)
-        .then(function(results){
-            if(results.length > 0){
+    this.myds.userHasLicenseMap(userId)
+        .then(function(state){
+            if(state){
                 return "no trial"
             }
             return _createSubscription.call(this, req, userId, stripeInfo, planInfo);
@@ -374,8 +427,8 @@ function upgradeLicense(req, res){
             var studentSeats = seats.studentSeats;
 
             promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
-            promiseList.push(_updateEducatorSeatsRemaining.call(this, licenseId, educatorSeats));
-            promiseList.push(_updateStudentSeatsRemaining.call(this, licenseId, studentSeats));
+            promiseList.push(this.updateEducatorSeatsRemaining(licenseId, educatorSeats));
+            promiseList.push(this.updateStudentSeatsRemaining(licenseId, studentSeats));
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
@@ -602,7 +655,7 @@ function addTeachersToLicense(req, res){
             var promiseList = [];
             var rejectedIds = Object.keys(rejectedTeachers);
             promiseList.push(_grabInstructorEmailsByType.call(this, existingTeachers, createTeachers, rejectedIds));
-            promiseList.push(_updateEducatorSeatsRemaining.call(this, licenseId, licenseSeats));
+            promiseList.push(this.updateEducatorSeatsRemaining(licenseId, licenseSeats));
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
@@ -772,6 +825,23 @@ function teacherLeavesLicense(req, res){
             this.requestUtil.errorResponse(res, err);
             console.error("Teacher Leaves License Error -",err);
         }.bind(this));
+}
+
+function _buildBillingInfo(cardData){
+    var output = {};
+    output.last4 = cardData.last4;
+    output.brand = cardData.brand;
+    output.expMonth = cardData.exp_month;
+    output.expYear = cardData.exp_year;
+    output.country = cardData.country;
+    output.name = cardData.name;
+    output.addressLine1 = cardData.address_line1;
+    output.addressLine2 = cardData.address_line2;
+    output.addressCity = cardData.address_city;
+    output.addressState = cardData.address_state;
+    output.addressZip = cardData.address_zip;
+    output.addressCountry = cardData.address_country;
+    return output;
 }
 
 function _createSubscription(req, userId, stripeInfo, planInfo){
@@ -1000,8 +1070,6 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
         var promiseList = [];
         promiseList.push(this.myds.getInstructorsByLicense(licenseId));
         promiseList.push(this.myds.getUsersByEmail(teacherEmail));
-        promiseList.push(this.myds.getLicenseById(licenseId));
-        var packageSize;
         var teacherId;
         when.all(promiseList)
             .then(function(results){
@@ -1018,12 +1086,18 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
                 }
                 var teacher = results[1][0];
                 teacherId = teacher.id;
-                var license = results[2][0];
-                packageSize = license["package_size_tier"];
-                var studentSeats = lConst.seats[packageSize].studentSeats;
+                return this.myds.getCoursesByInstructor(teacherId);
                 //find out which premium courses that instructor is a part of
                 //lock each of those premium courses (with utility method)
-                return _unassignInstructorPremiumCourses.call(this, teacherId, licenseId, studentSeats);
+            }.bind(this))
+            .then(function(results){
+                if(results === "email not in license"){
+                    return results;
+                }
+                var courseIds = results[0];
+                if(Array.isArray(courseIds)){
+                    return this.unassignPremiumCourses(courseIds, licenseId);
+                }
             }.bind(this))
             .then(function(state){
                 if(state === "email not in license"){
@@ -1039,7 +1113,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
                 }
                 // update educator count
                 var educatorSeats = lConst.seats[packageSize].educatorSeats;
-                return _updateEducatorSeatsRemaining.call(this, licenseId, educatorSeats);
+                return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
             }.bind(this))
             .then(function(state){
                 if(state === "email not in license"){
@@ -1069,55 +1143,6 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
                 console.error("Remove Instructor From License Error -",err);
                 reject(err);
             }.bind(this));
-    }.bind(this));
-}
-
-function _unassignInstructorPremiumCourses(userId, licenseId, studentSeats){
-    return when.promise(function(resolve, reject){
-        var promiseList = [this.myds.getCoursesByInstructor(userId), this.cbds.getActiveStudentsByLicense(licenseId)];
-        var studentList;
-        when.all(promiseList)
-            .then(function(results){
-                var courseIds = results[0];
-                var courseObj = {};
-                var premiumCourses = [];
-                courseIds.forEach(function(id){
-                    courseObj[id] = true;
-                });
-                studentList = results[1];
-                _(studentList).forEach(function(student){
-                    _(student).forEach(function(premiumCourse, courseId, courseList){
-                        if(premiumCourse && courseObj[courseId]){
-                            courseList[courseId] = false;
-                            premiumCourses.push(courseId);
-                        }
-                    })
-                });
-                if(premiumCourses.length > 0){
-                    return this.myds.unassignPremiumCourses(premiumCourses);
-                }
-                return "continue";
-            }.bind(this))
-            .then(function(status){
-                if(status === "continue"){
-                    return status;
-                }
-                var licenseStudentList = { students: studentList};
-                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
-            }.bind(this))
-            .then(function(status){
-                if(status === "continue"){
-                    return status;
-                }
-                return _updateStudentSeatsRemaining.call(this, licenseId, studentSeats);
-            }.bind(this))
-            .then(function(){
-                resolve();
-            })
-            .then(null, function(err){
-                console.error("Unassign Instructor Premium Courses Error -",err);
-                reject(err);
-            })
     }.bind(this));
 }
 
@@ -1155,6 +1180,7 @@ function _errorLicensingAccess(res, status){
     }
 }
 
+<<<<<<< HEAD
 function _updateEducatorSeatsRemaining(licenseId, seats){
     return when.promise(function(resolve, reject){
         this.myds.countEducatorSeatsByLicense(licenseId)
@@ -1208,6 +1234,8 @@ function _deactivateAutoRenew(licenseId) {
     }.bind(this));
 }
 
+=======
+>>>>>>> 221353a288e5aac82272be89c983482b36e21a9c
 function _createLicenseEmailResponse(licenseOwnerEmail, data, protocol, host, template){
     return when.promise(function(resolve, reject){
         // early prototype, needs development
