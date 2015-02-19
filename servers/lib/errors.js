@@ -104,6 +104,8 @@ module.exports = {
     "research.startDate.missing":           "Missing startDate or startEpoc",
     "research.arguments.missing":           "Missing Arguments",
     "research.endDate.missing":             "Missing endDate",
+    // lms
+    "lms.game.invalid":                     "Cannot access another license's premium game",
     // lic
     "lic.access.invalid":                   "Invalid Access",
     "lic.records.invalid":                  "User tied to to more than one license",

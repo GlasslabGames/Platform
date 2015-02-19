@@ -679,7 +679,8 @@ return when.promise(function(resolve, reject) {
             courseData.lmsType,               // lmsType for sso lms
             courseData.lmsId,                 // lmsId for sso lms
             courseData.labels,                // labels
-            courseData.meta                   // meta data
+            courseData.meta,                  // meta data
+            courseData.premiumGamesAssigned   // do the course's students count against the student cap in the license
         ];
         values = values.join(',');
 
@@ -700,7 +701,8 @@ return when.promise(function(resolve, reject) {
             "lmsType," +
             "lmsId," +
             "labels," +
-            "meta" +
+            "meta," +
+            "premium_games_assigned" +
             ") ";
 
         // if institutionId == NULL unique constraint will not apply so we need to check it
