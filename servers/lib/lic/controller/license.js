@@ -70,6 +70,7 @@ function getCurrentPlan(req, res){
                 return license;
             }
             license = license[0];
+            output["autoRenew"] = license["auto_renew"];
             output["studentSeatsRemaining"] = license["student_seats_remaining"];
             output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
             output["expirationDate"] = license["expiration_date"];
@@ -428,6 +429,12 @@ function cancelLicense(req, res){
             var license = results[1][0];
             var subscriptionId = license["subscription_id"];
             return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+        }.bind(this))
+        .then(function(status) {
+            if (typeof status === "string") {
+                return status;
+            }
+            return _deactivateAutoRenew.call(this, licenseId);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -1181,6 +1188,21 @@ function _updateStudentSeatsRemaining(licenseId, seats){
             })
             .then(null,function(err){
                 console.error("Update Student Seats Remaining Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _deactivateAutoRenew(licenseId) {
+    return when.promise(function (resolve, reject) {
+        var autoRenewString = "auto_renew = 0";
+        var updateFields = [autoRenewString];
+        return this.myds.updateLicenseById(licenseId, updateFields)
+            .then(function () {
+                resolve();
+            })
+            .then(null, function (err) {
+                console.error("Deactivate Auto Renew -", err);
                 reject(err);
             });
     }.bind(this));
