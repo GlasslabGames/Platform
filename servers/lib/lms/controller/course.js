@@ -1,4 +1,3 @@
-
 var _      = require('lodash');
 var when   = require('when');
 var Util   = require('../../core/util.js');
@@ -344,9 +343,24 @@ function createCourse(req, res, next, serviceManager)
             this.requestUtil.errorResponse(res, {error: "games missing or not array", key:"course.create.missing.gameids"}, 404);
             return;
         }
+        var games = req.body.games;
+        var licenseId = req.user.licenseId;
 
-        this.createCourse(userData, req.body)
+        _checkForGameAccess.call(this, licenseId, games)
+            .then(function(results){
+                var abort = results[0];
+                if(abort){
+                    return "invalid game access";
+                }
+                req.body.premiumGamesAssigned = results[1];
+                return this.createCourse(userData, req.body);
+            }.bind(this))
             .then(function(courseData){
+                if(courseData === "invalid game access"){
+                    // change to something better
+                    this.requestUtil.errorResponse(res, { key: "lms.game.invalid"});
+                    return;
+                }
                 this.requestUtil.jsonResponse(res, courseData);
             }.bind(this))
 
@@ -357,6 +371,67 @@ function createCourse(req, res, next, serviceManager)
     } else {
         this.requestUtil.errorResponse(res, {key:"course.general"});
     }
+}
+
+function _checkForGameAccess(licenseId, games){
+    return when.promise(function(resolve, reject) {
+
+        var promiseList = [{}];
+        var lic = this.serviceManager.get("lic");
+        var licService = lic.service;
+        if (licenseId) {
+            promiseList[0] = licService.myds.getLicenseById(licenseId);
+        }
+        var dashService = this.serviceManager.get("dash").service;
+        games.forEach(function (game) {
+            if(game.assigned){
+                promiseList.push(dashService.getGameBasicInfo(game.id));
+            }
+        });
+        when.all(promiseList)
+            .then(function (results) {
+                var license = results[0][0];
+                var gamesInfo = results.slice(1);
+                var availableGames = {};
+                var abort = false;
+                var premiumGamesAssigned = false;
+                var lConst = lic["lib"]["Const"];
+                var browserGames;
+                var iPadGames;
+                var downloadableGames;
+                if (license.id) {
+                    var plan = license["package_type"];
+                    browserGames = lConst.plan[plan].browserGames;
+                    browserGames.forEach(function (gameId) {
+                        availableGames[gameId] = true;
+                    });
+                    iPadGames = lConst.plan[plan].iPadGames;
+                    iPadGames.forEach(function (gameId) {
+                        availableGames[gameId] = true;
+                    });
+                    downloadableGames = lConst.plan[plan].downloadableGames;
+                    downloadableGames.forEach(function (gameId) {
+                        availableGames[gameId] = true;
+                    });
+                }
+                gamesInfo.some(function (game) {
+                    if (game.price === "Premium") {
+                        premiumGamesAssigned = true;
+                        // if user on a license, but the game is not in the user's plan
+                        // or if the user is not on a license, throw an error
+                        if ((licenseId && !availableGames[game.gameId]) || !licenseId) {
+                            abort = true;
+                            return true;
+                        }
+                    }
+                }.bind(this));
+                resolve([abort, premiumGamesAssigned]);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Check For Game Access Error -",err);
+                reject(err);
+            })
+    }.bind(this));
 }
 
 /*
@@ -545,18 +620,27 @@ function updateGamesInCourse(req, res, next, serviceManager)
         var licenseId = req.user.licenseId;
 
         _changePremiumGamesAssignedStatus.call(this, courseData.id, courseData.games, licenseId)
-            .then(function(){
+            .then(function(status){
+                if(status === "invalid game access"){
+                    return status;
+                }
                 // check if enrolled
                 return this.myds.isEnrolledInCourse(userData.id, courseData.id);
             }.bind(this))
             .then(function(isEnrolled){
-                if(isEnrolled) {
+                if(isEnrolled === "invalid game access"){
+                    return "invalid game access";
+                }
+                else if (isEnrolled){
                     return this.updateGamesInCourse(userData, courseData);
                 } else {
                     return when.reject({key:"course.general"});
                 }
             }.bind(this))
-            .then(function(){
+            .then(function(status){
+                if(status === "invalid game access"){
+                    this.requestUtil.errorResponse(res, { key: "lms.game.invalid"});
+                }
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);
             }.bind(this))
 
@@ -576,26 +660,18 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
             resolve();
             return;
         }
-        var dashService = this.serviceManager.get("dash").service;
-        var gameInfo;
         var promiseList = [];
         promiseList.push(this.myds.getCourse(courseId));
-        games.forEach(function(game){
-            if(game.assigned){
-                promiseList.push(dashService.getGameBasicInfo(game.id));
-            }
-        });
-        var licService = this.serviceManager.get("lic").service;
+        promiseList.push(_checkForGameAccess.call(this, licenseId, games));
         when.all(promiseList)
             .then(function(results){
+                var licService = this.serviceManager.get("lic").service;
                 var course = results[0];
-                // iterate across all the basic game info for assigned games, see if any are Premium
-                // first index is not a game, so skip that one
-                var isPremium = results.some(function(game, index){
-                    if(index > 0 && game.price === "Premium"){
-                        return true;
-                    }
-                });
+                var abort = results[1][0];
+                if(abort){
+                    return "invalid game access";
+                }
+                var isPremium = results[1][1];
                 if(course.premiumGamesAssigned && !isPremium){
                     // if database says premium course, but no premium games, unassign course
                     return licService.unassignPremiumCourses(courseId, licenseId);
@@ -603,8 +679,12 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
                     // if database says not premium course, but there are premium games, assign course
                     return licService.assignPremiumCourse(courseId, licenseId);
                 }
-            })
-            .then(function(){
+            }.bind(this))
+            .then(function(status){
+                if(status === "invalid game access"){
+                    resolve(status);
+                    return;
+                }
                 resolve();
             })
             .then(null, function(err){

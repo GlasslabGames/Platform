@@ -16,4 +16,4 @@ module.exports = {
         MySQL:  require('./lic.datastore.mysql.js'),
         Couchbase: require('./lic.datastore.couchbase.js')
     }
-}
+};
