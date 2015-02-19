@@ -472,7 +472,16 @@ module.exports = {
             service: "lic",
             controller: "license",
             method: {
-                post: "cancelLicense"
+                post: "cancelLicenseAutoRenew"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/renew",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "enableLicenseAutoRenew"
             }
         },
         {

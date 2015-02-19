@@ -115,5 +115,7 @@ module.exports = {
     "lic.create.denied":                    "An instructor currently on a license cannot create a new license",
     "lic.account.inactive":                 "The payment transaction did not go through",
     "lic.trial.expired":                    "Instructor was part of a license in the past",
-    "lic.email.invalid":                    "Emails with a + are not allowed for trials"
+    "lic.email.invalid":                    "Emails with a + are not allowed for trials",
+    "lic.cancelled.already":                "License auto-renew has already been cancelled, method should not be called",
+    "lic.renewing.already":                 "License auto-renew is already enabled, method should not be called"
 };
