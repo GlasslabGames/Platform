@@ -1,0 +1,74 @@
+{
+    "basic": {
+        "gameId": "WARP",
+        "enabled": true,
+        "visible": true,
+        "maintenance": null,
+        "shortName": "Warp Driver",
+        "longName": "Warp Driver",
+        "grades": "TBD",
+        "subject": "TBD",
+        "type": "TBD",
+        "platform": {
+            "type": "Browser",
+            "icon": {
+                "small": "assets/platform-browser.png",
+                "large": "assets/platform-browser@2x.png"
+            }
+        },
+        "price": "TBD",
+        "release": "dev",
+        "releaseDate": "TBD",
+        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
+        "description": "TBD",
+        "developer": {
+            "id": "GD",
+            "name": "GameDesk",
+            "logo": {
+                "small": "assets/gamedesk-logo.png",
+                "large": "assets/gamedesk-logo-2x.png"
+            },
+            "description": ""
+        },
+        "settings": {
+            "canCreateMatches": false
+        },
+        "license": {
+            "type": "loginType",
+            "loginType": "glasslabv2,icivics,edmodo",
+            "valid": false,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
+        },
+        "thumbnail": {
+            "small": "assets/thumb-game-PLACEHOLDER.png",
+            "large": "assets/thumb-game-PLACEHOLDER@2x.png"
+        },
+        "card": {
+            "small": "assets/game-card-WARP.png",
+            "large": "assets/game-card-WARP@2x.png"
+        },
+        "banners": {
+            "product": "assets/game-banner-WARP.png",
+            "reports": "assets/game-banner-WARP.png"
+        }
+    },
+    "assessment": [
+    ],
+    "reports": {
+        "list": [
+        ]
+    },
+    "details": {
+        "buttons": [
+        ],
+        "pages": {
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "https://plus.google.com/117864084582459836584/posts"
+        }
+    }
+}
