@@ -837,8 +837,6 @@ function _buildBillingInfo(cardData){
     return output;
 }
 
-function _grabInstructorEmailsByType(approvedUserIds, approvedNonUserIds, rejectedUserIds){
-
 function _createSubscription(req, userId, stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
         var email = req.user.email;
@@ -1011,6 +1009,8 @@ function _multiHasLicense(userIds){
             })
     }.bind(this));
 }
+
+function _grabInstructorEmailsByType(approvedUserIds, approvedNonUserIds, rejectedUserIds){
     return when.promise(function(resolve, reject){
         var promiseList = [[],[],[]];
         if(approvedUserIds.length > 0){
@@ -1139,55 +1139,6 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
     }.bind(this));
 }
 
-//function _unassignInstructorPremiumCourses(userId, licenseId, studentSeats){
-//    return when.promise(function(resolve, reject){
-//        var promiseList = [this.myds.getCoursesByInstructor(userId), this.cbds.getActiveStudentsByLicense(licenseId)];
-//        var studentList;
-//        when.all(promiseList)
-//            .then(function(results){
-//                var courseIds = results[0];
-//                var courseObj = {};
-//                var premiumCourses = [];
-//                courseIds.forEach(function(id){
-//                    courseObj[id] = true;
-//                });
-//                studentList = results[1];
-//                _(studentList).forEach(function(student){
-//                    _(student).forEach(function(premiumCourse, courseId, courseList){
-//                        if(premiumCourse && courseObj[courseId]){
-//                            courseList[courseId] = false;
-//                            premiumCourses.push(courseId);
-//                        }
-//                    })
-//                });
-//                if(premiumCourses.length > 0){
-//                    return this.myds.unassignPremiumCourses(premiumCourses);
-//                }
-//                return "continue";
-//            }.bind(this))
-//            .then(function(status){
-//                if(status === "continue"){
-//                    return status;
-//                }
-//                var licenseStudentList = { students: studentList};
-//                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
-//            }.bind(this))
-//            .then(function(status){
-//                if(status === "continue"){
-//                    return status;
-//                }
-//                return _updateStudentSeatsRemaining.call(this, licenseId, studentSeats);
-//            }.bind(this))
-//            .then(function(){
-//                resolve();
-//            })
-//            .then(null, function(err){
-//                console.error("Unassign Instructor Premium Courses Error -",err);
-//                reject(err);
-//            })
-//    }.bind(this));
-//}
-
 function _validateLicenseInstructorAccess(userId, licenseId) {
     return when.promise(function (resolve, reject) {
         this.myds.getLicenseMapByInstructors([userId])
@@ -1221,44 +1172,6 @@ function _errorLicensingAccess(res, status){
         this.requestUtil.errorResponse(res, {key: "lic.acces.invalid"}, 500);
     }
 }
-
-//function _updateEducatorSeatsRemaining(licenseId, seats){
-//    return when.promise(function(resolve, reject){
-//        this.myds.countEducatorSeatsByLicense(licenseId)
-//            .then(function(count){
-//                var seatsRemaining = seats - count +1;
-//                var seatsRemainingString = "educator_seats_remaining = " + seatsRemaining;
-//                var updateFields = [seatsRemainingString];
-//                return this.myds.updateLicenseById(licenseId, updateFields);
-//            }.bind(this))
-//            .then(function(){
-//                resolve();
-//            })
-//            .then(null, function(err){
-//                console.error("Update Educator Seats Remaining Error -",err);
-//                reject(err);
-//            });
-//    }.bind(this));
-//}
-
-//function _updateStudentSeatsRemaining(licenseId, seats){
-//    return when.promise(function(resolve, reject){
-//        this.cbds.countActiveStudentsByLicense(licenseId)
-//            .then(function(count){
-//                var seatsRemaining = seats - count;
-//                var seatsRemainingString = "student_seats_remaining = " + seatsRemaining;
-//                var updateFields = [seatsRemainingString];
-//                return this.myds.updateLicenseById(licenseId, updateFields);
-//            }.bind(this))
-//            .then(function(){
-//                resolve();
-//            })
-//            .then(null,function(err){
-//                console.error("Update Student Seats Remaining Error -",err);
-//                reject(err);
-//            });
-//    }.bind(this));
-//}
 
 function _createLicenseEmailResponse(licenseOwnerEmail, data, protocol, host, template){
     return when.promise(function(resolve, reject){
