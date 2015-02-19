@@ -220,17 +220,11 @@ function getBillingInfo(req, res){
             return this.serviceManager.stripe.retrieveCustomer(customerId);
         }.bind(this))
         .then(function(customer){
-            if(typeof customer === "string"){
-                return customer;
-            }
-            var cardId = customer["default_card"];
-            return this.serviceManager.stripe.retrieveCard(customerId, cardId);
-        }.bind(this))
-        .then(function(cardData){
             if(typeof cardData === "string"){
                 _errorLicensingAccess.call(this, res, cardData);
                 return;
             }
+            var cardData = customer.cards.data[0];
             var billingInfo = _buildBillingInfo(cardData);
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
@@ -249,9 +243,12 @@ function updateBillingInfo(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    var params = req.body;
+    var params = {};
+    params.card = req.body.card;
+    params.card = lConst.stripeTestCard;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
+    var customerId;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -263,14 +260,15 @@ function updateBillingInfo(req, res){
             if(typeof user === "string"){
                 return user;
             }
-            var customerId = user["customer_id"];
-            return this.serviceManager.stripe.createCard(customerId, params);
+            customerId = user["customer_id"];
+            return this.serviceManager.stripe.updateCustomer(customerId, params);
         }.bind(this))
-        .then(function(cardData){
-            if(typeof cardData === "string"){
-                this.requestUtil.errorResponse(res, cardData);
+        .then(function(customer){
+            if(typeof customer === "string"){
+                this.requestUtil.errorResponse(res, customer);
                 return;
             }
+            var cardData = customer.cards.data[0];
             var billingInfo = _buildBillingInfo(cardData);
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
