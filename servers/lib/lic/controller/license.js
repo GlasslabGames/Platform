@@ -245,7 +245,6 @@ function updateBillingInfo(req, res){
     }
     var params = {};
     params.card = req.body.card;
-    params.card = lConst.stripeTestCard;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var customerId;
