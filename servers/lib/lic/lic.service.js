@@ -77,10 +77,10 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
     return when.promise(function(resolve, reject){
         var studentSeats;
         var studentList;
-        var promiseList = [];
         if(!Array.isArray(courseIds)){
             courseIds = [courseIds];
         }
+        var promiseList = [];
         promiseList.push(this.myds.getLicenseById(licenseId));
         promiseList.push(this.cbds.getActiveStudentsByLicense(licenseId));
         when.all(promiseList)
@@ -102,11 +102,22 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
                         }
                     })
                 });
+
                 premiumCourses = Object.keys(premiumCourses);
-                if(premiumCourses.length > 0){
-                    return this.myds.unassignPremiumCourses(premiumCourses);
+                if(premiumCourses.length === 0){
+                    return "continue";
                 }
-                return "continue";
+                return this.myds.unassignPremiumCourses(premiumCourses);
+            }.bind(this))
+            .then(function(status){
+                if(status === "continue"){
+                    return status;
+                }
+                promiseList = [];
+                courseIds.forEach(function(id){
+                    promiseList.push(_unassignPremiumGames.call(this, id));
+                }.bind(this));
+                return when.all(promiseList);
             }.bind(this))
             .then(function(status){
                 if(status === "continue"){
@@ -130,6 +141,45 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
             })
     }.bind(this));
 };
+
+function _unassignPremiumGames(courseId){
+    return when.promise(function(resolve, reject){
+        var lmsService = this.serviceManager.get("lms").service;
+        var games;
+        lmsService.telmStore.getGamesForCourse(courseId)
+            .then(function(output){
+                games = output;
+                var dashService = this.serviceManager.get("dash").service;
+                var promiseList = [];
+                _(games).forEach(function(game){
+                    promiseList.push(dashService.getGameBasicInfo(game.id));
+                });
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(results){
+                var infoObj = {};
+                results.forEach(function(info){
+                   infoObj[info.gameId] = info;
+                });
+                var basicInfo;
+                var index = 0;
+                _(games).forEach(function(game, key){
+                    basicInfo = infoObj[key];
+                    if(basicInfo.price === "Premium"){
+                        game.assigned = false;
+                    }
+                });
+                return lmsService.telmStore.updateGamesForCourse(courseId, games);
+            })
+            .then(function(){
+                resolve()
+            })
+            .then(null,function(err){
+                console.error("Unassign Premium Games Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
 
 LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
     return when.promise(function(resolve, reject){
@@ -167,7 +217,13 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                 }
                 // if math adds up correctly, then assign the students
                 return this.myds.assignPremiumCourse(courseId, licenseId);
-                // change the student_count_remaining field in the license table
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
+                var plan = license["package_type"];
+                return _assignPremiumGames.call(this, courseId, plan);
             }.bind(this))
             .then(function(status){
                 if(typeof status === "string"){
@@ -182,6 +238,7 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                 }
                 var size = license["package_size_tier"];
                 var studentSeats = lConst.seats[size].studentSeats;
+                // change the student_count_remaining field in the license table
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(status){
@@ -196,6 +253,52 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
             });
     }.bind(this));
 };
+
+function _assignPremiumGames(courseId, plan){
+    return when.promise(function(resolve, reject){
+        var lmsService = this.serviceManager.get("lms").service;
+        var games;
+        lmsService.telmStore.getGamesForCourse(courseId)
+            .then(function(output){
+                games = output;
+                var promiseList = [];
+                var dashService = this.serviceManager.get("dash").service;
+                _(games).forEach(function(game){
+                    promiseList.push(dashService.getGameBasicInfo(game.id));
+                });
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(results){
+                var infoObj = {};
+                results.forEach(function(info){
+                    infoObj[info.gameId] = info;
+                });
+                var browserGames = lConst.plan[plan].browserGames;
+                var downloadGames = lConst.plan[plan].downloadableGames;
+                var iPadGames = lConst.plan[plan].iPadGames;
+                var availableGames = browserGames.concat(downloadGames, iPadGames);
+                var basicInfo;
+                _(games).forEach(function(game, key){
+                    basicInfo = infoObj[key];
+                    if(basicInfo.price === "Premium"){
+                        availableGames.forEach(function(gameId){
+                            if(game.id === gameId){
+                                game.assigned = true;
+                            }
+                        });
+                    }
+                });
+                return lmsService.telmStore.updateGamesForCourse(courseId, games);
+            })
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Assign Premium Games Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
 
 LicService.prototype.updateEducatorSeatsRemaining = function(licenseId, seats){
     return when.promise(function(resolve, reject){

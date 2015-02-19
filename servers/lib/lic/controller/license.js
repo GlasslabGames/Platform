@@ -9,7 +9,8 @@ module.exports = {
     getSubscriptionPackages: getSubscriptionPackages,
     getCurrentPlan: getCurrentPlan,
     getStudentsInLicense: getStudentsInLicense,
-    getCustomerId: getCustomerId,
+    getBillingInfo: getBillingInfo,
+    updateBillingInfo: updateBillingInfo,
     subscribeToLicense: subscribeToLicense,
     subscribeToTrialLicense: subscribeToTrialLicense,
     upgradeLicense: upgradeLicense,
@@ -191,7 +192,7 @@ function getStudentsInLicense(req, res){
         }.bind(this));
 }
 
-function getCustomerId(req, res){
+function getBillingInfo(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
@@ -203,6 +204,7 @@ function getCustomerId(req, res){
 
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
+    var customerId;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -212,16 +214,68 @@ function getCustomerId(req, res){
         }.bind(this))
         .then(function(user){
             if(typeof user === "string"){
-                _errorLicensingAccess.call(this, res, user);
+                return user;
+            }
+            customerId = user["customer_id"];
+            return this.serviceManager.stripe.retrieveCustomer(customerId);
+        }.bind(this))
+        .then(function(customer){
+            if(typeof cardData === "string"){
+                _errorLicensingAccess.call(this, res, cardData);
                 return;
             }
-            var customerId = user["customer_id"];
-            this.requestUtil.jsonResponse(res, { id: customerId });
+            var cardData = customer.cards.data[0];
+            var billingInfo = _buildBillingInfo(cardData);
+            this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
             console.error("Get Customer Id Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this))
+}
+
+function updateBillingInfo(req, res){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.card)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    var params = {};
+    params.card = req.body.card;
+    params.card = lConst.stripeTestCard;
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    var customerId;
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return this.myds.getUserById(userId);
+        }.bind(this))
+        .then(function(user){
+            if(typeof user === "string"){
+                return user;
+            }
+            customerId = user["customer_id"];
+            return this.serviceManager.stripe.updateCustomer(customerId, params);
+        }.bind(this))
+        .then(function(customer){
+            if(typeof customer === "string"){
+                this.requestUtil.errorResponse(res, customer);
+                return;
+            }
+            var cardData = customer.cards.data[0];
+            var billingInfo = _buildBillingInfo(cardData);
+            this.requestUtil.jsonResponse(res, billingInfo);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Update Billing Info Error -",err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }
 
 function subscribeToLicense(req, res){
@@ -767,6 +821,25 @@ function teacherLeavesLicense(req, res){
         }.bind(this));
 }
 
+function _buildBillingInfo(cardData){
+    var output = {};
+    output.last4 = cardData.last4;
+    output.brand = cardData.brand;
+    output.expMonth = cardData.exp_month;
+    output.expYear = cardData.exp_year;
+    output.country = cardData.country;
+    output.name = cardData.name;
+    output.addressLine1 = cardData.address_line1;
+    output.addressLine2 = cardData.address_line2;
+    output.addressCity = cardData.address_city;
+    output.addressState = cardData.address_state;
+    output.addressZip = cardData.address_zip;
+    output.addressCountry = cardData.address_country;
+    return output;
+}
+
+function _grabInstructorEmailsByType(approvedUserIds, approvedNonUserIds, rejectedUserIds){
+
 function _createSubscription(req, userId, stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
         var email = req.user.email;
@@ -939,8 +1012,6 @@ function _multiHasLicense(userIds){
             })
     }.bind(this));
 }
-
-function _grabInstructorEmailsByType(approvedUserIds, approvedNonUserIds, rejectedUserIds){
     return when.promise(function(resolve, reject){
         var promiseList = [[],[],[]];
         if(approvedUserIds.length > 0){

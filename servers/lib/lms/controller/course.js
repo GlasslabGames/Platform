@@ -311,8 +311,8 @@ exampleIn.createCourse = {
     "title": "test17",
     "grade": "7",
     "games": [
-        { "id": "SC",   "settings": { "missionProgressLock": false } },
-        { "id": "AA-1", "settings": {} }
+        { "id": "SC", "assigned": true, "settings": { "missionProgressLock": false } },
+        { "id": "AA-1", "assigned": true, "settings": {} }
     ]
 };
 
@@ -327,9 +327,10 @@ exampleOut.createCourse = {
     "code": "VMZ2P",
     "studentCount": 0,
     "games": [
-        { "id": "SC",   "settings": { "missionProgressLock": false } },
-        { "id": "AA-1", "settings": {} }
-    ]
+        { "id": "SC", assigned: true, "settings": { "missionProgressLock": true } },
+        { "id": "AA-1", assigned: true, "settings": {} }
+    ],
+    premiumGamesAssigned: true
 };
 function createCourse(req, res, next, serviceManager)
 {
@@ -521,9 +522,9 @@ function updateCourseInfo(req, res, next, serviceManager)
  POST http://localhost:8001/api/v2/lms/course/107/games
  */
 exampleIn.updateGamesInCourse = [
-    { "id": "SC",   "settings": {"Price": "Free", "assigned": true} },
-    { "id": "AA-1", "settings": {"Price": "Premium", "assigned": true} },
-    { "id": "PRIMA", "settings": { "Price": "Premium", "assigned": false } }
+    { "id": "SC", "assigned": true, "settings": {"missionProgressLock": true } },
+    { "id": "AA-1", "assigned": true, "settings": {} },
+    { "id": "PRIMA", "assigned": false, "settings": {} }
 ];
 function updateGamesInCourse(req, res, next, serviceManager)
 {
@@ -575,15 +576,26 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
             resolve();
             return;
         }
-        var isPremium = games.some(function(game){
-            var settings = game.settings;
-            if(settings.Price === "Premium" && settings.assigned === true){
-                return true;
+        var dashService = this.serviceManager.get("dash").service;
+        var gameInfo;
+        var promiseList = [];
+        promiseList.push(this.myds.getCourse(courseId));
+        games.forEach(function(game){
+            if(game.assigned){
+                promiseList.push(dashService.getGameBasicInfo(game.id));
             }
         });
         var licService = this.serviceManager.get("lic").service;
-        this.myds.getCourse(courseId)
-            .then(function(course){
+        when.all(promiseList)
+            .then(function(results){
+                var course = results[0];
+                // iterate across all the basic game info for assigned games, see if any are Premium
+                // first index is not a game, so skip that one
+                var isPremium = results.some(function(game, index){
+                    if(index > 0 && game.price === "Premium"){
+                        return true;
+                    }
+                });
                 if(course.premiumGamesAssigned && !isPremium){
                     // if database says premium course, but no premium games, unassign course
                     return licService.unassignPremiumCourses(courseId, licenseId);
