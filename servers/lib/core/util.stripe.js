@@ -195,6 +195,22 @@ StripeUtil.prototype.listPlans = function() {
 /*
  * Card APIs
  */
+StripeUtil.prototype.createCard = function( customerId, params ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe customers.create API
+        this.stripe.customers.createCard( params, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to create a new card: ", customerId, params, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully created a Card: ", customerId, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
 StripeUtil.prototype.retrieveCard = function( customerId, cardId ) {
     return when.promise(function(resolve, reject) {
         // Call the Stripe customers.retrieveCard API
