@@ -1180,45 +1180,6 @@ function _errorLicensingAccess(res, status){
     }
 }
 
-<<<<<<< HEAD
-function _updateEducatorSeatsRemaining(licenseId, seats){
-    return when.promise(function(resolve, reject){
-        this.myds.countEducatorSeatsByLicense(licenseId)
-            .then(function(count){
-                var seatsRemaining = seats - count +1;
-                var seatsRemainingString = "educator_seats_remaining = " + seatsRemaining;
-                var updateFields = [seatsRemainingString];
-                return this.myds.updateLicenseById(licenseId, updateFields);
-            }.bind(this))
-            .then(function(){
-                resolve();
-            })
-            .then(null, function(err){
-                console.error("Update Educator Seats Remaining Error -",err);
-                reject(err);
-            });
-    }.bind(this));
-}
-
-function _updateStudentSeatsRemaining(licenseId, seats){
-    return when.promise(function(resolve, reject){
-        this.cbds.countActiveStudentsByLicense(licenseId)
-            .then(function(count){
-                var seatsRemaining = seats - count;
-                var seatsRemainingString = "student_seats_remaining = " + seatsRemaining;
-                var updateFields = [seatsRemainingString];
-                return this.myds.updateLicenseById(licenseId, updateFields);
-            }.bind(this))
-            .then(function(){
-                resolve();
-            })
-            .then(null,function(err){
-                console.error("Update Student Seats Remaining Error -",err);
-                reject(err);
-            });
-    }.bind(this));
-}
-
 function _deactivateAutoRenew(licenseId) {
     return when.promise(function (resolve, reject) {
         var autoRenewString = "auto_renew = 0";
@@ -1234,8 +1195,6 @@ function _deactivateAutoRenew(licenseId) {
     }.bind(this));
 }
 
-=======
->>>>>>> 221353a288e5aac82272be89c983482b36e21a9c
 function _createLicenseEmailResponse(licenseOwnerEmail, data, protocol, host, template){
     return when.promise(function(resolve, reject){
         // early prototype, needs development
