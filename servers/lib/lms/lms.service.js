@@ -246,21 +246,22 @@ return when.promise(function(resolve, reject) {
         userData.role == lConst.role.admin ) {
 
         var courseData = {
-            title:         _courseData.title,
-            grade:         _courseData.grade,
-            institutionId: _courseData.institution || _courseData.institutionId,
-            games:         _courseData.games,
-            id:            0,
-            code:          "",
-            studentCount:  0,
-            freePlay:      false,
-            locked:        false,
-            archived:      _courseData.archived || false,
-            archivedDate:  null,
-            lmsType:       _courseData.lmsType || 'glasslab',
-            lmsId:         _courseData.lmsId,
-            labels:        _courseData.labels || "",
-            meta:          _courseData.meta || ""
+            title:                  _courseData.title,
+            grade:                  _courseData.grade,
+            institutionId:          _courseData.institution || _courseData.institutionId,
+            games:                  _courseData.games,
+            id:                     0,
+            code:                   "",
+            studentCount:           0,
+            freePlay:               false,
+            locked:                 false,
+            archived:               _courseData.archived || false,
+            archivedDate:           null,
+            lmsType:                _courseData.lmsType || 'glasslab',
+            lmsId:                  _courseData.lmsId,
+            labels:                 _courseData.labels || "",
+            meta:                   _courseData.meta || "",
+            premiumGamesAssigned:   _courseData.premiumGamesAssigned || false
         };
 
         // validate gameId's
