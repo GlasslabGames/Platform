@@ -198,7 +198,7 @@ StripeUtil.prototype.listPlans = function() {
 StripeUtil.prototype.createCard = function( customerId, params ) {
     return when.promise(function(resolve, reject) {
         // Call the Stripe customers.create API
-        this.stripe.customers.createCard( params, function( err, result ) {
+        this.stripe.customers.createCard(customerId, params, function( err, result ) {
             if( err ) {
                 console.error( "Stripe Utility Error - failed to create a new card: ", customerId, params, err );
                 reject( err );

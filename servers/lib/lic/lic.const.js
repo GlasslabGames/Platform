@@ -99,6 +99,7 @@ module.exports = {
     },
     stripeTestCard: {
         number: 4242424242424242,
+        //number: 4012888888881881,
         exp_month: 1,
         exp_year: 2020,
         cvc: 123
