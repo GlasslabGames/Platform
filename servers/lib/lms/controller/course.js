@@ -118,6 +118,16 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
                     // only if they are in the class
                     if(inCourse) {
                         this.myds.removeUserFromCourse(userId, courseId)
+                            .then(function(){
+                                return this.myds.isCoursePremium(courseId);
+                            }.bind(this))
+                            .then(function(state){
+                                if(!state){
+                                    return;
+                                }
+                                var licService = this.serviceManager.get("lic").service;
+                                return licService.removeStudentFromPremiumCourse(userId, courseId);
+                            }.bind(this))
                             .then(function() {
 
                                 req.query.showMembers = req.body.showMembers;
