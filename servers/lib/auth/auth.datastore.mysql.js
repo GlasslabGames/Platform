@@ -315,6 +315,10 @@ return when.promise(function(resolve, reject) {
                 } else {
                     user.isTrial = false;
                 }
+                if( user.licenseStatus === "active" ||
+                    user.licenseStatus === "pending" ) {
+                    user.expirationDate = license["expiration_date"];
+                }
             }
             resolve(user);
         });
@@ -603,7 +607,7 @@ Auth_MySQL.prototype.getUserEmail = function(userId){
 
 Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT lic.id,lic.user_id,lm.status FROM GL_LICENSE as lic JOIN\n" +
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lm.status FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
             "WHERE status in ('active','pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
