@@ -77,7 +77,7 @@ function getCurrentPlan(req, res){
             output["studentSeatsRemaining"] = license["student_seats_remaining"];
             output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
             output["expirationDate"] = license["expiration_date"];
-            output["autoRenew"] = license["auto_renew"];
+            output["autoRenew"] = license["auto_renew"] === 1 ? true : false;
             var packageType = license["package_type"];
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
