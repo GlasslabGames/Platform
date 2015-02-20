@@ -300,6 +300,52 @@ function _assignPremiumGames(courseId, plan){
     }.bind(this));
 }
 
+LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId){
+    return when.promise(function(resolve, reject){
+        // get teacher, and from teacher find license id
+        var licenseId;
+        var seats;
+        var inLicense;
+        this.myds.getLicenseFromPremiumCourse(courseId)
+            .then(function(license){
+                licenseId = license.id;
+                seats = license["package_size_tier"];
+                // get active student list
+                return this.cbds.getActiveStudentsByLicense(licenseId);
+            }.bind(this))
+            .then(function(activeStudents){
+                var student = activeStudents[userId];
+                student[courseId] = false;
+                inLicense = false;
+                _(student).some(function(value){
+                    if(value){
+                        inLicense = true;
+                        return true;
+                    }
+                });
+                // remove student's course reference from active student list
+                var data = {};
+                data.students = activeStudents;
+                return this.cbds.updateActiveStudentsByLicense(licenseId, data);
+            }.bind(this))
+            .then(function(){
+                if(inLicense){
+                    return;
+                }
+                // if student is no longer a premium student, update the seat count
+                var studentSeats = lConst.seats[seats].studentSeats;
+                this.updateStudentSeatsRemaining(licenseId, studentSeats);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Remove Student From Premium Course Error -", err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 LicService.prototype.updateEducatorSeatsRemaining = function(licenseId, seats){
     return when.promise(function(resolve, reject){
         this.myds.countEducatorSeatsByLicense(licenseId)
