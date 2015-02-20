@@ -127,7 +127,7 @@ StripeUtil.prototype.updateSubscription = function( customerId, subscriptionId, 
 
 StripeUtil.prototype.cancelSubscription = function( customerId, subscriptionId ) {
     return when.promise(function(resolve, reject) {
-        // Call the Stripe customers.cancelSubscription API
+        // Call the Stripe customers.updateSubscription API. By passing in a stripe_planId, plan is enabled
         this.stripe.customers.cancelSubscription( customerId, subscriptionId, { at_period_end: true }, function( err, result ) {
             if( err ) {
                 console.error( "Stripe Utility Error - failed to cancel the subscription: ", customerId, subscriptionId, err );
@@ -135,6 +135,22 @@ StripeUtil.prototype.cancelSubscription = function( customerId, subscriptionId )
             }
             else {
                 console.log( "Stripe Utility Successfully canceled the Subscription: ", customerId, subscriptionId, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
+StripeUtil.prototype.renewSubscription = function( customerId, subscriptionId, params ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe customers.cancelSubscription API
+        this.stripe.customers.updateSubscription( customerId, subscriptionId, params, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to enable subscription auto-renew: ", customerId, subscriptionId, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully Enabled the Subscription Auto-Renew: ", customerId, subscriptionId, result );
                 resolve( result );
             }
         });

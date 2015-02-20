@@ -95,6 +95,13 @@ module.exports = {
             educatorSeats: 15,
             discount: 30,
             seatId: 'school'
+        },
+        trial: {
+            size: "Trial",
+            studentSeats: 30,
+            educatorSeats: 0,
+            discount: 0,
+            seatId: 'trial'
         }
     },
     stripeTestCard: {
