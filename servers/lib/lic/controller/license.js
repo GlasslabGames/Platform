@@ -77,7 +77,7 @@ function getCurrentPlan(req, res){
             output["studentSeatsRemaining"] = license["student_seats_remaining"];
             output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
             output["expirationDate"] = license["expiration_date"];
-            output["autoRenew"] = license["auto_renew"];
+            output["autoRenew"] = license["auto_renew"] === 1 ? true : false;
             var packageType = license["package_type"];
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
@@ -1104,7 +1104,9 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
         var promiseList = [];
         promiseList.push(this.myds.getInstructorsByLicense(licenseId));
         promiseList.push(this.myds.getUsersByEmail(teacherEmail));
+        promiseList.push(this.myds.getLicenseById(licenseId));
         var teacherId;
+        var license;
         when.all(promiseList)
             .then(function(results){
                 var licenseMap = results[0];
@@ -1120,6 +1122,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
                 }
                 var teacher = results[1][0];
                 teacherId = teacher.id;
+                license = results[2][0];
                 return this.myds.getCoursesByInstructor(teacherId);
                 //find out which premium courses that instructor is a part of
                 //lock each of those premium courses (with utility method)
@@ -1146,6 +1149,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId){
                     return state;
                 }
                 // update educator count
+                var packageSize = license["package_size_tier"];
                 var educatorSeats = lConst.seats[packageSize].educatorSeats;
                 return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
             }.bind(this))

@@ -35,10 +35,27 @@ function enrollInCourse(req, res, next) {
             // preset role to be student
             userData.role = lConst.role.student;
             this.enrollInCourse(userData, courseCode)
-                .then(function(){
+                .then(function(status){
+                    if(status === "user.enroll.code.invalid"){
+                        this.requestUtil.errorResponse(res, { key:"user.enroll.code.invalid"});
+                        return;
+                    }
+                    if(status === "course.locked"){
+                        this.requestUtil.errorResponse(res, { key: "course.locked"});
+                        return;
+                    }
+                    if(status === "user.enroll.code.used"){
+                        this.requestUtil.errorResponse(res, { key: "user.enroll.code.used"});
+                        return;
+                    }
+                    if(status === "lic.students.full"){
+                        this.requestUtil.errorResponse(res, { key: "lic.students.full"});
+                        return;
+                    }
                     this.requestUtil.jsonResponse(res, {});
                 }.bind(this),
                 function(err){
+                    console.error("Enroll in Course Error -",err);
                     this.requestUtil.errorResponse(res, err);
                 }.bind(this))
         } else {
@@ -129,13 +146,15 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
                                 return licService.removeStudentFromPremiumCourse(userId, courseId);
                             }.bind(this))
                             .then(function() {
-
                                 req.query.showMembers = req.body.showMembers;
                                 req.params.courseId = courseId;
                                 // get and respond with course
                                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next]);
-
                             }.bind(this))
+                            .then(null, function(err){
+                                console.error("Unenroll User From Course Error -",err);
+                                this.requestUtil.errorResponse(res, err);
+                            }.bind(this));
                     } else {
                         //this.requestUtil.errorResponse(res, "not enrolled in course");
                         this.requestUtil.errorResponse(res, {key:"user.unenroll.notEnrolled"});
@@ -393,7 +412,10 @@ function _checkForGameAccess(licenseId, games){
             promiseList[0] = licService.myds.getLicenseById(licenseId);
         }
         var dashService = this.serviceManager.get("dash").service;
-        games.forEach(function (game) {
+        games.forEach(function (game){
+            if(game.assigned === undefined){
+                game.assigned = true;
+            }
             if(game.assigned){
                 promiseList.push(dashService.getGameBasicInfo(game.id));
             }
@@ -424,11 +446,12 @@ function _checkForGameAccess(licenseId, games){
                         availableGames[gameId] = true;
                     });
                 }
-                gamesInfo.some(function (game) {
+                _(gamesInfo).some(function (game) {
                     if (game.price === "Premium") {
                         premiumGamesAssigned = true;
                         // if user on a license, but the game is not in the user's plan
                         // or if the user is not on a license, throw an error
+                        var isAvailable = availableGames[game.gameId];
                         if ((licenseId && !availableGames[game.gameId]) || !licenseId) {
                             abort = true;
                             return true;
@@ -586,10 +609,17 @@ function updateCourseInfo(req, res, next, serviceManager)
                     return when.reject({key:"course.general"});
                 }
             }.bind(this))
-            .then(function(){
-                    return this.updateCourse(userData, courseData);
+            .then(function(status){
+                if(status === "not enough seats"){
+                    return status;
+                }
+                return this.updateCourse(userData, courseData);
             }.bind(this))
-            .then(function(){
+            .then(function(status){
+                if(status === "not enough seats"){
+                    this.requestUtil.errorResponse(res, { key: "lic.students.full"});
+                    return;
+                }
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);
             }.bind(this))
 
@@ -625,21 +655,20 @@ function updateGamesInCourse(req, res, next, serviceManager)
             return;
         }
         courseData.id = req.params.courseId;
-        courseData.games = req.body;
-
+        var games = courseData.games = req.body;
         var licenseId = req.user.licenseId;
 
-        _changePremiumGamesAssignedStatus.call(this, courseData.id, courseData.games, licenseId)
+        _changePremiumGamesAssignedStatus.call(this, courseData.id, games, licenseId)
             .then(function(status){
-                if(status === "invalid game access"){
+                if(typeof status === "string"){
                     return status;
                 }
                 // check if enrolled
                 return this.myds.isEnrolledInCourse(userData.id, courseData.id);
             }.bind(this))
             .then(function(isEnrolled){
-                if(isEnrolled === "invalid game access"){
-                    return "invalid game access";
+                if(typeof isEnrolled === "string"){
+                    return isEnrolled;
                 }
                 else if (isEnrolled){
                     return this.updateGamesInCourse(userData, courseData);
@@ -650,6 +679,11 @@ function updateGamesInCourse(req, res, next, serviceManager)
             .then(function(status){
                 if(status === "invalid game access"){
                     this.requestUtil.errorResponse(res, { key: "lms.game.invalid"});
+                    return;
+                }
+                if(status === "not enough seats"){
+                    this.requestUtil.errorResponse(res, { key: "lic.students.full"});
+                    return;
                 }
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);
             }.bind(this))
@@ -691,7 +725,7 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
                 }
             }.bind(this))
             .then(function(status){
-                if(status === "invalid game access"){
+                if(typeof status === "string"){
                     resolve(status);
                     return;
                 }
