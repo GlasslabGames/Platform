@@ -459,17 +459,34 @@ return when.promise(function(resolve, reject) {
     //
     .then(function(inCourse) {
         // skip if no inCourse
-        if(inCourse === null) return;
+        if(inCourse === null){
+            return;
+        }
 
         // only if they are NOT in the class
-        if(inCourse === false) {
-            this.myds.addUserToCourse(userData.id, courseInfo.id, userData.role)
-                .then(resolve, reject);
+        if(inCourse === false && courseInfo.premium_games_assigned) {
+            var licService = this.serviceManager.get("lic").service;
+            licService.enrollStudentInPremiumCourse(userData.id, courseInfo.id);
+        } else if(inCourse === false){
+            return;
         } else {
             reject({key:"user.enroll.code.used", statusCode:400});
         }
-    }.bind(this));
-
+    }.bind(this))
+    .then(function(status) {
+        if(status === "no seats"){
+            reject({key:"lic.students.full"});
+            return;
+        }
+        return this.myds.addUserToCourse(userData.id, courseInfo.id, userData.role);
+    }.bind(this))
+    .then(function(){
+        resolve();
+    })
+    .then(null, function(err){
+        console.error("Enroll in Course Error -",err);
+        reject(err);
+    });
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
