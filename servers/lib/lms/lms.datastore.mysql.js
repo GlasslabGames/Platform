@@ -1029,3 +1029,19 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+LMS_MySQL.prototype.isCoursePremium = function(courseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT premium_games_assigned > 0 as premiumGamesAssigned FROM GL_COURSE WHERE id = " + courseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                results = results[0];
+                var state = results.premiumGamesAssigned ? true : false;
+                resolve(state);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Is Course Premium Error -", err);
+                reject(err);
+            });
+    }.bind(this));
+};

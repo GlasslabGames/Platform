@@ -420,6 +420,25 @@ Lic_MySQL.prototype.unassignPremiumCourses = function(courses){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getLicenseFromPremiumCourse = function(courseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE AS l JOIN\n" +
+            "(SELECT license_id FROM GL_LICENSE_MAP AS lm JOIN\n" +
+                "(SELECT user_id FROM GL_MEMBERSHIP WHERE ROLE = 'instructor' and course_id = " + courseId + ") AS m\n" +
+            "ON m.user_id = lm.user_id WHERE status IN('active','pending')) AS lm\n" +
+            "ON lm.license_id = l.id;";
+        this.ds.query(Q)
+            .then(function(results){
+                results = results[0];
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get License From Premium Course Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.createLicenseTable = function() {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
