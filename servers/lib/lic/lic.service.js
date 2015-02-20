@@ -350,57 +350,53 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
     return when.promise(function(resolve, reject){
         var licenseId;
         var seats;
-        var alreadyInLicense;
+        var newStudent;
         this.myds.getLicenseFromPremiumCourse(courseId)
             .then(function(license){
                 licenseId = license.id;
                 seats = license["package_size_tier"];
                 var studentSeatsRemaining = license["student_seats_remaining"];
                 if(studentSeatsRemaining === 0){
-                    return "no seats";
+                    return "lic.students.full";
                 }
                 // get active student list
                 return this.cbds.getActiveStudentsByLicense(licenseId);
             }.bind(this))
             .then(function(activeStudents){
-                if(activeStudents === "no seats"){
+                if(activeStudents === "lic.students.full"){
                     return activeStudents
                 }
+                newStudent = false;
+                if(activeStudents[userId] === undefined){
+                    activeStudents[userId] = {};
+                    newStudent = true;
+                }
                 var student = activeStudents[userId];
-                //student[courseId] = false;
-                alreadyInLicense = false;
-                _(student).some(function(value){
-                    if(value){
-                        alreadyInLicense = true;
-                        return true;
-                    }
-                });
                 student[courseId] = true;
-                // remove student's course reference from active student list
                 var data = {};
                 data.students = activeStudents;
                 return this.cbds.updateActiveStudentsByLicense(licenseId, data);
             }.bind(this))
             .then(function(status){
-                if(status === "no seats"){
+                if(status === "lic.students.full"){
                     return status;
                 }
-                if(alreadyInLicense){
+                if(!newStudent){
                     return;
                 }
-                // if student is no longer a premium student, update the seat count
+                // if student is a new premium student, update the seat count
                 var studentSeats = lConst.seats[seats].studentSeats;
-                this.updateStudentSeatsRemaining(licenseId, studentSeats);
+                return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(status){
-                if(status === "no seats"){
+                if(status === "lic.students.full"){
                     resolve(status);
                     return;
                 }
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Remove Student From Premium Course Error -", err);
+                console.error("Enroll Student In Premium Course Error -", err);
                 reject(err);
             });
     }.bind(this));

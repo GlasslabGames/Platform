@@ -444,43 +444,43 @@ return when.promise(function(resolve, reject) {
     //
     .then(function(_courseInfo) {
         if(!_courseInfo) {
-            reject({key:"user.enroll.code.invalid", statusCode:404});
-            return null;
+            return "user.enroll.code.invalid";
         }
 
         courseInfo = _courseInfo;
         if(!courseInfo.locked) {
             return this.myds.isUserInCourse(userData.id, courseInfo.id);
         } else {
-            reject({key:"course.locked", statusCode:400});
-            return null;
+            return "course.locked";
         }
     }.bind(this))
     //
     .then(function(inCourse) {
         // skip if no inCourse
-        if(inCourse === null){
-            return;
+        if(typeof inCourse === "string"){
+            return inCourse;
         }
 
         // only if they are NOT in the class
-        if(inCourse === false && courseInfo.premium_games_assigned) {
+        if(inCourse === false && courseInfo.premiumGamesAssigned) {
             var licService = this.serviceManager.get("lic").service;
-            licService.enrollStudentInPremiumCourse(userData.id, courseInfo.id);
+            return licService.enrollStudentInPremiumCourse(userData.id, courseInfo.id);
         } else if(inCourse === false){
             return;
         } else {
-            reject({key:"user.enroll.code.used", statusCode:400});
+            return "user.enroll.code.used";
         }
     }.bind(this))
     .then(function(status) {
-        if(status === "no seats"){
-            reject({key:"lic.students.full"});
-            return;
+        if(typeof status === "string"){
+            return status;
         }
         return this.myds.addUserToCourse(userData.id, courseInfo.id, userData.role);
     }.bind(this))
-    .then(function(){
+    .then(function(status){
+        if(typeof status === "string"){
+            resolve(status)
+        }
         resolve();
     })
     .then(null, function(err){

@@ -356,7 +356,7 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
                 c.archived > 0 as archived,  \
                 c.archived_Date as archivedDate, \
                 c.institution_id as institution, \
-                c.premium_games_assigned > 0 as premiumGamesAssigned\
+                c.premium_games_assigned > 0 as premiumGamesAssigned,\
                 u.first_name as firstName, \
                 u.last_name as lastName \
             FROM GL_CODE co \

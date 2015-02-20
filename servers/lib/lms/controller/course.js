@@ -35,7 +35,23 @@ function enrollInCourse(req, res, next) {
             // preset role to be student
             userData.role = lConst.role.student;
             this.enrollInCourse(userData, courseCode)
-                .then(function(){
+                .then(function(status){
+                    if(status === "user.enroll.code.invalid"){
+                        this.requestUtil.errorResponse(res, { key:"user.enroll.code.invalid"});
+                        return;
+                    }
+                    if(status === "course.locked"){
+                        this.requestUtil.errorResponse(res, { key: "course.locked"});
+                        return;
+                    }
+                    if(status === "user.enroll.code.used"){
+                        this.requestUtil.errorResponse(res, { key: "user.enroll.code.used"});
+                        return;
+                    }
+                    if(status === "lic.students.full"){
+                        this.requestUtil.errorResponse(res, { key: "lic.students.full"});
+                        return;
+                    }
                     this.requestUtil.jsonResponse(res, {});
                 }.bind(this),
                 function(err){
