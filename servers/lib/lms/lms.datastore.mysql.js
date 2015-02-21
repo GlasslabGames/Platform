@@ -356,6 +356,7 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
                 c.archived > 0 as archived,  \
                 c.archived_Date as archivedDate, \
                 c.institution_id as institution, \
+                c.premium_games_assigned > 0 as premiumGamesAssigned,\
                 u.first_name as firstName, \
                 u.last_name as lastName \
             FROM GL_CODE co \
@@ -368,8 +369,9 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
             .then(function(results) {
                 if(results.length > 0) {
                     results = results[0];
-                    results.archived = results.archived ? true : false;
-                    results.locked   = results.locked   ? true : false;
+                    results.archived             = results.archived ? true : false;
+                    results.locked               = results.locked   ? true : false;
+                    results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
 
                     // move teacher info inside object
                     results.teacher = {
