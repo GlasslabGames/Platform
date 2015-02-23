@@ -468,7 +468,8 @@ function registerUserV2(req, res, next, serviceManager) {
     }.bind(this);
 
     var userID;
-    var register = function(regData, courseId) {
+    var licService = this.serviceManager.get("lic").service;
+    var register = function(regData, courseId, hasLicense) {
         return this.registerUser(regData)
             .then(function(userId){
                 userID = userId;
@@ -479,13 +480,27 @@ function registerUserV2(req, res, next, serviceManager) {
                     if(courseId) {
                         // courseId
                         this.stats.increment("info", "AddUserToCourse");
-                        this.lmsStore.addUserToCourse(userId, courseId, regData.role)
-                            .then(function() {
+                        _enrollPremiumIfPremium.call(this, userId, courseId, hasLicense)
+                            .then(function(status){
+                                if(typeof status === "string"){
+                                    return status;
+                                }
+                                return this.lmsStore.addUserToCourse(userId, courseId, regData.role)
+                            }.bind(this))
+                            .then(function(status) {
+                                if(status === "lic.students.full"){
+                                    registerErr({key:status}, 404);
+                                    this.stats.increment("error", "Route.Register.User.LicStudentsFull");
+                                    return;
+                                }
                                 this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
                                 serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                             }.bind(this))
                             // catch all errors
-                            .then(null, registerErr);
+                            .then(null, function(err){
+                                console.error("Register Error -",err);
+                                registerErr(err, 404);
+                            });
                     } else {
                         this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
                         serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
@@ -592,28 +607,80 @@ function registerUserV2(req, res, next, serviceManager) {
     else if(regData.role == lConst.role.student) {
         if(regData.regCode)
         {
+            var courseId;
             // get course Id from course code
             this.lmsStore.getCourseIdFromCourseCode(regData.regCode)
                 // register, passing in institutionId
-                .then(function(courseId){
+                .then(function(id){
+                    courseId = id;
                     if(courseId) {
                         // get rid of reg code, not longer needed
                         delete regData.regCode;
-
-                        register(regData, courseId);
+                        return this.lmsStore.isCoursePremium(courseId);
                     } else {
-                        this.stats.increment("error", "Route.Register.User.InvalidInstitution");
-                        registerErr({key:"user.enroll.code.invalid"}, 404);
+                        return "user.enroll.code.invalid"
                     }
                 }.bind(this))
+                .then(function(isPremium){
+                    if(typeof isPremium === "string"){
+                        return isPremium;
+                    }
+                    if(isPremium === false){
+                        return false;
+                    }
+                    return licService.myds.getLicenseFromPremiumCourse(courseId);
+                })
+                .then(function(license){
+                    if(license === "user.enroll.code.invalid"){
+                        registerErr({key:license}, 404);
+                        this.stats.increment("error", "Route.Register.User.InvalidInstitution");
+                        return;
+                    }
+                    var hasLicense;
+                    if(license === false){
+                        hasLicense = false;
+                    } else{
+                        hasLicense = true;
+                    }
+                    var studentSeatsRemaining = license["student_seats_remaining"];
+                    if(studentSeatsRemaining === 0){
+                        this.requestUtil.errorResponse(res, {key: "lic.students.full"}, 404);
+                        this.stats.increment("error", "Route.Register.User.licStudentsFull");
+                        return;
+                    }
+                    register(regData, courseId, hasLicense);
+                }.bind(this))
                 // catch all errors
-                .then(null, registerErr);
+                .then(null, function(err){
+                    this.requestUtil.errorResponse(err, 404);
+                    console.error("Student Registration Error -",err);
+                });
         } else {
             register(regData);
         }
     }
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
+}
+// if a course is a premium course, enroll student in license. else, do nothing
+function _enrollPremiumIfPremium(userId, courseId, hasLicense){
+    return when.promise(function(resolve, reject){
+        if(hasLicense){
+            var licService = this.serviceManager.get("lic").service;
+            licService.enrollStudentInPremiumCourse(userId, courseId)
+                .then(function(status){
+                    if(typeof status === "string"){
+                        resolve(status);
+                    }
+                    resolve();
+                })
+                .then(null, function(err){
+                    reject(err);
+                });
+        } else {
+            resolve();
+        }
+    }.bind(this));
 }
 
 function sendBetaConfirmEmail(regData, protocol, host) {

@@ -248,6 +248,7 @@ function updateBillingInfo(req, res){
         return;
     }
     var params = {};
+    // stripe token from new credit card
     params.card = req.body.card;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
