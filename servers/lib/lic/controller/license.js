@@ -427,6 +427,12 @@ function upgradeLicense(req, res){
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
+                return status;
+            }
+            return Util.sessionReload(req);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
             }
