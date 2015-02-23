@@ -427,6 +427,12 @@ function upgradeLicense(req, res){
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
+                return status;
+            }
+            return _sessionReload(req);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
             }
@@ -1263,6 +1269,19 @@ function _removeTeacherEmailResponse(teacherEmail, data, protocol, host){
 }
 
 function _teacherLeavesEmailResponse(licenseOwnerEmail, data, protocol, host){
+}
+
+function _sessionReload(req){
+    return when.promise(function(resolve, reject){
+        try{
+            req.session.reload(function(){
+                resolve()
+            });
+        } catch(err){
+            console.error("Session Reload Error -",err);
+            reject(err);
+        }
+    }.bind(this));
 }
 
 var exampleOut = {}, exampleIn = {};
