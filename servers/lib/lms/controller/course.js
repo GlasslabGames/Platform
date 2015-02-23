@@ -446,13 +446,14 @@ function _checkForGameAccess(licenseId, games){
                         availableGames[gameId] = true;
                     });
                 }
+                var isAvailable;
                 _(gamesInfo).some(function (game) {
-                    if (game.price === "Premium") {
+                    if (game.price === "Premium" || game.price === "TBD" || game.price === "Coming Soon") {
                         premiumGamesAssigned = true;
                         // if user on a license, but the game is not in the user's plan
                         // or if the user is not on a license, throw an error
-                        var isAvailable = availableGames[game.gameId];
-                        if ((licenseId && !availableGames[game.gameId]) || !licenseId) {
+                        isAvailable = availableGames[game.gameId];
+                        if (licenseId && !isAvailable || !licenseId) {
                             abort = true;
                             return true;
                         }

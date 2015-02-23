@@ -52,6 +52,23 @@ Lic_Couchbase.prototype.connect = function(){
 // end promise wrapper
 };
 
+Lic_Couchbase.prototype.getStudentsByLicense = function(licenseId){
+    return when.promise(function(resolve, reject){
+        // lic:licenseId
+        var key = lConst.datastore.licenseKey + ":" + licenseId;
+        this.client.get(key, function(err, results){
+            if(err){
+                console.error("Couchbase LicStore: Get Active Students By License Error -", err);
+                reject(err);
+                return;
+            }
+            var students = results.value.students;
+            resolve(students);
+        });
+    }.bind(this));
+};
+
+
 Lic_Couchbase.prototype.getActiveStudentsByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
         // lic:licenseId
@@ -63,7 +80,6 @@ Lic_Couchbase.prototype.getActiveStudentsByLicense = function(licenseId){
                 return;
             }
             var activeStudents = {};
-            var courseList;
             var students = results.value.students;
             _(students).forEach(function(premiumCourses, student){
                 _(premiumCourses).some(function(state){
@@ -104,7 +120,7 @@ Lic_Couchbase.prototype.countActiveStudentsByLicense = function(licenseId){
     }.bind(this));
 };
 
-Lic_Couchbase.prototype.updateActiveStudentsByLicense = function(licenseId, data){
+Lic_Couchbase.prototype.updateStudentsByLicense = function(licenseId, data){
     return when.promise(function(resolve, reject){
         var key = lConst.datastore.licenseKey + ":" + licenseId;
         this.client.set(key, data, function(err, results){

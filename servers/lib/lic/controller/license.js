@@ -249,6 +249,7 @@ function updateBillingInfo(req, res){
         return;
     }
     var params = {};
+    // stripe token from new credit card
     params.card = req.body.card;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
@@ -424,6 +425,12 @@ function upgradeLicense(req, res){
             promiseList.push(this.updateEducatorSeatsRemaining(licenseId, educatorSeats));
             promiseList.push(this.updateStudentSeatsRemaining(licenseId, studentSeats));
             return when.all(promiseList);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return Util.sessionReload(req);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){

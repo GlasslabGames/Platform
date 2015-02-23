@@ -204,7 +204,8 @@ module.exports = {
         capitalize:     capitalize
     },
     Reshape:            reshape,
-    WriteToCSV:         writeToCSV
+    writeToCSV:         writeToCSV,
+    sessionReload:      sessionReload
 };
 
 // writes data to a chosen file
@@ -217,5 +218,18 @@ function writeToCSV(data, file){
             }
             resolve()
         }.bind(this))
+    }.bind(this));
+}
+
+function sessionReload(req){
+    return when.promise(function(resolve, reject){
+        try{
+            req.session.reload(function(){
+                resolve()
+            });
+        } catch(err){
+            console.error("Session Reload Error -",err);
+            reject(err);
+        }
     }.bind(this));
 }

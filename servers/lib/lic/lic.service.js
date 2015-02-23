@@ -82,7 +82,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
         }
         var promiseList = [];
         promiseList.push(this.myds.getLicenseById(licenseId));
-        promiseList.push(this.cbds.getActiveStudentsByLicense(licenseId));
+        promiseList.push(this.cbds.getStudentsByLicense(licenseId));
         when.all(promiseList)
             .then(function(results){
                 var courseObj = {};
@@ -124,7 +124,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, use
                     return status;
                 }
                 var licenseStudentList = { students: studentList};
-                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
+                return this.cbds.updateStudentsByLicense(licenseId, licenseStudentList);
             }.bind(this))
             .then(function(status){
                 if(status === "continue"){
@@ -184,27 +184,27 @@ function _unassignPremiumGames(courseId){
 LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
     return when.promise(function(resolve, reject){
         var license;
-        var activeStudents;
+        var studentMap;
         var promiseList = [];
         var lmsService = this.serviceManager.get("lms").service;
         promiseList.push(lmsService.myds.getStudentIdsForCourse(courseId));
-        promiseList.push(this.cbds.getActiveStudentsByLicense(licenseId));
+        promiseList.push(this.cbds.getStudentsByLicense(licenseId));
         promiseList.push(this.myds.getLicenseById(licenseId));
         when.all(promiseList)
             .then(function(results){
                 // get an id list of all students in a course and all students in license
                 var students = results[0];
                 var studentIds = _.pluck(students, "id");
-                activeStudents = results[1];
-                // from activeStudentMap, determine which students would newly be added to the license, and count them
+                studentMap = results[1];
+                // from studentMap, determine which students would newly be added to the license, and count them
                 var newPremiumStudents = [];
                 studentIds.forEach(function(id){
-                    if(!activeStudents[id]){
+                    if(!studentMap[id]){
                         newPremiumStudents.push(id);
                         // add any students not already in the license to the activeStudentMap in couchbase
-                        activeStudents[id] = {};
-                        activeStudents[id][courseId] = true;
+                        studentMap[id] = {};
                     }
+                    studentMap[id][courseId] = true;
                 });
 
                 // check number of student seats remaining in license
@@ -229,8 +229,8 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                 if(typeof status === "string"){
                     return status;
                 }
-                var licenseStudentList = { students: activeStudents};
-                return this.cbds.updateActiveStudentsByLicense(licenseId, licenseStudentList);
+                var licenseStudentList = { students: studentMap};
+                return this.cbds.updateStudentsByLicense(licenseId, licenseStudentList);
             }.bind(this))
             .then(function(status){
                 if(typeof status === "string"){
@@ -310,11 +310,11 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
             .then(function(license){
                 licenseId = license.id;
                 seats = license["package_size_tier"];
-                // get active student list
-                return this.cbds.getActiveStudentsByLicense(licenseId);
+                // get student map
+                return this.cbds.getStudentsByLicense(licenseId);
             }.bind(this))
-            .then(function(activeStudents){
-                var student = activeStudents[userId];
+            .then(function(studentMap){
+                var student = studentMap[userId];
                 student[courseId] = false;
                 inLicense = false;
                 _(student).some(function(value){
@@ -323,10 +323,10 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                         return true;
                     }
                 });
-                // remove student's course reference from active student list
+                // set student's course reference to false in studentMap
                 var data = {};
-                data.students = activeStudents;
-                return this.cbds.updateActiveStudentsByLicense(licenseId, data);
+                data.students = studentMap;
+                return this.cbds.updateStudentsByLicense(licenseId, data);
             }.bind(this))
             .then(function(){
                 if(inLicense){
@@ -352,50 +352,50 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
         var seats;
         var newStudent;
         this.myds.getLicenseFromPremiumCourse(courseId)
-            .then(function(license){
+            .then(function (license) {
                 licenseId = license.id;
                 seats = license["package_size_tier"];
                 var studentSeatsRemaining = license["student_seats_remaining"];
-                if(studentSeatsRemaining === 0){
+                if (studentSeatsRemaining === 0) {
                     return "lic.students.full";
                 }
                 // get active student list
-                return this.cbds.getActiveStudentsByLicense(licenseId);
+                return this.cbds.getStudentsByLicense(licenseId);
             }.bind(this))
-            .then(function(activeStudents){
-                if(activeStudents === "lic.students.full"){
-                    return activeStudents
+            .then(function (studentMap) {
+                if (studentMap === "lic.students.full") {
+                    return studentMap;
                 }
                 newStudent = false;
-                if(activeStudents[userId] === undefined){
-                    activeStudents[userId] = {};
+                if (studentMap[userId] === undefined) {
+                    studentMap[userId] = {};
                     newStudent = true;
                 }
-                var student = activeStudents[userId];
+                var student = studentMap[userId];
                 student[courseId] = true;
                 var data = {};
-                data.students = activeStudents;
-                return this.cbds.updateActiveStudentsByLicense(licenseId, data);
+                data.students = studentMap;
+                return this.cbds.updateStudentsByLicense(licenseId, data);
             }.bind(this))
-            .then(function(status){
-                if(status === "lic.students.full"){
+            .then(function (status) {
+                if (status === "lic.students.full") {
                     return status;
                 }
-                if(!newStudent){
+                if (!newStudent) {
                     return;
                 }
                 // if student is a new premium student, update the seat count
                 var studentSeats = lConst.seats[seats].studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
-            .then(function(status){
-                if(status === "lic.students.full"){
+            .then(function (status) {
+                if (status === "lic.students.full") {
                     resolve(status);
                     return;
                 }
                 resolve();
             }.bind(this))
-            .then(null, function(err){
+            .then(null, function (err) {
                 console.error("Enroll Student In Premium Course Error -", err);
                 reject(err);
             });

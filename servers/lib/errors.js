@@ -106,6 +106,7 @@ module.exports = {
     "research.endDate.missing":             "Missing endDate",
     // lms
     "lms.game.invalid":                     "Cannot access another license's premium game",
+    "lms.course.premium.corrupted":         "Course labels itself as a premium course, but it is not associated with a license",
     // lic
     "lic.access.invalid":                   "Invalid Access",
     "lic.records.invalid":                  "User tied to to more than one license",
