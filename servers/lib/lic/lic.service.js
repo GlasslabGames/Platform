@@ -199,12 +199,25 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                 // from studentMap, determine which students would newly be added to the license, and count them
                 var newPremiumStudents = [];
                 studentIds.forEach(function(id){
-                    if(!studentMap[id]){
+                    var student = studentMap[id];
+                    if(!student){
                         newPremiumStudents.push(id);
                         // add any students not already in the license to the activeStudentMap in couchbase
-                        studentMap[id] = {};
+                        student = {};
+                    } else{
+                        var inLicense = false;
+                        _(student).some(function(value){
+                            // value is true if student is currently in a premium course
+                            if(value){
+                                inLicense = true;
+                                return true;
+                            }
+                        });
+                        if(!inLicense){
+                            newPremiumStudents.push(id);
+                        }
                     }
-                    studentMap[id][courseId] = true;
+                    student[courseId] = true;
                 });
 
                 // check number of student seats remaining in license
