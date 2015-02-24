@@ -176,6 +176,25 @@ DashService.prototype.getListOfAllGameIds = function() {
     }.bind(this) );
 };
 
+DashService.prototype.getListOfAllFreeGameIds = function(){
+    return when.promise(function(resolve, reject){
+        var gameIds = [];
+        for(var g in this._games){
+            if( this._games[g].info &&
+                this._games[g].info.basic &&
+                this._games[g].info.basic.gameId &&
+                this._games[g].info.basic.price === "Free") {
+                gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
+            }
+        }
+        if(gameIds.length !== 0){
+            resolve(gameIds);
+        } else{
+            reject();
+        }
+    }.bind(this));
+};
+
 // TODO: replace this with DB lookup, return promise
 // promise transition complete
 // 1 reference in dash game
