@@ -246,7 +246,7 @@ function updateBillingInfo(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.card)){
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.stripeInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
