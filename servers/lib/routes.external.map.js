@@ -468,6 +468,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/trial/upgrade",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "upgradeTrialLicense"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/cancel",
             service: "lic",
             controller: "license",

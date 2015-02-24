@@ -198,7 +198,7 @@ Lic_MySQL.prototype.userHasLicenseMap = function(userId){
 
 Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT u.first_name as firstName,u.last_name as lastName,u.email,lm.status FROM GL_USER as u\n" +
+        var Q = "SELECT u.id,u.first_name as firstName,u.last_name as lastName,u.email,lm.status FROM GL_USER as u\n" +
             "JOIN GL_LICENSE_MAP as lm\n" +
             "ON lm.user_id = u.id\n" +
             "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending');";
