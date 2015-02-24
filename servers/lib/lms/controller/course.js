@@ -764,9 +764,31 @@ function verifyCode(req, res, next) {
         return;
     }
     var code = req.params.code;
+    var courseInfo;
 
     this.myds.getCourseInfoFromCourseCode(code)
-        .then(function(courseInfo){
+        .then(function(info) {
+            courseInfo = info;
+            var isPremium = courseInfo.premiumGamesAssigned;
+            if(isPremium){
+                var licService = this.serviceManager.get("lic").service;
+                return licService.myds.getLicenseFromPremiumCourse(courseInfo.id);
+            }
+            return "not premium";
+        }.bind(this))
+        .then(function(license){
+            if(typeof license === "string") {
+                return license;
+            }
+            var studentSeatsRemaining = license["student_seats_remaining"];
+            if(studentSeatsRemaining < 1){
+                return "denied";
+            }
+        }.bind(this))
+        .then(function(status){
+            if(status === "denied"){
+                this.requestUtil.errorResponse(res, {key:"lic.students.full"});
+            }
             if( courseInfo &&
                 courseInfo.locked) {
                 this.requestUtil.errorResponse(res, {key:"course.locked", statusCode:400});

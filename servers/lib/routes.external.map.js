@@ -251,6 +251,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/games/class/basic",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getClassAddableGamesBasicInfo"
+            }
+        },
+        {
             api: "/api/v2/dash/games",
             service: "dash",
             controller: "games",
@@ -464,6 +472,15 @@ module.exports = {
             controller: "license",
             method: {
                 post: "upgradeLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/trial/upgrade",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "upgradeTrialLicense"
             }
         },
         {

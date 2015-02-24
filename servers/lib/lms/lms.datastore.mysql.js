@@ -167,7 +167,6 @@ return when.promise(function(resolve, reject) {
                     results[i].lockedRegistration = results[i].lockedRegistration   ? true : false;
                     results[i].premiumGamesAssigned = results[i].premiumGamesAssigned ? true : false;
 
-
                     // convert string to array
                     results[i].grade = this._splitGrade(results[i].grade);
 
