@@ -251,11 +251,11 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/games/license/basic",
+            api: "/api/v2/dash/games/class/basic",
             service: "dash",
             controller: "games",
             method: {
-                get: "getLicenseGamesBasicInfo"
+                get: "getClassAddableGamesBasicInfo"
             }
         },
         {

@@ -6,17 +6,17 @@ var dConst    = require('../dash.const.js');
 var fs = require('fs');
 
 module.exports = {
-    getActiveGamesBasicInfo:    getActiveGamesBasicInfo,
-    getGamesBasicInfo:          getGamesBasicInfo,
-    getLicenseGamesBasicInfo:   getLicenseGamesBasicInfo,
-    getActiveGamesDetails:      getActiveGamesDetails,
-    getMyGames:                 getMyGames,
-    reloadGameFiles:            reloadGameFiles,
-    migrateInfoFiles:           migrateInfoFiles,
-    getDeveloperProfile:        getDeveloperProfile,
-    getDeveloperGameIds:        getDeveloperGameIds,
-    getDeveloperGamesInfo:      getDeveloperGamesInfo,
-    updateDeveloperGameInfo:    updateDeveloperGameInfo
+    getActiveGamesBasicInfo:         getActiveGamesBasicInfo,
+    getGamesBasicInfo:               getGamesBasicInfo,
+    getClassAddableGamesBasicInfo:   getClassAddableGamesBasicInfo,
+    getActiveGamesDetails:           getActiveGamesDetails,
+    getMyGames:                      getMyGames,
+    reloadGameFiles:                 reloadGameFiles,
+    migrateInfoFiles:                migrateInfoFiles,
+    getDeveloperProfile:             getDeveloperProfile,
+    getDeveloperGameIds:             getDeveloperGameIds,
+    getDeveloperGamesInfo:           getDeveloperGamesInfo,
+    updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
 
 var exampleIn = {};
@@ -102,25 +102,36 @@ function getActiveGamesBasicInfo(req, res){
     }
 }
 
-function getLicenseGamesBasicInfo(req, res){
-    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+function getClassAddableGamesBasicInfo(req, res){
+    if(!(req && req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "dash.permission.denied"});
         return;
     }
     var licenseId = req.user.licenseId;
-    var licService = this.serviceManager.get("lic").service;
     var loginType = req.user.loginType;
     var availableGames;
-    licService.myds.getLicenseById(licenseId)
-        .then(function(license) {
-            license = license[0];
-            var type = license["package_type"];
-            var lConst = require('../../lic/lic.const.js');
-            var plan = lConst.plan[type];
-            var browserGames = plan.browserGames;
-            var iPadGames = plan.iPadGames;
-            var downloadableGames = plan.downloadableGames;
-            availableGames = browserGames.concat(iPadGames, downloadableGames);
+    var promise;
+    if(licenseId){
+        var licService = this.serviceManager.get("lic").service;
+        promise = licService.myds.getLicenseById(licenseId);
+    } else{
+        promise = this.getListOfAllFreeGameIds();
+    }
+    promise
+        .then(function(output) {
+            if(licenseId){
+                license = output[0];
+                var type = license["package_type"];
+                var lConst = require('../../lic/lic.const.js');
+                var plan = lConst.plan[type];
+                var browserGames = plan.browserGames;
+                var iPadGames = plan.iPadGames;
+                var downloadableGames = plan.downloadableGames;
+                availableGames = browserGames.concat(iPadGames, downloadableGames);
+            } else{
+                // basic, nonpremium user
+                availableGames = output;
+            }
             var promiseList = [];
             availableGames.forEach(function (gameId) {
                 promiseList.push(this.getGameBasicInfo(gameId));
