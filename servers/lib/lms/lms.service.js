@@ -193,6 +193,7 @@ return when.promise(function(resolve, reject) {
                         // if not settings default to empty object
                         course.games.push( {
                             id:       g,
+                            assigned: games[g].assigned,
                             settings: games[g].settings || {}
                         } );
 
