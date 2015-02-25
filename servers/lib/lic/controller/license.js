@@ -75,6 +75,7 @@ function getCurrentPlan(req, res){
                 return license;
             }
             license = license[0];
+            output["autoRenew"] = license["auto_renew"];
             output["studentSeatsRemaining"] = license["student_seats_remaining"];
             output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
             output["expirationDate"] = license["expiration_date"];
@@ -245,7 +246,7 @@ function updateBillingInfo(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.card)){
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.stripeInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -579,6 +580,12 @@ function enableLicenseAutoRenew(req, res){
             var user = results[1];
             var customerId = user["customer_id"];
             return this.serviceManager.stripe.renewSubscription(customerId, subscriptionId, params);
+        }.bind(this))
+        .then(function(status) {
+            if (typeof status === "string") {
+                return status;
+            }
+            return _deactivateAutoRenew.call(this, licenseId);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -1381,6 +1388,21 @@ function _errorLicensingAccess(res, status){
         console.trace('unexpected error status:' + status);
         this.requestUtil.errorResponse(res, {key: "lic.acces.invalid"}, 500);
     }
+}
+
+function _deactivateAutoRenew(licenseId) {
+    return when.promise(function (resolve, reject) {
+        var autoRenewString = "auto_renew = 0";
+        var updateFields = [autoRenewString];
+        return this.myds.updateLicenseById(licenseId, updateFields)
+            .then(function () {
+                resolve();
+            })
+            .then(null, function (err) {
+                console.error("Deactivate Auto Renew -", err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 function _createLicenseEmailResponse(licenseOwnerEmail, data, protocol, host, template){

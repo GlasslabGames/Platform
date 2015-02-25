@@ -21,7 +21,7 @@ module.exports = {
             description: 'All Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
             browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: [],
+            iPadGames: ['AA-1'],
             downloadableGames: [],
             planId: 'chromebook'
         },
@@ -42,7 +42,7 @@ module.exports = {
             description: 'Games in this package run on PC or Mac computers.',
             pricePerSeat: 2.5,
             browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: [],
+            iPadGames: ['AA-1'],
             downloadableGames: ['SC'],
             planId: 'pcMac'
         },
