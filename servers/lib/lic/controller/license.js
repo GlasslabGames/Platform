@@ -1047,12 +1047,14 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
 
 function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     var card = stripeInfo.id;
+    //var coupon = "";//stripeInfo.coupon;
     var plan = planInfo.type;
     var seats = planInfo.seats;
     var stripePlan = lConst.plan[plan]["stripe_planId"];
     var stripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
     var params = {};
     params.card = card;
+    //params.coupon = coupon;
     params.plan = stripePlan;
     params.quantity = stripeQuantity;
 
