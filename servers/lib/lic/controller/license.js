@@ -412,19 +412,21 @@ function upgradeLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
+            var plan = planInfo.type;
+            return _unassignCoursesWhenUpgrading.call(this, licenseId, plan);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
             var promiseList = [];
-
             var packageType = "package_type = '" +  planInfo.type + "'";
             var packageSizeTier = "package_size_tier = '" + planInfo.seats + "'";
             var updateFields = [packageType, packageSizeTier];
-
+            promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
             var seats = lConst.seats[planInfo.seats];
             var educatorSeats = seats.educatorSeats;
-            var studentSeats = seats.studentSeats;
-
-            promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
             promiseList.push(this.updateEducatorSeatsRemaining(licenseId, educatorSeats));
-            promiseList.push(this.updateStudentSeatsRemaining(licenseId, studentSeats));
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
@@ -1110,6 +1112,59 @@ function _createLicenseSQL(userId, planInfo, stripeData){
                 console.error("Create License Error -",err);
                 reject(err);
             });
+    }.bind(this));
+}
+
+function _unassignCoursesWhenUpgrading(licenseId, plan){
+    return when.promise(function(resolve, reject){
+        var availableGames = {};
+        var courseIds;
+        var browserGames = lConst.plan[plan].browserGames;
+        browserGames.forEach(function(gameId){
+            availableGames[gameId] = true;
+        });
+        var iPadGames = lConst.plan[plan].iPadGames;
+        iPadGames.forEach(function(gameId){
+            availableGames[gameId] = true;
+        });
+        var downloadableGames = lConst.plan[plan].downloadableGames;
+        downloadableGames.forEach(function(gameId){
+            availableGames[gameId] = true;
+        });
+        this.myds.getCourseTeacherMapByLicense(licenseId)
+            .then(function(courseMap){
+                courseIds = Object.keys(courseMap);
+                var promiseList = [];
+                var dataService = this.serviceManager.get("data").service;
+                courseIds.forEach(function(courseId){
+                    promiseList.push(dataService.cbds.getGamesForCourse(courseId));
+                });
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(courseGames){
+                var unassignCourseIds = [];
+                var unassignCourse;
+                courseGames.forEach(function(course, index){
+                    unassignCourse = false;
+                    _(course).some(function(value, key){
+                        if(!availableGames[key] && value.assigned){
+                            unassignCourse = true;
+                            return;
+                        }
+                    });
+                    if(unassignCourse){
+                        unassignCourseIds.push(courseIds[index]);
+                    }
+                });
+                return this.unassignPremiumCourses(unassignCourseIds, licenseId);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Unassign Premium Courses When Upgrading Error -",err);
+                reject(err)
+            })
     }.bind(this));
 }
 

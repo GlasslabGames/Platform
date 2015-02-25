@@ -73,7 +73,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, userId){
+LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
     return when.promise(function(resolve, reject){
         var studentSeats;
         var studentList;
