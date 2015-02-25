@@ -246,7 +246,7 @@ function _getAchievements(req, res, reportId, gameId, courseId) {
 
         .then(function(playerInfoList) {
             var achievements = [];
-            var defaultStandards = req.session.passport.user.defaultStandards;
+            var defaultStandards = req.session.passport.user.standards;
             //console.log("playerInfoList:", playerInfoList);
 
             for(var userId in playerInfoList) {

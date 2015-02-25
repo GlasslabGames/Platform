@@ -253,7 +253,7 @@ return when.promise(function(resolve, reject) {
             verify_code as verifyCode, \
             verify_code_expiration as verifyCodeExpiration, \
             verify_code_status as verifyCodeStatus, \
-            state as state \
+            standards_view as standards \
         FROM \
             GL_USER \
         WHERE \
@@ -288,13 +288,7 @@ return when.promise(function(resolve, reject) {
 
                     // Returning default standards to display in the front-end
                     // TODO: remove this when we have clarity on the multi-standards design
-                    if( user[i].state === "Texas" ) {
-                        user[i].defaultStandards = "TEKS";
-                    }
-                    else {
-                        user[i].defaultStandards = "CCSS";
-                    }
-                    delete user[i].state;
+                    user[i].standards = user[i].standards ? user[i].standards : "CCSS";
                 }
 
                 // if input not array then return a single user
@@ -412,6 +406,7 @@ return when.promise(function(resolve, reject) {
         verify_code_status: "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
+        standards_view: this.ds.escape(userData.standards),
         ftue_checklist: "NULL"
     };
 
@@ -505,6 +500,13 @@ return when.promise(function(resolve, reject) {
             data.ftue_checklist = "NULL";
         } else {
             data.ftue_checklist = this.ds.escape(userData.ftue);
+        }
+    }
+    if(userData.standards) {
+        if (userData.standards == "NULL") {
+            data.standards_view = "NULL";
+        } else {
+            data.standards_view = this.ds.escape(userData.standards);
         }
     }
 

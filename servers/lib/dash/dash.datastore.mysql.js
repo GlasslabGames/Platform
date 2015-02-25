@@ -91,7 +91,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 enabled > 0 as enabled, \
                 login_Type as loginType, \
                 ftue_checklist as ftue, \
-                state as state \
+                standards_view as standards \
             FROM GL_USER  \
             WHERE id="+ this.ds.escape(id);
         this.ds.query(Q)
@@ -103,13 +103,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
 
                     // Returning default standards to display in the front-end
                     // TODO: remove this when we have clarity on the multi-standards design
-                    if( results.state === "Texas" ) {
-                        results.defaultStandards = "TEKS";
-                    }
-                    else {
-                        results.defaultStandards = "CCSS";
-                    }
-                    delete results.state;
+                    results.standards = results.standards ? results.standards : "CCSS";
 
                     resolve(results);
                 } else {

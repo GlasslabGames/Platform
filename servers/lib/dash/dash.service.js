@@ -300,6 +300,8 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
     }
 
     // if no default standards are set, then default to "CCSS"
+    // also default to "CCSS" if there are no achievements associated with this standard
+    // because we know "CCSS" will exist
     if( !defaultStandards || !this._games[gameId].achievements.groups[ defaultStandards ] ) {
         defaultStandards = "CCSS";
     }
