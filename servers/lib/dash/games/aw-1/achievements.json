@@ -1,27 +1,56 @@
 {
-    "groups": [
-        {
-            "id": "a",
-            "description": "Common Core Standards",
-            "title": "Standards",
-            "subGroups": [
-                {
-                    "id": "a",
-                    "title": "CCSS.ELA-Literacy.RH.6-8.8",
-                    "name": "Argumentation RH",
-                    "description": "Distinguish among fact, opinion, and reasoned judgment in a text.",
-                    "info": ""
-                },
-                {
-                    "id": "b",
-                    "title": "CCSS.ELA-Literacy.RI.6-8.8",
-                    "name": "Argumentation RI",
-                    "description": "Trace and evaluate the argument and specific claims in a text, distinguishing claims that are supported by reasons and evidence from claims that are not.",
-                    "info": ""
-                }
-            ]
-        }
-    ],
+    "groups": {
+        "CCSS": [
+            {
+                "id": "a",
+                "description": "Common Core Standards",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "CCSS.ELA-Literacy.RH.6-8.8",
+                        "name": "Argumentation RH",
+                        "description": "Distinguish among fact, opinion, and reasoned judgment in a text.",
+                        "info": "",
+                        "icon": "achievement-light-blue"
+                    },
+                    {
+                        "id": "b",
+                        "title": "CCSS.ELA-Literacy.RI.6-8.8",
+                        "name": "Argumentation RI",
+                        "description": "Trace and evaluate the argument and specific claims in a text, distinguishing claims that are supported by reasons and evidence from claims that are not.",
+                        "info": "",
+                        "icon": "achievement-light-green"
+                    }
+                ]
+            }
+        ],
+        "TEKS": [
+            {
+                "id": "a",
+                "description": "Texas Essential Knowledge and Skills",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "TEKS 6(11)(B)",
+                        "name": "",
+                        "description": "Identify simply faulty reasoning used in persuasive texts.",
+                        "info": "",
+                        "icon": "achievement-light-blue"
+                    },
+                    {
+                        "id": "b",
+                        "title": "TEKS E1(10)(A)",
+                        "name": "",
+                        "description": "Analyze the relevance, quality, and credibility of evidence given to support or oppose an argument for a specific audience.",
+                        "info": "",
+                        "icon": "achievement-light-green"
+                    }
+                ]
+            }
+        ]
+    },
     "achievements": [
         {
             "id": "Legal Intern",
@@ -29,10 +58,22 @@
             "info": "Student makes at least 1 correct objection within a single case.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "a"
                 },
                 {
+                    "id": "CCSS",
+                    "group": "a",
+                    "subGroup": "b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "a"
+                },
+                {
+                    "id": "TEKS",
                     "group": "a",
                     "subGroup": "b"
                 }
@@ -44,10 +85,22 @@
             "info": "Student has selected only relevant evidence within a single case.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "a"
                 },
                 {
+                    "id": "CCSS",
+                    "group": "a",
+                    "subGroup": "b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "a"
+                },
+                {
+                    "id": "TEKS",
                     "group": "a",
                     "subGroup": "b"
                 }
@@ -59,10 +112,12 @@
             "info": "Student correctly completes the reasoning wheel 2 times within a single case.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "a"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "b"
                 }
@@ -74,10 +129,12 @@
             "info": "Student has selected relevant Supreme Court or Constitution support at least 2 times within the first 3 turns within a single case.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "a"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "b"
                 }

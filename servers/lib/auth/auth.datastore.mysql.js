@@ -252,7 +252,8 @@ return when.promise(function(resolve, reject) {
             reset_Code_Status as resetCodeStatus, \
             verify_code as verifyCode, \
             verify_code_expiration as verifyCodeExpiration, \
-            verify_code_status as verifyCodeStatus \
+            verify_code_status as verifyCodeStatus, \
+            state as state \
         FROM \
             GL_USER \
         WHERE \
@@ -284,6 +285,16 @@ return when.promise(function(resolve, reject) {
                     }
                     // add user permissions object
                     user[i].permits = aConst.permits[user[i].role];
+
+                    // Returning default standards to display in the front-end
+                    // TODO: remove this when we have clarity on the multi-standards design
+                    if( user[i].state === "Texas" ) {
+                        user[i].defaultStandards = "TEKS";
+                    }
+                    else {
+                        user[i].defaultStandards = "CCSS";
+                    }
+                    delete user[i].state;
                 }
 
                 // if input not array then return a single user

@@ -293,10 +293,15 @@ DashService.prototype.getGameReleases = function(gameId) {
 };
 
 // TODO: replace this with DB lookup
-DashService.prototype.getListOfAchievements = function(gameId, playerAchievement) {
+DashService.prototype.getListOfAchievements = function(gameId, playerAchievement, defaultStandards) {
     // if no player achievements then default to none
     if(!playerAchievement) {
         playerAchievement = {};
+    }
+
+    // if no default standards are set, then default to "CCSS"
+    if( !defaultStandards || !this._games[gameId].achievements.groups[ defaultStandards ] ) {
+        defaultStandards = "CCSS";
     }
 
     // if not game Id in games, then return empty object
@@ -317,22 +322,38 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
         for( var j = 0; j < a[i].standards.length; j++ ) {
             var standard = a[i].standards[j];
 
+            // Only check for standards associated with the default standard passed in
+            if( standard.id !== defaultStandards ) {
+                continue;
+            }
+
             var achievement = {
-                "group":    standard.group,
-                "subGroup": standard.subGroup,
-                "item":     itemId,
-                "won":      false
+                "group":        standard.group,
+                "subGroup":     standard.subGroup,
+                "item":         itemId,
+                "won":          false
             };
 
             // playerAchievement stored as tree
             // get won or not from tree
-            if( playerAchievement.groups &&
+            for( var group in playerAchievement.groups ) {
+                for( var subGroup in playerAchievement.groups[ group ].subGroups ) {
+                    if( playerAchievement.groups[ group ].subGroups[ subGroup ].items.hasOwnProperty( itemId ) ) {
+                        achievement.won = true;
+                        break;
+                    }
+                }
+                if( achievement.won == true ) {
+                    break;
+                }
+            }
+            /*if( playerAchievement.groups &&
                 playerAchievement.groups.hasOwnProperty(standard.group) &&
                 playerAchievement.groups[standard.group].subGroups.hasOwnProperty(standard.subGroup) &&
                 playerAchievement.groups[standard.group].subGroups[standard.subGroup].items.hasOwnProperty(itemId) &&
                 playerAchievement.groups[standard.group].subGroups[standard.subGroup].items[itemId].won) {
                 achievement.won = true;
-            }
+            }*/
 
             achievementsList.push(achievement);
         }
