@@ -255,7 +255,7 @@ module.exports = {
             service: "dash",
             controller: "games",
             method: {
-                get: "getClassAddableGamesBasicInfo"
+                get: "getPlanAddableGamesBasicInfo"
             }
         },
         {

@@ -8,7 +8,7 @@ var fs = require('fs');
 module.exports = {
     getActiveGamesBasicInfo:         getActiveGamesBasicInfo,
     getGamesBasicInfo:               getGamesBasicInfo,
-    getClassAddableGamesBasicInfo:   getClassAddableGamesBasicInfo,
+    getPlanAddableGamesBasicInfo:   getPlanAddableGamesBasicInfo,
     getActiveGamesDetails:           getActiveGamesDetails,
     getMyGames:                      getMyGames,
     reloadGameFiles:                 reloadGameFiles,
@@ -102,7 +102,7 @@ function getActiveGamesBasicInfo(req, res){
     }
 }
 
-function getClassAddableGamesBasicInfo(req, res){
+function getPlanAddableGamesBasicInfo(req, res){
     if(!(req && req.user && req.user.id)){
         this.requestUtil.errorResponse(res, {key: "dash.permission.denied"});
         return;

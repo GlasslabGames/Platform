@@ -769,12 +769,16 @@ function verifyCode(req, res, next) {
     this.myds.getCourseInfoFromCourseCode(code)
         .then(function(info) {
             courseInfo = info;
-            var isPremium = courseInfo.premiumGamesAssigned;
-            if(isPremium){
-                var licService = this.serviceManager.get("lic").service;
-                return licService.myds.getLicenseFromPremiumCourse(courseInfo.id);
+            if (courseInfo) {
+                var isPremium = courseInfo.premiumGamesAssigned;
+                if (isPremium) {
+                    var licService = this.serviceManager.get("lic").service;
+                    return licService.myds.getLicenseFromPremiumCourse(courseInfo.id);
+                }
+                return "not premium";
+            } else {
+                return "no course found";
             }
-            return "not premium";
         }.bind(this))
         .then(function(license){
             if(typeof license === "string") {
@@ -786,8 +790,11 @@ function verifyCode(req, res, next) {
             }
         }.bind(this))
         .then(function(status){
-            if(status === "denied"){
+            if(status === "denied") {
                 this.requestUtil.errorResponse(res, {key:"lic.students.full"});
+            }
+            if (status === "no course found") {
+                this.requestUtil.errorResponse(res, {key: "user.enroll.code.invalid", statusCode: 404});
             }
             if( courseInfo &&
                 courseInfo.locked) {
@@ -795,16 +802,17 @@ function verifyCode(req, res, next) {
             }
             else if(courseInfo) {
                 courseInfo = _.merge(
-                    {status: "code valid", key:"code.valid"},
-                    courseInfo
+                    {status: "code valid", key:"code.valid"}, courseInfo
                 );
                 this.requestUtil.jsonResponse(res, courseInfo);
             }
-            else {
-                this.requestUtil.errorResponse(res, {key:"user.enroll.code.invalid", statusCode:404});
-            }
         }.bind(this))
 }
+
+// check course
+// premium
+// check students remaining
+// check course locked
 
 function verifyGameInCourse(req, res, next) {
 
