@@ -86,7 +86,6 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
         when.all(promiseList)
             .then(function(results){
                 var courseObj = {};
-                var premiumCourses = {};
                 courseIds.forEach(function(id){
                     courseObj[id] = true;
                 });
@@ -98,16 +97,11 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
                     _(student).forEach(function(premiumCourse, courseId, courseList){
                         if(premiumCourse && courseObj[courseId]){
                             courseList[courseId] = false;
-                            premiumCourses[courseId] = true;
                         }
-                    })
+                    });
                 });
 
-                premiumCourses = Object.keys(premiumCourses);
-                if(premiumCourses.length === 0){
-                    return "continue";
-                }
-                return this.myds.unassignPremiumCourses(premiumCourses);
+                return this.myds.unassignPremiumCourses(courseIds);
             }.bind(this))
             .then(function(status){
                 if(status === "continue"){
@@ -286,19 +280,26 @@ function _assignPremiumGames(courseId, plan){
                 results.forEach(function(info){
                     infoObj[info.gameId] = info;
                 });
+                var availableGames = {};
                 var browserGames = lConst.plan[plan].browserGames;
+                browserGames.forEach(function(gameId){
+                    availableGames[gameId] = true;
+                });
                 var downloadGames = lConst.plan[plan].downloadableGames;
+                downloadGames.forEach(function(gameId){
+                    availableGames[gameId] = true;
+                });
                 var iPadGames = lConst.plan[plan].iPadGames;
-                var availableGames = browserGames.concat(downloadGames, iPadGames);
+                iPadGames.forEach(function(gameId){
+                    availableGames[gameId] = true;
+                });
                 var basicInfo;
                 _(games).forEach(function(game, key){
                     basicInfo = infoObj[key];
-                    if(basicInfo.price === "Premium"){
-                        availableGames.forEach(function(gameId){
-                            if(game.id === gameId){
-                                game.assigned = true;
-                            }
-                        });
+                    if(basicInfo.price === "Premium" || basicInfo.price === "TBD" || basicInfo.price === "Coming Soon"){
+                        if(availableGames[game.id]){
+                            game.assigned = true;
+                        }
                     }
                 });
                 return lmsService.telmStore.updateGamesForCourse(courseId, games);
