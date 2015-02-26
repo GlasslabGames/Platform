@@ -306,7 +306,7 @@ function subscribeToLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return Util.sessionReload(req);
+            return Util.updateSession(req);
         })
         .then(function(status){
             if(status === "duplicate customer account"){
@@ -317,6 +317,7 @@ function subscribeToLicense(req, res){
                 this.requestUtil.errorResponse(res,{key:"lic.account.inactive"});
                 return;
             }
+
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
@@ -452,7 +453,7 @@ function upgradeLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return Util.sessionReload(req);
+            return Util.updateSession(req);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -1037,6 +1038,7 @@ function _createSubscription(req, userId, stripeInfo, planInfo){
                 }
                 req.user.licenseId = licenseId;
                 req.user.licenseOwnerId = userId;
+                req.user.licenseStatus = "active";
                 return this.cbds.createLicenseStudentObject(licenseId);
             }.bind(this))
             .then(function(state){

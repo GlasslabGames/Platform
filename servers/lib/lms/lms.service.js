@@ -288,8 +288,13 @@ return when.promise(function(resolve, reject) {
                             userData.role == lConst.role.manager) {
                             // create games map
                             var games = {};
+                            var gameId;
                             for(var i = 0; i < courseData.games.length; i++) {
-                                games[ courseData.games[i].id ] = courseData.games[i].settings || {};
+                                gameId = courseData.games[i].id;
+                                games[gameId] = {};
+                                games[gameId].id = gameId;
+                                games[gameId].settings = courseData.games[i].settings || {};
+                                games[gameId].assigned = true;
                             }
 
                             return this.telmStore.updateGamesForCourse(courseId, games)
