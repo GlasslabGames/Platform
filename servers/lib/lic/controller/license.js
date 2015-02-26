@@ -275,6 +275,13 @@ function updateBillingInfo(req, res){
                 this.requestUtil.errorResponse(res, customer);
                 return;
             }
+            //var data = {};
+            //data.firstName = req.user["FIRST_NAME"];
+            //data.lastName = req.user["LAST_NAME"];
+            //data.subject = "Billing Info Successfull Updated"
+            //var licenseOwnerEmail = req.user.email;
+            //var template = "owner-billing-update";
+            //_sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             var cardData = customer.cards.data[0];
             var billingInfo = _buildBillingInfo(cardData);
             this.requestUtil.jsonResponse(res, billingInfo);
@@ -301,7 +308,8 @@ function subscribeToLicense(req, res){
     var userId = req.user.id;
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
-    _createSubscription.call(this, req, userId, stripeInfo, planInfo)
+    var emailData = {};
+    _createSubscription.call(this, req, userId, stripeInfo, planInfo, emailData)
         .then(function(status){
             if(typeof status === "string"){
                 return status;
@@ -321,8 +329,8 @@ function subscribeToLicense(req, res){
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Welcome to GlassLab Games Premium!";
             var template = "owner-subscribe";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -376,8 +384,8 @@ function subscribeToTrialLicense(req, res){
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Enjoy your Trial";
             var template = "owner-trial-create";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -462,8 +470,8 @@ function upgradeLicense(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Premium Plan Upgraded!";
             var template = "owner-upgrade";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -521,8 +529,8 @@ function upgradeTrialLicense(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Welcome to GlassLab Games Premium!";
             var template = "owner-upgrade-trial";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -563,11 +571,10 @@ function cancelLicenseAutoRenew(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Autorenew Disabled";
-            //var template = "owner-autorenew-disable";
-            var template = "owner-subscribe";
+            var template = "owner-autorenew-disable";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
@@ -634,8 +641,8 @@ function enableLicenseAutoRenew(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Autorenew Enabled";
             var template = "owner-autorenew-enable";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -665,6 +672,7 @@ function addTeachersToLicense(req, res){
     var existingTeachers;
     var licenseSeats;
     var approvedTeachers;
+    var emails;
     var rejectedTeachers = {};
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(state){
@@ -796,6 +804,13 @@ function addTeachersToLicense(req, res){
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            emails = status[0];
+            return Util.updateSession(req);
+        })
+        .then(function(status){
             if(status === "not enough seats"){
                 this.requestUtil.errorResponse(res, {key:"lic.educators.full"});
                 return;
@@ -808,7 +823,6 @@ function addTeachersToLicense(req, res){
                 _errorLicensingAccess.call(this, res, status);
                 return;
             }
-            var emails = status[0];
             // design emails language, methods, and templates
             // method currently is empty
             var usersEmails = emails[0];
@@ -842,7 +856,7 @@ function addTeachersToLicense(req, res){
             nonUsersData.subject = "Added to License!";
 
             nonUsersEmails.forEach(function(email){
-                _sendEmailResponse.call(this, email, usersData, protocol, host, nonUsersTemplate);
+                _sendEmailResponse.call(this, email, usersData, req.protocol, req.headers.host, nonUsersTemplate);
             }.bind(this));
 
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -919,8 +933,8 @@ function removeTeacherFromLicense(req, res){
             }
             var teacherEmail = emails[1];
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Removed from License";
             var template = "educator-removed";
             _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -961,8 +975,8 @@ function teacherLeavesLicense(req, res){
             }
             var licenseOwnerEmail = emails[0];
             var data = {};
-            data.firstName = "hello";
-            data.lastName = "world";
+            data.firstName = req.user["FIRST_NAME"];
+            data.lastName = req.user["LAST_NAME"];
             data.subject = "Teacher Left License";
             var template = "owner-educator-left";
             _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);              this.requestUtil.jsonResponse(res, { status: 'success' });
@@ -972,37 +986,6 @@ function teacherLeavesLicense(req, res){
             console.error("Teacher Leaves License Error -",err);
         }.bind(this));
 }
-
-//function endLicense(req, res){
-//    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
-//        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
-//        return;
-//    }
-//    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo)){
-//        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
-//        return;
-//    }
-//    var userId = req.user.id;
-//    var licenseId = req.user.licenseId;
-//    _validateLicenseInstructorAccess.call(this, userId, licenseId)
-//        .then(function(status){
-//            if(typeof status === "string"){
-//                return status;
-//            }
-//            return _endLicense.call(this, userId, licenseId);
-//        }.bind(this))
-//        .then(function(emails){
-//            if(typeof emails === "string"){
-//                return emails;
-//            }
-//
-//            this.requestUtil.jsonResponse(res, {status: "ok"});
-//        }.bind(this))
-//        .then(null, function(err){
-//            console.error("End License Error -",err);
-//            this.requestUtil.errorResponse(res, err);
-//        }.bind(this))
-//}
 
 function _buildBillingInfo(cardData){
     var output = {};
@@ -1021,11 +1004,12 @@ function _buildBillingInfo(cardData){
     return output;
 }
 
-function _createSubscription(req, userId, stripeInfo, planInfo){
+function _createSubscription(req, userId, stripeInfo, planInfo, emailData){
     return when.promise(function(resolve, reject){
         var email = req.user.email;
         var name = req.user.firstName + " " + req.user.lastName;
-        _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo)
+        emailData.name = name;
+        _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo, emailData)
             .then(function(stripeData){
                 if(typeof stripeData === "string"){
                     return stripeData;
@@ -1527,7 +1511,7 @@ function _errorLicensingAccess(res, status){
 
 function _sendEmailResponse(email, data, protocol, host, template){
     // to remove testing email spam, i've added a return. remove to test
-    return;
+    //return;
     var emailData = {
         subject: data.subject,
         to: email,
