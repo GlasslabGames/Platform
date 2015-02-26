@@ -205,7 +205,7 @@ module.exports = {
     },
     Reshape:            reshape,
     writeToCSV:         writeToCSV,
-    sessionReload:      sessionReload
+    updateSession:      updateSession
 };
 
 // writes data to a chosen file
@@ -221,10 +221,10 @@ function writeToCSV(data, file){
     }.bind(this));
 }
 
-function sessionReload(req){
+function updateSession(req){
     return when.promise(function(resolve, reject){
         try{
-            req.session.reload(function(){
+            req.session.save(function(){
                 resolve()
             });
         } catch(err){
