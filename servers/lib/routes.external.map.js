@@ -485,6 +485,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/license/promo-code/:code",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "validatePromoCode"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/cancel",
             service: "lic",
             controller: "license",
