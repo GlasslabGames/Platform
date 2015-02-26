@@ -104,9 +104,6 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
                 return this.myds.unassignPremiumCourses(courseIds);
             }.bind(this))
             .then(function(status){
-                if(status === "continue"){
-                    return status;
-                }
                 promiseList = [];
                 courseIds.forEach(function(id){
                     promiseList.push(_unassignPremiumGames.call(this, id));
@@ -114,16 +111,10 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
                 return when.all(promiseList);
             }.bind(this))
             .then(function(status){
-                if(status === "continue"){
-                    return status;
-                }
                 var licenseStudentList = { students: studentList};
                 return this.cbds.updateStudentsByLicense(licenseId, licenseStudentList);
             }.bind(this))
             .then(function(status){
-                if(status === "continue"){
-                    return status;
-                }
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(){
@@ -197,7 +188,7 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                     if(!student){
                         newPremiumStudents.push(id);
                         // add any students not already in the license to the activeStudentMap in couchbase
-                        student = {};
+                        student = studentMap[id] = {};
                     } else{
                         var inLicense = false;
                         _(student).some(function(value){

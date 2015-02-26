@@ -431,7 +431,7 @@ function upgradeLicense(req, res){
             return _unassignCoursesWhenUpgrading.call(this, licenseId, plan);
         }.bind(this))
         .then(function(status){
-            if(typeof status === "string"){
+            if(typeof status === "string" && status !== "student count"){
                 return status;
             }
             var promiseList = [];
@@ -442,6 +442,10 @@ function upgradeLicense(req, res){
             var seats = lConst.seats[planInfo.seats];
             var educatorSeats = seats.educatorSeats;
             promiseList.push(this.updateEducatorSeatsRemaining(licenseId, educatorSeats));
+            if(status === "student count"){
+                var studentSeats = seats.studentSeats;
+                promiseList.push(this.updateStudentSeatsRemaining(licenseId, studentSeats));
+            }
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
@@ -1214,10 +1218,13 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
                         unassignCourseIds.push(courseIds[index]);
                     }
                 });
+                if(unassignCourseIds.length === 0){
+                    return "student count";
+                }
                 return this.unassignPremiumCourses(unassignCourseIds, licenseId);
             }.bind(this))
-            .then(function(){
-                resolve();
+            .then(function(status){
+                resolve(status);
             })
             .then(null, function(err){
                 console.error("Unassign Premium Courses When Upgrading Error -",err);
