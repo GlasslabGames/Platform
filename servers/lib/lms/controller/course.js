@@ -618,7 +618,7 @@ function updateCourseInfo(req, res, next, serviceManager)
             }.bind(this))
             .then(function(status){
                 if(status === "not enough seats"){
-                    this.requestUtil.errorResponse(res, { key: "lic.students.full"});
+                    this.requestUtil.errorResponse(res, { key: "lic.students.full.enable.premium"});
                     return;
                 }
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);

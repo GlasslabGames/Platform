@@ -114,6 +114,7 @@ module.exports = {
     "lic.records.inconsistent":             "The license records from the client and server do not match.  Update client records",
     "lic.educators.full":                   "There are not enough seats in the license for this list of educators",
     "lic.students.full":                    "This class is already full. Please contact your teacher.",
+    "lic.students.full.enable.premium":     "This license does not have enough student seats left to accommodate for all the students in this class. To enable premium games, please upgrade your plan or reduce the number of students in this class.",
     "lic.create.denied":                    "An instructor currently on a license cannot create a new license",
     "lic.account.inactive":                 "The payment transaction did not go through",
     "lic.trial.expired":                    "Instructor was part of a license in the past",
