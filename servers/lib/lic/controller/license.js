@@ -15,6 +15,7 @@ module.exports = {
     subscribeToTrialLicense: subscribeToTrialLicense,
     upgradeLicense: upgradeLicense,
     upgradeTrialLicense: upgradeTrialLicense,
+    validatePromoCode: validatePromoCode,
     cancelLicenseAutoRenew: cancelLicenseAutoRenew,
     enableLicenseAutoRenew: enableLicenseAutoRenew,
     addTeachersToLicense: addTeachersToLicense,
@@ -306,7 +307,7 @@ function subscribeToLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return Util.sessionReload(req);
+            return Util.updateSession(req);
         })
         .then(function(status){
             if(status === "duplicate customer account"){
@@ -317,6 +318,7 @@ function subscribeToLicense(req, res){
                 this.requestUtil.errorResponse(res,{key:"lic.account.inactive"});
                 return;
             }
+
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
@@ -452,7 +454,7 @@ function upgradeLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return Util.sessionReload(req);
+            return Util.updateSession(req);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -530,6 +532,47 @@ function upgradeTrialLicense(req, res){
         .then(null, function(err){
             console.error("Upgrade Trial License Error -",err);
             this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function validatePromoCode(req, res) {
+    // Validate the user role as instructor
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")) {
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+
+    // Verify a promo code was passed in
+    var code;
+    if( req.params &&
+        req.params.code ) {
+        code = req.params.code;
+    }
+    else {
+        // no code was supplied
+        this.requestUtil.errorResponse(res, {key: "lic.promoCode.missing"});
+        return;
+    }
+
+    // Attempt to retrieve the associated "coupon" from Stripe
+    this.serviceManager.stripe.retrieveCoupon( code )
+        .then(function(coupon) {
+            // sanitize the coupon and ensure it's valid
+            // then only return the amount off and percent off
+            var promoCodeInfo = {};
+            if( coupon.valid == true ) {
+                promoCodeInfo.id = coupon.id;
+                promoCodeInfo.percent_off = coupon.percent_off;
+                promoCodeInfo.amount_off = coupon.amount_off;
+            }
+            else {
+                this.requestUtil.errorResponse(res, {key: "lic.promoCode.noMoreRedemptions"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, promoCodeInfo);
+        }.bind(this))
+        .then(null, function(err) {
+            this.requestUtil.errorResponse(res, {key: "lic.promoCode.invalid"});
         }.bind(this));
 }
 
@@ -1037,6 +1080,7 @@ function _createSubscription(req, userId, stripeInfo, planInfo){
                 }
                 req.user.licenseId = licenseId;
                 req.user.licenseOwnerId = userId;
+                req.user.licenseStatus = "active";
                 return this.cbds.createLicenseStudentObject(licenseId);
             }.bind(this))
             .then(function(state){
@@ -1110,6 +1154,11 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     params.card = card;
     params.plan = stripePlan;
     params.quantity = stripeQuantity;
+
+    // Attach the coupon if it exists
+    if( stripeInfo.coupon ) {
+        params.coupon = stripeInfo.coupon;
+    }
 
     if(!customerId){
         var description = "Customer for " + name;

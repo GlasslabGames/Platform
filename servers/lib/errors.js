@@ -120,5 +120,8 @@ module.exports = {
     "lic.trial.expired":                    "Instructor was part of a license in the past",
     "lic.email.invalid":                    "Emails with a + are not allowed for trials",
     "lic.cancelled.already":                "License auto-renew has already been cancelled, method should not be called",
-    "lic.renewing.already":                 "License auto-renew is already enabled, method should not be called"
+    "lic.renewing.already":                 "License auto-renew is already enabled, method should not be called",
+    "lic.promoCode.missing":                "No promo code was supplied",
+    "lic.promoCode.invalid":                "The promo code supplied was invalid",
+    "lic.promoCode.noMoreRedemptions":      "This promo code has already been used and has no redemptions remaining"
 };

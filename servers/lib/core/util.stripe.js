@@ -213,7 +213,7 @@ StripeUtil.prototype.listPlans = function() {
  */
 StripeUtil.prototype.createCard = function( customerId, params ) {
     return when.promise(function(resolve, reject) {
-        // Call the Stripe customers.create API
+        // Call the Stripe customers.createCard API
         this.stripe.customers.createCard(customerId, params, function( err, result ) {
             if( err ) {
                 console.error( "Stripe Utility Error - failed to create a new card: ", customerId, params, err );
@@ -253,6 +253,41 @@ StripeUtil.prototype.updateCard = function( customerId, cardId, params ) {
             }
             else {
                 console.log( "Stripe Utility Successfully updated the Card: ", customerId, cardId, params, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
+/*
+ * Coupon APIs
+ */
+StripeUtil.prototype.createCoupon = function( params ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe coupons.create API
+        this.stripe.coupons.create(params, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to create a new coupon: ", params, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully created a Coupon: ", result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
+StripeUtil.prototype.retrieveCoupon = function( couponId ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe coupons.retrieveCard API
+        this.stripe.coupons.retrieve( couponId, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to retrieve the coupon: ", couponId, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully retrieved the Coupon: ", couponId, result );
                 resolve( result );
             }
         });
