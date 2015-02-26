@@ -374,8 +374,7 @@ function createCourse(req, res, next, serviceManager)
         }
         var games = req.body.games;
         var licenseId = req.user.licenseId;
-
-        _checkForGameAccess.call(this, licenseId, games)
+        _checkForGameAccess.call(this, licenseId, games, [])
             .then(function(results){
                 var abort = results[0];
                 if(abort){
@@ -402,9 +401,9 @@ function createCourse(req, res, next, serviceManager)
     }
 }
 
-function _checkForGameAccess(licenseId, games){
+function _checkForGameAccess(licenseId, games, newGameIds){
     return when.promise(function(resolve, reject) {
-
+        newGameIds = newGameIds || [];
         var promiseList = [{}];
         var lic = this.serviceManager.get("lic");
         var licService = lic.service;
@@ -414,6 +413,7 @@ function _checkForGameAccess(licenseId, games){
         var dashService = this.serviceManager.get("dash").service;
         games.forEach(function (game){
             if(game.assigned === undefined){
+                newGameIds.push(game.id);
                 game.assigned = true;
             }
             if(game.assigned){
@@ -707,7 +707,8 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
         }
         var promiseList = [];
         promiseList.push(this.myds.getCourse(courseId));
-        promiseList.push(_checkForGameAccess.call(this, licenseId, games));
+        var newGameIds = [];
+        promiseList.push(_checkForGameAccess.call(this, licenseId, games, newGameIds));
         when.all(promiseList)
             .then(function(results){
                 var licService = this.serviceManager.get("lic").service;
@@ -726,9 +727,18 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
                 }
             }.bind(this))
             .then(function(status){
-                if(typeof status === "string"){
-                    resolve(status);
-                    return;
+                if(status === "not enough seats"){
+                    var index = 0;
+                    newGameIds.forEach(function(gameId){
+                        while(index < games.length){
+                            if(gameId === games[index].id){
+                                games[index].assigned = false;
+                                index++;
+                                return;
+                            }
+                            index++;
+                        }
+                    });
                 }
                 resolve();
             })
