@@ -1,10 +1,14 @@
-Demo Email, need to design for each case
-Hello <span>{{= data.firstName }}{{= data.lastName ? ' '+data.lastName : '' }}</span>,<br />
+Demo Email for subscribe
+<br />
+Hello <span>{{= data.name }}</span>,<br />
 <br />
 Let's Play!<br />
 <br />
 
 
+You have enrolled in the <span>{{= " " + data.plan + ", " }} </span> plan with the <span>{{= " " + data.seats + " " }}</span> seats package. The license expires on <span>{{= " " + data.expirationDate + "." }}</span>
+<br />
+<br />
 Thank you for bringing the best in high-impact learning and formative assessment games to your students. Be sure to browse the growing library and treasure trove of educator resources at <a href="http://www.glasslabgames.org">glasslabgames.org</a>.
 <br/>
 <br/>

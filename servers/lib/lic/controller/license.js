@@ -276,13 +276,6 @@ function updateBillingInfo(req, res){
                 this.requestUtil.errorResponse(res, customer);
                 return;
             }
-            //var data = {};
-            //data.firstName = req.user["FIRST_NAME"];
-            //data.lastName = req.user["LAST_NAME"];
-            //data.subject = "Billing Info Successfull Updated"
-            //var licenseOwnerEmail = req.user.email;
-            //var template = "owner-billing-update";
-            //_sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             var cardData = customer.cards.data[0];
             var billingInfo = _buildBillingInfo(cardData);
             this.requestUtil.jsonResponse(res, billingInfo);
@@ -309,12 +302,13 @@ function subscribeToLicense(req, res){
     var userId = req.user.id;
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
-    var emailData = {};
-    _createSubscription.call(this, req, userId, stripeInfo, planInfo, emailData)
-        .then(function(status){
-            if(typeof status === "string"){
-                return status;
+    var expirationDate;
+    _createSubscription.call(this, req, userId, stripeInfo, planInfo)
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
             }
+            expirationDate = results.expirationDate;
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -330,9 +324,11 @@ function subscribeToLicense(req, res){
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.name = req.user.firstName + " " + req.user.lastName;
             data.subject = "Welcome to GlassLab Games Premium!";
+            data.plan = planInfo.type;
+            data.seats = planInfo.seats;
+            data.expirationDate = expirationDate;
             var template = "owner-subscribe";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -362,6 +358,7 @@ function subscribeToTrialLicense(req, res){
         seats: "trial",
         type: "trial"
     };
+    var expirationDate;
     this.myds.userHasLicenseMap(userId)
         .then(function(state){
             if(state){
@@ -369,6 +366,13 @@ function subscribeToTrialLicense(req, res){
             }
             return _createSubscription.call(this, req, userId, stripeInfo, planInfo);
         }.bind(this))
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
+            }
+            expirationDate = results.expirationDate;
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(status === "duplicate customer account"){
                 this.requestUtil.errorResponse(res,{key:"lic.records.invalid"});
@@ -385,9 +389,10 @@ function subscribeToTrialLicense(req, res){
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.name = req.user.firstName + " " + req.user.lastName;
             data.subject = "Enjoy your Trial";
+            //data.seats = lConst.seats['trial'].studentSeats;
+            data.expirationDate = expirationDate;
             var template = "owner-trial-create";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -471,8 +476,7 @@ function upgradeLicense(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.name = req.user.firstName + " " + req.user.lastName;
             data.subject = "Premium Plan Upgraded!";
             var template = "owner-upgrade";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -497,7 +501,7 @@ function upgradeTrialLicense(req, res){
     var licenseId = req.user.licenseId;
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
-
+    var expirationDate;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -511,6 +515,13 @@ function upgradeTrialLicense(req, res){
             }
             return _createSubscription.call(this, req, userId, stripeInfo, planInfo);
         }.bind(this))
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
+            }
+            expirationDate = results.expirationDate;
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(status === "duplicate customer account"){
                 this.requestUtil.errorResponse(res,{key:"lic.records.invalid"});
@@ -530,9 +541,11 @@ function upgradeTrialLicense(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.name = req.user.firstName + ' ' + req.user.lastName;
             data.subject = "Welcome to GlassLab Games Premium!";
+            data.plan = planInfo.type;
+            data.seats = planInfo.seats;
+            data.expirationDate = expirationDate;
             var template = "owner-upgrade-trial";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -595,6 +608,7 @@ function cancelLicenseAutoRenew(req, res){
     }
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
+    var plan;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -602,20 +616,21 @@ function cancelLicenseAutoRenew(req, res){
             }
             return _cancelAutoRenew.call(this, userId, licenseId);
         }.bind(this))
-        .then(function(status){
-            if(status === "already cancelled"){
+        .then(function(results){
+            if(results === "already cancelled"){
                 this.requestUtil.errorResponse(res, { key: "lic.cancelled.already"});
                 return;
             }
-            if(typeof status === "string"){
-                _errorLicensingAccess.call(this, res, status);
+            if(typeof results === "string"){
+                _errorLicensingAccess.call(this, res, results);
                 return;
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.name = req.user.firstName + " " + req.user.lastName;
             data.subject = "Autorenew Disabled";
+            data.plan = results.plan;
+            data.expirationDate = results.expirationDate;
             var template = "owner-autorenew-disable";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -637,6 +652,8 @@ function enableLicenseAutoRenew(req, res){
     }
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
+    var plan;
+    var expirationDate;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -657,7 +674,8 @@ function enableLicenseAutoRenew(req, res){
                 return "already renewing";
             }
             var subscriptionId = license["subscription_id"];
-            var plan = license["package_type"];
+            plan = license["package_type"];
+            expirationDate = license["expiration_date"];
             var stripePlan = lConst.plan[plan].stripe_planId;
             var params = { plan: stripePlan };
             var user = results[1];
@@ -683,9 +701,10 @@ function enableLicenseAutoRenew(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.name = req.user.firstName + " " + req.user.lastName;
             data.subject = "Autorenew Enabled";
+            data.plan = plan;
+            data.expirationDate = expirationDate;
             var template = "owner-autorenew-enable";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
@@ -953,6 +972,7 @@ function removeTeacherFromLicense(req, res){
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
     var teacherEmail = [req.body.teacherEmail];
+    var emailData = {};
     if(licenseOwnerId !== userId){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
@@ -963,7 +983,7 @@ function removeTeacherFromLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return _removeInstructorFromLicense.call(this, licenseId, teacherEmail, licenseOwnerId);
+            return _removeInstructorFromLicense.call(this, licenseId, teacherEmail, licenseOwnerId, emailData);
         }.bind(this))
         .then(function(emails){
             if(emails === "email not in license"){
@@ -975,9 +995,10 @@ function removeTeacherFromLicense(req, res){
             }
             var teacherEmail = emails[1];
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.ownerName = emailData.ownerName;
             data.subject = "Removed from License";
+            data.teacherName = emailData.teacherName;
+            data.plan = emailData.plan;
             var template = "educator-removed";
             _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
@@ -996,6 +1017,8 @@ function teacherLeavesLicense(req, res){
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
     var teacherEmail = [req.user.email];
+    var emailData = {};
+    var emails;
     if(licenseOwnerId === userId){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
@@ -1005,23 +1028,32 @@ function teacherLeavesLicense(req, res){
             if(typeof state === "string"){
                 return state;
             }
-            return _removeInstructorFromLicense.call(this, licenseId, teacherEmail, licenseOwnerId);
+            return _removeInstructorFromLicense.call(this, licenseId, teacherEmail, licenseOwnerId, emailData);
         }.bind(this))
-        .then(function(emails){
-            if(email === "email not in license"){
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
+            }
+            emails = results;
+            return Util.updateSession(req);
+        })
+        .then(function(status){
+            if(status === "status not in license"){
                 this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
                 return;
-            } else if(typeof email === "string"){
-                _errorLicensingAccess.call(this, res, email);
+            } else if(typeof status === "string"){
+                _errorLicensingAccess.call(this, res, status);
                 return;
             }
             var licenseOwnerEmail = emails[0];
             var data = {};
-            data.firstName = req.user["FIRST_NAME"];
-            data.lastName = req.user["LAST_NAME"];
+            data.ownerName = emailData.ownerName;
             data.subject = "Teacher Left License";
+            data.teacherName = emailData.teacherName;
+            data.plan = emailData.plan;
             var template = "owner-educator-left";
-            _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);              this.requestUtil.jsonResponse(res, { status: 'success' });
+            _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);
+            this.requestUtil.jsonResponse(res, { status: 'success' });
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
@@ -1046,16 +1078,17 @@ function _buildBillingInfo(cardData){
     return output;
 }
 
-function _createSubscription(req, userId, stripeInfo, planInfo, emailData){
+function _createSubscription(req, userId, stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
         var email = req.user.email;
         var name = req.user.firstName + " " + req.user.lastName;
-        emailData.name = name;
-        _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo, emailData)
+        var expirationDate;
+        _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo)
             .then(function(stripeData){
                 if(typeof stripeData === "string"){
                     return stripeData;
                 }
+                expirationDate = stripeData.expirationDate;
                 return _createLicenseSQL.call(this, userId, planInfo, stripeData);
             }.bind(this))
             .then(function(licenseId){
@@ -1068,7 +1101,10 @@ function _createSubscription(req, userId, stripeInfo, planInfo, emailData){
                 return this.cbds.createLicenseStudentObject(licenseId);
             }.bind(this))
             .then(function(state){
-                resolve(state);
+                if(typeof state === "string"){
+                    resolve(state);
+                }
+                resolve({"expirationDate": expirationDate});
             })
             .then(null, function(err){
                 console.error("Create Subscription Error -",err);
@@ -1133,7 +1169,9 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     var plan = planInfo.type;
     var seats = planInfo.seats;
     var stripePlan = lConst.plan[plan]["stripe_planId"];
-    var stripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
+    var baseStripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
+    var discountRate = lConst.seats[seats].discount;
+    var stripeQuantity = Math.round(baseStripeQuantity - baseStripeQuantity*discountRate/100);
     var params = {};
     params.card = card;
     params.plan = stripePlan;
@@ -1267,12 +1305,16 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
 function _cancelAutoRenew(userId, licenseId){
     return when.promise(function(resolve, reject){
         var promiseList = [];
+        var plan;
+        var expirationDate;
         promiseList.push(this.myds.getLicenseById(licenseId));
         promiseList.push(this.myds.getUserById(userId));
         return when.all(promiseList)
             .then(function(results){
                 var license = results[0][0];
                 var autoRenew = license["auto_renew"];
+                plan = license["package_type"];
+                expirationDate = license["expiration_date"];
                 if(!autoRenew){
                     return "already cancelled";
                 }
@@ -1294,7 +1336,8 @@ function _cancelAutoRenew(userId, licenseId){
                     resolve(status);
                     return;
                 }
-                resolve();
+                resolve({"plan": plan,
+                         "expirationDate": expirationDate});
             })
             .then(null, function(err){
                 console.error("Cancel Auto Renew Error -", err);
@@ -1319,7 +1362,7 @@ function _endLicense(userId, licenseId){
                 }
                 var promiseList = [];
                 users.forEach(function(educator){
-                    promiseList.push(_removeInstructorFromLicense.call(this, licenseId, [educator["email"]], userId, users));
+                    promiseList.push(_removeInstructorFromLicense.call(this, licenseId, [educator["email"]], userId, {}, users));
                 }.bind(this));
 
                 return when.reduce(promiseList, function(results, emails, index){
@@ -1410,7 +1453,7 @@ function _grabInstructorEmailsByType(approvedUserIds, rejectedUserIds, approvedN
     }.bind(this));
 }
 
-function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, instructors){
+function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, emailData, instructors){
     return when.promise(function(resolve, reject){
         var promiseList = [];
         // if licenseMap not already computed, find it. else, use existing value
@@ -1439,6 +1482,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, i
                 var teacher = results[1][0];
                 teacherId = teacher.id;
                 license = results[2][0];
+                emailData.plan = license["package_type"];
                 return this.myds.getCoursesByInstructor(teacherId);
                 //find out which premium courses that instructor is a part of
                 //lock each of those premium courses (with utility method)
@@ -1486,8 +1530,10 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, i
                 users.forEach(function(user){
                     if(licenseOwnerId === user.id){
                         licenseOwnerEmail = user["EMAIL"];
+                        emailData.ownerName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
                     } else{
                         teacherEmail = user["EMAIL"];
+                        emailData.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
                     }
                 });
                 var emails = [licenseOwnerEmail,teacherEmail];
