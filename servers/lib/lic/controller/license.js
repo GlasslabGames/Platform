@@ -416,6 +416,8 @@ function upgradeLicense(req, res){
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var planInfo = req.body.planInfo;
+    var emailData = {};
+    var instructors;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -432,8 +434,10 @@ function upgradeLicense(req, res){
             }
             var user = results[0];
             var customerId = user["customer_id"];
-            var license = results[1];
-            var subscriptionId = license[0]["subscription_id"];
+            var license = results[1][0];
+            emailData.oldPlan = license["package_type"];
+            emailData.oldSeats = license["package_size_tier"];
+            var subscriptionId = license["subscription_id"];
             var params = _buildStripeParams(planInfo, customerId, {});
             delete params.card;
             return this.serviceManager.stripe.updateSubscription(customerId, subscriptionId, params);
@@ -449,24 +453,26 @@ function upgradeLicense(req, res){
             if(typeof status === "string" && status !== "student count"){
                 return status;
             }
-            var promiseList = [];
+            var promiseList = [{},{},{},{}];
             var packageType = "package_type = '" +  planInfo.type + "'";
             var packageSizeTier = "package_size_tier = '" + planInfo.seats + "'";
             var updateFields = [packageType, packageSizeTier];
-            promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
+            promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
             var seats = lConst.seats[planInfo.seats];
             var educatorSeats = seats.educatorSeats;
-            promiseList.push(this.updateEducatorSeatsRemaining(licenseId, educatorSeats));
+            promiseList[1] = this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
             if(status === "student count"){
                 var studentSeats = seats.studentSeats;
-                promiseList.push(this.updateStudentSeatsRemaining(licenseId, studentSeats));
+                promiseList[2] = this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }
+            promiseList[3] = this.myds.getInstructorsByLicense(licenseId);
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
+            instructors = status[3];
             return Util.updateSession(req);
         }.bind(this))
         .then(function(status){
@@ -475,11 +481,10 @@ function upgradeLicense(req, res){
                 return;
             }
             var licenseOwnerEmail = req.user.email;
-            var data = {};
-            data.name = req.user.firstName + " " + req.user.lastName;
-            data.subject = "Premium Plan Upgraded!";
-            var template = "owner-upgrade";
-            _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
+            emailData.ownerName = req.user.firstName + " " + req.user.lastName;
+            emailData.newPlan = planInfo.type;
+            emailData.newSeats = planInfo.seats;
+            _upgradeLicenseEmailResponse.call(this, licenseOwnerEmail, instructors, emailData, req.protocol, req.headers.host);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -625,14 +630,6 @@ function cancelLicenseAutoRenew(req, res){
                 _errorLicensingAccess.call(this, res, results);
                 return;
             }
-            var licenseOwnerEmail = req.user.email;
-            var data = {};
-            data.name = req.user.firstName + " " + req.user.lastName;
-            data.subject = "Autorenew Disabled";
-            data.plan = results.plan;
-            data.expirationDate = results.expirationDate;
-            var template = "owner-autorenew-disable";
-            _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -652,8 +649,6 @@ function enableLicenseAutoRenew(req, res){
     }
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
-    var plan;
-    var expirationDate;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -674,8 +669,7 @@ function enableLicenseAutoRenew(req, res){
                 return "already renewing";
             }
             var subscriptionId = license["subscription_id"];
-            plan = license["package_type"];
-            expirationDate = license["expiration_date"];
+            var plan = license["package_type"];
             var stripePlan = lConst.plan[plan].stripe_planId;
             var params = { plan: stripePlan };
             var user = results[1];
@@ -699,14 +693,6 @@ function enableLicenseAutoRenew(req, res){
                 _errorLicensingAccess.call(this, res, status);
                 return;
             }
-            var licenseOwnerEmail = req.user.email;
-            var data = {};
-            data.name = req.user.firstName + " " + req.user.lastName;
-            data.subject = "Autorenew Enabled";
-            data.plan = plan;
-            data.expirationDate = expirationDate;
-            var template = "owner-autorenew-enable";
-            _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -733,8 +719,10 @@ function addTeachersToLicense(req, res){
     var existingTeachers;
     var licenseSeats;
     var approvedTeachers;
-    var emails;
+    var users;
     var rejectedTeachers = {};
+    var plan;
+    var seatsTier;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(state){
             if(typeof state === "string"){
@@ -746,15 +734,17 @@ function addTeachersToLicense(req, res){
             if(typeof license === "string"){
                 return license;
             }
-            var educatorSeatsRemaining = license[0]["educator_seats_remaining"];
+            license = license[0];
+            var educatorSeatsRemaining = license["educator_seats_remaining"];
             if(teacherEmails.length > educatorSeatsRemaining){
                 return "not enough seats";
             }
             if(license.active === 0 || license.active === false ){
                 return "inactive license";
             }
-            var seatsTier = license[0]["package_size_tier"];
+            seatsTier = license["package_size_tier"];
             licenseSeats = lConst.seats[seatsTier].educatorSeats;
+            plan = license["package_type"];
             return this.myds.getUsersByEmail(teacherEmails);
         }.bind(this))
         .then(function(teachers){
@@ -768,7 +758,7 @@ function addTeachersToLicense(req, res){
             });
             existingTeachers = [];
             teachers.forEach(function(teacher){
-                if(teacher["SYSTEM_ROLE"] !== 'instructor'){
+                if(teacher["SYSTEM_ROLE"] !== 'instructor' && teacher["SYSTEM_ROLE"] !== "manager"){
                     delete newInstructors[teacher["EMAIL"]];
                     rejectedTeachers[teacher.id] = "user role not instructor";
                     return;
@@ -860,7 +850,7 @@ function addTeachersToLicense(req, res){
             }
             var promiseList = [];
             var rejectedIds = Object.keys(rejectedTeachers);
-            promiseList.push(_grabInstructorEmailsByType.call(this, existingTeachers, rejectedIds, createTeachers));
+            promiseList.push(_grabInstructorsByType.call(this, existingTeachers, rejectedIds, createTeachers));
             promiseList.push(this.updateEducatorSeatsRemaining(licenseId, licenseSeats));
             return when.all(promiseList);
         }.bind(this))
@@ -868,7 +858,7 @@ function addTeachersToLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            emails = status[0];
+            users = status[0];
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -886,11 +876,17 @@ function addTeachersToLicense(req, res){
             }
             // design emails language, methods, and templates
             // method currently is empty
-            var usersEmails = emails[0];
-            var nonUsersEmails = emails[1];
-            var rejectedEmails = emails[2];
+            var approvedUsers = users[0];
+            var approvedNonUsers = users[1];
+            var rejectedEmails = users[2];
 
-            var approvedTeachersOutput = usersEmails.concat(nonUsersEmails);
+            var approvedTeachersOutput = [];
+            approvedUsers.forEach(function(user){
+                approvedTeachersOutput.push(user["EMAIL"]);
+            });
+            approvedNonUsers.forEach(function(user){
+                approvedTeachersOutput.push(user["EMAIL"]);
+            });
             var rejectedTeachersOutput = [];
             var email;
             _(rejectedTeachers).forEach(function(value, key){
@@ -899,27 +895,8 @@ function addTeachersToLicense(req, res){
             });
             req.approvedTeachers = approvedTeachersOutput;
             req.rejectedTeachers = rejectedTeachersOutput;
-
-            var usersData = {};
-            var usersTemplate = "educator-user-invited";
-            usersData.firstName = "hello";
-            usersData.lastName = "world";
-            usersData.subject = "Added to License!";
-
-            usersEmails.forEach(function(email){
-                _sendEmailResponse.call(this, email, usersData, req.protocol, req.headers.host, usersTemplate);
-            }.bind(this));
-
-            var nonUsersData = {};
-            var nonUsersTemplate = "educator-nonuser-invited";
-            nonUsersData.firstName = "hello";
-            nonUsersData.lastName = "world";
-            nonUsersData.subject = "Added to License!";
-
-            nonUsersEmails.forEach(function(email){
-                _sendEmailResponse.call(this, email, usersData, req.protocol, req.headers.host, nonUsersTemplate);
-            }.bind(this));
-
+            var ownerName = req.user.firstName + " " + req.user.lastName;
+            _addTeachersEmailResponse.call(this, ownerName, approvedUsers, approvedNonUsers, plan, seatsTier, req.protocol, req.headers.host);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -1305,16 +1282,12 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
 function _cancelAutoRenew(userId, licenseId){
     return when.promise(function(resolve, reject){
         var promiseList = [];
-        var plan;
-        var expirationDate;
         promiseList.push(this.myds.getLicenseById(licenseId));
         promiseList.push(this.myds.getUserById(userId));
         return when.all(promiseList)
             .then(function(results){
                 var license = results[0][0];
                 var autoRenew = license["auto_renew"];
-                plan = license["package_type"];
-                expirationDate = license["expiration_date"];
                 if(!autoRenew){
                     return "already cancelled";
                 }
@@ -1336,8 +1309,7 @@ function _cancelAutoRenew(userId, licenseId){
                     resolve(status);
                     return;
                 }
-                resolve({"plan": plan,
-                         "expirationDate": expirationDate});
+                resolve();
             })
             .then(null, function(err){
                 console.error("Cancel Auto Renew Error -", err);
@@ -1415,29 +1387,27 @@ function _multiHasLicense(userIds){
     }.bind(this));
 }
 
-function _grabInstructorEmailsByType(approvedUserIds, rejectedUserIds, approvedNonUserEmails){
+function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUserEmails){
     return when.promise(function(resolve, reject){
-        var promiseList = [[],[]];
+        var promiseList = [[],[], []];
         if(approvedUserIds.length > 0){
             promiseList[0] = this.myds.getUsersByIds(approvedUserIds);
         }
+        if(approvedNonUserEmails.length > 0){
+            promiseList[1] = this.myds.getUsersByEmail(approvedNonUserEmails);
+        }
         if(rejectedUserIds.length > 0){
-            promiseList[1] = this.myds.getUsersByIds(rejectedUserIds);
+            promiseList[2] = this.myds.getUsersByIds(rejectedUserIds);
         }
         return when.all(promiseList)
             .then(function(results){
                 var output = [];
                 var emails = [];
-                var email;
                 var approvedUsers = results[0];
-                approvedUsers.forEach(function(user){
-                    email = user["EMAIL"];
-                    emails.push(email);
-                });
-                output.push(emails);
-                output.push(approvedNonUserEmails);
-
-                var rejectedUsers = results[1];
+                output.push(approvedUsers);
+                var approvedNonUsers= results[1];
+                output.push(approvedNonUsers);
+                var rejectedUsers = results[2];
                 emails = {};
                 rejectedUsers.forEach(function(user){
                     emails[user.id] = user["EMAIL"];
@@ -1602,9 +1572,75 @@ function _errorLicensingAccess(res, status){
 //        });
 //}
 
+function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, protocol, host){
+    var ownerTemplate = "owner-upgrade";
+    var educatorTemplate = "educator-upgrade";
+    var emailData;
+    var email;
+    var template;
+    instructors.forEach(function(user){
+        emailData = {};
+        email = user["email"];
+        if(email === licenseOwnerEmail){
+            template = ownerTemplate;
+        } else{
+            template = educatorTemplate;
+            var name;
+            // if user is a temporary user who has not yet registered, set name to email
+            if(user.firstName === "temp" && user.lastName === "temp"){
+                name = email;
+            } else{
+                name = user.firstName + " " + user.firstName;
+            }
+            emailData.teacherName = name;
+        }
+        emailData.subject = "Premium Plan Upgraded!";
+        emailData.ownerName = data.ownerName;
+        emailData.oldPlan = data.oldPlan;
+        emailData.oldSeats = data.oldSeats;
+        emailData.newPlan = data.newPlan;
+        emailData.newSeats = data.newSeats;
+        _sendEmailResponse.call(this, email, emailData, protocol, host, template);
+    }.bind(this));
+}
+
+function _addTeachersEmailResponse(ownerName, approvedUsers, approvedNonUsers, plan, seatsTier, protocol, host){
+    var data;
+    var email;
+    var usersTemplate = "educator-user-invited";
+    approvedUsers.forEach(function(user){
+        email = user["EMAIL"];
+        data = {};
+        data.subject = "Added to License!";
+        data.ownerName = ownerName;
+        data.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
+        data.plan = plan;
+        data.seats = seatsTier;
+
+        _sendEmailResponse.call(this, email, data, protocol, host, usersTemplate);
+    }.bind(this));
+
+    var data;
+    var nonUsersTemplate = "educator-nonuser-invited";
+    approvedNonUsers.forEach(function(user){
+        email = user["EMAIL"];
+        data = {};
+        data.subject = "Added to License!";
+        data.ownerName = ownerName;
+        // temporary users do not have a name yet, so use email
+        data.teacherEmail = email;
+        data.plan = plan;
+        data.seats = seatsTier;
+        _sendEmailResponse.call(this, email, data, protocol, host, nonUsersTemplate);
+    }.bind(this));
+}
+
 function _sendEmailResponse(email, data, protocol, host, template){
     // to remove testing email spam, i've added a return. remove to test
     //return;
+    if(data.expirationDate){
+        data.expirationDate = new Date(data.expirationDate);
+    }
     var emailData = {
         subject: data.subject,
         to: email,
