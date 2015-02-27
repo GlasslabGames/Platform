@@ -57,7 +57,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/1/index.html",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/2/index.html",
                 "format": "html",
                 "size": {
                     "width": 800,
