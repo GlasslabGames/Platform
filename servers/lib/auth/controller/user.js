@@ -392,6 +392,7 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.school      = Util.ConvertToString(req.body.school);
         regData.email       = Util.ConvertToString(req.body.email);
         regData.state       = Util.ConvertToString(req.body.state);
+        regData.standards   = Util.ConvertToString(req.body.standards);
 
 
         if(!regData.username) {
@@ -417,6 +418,9 @@ function registerUserV2(req, res, next, serviceManager) {
         if (!regData.school) {
             this.requestUtil.errorResponse(res, {key: "user.create.input.missing.school"}, 400);
             return;
+        }
+        if (!regData.standards) {
+            regData.standards = "CCSS";
         }
     }
     else if( regData.role == lConst.role.developer ) {

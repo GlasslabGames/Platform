@@ -422,7 +422,7 @@ function _checkForGameAccess(licenseId, games, newGameIds){
         });
         when.all(promiseList)
             .then(function (results) {
-                var license = results[0][0];
+                var license = results[0][0] || {};
                 var gamesInfo = results.slice(1);
                 var availableGames = {};
                 var abort = false;

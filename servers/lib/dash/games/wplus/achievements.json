@@ -1,90 +1,103 @@
 {
-    "groups": [
-        {
-            "id": "a",
-            "description": "Common Core Standards",
-            "title": "Standards",
-            "subGroups": [
-                {
-                    "id": "a",
-                    "title": "Identify System Functions",
-                    "name": "",
-                    "description": "Describe the overall behavior of the system.",
-                    "info": ""
-                },
-                {
-                    "id": "b",
-                    "title": "Distinguish System Goals",
-                    "name": "",
-                    "description": "What is the system intentionally designed to do?",
-                    "info": ""
-                },
-                {
-                    "id": "c",
-                    "title": "Identify Behaviors",
-                    "name": "",
-                    "description": "What are the actions or roles that each component of the system displays under various conditions?",
-                    "info": ""
-                },
-                {
-                    "id": "d",
-                    "title": "Design a System",
-                    "name": "",
-                    "description": "Thinking deeply about the state of an envisioned system and how the particular components that are available might need to interconnect for that state to be realized.",
-                    "info": ""
-                },
-                {
-                    "id": "e",
-                    "title": "Identify Interconnections",
-                    "name": "",
-                    "description": "The different ways that a system’s parts, or components, interact with each other through their behaviors and change the behaviors of other components through those interactions.",
-                    "info": ""
-                },
-                {
-                    "id": "f",
-                    "title": "Perceive Dynamics",
-                    "name": "",
-                    "description": "How do the components come together to perform a function (not necessarily the same thing as a goal)?",
-                    "info": ""
-                },
-                {
-                    "id": "g",
-                    "title": "Consider the Role of System Structure",
-                    "name": "",
-                    "description": "How are the components set up in relation to one another? This gives insight into the behavior of components. A system's structure affects the behaviors of its components and the overall dynamics of a system.",
-                    "info": ""
-                },
-                {
-                    "id": "h",
-                    "title": "Limited Resources",
-                    "name": "",
-                    "description": "In any system, it is important to understand which resources are finite, ones that will run out at a certain point?",
-                    "info": ""
-                },
-                {
-                    "id": "i",
-                    "title": "Fixes That Fail",
-                    "name": "",
-                    "description": "Any kind of solution to a problem that fixes the problem temporarily but fails fix it in the long term, and might even make it worse over time.",
-                    "info": ""
-                },
-                {
-                    "id": "j",
-                    "title": "Unintended Consequences",
-                    "name": "",
-                    "description": "The unexpected result of an action taken in a system. Unintended consequences are often the result of fixes that fail or someone aiming to find a leverage point in a system but not considering long-term implications to those actions.",
-                    "info": ""
-                },
-                {
-                    "id": "k",
-                    "title": "Leverage Points",
-                    "name": "",
-                    "description": "Particular places within a system where a small shift in one thing can produce big changes in everything.",
-                    "info": ""
-                }
-            ]
-        }
-    ],
+    "groups": {
+        "CCSS": [
+            {
+                "id": "a",
+                "description": "Common Core Standards",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "Identify System Functions",
+                        "name": "",
+                        "description": "Describe the overall behavior of the system.",
+                        "info": "",
+                        "icon": "achievement-light-brown"
+                    },
+                    {
+                        "id": "b",
+                        "title": "Distinguish System Goals",
+                        "name": "",
+                        "description": "What is the system intentionally designed to do?",
+                        "info": "",
+                        "icon": "achievement-light-blue"
+                    },
+                    {
+                        "id": "c",
+                        "title": "Identify Behaviors",
+                        "name": "",
+                        "description": "What are the actions or roles that each component of the system displays under various conditions?",
+                        "info": "",
+                        "icon": "achievement-light-magenta"
+                    },
+                    {
+                        "id": "d",
+                        "title": "Design a System",
+                        "name": "",
+                        "description": "Thinking deeply about the state of an envisioned system and how the particular components that are available might need to interconnect for that state to be realized.",
+                        "info": "",
+                        "icon": "achievement-light-green"
+                    },
+                    {
+                        "id": "e",
+                        "title": "Identify Interconnections",
+                        "name": "",
+                        "description": "The different ways that a system’s parts, or components, interact with each other through their behaviors and change the behaviors of other components through those interactions.",
+                        "info": "",
+                        "icon": "achievement-light-red"
+                    },
+                    {
+                        "id": "f",
+                        "title": "Perceive Dynamics",
+                        "name": "",
+                        "description": "How do the components come together to perform a function (not necessarily the same thing as a goal)?",
+                        "info": "",
+                        "icon": "achievement-light-yellow"
+                    },
+                    {
+                        "id": "g",
+                        "title": "Consider the Role of System Structure",
+                        "name": "",
+                        "description": "How are the components set up in relation to one another? This gives insight into the behavior of components. A system's structure affects the behaviors of its components and the overall dynamics of a system.",
+                        "info": "",
+                        "icon": "achievement-brown"
+                    },
+                    {
+                        "id": "h",
+                        "title": "Limited Resources",
+                        "name": "",
+                        "description": "In any system, it is important to understand which resources are finite, ones that will run out at a certain point?",
+                        "info": "",
+                        "icon": "achievement-blue"
+                    },
+                    {
+                        "id": "i",
+                        "title": "Fixes That Fail",
+                        "name": "",
+                        "description": "Any kind of solution to a problem that fixes the problem temporarily but fails fix it in the long term, and might even make it worse over time.",
+                        "info": "",
+                        "icon": "achievement-magenta"
+                    },
+                    {
+                        "id": "j",
+                        "title": "Unintended Consequences",
+                        "name": "",
+                        "description": "The unexpected result of an action taken in a system. Unintended consequences are often the result of fixes that fail or someone aiming to find a leverage point in a system but not considering long-term implications to those actions.",
+                        "info": "",
+                        "icon": "achievement-green"
+                    },
+                    {
+                        "id": "k",
+                        "title": "Leverage Points",
+                        "name": "",
+                        "description": "Particular places within a system where a small shift in one thing can produce big changes in everything.",
+                        "info": "",
+                        "icon": "achievement-red"
+                    }
+                ]
+            }
+        ]
+    },
     "achievements": [
         {
             "id": "SystemsBasics",
@@ -92,14 +105,17 @@
             "info": "Student has shown proficiency at interconnecting the most basic pieces.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "a"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "b"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "c"
                 }
@@ -111,6 +127,7 @@
             "info": "Student has solved levels that require moderately difficult problem solving and mixing colors.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "d"
                 }
@@ -122,6 +139,7 @@
             "info": "Student has mastered basic pieces as well as splitters and blenders and used them in conjunction to design tricky systems.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "e"
                 }
@@ -133,6 +151,7 @@
             "info": "Student has completed all basic levels and has a good grasp of how to leverage the abilities of all components.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "f"
                 }
@@ -144,10 +163,12 @@
             "info": "Student has shown proficiency at solving levels taht are pre-populated with incorrect solutions.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "j"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "i"
                 }
@@ -159,6 +180,7 @@
             "info": "Student has shown proficiency at fixing incorrect solutions by finding the system's leverage point(s).",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "k"
                 }
@@ -170,6 +192,7 @@
             "info": "Student has designed systems that negotiate 3D space efficiently.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "g"
                 }
@@ -181,6 +204,7 @@
             "info": "Student has solved a considerable amount of the game's limited pieces levels.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "h"
                 }

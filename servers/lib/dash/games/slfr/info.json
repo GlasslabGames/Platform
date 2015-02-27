@@ -594,9 +594,9 @@
                 "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
-                "list": [
+                "CCSS": [
                     {
-                        "category": "Geometry",
+                        "category": "Common Core Math: Geometry",
                         "groups": [
                             {
                                 "name": "Split groups",
@@ -621,7 +621,7 @@
                         ]
                     },
                     {
-                      "category": "Fractions",
+                      "category": "Common Core Math: Fractions",
                         "groups": [
                             {
                                 "name": "Denominator",
@@ -720,6 +720,103 @@
                                         "name": "CCSS.MATH.CONTENT.2.NF.B.3.A",
                                         "link": "http://www.corestandards.org/Math/Content/4/NF/B/3/a/",
                                         "description": "Subtract fractions from 1"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "TEKS": [
+                    {
+                        "category": "Texas Essential Knowledge and Skills: Math",
+                        "groups": [
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.2.3",
+                                        "link": "",
+                                        "description": "The student applies mathematical process standards to recognize and represent fractional units and communicates how they are used to name parts of a whole."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.3.3.A",
+                                        "link": "",
+                                        "description": "Represent fractions greater than zero and less than or equal to one with denominators of 2, 3, 4, 6, and 8 using concrete objects and pictorial models, including strip diagrams and number lines."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.3.3.C",
+                                        "link": "",
+                                        "description": "Explain that the unit fraction 1/b represents the quantity formed by one part of a whole that has been partitioned into b equal parts where b is a non-zero whole number."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.3.3.D",
+                                        "link": "",
+                                        "description": "Compose and decompose a fraction a/b with a numerator greater than zero and less than or equal to b as a sum of parts 1/b."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.3.3.E",
+                                        "link": "",
+                                        "description": "Solve problems involving partitioning an object or a set of objects among two or more recipients using pictorial representations of fractions with denominators of 2, 3, 4, 6, and 8."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.3.3.F",
+                                        "link": "",
+                                        "description": "Represent equivalent fractions with denominators of 2, 3, 4, 6, and 8 using a variety of objects and pictorial models, including number lines."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.3.3.G",
+                                        "link": "",
+                                        "description": "Explain that two fractions are equivalent if and only if they are both represented by the same point on the number line or represent the same portion of a same size whole for an area model."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.3.3.H",
+                                        "link": "",
+                                        "description": "Compare two fractions having the same numerator or denominator in problems by reasoning about their sizes and justifying the conclusion using symbols, words, objects, and pictorial models."
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "",
+                                "list": [
+                                    {
+                                        "name": "TEKS.MATH.4.3.E",
+                                        "link": "",
+                                        "description": "Represent and solve addition and subtraction of fractions with equal denominators using objects and pictorial models that build to the number line and properties of operations."
                                     }
                                 ]
                             }

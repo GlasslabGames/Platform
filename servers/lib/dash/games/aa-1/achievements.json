@@ -1,48 +1,54 @@
 {
-    "groups": [
-        {
-            "id": "CCSS.ELA-Literacy.WHST.6-8.1",
-            "description": "Common Core Standards",
-            "title": "Standards",
-            "subGroups": [
-                {
-                    "id": "a",
-                    "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
-                    "name": "Organizing Claims",
-                    "description": "Write arguments focused on discipline-specific content",
-                    "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically."
-                },
-                {
-                    "id": "b",
-                    "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
-                    "name": "Supporting Claims",
-                    "description": "Write arguments to support claims with clear reasons and relevant evidence",
-                    "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources."
-                }
-            ]
-        },
-        {
-            "id": "21st.Century.Skills",
-            "description": "21st Century Skills",
-            "title": "21st Century Skills",
-            "subGroups": [
-                {
-                    "id": "a",
-                    "title": "Problem Solving",
-                    "name": "Problem Solving",
-                    "description": "Distinguish among fact, opinion, and reasoned judgement in a text",
-                    "info": "Experimentation of new and familiar concepts while processing￼information until a viable solution is reached."
-                },
-                {
-                    "id": "b",
-                    "title": "Citizenship",
-                    "name": "Citizenship",
-                    "description": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
-                    "info": "Demonstration of proper technology use, global awareness, and moral capacity in and outside of the classroom."
-                }
-            ]
-        }
-    ],
+    "groups": {
+        "CCSS": [
+            {
+                "id": "CCSS.ELA-Literacy.WHST.6-8.1",
+                "description": "Common Core Standards",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
+                        "name": "Organizing Claims",
+                        "description": "Write arguments focused on discipline-specific content",
+                        "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically.",
+                        "icon": "achievement-blue"
+                    },
+                    {
+                        "id": "b",
+                        "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
+                        "name": "Supporting Claims",
+                        "description": "Write arguments to support claims with clear reasons and relevant evidence",
+                        "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources.",
+                        "icon": "achievement-green"
+                    }
+                ]
+            },
+            {
+                "id": "21st.Century.Skills",
+                "description": "21st Century Skills",
+                "title": "21st Century Skills",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "Problem Solving",
+                        "name": "Problem Solving",
+                        "description": "Distinguish among fact, opinion, and reasoned judgement in a text",
+                        "info": "Experimentation of new and familiar concepts while processing￼information until a viable solution is reached.",
+                        "icon": "achievement-red"
+                    },
+                    {
+                        "id": "b",
+                        "title": "Citizenship",
+                        "name": "Citizenship",
+                        "description": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
+                        "info": "Demonstration of proper technology use, global awareness, and moral capacity in and outside of the classroom.",
+                        "icon": "achievement-yellow"
+                    }
+                ]
+            }
+        ]
+    },
     "achievements": [
         {
             "id": "Bot Champion",
@@ -50,6 +56,7 @@
             "info": "Student has won three argubot battles in a row!",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS.ELA-Literacy.WHST.6-8.1",
                     "subGroup": "a"
                 }
@@ -61,6 +68,7 @@
             "info": "Great detective work! Student has collected a wide range of evidence.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS.ELA-Literacy.WHST.6-8.1",
                     "subGroup": "a"
                 }
@@ -72,6 +80,7 @@
             "info": "Student dominated a battle by successfully critiquing an opposing argument while defending his/her own.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS.ELA-Literacy.WHST.6-8.1",
                     "subGroup": "b"
                 }
@@ -83,6 +92,7 @@
             "info": "Student has 100% accuracy at identifying strengths and weaknesses of claim-data pairs for his/her 5 most recent attempts.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS.ELA-Literacy.WHST.6-8.1",
                     "subGroup": "b"
                 }
@@ -94,6 +104,7 @@
             "info": "Student has completed greater than 15 Claim Cores with a high success rate!",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS.ELA-Literacy.WHST.6-8.1",
                     "subGroup": "b"
                 }
@@ -105,6 +116,7 @@
             "info": "Gathered 100% evidence before equipping an argubot.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "21st.Century.Skills",
                     "subGroup": "a"
                 }
@@ -116,6 +128,7 @@
             "info": "Student is taking the initiative to change positions at difficult times in order to make a better argument.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "21st.Century.Skills",
                     "subGroup": "a"
                 }
@@ -127,6 +140,7 @@
             "info": "After failing a battle, immediately selects the option to try again.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "21st.Century.Skills",
                     "subGroup": "a"
                 }
@@ -138,6 +152,7 @@
             "info": "Touches all the objects in a scene before leaving the room.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "21st.Century.Skills",
                     "subGroup": "b"
                 }
@@ -149,6 +164,7 @@
             "info": "The student is choosing empathetic dialogue when speaking with other characters.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "21st.Century.Skills",
                     "subGroup": "b"
                 }

@@ -504,173 +504,173 @@
                 "authRequired": false,
                 "id": "standards",
                 "title": "Standards Alignment",
-                "list": [
-                  {
-                    "category": "Framework for 21st Century Learning",
-                    "groups": [
-                        {
-                            "list": [
-                                {
-                                    "name": "Critical Thinking and Problem Solving",
-                                    "link": "http://www.p21.org/about-us/p21-framework/260",
-                                    "description": "Use Systems Thinking and Make Judgements and Decisions"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "category": "Next Generation Science Standards (NGSS):Itemized Standards",
-                    "groups": [
-                        {
-                            "list": [
-                                {
-                                    "name": "MS-LS2-1",
-                                    "link": "http://www.nextgenscience.org/ms-ls2-1-ecosystems-interactions-energy-and-dynamics",
-                                    "description": "Interdependent relationships in ecosystems: resource allocation"
-                                },
-                                {
-                                    "name": "MS-LS2-4",
-                                    "link": "http://www.nextgenscience.org/ms-ls2-4-ecosystems-interactions-energy-and-dynamics",
-                                    "description": "Evaluate effect of resource changes on ecosystem population"
-                                },
-                                {
-                                    "name": "MS-LS2-5",
-                                    "link": "http://www.nextgenscience.org/ms-ls2-5-ecosystems-interactions-energy-and-dynamics",
-                                    "description": "Evaluate interdependent relationships in ecosystems"
-                                },
-                                {
-                                    "name": "MS-ETS1-1",
-                                    "link": "http://www.nextgenscience.org/msets1-engineering-design",
-                                    "description": "Defining and delimiting the scope of a problem"
-                                },
-                                {
-                                    "name": "MS-ETS1-2",
-                                    "link": "http://www.nextgenscience.org/msets1-engineering-design",
-                                    "description": "Designing and evaluating solutions>"
-                                },
-                                {
-                                    "name": "MS-ETS1-3",
-                                    "link": "http://www.nextgenscience.org/msets1-engineering-design",
-                                    "description": "Optimizing solutions through systematic evaluation"
-                                },
-                                {
-                                    "name": "MS-ESS3-3",
-                                    "link": "http://www.nextgenscience.org/msess-hi-human-impacts",
-                                    "description": "Evaluating human impact on the environment"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "category": "Next Generation Science Standards (NGSS):Crosscutting Concepts",
-                    "groups": [
-                        {
-                            "list": [
-                                {
-                                    "name": "Cause and Effect",
-                                    "link": "http://www.nextgenscience.org/three-dimensions",
-                                    "description": "investigating and explaining causal relationships"
-                                },
-                                {
-                                    "name": "Systems and System Models",
-                                    "link": "http://www.nextgenscience.org/three-dimensions",
-                                    "description": "defining and explaining systems of study"
-                                },
-                                {
-                                    "name": "Scale, Proportion, and Quantity",
-                                    "link": "http://www.nextgenscience.org/three-dimensions",
-                                    "description": "Understanding impact of scale, proportion, and quantity on a system>"
-                                },
-                                {
-                                    "name": "Stability and Change",
-                                    "link": "http://www.nextgenscience.org/three-dimensions",
-                                    "description": "Studying factors of system stability and change"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "category": "Connections to Engineering, Technology, and Applications of Science",
-                    "groups": [
-                        {
-                            "list": [
-                                {
-                                    "name":"Influence of Science, Engineering, and Technology on Society and Nature",
-                                    "link":"http://www.nap.edu/openbook.php?record_id=13165&page=201",
-                                    "description": "Core interdisciplinary connections"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "category": "Common Core Math Standards (CCSS)",
-                    "groups": [
-                        {
-                            "list":[
-                                {
-                                    "name":"CCSS.MATH.6.EE.B.6",
-                                    "link":"http://www.corestandards.org/Math/Content/6/EE/#CCSS.Math.Content.6.EE.B.6",
-                                    "description":"Understanding/identifying variables"
-                                },
-                                {
-                                    "name":"CCSS.MATH.7.EE.B.4",
-                                    "link":"http://www.corestandards.org/Math/Content/7/EE/#CCSS.Math.Content.7.EE.B.4",
-                                    "description":"Understanding/identifying variables"
-                                },
-                                {
-                                    "name":"CCSS.MATH.6.RP.A.1",
-                                    "link":"http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
-                                    "description":"Understanding/identifying ratios"
-                                },
-                                {
-                                  "name":"CCSS.MATH.7.RP.A.2",
-                                   "link":"http://www.corestandards.org/Math/Content/7/RP/#CCSS.Math.Content.7.RP.A.2",
-                                   "description":"Understanding/identifying ratios"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "category": "Council for Economic Education (CEE)",
-                    "groups": [
-                        {
-                            "list":[
+                "CCSS": [
+                    {
+                        "category": "Framework for 21st Century Learning",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "Critical Thinking and Problem Solving",
+                                        "link": "http://www.p21.org/about-us/p21-framework/260",
+                                        "description": "Use Systems Thinking and Make Judgements and Decisions"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Next Generation Science Standards (NGSS):Itemized Standards",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "MS-LS2-1",
+                                        "link": "http://www.nextgenscience.org/ms-ls2-1-ecosystems-interactions-energy-and-dynamics",
+                                        "description": "Interdependent relationships in ecosystems: resource allocation"
+                                    },
+                                    {
+                                        "name": "MS-LS2-4",
+                                        "link": "http://www.nextgenscience.org/ms-ls2-4-ecosystems-interactions-energy-and-dynamics",
+                                        "description": "Evaluate effect of resource changes on ecosystem population"
+                                    },
+                                    {
+                                        "name": "MS-LS2-5",
+                                        "link": "http://www.nextgenscience.org/ms-ls2-5-ecosystems-interactions-energy-and-dynamics",
+                                        "description": "Evaluate interdependent relationships in ecosystems"
+                                    },
+                                    {
+                                        "name": "MS-ETS1-1",
+                                        "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                        "description": "Defining and delimiting the scope of a problem"
+                                    },
+                                    {
+                                        "name": "MS-ETS1-2",
+                                        "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                        "description": "Designing and evaluating solutions>"
+                                    },
+                                    {
+                                        "name": "MS-ETS1-3",
+                                        "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                        "description": "Optimizing solutions through systematic evaluation"
+                                    },
+                                    {
+                                        "name": "MS-ESS3-3",
+                                        "link": "http://www.nextgenscience.org/msess-hi-human-impacts",
+                                        "description": "Evaluating human impact on the environment"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Next Generation Science Standards (NGSS):Crosscutting Concepts",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "Cause and Effect",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "investigating and explaining causal relationships"
+                                    },
+                                    {
+                                        "name": "Systems and System Models",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "defining and explaining systems of study"
+                                    },
+                                    {
+                                        "name": "Scale, Proportion, and Quantity",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "Understanding impact of scale, proportion, and quantity on a system>"
+                                    },
+                                    {
+                                        "name": "Stability and Change",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "Studying factors of system stability and change"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Connections to Engineering, Technology, and Applications of Science",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name":"Influence of Science, Engineering, and Technology on Society and Nature",
+                                        "link":"http://www.nap.edu/openbook.php?record_id=13165&page=201",
+                                        "description": "Core interdisciplinary connections"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Common Core Math Standards (CCSS)",
+                        "groups": [
+                            {
+                                "list":[
+                                    {
+                                        "name":"CCSS.MATH.6.EE.B.6",
+                                        "link":"http://www.corestandards.org/Math/Content/6/EE/#CCSS.Math.Content.6.EE.B.6",
+                                        "description":"Understanding/identifying variables"
+                                    },
+                                    {
+                                        "name":"CCSS.MATH.7.EE.B.4",
+                                        "link":"http://www.corestandards.org/Math/Content/7/EE/#CCSS.Math.Content.7.EE.B.4",
+                                        "description":"Understanding/identifying variables"
+                                    },
+                                    {
+                                        "name":"CCSS.MATH.6.RP.A.1",
+                                        "link":"http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
+                                        "description":"Understanding/identifying ratios"
+                                    },
+                                    {
+                                      "name":"CCSS.MATH.7.RP.A.2",
+                                       "link":"http://www.corestandards.org/Math/Content/7/RP/#CCSS.Math.Content.7.RP.A.2",
+                                       "description":"Understanding/identifying ratios"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Council for Economic Education (CEE)",
+                        "groups": [
+                            {
+                                "list":[
 
 
-                                {
-                                    "name":"Standard 1 (Scarcity: Productive Resources)",
-                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                    "description":"Productive Resources"
-                                },
-                                {
-                                    "name":"Standard 1 (Scarcity: Human Capital)",
-                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                    "description":"Human Capital"
-                                },
-                                {
-                                    "name":"Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
-                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                    "description":"Cost/Benefit Analysis"
-                                },
-                                {
-                                    "name":"Standard 6 (Specialization and Trade: Division of Labor)",
-                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                    "description":"Division of Labor"
-                                },
-                                {
-                                    "name":"Standard 6 (Specialization and Trade: Employment/Unemployment)",
-                                    "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                    "description":"Employment/Unemployment"
-                                }
-                            ]
-                        }
-                    ]
-                }
+                                    {
+                                        "name":"Standard 1 (Scarcity: Productive Resources)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Productive Resources"
+                                    },
+                                    {
+                                        "name":"Standard 1 (Scarcity: Human Capital)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Human Capital"
+                                    },
+                                    {
+                                        "name":"Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Cost/Benefit Analysis"
+                                    },
+                                    {
+                                        "name":"Standard 6 (Specialization and Trade: Division of Labor)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Division of Labor"
+                                    },
+                                    {
+                                        "name":"Standard 6 (Specialization and Trade: Employment/Unemployment)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Employment/Unemployment"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 ]
             },
             "lessonPlans": {
