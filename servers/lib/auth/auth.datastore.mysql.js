@@ -252,7 +252,8 @@ return when.promise(function(resolve, reject) {
             reset_Code_Status as resetCodeStatus, \
             verify_code as verifyCode, \
             verify_code_expiration as verifyCodeExpiration, \
-            verify_code_status as verifyCodeStatus \
+            verify_code_status as verifyCodeStatus, \
+            standards_view as standards \
         FROM \
             GL_USER \
         WHERE \
@@ -285,6 +286,10 @@ return when.promise(function(resolve, reject) {
                     }
                     // add user permissions object
                     user[i].permits = aConst.permits[user[i].role];
+
+                    // Returning default standards to display in the front-end
+                    // TODO: remove this when we have clarity on the multi-standards design
+                    user[i].standards = user[i].standards ? user[i].standards : "CCSS";
                 }
 
                 // if input not array then return a single user
@@ -433,10 +438,11 @@ return when.promise(function(resolve, reject) {
         verify_code_status: "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
+        standards_view: this.ds.escape(userData.standards),
         ftue_checklist: "NULL"
     };
 
-    if(userData.role === "instructor"){
+    if(userData.role === "instructor" || userData.role === "manager"){
         data.ftue_checklist = 0;
     }
 
@@ -567,6 +573,13 @@ return when.promise(function(resolve, reject) {
             data.ftue_checklist = "NULL";
         } else {
             data.ftue_checklist = this.ds.escape(userData.ftue);
+        }
+    }
+    if(userData.standards) {
+        if (userData.standards == "NULL") {
+            data.standards_view = "NULL";
+        } else {
+            data.standards_view = this.ds.escape(userData.standards);
         }
     }
 
