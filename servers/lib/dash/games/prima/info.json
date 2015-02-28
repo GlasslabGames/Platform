@@ -42,8 +42,8 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-PLACEHOLDER.png",
-            "large": "assets/thumb-game-PLACEHOLDER@2x.png"
+            "small": "assets/thumb-game-PRIMA.png",
+            "large": "assets/thumb-game-PRIMA.png"
         },
         "card": {
             "small": "assets/game-card-PRIMA.png",
@@ -57,7 +57,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/1/index.html",
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/2/index.html",
                 "format": "html",
                 "size": {
                     "width": 800,
@@ -82,6 +82,28 @@
                     {
                         "name": "Play Game",
                         "type": "play"
+                    }
+                ]
+            },
+            {
+                "name": "Pre-Test Survey",
+                "authRequired": false,
+                "type": "link",
+                "links": [
+                    {
+                        "target": "_blank",
+                        "link": "http://www.surveygizmo.com/s3/1994048/Prima-Form-A1"
+                    }
+                ]
+            },
+            {
+                "name": "Post-Test Survey",
+                "authRequired": false,
+                "type": "link",
+                "links": [
+                    {
+                        "target": "_blank",
+                        "link": "http://www.surveygizmo.com/s3/1999026/Prima-Form-B1"
                     }
                 ]
             }
