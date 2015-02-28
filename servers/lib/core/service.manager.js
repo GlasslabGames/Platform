@@ -130,7 +130,7 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.urlencoded());
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
-                var whitelist = [ "http://new.wwf.local", "http://edu.zwf-staging.zynga.com" ];
+                var whitelist = [ "http://new.wwf.local", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com" ];
                 var corsOptions = {
                     origin: function( origin, callback ) {
                         var originIsWhitelisted = whitelist.indexOf( origin ) !== -1;
@@ -138,7 +138,6 @@ return when.promise(function(resolve, reject) {
                     },
                     credentials: true
                 };
-                //this.app.use(cors({origin:"http://stage.playfully.org; http://localhost:8080", credentials: true}));
                 this.app.use( cors(corsOptions) );
 
                 this.app.use(express.session({

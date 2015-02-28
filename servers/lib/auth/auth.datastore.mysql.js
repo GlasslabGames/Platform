@@ -410,7 +410,7 @@ return when.promise(function(resolve, reject) {
         ftue_checklist: "NULL"
     };
 
-    if(userData.role === "instructor"){
+    if(userData.role === "instructor" || userData.role === "manager"){
         data.ftue_checklist = 0;
     }
 
