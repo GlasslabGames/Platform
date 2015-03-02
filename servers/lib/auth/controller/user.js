@@ -664,7 +664,7 @@ function registerUserV2(req, res, next, serviceManager) {
                 }.bind(this))
                 // catch all errors
                 .then(null, function(err){
-                    this.requestUtil.errorResponse(err, 404);
+                    registerErr(err, 404);
                     console.error("Student Registration Error -",err);
                 });
         } else {
