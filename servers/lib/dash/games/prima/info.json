@@ -84,28 +84,6 @@
                         "type": "play"
                     }
                 ]
-            },
-            {
-                "name": "Pre-Test Survey",
-                "authRequired": false,
-                "type": "link",
-                "links": [
-                    {
-                        "target": "_blank",
-                        "link": "http://www.surveygizmo.com/s3/1994048/Prima-Form-A1"
-                    }
-                ]
-            },
-            {
-                "name": "Post-Test Survey",
-                "authRequired": false,
-                "type": "link",
-                "links": [
-                    {
-                        "target": "_blank",
-                        "link": "http://www.surveygizmo.com/s3/1999026/Prima-Form-B1"
-                    }
-                ]
             }
         ],
         "pages": {
