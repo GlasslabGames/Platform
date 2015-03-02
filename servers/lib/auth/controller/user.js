@@ -354,7 +354,9 @@ function registerUserV2(req, res, next, serviceManager) {
         state:         "",
         school:        "",
         role:          req.body.role,
-        loginType:     aConst.login.type.glassLabV2
+        loginType:     aConst.login.type.glassLabV2,
+        trial:         false,
+        subscribe:     false
     };
 
     if(regData.role == lConst.role.student) {
@@ -421,6 +423,12 @@ function registerUserV2(req, res, next, serviceManager) {
         }
         if (!regData.standards) {
             regData.standards = "CCSS";
+        }
+        if(req.query.hasOwnProperty('trial')){
+            regData.trial = true;
+        }
+        if(req.query.hasOwnProperty('subscribe')){
+            regData.subscribe = true;
         }
     }
     else if( regData.role == lConst.role.developer ) {
@@ -656,7 +664,7 @@ function registerUserV2(req, res, next, serviceManager) {
                 }.bind(this))
                 // catch all errors
                 .then(null, function(err){
-                    this.requestUtil.errorResponse(err, 404);
+                    registerErr(err, 404);
                     console.error("Student Registration Error -",err);
                 });
         } else {
@@ -924,6 +932,8 @@ function sendVerifyEmail(regData, protocol, host) {
             userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
             userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
+            userData.trial                = regData.trial;
+            userData.subscribe            = regData.subscribe;
 
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
