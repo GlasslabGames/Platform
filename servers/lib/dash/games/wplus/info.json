@@ -16,7 +16,7 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "price": "TBD",
+        "price": "Coming Soon",
         "release": "dev",
         "releaseDate": "March 13, 2015",
         "shortDescription": "Water Bears EDU",
@@ -25,8 +25,8 @@
             "id": "SG",
             "name": "Schell Games",
             "logo": {
-                "small": "assets/dev-logo-placeholder.jpg",
-                "large": "assets/dev-logo-placeholder@2x.jpg"
+                "small": "assets/dev-logo-schellgames.png",
+                "large": "assets/dev-logo-schellgames@2x.png"
             },
             "description": ""
         },
@@ -51,7 +51,7 @@
         },
         "banners": {
             "product": "assets/game-banner-WPLUS.png",
-            "reports": "assets/game-banner-WPLUS.png"
+            "reports": "assets/game-banner-WPLUS@2x.png"
         }
     },
     "assessment": [
@@ -230,15 +230,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/GOG-carousel_1.png"
+                        "url": "assets/WPLUS-carousel_1.jpg"
                     },
                     {
                         "type": "image",
-                        "url": "assets/GOG-carousel_2.png"
+                        "url": "assets/WPLUS-carousel_2.jpg"
                     },
                     {
                         "type": "image",
-                        "url": "assets/GOG-carousel_3.png"
+                        "url": "assets/WPLUS-carousel_3.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WPLUS-carousel_4.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WPLUS-carousel_5.jpg"
                     }
                 ]
             },
@@ -372,7 +380,7 @@
                             {
                                 "name": "Systems Thinking Basics: From Concepts to Causal Loops",
                                 "link": "http://www.homeworkmarket.com/sites/default/files/qx/15/01/11/05/systems_thinking_basics_ebook.pdf"
-                            },
+                            }
                         ]
                     }
                 ]
