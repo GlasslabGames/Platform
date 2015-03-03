@@ -255,7 +255,15 @@ module.exports = {
             service: "dash",
             controller: "games",
             method: {
-                get: "getPlanAddableGamesBasicInfo"
+                get: "getPlanLicenseGamesBasicInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/plan/:planId/basic",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesBasicInfoByPlan"
             }
         },
         {
