@@ -383,6 +383,7 @@ return when.promise(function(resolve, reject) {
 
 // loads of permission checks are done before update the DB data
 Glasslab_Strategy.prototype.updateUserData = function(userData, loginUserSessionData){
+    console.log( JSON.stringify( userData ) );
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -453,6 +454,19 @@ return when.promise(function(resolve, reject) {
             } else {
                 return Util.PromiseContinue();
             }
+        }.bind(this))
+        // check if standards is same
+        .then(function () {
+            if( userData.role === lConst.role.student ) {
+                userData.standards = "NULL";
+            }
+            if( userData.standards !== dbUserData.standards ) {
+                if( isSelf ) {
+                    loginUserSessionData.standards = userData.standards;
+                    sessionDataChanged = true;
+                }
+            }
+            return Util.PromiseContinue();
         }.bind(this))
         // check if ftue is same
         .then(function () {

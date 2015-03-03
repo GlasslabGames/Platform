@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "PRIMA",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Prima",
         "longName": "Prima",
@@ -42,8 +42,8 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-PLACEHOLDER.png",
-            "large": "assets/thumb-game-PLACEHOLDER@2x.png"
+            "small": "assets/thumb-game-PRIMA.png",
+            "large": "assets/thumb-game-PRIMA.png"
         },
         "card": {
             "small": "assets/game-card-PRIMA.png",
@@ -57,7 +57,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/1/index.html",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/4/index.html?sdkURL=http://stage.playfully.org",
                 "format": "html",
                 "size": {
                     "width": 800,

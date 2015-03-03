@@ -2,7 +2,7 @@
     "basic": {
         "gameId": "WT",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Wuzzit Trouble",
         "longName": "Wuzzit Trouble",
@@ -245,15 +245,15 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/WT-carousel_1.png"
+                        "url": "assets/WT-carousel_1.PNG"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WT-carousel_2.png"
+                        "url": "assets/WT-carousel_2.PNG"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WT-carousel_3.png"
+                        "url": "assets/WT-carousel_3.PNG"
                     },
                     {
                         "type": "image",
@@ -265,11 +265,11 @@
                     },
                     {
                         "type": "image",
-                        "url": "assets/WT-carousel_6.png"
+                        "url": "assets/WT-carousel_6.PNG"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WT-carousel_7.png"
+                        "url": "assets/WT-carousel_7.PNG"
                     }
                 ]
             },
@@ -279,7 +279,7 @@
                 "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
-                "list": [
+                "CCSS": [
                     {
                         "category": "Common Core Math",
                         "groups": [

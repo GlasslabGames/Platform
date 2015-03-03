@@ -258,7 +258,7 @@
                 "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
-                "list": [
+                "CCSS": [
                     {
                         "category": "ELA Common Core",
                         "groups": [
