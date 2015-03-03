@@ -1057,7 +1057,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
                         .then(function() {
                             return when.promise(function(resolve,reject) {
                                 req.body.verifyCode = req.params.code;
-                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next])
+                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                                 resolve();
                             }).then(function() {
                                 return userData;
