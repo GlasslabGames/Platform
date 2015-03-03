@@ -403,14 +403,12 @@ function createCourse(req, res, next, serviceManager)
 
 function _checkForGameAccess(licenseId, games, newGameIds){
     return when.promise(function(resolve, reject) {
-        var promiseList = [{}, []];
+        var promiseList = [{}];
         var lic = this.serviceManager.get("lic");
         var licService = lic.service;
         var dashService = this.serviceManager.get("dash").service;
         if (licenseId) {
             promiseList[0] = licService.myds.getLicenseById(licenseId);
-        } else{
-            promiseList[1] = dashService.getListOfAllFreeGameIds();
         }
         games.forEach(function (game){
             if(game.assigned === undefined){
@@ -448,8 +446,6 @@ function _checkForGameAccess(licenseId, games, newGameIds){
                             availableGames[gameId] = true;
                         });
                     }
-                } else {
-
                 }
                 var isAvailable;
                 _(gamesInfo).some(function (game) {
@@ -595,33 +591,36 @@ function updateCourseInfo(req, res, next, serviceManager)
         }
         var courseData = req.body;
         var courseId = courseData.id = req.params.courseId;
-        var premiumGamesAssignedChanged = courseData.premiumGamesAssigned !== undefined;
 
         // check if enrolled
         this.myds.isEnrolledInCourse(userData.id, courseId)
             .then(function(isEnrolled){
-                if(isEnrolled && premiumGamesAssignedChanged) {
-                    //add class type method here
-                    var licenseId = req.user.licenseId;
-                    var licService = this.serviceManager.get("lic").service;
-                    if(courseData.premiumGamesAssigned){
-                        return _canClassEnable.call(this, licenseId, courseData.games)
-                            .then(function(state){
-                                if(state){
-                                    return licService.assignPremiumCourse(courseId, licenseId);
-                                }
-                                return "no game to enable";
-                            })
-                            .then(null, function(err){
-                                return when.reject(err);
-                            });
-                    } else {
-                        return licService.unassignPremiumCourses(courseId, licenseId);
-                    }
-                } else if(isEnrolled){
-                    return;
+                if(isEnrolled) {
+                    return this.myds.getCourseInfoFromKey('id', courseId);
                 } else{
                     return "course.general";
+                }
+            }.bind(this))
+            .then(function(oldCourseData){
+                if(typeof oldCourseData === "string"){
+                    return oldCourseData;
+                }
+                var licenseId = req.user.licenseId;
+                var licService = this.serviceManager.get("lic").service;
+                if(courseData.premiumGamesAssigned && !oldCourseData.premiumGamesAssigned){
+                    return _canClassEnable.call(this, licenseId, courseData.games)
+                        .then(function(state){
+                            if(state){
+                                return licService.assignPremiumCourse(courseId, licenseId);
+                            }
+                            return "no game to enable";
+                        })
+                        .then(null, function(err){
+                            return when.reject(err);
+                        });
+                }
+                if(!courseData.premiumGamesAssigned && oldCourseData.premiumGamesAssigned) {
+                    return licService.unassignPremiumCourses(courseId, licenseId);
                 }
             }.bind(this))
             .then(function(status){
@@ -766,18 +765,38 @@ function updateGamesInCourse(req, res, next, serviceManager)
 
 function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
     return when.promise(function(resolve, reject){
-        if(!licenseId){
-            resolve();
-            return;
-        }
         var promiseList = [];
         promiseList.push(this.myds.getCourse(courseId));
         var newGameIds = [];
-        promiseList.push(_checkForGameAccess.call(this, licenseId, games, newGameIds));
+
+        if(licenseId){
+            promiseList.push(_checkForGameAccess.call(this, licenseId, games, newGameIds));
+        } else{
+            // basic user does not have license, so check games against free game list
+            var dashService = this.serviceManager.get("dash").service;
+            promiseList.push(dashService.getListOfAllFreeGameIds());
+        }
         when.all(promiseList)
             .then(function(results){
                 var licService = this.serviceManager.get("lic").service;
                 var course = results[0];
+
+                // for basic user
+                if(!licenseId){
+                    var freeGames = results[1];
+                    var freeGamesObj = {};
+                    freeGames.forEach(function(gameId){
+                        freeGamesObj[gameId] = true;
+                    });
+                    games.forEach(function(game){
+                        if(freeGamesObj[game.id]){
+                            game.assigned = true;
+                        }
+                    });
+
+                    return;
+                }
+
                 var abort = results[1][0];
                 if(abort){
                     return "invalid game access";
