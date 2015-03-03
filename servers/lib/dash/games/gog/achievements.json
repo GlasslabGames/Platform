@@ -1,34 +1,39 @@
 {
-    "groups": [
-        {
-            "id": "CCSS Math 6.NS",
-            "description": "Common Core Standards",
-            "title": "Standards",
-            "subGroups": [
-                {
-                    "id": "6b",
-                    "title": "CCSS Math 6.NS.6b",
-                    "name": "",
-                    "description": "Understand signs of numbers in ordered pairs as indicating locations in quadrants of the coordinate plane; recognize that when two ordered pairs differ only by signs, the locations of the points are related by reflections across one or both axes.",
-                    "info": ""
-                },
-                {
-                    "id": "6c",
-                    "title": "CCSS Math 6.NS.6c",
-                    "name": "",
-                    "description": "Find and position integers and other rational numbers on a horizontal or vertical number line diagram; find and position pairs of integers and other rational numbers on a coordinate plane.",
-                    "info": ""
-                },
-                {
-                    "id": "8",
-                    "title": "CCSS Math 6.NS.8",
-                    "name": "",
-                    "description": "Solve real-world and mathematical problems by graphing points in all four quadrants of the coordinate plane. Include use of coordinates and absolute value to find distances between points with the same first coordinate or the same second coordinate.",
-                    "info": ""
-                }
-            ]
-        }
-    ],
+    "groups": {
+        "CCSS": [
+            {
+                "id": "CCSS Math 6.NS",
+                "description": "Common Core Standards",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "6b",
+                        "title": "CCSS Math 6.NS.6b",
+                        "name": "",
+                        "description": "Understand signs of numbers in ordered pairs as indicating locations in quadrants of the coordinate plane; recognize that when two ordered pairs differ only by signs, the locations of the points are related by reflections across one or both axes.",
+                        "info": "",
+                        "icon": "achievement-light-blue"
+                    },
+                    {
+                        "id": "6c",
+                        "title": "CCSS Math 6.NS.6c",
+                        "name": "",
+                        "description": "Find and position integers and other rational numbers on a horizontal or vertical number line diagram; find and position pairs of integers and other rational numbers on a coordinate plane.",
+                        "info": "",
+                        "icon": "achievement-green"
+                    },
+                    {
+                        "id": "8",
+                        "title": "CCSS Math 6.NS.8",
+                        "name": "",
+                        "description": "Solve real-world and mathematical problems by graphing points in all four quadrants of the coordinate plane. Include use of coordinates and absolute value to find distances between points with the same first coordinate or the same second coordinate.",
+                        "info": "",
+                        "icon": "achievement-yellow"
+                    }
+                ]
+            }
+        ]
+    },
     "achievements": [
         {
             "id": "Placed Coordinates in all Quadrants",
@@ -36,10 +41,12 @@
             "info": "Player has completed all three first levels.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6b"
                 },
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
                 }
@@ -51,6 +58,7 @@
             "info": "Player has used the Melon Strike successfully.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6b"
                 }
@@ -62,6 +70,7 @@
             "info": "Player has completed level 11.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6b"
                 }
@@ -73,10 +82,12 @@
             "info": "Player has completed first challenge round.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6b"
                 },
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
                 }
@@ -88,6 +99,7 @@
             "info": "Player has used the Iceberg Lettuce tool successfully.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
                 }
@@ -99,6 +111,7 @@
             "info": "Player has completed level 8.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
                 }
@@ -110,6 +123,7 @@
             "info": "Player has completed level 10.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
                 }
@@ -121,14 +135,17 @@
             "info": "Player has completed all levels.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6b"
                 },
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
                 },
                 {
+                    "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "8"
                 }

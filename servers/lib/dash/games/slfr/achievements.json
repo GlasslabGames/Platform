@@ -1,69 +1,160 @@
 {
-    "groups": [
-        {
-            "id": "a",
-            "description": "Common Core Standards",
-            "title": "Standards",
-            "subGroups": [
-                {
-                    "id": "a",
-                    "title": "CCSS Math 2.G.A.3",
-                    "name": "",
-                    "description": "Partition circles and rectangles into two, three, or four equal shares, describe the shares using the words halves, thirds, half of, a third of, etc., and describe the whole as two halves, three thirds, four fourths. Recognize that equal shares of identical wholes need not have the same shape.",
-                    "info": ""
-                },
-                {
-                    "id": "b",
-                    "title": "Symbolic notation",
-                    "name": "",
-                    "description": "Students can read symbolic fractions and are starting to understand how they relate to numerical fractions.",
-                    "info": ""
-                },
-                {
-                    "id": "c",
-                    "title": "CCSS Math 3.NF.A.1",
-                    "name": "",
-                    "description": "Understand a fraction 1/b as the quantity formed by 1 part when a whole is partitioned into b equal parts; understand a fraction a/b as the quantity formed by a parts of size 1/b.",
-                    "info": ""
-                },
-                {
-                    "id": "d",
-                    "title": "CCSS Math 3.NF.A.3b",
-                    "name": "",
-                    "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3. Explain why the fractions are equivalent, e.g., by using a visual fraction model.",
-                    "info": ""
-                },
-                {
-                    "id": "e",
-                    "title": "CCSS Math 4.NF.B.3a",
-                    "name": "",
-                    "description": "Understand subtraction of fractions as separating parts referring to the same whole.",
-                    "info": ""
-                },
-                {
-                    "id": "f",
-                    "title": "CCSS Math 2.G.A.2",
-                    "name": "",
-                    "description": "Partition a rectangle into rows and columns of same-size squares and count to find the total number of them.",
-                    "info": ""
-                },
-                {
-                    "id": "g",
-                    "title": "CCSS Math 3.NF.A.3a",
-                    "name": "",
-                    "description": "Understand two fractions as equivalent (equal) if they are the same size, or the same point on a number line.",
-                    "info": ""
-                },
-                {
-                    "id": "h",
-                    "title": "CCSS Math 3.NF.A.3d",
-                    "name": "",
-                    "description": "Compare two fractions with the same numerator or the same denominator by reasoning about their size. Recognize that comparisons are valid only when the two fractions refer to the same whole. Record the results of comparisons with the symbols >, =, or <, and justify the conclusions, e.g., by using a visual fraction model.",
-                    "info": ""
-                }
-            ]
-        }
-    ],
+    "groups": {
+        "CCSS": [
+            {
+                "id": "a",
+                "description": "Common Core Standards",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "CCSS Math 2.G.A.3",
+                        "name": "",
+                        "description": "Partition circles and rectangles into two, three, or four equal shares, describe the shares using the words halves, thirds, half of, a third of, etc., and describe the whole as two halves, three thirds, four fourths. Recognize that equal shares of identical wholes need not have the same shape.",
+                        "info": "",
+                        "icon": "achievement-blue"
+                    },
+                    {
+                        "id": "b",
+                        "title": "Symbolic notation",
+                        "name": "",
+                        "description": "Students can read symbolic fractions and are starting to understand how they relate to numerical fractions.",
+                        "info": "",
+                        "icon": "achievement-magenta"
+                    },
+                    {
+                        "id": "c",
+                        "title": "CCSS Math 3.NF.A.1",
+                        "name": "",
+                        "description": "Understand a fraction 1/b as the quantity formed by 1 part when a whole is partitioned into b equal parts; understand a fraction a/b as the quantity formed by a parts of size 1/b.",
+                        "info": "",
+                        "icon": "achievement-green"
+                    },
+                    {
+                        "id": "d",
+                        "title": "CCSS Math 3.NF.A.3b",
+                        "name": "",
+                        "description": "Recognize simple equivalent fractions, e.g., 1/2 = 2/4, 4/6 = 2/3. Explain why the fractions are equivalent, e.g., by using a visual fraction model.",
+                        "info": "",
+                        "icon": "achievement-light-yellow"
+                    },
+                    {
+                        "id": "e",
+                        "title": "CCSS Math 4.NF.B.3a",
+                        "name": "",
+                        "description": "Understand subtraction of fractions as separating parts referring to the same whole.",
+                        "info": "",
+                        "icon": "achievement-yellow"
+                    },
+                    {
+                        "id": "f",
+                        "title": "CCSS Math 2.G.A.2",
+                        "name": "",
+                        "description": "Partition a rectangle into rows and columns of same-size squares and count to find the total number of them.",
+                        "info": "",
+                        "icon": "achievement-light-blue"
+                    },
+                    {
+                        "id": "g",
+                        "title": "CCSS Math 3.NF.A.3a",
+                        "name": "",
+                        "description": "Understand two fractions as equivalent (equal) if they are the same size, or the same point on a number line.",
+                        "info": "",
+                        "icon": "achievement-red"
+                    },
+                    {
+                        "id": "h",
+                        "title": "CCSS Math 3.NF.A.3d",
+                        "name": "",
+                        "description": "Compare two fractions with the same numerator or the same denominator by reasoning about their size. Recognize that comparisons are valid only when the two fractions refer to the same whole. Record the results of comparisons with the symbols >, =, or <, and justify the conclusions, e.g., by using a visual fraction model.",
+                        "info": "",
+                        "icon": "achievement-light-brown"
+                    }
+                ]
+            }
+        ],
+        "TEKS": [
+            {
+                "id": "a",
+                "description": "Texas Essential Knowledge and Skills",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "TEKS.MATH.2.3",
+                        "name": "",
+                        "description": "The student applies mathematical process standards to recognize and represent fractional units and communicates how they are used to name parts of a whole.",
+                        "info": "",
+                        "icon": "achievement-blue"
+                    },
+                    {
+                        "id": "b",
+                        "title": "TEKS.MATH.3.3.A",
+                        "name": "",
+                        "description": "Represent fractions greater than zero and less than or equal to one with denominators of 2, 3, 4, 6, and 8 using concrete objects and pictorial models, including strip diagrams and number lines.",
+                        "info": "",
+                        "icon": "achievement-red"
+                    },
+                    {
+                        "id": "c",
+                        "title": "TEKS.MATH.3.3.C",
+                        "name": "",
+                        "description": "Explain that the unit fraction 1/b represents the quantity formed by one part of a whole that has been partitioned into b equal parts where b is a non-zero whole number.",
+                        "info": "",
+                        "icon": "achievement-yellow"
+                    },
+                    {
+                        "id": "d",
+                        "title": "TEKS.MATH.3.3.D",
+                        "name": "",
+                        "description": "Compose and decompose a fraction a/b with a numerator greater than zero and less than or equal to b as a sum of parts 1/b.",
+                        "info": "",
+                        "icon": "achievement-green"
+                    },
+                    {
+                        "id": "e",
+                        "title": "TEKS.MATH.3.3.E",
+                        "name": "",
+                        "description": "Solve problems involving partitioning an object or a set of objects among two or more recipients using pictorial representations of fractions with denominators of 2, 3, 4, 6, and 8.",
+                        "info": "",
+                        "icon": "achievement-brown"
+                    },
+                    {
+                        "id": "f",
+                        "title": "TEKS.MATH.3.3.F",
+                        "name": "",
+                        "description": "Represent equivalent fractions with denominators of 2, 3, 4, 6, and 8 using a variety of objects and pictorial models, including number lines.",
+                        "info": "",
+                        "icon": "achievement-light-blue"
+                    },
+                    {
+                        "id": "g",
+                        "title": "TEKS.MATH.3.3.G",
+                        "name": "",
+                        "description": "Explain that two fractions are equivalent if and only if they are both represented by the same point on the number line or represent the same portion of a same size whole for an area model.",
+                        "info": "",
+                        "icon": "achievement-light-red"
+                    },
+                    {
+                        "id": "h",
+                        "title": "TEKS.MATH.3.3.H",
+                        "name": "",
+                        "description": "Compare two fractions having the same numerator or denominator in problems by reasoning about their sizes and justifying the conclusion using symbols, words, objects, and pictorial models.",
+                        "info": "",
+                        "icon": "achievement-light-magenta"
+                    },
+                    {
+                        "id": "i",
+                        "title": "TEKS.MATH.4.3.E",
+                        "name": "",
+                        "description": "Represent and solve addition and subtraction of fractions with equal denominators using objects and pictorial models that build to the number line and properties of operations.",
+                        "info": "",
+                        "icon": "achievement-light-yellow"
+                    }
+                ]
+            }
+        ]
+    },
     "achievements": [
         {
             "id": "achievement1",
@@ -71,12 +162,19 @@
             "info": "Students understand how the game works and can split groups or shapes into equal shares.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "a"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "f"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "a"
                 }
             ]
         },
@@ -86,8 +184,14 @@
             "info": "Students understand how a fractions is written.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "a"
                 }
             ]
         },
@@ -97,8 +201,29 @@
             "info": "Students understand what changing the numerator and the denominator mean in a fraction.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "d"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "e"
                 }
             ]
         },
@@ -108,12 +233,29 @@
             "info": "Students understand what an equivalent fraction is, by comparing shapes of different sizes together.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "d"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "g"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "f"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "g"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "h"
                 }
             ]
         },
@@ -123,12 +265,49 @@
             "info": "Students can deduct fraction values based on the information at hand.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "h"
                 },
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "d"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "e"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "f"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "g"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "h"
                 }
             ]
         },
@@ -138,8 +317,14 @@
             "info": "Students can subtract fractions from 1.",
             "standards": [
                 {
+                    "id": "CCSS",
                     "group": "a",
                     "subGroup": "e"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "a",
+                    "subGroup": "i"
                 }
             ]
         }

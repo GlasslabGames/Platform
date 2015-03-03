@@ -90,7 +90,8 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 collect_Telemetry > 0 as collectTelemetry, \
                 enabled > 0 as enabled, \
                 login_Type as loginType, \
-                ftue_checklist as ftue\
+                ftue_checklist as ftue, \
+                standards_view as standards \
             FROM GL_USER  \
             WHERE id="+ this.ds.escape(id);
         this.ds.query(Q)
@@ -99,6 +100,11 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     results = results[0];
                     results.collectTelemetry = results.collectTelemetry ? true : false;
                     results.enabled          = results.enabled ? true : false;
+
+                    // Returning default standards to display in the front-end
+                    // TODO: remove this when we have clarity on the multi-standards design
+                    results.standards = results.standards ? results.standards : "CCSS";
+
                     resolve(results);
                 } else {
                     reject({"error": "none found"}, 500);

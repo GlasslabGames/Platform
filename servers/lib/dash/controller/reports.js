@@ -246,6 +246,7 @@ function _getAchievements(req, res, reportId, gameId, courseId) {
 
         .then(function(playerInfoList) {
             var achievements = [];
+            var defaultStandards = req.session.passport.user.standards;
             //console.log("playerInfoList:", playerInfoList);
 
             for(var userId in playerInfoList) {
@@ -258,7 +259,7 @@ function _getAchievements(req, res, reportId, gameId, courseId) {
                     totalTimePlayed: info.totalTimePlayed || 0
                 };
 
-                userAchievements.achievements = this.getListOfAchievements(gameId, info.achievement);
+                userAchievements.achievements = this.getListOfAchievements(gameId, info.achievement, defaultStandards);
                 achievements.push(userAchievements);
             }
 

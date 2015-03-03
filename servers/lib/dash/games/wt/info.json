@@ -279,7 +279,7 @@
                 "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
-                "list": [
+                "CCSS": [
                     {
                         "category": "Common Core Math",
                         "groups": [
