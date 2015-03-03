@@ -470,16 +470,10 @@ function upgradeLicense(req, res){
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
-                return status;
-            }
-            instructors = status[3];
-            return Util.updateSession(req);
-        }.bind(this))
-        .then(function(status){
-            if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
             }
+            instructors = status[3];
             var licenseOwnerEmail = req.user.email;
             emailData.ownerName = req.user.firstName + " " + req.user.lastName;
             emailData.newPlan = planInfo.type;
@@ -855,13 +849,6 @@ function addTeachersToLicense(req, res){
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
-            if(typeof status === "string"){
-                return status;
-            }
-            users = status[0];
-            return Util.updateSession(req);
-        })
-        .then(function(status){
             if(status === "not enough seats"){
                 this.requestUtil.errorResponse(res, {key:"lic.educators.full"});
                 return;
@@ -876,6 +863,7 @@ function addTeachersToLicense(req, res){
             }
             // design emails language, methods, and templates
             // method currently is empty
+            users = status[0];
             var approvedUsers = users[0];
             var approvedNonUsers = users[1];
             var rejectedEmails = users[2];
@@ -1012,6 +1000,9 @@ function teacherLeavesLicense(req, res){
                 return results;
             }
             emails = results;
+            delete req.user.licenseId;
+            delete req.user.licenseOwnerId;
+            delete req.user.licenseStatus;
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -1457,11 +1448,10 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 //find out which premium courses that instructor is a part of
                 //lock each of those premium courses (with utility method)
             }.bind(this))
-            .then(function(results){
-                if(results === "email not in license"){
-                    return results;
+            .then(function(courseIds){
+                if(courseIds === "email not in license"){
+                    return courseIds;
                 }
-                var courseIds = results[0];
                 if(Array.isArray(courseIds)){
                     return this.unassignPremiumCourses(courseIds, licenseId);
                 }
