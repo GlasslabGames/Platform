@@ -150,7 +150,7 @@ function _unassignPremiumGames(courseId){
                 var index = 0;
                 _(games).forEach(function(game, key){
                     basicInfo = infoObj[key];
-                    if(basicInfo.price === "Premium"){
+                    if(basicInfo.price === "Premium" || basicInfo.price === "TBD" || basicInfo.price === "Coming Soon"){
                         game.assigned = false;
                     }
                 });

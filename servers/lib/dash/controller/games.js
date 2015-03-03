@@ -8,7 +8,8 @@ var fs = require('fs');
 module.exports = {
     getActiveGamesBasicInfo:         getActiveGamesBasicInfo,
     getGamesBasicInfo:               getGamesBasicInfo,
-    getPlanAddableGamesBasicInfo:   getPlanAddableGamesBasicInfo,
+    getPlanLicenseGamesBasicInfo:    getPlanLicenseGamesBasicInfo,
+    getGamesBasicInfoByPlan:         getGamesBasicInfoByPlan,
     getActiveGamesDetails:           getActiveGamesDetails,
     getMyGames:                      getMyGames,
     reloadGameFiles:                 reloadGameFiles,
@@ -102,43 +103,34 @@ function getActiveGamesBasicInfo(req, res){
     }
 }
 
-function getPlanAddableGamesBasicInfo(req, res){
+function getPlanLicenseGamesBasicInfo(req, res){
     if(!(req && req.user && req.user.id)){
         this.requestUtil.errorResponse(res, {key: "dash.permission.denied"});
         return;
     }
     var licenseId = req.user.licenseId;
     var loginType = req.user.loginType;
-    var availableGames;
     var promise;
     if(licenseId){
         var licService = this.serviceManager.get("lic").service;
         promise = licService.myds.getLicenseById(licenseId);
     } else{
-        promise = this.getListOfAllFreeGameIds();
+        promise = Util.PromiseContinue();
     }
     promise
         .then(function(output) {
+            var type;
             if(licenseId){
-                license = output[0];
-                var type = license["package_type"];
-                var lConst = require('../../lic/lic.const.js');
-                var plan = lConst.plan[type];
-                var browserGames = plan.browserGames;
-                var iPadGames = plan.iPadGames;
-                var downloadableGames = plan.downloadableGames;
-                availableGames = browserGames.concat(iPadGames, downloadableGames);
+                var license = output[0];
+                type = license["package_type"];
             } else{
-                // basic, nonpremium user
-                availableGames = output;
+                type = "basic";
             }
-            var promiseList = [];
-            availableGames.forEach(function (gameId) {
-                promiseList.push(this.getGameBasicInfo(gameId));
-            }.bind(this));
-            return when.all(promiseList);
+            return _getPlanGamesBasicInfo.call(this, type);
         }.bind(this))
-        .then(function(gamesInfo){
+        .then(function(output){
+            var gamesInfo = output[0];
+            var availableGames = output[1];
             var outGames = _infoFormat(gamesInfo, loginType, availableGames, availableGames);
             this.requestUtil.jsonResponse(res, outGames);
         }.bind(this))
@@ -146,6 +138,60 @@ function getPlanAddableGamesBasicInfo(req, res){
             console.error("Get License Games Basic Info Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
+}
+
+function getGamesBasicInfoByPlan(req, res){
+    var planId = req.params.planId;
+    var loginType = "guest";
+    if(req.user && req.user.loginType){
+        loginType = req.user.loginType;
+    }
+    _getPlanGamesBasicInfo.call(this, planId)
+        .then(function(output){
+            var gamesInfo = output[0];
+            var availableGames = output[1];
+            var outGames = _infoFormat(gamesInfo, loginType, availableGames, availableGames);
+            this.requestUtil.jsonResponse(res, outGames);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Games Basic Info By Plan Error -",err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function _getPlanGamesBasicInfo(type){
+    return when.promise(function(resolve, reject){
+        var promise;
+        var availableGames;
+        if(type === 'basic'){
+            promise = this.getListOfAllFreeGameIds();
+        }
+        else{
+            var lConst = require('../../lic/lic.const.js');
+            var plan = lConst.plan[type];
+            var browserGames = plan.browserGames;
+            var iPadGames = plan.iPadGames;
+            var downloadableGames = plan.downloadableGames;
+            var gameIds = browserGames.concat(iPadGames, downloadableGames);
+            promise = Util.PromiseContinue(gameIds);
+        }
+        promise
+            .then(function(gameIds){
+                availableGames = gameIds;
+                var promiseList = [];
+                gameIds.forEach(function(gameId){
+                    promiseList.push(this.getGameBasicInfo(gameId));
+                }.bind(this));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(gamesInfo){
+                resolve([gamesInfo, availableGames]);
+            })
+            .then(null, function(err){
+                console.error("Get Plan Games Basic Info Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 // no input

@@ -4,8 +4,15 @@ Hello {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},<br />
 <b>To complete creating your GlassLab Games account</b>, please click on the link below to confirm your email address:<br />
 <br/>
 
-<a href="{{= host }}/verify-email/{{= code }}">{{= host }}/verify-email/{{= code }}</a><br /><br />
-
+{{ if(user.trial){ }}
+    <a href="{{= host }}/verify-email/{{= code }}">{{= host }}/verify-email/{{= code }}?trial=true</a>
+{{ } else if(user.subscribe){ }}
+    <a href="{{= host }}/verify-email/{{= code }}">{{= host }}/verify-email/{{= code }}?subscribe=true</a>
+{{ } else{ }}
+    <a href="{{= host }}/verify-email/{{= code }}">{{= host }}/verify-email/{{= code }}</a>
+{{ } }}
+<br />
+<br />
 
 We're so excited to have you join the movement! Once you have verified, you’ll have access to lesson plans, real-time reports, and other resources that will help make learning visible!
 <br/>
