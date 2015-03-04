@@ -635,7 +635,7 @@ function updateCourseInfo(req, res, next, serviceManager)
                     return;
                 }
                 if(status === "not enough seats"){
-                    this.requestUtil.errorResponse(res, { key: "lic.students.full"});
+                    this.requestUtil.errorResponse(res, { key: "lic.students.full.enable.premium"});
                     return;
                 }
                 if(status === "no game to enable"){

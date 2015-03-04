@@ -424,12 +424,19 @@ function registerUserV2(req, res, next, serviceManager) {
         if (!regData.standards) {
             regData.standards = "CCSS";
         }
-        if(req.query.hasOwnProperty('trial')){
-            regData.trial = true;
+        if(req.query.hasOwnProperty('upgrade')){
+            regData.trial = req.query.upgrade === 'trial';
+            regData.subscribe = req.query.upgrade === 'subscribe'
         }
-        if(req.query.hasOwnProperty('subscribe')){
-            regData.subscribe = true;
+        if (regData.subscribe) {
+            if (req.query.hasOwnProperty('seatsSelected')) {
+                regData.seatsSelected = parseInt(req.query.seatsSelected);
+            }
+            if (req.query.hasOwnProperty('packageType')) {
+                regData.packageType = req.query.packageType;
+            }
         }
+
     }
     else if( regData.role == lConst.role.developer ) {
         // email and username is the same
@@ -934,6 +941,8 @@ function sendVerifyEmail(regData, protocol, host) {
             userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
             userData.trial                = regData.trial;
             userData.subscribe            = regData.subscribe;
+            userData.seatsSelected        = regData.seatsSelected;
+            userData.packageType          = regData.packageType;
 
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
