@@ -1001,6 +1001,7 @@ return when.promise(function(resolve, reject) {
             c.lmsId, \
             c.labels, \
             c.meta, \
+            c.premium_games_assigned as premiumGamesAssigned, \
             co.code \
         FROM GL_COURSE c \
         JOIN GL_CODE co on co.course_id=c.id \
@@ -1012,6 +1013,7 @@ return when.promise(function(resolve, reject) {
                 results = results[0];
                 results.archived = results.archived ? true : false;
                 results.locked   = results.locked   ? true : false;
+                results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
 
                 // convert string to array
                 results.grade = this._splitGrade(results.grade);

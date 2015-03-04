@@ -24,6 +24,8 @@ module.exports = {
     "course.general":                       "We encountered an error. Please try again.",
     "course.locked":                        "Course Registration is Locked at the moment. Please try again later.",
     "course.notUnique.name":                "Class names must be unique. Please choose a different class name.",
+    "course.cannot.enable":                 "This action would not enable any premium games",
+    //user
     "user.permit.invalid":                  "Your role does not have permission to access this feature",
     "user.enroll.general":                  "There was an error with the information you entered.",
     "user.enroll.code.missing":             "The class code is missing.",
@@ -123,5 +125,6 @@ module.exports = {
     "lic.renewing.already":                 "License auto-renew is already enabled, method should not be called",
     "lic.promoCode.missing":                "No promo code was supplied",
     "lic.promoCode.invalid":                "The promo code supplied was invalid",
-    "lic.promoCode.noMoreRedemptions":      "This promo code has already been used and has no redemptions remaining"
+    "lic.promoCode.noMoreRedemptions":      "This promo code has already been used and has no redemptions remaining",
+    "lic.general":                          "We encountered an error. Please Try again"
 };
