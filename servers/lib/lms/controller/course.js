@@ -274,13 +274,13 @@ exampleOut.getEnrolledCourses_WithMembers_ForGame =[
                 "id": 175,
                 "lastName": "test2_s1",
                 "firstName": "test2_s1",
-                "username": "test2_s1",
+                "username": "test2_s1"
             },
             {
                 "id": 176,
                 "lastName": "test2_s2",
                 "firstName": "test2_s2",
-                "username": "test2_s2",
+                "username": "test2_s2"
             }
         ]
     }
