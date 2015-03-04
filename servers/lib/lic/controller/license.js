@@ -51,7 +51,8 @@ function getSubscriptionPackages(req, res){
         };
         this.requestUtil.jsonResponse(res, output);
     } catch(err){
-        this.requestUtil.errorResponse(res, err)
+        console.error("Get Subscription Packages Error -",err);
+        this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
     }
 }
 
@@ -112,8 +113,8 @@ function getCurrentPlan(req, res){
             this.requestUtil.jsonResponse(res, output, 200);
         }.bind(this))
         .then(null, function(err){
-            console.error(err);
-            this.requestUtil.errorResponse(res, err);
+            console.error("Get Current Plan Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -196,7 +197,8 @@ function getStudentsInLicense(req, res){
             this.requestUtil.jsonResponse(res, output);
         }.bind(this))
         .then(null, function(err){
-            this.requestUtil.errorResponse(res, err);
+            console.error("Get Students in License Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -238,7 +240,7 @@ function getBillingInfo(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Get Customer Id Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this))
 }
 
@@ -282,7 +284,7 @@ function updateBillingInfo(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Update Billing Info Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -335,7 +337,7 @@ function subscribeToLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To License Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -399,7 +401,7 @@ function subscribeToTrialLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To Trial License Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -483,7 +485,7 @@ function upgradeLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Upgrade License Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -551,7 +553,7 @@ function upgradeTrialLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Upgrade Trial License Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -592,6 +594,7 @@ function validatePromoCode(req, res) {
             this.requestUtil.jsonResponse(res, promoCodeInfo);
         }.bind(this))
         .then(null, function(err) {
+            console.error("Validate Promo Code Error -",err);
             this.requestUtil.errorResponse(res, {key: "lic.promoCode.invalid"});
         }.bind(this));
 }
@@ -628,7 +631,7 @@ function cancelLicenseAutoRenew(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Cancel License Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -691,7 +694,7 @@ function enableLicenseAutoRenew(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Renew License Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -889,7 +892,7 @@ function addTeachersToLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Add Teachers to License Error - ",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -924,7 +927,7 @@ function setInstructorLicenseStatusToActive(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Set License Map Status to Active Error -",err);
-            this.requestUtil.errorResponse(res, err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -968,8 +971,8 @@ function removeTeacherFromLicense(req, res){
             _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            this.requestUtil.errorResponse(res, err);
             console.error("Remove Teacher From License Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -1024,8 +1027,8 @@ function teacherLeavesLicense(req, res){
             this.requestUtil.jsonResponse(res, { status: 'success' });
         }.bind(this))
         .then(null, function(err){
-            this.requestUtil.errorResponse(res, err);
             console.error("Teacher Leaves License Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
 
@@ -1529,14 +1532,14 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
 
 function _errorLicensingAccess(res, status){
     if(status === "access absent"){
-        this.requestUtil.errorResponse(res, {key: "lic.access.absent"},500);
+        this.requestUtil.errorResponse(res, {key: "lic.access.absent"});
     } else if(status === "invalid records"){
-        this.requestUtil.errorResponse(res, {key: "lic.records.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.records.invalid"});
     } else if (status === "inconsistent"){
-        this.requestUtil.errorResponse(res, {key: "lic.records.inconsistent"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.records.inconsistent"});
     } else{
         console.trace('unexpected error status:' + status);
-        this.requestUtil.errorResponse(res, {key: "lic.acces.invalid"}, 500);
+        this.requestUtil.errorResponse(res, {key: "lic.general"}, 500);
     }
 }
 

@@ -103,18 +103,18 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
 
                 return this.myds.unassignPremiumCourses(courseIds);
             }.bind(this))
-            .then(function(status){
+            .then(function(){
                 promiseList = [];
                 courseIds.forEach(function(id){
                     promiseList.push(_unassignPremiumGames.call(this, id));
                 }.bind(this));
                 return when.all(promiseList);
             }.bind(this))
-            .then(function(status){
+            .then(function(){
                 var licenseStudentList = { students: studentList};
                 return this.cbds.updateStudentsByLicense(licenseId, licenseStudentList);
             }.bind(this))
-            .then(function(status){
+            .then(function(){
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(){
