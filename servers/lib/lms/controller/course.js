@@ -424,7 +424,7 @@ function _checkForGameAccess(licenseId, games, newGameIds){
                 var availableGames = {};
                 var abort = false;
                 var premiumGamesAssigned = false;
-                var gamesInfo = results.slice(2);
+                var gamesInfo = results.slice(1);
                 if(licenseId){
                     var license = results[0][0] || {};
                     if(license.id){
