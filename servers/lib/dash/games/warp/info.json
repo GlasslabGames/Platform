@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "WARP",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Warp Driver",
         "longName": "Warp Driver",

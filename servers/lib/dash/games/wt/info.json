@@ -2,7 +2,7 @@
     "basic": {
         "gameId": "WT",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Wuzzit Trouble",
         "longName": "Wuzzit Trouble",
