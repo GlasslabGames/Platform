@@ -383,6 +383,14 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         this.app[ m ](a.api, function(req, res, next) {
                             this.stats.increment("info", "Route.AuthCheck");
 
+                            /*// Validate against requireHttps
+                            if( a.requireHttps ) {
+                                if( !req.connection.encrypted ) {
+                                    res.status(403).end();
+                                    return;
+                                }
+                            }*/
+
                             // auth
                             if( req.isAuthenticated() ) {
                                 this.stats.increment("info", "Route.Auth.Ok");
@@ -405,6 +413,14 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         }.bind(this));
                     } else {
                         console.log("API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
+
+                        /*// Validate against requireHttps
+                        if( a.requireHttps ) {
+                            if( !req.connection.encrypted ) {
+                                res.status(403).end();
+                                return;
+                            }
+                        }*/
 
                         // no login required
                         this.app[ m ](a.api, function(req, res, next) {
