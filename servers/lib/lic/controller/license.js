@@ -427,6 +427,7 @@ function upgradeLicense(req, res){
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var planInfo = req.body.planInfo;
+    var stripeInfo = req.body.stripeInfo || {};
     var emailData = {};
     var instructors;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
@@ -446,12 +447,22 @@ function upgradeLicense(req, res){
             var user = results[0];
             var customerId = user["customer_id"];
             var license = results[1][0];
+            if(license["purchase_order_id"] !== null){
+                return "po-id";
+            }
             emailData.oldPlan = license["package_type"];
             emailData.oldSeats = license["package_size_tier"];
             var subscriptionId = license["subscription_id"];
-            var params = _buildStripeParams(planInfo, customerId, {});
-            delete params.card;
-            return this.serviceManager.stripe.updateSubscription(customerId, subscriptionId, params);
+            var params = _buildStripeParams(planInfo, customerId, stripeInfo);
+            var promiseList = [];
+            if(license["payment_type"] === "purchase_order"){
+                promiseList.push(_switchToCreditCard.call(this, licenseId));
+            }
+            if(!params.card){
+                delete params.card;
+            }
+            promiseList.push(this.serviceManager.stripe.updateSubscription(customerId, subscriptionId, params));
+            return when.all(promiseList);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -480,6 +491,10 @@ function upgradeLicense(req, res){
             return when.all(promiseList);
         }.bind(this))
         .then(function(status){
+            if(status === "po-id"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
+                return;
+            }
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
@@ -1265,8 +1280,8 @@ function upgradeLicensePurchaseOrder(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(req.user.licenseId){
-        this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
@@ -1288,13 +1303,42 @@ function approvePurchaseOrderUpgradeLicense(req, res){
     // email
 }
 
-function _switchToPurchaseOrder(userId){
-    // call cancel stripe subscription
-    // update license table
+function _switchToPurchaseOrder(userId, licenseId){
+    return when.promise(function(resolve, reject){
+    // cancel auto renew
+    _cancelAutoRenew.call(this, userId, licenseId)
+        .then(function(){
+            var paymentType = "payment_type = 'purchase-order'";
+            var autoRenew = "auto_renew = 0";
+            var updateFields = [paymentType, autoRenew];
+            // update license table
+            return this.myds.updateLicenseById(licenseId, updateFields);
+        }.bind(this))
+        .then(function(){
+            resolve();
+        })
+        .then(null, function(err){
+            console.error("Switch to Purchase Order Error -",err);
+            reject(err);
+        });
+    }.bind(this));
 }
 
-function _switchToCreditCard(userId){
-    // update license table
+function _switchToCreditCard(licenseId){
+    return when.promise(function(resolve, reject){
+        var paymentType = "payment_type = 'credit-card'";
+        var autoRenew = "auto_renew = 1";
+        var updateFields = [paymentType, autoRenew];
+        // update license table
+        this.myds.updateLicenseById(licenseId, updateFields)
+            .then(function(){
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Switch to Credit Card Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 function _buildBillingInfo(cardData){
