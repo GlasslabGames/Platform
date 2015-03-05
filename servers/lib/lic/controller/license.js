@@ -24,6 +24,7 @@ module.exports = {
     teacherLeavesLicense: teacherLeavesLicense,
     subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
     upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
+    upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -1168,24 +1169,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
                 }
                 licenseId = id;
                 //create entry in purchaseOrder table
-                var values = [];
-                values.push(userId);
-                values.push(licenseId);
-                var status = "'pending'";
-                values.push(status);
-                var purchaseOrderNumber = "NULL";
-                values.push(purchaseOrderNumber);
-                var purchaseOrderKey = "'" + Util.createUUID() + "'";
-                values.push(purchaseOrderKey);
-                var phone = "'" + purchaseOrderInfo.phone + "'";
-                values.push(phone);
-                var email = "'" + purchaseOrderInfo.email + "'";
-                values.push(email);
-                var name = "'" + purchaseOrderInfo.name + "'";
-                values.push(name);
-                var payment = purchaseOrderInfo.payment;
-                values.push(payment);
-
+                var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo);
                 //need to formalize table schema
                 return this.myds.insertToPurchaseOrderTable(values);
 
@@ -1211,6 +1195,27 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
                 reject(err);
             });
     }.bind(this));
+}
+
+function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
+    var values = [];
+    values.push(userId);
+    values.push(licenseId);
+    var status = "'pending'";
+    values.push(status);
+    var purchaseOrderNumber = "NULL";
+    values.push(purchaseOrderNumber);
+    var purchaseOrderKey = "'" + Util.createUUID() + "'";
+    values.push(purchaseOrderKey);
+    var phone = "'" + purchaseOrderInfo.phone + "'";
+    values.push(phone);
+    var email = "'" + purchaseOrderInfo.email + "'";
+    values.push(email);
+    var name = "'" + purchaseOrderInfo.name + "'";
+    values.push(name);
+    var payment = purchaseOrderInfo.payment;
+    values.push(payment);
+    return values;
 }
 
 function approvePurchaseOrderSubscribe(req, res){
@@ -1272,28 +1277,74 @@ function upgradeTrialLicensePurchaseOrder(req, res){
 
 function upgradeLicensePurchaseOrder(req, res){
     // do subscribe purchase order stuff
-    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
-        return;
-    }
-    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo)){
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo && req.body.purchaseOrderInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
+    var licenseId = req.user.licenseId;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var planInfo = req.body.planInfo;
-
     // validation stuff. if p.o. id defined, do not let upgrade (do this for cc too)
-
-    // check if account formerly used cc if so call _switchToPurchaseOrder
-    // create purchase order row in sql
-    // update license table purchaseOrderId column to true
-    // email and send current plan stuff
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return this.myds.getLicenseById(licenseId);
+        }.bind(this))
+        .then(function(license){
+            license = license[0];
+            if(license["purchase_order_id"] !== null){
+                return "po-id";
+            }
+            // check if account most recently used cc
+            if(license["payment_type"] === "credit-card"){
+                return _switchToPurchaseOrder.call(this, userId, licenseId);
+            }
+        }.bind(this))
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
+            }
+            // create purchase order row in sql
+            var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo);
+            return this.myds.insertToPurchaseOrderTable(values);
+        }.bind(this))
+        .then(function(purchaseOrderId){
+            if(typeof purchaseOrderId === "string"){
+                return purchaseOrderId;
+            }
+            // update license table purchaseOrderId column
+            purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
+            var updateFields = [purchaseOrderId];
+            return this.myds.updateLicenseById(licenseId, updateFields);
+        }.bind(this))
+        .then(function(status){
+            if(status === "po-id"){
+                this.requestUtil.errorResponse(res, { key:"lic.order.pending"});
+                return;
+            }
+            if(typeof status === "string"){
+                _errorLicensingAccess.call(this, status);
+                return;
+            }
+            // email and send current plan stuff
+            var data = {};
+            var email = req.user.email;
+            data.subject = "Purchase Order Received";
+            var template = "owner-purchase-order-received";
+            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Upgrade License Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
 }
 
 function approvePurchaseOrderUpgradeLicense(req, res){
