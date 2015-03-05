@@ -22,6 +22,8 @@ module.exports = {
     setInstructorLicenseStatusToActive: setInstructorLicenseStatusToActive,
     removeTeacherFromLicense: removeTeacherFromLicense,
     teacherLeavesLicense: teacherLeavesLicense,
+    subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
+    upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -305,6 +307,7 @@ function subscribeToLicense(req, res){
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
     var expirationDate;
+
     _createSubscription.call(this, req, userId, stripeInfo, planInfo)
         .then(function(results){
             if(typeof results === "string"){
@@ -322,7 +325,10 @@ function subscribeToLicense(req, res){
                 this.requestUtil.errorResponse(res,{key:"lic.account.inactive"});
                 return;
             }
-
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
+                return;
+            }
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
@@ -385,6 +391,10 @@ function subscribeToTrialLicense(req, res){
             }
             if(status === "no trial"){
                 this.requestUtil.errorResponse(res, { key: "lic.trial.expired"});
+                return;
+            }
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
                 return;
             }
             // get users email address and build below method
@@ -537,6 +547,10 @@ function upgradeTrialLicense(req, res){
             }
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
+                return;
+            }
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
                 return;
             }
             var licenseOwnerEmail = req.user.email;
@@ -1049,7 +1063,11 @@ function subscribeToLicensePurchaseOrder(req, res){
     var planInfo = req.body.planInfo;
 
    _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo)
-        .then(function(){
+        .then(function(status){
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
+                return;
+            }
             //email + conclusion stuff, go to dashboard
             //subscribePurchaseOrderEmail thing
             var email = req.user.email;
@@ -1095,16 +1113,32 @@ function _createStripeCustomer(userId, params){
 
 function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
     return when.promise(function(resolve, reject){
-        var params = {
-            metadata: {
-                purchaseOrder: true
-            }
-        };
         var licenseId;
         //create stripe customer id
         //customerId = customer.id --> write to user table
-        _createStripeCustomer.call(this, userId, params)
-            .then(function(){
+        this.myds.getLicenseMapByInstructors([userId])
+            .then(function(licenseMaps){
+                var status = false;
+                licenseMaps.some(function(license){
+                    if(license.status === "po-pending"){
+                        status = license.status;
+                        return true;
+                    }
+                });
+                if(status){
+                    return status;
+                }
+                var params = {
+                    metadata: {
+                        purchaseOrder: true
+                    }
+                };
+                return _createStripeCustomer.call(this, userId, params);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
                 var data = {};
                 var date = new Date(Date.now());
                 date.setFullYear(date.getFullYear()+1);
@@ -1114,6 +1148,9 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
                 return _createLicenseSQL.call(this, userId, planInfo, data);
             }.bind(this))
             .then(function(id){
+                if(typeof id === "string"){
+                    return id;
+                }
                 licenseId = id;
                 //create entry in purchaseOrder table
                 var values = [];
@@ -1123,8 +1160,8 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
                 values.push(status);
                 var purchaseOrderNumber = "NULL";
                 values.push(purchaseOrderNumber);
-                var uniqueIdentifier = "'" + Util.createUUID() + "'";
-                values.push(uniqueIdentifier);
+                var purchaseOrderKey = "'" + Util.createUUID() + "'";
+                values.push(purchaseOrderKey);
                 var phone = "'" + purchaseOrderInfo.phone + "'";
                 values.push(phone);
                 var email = "'" + purchaseOrderInfo.email + "'";
@@ -1139,12 +1176,19 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
 
             }.bind(this))
             .then(function(purchaseOrderId){
+                if(typeof purchaseOrderId === "string"){
+                    return purchaseOrderId;
+                }
                 //update license table with po id
                 purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
                 var updateFields = [purchaseOrderId];
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }.bind(this))
-            .then(function(){
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                    return;
+                }
                 resolve();
             })
             .then(null, function(err){
@@ -1188,22 +1232,9 @@ function upgradeTrialLicensePurchaseOrder(req, res){
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var planInfo = req.body.planInfo;
 
-    this.myds.getLicenseMapByInstructors([userId])
-        .then(function(licenses){
-            var orderPending = false;
-            licenses.some(function(license){
-                if(license.status === "purchase-order-pending"){
-                    orderPending = true;
-                    return orderPending;
-                }
-            });
-            if(orderPending){
-                return "order pending";
-            }
-            return _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo);
-        })
+    _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo)
         .then(function(status){
-            if(status === "order pending"){
+            if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
                 return;
             }
@@ -1241,7 +1272,9 @@ function upgradeLicensePurchaseOrder(req, res){
     var userId = req.user.id;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var planInfo = req.body.planInfo;
+
     // validation stuff. if p.o. id defined, do not let upgrade (do this for cc too)
+
     // check if account formerly used cc if so call _switchToPurchaseOrder
     // create purchase order row in sql
     // update license table purchaseOrderId column to true
@@ -1286,7 +1319,20 @@ function _createSubscription(req, userId, stripeInfo, planInfo){
         var email = req.user.email;
         var name = req.user.firstName + " " + req.user.lastName;
         var expirationDate;
-        _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo)
+        this.myds.getLicenseMapByInstructors([userId])
+            .then(function(licenseMaps){
+                var status = false;
+                licenseMaps.some(function(map){
+                    if(map.status === "po-pending"){
+                        status = map.status;
+                        return true;
+                    }
+                });
+                if(status){
+                    return status;
+                }
+                return _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo);
+            }.bind(this))
             .then(function(stripeData){
                 if(typeof stripeData === "string"){
                     return stripeData;

@@ -554,7 +554,24 @@ module.exports = {
                 post: "teacherLeavesLicense"
             }
         },
-
+        {
+            requireAuth: true,
+            api: "/api/v2/license/subscribe/po",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "subscribeToLicensePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/trial/upgrade/po",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "upgradeTrialLicensePurchaseOrder"
+            }
+        },
         // old api methods, not in use
         {
             requireAuth: true,
