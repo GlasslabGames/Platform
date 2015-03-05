@@ -340,7 +340,6 @@ function subscribeToLicense(req, res){
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
-
 function subscribeToTrialLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -1032,6 +1031,239 @@ function teacherLeavesLicense(req, res){
         }.bind(this));
 }
 
+function subscribeToLicensePurchaseOrder(req, res){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(req.user.licenseId){
+        this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
+        return;
+    }
+    var userId = req.user.id;
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var planInfo = req.body.planInfo;
+
+   _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo)
+        .then(function(){
+            //email + conclusion stuff, go to dashboard
+            //subscribePurchaseOrderEmail thing
+            var email = req.user.email;
+            var data = {};
+            // template's data pipeline and desired variables needs scoping out
+            data.subject = "Purchase Order Received";
+            var template = "owner-purchase-order-received";
+            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Subscribe to License Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+        }.bind(this));
+}
+
+// if user is not on stripe, set up a customer account on stripe.
+// if already on stripe, do nothing
+function _createStripeCustomer(userId, params){
+    return when.promise(function(resolve, reject){
+        this.myds.getUserById(userId)
+            .then(function(user){
+                var customerId = user.customer_id;
+                if(!customerId){
+                    return this.serviceManager.stripe.createCustomer(params)
+                }
+            }.bind(this))
+            .then(function(customer){
+                if(customer){
+                    var customerId = customer.id;
+                    return this.myds.setCustomerIdByUserId(userId, customerId);
+                }
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Create Customer Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
+    return when.promise(function(resolve, reject){
+        var params = {
+            metadata: {
+                purchaseOrder: true
+            }
+        };
+        var licenseId;
+        //create stripe customer id
+        //customerId = customer.id --> write to user table
+        _createStripeCustomer.call(this, userId, params)
+            .then(function(){
+                var data = {};
+                var date = new Date(Date.now());
+                date.setFullYear(date.getFullYear()+1);
+                data.expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
+                data.subscriptionId = null;
+                data.purchaseOrder = true;
+                return _createLicenseSQL.call(this, userId, planInfo, data);
+            }.bind(this))
+            .then(function(id){
+                licenseId = id;
+                //create entry in purchaseOrder table
+                var values = [];
+                values.push(userId);
+                values.push(licenseId);
+                var status = "'pending'";
+                values.push(status);
+                var purchaseOrderNumber = "NULL";
+                values.push(purchaseOrderNumber);
+                var uniqueIdentifier = "'" + Util.createUUID() + "'";
+                values.push(uniqueIdentifier);
+                var phone = "'" + purchaseOrderInfo.phone + "'";
+                values.push(phone);
+                var email = "'" + purchaseOrderInfo.email + "'";
+                values.push(email);
+                var name = "'" + purchaseOrderInfo.name + "'";
+                values.push(name);
+                var payment = purchaseOrderInfo.payment;
+                values.push(payment);
+
+                //need to formalize table schema
+                return this.myds.insertToPurchaseOrderTable(values);
+
+            }.bind(this))
+            .then(function(purchaseOrderId){
+                //update license table with po id
+                purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
+                var updateFields = [purchaseOrderId];
+                return this.myds.updateLicenseById(licenseId, updateFields);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Purchase Order Subscribe Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function approvePurchaseOrderSubscribe(req, res){
+    // validate inputs from matt, perhaps with code
+
+    //if legit, update license table, licenseMap, and purchaseOrder tables,
+    // email response, different if upgrading from trial or subscribing without trial
+}
+
+function rejectPurchaseOrder(req, res){
+    // validate inputs from matt, perhaps with code
+
+    // if legit, update license table, license map, and purchase order table
+
+    // proper email response, depending on circumstance
+}
+
+// highly similar to subscribe
+function upgradeTrialLicensePurchaseOrder(req, res){
+    // do subscribe purchase order stuff
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(req.user.licenseId){
+        this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
+        return;
+    }
+    var userId = req.user.id;
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var planInfo = req.body.planInfo;
+
+    this.myds.getLicenseMapByInstructors([userId])
+        .then(function(licenses){
+            var orderPending = false;
+            licenses.some(function(license){
+                if(license.status === "purchase-order-pending"){
+                    orderPending = true;
+                    return orderPending;
+                }
+            });
+            if(orderPending){
+                return "order pending";
+            }
+            return _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo);
+        })
+        .then(function(status){
+            if(status === "order pending"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
+                return;
+            }
+            //email + conclusion stuff, go to dashboard
+            //subscribePurchaseOrderEmail thing
+            var email = req.user.email;
+            var data = {};
+            // template's data pipeline and desired variables needs scoping out
+            data.subject = "Purchase Order Received";
+            var template = "owner-purchase-order-received";
+            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Upgrade Trial License Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+        }.bind(this));
+    // email response
+}
+
+function upgradeLicensePurchaseOrder(req, res){
+    // do subscribe purchase order stuff
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(req.user.licenseId){
+        this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
+        return;
+    }
+    var userId = req.user.id;
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var planInfo = req.body.planInfo;
+    // validation stuff. if p.o. id defined, do not let upgrade (do this for cc too)
+    // check if account formerly used cc if so call _switchToPurchaseOrder
+    // create purchase order row in sql
+    // update license table purchaseOrderId column to true
+    // email and send current plan stuff
+}
+
+function approvePurchaseOrderUpgradeLicense(req, res){
+    // validate with code
+    //update license table for upgrade success
+    //update purchase order table
+    // email
+}
+
+function _switchToPurchaseOrder(userId){
+    // call cancel stripe subscription
+    // update license table
+}
+
+function _switchToCreditCard(userId){
+    // update license table
+}
+
 function _buildBillingInfo(cardData){
     var output = {};
     output.last4 = cardData.last4;
@@ -1161,7 +1393,7 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     return params;
 }
 
-function _createLicenseSQL(userId, planInfo, stripeData){
+function _createLicenseSQL(userId, planInfo, data){
     return when.promise(function(resolve, reject){
         var seatsTier = planInfo.seats;
         var type = "'" + planInfo.type + "'";
@@ -1169,30 +1401,49 @@ function _createLicenseSQL(userId, planInfo, stripeData){
         if(planInfo.licenseKey){
             licenseKey = "'" + planInfo.licenseKey + "'";
         } else{
-            licenseKey = 'NULL';
+            licenseKey = "NULL";
         }
         var promo;
         if(planInfo.promo){
             promo = "'" + planInfo.promo + "'";
         } else{
-            promo = 'NULL';
+            promo = "NULL";
         }
-        var expirationDate = "'" + stripeData.expirationDate + "'";
+        var expirationDate = "'" + data.expirationDate + "'";
         var educatorSeatsRemaining = lConst.seats[seatsTier].educatorSeats;
         var studentSeatsRemaining = lConst.seats[seatsTier].studentSeats;
         seatsTier = "'" + seatsTier + "'";
-        var subscriptionId = "'" + stripeData.subscriptionId + "'";
+        var subscriptionId;
+        if(!data.subscriptionId){
+            subscriptionId = "NULL";
+        } else{
+            subscriptionId = "'" + data.subscriptionId + "'";
+        }
+        var active;
+        var autoRenew;
+        var paymentType;
+        if(data.purchaseOrder){
+            active = 0;
+            autoRenew = 0;
+            paymentType = "'purchase-order'";
+        } else{
+            active = 1;
+            autoRenew = 1;
+            paymentType = "'credit-card'";
+        }
         var values = [];
         values.push(userId);
         values.push(licenseKey);
         values.push(type);
         values.push(seatsTier);
         values.push(expirationDate);
-        values.push(1);
+        values.push(active);
         values.push(educatorSeatsRemaining);
         values.push(studentSeatsRemaining);
         values.push(promo);
         values.push(subscriptionId);
+        values.push(autoRenew);
+        values.push(paymentType);
         var licenseId;
         this.myds.insertToLicenseTable(values)
             .then(function(insertId){
@@ -1200,7 +1451,11 @@ function _createLicenseSQL(userId, planInfo, stripeData){
                 values = [];
                 values.push(userId);
                 values.push(licenseId);
-                values.push("'active'");
+                if(data.purchaseOrder){
+                    values.push("'purchase-order-pending'");
+                } else{
+                    values.push("'active'");
+                }
                 return this.myds.insertToLicenseMapTable(values);
             }.bind(this))
             .then(function(state){
