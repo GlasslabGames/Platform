@@ -485,10 +485,30 @@ Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
                     reject(err);
                 }
                 var order = results[0] || "no active order";
-                resolve(results[0]);
+                resolve(order);
             })
             .then(null, function(err){
                 console.error("Get Active Purchase Order By User Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE purchase_order_key = " + key + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length > 1){
+                    var err = { status: "key should be unique"};
+                    console.error("Get Purchase Order By Purchase Order Key Error -",err);
+                    reject(error);
+                }
+                var order = results[0] || "no active order";
+                resolve(order);
+            })
+            .then(null, function(err){
+                console.error("Get Purchase Order By Purchase Order Key Error -",err);
                 reject(err);
             });
     }.bind(this));

@@ -613,6 +613,14 @@ module.exports = {
                 post: "cancelActivePurchaseOrder"
             }
         },
+        {
+            api: "/api/v2/license/po/reject/code/:code",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "rejectPurchaseOrder"
+            }
+        },
         // old api methods, not in use
         {
             requireAuth: true,

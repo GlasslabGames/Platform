@@ -27,6 +27,7 @@ module.exports = {
     upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
     getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
     cancelActivePurchaseOrder: cancelActivePurchaseOrder,
+    rejectPurchaseOrder: rejectPurchaseOrder,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -1267,29 +1268,14 @@ function cancelActivePurchaseOrder(req, res){
         return;
     }
     var userId = req.user.id;
-    var purchaseOrderId;
     this.myds.getActivePurchaseOrderByUserId(userId)
         .then(function(purchaseOrder){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
-            purchaseOrderId = purchaseOrder.id;
-            var status = "status = 'cancelled'";
-            var updateFields = [status];
-            return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
-        }.bind(this))
-        .then(function(status){
-            if(status === "no active order"){
-                return status;
-            }
-            var purchaseOrderIdUpdate = "purchase_order_id = NULL";
-            var licenseUpdateFields = [purchaseOrderIdUpdate];
-            var licenseMapStatus = "status = NULL";
-            var licenseMapUpdateFields = [licenseMapStatus];
-            var promiseList = [];
-            promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
-            promiseList.push(this.myds.updateLicenseMapByUserIdStatus(userId,"'po-pending'", licenseMapUpdateFields));
-            return when.all(promiseList);
+            var purchaseOrderId = purchaseOrder.id;
+
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false);
         }.bind(this))
         .then(function(status){
             if(status === "no active order"){
@@ -1302,6 +1288,36 @@ function cancelActivePurchaseOrder(req, res){
             console.error("Cancel Active Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key:"lic.general"});
         }.bind(this));
+}
+
+function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, purchaseOrderNumber){
+    return when.promise(function(resolve, reject){
+        var updateFields = [];
+        var statusUpdate = "status = '" + status + "'";
+        updateFields.push(statusUpdate);
+        if(purchaseOrderNumber){
+            purchaseOrderNumber = "purchase_order_number = '" + purchaseOrderNumber + "'";
+            updateFields.push(purchaseOrderNumber);
+        }
+        this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
+            .then(function(state){
+                var purchaseOrderIdUpdate = "purchase_order_id = NULL";
+                var licenseUpdateFields = [purchaseOrderIdUpdate];
+                var licenseMapStatus = "status = NULL";
+                var licenseMapUpdateFields = [licenseMapStatus];
+                var promiseList = [];
+                promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
+                promiseList.push(this.myds.updateLicenseMapByUserIdStatus(userId,"'po-pending'", licenseMapUpdateFields));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(state){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Reject Purchase Order Request Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
 }
 
 // next in line
@@ -1318,11 +1334,33 @@ function rejectPurchaseOrder(req, res){
         this.requestUtil.errorResponse("lic.access.invalid");
         return;
     }
-
-    // purchase order table
-    // if legit, update license table, license map, and
-
-    // proper email response, depending on circumstance
+    var email;
+    // if legit, update license table, license map, and purchase order table
+    this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            var purchaseOrderId = purchaseOrder.id;
+            email = purchaseOrder.email;
+            var userId = purchaseOrder["user_id"];
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber);
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.general"});
+            }
+            // proper email response, depending on circumstance
+            var data = {};
+            data.subject = "Purchase Order Rejected";
+            var template = "owner-purchase-order-rejected";
+            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Reject Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
 }
 
 // highly similar to subscribe
