@@ -51,7 +51,8 @@ Lic_MySQL.prototype.insertToLicenseTable = function(values){
         var valuesString = values.join(",");
         var Q = "INSERT INTO GL_LICENSE\n" +
             "(user_id,license_key,package_type,package_size_tier,expiration_date," +
-            "active,educator_seats_remaining,student_seats_remaining,promo,subscription_id)\n" +
+            "active,educator_seats_remaining,student_seats_remaining,promo," +
+            "subscription_id,auto_renew,payment_type)\n" +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -180,6 +181,20 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
             }.bind(this));
     }.bind(this));
 };
+
+Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Get License Map By Instructors Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
 
 Lic_MySQL.prototype.userHasLicenseMap = function(userId){
     return when.promise(function(resolve, reject){
@@ -439,72 +454,20 @@ Lic_MySQL.prototype.getLicenseFromPremiumCourse = function(courseId){
     }.bind(this));
 };
 
-Lic_MySQL.prototype.createLicenseTable = function() {
-// add promise wrapper
-    return when.promise(function(resolve, reject) {
-// ------------------------------------------------
-
-        var Q = "CREATE TABLE GL_LICENSE(\n" +
-            "id BIGINT(20) NULL AUTO_INCREMENT,\n" +
-            "user_id BIGINT(20) NULL,\n" +
-            "license_key VARCHAR(20) NULL,\n" +
-            "package_type VARCHAR(20) NULL,\n" +
-            "package_size_tier VARCHAR(20) NULL,\n" +
-            "expiration_date DATETIME,\n" +
-            "active TINYINT(1),\n" +
-            "educator_seats_remaining INT(10) NULL,\n" +
-            "student_seats_remaining INT(10) NULL,\n" +
-            "promo VARCHAR(20) NULL,\n" +
-            "PRIMARY KEY (id),\n" +
-            "INDEX fk_user_id_idx (user_id ASC),\n" +
-            "CONSTRAINT fk_owner_id\n" +
-                "FOREIGN KEY (user_id)\n" +
-                "REFERENCES GL_USER (id)\n" +
-                "ON DELETE NO ACTION\n" +
-                "ON UPDATE NO ACTION\n" +
-        ");";
-
-        this.ds.query(Q)
-            .then(function() {
-                resolve()
-            })
-            .then(null, function(err){
-                reject(err);
-            });
-// ------------------------------------------------
-    }.bind(this));
-// end promise wrapper
-};
-
-Lic_MySQL.prototype.createLicenseMapTable = function(){
+// need to edit once table schema has been approved
+Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
     return when.promise(function(resolve, reject){
-
-        // IF NOT EXIST
-        var Q = "CREATE TABLE GL_LICENSE_MAP(\n" +
-            "id BIGINT(20) NULL AUTO_INCREMENT,\n" +
-            "user_id BIGINT(20) NULL,\n" +
-            "license_id BIGINT(20) NULL,\n" +
-            "status VARCHAR(20) NULL,\n" +
-            "PRIMARY KEY (id),\n" +
-            "INDEX fk_user_id_idx (user_id ASC),\n" +
-            "INDEX fk_license_id_idx (license_id ASC),\n" +
-            "UNIQUE INDEX uq_user_license (user_id ASC, license_id ASC),\n" +
-            "CONSTRAINT fk_educator_id\n" +
-                "FOREIGN KEY (license_id)\n" +
-                "REFERENCES GL_USER (id)\n" +
-                "ON DELETE NO ACTION\n" +
-                "ON UPDATE NO ACTION,\n" +
-            "CONSTRAINT fk_license_id\n" +
-                "FOREIGN KEY (license_id)\n" +
-                "REFERENCES GL_LICENSE (id)\n" +
-                "ON DELETE NO ACTION\n" +
-                "ON UPDATE NO ACTION\n" +
-        ");";
+        var valuesString = values.join(",");
+        var Q = "INSERT INTO GL_PURCHASE_ORDER " +
+            "(user_id,license_id,status,purchase_order_number," +
+            "purchase_order_key,phone,email,name,payment) " +
+            "VALUES (" + valuesString + ");";
         this.ds.query(Q)
-            .then(function(){
-                resolve();
+            .then(function(results){
+                resolve(results.insertId);
             })
             .then(null, function(err){
+                console.error("Insert to Purchase Order Table Error -",err);
                 reject(err);
             })
     }.bind(this));

@@ -274,13 +274,13 @@ exampleOut.getEnrolledCourses_WithMembers_ForGame =[
                 "id": 175,
                 "lastName": "test2_s1",
                 "firstName": "test2_s1",
-                "username": "test2_s1",
+                "username": "test2_s1"
             },
             {
                 "id": 176,
                 "lastName": "test2_s2",
                 "firstName": "test2_s2",
-                "username": "test2_s2",
+                "username": "test2_s2"
             }
         ]
     }
@@ -424,7 +424,7 @@ function _checkForGameAccess(licenseId, games, newGameIds){
                 var availableGames = {};
                 var abort = false;
                 var premiumGamesAssigned = false;
-                var gamesInfo = results.slice(2);
+                var gamesInfo = results.slice(1);
                 if(licenseId){
                     var license = results[0][0] || {};
                     if(license.id){
