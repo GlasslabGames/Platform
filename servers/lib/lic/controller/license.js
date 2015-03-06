@@ -25,6 +25,9 @@ module.exports = {
     subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
     upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
     upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
+    getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
+    cancelActivePurchaseOrder: cancelActivePurchaseOrder,
+    rejectPurchaseOrder: rejectPurchaseOrder,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -1231,12 +1234,133 @@ function approvePurchaseOrderSubscribe(req, res){
     // email response, different if upgrading from trial or subscribing without trial
 }
 
+function getActivePurchaseOrderInfo(req, res){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.user.id;
+    // get name, phone, email, and license status from purchase_order table
+    this.myds.getActivePurchaseOrderByUserId(userId)
+        .then(function(purchaseOrders){
+            if(!purchaseOrders === "no active order"){
+                this.requestUtil.errorResponse(res, {key: "lic.order.absent"});
+            }
+            var output = {};
+            output.name = purchaseOrders.name;
+            output.phone = purchaseOrders.phone;
+            output.email = purchaseOrders.email;
+            output.status = purchaseOrders.status;
+            output.status = purchaseOrders.status;
+
+            // send back up
+            this.requestUtil.jsonResponse(res, output);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Active Purchase Order Info Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function cancelActivePurchaseOrder(req, res){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.user.id;
+    this.myds.getActivePurchaseOrderByUserId(userId)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            var purchaseOrderId = purchaseOrder.id;
+
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false);
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Cancel Active Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key:"lic.general"});
+        }.bind(this));
+}
+
+function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, purchaseOrderNumber){
+    return when.promise(function(resolve, reject){
+        var updateFields = [];
+        var statusUpdate = "status = '" + status + "'";
+        updateFields.push(statusUpdate);
+        if(purchaseOrderNumber){
+            purchaseOrderNumber = "purchase_order_number = '" + purchaseOrderNumber + "'";
+            updateFields.push(purchaseOrderNumber);
+        }
+        this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
+            .then(function(state){
+                var purchaseOrderIdUpdate = "purchase_order_id = NULL";
+                var licenseUpdateFields = [purchaseOrderIdUpdate];
+                var licenseMapStatus = "status = NULL";
+                var licenseMapUpdateFields = [licenseMapStatus];
+                var promiseList = [];
+                promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
+                promiseList.push(this.myds.updateLicenseMapByUserIdStatus(userId,"'po-pending'", licenseMapUpdateFields));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(state){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Reject Purchase Order Request Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
+// next in line
 function rejectPurchaseOrder(req, res){
     // validate inputs from matt, perhaps with code
-
+    if(!(req.params.code === lConst.code.reject && req.body && req.body.purchaseOrderInfo)){
+        this.requestUtil.errorResponse("lic.access.invalid");
+        return;
+    }
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var purchaseOrderNumber = purchaseOrderInfo.number;
+    var purchaseOrderKey = purchaseOrderInfo.key;
+    if(!(purchaseOrderInfo && purchaseOrderKey)){
+        this.requestUtil.errorResponse("lic.access.invalid");
+        return;
+    }
+    var email;
     // if legit, update license table, license map, and purchase order table
-
-    // proper email response, depending on circumstance
+    this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            var purchaseOrderId = purchaseOrder.id;
+            email = purchaseOrder.email;
+            var userId = purchaseOrder["user_id"];
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber);
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.general"});
+            }
+            // proper email response, depending on circumstance
+            var data = {};
+            data.subject = "Purchase Order Rejected";
+            var template = "owner-purchase-order-rejected";
+            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Reject Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
 }
 
 // highly similar to subscribe
