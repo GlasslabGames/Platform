@@ -545,7 +545,7 @@ module.exports = {
             service: "lic",
             controller: "license",
             method: {
-                post: "setInstructorLicenseStatusToActive"
+                post: "setLicenseMapStatusToActive"
             }
         },
         {
@@ -611,6 +611,15 @@ module.exports = {
             controller: "license",
             method: {
                 post: "cancelActivePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/nullify",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "setLicenseMapStatusToNull"
             }
         },
         {

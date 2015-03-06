@@ -19,7 +19,8 @@ module.exports = {
     cancelLicenseAutoRenew: cancelLicenseAutoRenew,
     enableLicenseAutoRenew: enableLicenseAutoRenew,
     addTeachersToLicense: addTeachersToLicense,
-    setInstructorLicenseStatusToActive: setInstructorLicenseStatusToActive,
+    setLicenseMapStatusToActive: setLicenseMapStatusToActive,
+    setLicenseMapStatusToNull: setLicenseMapStatusToNull,
     removeTeacherFromLicense: removeTeacherFromLicense,
     teacherLeavesLicense: teacherLeavesLicense,
     subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
@@ -875,7 +876,7 @@ function addTeachersToLicense(req, res){
                 promiseList[0] = this.myds.multiInsertLicenseMap(licenseId, teachersToInsert);
             }
             if(teachersToUpdate.length > 0){
-                promiseList[1] = this.myds.multiUpdateLicenseMap(licenseId, teachersToUpdate);
+                promiseList[1] = this.myds.multiUpdateLicenseMapStatus(licenseId, teachersToUpdate, "pending");
             }
             return when.all(promiseList);
         }.bind(this))
@@ -934,28 +935,35 @@ function addTeachersToLicense(req, res){
         }.bind(this));
 }
 
-function setInstructorLicenseStatusToActive(req, res){
+function setLicenseMapStatusToActive(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(req.user.licenseStatus === "active"){
+    if(!(req.user.licenseStatus === "pending" || req.user.licenseStatus === "po-received")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
-    var userIdList = [req.user.id];
     var licenseId = req.user.licenseId;
-    var status = "status = 'active'";
-    var updateFields = [status];
 
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
+            var userIdList = [userId];
+            var statusField = "status = 'active'";
+            var updateFields = [statusField];
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            req.user.licenseStatus = "active";
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
@@ -1227,138 +1235,6 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
     return values;
 }
 
-function approvePurchaseOrderSubscribe(req, res){
-    // validate inputs from matt, perhaps with code
-
-    //if legit, update license table, licenseMap, and purchaseOrder tables,
-    // email response, different if upgrading from trial or subscribing without trial
-}
-
-function getActivePurchaseOrderInfo(req, res){
-    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
-        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
-        return;
-    }
-    var userId = req.user.id;
-    // get name, phone, email, and license status from purchase_order table
-    this.myds.getActivePurchaseOrderByUserId(userId)
-        .then(function(purchaseOrders){
-            if(!purchaseOrders === "no active order"){
-                this.requestUtil.errorResponse(res, {key: "lic.order.absent"});
-            }
-            var output = {};
-            output.name = purchaseOrders.name;
-            output.phone = purchaseOrders.phone;
-            output.email = purchaseOrders.email;
-            output.status = purchaseOrders.status;
-            output.status = purchaseOrders.status;
-
-            // send back up
-            this.requestUtil.jsonResponse(res, output);
-        }.bind(this))
-        .then(null, function(err){
-            console.error("Get Active Purchase Order Info Error -",err);
-            this.requestUtil.errorResponse(res, { key: "lic.general"});
-        }.bind(this));
-}
-
-function cancelActivePurchaseOrder(req, res){
-    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
-        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
-        return;
-    }
-    var userId = req.user.id;
-    this.myds.getActivePurchaseOrderByUserId(userId)
-        .then(function(purchaseOrder){
-            if(purchaseOrder === "no active order"){
-                return purchaseOrder;
-            }
-            var purchaseOrderId = purchaseOrder.id;
-
-            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false);
-        }.bind(this))
-        .then(function(status){
-            if(status === "no active order"){
-                this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
-                return;
-            }
-            this.requestUtil.jsonResponse(res, { status: "ok"});
-        }.bind(this))
-        .then(null, function(err){
-            console.error("Cancel Active Purchase Order Error -",err);
-            this.requestUtil.errorResponse(res, { key:"lic.general"});
-        }.bind(this));
-}
-
-function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, purchaseOrderNumber){
-    return when.promise(function(resolve, reject){
-        var updateFields = [];
-        var statusUpdate = "status = '" + status + "'";
-        updateFields.push(statusUpdate);
-        if(purchaseOrderNumber){
-            purchaseOrderNumber = "purchase_order_number = '" + purchaseOrderNumber + "'";
-            updateFields.push(purchaseOrderNumber);
-        }
-        this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
-            .then(function(state){
-                var purchaseOrderIdUpdate = "purchase_order_id = NULL";
-                var licenseUpdateFields = [purchaseOrderIdUpdate];
-                var licenseMapStatus = "status = NULL";
-                var licenseMapUpdateFields = [licenseMapStatus];
-                var promiseList = [];
-                promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
-                promiseList.push(this.myds.updateLicenseMapByUserIdStatus(userId,"'po-pending'", licenseMapUpdateFields));
-                return when.all(promiseList);
-            }.bind(this))
-            .then(function(state){
-                resolve();
-            })
-            .then(null, function(err){
-                console.error("Reject Purchase Order Request Error -",err);
-                reject(err);
-            }.bind(this));
-    }.bind(this));
-}
-
-// next in line
-function rejectPurchaseOrder(req, res){
-    // validate inputs from matt, perhaps with code
-    if(!(req.params.code === lConst.code.reject && req.body && req.body.key && req.body.number)){
-        this.requestUtil.errorResponse(res, "lic.access.invalid");
-        return;
-    }
-    var purchaseOrderInfo = req.body;
-    var purchaseOrderNumber = purchaseOrderInfo.number;
-    var purchaseOrderKey = purchaseOrderInfo.key;
-    var email;
-    // if legit, update license table, license map, and purchase order table
-    this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
-        .then(function(purchaseOrder){
-            if(purchaseOrder === "no active order"){
-                return purchaseOrder;
-            }
-            var purchaseOrderId = purchaseOrder.id;
-            email = purchaseOrder.email;
-            var userId = purchaseOrder["user_id"];
-            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber);
-        }.bind(this))
-        .then(function(status){
-            if(status === "no active order"){
-                this.requestUtil.errorResponse(res, { key: "lic.general"});
-            }
-            // proper email response, depending on circumstance
-            var data = {};
-            data.subject = "Purchase Order Rejected";
-            var template = "owner-purchase-order-rejected";
-            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
-            this.requestUtil.jsonResponse(res, { status: "ok"});
-        }.bind(this))
-        .then(null, function(err){
-            console.error("Reject Purchase Order Error -",err);
-            this.requestUtil.errorResponse(res, { key: "lic.general"});
-        }.bind(this));
-}
-
 // highly similar to subscribe
 function upgradeTrialLicensePurchaseOrder(req, res){
     // do subscribe purchase order stuff
@@ -1471,11 +1347,269 @@ function upgradeLicensePurchaseOrder(req, res){
         }.bind(this));
 }
 
-function approvePurchaseOrderUpgradeLicense(req, res){
+function getActivePurchaseOrderInfo(req, res){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.user.id;
+    // get name, phone, email, and license status from purchase_order table
+    this.myds.getActivePurchaseOrderByUserId(userId)
+        .then(function(purchaseOrders){
+            if(!purchaseOrders === "no active order"){
+                this.requestUtil.errorResponse(res, {key: "lic.order.absent"});
+            }
+            var output = {};
+            output.name = purchaseOrders.name;
+            output.phone = purchaseOrders.phone;
+            output.email = purchaseOrders.email;
+            output.status = purchaseOrders.status;
+            output.status = purchaseOrders.status;
+
+            // send back up
+            this.requestUtil.jsonResponse(res, output);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Active Purchase Order Info Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function cancelActivePurchaseOrder(req, res){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.user.id;
+    this.myds.getActivePurchaseOrderByUserId(userId)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            var purchaseOrderId = purchaseOrder.id;
+
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false, "cancel");
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Cancel Active Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key:"lic.general"});
+        }.bind(this));
+}
+
+function setLicenseMapStatusToNull(req, res){
+    if(!(req.user && req.user.licenseId && req.user.licenseStatus && req.user.licenseStatus === "po-rejected")){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            var userIdList = [req.user.id];
+            var statusString = "status = NULL";
+            var updateFields = [statusString];
+
+            return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            delete req.user.licenseStatus;
+            delete req.user.licenseId;
+            delete req.user.licenseOwnerId;
+            return Util.updateSession(req);
+        })
+        .then(function(status){
+            if(typeof status === "string"){
+                _errorLicensingAccess.call(this, res, status);
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Set Instructor License Map Status To Null Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+// next in line
+function rejectPurchaseOrder(req, res){
+    // validate inputs from matt, perhaps with code
+    if(!(req.params.code === lConst.code.reject && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var purchaseOrderNumber = purchaseOrderInfo.number;
+    var purchaseOrderKey = purchaseOrderInfo.key;
+    // an action could be upgrade, trial upgrade, subscribe, renew.
+    var action = purchaseOrderInfo.action;
+    var payment = purchaseOrderInfo.payment;
+    var planInfo = req.body.planInfo;
+    // two emails, license owner and billing email
+    var email;
+    // if legit, update license table, license map, and purchase order table
+    this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            var purchaseOrderId = purchaseOrder.id;
+            email = purchaseOrder.email;
+            var userId = purchaseOrder["user_id"];
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber, action);
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.general"});
+            }
+            // proper email response, depending on circumstance
+            var data = {};
+            data.subject = "Purchase Order Rejected";
+            var template = "owner-purchase-order-rejected";
+            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Reject Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function receivedPurchaseOrder(req, res){
+    // validate inputs from matt, perhaps with code
+    if(!(req.paramse.code === lConst.code.receive && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var purchaseOrderNumber = purchaseOrderInfo.number;
+    var purchaseOrderKey = purchaseOrderInfo.key;
+    var payment = purchaseOrderInfo.payment;
+    var action = purchaseOrderInfo.action;
+    var planInfo = req.body.planInfo;
+    // two emails, license owner and billing email
+    var email;
+    this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            var purchaseOrderId = purchaseOrder.id;
+            email = purchaseOrder.email;
+            var userId = purchaseOrder["user_id"];
+            var updateFields = [];
+            var status = "status = 'received'";
+            updateFields.push(status);
+            var number = "purchase_order_number = '" + purchaseOrderNumber + "'";
+            updateFields.push(number);
+            var paymentAmount = "payment = " + payment;
+            updateFields.push(paymentAmount);
+            return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
+        }.bind(this))
+        .then(function(state){
+            if(typeof state === "string"){
+                return state;
+            }
+            if(action === "subscribe"){
+                return _receivedSubscribePurchaseOrder.call(this);
+            }
+            if(action === "trial upgrade"){
+                return _receivedTrialUpgradePurchaseOrder.call(this);
+            }
+            if(action === "upgrade"){
+                // problem: if we let them upgrade, but then payment does not go through, how do we know what their old plan was?
+                //put info in purchase order table
+                return _receivedUpgradePurchaseOrder.call(this);
+            }
+            if(action === "renew"){
+                return _receivedRenewPurchaseOrder.call(this);
+            }
+            return "invalid action";
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            if(status === "invalid action"){
+                this.requestUtil.errorResponse(res, { key: "lic.action.invalid"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok "});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Received Purchase Order Subscribe Error -",err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+    //if legit, update license table, licenseMap, and purchaseOrder tables,
+    // email response, different if upgrading from trial or subscribing without trial
+}
+
+function approvePurchaseOrder(req, res){
     // validate with code
+    if(!(req.paramse.code === lConst.code.approve && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var purchaseOrderKey = purchaseOrderInfo.key;
+    var purchaseOrderNumber = purchaseOrderInfo.number;
+    var payment = purchaseOrderInfo.payment;
+    var action = purchaseOrderInfo.action;
+    var planInfo = purchaseOrderInfo.planInfo;
     //update license table for upgrade success
     //update purchase order table
-    // email
+    // two emails, license owner and billing email
+    var email
+}
+
+function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, purchaseOrderNumber, action){
+    return when.promise(function(resolve, reject){
+        var updateFields = [];
+        var statusUpdate = "status = '" + status + "'";
+        updateFields.push(statusUpdate);
+        if(purchaseOrderNumber){
+            purchaseOrderNumber = "purchase_order_number = '" + purchaseOrderNumber + "'";
+            updateFields.push(purchaseOrderNumber);
+        }
+        this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
+            .then(function(state){
+                var purchaseOrderIdUpdate = "purchase_order_id = NULL";
+                var licenseUpdateFields = [purchaseOrderIdUpdate];
+                var licenseMapStatus;
+                if(status = "rejected"){
+                    licenseMapStatus = "status = 'po-rejected'";
+                } else{
+                    licenseMapStatus = "status = NULL";
+                }
+                var licenseMapUpdateFields = [licenseMapStatus];
+                var promiseList = [];
+                promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
+                if(action === "subscribe" || action === "trial upgrade" || action === "cancel"){
+                    promiseList.push(this.myds.updateLicenseMapByUserIdStatus(userId,"'po-pending'", licenseMapUpdateFields));
+                }
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(state){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Reject Purchase Order Request Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
 }
 
 function _switchToPurchaseOrder(userId, licenseId){

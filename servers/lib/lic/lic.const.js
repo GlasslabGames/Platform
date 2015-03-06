@@ -112,6 +112,8 @@ module.exports = {
         cvc: 123
     },
     code: {
-        reject: "12345"
+        reject:  "12345",
+        receive: "23456",
+        approve: "34567"
     }
 };
