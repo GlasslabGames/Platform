@@ -182,6 +182,20 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Get License Map By Instructors Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
 Lic_MySQL.prototype.userHasLicenseMap = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + userId + ";";

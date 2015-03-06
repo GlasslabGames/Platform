@@ -238,7 +238,10 @@ function getBillingInfo(req, res){
                 return;
             }
             var cardData = customer.cards.data[0];
-            var billingInfo = _buildBillingInfo(cardData);
+            var billingInfo = {};
+            if(cardData){
+                billingInfo = _buildBillingInfo(cardData);
+            }
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
@@ -282,7 +285,10 @@ function updateBillingInfo(req, res){
                 return;
             }
             var cardData = customer.cards.data[0];
-            var billingInfo = _buildBillingInfo(cardData);
+            var billingInfo = {};
+            if(cardData){
+                billingInfo = _buildBillingInfo(cardData);
+            }
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
@@ -528,7 +534,7 @@ function upgradeTrialLicense(req, res){
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
     var expirationDate;
-    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+    _validateLicenseUpgradeTrial.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
                 return status;
@@ -561,12 +567,12 @@ function upgradeTrialLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
                 return;
             }
-            if(typeof status === "string"){
-                _errorLicensingAccess.call(this, res, status);
-                return;
-            }
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
+                return;
+            }
+            if(typeof status === "string"){
+                _errorLicensingAccess.call(this, res, status);
                 return;
             }
             var licenseOwnerEmail = req.user.email;
@@ -1086,7 +1092,7 @@ function subscribeToLicensePurchaseOrder(req, res){
             }
             //email + conclusion stuff, go to dashboard
             //subscribePurchaseOrderEmail thing
-            var email = req.user.email;
+            var email = purchaseOrderInfo.email;
             var data = {};
             // template's data pipeline and desired variables needs scoping out
             data.subject = "Purchase Order Received";
@@ -1132,7 +1138,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
         var licenseId;
         //create stripe customer id
         //customerId = customer.id --> write to user table
-        this.myds.getLicenseMapByInstructors([userId])
+        this.myds.getLicenseMapByUser(userId)
             .then(function(licenseMaps){
                 var status = false;
                 licenseMaps.some(function(license){
@@ -1205,7 +1211,7 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
     values.push(status);
     var purchaseOrderNumber = "NULL";
     values.push(purchaseOrderNumber);
-    var purchaseOrderKey = "'" + Util.createUUID() + "'";
+    var purchaseOrderKey = "'" + Util.CreateUUID() + "'";
     values.push(purchaseOrderKey);
     var phone = "'" + purchaseOrderInfo.phone + "'";
     values.push(phone);
@@ -1242,10 +1248,6 @@ function upgradeTrialLicensePurchaseOrder(req, res){
     }
     if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
-        return;
-    }
-    if(req.user.licenseId){
-        this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
     var userId = req.user.id;
@@ -1335,9 +1337,11 @@ function upgradeLicensePurchaseOrder(req, res){
             }
             // email and send current plan stuff
             var data = {};
+            data.plan = planInfo.type;
+            data.seats = planInfo.seats;
             var email = req.user.email;
             data.subject = "Purchase Order Received";
-            var template = "owner-purchase-order-received";
+            var template = "owner-upgrade-purchase-order-received";
             _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
@@ -1414,7 +1418,7 @@ function _createSubscription(req, userId, stripeInfo, planInfo){
         var email = req.user.email;
         var name = req.user.firstName + " " + req.user.lastName;
         var expirationDate;
-        this.myds.getLicenseMapByInstructors([userId])
+        this.myds.getLicenseMapByUser(userId)
             .then(function(licenseMaps){
                 var status = false;
                 licenseMaps.some(function(map){
@@ -1593,7 +1597,7 @@ function _createLicenseSQL(userId, planInfo, data){
                 values.push(userId);
                 values.push(licenseId);
                 if(data.purchaseOrder){
-                    values.push("'purchase-order-pending'");
+                    values.push("'po-pending'");
                 } else{
                     values.push("'active'");
                 }
@@ -1915,6 +1919,40 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 } else if (results.length > 1) {
                     state = "invalid records";
                 } else if (results[0]['license_id'] !== licenseId) {
+                    state = "inconsistent";
+                }
+                resolve(state);
+            })
+            .then(null, function (err) {
+                console.error('Validate License Instructor Access Error - ', err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _validateLicenseUpgradeTrial(userId, licenseId) {
+    return when.promise(function (resolve, reject) {
+        this.myds.getLicenseMapByUser(userId)
+            .then(function (results) {
+                var state;
+                var activePendingResults = [];
+                results.some(function(map){
+                    if(map.status === "active" || map.status === "pending"){
+                        activePendingResults.push(map);
+                    } else if(map.status === "po-pending"){
+                        state = "po-pending";
+                        return true;
+                    }
+                }.bind(this));
+                if(state === "po-pending"){
+                    resolve(state);
+                    return;
+                }
+                if (activePendingResults.length === 0) {
+                    state = "access absent";
+                } else if (activePendingResults.length > 1) {
+                    state = "invalid records";
+                } else if (activePendingResults[0]['license_id'] !== licenseId) {
                     state = "inconsistent";
                 }
                 resolve(state);
