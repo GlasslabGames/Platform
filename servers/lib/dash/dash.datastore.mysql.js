@@ -130,7 +130,9 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                         user.isTrial = false;
                     }
                     if( user.licenseStatus === "active" ||
-                        user.licenseStatus === "pending" ) {
+                        user.licenseStatus === "pending" ||
+                        user.licenseStatus === "po-received" ||
+                        user.licenseStatus === "po-rejected") {
                         user.expirationDate = license["expiration_date"];
                     }
                 }
@@ -247,7 +249,7 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lm.status FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
-            "WHERE status in ('active','pending') and user_id = " + userId+ ") as lm\n" +
+            "WHERE status in ('active','pending', 'po-received', 'po-rejected') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
         var licenseInfo;
         this.ds.query(Q)

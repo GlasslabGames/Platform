@@ -170,7 +170,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
 Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     return when.promise(function(resolve, reject){
         var userIdsString = userIds.join(",");
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending') and user_id in (" + userIdsString + ");";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending','po-received','po-rejected') and user_id in (" + userIdsString + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -360,10 +360,13 @@ Lic_MySQL.prototype.multiGetLicenseMap = function(licenseId, userIds){
     }.bind(this));
 };
 
-Lic_MySQL.prototype.multiUpdateLicenseMap = function(licenseId, userIds){
+Lic_MySQL.prototype.multiUpdateLicenseMapStatus = function(licenseId, userIds, status){
     return when.promise(function(resolve, reject){
+        if(status !== "NULL"){
+            status = "'" + status + "'";
+        }
         var userIdsString = userIds.join(',');
-        var Q = "UPDATE GL_LICENSE_MAP SET status = 'pending' WHERE user_id in(" + userIdsString + ");"
+        var Q = "UPDATE GL_LICENSE_MAP SET status = " + status + " WHERE user_id in(" + userIdsString + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
