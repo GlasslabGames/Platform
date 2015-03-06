@@ -426,7 +426,7 @@ function registerUserV2(req, res, next, serviceManager) {
         }
         if(req.query.hasOwnProperty('upgrade')){
             regData.trial = req.query.upgrade === 'trial';
-            regData.subscribe = req.query.upgrade === 'subscribe'
+            regData.subscribe = req.query.upgrade === 'subscribe';
         }
         if (regData.subscribe) {
             if (req.query.hasOwnProperty('seatsSelected')) {
