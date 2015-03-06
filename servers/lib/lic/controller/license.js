@@ -1323,17 +1323,13 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
 // next in line
 function rejectPurchaseOrder(req, res){
     // validate inputs from matt, perhaps with code
-    if(!(req.params.code === lConst.code.reject && req.body && req.body.purchaseOrderInfo)){
-        this.requestUtil.errorResponse("lic.access.invalid");
+    if(!(req.params.code === lConst.code.reject && req.body && req.body.key && req.body.number)){
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
-    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var purchaseOrderInfo = req.body;
     var purchaseOrderNumber = purchaseOrderInfo.number;
     var purchaseOrderKey = purchaseOrderInfo.key;
-    if(!(purchaseOrderInfo && purchaseOrderKey)){
-        this.requestUtil.errorResponse("lic.access.invalid");
-        return;
-    }
     var email;
     // if legit, update license table, license map, and purchase order table
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)

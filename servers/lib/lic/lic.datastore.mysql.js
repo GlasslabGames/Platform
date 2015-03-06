@@ -496,7 +496,7 @@ Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
 
 Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE purchase_order_key = " + key + ";";
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE purchase_order_key = '" + key + "';";
         this.ds.query(Q)
             .then(function(results){
                 if(results.length > 1){
