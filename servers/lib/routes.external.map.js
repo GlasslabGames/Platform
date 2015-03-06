@@ -581,6 +581,24 @@ module.exports = {
                 post: "upgradeLicensePurchaseOrder"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/po",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getActivePurchaseOrderInfo"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/po/cancel",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelActivePurchaseOrder"
+            }
+        },
         // old api methods, not in use
         {
             requireAuth: true,

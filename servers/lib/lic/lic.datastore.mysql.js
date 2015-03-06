@@ -473,6 +473,72 @@ Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
+    // an active purchase order is one that is in progress, either with a status of pending or received
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received') and user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length > 1){
+                    var err = { status: "There should only be one purchase order with status pending or received"};
+                    console.error("Get Active Purchase Order By User Id Error -",err);
+                    reject(err);
+                }
+                var order = results[0] || "no active order";
+                resolve(results[0]);
+            })
+            .then(null, function(err){
+                console.error("Get Active Purchase Order By User Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.updatePurchaseOrderById = function(purchaseOrderId, updateFields){
+    return when.promise(function(resolve, reject){
+        var updateFieldsString = updateFields.join(",");
+        var Q = "UPDATE GL_PURCHASE_ORDER SET " + updateFieldsString + " WHERE id = " + purchaseOrderId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Update Active Purchase Order By User Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.updateLicenseByPurchaseOrderId = function(purchaseOrderId, updateFields){
+    return when.promise(function(resolve, reject){
+        var updateFieldsString = updateFields.join(",");
+        var Q = "UPDATE GL_LICENSE SET " + updateFieldsString + " WHERE purchase_order_id = " + purchaseOrderId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Update License By Purchase Order Id");
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.updateLicenseMapByUserIdStatus = function(userId, status, updateFields){
+    return when.promise(function(resolve, reject){
+        var updateFieldsString = updateFields.join(",");
+        var Q = "UPDATE GL_LICENSE_MAP SET " + updateFieldsString + " WHERE status = " + status + " and user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Update License Map By User Id Status Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 ///////////////////////////////////////////
 /////////////OUTDATED METHODS/////////////
 /////////////////////////////////////////
