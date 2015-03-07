@@ -1514,16 +1514,29 @@ function receivedPurchaseOrder(req, res){
     var payment = purchaseOrderInfo.payment;
     var action = purchaseOrderInfo.action;
     var planInfo = req.body.planInfo;
-    // two emails, license owner and billing email
-    var email;
+
+    var licenseId;
+    var userId;
+    var billingEmail;
+    var billingName;
+    var expirationDate;
+
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
         .then(function(purchaseOrder){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
             var purchaseOrderId = purchaseOrder.id;
-            email = purchaseOrder.email;
-            var userId = purchaseOrder["user_id"];
+            billingEmail = purchaseOrder.email;
+            userId = purchaseOrder["user_id"];
+            licenseId = purchaseOrder["license_id"];
+            billingName = purchaseOrder["FIRST_NAME"] + " " + purchaseOrder["LAST_NAME"];
+            if(action !== "upgrade"){
+                var date = new Date(Date.now());
+                date.setFullYear(date.getFullYear()+1);
+                expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
+            }
+
             var updateFields = [];
             var status = "status = 'received'";
             updateFields.push(status);
@@ -1538,20 +1551,28 @@ function receivedPurchaseOrder(req, res){
                 return state;
             }
             if(action === "subscribe"){
-                return _receivedSubscribePurchaseOrder.call(this);
+                return _receivedSubscribePurchaseOrder.call(this, userId, licenseId, planInfo, expirationDate);
             }
             if(action === "trial upgrade"){
-                return _receivedTrialUpgradePurchaseOrder.call(this);
+                return _receivedTrialUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, expirationDate);
             }
             if(action === "upgrade"){
                 // problem: if we let them upgrade, but then payment does not go through, how do we know what their old plan was?
                 //put info in purchase order table
-                return _receivedUpgradePurchaseOrder.call(this);
+                return _receivedUpgradePurchaseOrder.call(this, userId, licenseId, planInfo);
             }
-            if(action === "renew"){
-                return _receivedRenewPurchaseOrder.call(this);
-            }
+            // need to make renew eventually
+            //if(action === "renew"){
+            //    return _receivedRenewPurchaseOrder.call(this);
+            //}
             return "invalid action";
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            var subject = "Purchase Order Received";
+            return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
         .then(function(status){
             if(status === "no active order"){
@@ -1562,14 +1583,127 @@ function receivedPurchaseOrder(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.action.invalid"});
                 return;
             }
+            if(status === "invalid records"){
+                this.requestUtil.errorResponse(res, { keyL :"lic.records.inconsistent"});
+                return;
+            }
+            var ownerData = results[0];
+            var billerData = results[1];
+            // two emails, license owner and billing email
+            var template = "owner-purchase-order-received";
+            _sendEmailResponse.call(this, ownerData.email, ownerData, req.protocol, req.headers.host, template);
+            _sendEmailResponse.call(this, billerData.email, billerData, req.protocol, req.headers.host, template);
             this.requestUtil.jsonResponse(res, { status: "ok "});
         }.bind(this))
         .then(null, function(err){
             console.error("Received Purchase Order Subscribe Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
-    //if legit, update license table, licenseMap, and purchaseOrder tables,
-    // email response, different if upgrading from trial or subscribing without trial
+}
+
+function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expirationDate){
+    return when.promise(function(resolve, reject) {
+        var updateFields = [];
+        var purchaseOrderId = "purchase_order_id = NULL";
+        updateFields.push(purchaseOrderId);
+        var active = "active = 1";
+        updateFields.push(active);
+        var seats = "package_size_tier = '" + planInfo.seats + "'";
+        updateFields.push(seats);
+        var educatorSeatsRemaining = "educator_seats_remaining = " + lConst.seats[seats].educatorSeatsRemaining;
+        updateFields.push(educatorSeatsRemaining);
+        var studentSeatsRemaining = "student_seats_remaining = " + lConst.seats[seats].studentSeatsRemaining;
+        updateFields.push(studentSeatsRemaining);
+        var plan = "package_type = '" + planInfo.type + "'";
+        updateFields.push(plan);
+        var expirationDateString = "expiration_date = '" + expirationDate + "'";
+        updateFields.push(expirationDateString);
+
+        this.myds.updateLicenseById(licenseId, updateFields)
+            .then(function () {
+                var updateFields = [];
+                var status = "status = 'po-received'";
+                updateFields.push(status);
+                return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Received Subscribe Purchase Order Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirationDate){
+    return when.promise(function(resolve, reject){
+        this.myds.getLicenseMapByUser(userId)
+            .then(function(results){
+                var license = results[0];
+                var trialLicenseId = license.id;
+                if(trialLicenseId >= licenseId){
+                    return "invalid records";
+                }
+                if(license.status === "active"){
+                    return _endLicense.call(this, userId, trialLicenseId);
+                }
+            }.bind(this))
+            .then(function(status){
+                if(status === "invalid records"){
+                    return status;
+                }
+                return _receivedSubscribePurchaseOrder.call(this, userId, licenseId, planInfo, expirationDate);
+            }.bind(this))
+            .then(function(status){
+                if(status === "invalid records"){
+                    resolve(status);
+                }
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Received Trial Upgrade Purchase Order -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+// upgrade email seems fairly different.  how do?
+function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo){
+    return when.promise(function(resolve, reject){
+        var plan = planInfo.type;
+        _unassignCoursesWhenUpgrading.call(this, licenseId, plan)
+            .then(function(status){
+                var promiseList = [{},{},{},{}];
+                var updateFields = [];
+                var purchaseOrderId = "purhase_order_id = NULL";
+                updateFields.push(purchaseOrderId);
+                var packageSize = "package_size_tier = '" + planInfo.seats + "'";
+                updateFields.push(packageSize);
+                var packageType = "package_type = '" + plan + "'";
+                updateFields.push(packageType);
+                promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
+
+                var seats = lConst.seats[planInfo.seats];
+                var educatorSeats = seats.educatorSeats;
+                promiseList[1] = this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
+
+                if(status === "student count"){
+                    var studentSeats = seats.studentSeats;
+                    promiseList[2] = this.updateStudentSeatsRemaining(licenseId, studentSeats);
+                }
+                var lmUpdateFields = ["status = 'po-received'"];
+                promiseList[3] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], lmUpdateFields);
+                //promiseList[4] = this.myds.getInstructorsByLicense(licenseId);
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Received Upgrade Purchase Order -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 function approvePurchaseOrder(req, res){
@@ -2322,28 +2456,6 @@ function _errorLicensingAccess(res, status){
         this.requestUtil.errorResponse(res, {key: "lic.general"}, 500);
     }
 }
-
-//function _createLicenseEmailResponse(licenseOwnerEmail, data, protocol, host, template){
-//    // early prototype, needs development
-//    data.firstName = "hello";
-//    data.lastName = "world";
-//    var emailData = {
-//        subject: "Welcome to GlassLab Games Premium!",
-//        to: licenseOwnerEmail,
-//        data: data,
-//        host: protocol + "://" + host
-//    };
-//    var pathway = path.join(__dirname,"../email-templates");
-//    var options = this.options.auth.email;
-//    var email = new Util.Email(
-//        this.options.auth.email,
-//        path.join( __dirname, "../email-templates" ),
-//        this.stats );
-//    email.send( template, emailData )
-//        .then(null, function(err){
-//            console.error("Create License Email Response Error -",err);
-//        });
-//}
 
 function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, protocol, host){
     var ownerTemplate = "owner-upgrade";
