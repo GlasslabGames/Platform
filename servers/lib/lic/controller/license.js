@@ -1535,6 +1535,8 @@ function receivePurchaseOrder(req, res){
     var billingName;
     var expirationDate;
 
+    var purchaseOrderId;
+
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
         .then(function(purchaseOrder){
             if(purchaseOrder === "no active order"){
@@ -1543,7 +1545,7 @@ function receivePurchaseOrder(req, res){
             if(purchaseOrder.status === "received"){
                 return "already received";
             }
-            var purchaseOrderId = purchaseOrder.id;
+            purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
             userId = purchaseOrder["user_id"];
             licenseId = purchaseOrder["license_id"];
@@ -1576,7 +1578,7 @@ function receivePurchaseOrder(req, res){
             if(action === "upgrade"){
                 // problem: if we let them upgrade, but then payment does not go through, how do we know what their old plan was?
                 //put info in purchase order table
-                return _receivedUpgradePurchaseOrder.call(this, userId, licenseId, planInfo);
+                return _receivedUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, purchaseOrderId);
             }
             // need to make renew eventually
             //if(action === "renew"){
@@ -1689,14 +1691,28 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
     }.bind(this));
 }
 // upgrade email seems fairly different.  how do?
-function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo){
+function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrderId){
     return when.promise(function(resolve, reject){
         var plan = planInfo.type;
+        var status;
         _unassignCoursesWhenUpgrading.call(this, licenseId, plan)
-            .then(function(status){
+            .then(function(results){
+                if(results === "student count"){
+                    status = results;
+                }
+                return this.myds.getLicenseById(licenseId);
+            }.bind(this))
+            .then(function(license){
+                license = license[0];
+                var oldPlan = "current_package_type = '" + license["package_type"] + "'";
+                var oldSeats = "current_package_size_tier = '" + license["package_size_tier"] + "'";
+                var updateFields = [oldPlan, oldSeats];
+                return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
+            }.bind(this))
+            .then(function(){
                 var promiseList = [{},{},{},{}];
                 var updateFields = [];
-                var purchaseOrderId = "purhase_order_id = NULL";
+                var purchaseOrderId = "purchase_order_id = NULL";
                 updateFields.push(purchaseOrderId);
                 var packageSize = "package_size_tier = '" + planInfo.seats + "'";
                 updateFields.push(packageSize);

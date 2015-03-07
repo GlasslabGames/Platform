@@ -254,10 +254,7 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
         var licenseInfo;
         this.ds.query(Q)
             .then(function(results){
-                if(results.length > 1){
-                    reject({key: "lic.records.invalid"});
-                    return;
-                } else if(results.length === 0){
+                if(results.length === 0){
                     resolve([]);
                     return;
                 }

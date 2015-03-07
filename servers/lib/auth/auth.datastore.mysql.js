@@ -629,13 +629,12 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
         var licenseInfo;
         this.ds.query(Q)
             .then(function(results){
-                if(results.length > 1){
-                    reject({key: "lic.records.invalid"});
-                    return;
-                } else if(results.length === 0){
+                if(results.length === 0){
                     resolve([]);
                     return;
                 }
+                // if a user is on a trial and has a pending purchase order subscription
+                // I cannot show that user's po-pending license map status, because i have to show the trial status
                 licenseInfo = results[0];
                 resolve(licenseInfo);
             }.bind(this))
