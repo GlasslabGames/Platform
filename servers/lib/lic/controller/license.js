@@ -1263,12 +1263,16 @@ function upgradeTrialLicensePurchaseOrder(req, res){
                 return;
             }
             //email + conclusion stuff, go to dashboard
-            //subscribePurchaseOrderEmail thing
-            var email = req.user.email;
+            // email here goes to accounting/mat
+            // for now, i will send it to the billing email
+            var email = purchaseOrderInfo.email;
             var data = {};
+            _.merge(data, purchaseOrderInfo, planInfo);
             // template's data pipeline and desired variables needs scoping out
-            data.subject = "Purchase Order Received";
-            var template = "owner-purchase-order-received";
+            data.subject = "Upgrade Trial Purchase Order";
+            data.action = "trial upgrade";
+            // template's data pipeline and desired variables needs scoping out
+            var template = "invoice-order";
             _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
@@ -1338,12 +1342,16 @@ function upgradeLicensePurchaseOrder(req, res){
                 return;
             }
             // email and send current plan stuff
+            // email here goes to accounting/mat
+            // for now, i will send it to the billing email
+            var email = purchaseOrderInfo.email;
             var data = {};
-            data.plan = planInfo.type;
-            data.seats = planInfo.seats;
-            var email = req.user.email;
-            data.subject = "Purchase Order Received";
-            var template = "owner-upgrade-purchase-order-received";
+            _.merge(data, purchaseOrderInfo, planInfo);
+            // template's data pipeline and desired variables needs scoping out
+            data.subject = "Upgrade Purchase Order";
+            data.action = "upgrade";
+            // template's data pipeline and desired variables needs scoping out
+            var template = "invoice-order";
             _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
@@ -1532,6 +1540,9 @@ function receivePurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
+            if(purchaseOrder.status === "received"){
+                return "already received";
+            }
             var purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
             userId = purchaseOrder["user_id"];
@@ -1591,6 +1602,10 @@ function receivePurchaseOrder(req, res){
             }
             if(results === "invalid records"){
                 this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
+                return;
+            }
+            if(results === "already received"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.received.already"});
                 return;
             }
             var ownerData = results[0];

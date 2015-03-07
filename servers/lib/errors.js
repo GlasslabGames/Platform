@@ -129,5 +129,6 @@ module.exports = {
     "lic.general":                          "We encountered an error. Please Try again",
     "lic.order.pending":                    "You currently have a pending purchase order. Please consult your billing department",
     "lic.order.absent":                     "No purchase order was found",
-    "lic.action.invalid":                   "The action you listed is not supported by our system.  Please recheck your options"
+    "lic.action.invalid":                   "The action you listed is not supported by our system.  Please recheck your options",
+    "lic.order.received.already":           "This purchase order has already been marked as received by our system"
 };
