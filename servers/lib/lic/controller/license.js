@@ -1455,10 +1455,13 @@ function rejectPurchaseOrder(req, res){
     var purchaseOrderKey = purchaseOrderInfo.key;
     // an action could be upgrade, trial upgrade, subscribe, renew.
     var action = purchaseOrderInfo.action;
-    var payment = purchaseOrderInfo.payment;
     var planInfo = req.body.planInfo;
     // two emails, license owner and billing email
-    var email;
+    var licenseId;
+    var userId;
+    var billingEmail;
+    var billingName;
+
     // if legit, update license table, license map, and purchase order table
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
         .then(function(purchaseOrder){
@@ -1466,19 +1469,31 @@ function rejectPurchaseOrder(req, res){
                 return purchaseOrder;
             }
             var purchaseOrderId = purchaseOrder.id;
-            email = purchaseOrder.email;
-            var userId = purchaseOrder["user_id"];
+            licenseId = purchaseOrder["license_id"];
+            userId = purchaseOrder["user_id"];
+            billingEmail = purchaseOrder.email;
+            billingName = purchaseOrder.name;
+
             return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber, action);
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                return status;
+            }
+            var subject = "Purchase Order Rejected";
+            return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
         .then(function(status){
             if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.general"});
             }
             // proper email response, depending on circumstance
-            var data = {};
-            data.subject = "Purchase Order Rejected";
+            var ownerData = results[0];
+            var billerData = results[1];
+            // two emails, license owner and billing email
             var template = "owner-purchase-order-rejected";
-            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            _sendEmailResponse.call(this, ownerData.email, ownerData, req.protocol, req.headers.host, template);
+            _sendEmailResponse.call(this, billerData.email, billerData, req.protocol, req.headers.host, template);
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
@@ -1565,14 +1580,91 @@ function approvePurchaseOrder(req, res){
     }
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var purchaseOrderKey = purchaseOrderInfo.key;
-    var purchaseOrderNumber = purchaseOrderInfo.number;
-    var payment = purchaseOrderInfo.payment;
-    var action = purchaseOrderInfo.action;
     var planInfo = purchaseOrderInfo.planInfo;
-    //update license table for upgrade success
-    //update purchase order table
-    // two emails, license owner and billing email
-    var email
+
+    var licenseId;
+    var userId;
+    var billingEmail;
+    var billingName;
+
+    this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            var purchaseOrderId = purchaseOrder.id;
+            billingEmail = purchaseOrder.email;
+            billingName = purchaseOrder.name;
+            userId = purchaseOrder.user_id;
+
+            licenseId = purchaseOrder.license_id;
+            var updateFields = [];
+            var status = "status = 'approved'";
+
+            return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                return status;
+            }
+            var subject = "Purchase Order Approved";
+            return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
+        }.bind(this))
+        .then(function(results){
+            if(results === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            var ownerData = results[0];
+            var billerData = results[1];
+            // two emails, license owner and billing email
+            var template = "owner-purchase-order-approved";
+            _sendEmailResponse.call(this, ownerData.email, ownerData, req.protocol, req.headers.host, template);
+            _sendEmailResponse.call(this, billerData.email, billerData, req.protocol, req.headers.host, template);
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Approve Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function _buildPurchaseOrderEmailData(subject, name, expirationDate, planInfo, purchaseOrderInfo){
+    var data = {};
+    data.subject = subject;
+    data.name = name;
+    data.expirationDate = expirationDate;
+    data.seats = planInfo.seats;
+    data.plan = planInfo.type;
+    data.purchaseOrderNumber = purchaseOrderInfo.number;
+    data.payment = purchaseOrderInfo.payment;
+    data.action = purchaseOrderInfo.action;
+    return data;
+}
+
+function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo){
+    return when.promise(function(resolve, reject) {
+        var pomiseList = [];
+        promiseList.push(this.myds.getUserById(userId));
+        promiseList.push(this.myds.getLicenseById(licenseId));
+        when.all(promiseList)
+            .then(function(results){
+                var user = results[0];
+                var ownerName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
+                var ownerEmail = user["EMAIL"];
+                var license = results[1];
+                var expirationDate = license["expiration_date"];
+                var ownerData = _buildPurchaseOrderEmailData(subject, ownerName, expirationDate, planInfo, purchaseOrderInfo);
+                var billerData = _buildPurchaseOrderEmailData(subject, billingName, expirationDate, planInfo, purchaseOrderInfo);
+                ownerData.email = ownerEmail;
+                billerData.email = billingEmail;
+                resolve([ownerData, billerData]);
+            })
+            .then(null, function(err){
+                console.error("Gather Purchase Order Email Data Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, purchaseOrderNumber, action){
