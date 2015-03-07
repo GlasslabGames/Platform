@@ -623,11 +623,27 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/license/po/receive/code/:code",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "receivePurchaseOrder"
+            }
+        },
+        {
             api: "/api/v2/license/po/reject/code/:code",
             service: "lic",
             controller: "license",
             method: {
                 post: "rejectPurchaseOrder"
+            }
+        },
+        {
+            api: "/api/v2/license/po/approve/code/:code",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "approvePurchaseOrder"
             }
         },
         // old api methods, not in use

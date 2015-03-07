@@ -547,10 +547,11 @@ Lic_MySQL.prototype.updateLicenseByPurchaseOrderId = function(purchaseOrderId, u
     }.bind(this));
 };
 
-Lic_MySQL.prototype.updateLicenseMapByUserIdStatus = function(userId, status, updateFields){
+// only update most recent license map entry for a user, so a trial will not be altered when we shut down a bad purchase order
+Lic_MySQL.prototype.updateRecentLicenseMapByUserId = function(userId, updateFields){
     return when.promise(function(resolve, reject){
         var updateFieldsString = updateFields.join(",");
-        var Q = "UPDATE GL_LICENSE_MAP SET " + updateFieldsString + " WHERE status = " + status + " and user_id = " + userId + ";";
+        var Q = "UPDATE GL_LICENSE_MAP SET " + updateFieldsString + " WHERE user_id = " + userId + " ORDER BY id DESC LIMIT 1;";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);

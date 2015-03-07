@@ -28,7 +28,9 @@ module.exports = {
     upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
     getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
     cancelActivePurchaseOrder: cancelActivePurchaseOrder,
+    receivePurchaseOrder: receivePurchaseOrder,
     rejectPurchaseOrder: rejectPurchaseOrder,
+    approvePurchaseOrder: approvePurchaseOrder,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -1102,12 +1104,15 @@ function subscribeToLicensePurchaseOrder(req, res){
                 return;
             }
             //email + conclusion stuff, go to dashboard
-            //subscribePurchaseOrderEmail thing
-            var email = purchaseOrderInfo.email;
+           // email here goes to accounting/mat
+           // for now, i will send it to the billing email
+           var email = purchaseOrderInfo.email;
             var data = {};
+            _.merge(data, purchaseOrderInfo, planInfo);
             // template's data pipeline and desired variables needs scoping out
-            data.subject = "Purchase Order Received";
-            var template = "owner-purchase-order-received";
+            data.subject = "Subscribe Purchase Order";
+            data.action = "subscribe";
+            var template = "invoice-order";
             _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
@@ -1223,6 +1228,7 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
     var purchaseOrderNumber = "NULL";
     values.push(purchaseOrderNumber);
     var purchaseOrderKey = "'" + Util.CreateUUID() + "'";
+    purchaseOrderInfo.key = purchaseOrderKey;
     values.push(purchaseOrderKey);
     var phone = "'" + purchaseOrderInfo.phone + "'";
     values.push(phone);
@@ -1483,8 +1489,8 @@ function rejectPurchaseOrder(req, res){
             var subject = "Purchase Order Rejected";
             return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
-        .then(function(status){
-            if(status === "no active order"){
+        .then(function(results){
+            if(results === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.general"});
             }
             // proper email response, depending on circumstance
@@ -1502,9 +1508,9 @@ function rejectPurchaseOrder(req, res){
         }.bind(this));
 }
 
-function receivedPurchaseOrder(req, res){
+function receivePurchaseOrder(req, res){
     // validate inputs from matt, perhaps with code
-    if(!(req.paramse.code === lConst.code.receive && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+    if(!(req.params.code === lConst.code.receive && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -1530,7 +1536,7 @@ function receivedPurchaseOrder(req, res){
             billingEmail = purchaseOrder.email;
             userId = purchaseOrder["user_id"];
             licenseId = purchaseOrder["license_id"];
-            billingName = purchaseOrder["FIRST_NAME"] + " " + purchaseOrder["LAST_NAME"];
+            billingName = purchaseOrder["name"];
             if(action !== "upgrade"){
                 var date = new Date(Date.now());
                 date.setFullYear(date.getFullYear()+1);
@@ -1574,17 +1580,17 @@ function receivedPurchaseOrder(req, res){
             var subject = "Purchase Order Received";
             return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
-        .then(function(status){
-            if(status === "no active order"){
+        .then(function(results){
+            if(results === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
                 return;
             }
-            if(status === "invalid action"){
+            if(results === "invalid action"){
                 this.requestUtil.errorResponse(res, { key: "lic.action.invalid"});
                 return;
             }
-            if(status === "invalid records"){
-                this.requestUtil.errorResponse(res, { keyL :"lic.records.inconsistent"});
+            if(results === "invalid records"){
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
                 return;
             }
             var ownerData = results[0];
@@ -1596,7 +1602,7 @@ function receivedPurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok "});
         }.bind(this))
         .then(null, function(err){
-            console.error("Received Purchase Order Subscribe Error -",err);
+            console.error("Received Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -1610,9 +1616,9 @@ function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expiration
         updateFields.push(active);
         var seats = "package_size_tier = '" + planInfo.seats + "'";
         updateFields.push(seats);
-        var educatorSeatsRemaining = "educator_seats_remaining = " + lConst.seats[seats].educatorSeatsRemaining;
+        var educatorSeatsRemaining = "educator_seats_remaining = " + lConst.seats[planInfo.seats].educatorSeats;
         updateFields.push(educatorSeatsRemaining);
-        var studentSeatsRemaining = "student_seats_remaining = " + lConst.seats[seats].studentSeatsRemaining;
+        var studentSeatsRemaining = "student_seats_remaining = " + lConst.seats[planInfo.seats].studentSeats;
         updateFields.push(studentSeatsRemaining);
         var plan = "package_type = '" + planInfo.type + "'";
         updateFields.push(plan);
@@ -1708,13 +1714,13 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo){
 
 function approvePurchaseOrder(req, res){
     // validate with code
-    if(!(req.paramse.code === lConst.code.approve && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+    if(!(req.params.code === lConst.code.approve && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var purchaseOrderKey = purchaseOrderInfo.key;
-    var planInfo = purchaseOrderInfo.planInfo;
+    var planInfo = req.body.planInfo;
 
     var licenseId;
     var userId;
@@ -1734,7 +1740,7 @@ function approvePurchaseOrder(req, res){
             licenseId = purchaseOrder.license_id;
             var updateFields = [];
             var status = "status = 'approved'";
-
+            updateFields.push(status);
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
         .then(function(status){
@@ -1778,7 +1784,7 @@ function _buildPurchaseOrderEmailData(subject, name, expirationDate, planInfo, p
 
 function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo){
     return when.promise(function(resolve, reject) {
-        var pomiseList = [];
+        var promiseList = [];
         promiseList.push(this.myds.getUserById(userId));
         promiseList.push(this.myds.getLicenseById(licenseId));
         when.all(promiseList)
@@ -1786,7 +1792,7 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
                 var user = results[0];
                 var ownerName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
                 var ownerEmail = user["EMAIL"];
-                var license = results[1];
+                var license = results[1][0];
                 var expirationDate = license["expiration_date"];
                 var ownerData = _buildPurchaseOrderEmailData(subject, ownerName, expirationDate, planInfo, purchaseOrderInfo);
                 var billerData = _buildPurchaseOrderEmailData(subject, billingName, expirationDate, planInfo, purchaseOrderInfo);
@@ -1811,9 +1817,10 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
             updateFields.push(purchaseOrderNumber);
         }
         this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
-            .then(function(state){
+            .then(function(){
                 var purchaseOrderIdUpdate = "purchase_order_id = NULL";
-                var licenseUpdateFields = [purchaseOrderIdUpdate];
+                var active = "active = 0";
+                var licenseUpdateFields = [purchaseOrderIdUpdate, active];
                 var licenseMapStatus;
                 if(status = "rejected"){
                     licenseMapStatus = "status = 'po-rejected'";
@@ -1824,11 +1831,12 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
                 var promiseList = [];
                 promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
                 if(action === "subscribe" || action === "trial upgrade" || action === "cancel"){
-                    promiseList.push(this.myds.updateLicenseMapByUserIdStatus(userId,"'po-pending'", licenseMapUpdateFields));
+                    var statuses = ["'po-pending'", "'po-received'", "'active'"];
+                    promiseList.push(this.myds.updateRecentLicenseMapByUserId(userId, licenseMapUpdateFields));
                 }
                 return when.all(promiseList);
             }.bind(this))
-            .then(function(state){
+            .then(function(){
                 resolve();
             })
             .then(null, function(err){
