@@ -624,18 +624,17 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lm.status FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
-            "WHERE status in ('active','pending','po-received','po-rejected') and user_id = " + userId+ ") as lm\n" +
+            "WHERE status in ('active','pending','po-received','po-rejected', 'po-pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
         var licenseInfo;
         this.ds.query(Q)
             .then(function(results){
-                if(results.length > 1){
-                    reject({key: "lic.records.invalid"});
-                    return;
-                } else if(results.length === 0){
+                if(results.length === 0){
                     resolve([]);
                     return;
                 }
+                // if a user is on a trial and has a pending purchase order subscription
+                // I cannot show that user's po-pending license map status, because i have to show the trial status
                 licenseInfo = results[0];
                 resolve(licenseInfo);
             }.bind(this))

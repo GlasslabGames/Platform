@@ -136,8 +136,8 @@ function _unassignPremiumGames(courseId){
                 games = output;
                 var dashService = this.serviceManager.get("dash").service;
                 var promiseList = [];
-                _(games).forEach(function(game){
-                    promiseList.push(dashService.getGameBasicInfo(game.id));
+                _(games).forEach(function(game, gameId){
+                    promiseList.push(dashService.getGameBasicInfo(gameId));
                 });
                 return when.all(promiseList);
             }.bind(this))
