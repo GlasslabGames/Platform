@@ -113,7 +113,7 @@ module.exports = {
     "lic.access.invalid":                   "Invalid Access",
     "lic.records.invalid":                  "User tied to to more than one license",
     "lic.access.absent":                    "Only instructors who are part of an active license should have access",
-    "lic.records.inconsistent":             "The license records from the client and server do not match.  Update client records",
+    "lic.records.inconsistent":             "The license records are inconsistent.  Review records",
     "lic.educators.full":                   "There are not enough seats in the license for this list of educators",
     "lic.students.full":                    "This class is already full. Please contact your teacher.",
     "lic.students.full.enable.premium":     "This license does not have enough student seats left to accommodate for all the students in this class. To enable premium games, please upgrade your plan or reduce the number of students in this class.",
@@ -129,5 +129,6 @@ module.exports = {
     "lic.general":                          "We encountered an error. Please Try again",
     "lic.order.pending":                    "You currently have a pending purchase order. Please consult your billing department",
     "lic.order.absent":                     "No purchase order was found",
-    "lic.action.invalid":                   "The action you listed is not supported by our system.  Please recheck your options"
+    "lic.action.invalid":                   "The action you listed is not supported by our system.  Please recheck your options",
+    "lic.order.received.already":           "This purchase order has already been marked as received by our system"
 };
