@@ -850,7 +850,21 @@ function blockPremiumGamesBasicCourses(req, res){
         }.bind(this))
         .then(function(courses){
             var updatedCourses = {};
+            var basicCourses = {};
+            var basic;
             _(courses).forEach(function(course, key){
+                basic = true;
+                _(course).some(function(game, gameId){
+                    if(!freeGameIds[gameId] && game.assigned === true){
+                        basic = false;
+                        return true;
+                    }
+                });
+                if(basic){
+                    basicCourses[key] = course;
+                }
+            });
+            _(basicCourses).forEach(function(course, key){
                 _(course).forEach(function(game, gameId){
                     if(game.assigned === undefined){
                         if(freeGameIds[gameId]){
