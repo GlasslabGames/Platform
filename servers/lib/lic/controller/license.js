@@ -2138,6 +2138,7 @@ function _createLicenseSQL(userId, planInfo, data){
 
 function _unassignCoursesWhenUpgrading(licenseId, plan){
     return when.promise(function(resolve, reject){
+        var status;
         var availableGames = {};
         var courseIds;
         var browserGames = lConst.plan[plan].browserGames;
@@ -2156,33 +2157,68 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
             .then(function(courseMap){
                 courseIds = Object.keys(courseMap);
                 var promiseList = [];
+                var dashService = this.serviceManager.get("dash").service;
+                promiseList.push(dashService.getListOfAllFreeGameIds());
                 var dataService = this.serviceManager.get("data").service;
                 courseIds.forEach(function(courseId){
                     promiseList.push(dataService.cbds.getGamesForCourse(courseId));
                 });
                 return when.all(promiseList);
             }.bind(this))
-            .then(function(courseGames){
+            .then(function(results){
+                var freeGames = {};
+                var freeGameIds = results[0];
+                freeGameIds.forEach(function(gameId){
+                    freeGames[gameId] = true;
+                });
+                var courseGames = results.slice(1);
+                courseGames.forEach(function(course){
+                    _(course).some(function(gameId){
+                        if(!freeGames[gameId]){
+                            course.premiumCourse = true;
+                            return true;
+                        }
+                    });
+                });
+                var assignCourseGames = {};
+                var assignGames;
                 var unassignCourseIds = [];
                 var unassignCourse;
                 courseGames.forEach(function(course, index){
-                    unassignCourse = false;
-                    _(course).some(function(value, key){
-                        if(!availableGames[key] && value.assigned){
-                            unassignCourse = true;
-                            return;
+                    if(course.premiumCourse){
+                        delete course.premiumCourse;
+                        unassignCourse = false;
+                        assignGames = false;
+                        _(course).some(function(value, key){
+                            if(!availableGames[key] && value.assigned){
+                                unassignCourse = true;
+                                return true;
+                            }
+                            if(availableGames[key] && !value.assigned){
+                                value.assigned = true;
+                                assignGames = true;
+                            }
+                        });
+                        if(unassignCourse){
+                            unassignCourseIds.push(courseIds[index]);
+                        } else if(assignGames){
+                            assignCourseGames[courseIds[index]] = course;
                         }
-                    });
-                    if(unassignCourse){
-                        unassignCourseIds.push(courseIds[index]);
                     }
                 });
+                var promiseList = [{}];
                 if(unassignCourseIds.length === 0){
-                    return "student count";
+                    status = "student count";
+                } else{
+                    promiseList[0] = this.unassignPremiumCourses(unassignCourseIds, licenseId);
                 }
-                return this.unassignPremiumCourses(unassignCourseIds, licenseId);
+                var lmsService = this.serviceManager.get("lms").service;
+                _(assignCourseGames).forEach(function(course, courseId){
+                    promiseList.push(lmsService.telmStore.updateGamesForCourse(courseId, course));
+                });
+                return when.all(promiseList);
             }.bind(this))
-            .then(function(status){
+            .then(function(){
                 resolve(status);
             })
             .then(null, function(err){
