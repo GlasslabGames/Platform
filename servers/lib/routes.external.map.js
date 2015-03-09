@@ -417,6 +417,15 @@ module.exports = {
                 post: "updateGamesInCourse"
             }
         },
+        {
+            api: "/api/v2/lms/course/block/code/:code",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "blockPremiumGamesBasicCourses"
+            }
+        },
+
         // ---------------------------------------------------
         {
             api: "/api/v2/license/packages",
