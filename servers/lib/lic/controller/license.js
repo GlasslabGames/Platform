@@ -1365,7 +1365,7 @@ function getActivePurchaseOrderInfo(req, res){
             output.email = purchaseOrders.email;
             if (purchaseOrders.status === 'pending') {
                 output.status = 1;
-            } else if (purchaseOrders.status === 'received' || purchaseOrders.status === 'rejected') {
+            } else if (purchaseOrders.status === 'received' || purchaseOrder.status === 'rejected') {
                 output.status = 2;
             } else if (purchaseOrders.status === 'approved') {
                 output.status = 3;
