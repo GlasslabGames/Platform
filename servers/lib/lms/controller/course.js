@@ -12,6 +12,7 @@ module.exports = {
     getCourse:              getCourse,
     updateCourseInfo:       updateCourseInfo,
     updateGamesInCourse:    updateGamesInCourse,
+    blockPremiumGamesBasicCourses: blockPremiumGamesBasicCourses,
     verifyCode:             verifyCode,
     verifyGameInCourse:     verifyGameInCourse
 };
@@ -831,6 +832,58 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId){
                 reject(err);
             });
     }.bind(this));
+}
+
+function blockPremiumGamesBasicCourses(req, res){
+    if(req.params.code !== lConst.accessCode.block){
+        this.requestUtil.errorResponse(res, { key: "lms.access.invalid"});
+        return;
+    }
+    var dashService = this.serviceManager.get("dash").service;
+    var freeGameIds = {};
+    dashService.getListOfAllFreeGameIds()
+        .then(function(freeGamesList){
+            freeGamesList.forEach(function(gameId){
+                freeGameIds[gameId] = true;
+            });
+            return this.telmStore.getAllCourseGameProfiles()
+        }.bind(this))
+        .then(function(courses){
+            var updatedCourses = {};
+            var basicCourses = {};
+            var basic;
+            _(courses).forEach(function(course, key){
+                basic = true;
+                _(course).some(function(game, gameId){
+                    if(!freeGameIds[gameId] && game.assigned === true){
+                        basic = false;
+                        return true;
+                    }
+                });
+                if(basic){
+                    basicCourses[key] = course;
+                }
+            });
+            _(basicCourses).forEach(function(course, key){
+                _(course).forEach(function(game, gameId){
+                    if(game.assigned === undefined){
+                        if(freeGameIds[gameId]){
+                            game.assigned = true;
+                        } else{
+                            game.assigned = false;
+                        }
+                    }
+                });
+                updatedCourses[key] = { value: course };
+            });
+            return this.telmStore.multiSetCourseGameProfiles(updatedCourses);
+        }.bind(this))
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 }
 
 /*

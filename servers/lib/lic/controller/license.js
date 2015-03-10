@@ -368,7 +368,7 @@ function subscribeToTrialLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
-    if(req.user.email.indexOf("+") !== -1){
+    if(this.options.env === "prod" && req.user.email.indexOf("+") !== -1){
         this.requestUtil.errorResponse(res, {key: "lic.email.invalid"});
         return;
     }
@@ -2219,7 +2219,7 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
                 }
                 var lmsService = this.serviceManager.get("lms").service;
                 _(assignCourseGames).forEach(function(course, courseId){
-                    promiseList.push(lmsService.telmStore.updateGamesForCourse(courseId, course));
+                    promiseList.push(lmsService.updateCBLMSInEnabledCourse(courseId, course));
                 });
                 return when.all(promiseList);
             }.bind(this))

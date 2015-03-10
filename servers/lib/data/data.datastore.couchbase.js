@@ -315,6 +315,14 @@ var gdv_getAllMatches = function(doc, meta){
         emit( meta.id );
     }
 };
+
+var gdv_getAllCourseGameProfiles = function(doc, meta){
+    var values = meta.id.split(':');
+    if((values[0] === "lms") &&
+       (values[1] === "c")){
+        emit(meta.id);
+    }
+};
 // ------------------------------------
 
     this.telemDDoc = {
@@ -357,6 +365,9 @@ var gdv_getAllMatches = function(doc, meta){
             },
             getAllMatches: {
                 map: gdv_getAllMatches
+            },
+            getAllCourseGameProfiles: {
+                map: gdv_getAllCourseGameProfiles
             }
         }
     };
@@ -2979,5 +2990,48 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
                     resolve(output);
                 }.bind(this));
             }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllCourseGameProfiles = function(){
+    return when.promise(function(resolve, reject){
+        var map = "getAllCourseGameProfiles";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results){
+                if(err){
+                    console.error("Couchbase TelemetryStore: Update All Course Game Profiles Error -", err);
+                    reject(err);
+                    return;
+                }
+                var keys = _.pluck(results, "id");
+                this._chunk_getMulti(keys, {}, function(err, results){
+                    if(err){
+                        console.error("Couchbase TelemetryStore: Update All Course Game Profiles Error -", err);
+                        reject(err);
+                        return;
+                    }
+                    var courses = {};
+                    _(results).forEach(function(result, key){
+                        courses[key] = result.value;
+                    });
+                    resolve(courses);
+                });
+            }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.multiSetCourseGameProfiles = function(courses){
+    return when.promise(function(resolve, reject){
+        this._chunk_setMulti(courses, {}, function(err, results){
+            if(err){
+                console.error("Couchbase DataStore: Updat Course Game Profiles Error -",err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        });
     }.bind(this));
 };
