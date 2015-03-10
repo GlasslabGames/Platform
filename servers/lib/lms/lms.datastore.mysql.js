@@ -187,7 +187,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.getCourse = function(couserId) {
+LMS_MySQL.prototype.getCourse = function(courseId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -206,7 +206,7 @@ return when.promise(function(resolve, reject) {
             c.institution_id as institution,     \
             c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
-        WHERE c.id="+ this.ds.escape(couserId);
+        WHERE c.id="+ this.ds.escape(courseId);
 
     this.ds.query(Q)
         .then(function(results) {
