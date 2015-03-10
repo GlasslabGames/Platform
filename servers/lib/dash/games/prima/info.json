@@ -57,7 +57,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/2/index.html",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/4/index.html?sdkURL=http://stage.playfully.org",
                 "format": "html",
                 "size": {
                     "width": 800,
@@ -82,28 +82,6 @@
                     {
                         "name": "Play Game",
                         "type": "play"
-                    }
-                ]
-            },
-            {
-                "name": "Pre-Test Survey",
-                "authRequired": false,
-                "type": "link",
-                "links": [
-                    {
-                        "target": "_blank",
-                        "link": "http://www.surveygizmo.com/s3/1994048/Prima-Form-A1"
-                    }
-                ]
-            },
-            {
-                "name": "Post-Test Survey",
-                "authRequired": false,
-                "type": "link",
-                "links": [
-                    {
-                        "target": "_blank",
-                        "link": "http://www.surveygizmo.com/s3/1999026/Prima-Form-B1"
                     }
                 ]
             }

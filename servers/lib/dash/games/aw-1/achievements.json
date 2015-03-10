@@ -33,7 +33,7 @@
                 "subGroups": [
                     {
                         "id": "a",
-                        "title": "TEKS 6(11)(B)",
+                        "title": "TEKS.ELA.6.11.B",
                         "name": "",
                         "description": "Identify simply faulty reasoning used in persuasive texts.",
                         "info": "",
@@ -41,7 +41,7 @@
                     },
                     {
                         "id": "b",
-                        "title": "TEKS E1(10)(A)",
+                        "title": "TEKS.ENGL1.10.A",
                         "name": "",
                         "description": "Analyze the relevance, quality, and credibility of evidence given to support or oppose an argument for a specific audience.",
                         "info": "",
