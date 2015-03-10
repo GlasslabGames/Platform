@@ -1114,8 +1114,9 @@ function subscribeToLicensePurchaseOrder(req, res){
     var userId = req.user.id;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var planInfo = req.body.planInfo;
+    var action = "subscribe";
 
-   _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo)
+   _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
         .then(function(status){
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
@@ -1129,7 +1130,6 @@ function subscribeToLicensePurchaseOrder(req, res){
             _.merge(data, purchaseOrderInfo, planInfo);
             // template's data pipeline and desired variables needs scoping out
             data.subject = "Subscribe Purchase Order";
-            data.action = "subscribe";
             var template = "invoice-order";
             _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             this.requestUtil.jsonResponse(res, { status: "ok"});
@@ -1167,7 +1167,7 @@ function _createStripeCustomer(userId, params){
     }.bind(this));
 }
 
-function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
+function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
     return when.promise(function(resolve, reject){
         var licenseId;
         //create stripe customer id
@@ -1209,7 +1209,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
                 }
                 licenseId = id;
                 //create entry in purchaseOrder table
-                var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo);
+                var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, action);
                 //need to formalize table schema
                 return this.myds.insertToPurchaseOrderTable(values);
 
@@ -1237,7 +1237,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo){
     }.bind(this));
 }
 
-function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
+function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, action){
     var values = [];
     values.push(userId);
     values.push(licenseId);
@@ -1261,6 +1261,8 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
     values.push(name);
     var payment = parseInt(purchaseOrderInfo.payment);
     values.push(payment);
+    action = "'" + action + "'";
+    values.push(action);
     return values;
 }
 
@@ -1278,8 +1280,9 @@ function upgradeTrialLicensePurchaseOrder(req, res){
     var userId = req.user.id;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var planInfo = req.body.planInfo;
+    var action = "trial upgrade";
 
-    _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo)
+    _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
         .then(function(status){
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
@@ -1293,7 +1296,6 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             _.merge(data, purchaseOrderInfo, planInfo);
             // template's data pipeline and desired variables needs scoping out
             data.subject = "Upgrade Trial Purchase Order";
-            data.action = "trial upgrade";
             // template's data pipeline and desired variables needs scoping out
             var template = "invoice-order";
             _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
@@ -1320,6 +1322,7 @@ function upgradeLicensePurchaseOrder(req, res){
     var licenseId = req.user.licenseId;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var planInfo = req.body.planInfo;
+    var action = "upgrade";
     // validation stuff. if p.o. id defined, do not let upgrade (do this for cc too)
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
@@ -1343,7 +1346,7 @@ function upgradeLicensePurchaseOrder(req, res){
                 return results;
             }
             // create purchase order row in sql
-            var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo);
+            var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, action);
             return this.myds.insertToPurchaseOrderTable(values);
         }.bind(this))
         .then(function(purchaseOrderId){
@@ -1372,7 +1375,6 @@ function upgradeLicensePurchaseOrder(req, res){
             _.merge(data, purchaseOrderInfo, planInfo);
             // template's data pipeline and desired variables needs scoping out
             data.subject = "Upgrade Purchase Order";
-            data.action = "upgrade";
             // template's data pipeline and desired variables needs scoping out
             var template = "invoice-order";
             _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
@@ -1496,11 +1498,11 @@ function rejectPurchaseOrder(req, res){
     var purchaseOrderNumber = purchaseOrderInfo.number;
     var purchaseOrderKey = purchaseOrderInfo.key;
     // an action could be upgrade, trial upgrade, subscribe, renew.
-    var action = purchaseOrderInfo.action;
     var planInfo = req.body.planInfo;
     // two emails, license owner and billing email
     var licenseId;
     var userId;
+    var action;
     var billingEmail;
     var billingName;
 
@@ -1513,6 +1515,8 @@ function rejectPurchaseOrder(req, res){
             var purchaseOrderId = purchaseOrder.id;
             licenseId = purchaseOrder["license_id"];
             userId = purchaseOrder["user_id"];
+            action = purchaseOrder["action"];
+            purchaseOrderInfo.action = action;
             billingEmail = purchaseOrder.email;
             billingName = purchaseOrder.name;
 
@@ -1554,11 +1558,11 @@ function receivePurchaseOrder(req, res){
     var purchaseOrderNumber = purchaseOrderInfo.number;
     var purchaseOrderKey = purchaseOrderInfo.key;
     var payment = purchaseOrderInfo.payment;
-    var action = purchaseOrderInfo.action;
     var planInfo = req.body.planInfo;
 
     var licenseId;
     var userId;
+    var action;
     var billingEmail;
     var billingName;
     var expirationDate;
@@ -1578,6 +1582,8 @@ function receivePurchaseOrder(req, res){
             userId = purchaseOrder["user_id"];
             licenseId = purchaseOrder["license_id"];
             billingName = purchaseOrder["name"];
+            action = purchaseOrder["action"];
+            purchaseOrderInfo.action = action;
             if(action !== "upgrade"){
                 var date = new Date(Date.now());
                 date.setFullYear(date.getFullYear()+1);
@@ -1795,6 +1801,7 @@ function approvePurchaseOrder(req, res){
             billingEmail = purchaseOrder.email;
             billingName = purchaseOrder.name;
             userId = purchaseOrder.user_id;
+            purchaseOrderInfo.action = purchaseOrder.action;
 
             licenseId = purchaseOrder.license_id;
             var updateFields = [];
@@ -1839,7 +1846,6 @@ function _buildPurchaseOrderEmailData(subject, name, firstName, lastName, expira
     data.plan = planInfo.type;
     data.purchaseOrderNumber = purchaseOrderInfo.number;
     data.payment = purchaseOrderInfo.payment;
-    data.action = purchaseOrderInfo.action;
     return data;
 }
 
