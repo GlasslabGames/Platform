@@ -113,7 +113,12 @@ function getCurrentPlan(req, res){
                 _errorLicensingAccess.call(this, res, owner);
                 return;
             }
-            var ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
+            var ownerName;
+            if(owner["LAST_NAME"]){
+                ownerName = owner["FIRST_NAME"] + " " + owner["LAST_NAME"];
+            } else{
+                ownerName = owner["FIRST_NAME"];
+            }
             output.ownerName = ownerName;
             output.ownerEmail = owner['EMAIL'];
             output.rejectedTeachers = req.rejectedTeachers || [];
@@ -345,8 +350,10 @@ function subscribeToLicense(req, res){
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
+            data.firstName = req.user.firstName;
+            data.lastName = req.user.lastName;
             data.name = req.user.firstName + " " + req.user.lastName;
-            data.subject = "Welcome to GlassLab Games Premium!";
+            data.subject = "Successful Subscription!";
             data.plan = planInfo.type;
             data.seats = planInfo.seats;
             data.expirationDate = expirationDate;
@@ -413,8 +420,10 @@ function subscribeToTrialLicense(req, res){
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
+            data.firstName = req.user.firstName;
+            data.lastName = req.user.lastName;
             data.name = req.user.firstName + " " + req.user.lastName;
-            data.subject = "Enjoy your Trial";
+            data.subject = "Your Trial Subscription has Started!";
             //data.seats = lConst.seats['trial'].studentSeats;
             data.expirationDate = expirationDate;
             var template = "owner-trial-create";
@@ -515,6 +524,8 @@ function upgradeLicense(req, res){
             instructors = status[3];
             var licenseOwnerEmail = req.user.email;
             emailData.ownerName = req.user.firstName + " " + req.user.lastName;
+            emailData.ownerFirstName = req.user.firstName;
+            emailData.ownerLastName = req.user.lastName;
             emailData.newPlan = planInfo.type;
             emailData.newSeats = planInfo.seats;
             _upgradeLicenseEmailResponse.call(this, licenseOwnerEmail, instructors, emailData, req.protocol, req.headers.host);
@@ -583,6 +594,8 @@ function upgradeTrialLicense(req, res){
             }
             var licenseOwnerEmail = req.user.email;
             var data = {};
+            data.firstName = req.user.firstName;
+            data.lastName = req.user.lastName;
             data.name = req.user.firstName + ' ' + req.user.lastName;
             data.subject = "Welcome to GlassLab Games Premium!";
             data.plan = planInfo.type;
@@ -1012,11 +1025,16 @@ function removeTeacherFromLicense(req, res){
             var teacherEmail = emails[1];
             var data = {};
             data.ownerName = emailData.ownerName;
-            data.subject = "Removed from License";
+            data.ownerFirstName = emailData.ownerFirstName;
+            data.ownerLastName = emailData.ownerLastName;
+            data.subject = "You’ve Successfully Left Your License";
             data.teacherName = emailData.teacherName;
+            data.teacherFirstName = emailData.teacherFirstName;
+            data.teacherLastName = emailData.teacherLastName;
             data.plan = emailData.plan;
             var template = "educator-removed";
-            _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
+            _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);
+            this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
             console.error("Remove Teacher From License Error -",err);
@@ -1067,7 +1085,7 @@ function teacherLeavesLicense(req, res){
             var licenseOwnerEmail = emails[0];
             var data = {};
             data.ownerName = emailData.ownerName;
-            data.subject = "Teacher Left License";
+            data.subject = "An Educator Has Left Your License";
             data.teacherName = emailData.teacherName;
             data.plan = emailData.plan;
             var template = "owner-educator-left";
@@ -1234,7 +1252,12 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
     values.push(phone);
     var email = "'" + purchaseOrderInfo.email + "'";
     values.push(email);
-    var name = "'" + purchaseOrderInfo.name + "'";
+    var name;
+    if(purchaseOrderInfo.lastName){
+        name = "'" + purchaseOrderInfo.firstName + " " + purchaseOrderInfo.lastName + "'";
+    } else{
+        name = "'" + purchaseOrderInfo.firstName + "'";
+    }
     values.push(name);
     var payment = parseInt(purchaseOrderInfo.payment);
     values.push(payment);
@@ -1499,7 +1522,7 @@ function rejectPurchaseOrder(req, res){
             if(status === "no active order"){
                 return status;
             }
-            var subject = "Purchase Order Rejected";
+            var subject = "Please Check Your Purchase Order";
             return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
         .then(function(results){
@@ -1595,7 +1618,7 @@ function receivePurchaseOrder(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            var subject = "Purchase Order Received";
+            var subject = "Your Purchase Order has Been Received";
             return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
         .then(function(results){
@@ -1783,7 +1806,7 @@ function approvePurchaseOrder(req, res){
             if(status === "no active order"){
                 return status;
             }
-            var subject = "Purchase Order Approved";
+            var subject = "Your Purchase Order has Been Approved";
             return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
         .then(function(results){
@@ -1805,10 +1828,12 @@ function approvePurchaseOrder(req, res){
         }.bind(this));
 }
 
-function _buildPurchaseOrderEmailData(subject, name, expirationDate, planInfo, purchaseOrderInfo){
+function _buildPurchaseOrderEmailData(subject, name, firstName, lastName, expirationDate, planInfo, purchaseOrderInfo){
     var data = {};
     data.subject = subject;
     data.name = name;
+    data.firstName = firstName;
+    data.lastName = lastName;
     data.expirationDate = expirationDate;
     data.seats = planInfo.seats;
     data.plan = planInfo.type;
@@ -1826,12 +1851,14 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
         when.all(promiseList)
             .then(function(results){
                 var user = results[0];
+                var ownerFirstName = user["FIRST_NAME"];
+                var ownerLastName = user["LAST_NAME"];
                 var ownerName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
                 var ownerEmail = user["EMAIL"];
                 var license = results[1][0];
                 var expirationDate = license["expiration_date"];
-                var ownerData = _buildPurchaseOrderEmailData(subject, ownerName, expirationDate, planInfo, purchaseOrderInfo);
-                var billerData = _buildPurchaseOrderEmailData(subject, billingName, expirationDate, planInfo, purchaseOrderInfo);
+                var ownerData = _buildPurchaseOrderEmailData(subject, ownerName, ownerFirstName, ownerLastName, expirationDate, planInfo, purchaseOrderInfo);
+                var billerData = _buildPurchaseOrderEmailData(subject, billingName, billingName, false, expirationDate, planInfo, purchaseOrderInfo);
                 ownerData.email = ownerEmail;
                 billerData.email = billingEmail;
                 resolve([ownerData, billerData]);
@@ -2454,9 +2481,13 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                     if(licenseOwnerId === user.id){
                         licenseOwnerEmail = user["EMAIL"];
                         emailData.ownerName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
+                        emailData.ownerFirstName = user["FIRST_NAME"];
+                        emailData.ownerLastName = user["LAST_NAME"];
                     } else{
                         teacherEmail = user["EMAIL"];
                         emailData.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
+                        emailData.teacherFirstName = user["FIRST_NAME"];
+                        emailData.teacherLastName = user["LAST_NAME"];
                     }
                 });
                 var emails = [licenseOwnerEmail,teacherEmail];
@@ -2551,16 +2582,25 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
         } else{
             template = educatorTemplate;
             var name;
+            var firstName;
+            var lastName;
             // if user is a temporary user who has not yet registered, set name to email
             if(user.firstName === "temp" && user.lastName === "temp"){
                 name = email;
+                firstName = email;
             } else{
                 name = user.firstName + " " + user.firstName;
+                firstName = user.firstName;
+                lastName = user.lastName;
             }
             emailData.teacherName = name;
+            emailData.teacherFirstName = firstName;
+            emailData.teacherLastName = lastName;
         }
-        emailData.subject = "Premium Plan Upgraded!";
+        emailData.subject = "Your Account has Been Upgraded!";
         emailData.ownerName = data.ownerName;
+        emailData.ownerFirstName = data.ownerFirstName;
+        emailData.ownerLastName = data.ownerLastName;
         emailData.oldPlan = data.oldPlan;
         emailData.oldSeats = data.oldSeats;
         emailData.newPlan = data.newPlan;
@@ -2576,9 +2616,11 @@ function _addTeachersEmailResponse(ownerName, approvedUsers, approvedNonUsers, p
     approvedUsers.forEach(function(user){
         email = user["EMAIL"];
         data = {};
-        data.subject = "Added to License!";
+        data.subject = "You’ve Been Invited!";
         data.ownerName = ownerName;
         data.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
+        data.teacherFirstName = user["FIRST_NAME"];
+        data.teacherLastName = user["LAST_NAME"];
         data.plan = plan;
         data.seats = seatsTier;
 
@@ -2590,7 +2632,7 @@ function _addTeachersEmailResponse(ownerName, approvedUsers, approvedNonUsers, p
     approvedNonUsers.forEach(function(user){
         email = user["EMAIL"];
         data = {};
-        data.subject = "Added to License!";
+        data.subject = "You’ve Been Invited!";
         data.ownerName = ownerName;
         // temporary users do not have a name yet, so use email
         data.teacherEmail = email;

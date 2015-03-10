@@ -1,13 +1,17 @@
-Demo Email for educator's license upgrade
+Hello <span>{{= data.teacherFirstName }}{{= data.teacherLastName ? ' '+ data.teacherLastName : '' }}</span>,<br />
 <br />
-<span>{{= data.teacherName }}</span>
+Your license administrator has successfully upgraded your account to {{= data.newPlan + ' ' + data.newSeats }}. It’s all ready to go!
 <br />
-<span>{{= data.ownerName }}</span>
 <br />
-<span>{{= data.oldPlan }}</span>
+Feel free to use your [Subscription Manager] to check, edit, and/or upgrade your account info at any time.
+<br/>
+<br/>
+If you have any questions, please check out the FAQ or <a href="mailto:support@glasslabgames.org">contact our support team</a> directly!
 <br />
-<span>{{= data.oldSeats }}</span>
 <br />
-<span>{{= data.newPlan }}</span>
-<br />
-<span>{{= data.newSeats }}</span>
+Thanks again for bringing the best in high-impact learning games to your students!
+<br/>
+<br/>
+
+Sincerely,<br />
+Your Best Friends at GlassLab
