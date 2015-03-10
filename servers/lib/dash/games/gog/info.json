@@ -238,7 +238,7 @@
                 "header": "About the Game",
                 "about": "Game Over Gopher is an exciting tower defense game built around the coordinate grid. To defend a prize carrot, the player selects various tools to \"feed\" the space gophers marching hungrily toward it. Game Over Gopher guides students in plotting coordinate pairs, differentiating negative coordinates from positive coordinates, and identifying the four quadrants. It helps establish the fundamentals of plotting functions on a grid. We recommend it for students who are struggling to understand the coordinate grid or those who just want to become more comfortable with graphing.<br ><br >Funded by the National Science Foundation and developed by the Learning Games Lab at New Mexico State University, Game Over Gopher is a game in the Math Snacks suite of interactive educational learning modules, and prepares students to better understand mathematics concepts crucial for 6th-grade math. Aligned to Common Core standards, it has been used effectively with students in 2nd through 7th grades learning to graph coordinates and track locations on a grid.",
                 "video": "https://www.youtube.com/embed/3AWu9Ln7s6E",
-                "brochure":"",
+                "brochure": "",
                 "curriculum": [
                     "Addresses Common Core standards related to application of coordinates, ordered pairs, and absolute value to solving real-world and mathematical problems",
                     "Offers interactive modules and short animations intended to creatively and visually help learners better understand the concepts behind difficult mathematics concepts"

@@ -4,16 +4,11 @@
         "enabled": true,
         "visible": true,
         "maintenance": null,
-        "shortName": "Water Bears",
-        "longName": "Water Bears",
-        "grades": "TBD",
-        "subject": "TBD",
+        "shortName": "Water Bears EDU",
+        "longName": "Water Bears EDU",
+        "grades": "6-8",
+        "subject": "Systems Thinking",
         "type": "App",
-        "shortDescription": "Water Bears",
-        "description": "Water Bears by Schell Games",
-        "settings": {
-            "canCreateMatches": false
-        },
         "platform": {
             "type": "iPad",
             "icon": {
@@ -21,41 +16,44 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
+        "price": "Coming Soon",
         "release": "dev",
-        "releaseDate": "TBD",
-        "price": "TBD",
+        "releaseDate": "March 13, 2015",
+        "shortDescription": "Water Bears EDU",
+        "description": "Water Bears EDU is a 3D puzzle game that requires students to use spatial reasoning and color-mixing skills to redirect water through pipes in a grid-based environment. Each puzzle has been designed to give students hands-on experience with different Systems Thinking concepts.",
+        "developer": {
+            "id": "SG",
+            "name": "Schell Games",
+            "logo": {
+                "small": "assets/dev-logo-schellgames.png",
+                "large": "assets/dev-logo-schellgames@2x.png"
+            },
+            "description": "Schell Games is a full-service game design and development company, which specializes in creating transformational games and innovative, interactive experiences. Founded in 2002 by world-class game designer and esteemed author Jesse Schell and located in Pittsburgh, we are the largest game studio in Pennsylvania and one of the biggest independent game studios in the country. The company crafts transformational games, or games that change people for the better. Not only do our games educate players and advocate for change, but they are fun! Our team of highly talented artists, programmers, producers and game designers is adept at creating these transformative experiences for some of the world’s most respected companies. Projects in our vast portfolio include mobile, PC, online, console, hand-held, casual and social games; interactive installations and theme park attractions; connected toys and virtual worlds."
+        },
+        "settings": {
+            "canCreateMatches": false
+        },
         "license": {
             "type": "loginType",
-            "loginType": "glasslabv2",
+            "loginType": "glasslabv2,icivics,edmodo",
             "valid": false,
             "message": {
                 "invalid": "In Development"
             }
         },
-        "developer": {
-            "id": "SG",
-            "name": "Schell Games",
-            "logo": {
-                "small": "assets/dev-logo-placeholder.jpg",
-                "large": "assets/dev-logo-placeholder@2x.jpg"
-            },
-            "description": ""
-        },
         "thumbnail": {
             "small": "assets/thumb-game-WPLUS.png",
-            "large": "assets/thumb-game-WPLUS.png"
+            "large": "assets/thumb-game-WPLUS@2x.png"
         },
         "card": {
-            "small": "assets/game-card-PLACEHOLDER.jpg",
-            "large": "assets/game-card-PLACEHOLDER@2x.jpg"
+            "small": "assets/game-card-WPLUS.png",
+            "large": "assets/game-card-WPLUS@2x.png"
         },
         "banners": {
-            "product": "assets/game-banner-WPLUS.jpg",
-            "reports": "assets/game-banner-WPLUS.jpg"
+            "product": "assets/game-banner-WPLUS.png",
+            "reports": "assets/game-banner-WPLUS@2x.png"
         }
     },
-    "buttons": [
-    ],
     "assessment": [
         {
             "enabled": true,
@@ -184,27 +182,85 @@
                                 {
                                     "id": "wo1",
                                     "title": "Stuck on Pack 1",
-                                    "description": "Student has spent an irregular amount of time on a pack 1 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 1 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo2",
                                     "title": "Stuck on Pack 2",
-                                    "description": "Student has spent an irregular amount of time on a pack 2 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 2 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo3",
                                     "title": "Stuck on Pack 3",
-                                    "description": "Student has spent an irregular amount of time on a pack 3 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 3 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo4",
                                     "title": "Stuck on Pack 4",
-                                    "description": "Student has spent an irregular amount of time on a pack 4 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 4 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo5",
                                     "title": "Avoiding Challenges",
-                                    "description": "Student is doing great on the base levels, but they haven't completed any challenges yet. Encourage them to try one!"
+                                    "description": "Student is doing great on the base levels, but they haven't completed any challenges yet. Encourage them to try one!",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student why they haven't tried any challenge levels yet. It's possible that they have tried one but were unable to finish it.",
+                                        "actionPoints":
+                                            [
+                                                "Encourage them to try the first challenge level of Pack 1, and help them analyze the level if necessary",
+                                                "Remind them that they can jump around challenge levels, so they can try different ones until they find one  they like"
+                                            ],
+                                        "summary": ""
+                                    }
                                 }
                             ]
                         }
@@ -216,11 +272,182 @@
     },
     "details": {
         "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "Water Bears EDU is a 3D puzzle game that requires students to use spatial reasoning and color-mixing skills to redirect water through pipes in a grid-based environment. The end goal of each puzzle is to fill each water bear’s bubble with the correct color water. Each puzzle has been designed to give students hands-on experience with different Systems Thinking concepts, such as identifying interconnections, using leverage points, and managing limited resources. Some puzzles introduce game mechanics or Systems Thinking concepts, while others provide engaging challenges that help students develop deeper problem-solving skills.<br /><br />After working with systems in the game, students have the tools to participate in meaningful classroom discussions about Systems Thinking concepts that can be difficult to grasp without concrete experience. This guide includes lesson plans that give an introduction to Systems Thinking in the context of Next Generation Science Standards, as well as provides a framework to customize lesson plans to suit the needs of different classrooms and students.",
+                "video": "",
+                "brochure": "",
+                "curriculum": [
+                    "Allows students to apply Systems Thinking concepts while exercising problem-solving skills",
+                    "Addresses middle school Next Generation Science Standards related to engineering design"
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "assets/WPLUS-carousel_1.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WPLUS-carousel_2.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WPLUS-carousel_3.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WPLUS-carousel_4.jpg"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/WPLUS-carousel_5.jpg"
+                    }
+                ]
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards Alignment",
+                "CCSS": [
+                    {
+                        "category": "Next Generation Science Standards",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "MS-ETS1-1",
+                                        "link": "",
+                                        "description": "Defining and delimiting the scope of a problem."
+                                    },
+                                    {
+                                        "name": "MS-ETS1-2",
+                                        "link": "",
+                                        "description": "Evaluate competing design solutions using a systematic process to determine how well they meet the criteria and constraints of the problem."
+                                    },
+                                    {
+                                        "name": "MS-ETS1-3",
+                                        "link": "",
+                                        "description": "Analyzing data from tests and combining solutions."
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "PA Assessment Anchors and Eligible Content",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "S.6.A.2.1",
+                                        "link": "",
+                                        "description": "Apply knowledge of scientific investigation or technological design in different contexts to make inferences to solve problems."
+                                    },
+                                    {
+                                        "name": "S.6.A.3.1",
+                                        "link": "",
+                                        "description": "Explain the parts of a simple system, their roles, and their relationships to the system as a whole."
+                                    },
+                                    {
+                                        "name": "S.6.A.3.2",
+                                        "link": "",
+                                        "description": "Apply knowledge of models to make predictions, draw inferences, or explain technological concepts."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "TEKS": [
+                    {
+                        "category": "Texas Essential Knowledge and Skills",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "126.14(c)(1)(C)(Grade 6)",
+                                        "link": "",
+                                        "description": "Explore complex systems or issues using models, simulations, and new technologies to make predictions, modify input, and review results."
+                                    },
+                                    {
+                                        "name": "126.15(c)(1)(C) (Grade 7)",
+                                        "link": "",
+                                        "description": "Explore complex systems or issues using models, simulations, and new technologies to make predictions, modify input, and review results."
+                                    },
+                                    {
+                                        "name": "126.16(c)(1)(C)(Grade 8)",
+                                        "link": "",
+                                        "description": "Explore complex systems or issues using models, simulations, and new technologies to develop hypotheses, modify input, and analyze results."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Lesson Plans and Guides",
+                        "list": [
+                            {
+                                "name": "Teacher's Guide",
+                                "link": "http://watersfoundation.org/systems-thinking/what/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                    {
+                        "category": "Research Articles",
+                        "list": [
+                            {
+                                "name": "Systems Thinking in Schools",
+                                "link": "http://watersfoundation.org/systems-thinking/what/"
+                            },
+                            {
+                                "name": "Systems Thinking in Schools - Connections to Cirricular Standards",
+                                "link": "http://watersfoundation.org/systems-thinking/standards/"
+                            },
+                            {
+                                "name": "Systems Thinking: A Skill to Improve Student Achievement",
+                                "link": "http://donnaelder.wiki.westga.edu/file/view/Systems+Thinking+A+skill+to+Improve+Student+Achievement.pdf"
+                            },
+                            {
+                                "name": "Developing Games and Simulations for Today and Tomorrow's Tech Savvy Youth",
+                                "link": "http://www.autzones.com/din6000/textes/semaine10/Klopfer+Yoon(2005).pdf"
+                            },
+                            {
+                                "name": "Systems Thinking Basics: From Concepts to Causal Loops",
+                                "link": "http://www.homeworkmarket.com/sites/default/files/qx/15/01/11/05/systems_thinking_basics_ebook.pdf"
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         "social": {
-            "facebook": "http://facebook.com/glasslabgames",
-            "twitter": "http://twitter.com/glasslabgames",
-            "google": "https://plus.google.com/117864084582459836584/posts"
+            "facebook": "https://www.facebook.com/SchellGames",
+            "twitter": "https://twitter.com/schellgames",
+            "google": "https://plus.google.com/103286963555251312233/about"
         }
     }
 }
