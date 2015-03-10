@@ -2214,7 +2214,7 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
                 }
                 var lmsService = this.serviceManager.get("lms").service;
                 _(assignCourseGames).forEach(function(course, courseId){
-                    promiseList.push(lmsService.telmStore.updateGamesForCourse(courseId, course));
+                    promiseList.push(lmsService.updateCBLMSInEnabledCourse(courseId, course));
                 });
                 return when.all(promiseList);
             }.bind(this))

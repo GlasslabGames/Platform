@@ -506,3 +506,25 @@ LMSService.prototype.getStudentsOfCourse = function(courseId) {
             return authService.getUsersData(studentIds);
         }.bind(this));
 };
+
+// method giving couchbase course object that lists which games would be assigned if class were enabled
+// check if class is enabled, if so update couchbase course object with courseGames
+LMSService.prototype.updateCBLMSInEnabledCourse = function(courseId, courseGames){
+    return when.promise(function(resolve, reject){
+        this.myds.getCourse(courseId)
+            .then(function(course){
+                var promiseList = [];
+                if(course.premiumGamesAssigned){
+                    promiseList.push(this.telmStore.updateGamesForCourse(courseId, courseGames));
+                }
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Update CB LMS In Enabled Course Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+};
