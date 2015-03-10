@@ -632,7 +632,8 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/license/po/receive/code/:code",
+            requireAuth: true,
+            api: "/api/v2/license/po/receive",
             service: "lic",
             controller: "license",
             method: {
@@ -640,7 +641,8 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/license/po/reject/code/:code",
+            requireAuth: true,
+            api: "/api/v2/license/po/reject",
             service: "lic",
             controller: "license",
             method: {
@@ -648,7 +650,8 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/license/po/approve/code/:code",
+            requireAuth: true,
+            api: "/api/v2/license/po/approve",
             service: "lic",
             controller: "license",
             method: {

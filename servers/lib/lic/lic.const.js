@@ -110,10 +110,5 @@ module.exports = {
         exp_month: 1,
         exp_year: 2020,
         cvc: 123
-    },
-    code: {
-        reject:  "12345",
-        receive: "23456",
-        approve: "34567"
     }
 };

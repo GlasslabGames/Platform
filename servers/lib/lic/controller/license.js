@@ -1464,8 +1464,14 @@ function setLicenseMapStatusToNull(req, res){
 
 // next in line
 function rejectPurchaseOrder(req, res){
+    // Only admins should be allowed to perform this operation
+    if( req.user.role !== lConst.role.admin ) {
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+
     // validate inputs from matt, perhaps with code
-    if(!(req.params.code === lConst.code.reject && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -1522,8 +1528,14 @@ function rejectPurchaseOrder(req, res){
 }
 
 function receivePurchaseOrder(req, res){
+    // Only admins should be allowed to perform this operation
+    if( req.user.role !== lConst.role.admin ) {
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+
     // validate inputs from matt, perhaps with code
-    if(!(req.params.code === lConst.code.receive && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -1749,8 +1761,14 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
 }
 
 function approvePurchaseOrder(req, res){
+    // Only admins should be allowed to perform this operation
+    if( req.user.role !== lConst.role.admin ) {
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+
     // validate with code
-    if(!(req.params.code === lConst.code.approve && req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
