@@ -28,7 +28,7 @@
                 "small": "assets/dev-logo-schellgames.png",
                 "large": "assets/dev-logo-schellgames@2x.png"
             },
-            "description": ""
+            "description": "Schell Games is a full-service game design and development company, which specializes in creating transformational games and innovative, interactive experiences. Founded in 2002 by world-class game designer and esteemed author Jesse Schell and located in Pittsburgh, we are the largest game studio in Pennsylvania and one of the biggest independent game studios in the country. The company crafts transformational games, or games that change people for the better. Not only do our games educate players and advocate for change, but they are fun! Our team of highly talented artists, programmers, producers and game designers is adept at creating these transformative experiences for some of the world’s most respected companies. Projects in our vast portfolio include mobile, PC, online, console, hand-held, casual and social games; interactive installations and theme park attractions; connected toys and virtual worlds."
         },
         "settings": {
             "canCreateMatches": false
