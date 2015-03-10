@@ -1236,7 +1236,7 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo){
     values.push(email);
     var name = "'" + purchaseOrderInfo.name + "'";
     values.push(name);
-    var payment = purchaseOrderInfo.payment;
+    var payment = parseInt(purchaseOrderInfo.payment);
     values.push(payment);
     return values;
 }
@@ -1377,8 +1377,13 @@ function getActivePurchaseOrderInfo(req, res){
             output.name = purchaseOrders.name;
             output.phone = purchaseOrders.phone;
             output.email = purchaseOrders.email;
-            output.status = purchaseOrders.status;
-            output.status = purchaseOrders.status;
+            if (purchaseOrders.status === 'pending') {
+                output.status = 1;
+            } else if (purchaseOrders.status === 'received' || purchaseOrders.status === 'rejected') {
+                output.status = 2;
+            } else if (purchaseOrders.status === 'approved') {
+                output.status = 3;
+            }
 
             // send back up
             this.requestUtil.jsonResponse(res, output);
