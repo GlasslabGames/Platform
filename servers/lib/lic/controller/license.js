@@ -1598,6 +1598,7 @@ function receivePurchaseOrder(req, res){
             licenseId = purchaseOrder["license_id"];
             billingName = purchaseOrder["name"];
             action = purchaseOrder["action"];
+            payment = purchaseOrder["payment"];
             purchaseOrderInfo.action = action;
             if(action !== "upgrade"){
                 var date = new Date(Date.now());
