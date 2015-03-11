@@ -452,6 +452,9 @@ function upgradeLicense(req, res){
     var stripeInfo = req.body.stripeInfo || {};
     var emailData = {};
     var instructors;
+    var autoRenew;
+    var subscriptionId;
+    var customerId;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -467,24 +470,33 @@ function upgradeLicense(req, res){
                 return results;
             }
             var user = results[0];
-            var customerId = user["customer_id"];
+            customerId = user["customer_id"];
             var license = results[1][0];
             if(license["purchase_order_id"] !== null){
                 return "po-id";
             }
             emailData.oldPlan = license["package_type"];
             emailData.oldSeats = license["package_size_tier"];
-            var subscriptionId = license["subscription_id"];
+            subscriptionId = license["subscription_id"];
+            autoRenew = license["auto_renew"] > 0;
             var params = _buildStripeParams(planInfo, customerId, stripeInfo);
             var promiseList = [];
-            if(license["payment_type"] === "purchase_order"){
-                promiseList.push(_switchToCreditCard.call(this, licenseId));
-            }
+            //if(license["payment_type"] === "purchase_order"){
+            //    promiseList.push(_switchToCreditCard.call(this, licenseId));
+            //}
             if(!params.card){
                 delete params.card;
             }
             promiseList.push(this.serviceManager.stripe.updateSubscription(customerId, subscriptionId, params));
             return when.all(promiseList);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            if(!autoRenew){
+                return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+            }
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -1258,6 +1270,7 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     } else{
         name = "'" + purchaseOrderInfo.firstName + "'";
     }
+    purchaseOrderInfo.name = name;
     values.push(name);
     var payment = parseInt(purchaseOrderInfo.payment);
     values.push(payment);
@@ -1945,6 +1958,10 @@ function _switchToPurchaseOrder(userId, licenseId){
             return this.myds.updateLicenseById(licenseId, updateFields);
         }.bind(this))
         .then(function(){
+            req.user.paymentType = "purchase-order";
+            return Util.updateSession(req);
+        })
+        .then(function(){
             resolve();
         })
         .then(null, function(err){
@@ -1961,6 +1978,10 @@ function _switchToCreditCard(licenseId){
         var updateFields = [paymentType, autoRenew];
         // update license table
         this.myds.updateLicenseById(licenseId, updateFields)
+            .then(function(){
+                req.user.paymentType = "credit-card";
+                return Util.updateSession(req);
+            })
             .then(function(){
                 resolve();
             }.bind(this))
@@ -2039,7 +2060,11 @@ function _createSubscription(req, userId, stripeInfo, planInfo){
 function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
         var customerId;
+        var existingCustomer;
         var output;
+        var stripeOutput;
+        var subscription;
+        var subscriptionId;
         this.myds.getCustomerIdByUserId(userId)
             .then(function(id){
                 customerId = id;
@@ -2053,27 +2078,31 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
                 }
                 return this.serviceManager.stripe.createCustomer(params);
             }.bind(this))
+            .then(function(results){
+                stripeOutput = results;
+                if(!customerId){
+                    existingCustomer = false;
+                    customerId = stripeOutput.id;
+                    subscription = stripeOutput.subscriptions.data[0];
+                } else{
+                    existingCustomer = true;
+                    subscription = stripeOutput;
+                }
+                subscriptionId = subscription.id;
+                return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+            }.bind(this))
             .then(function(results) {
                 // results could be either a new customer object, or a new subscription object. deal with both.
-                var subscription;
-                var customer;
                 output = {};
-                if(!customerId) {
-                    customer = results;
-                    customerId = customer.id;
-                    subscription = customer.subscriptions.data[0];
-                } else {
-                    subscription = results;
-                }
                 output.customerId = customerId;
                 if(subscription && (subscription.status === "active" || subscription.status === "trialing")){
-                    output.subscriptionId = subscription.id;
+                    output.subscriptionId = subscriptionId;
                     var msDate = subscription["current_period_end"] * 1000;
                     output.expirationDate = new Date(msDate).toISOString().slice(0, 19).replace('T', ' ');
                 } else{
                     output = "account inactive";
                 }
-                if(customer){
+                if(!existingCustomer){
                     return this.myds.setCustomerIdByUserId(userId, customerId);
                 }
             }.bind(this))
@@ -2140,15 +2169,13 @@ function _createLicenseSQL(userId, planInfo, data){
             subscriptionId = "'" + data.subscriptionId + "'";
         }
         var active;
-        var autoRenew;
+        var autoRenew = 0;
         var paymentType;
         if(data.purchaseOrder){
             active = 0;
-            autoRenew = 0;
             paymentType = "'purchase-order'";
         } else{
             active = 1;
-            autoRenew = 1;
             paymentType = "'credit-card'";
         }
         var values = [];
