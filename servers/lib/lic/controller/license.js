@@ -25,7 +25,7 @@ module.exports = {
     teacherLeavesLicense: teacherLeavesLicense,
     subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
     upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
-    upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
+    //upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
     getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
     cancelActivePurchaseOrder: cancelActivePurchaseOrder,
     receivePurchaseOrder: receivePurchaseOrder,
@@ -452,9 +452,6 @@ function upgradeLicense(req, res){
     var stripeInfo = req.body.stripeInfo || {};
     var emailData = {};
     var instructors;
-    var autoRenew;
-    var subscriptionId;
-    var customerId;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -470,15 +467,15 @@ function upgradeLicense(req, res){
                 return results;
             }
             var user = results[0];
-            customerId = user["customer_id"];
+            var customerId = user["customer_id"];
             var license = results[1][0];
             if(license["purchase_order_id"] !== null){
                 return "po-id";
             }
             emailData.oldPlan = license["package_type"];
             emailData.oldSeats = license["package_size_tier"];
-            subscriptionId = license["subscription_id"];
-            autoRenew = license["auto_renew"] > 0;
+            var subscriptionId = license["subscription_id"];
+            var autoRenew = license["auto_renew"] > 0;
             var params = _buildStripeParams(planInfo, customerId, stripeInfo);
             var promiseList = [];
             //if(license["payment_type"] === "purchase_order"){
@@ -487,16 +484,8 @@ function upgradeLicense(req, res){
             if(!params.card){
                 delete params.card;
             }
-            promiseList.push(this.serviceManager.stripe.updateSubscription(customerId, subscriptionId, params));
+            promiseList.push(_updateStripeSubscription.call(this, customerId, subscriptionId, params, autoRenew));
             return when.all(promiseList);
-        }.bind(this))
-        .then(function(status){
-            if(typeof status === "string"){
-                return status;
-            }
-            if(!autoRenew){
-                return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
-            }
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -1321,6 +1310,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
     // email response
 }
 
+// no longer supporting purchase order upgrades
 function upgradeLicensePurchaseOrder(req, res){
     // do subscribe purchase order stuff
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
@@ -1749,6 +1739,7 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
             });
     }.bind(this));
 }
+
 // upgrade email seems fairly different.  how do?
 function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrderId){
     return when.promise(function(resolve, reject){
@@ -2216,6 +2207,30 @@ function _createLicenseSQL(userId, planInfo, data){
                 console.error("Create License Error -",err);
                 reject(err);
             });
+    }.bind(this));
+}
+
+function _updateStripeSubscription(customerId, subscriptionId, params, autoRenew){
+    return when.promise(function(resolve, reject){
+        var invoice;
+        this.serviceManager.stripe.updateSubscription(customerId, subscriptionId, params)
+            .then(function(){
+                return this.serviceManager.stripe.chargeInvoice(customerId);
+            }.bind(this))
+            .then(function(result){
+                invoice = result;
+                // do we store this invoice data anywhere?
+                if(!autoRenew){
+                    return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
+                }
+            }.bind(this))
+            .then(function(){
+                resolve()
+            })
+            .then(null, function(err){
+                console.error("Upgrade Stripe Subscription Error -",err);
+                reject(err);
+            }.bind(this));
     }.bind(this));
 }
 
