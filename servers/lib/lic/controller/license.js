@@ -1028,7 +1028,7 @@ function removeTeacherFromLicense(req, res){
             data.ownerName = emailData.ownerName;
             data.ownerFirstName = emailData.ownerFirstName;
             data.ownerLastName = emailData.ownerLastName;
-            data.subject = "You’ve Successfully Left Your License";
+            data.subject = "Your Access has Been Removed";
             data.teacherName = emailData.teacherName;
             data.teacherFirstName = emailData.teacherFirstName;
             data.teacherLastName = emailData.teacherLastName;
