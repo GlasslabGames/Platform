@@ -288,23 +288,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_1.jpg"
+                        "url": "assets/WPLUS-carousel_1.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_2.jpg"
+                        "url": "assets/WPLUS-carousel_2.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_3.jpg"
+                        "url": "assets/WPLUS-carousel_3.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_4.jpg"
+                        "url": "assets/WPLUS-carousel_4.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_5.jpg"
+                        "url": "assets/WPLUS-carousel_5.png"
                     }
                 ]
             },
