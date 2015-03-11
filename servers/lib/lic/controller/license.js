@@ -1605,7 +1605,6 @@ function receivePurchaseOrder(req, res){
                 date.setFullYear(date.getFullYear()+1);
                 expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
             }
-
             var updateFields = [];
             var status = "status = 'received'";
             updateFields.push(status);
@@ -1914,7 +1913,7 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
                 var active = "active = 0";
                 var licenseUpdateFields = [purchaseOrderIdUpdate, active];
                 var licenseMapStatus;
-                if(status = "rejected"){
+                if(status === "rejected"){
                     licenseMapStatus = "status = 'po-rejected'";
                 } else{
                     licenseMapStatus = "status = NULL";
