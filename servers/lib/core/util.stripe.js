@@ -293,3 +293,28 @@ StripeUtil.prototype.retrieveCoupon = function( couponId ) {
         });
     }.bind(this));
 };
+
+StripeUtil.prototype.chargeInvoice = function(customerId){
+    return when.promise(function(resolve, reject){
+        this.stripe.invoices.create({
+            customer: customerId
+        }, function(err, invoice){
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to create invoice: ", customerId, err);
+                reject(err);
+            }
+            else {
+                var invoiceId = invoice.id;
+                this.stripe.invoices.pay(invoiceId, function(err, invoice){
+                    if( err ) {
+                        console.error( "Stripe Utility Error - failed to pay invoice: ", invoiceId, err);
+                        reject(err);
+                    } else{
+                        console.log( "Stripe Utility Successfully paid Invoice: ", invoiceId, invoice);
+                        resolve(invoice);
+                    }
+                });
+            }
+        }.bind(this))
+    }.bind(this));
+};

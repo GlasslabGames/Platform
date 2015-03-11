@@ -463,7 +463,7 @@ Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
         var valuesString = values.join(",");
         var Q = "INSERT INTO GL_PURCHASE_ORDER " +
             "(user_id,license_id,status,purchase_order_number," +
-            "purchase_order_key,phone,email,name,payment) " +
+            "purchase_order_key,phone,email,name,payment,action) " +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){

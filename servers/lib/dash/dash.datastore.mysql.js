@@ -120,9 +120,10 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     reject({"error": "none found"}, 500);
                     return;
                 } else if(!Array.isArray(license)){
-                    //user.licenseId = license["id"];
+                    user.licenseId = license["id"];
                     user.licenseOwnerId = license["user_id"];
                     user.licenseStatus = license["status"];
+                    user.paymentType = license["payment_type"];
                     var packageType = license["package_type"];
                     if(packageType === "trial"){
                         user.isTrial = true;
@@ -247,7 +248,7 @@ return when.promise(function(resolve, reject) {
 
 WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lm.status FROM GL_LICENSE as lic JOIN\n" +
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
             "WHERE status in ('active','pending', 'po-received', 'po-rejected', 'po-pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
