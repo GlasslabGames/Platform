@@ -403,7 +403,15 @@
                         "list": [
                             {
                                 "name": "Teacher's Guide",
-                                "link": "http://watersfoundation.org/systems-thinking/what/"
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WPLUS/guides/WaterBearsTeachersGuide_NGSS.pdf"
+                            },
+                            {
+                                "name": "Puzzle Guide",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WPLUS/guides/PuzzleGuideForTeachers.pdf"
+                            },
+                            {
+                                "name": "Lesson Plans",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WPLUS/guides/LessonPlans_NGSS.pdf"
                             }
                         ]
                     }
