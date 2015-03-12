@@ -1028,7 +1028,7 @@ function removeTeacherFromLicense(req, res){
             data.ownerName = emailData.ownerName;
             data.ownerFirstName = emailData.ownerFirstName;
             data.ownerLastName = emailData.ownerLastName;
-            data.subject = "You’ve Successfully Left Your License";
+            data.subject = "Your Access has Been Removed";
             data.teacherName = emailData.teacherName;
             data.teacherFirstName = emailData.teacherFirstName;
             data.teacherLastName = emailData.teacherLastName;
@@ -1086,8 +1086,12 @@ function teacherLeavesLicense(req, res){
             var licenseOwnerEmail = emails[0];
             var data = {};
             data.ownerName = emailData.ownerName;
+            data.ownerFirstName = emailData.ownerFirstName;
+            data.ownerLastName = emailData.ownerLastName;
             data.subject = "An Educator Has Left Your License";
             data.teacherName = emailData.teacherName;
+            data.teacherFirstName = emailData.teacherFirstName;
+            data.teacherLastName = emailData.teacherLastName;
             data.plan = emailData.plan;
             var template = "owner-educator-left";
             _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);
@@ -1311,6 +1315,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
 }
 
 // no longer supporting purchase order upgrades
+// also we would need to change this if we decided to use it again, details listed in below comment
 function upgradeLicensePurchaseOrder(req, res){
     // do subscribe purchase order stuff
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
@@ -1336,6 +1341,8 @@ function upgradeLicensePurchaseOrder(req, res){
         }.bind(this))
         .then(function(license){
             license = license[0];
+            // we changed purchase order logic to leave the id there until a new one replaces it.
+            // if we use this method again, we need to change the check to see if upgrade can occur
             if(license["purchase_order_id"] !== null){
                 return "po-id";
             }
@@ -1686,8 +1693,6 @@ function receivePurchaseOrder(req, res){
 function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expirationDate){
     return when.promise(function(resolve, reject) {
         var updateFields = [];
-        var purchaseOrderId = "purchase_order_id = NULL";
-        updateFields.push(purchaseOrderId);
         var active = "active = 1";
         updateFields.push(active);
         var seats = "package_size_tier = '" + planInfo.seats + "'";
@@ -1772,8 +1777,6 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
             .then(function(){
                 var promiseList = [{},{},{},{}];
                 var updateFields = [];
-                var purchaseOrderId = "purchase_order_id = NULL";
-                updateFields.push(purchaseOrderId);
                 var packageSize = "package_size_tier = '" + planInfo.seats + "'";
                 updateFields.push(packageSize);
                 var packageType = "package_type = '" + plan + "'";
@@ -1919,9 +1922,9 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
         }
         this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
             .then(function(){
-                var purchaseOrderIdUpdate = "purchase_order_id = NULL";
                 var active = "active = 0";
-                var licenseUpdateFields = [purchaseOrderIdUpdate, active];
+                var purchaseOrderIdString = "purchase_order_id = NULL";
+                var licenseUpdateFields = [active, purchaseOrderIdString];
                 var licenseMapStatus;
                 if(status === "rejected"){
                     licenseMapStatus = "status = 'po-rejected'";
@@ -1932,7 +1935,7 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
                 var promiseList = [];
                 promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
                 if(action === "subscribe" || action === "trial upgrade" || action === "cancel"){
-                    var statuses = ["'po-pending'", "'po-received'", "'active'"];
+                    //var statuses = ["'po-pending'", "'po-received'", "'active'"];
                     promiseList.push(this.myds.updateRecentLicenseMapByUserId(userId, licenseMapUpdateFields));
                 }
                 return when.all(promiseList);
@@ -2518,7 +2521,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 if(courseIds === "email not in license"){
                     return courseIds;
                 }
-                if(Array.isArray(courseIds)){
+                if(Array.isArray(courseIds) && courseIds.length > 0){
                     return this.unassignPremiumCourses(courseIds, licenseId);
                 }
             }.bind(this))
