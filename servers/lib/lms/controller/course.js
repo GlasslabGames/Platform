@@ -426,7 +426,8 @@ function _checkForGameAccess(licenseId, games, newGameIds){
                 var abort = false;
                 var premiumGamesAssigned = false;
                 var gamesInfo = results.slice(1);
-                if(licenseId){
+                // check if part of active license
+                if(licenseId && results[0][0].active > 0){
                     var license = results[0][0] || {};
                     if(license.id){
                         var lConst = lic["lib"]["Const"];

@@ -120,7 +120,8 @@ function getPlanLicenseGamesBasicInfo(req, res){
     promise
         .then(function(output) {
             var type;
-            if(licenseId){
+            // check if part of active license
+            if(licenseId && output[0].active > 0){
                 var license = output[0];
                 type = license["package_type"];
             } else{
