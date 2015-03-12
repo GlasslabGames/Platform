@@ -170,7 +170,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
 Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     return when.promise(function(resolve, reject){
         var userIdsString = userIds.join(",");
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending','po-received','po-rejected') and user_id in (" + userIdsString + ");";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending', 'po-pending', 'po-received','po-rejected') and user_id in (" + userIdsString + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);

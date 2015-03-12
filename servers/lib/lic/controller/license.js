@@ -1268,7 +1268,8 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                 var params = {
                     metadata: {
                         purchaseOrder: true
-                    }
+                    },
+                    email: purchaseOrderInfo.email
                 };
                 return _createStripeCustomer.call(this, userId, params);
             }.bind(this))
@@ -1326,8 +1327,9 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     values.push(status);
     var purchaseOrderNumber = "NULL";
     values.push(purchaseOrderNumber);
-    var purchaseOrderKey = "'" + Util.CreateUUID() + "'";
+    var purchaseOrderKey = Util.CreateUUID();
     purchaseOrderInfo.key = purchaseOrderKey;
+    purchaseOrderKey = "'" + purchaseOrderKey + "'";
     values.push(purchaseOrderKey);
     var phone = "'" + purchaseOrderInfo.phone + "'";
     values.push(phone);
@@ -1335,11 +1337,12 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     values.push(email);
     var name;
     if(purchaseOrderInfo.lastName){
-        name = "'" + purchaseOrderInfo.firstName + " " + purchaseOrderInfo.lastName + "'";
+        name = purchaseOrderInfo.firstName + " " + purchaseOrderInfo.lastName;
     } else{
-        name = "'" + purchaseOrderInfo.firstName + "'";
+        name = purchaseOrderInfo.firstName;
     }
     purchaseOrderInfo.name = name;
+    name = "'" + name + "'";
     values.push(name);
     var payment = parseInt(purchaseOrderInfo.payment);
     values.push(payment);
@@ -1664,7 +1667,7 @@ function receivePurchaseOrder(req, res){
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var purchaseOrderNumber = purchaseOrderInfo.number;
     var purchaseOrderKey = purchaseOrderInfo.key;
-    var payment = purchaseOrderInfo.payment;
+    var payment = purchaseOrderInfo.amount;
     var planInfo = req.body.planInfo;
 
     var licenseId;
