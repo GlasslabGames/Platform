@@ -304,6 +304,22 @@ function updateBillingInfo(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Update Billing Info Error -",err);
+            if(err.code === "card_declined"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
+                return;
+            }
+            if(err.code === "incorrect_cvc"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
+                return;
+            }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -375,9 +391,18 @@ function subscribeToLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
                 return;
             }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
+
 function subscribeToTrialLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -448,14 +473,6 @@ function subscribeToTrialLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To Trial License Error -",err);
-            if(err.code === "card_declined"){
-                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
-                return;
-            }
-            if(err.code === "incorrect_cvc"){
-                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
-                return;
-            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -566,6 +583,14 @@ function upgradeLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
                 return;
             }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -640,6 +665,22 @@ function upgradeTrialLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Upgrade Trial License Error -",err);
+            if(err.code === "card_declined"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
+                return;
+            }
+            if(err.code === "incorrect_cvc"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
+                return;
+            }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1307,7 +1348,6 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     return values;
 }
 
-// highly similar to subscribe
 function upgradeTrialLicensePurchaseOrder(req, res){
     // do subscribe purchase order stuff
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
@@ -1543,7 +1583,6 @@ function setLicenseMapStatusToNull(req, res){
         }.bind(this));
 }
 
-// next in line
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
