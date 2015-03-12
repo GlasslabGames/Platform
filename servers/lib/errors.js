@@ -131,5 +131,8 @@ module.exports = {
     "lic.order.pending":                    "You currently have a pending purchase order. Please consult your billing department",
     "lic.order.absent":                     "No purchase order was found",
     "lic.action.invalid":                   "The action you listed is not supported by our system.  Please recheck your options",
-    "lic.order.received.already":           "This purchase order has already been marked as received by our system"
+    "lic.order.received.already":           "This purchase order has already been marked as received by our system",
+    "lic.card.declined":                    "Your card was declined.",
+    "lic.card.cvc.incorrect":               "Your card's security code is incorrect.",
+    "lic.access.invited":                   "You are already invited to another license.  Log out and log in again to join."
 };

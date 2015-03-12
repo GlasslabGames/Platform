@@ -347,6 +347,10 @@ function subscribeToLicense(req, res){
                 this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
                 return;
             }
+            if(status === "already on a license"){
+                this.requestUtil.errorResponse(res, {key: "lic.access.invited"});
+                return;
+            }
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
@@ -363,6 +367,14 @@ function subscribeToLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To License Error -",err);
+            if(err.code === "card_declined"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
+                return;
+            }
+            if(err.code === "incorrect_cvc"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -417,6 +429,10 @@ function subscribeToTrialLicense(req, res){
                 this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
                 return;
             }
+            if(status === "already on a license"){
+                this.requestUtil.errorResponse(res, {key:"lic.access.invited"});
+                return;
+            }
             // get users email address and build below method
             var licenseOwnerEmail = req.user.email;
             var data = {};
@@ -432,6 +448,14 @@ function subscribeToTrialLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To Trial License Error -",err);
+            if(err.code === "card_declined"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
+                return;
+            }
+            if(err.code === "incorrect_cvc"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -534,6 +558,14 @@ function upgradeLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Upgrade License Error -",err);
+            if(err.code === "card_declined"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
+                return;
+            }
+            if(err.code === "incorrect_cvc"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -942,7 +974,9 @@ function addTeachersToLicense(req, res){
             req.approvedTeachers = approvedTeachersOutput;
             req.rejectedTeachers = rejectedTeachersOutput;
             var ownerName = req.user.firstName + " " + req.user.lastName;
-            _addTeachersEmailResponse.call(this, ownerName, approvedUsers, approvedNonUsers, plan, seatsTier, req.protocol, req.headers.host);
+            var ownerFirstName = req.user.firstName;
+            var ownerLastName = req.user.lastName;
+            _addTeachersEmailResponse.call(this, ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, plan, seatsTier, req.protocol, req.headers.host);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -1073,6 +1107,7 @@ function teacherLeavesLicense(req, res){
             delete req.user.licenseId;
             delete req.user.licenseOwnerId;
             delete req.user.licenseStatus;
+            delete req.user.paymentType;
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -1456,6 +1491,16 @@ function cancelActivePurchaseOrder(req, res){
         })
         .then(function(status){
             if(status === "no active order"){
+                return status;
+            }
+            delete req.user.licenseId;
+            delete req.user.licenseStatus;
+            delete req.user.licenseOwnerId;
+            delete req.user.paymentType;
+            return Util.updateSession(req);
+        })
+        .then(function(status){
+            if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
                 return;
             }
@@ -1493,6 +1538,7 @@ function setLicenseMapStatusToNull(req, res){
             delete req.user.licenseStatus;
             delete req.user.licenseId;
             delete req.user.licenseOwnerId;
+            delete req.user.paymentType;
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -2022,12 +2068,17 @@ function _createSubscription(req, userId, stripeInfo, planInfo){
             .then(function(licenseMaps){
                 var status = false;
                 licenseMaps.some(function(map){
-                    if(map.status === "po-pending"){
-                        status = map.status;
+                    if(map.status !== null){
+                        if(map.status === "po-pending"){
+                            status = map.status;
+                            return true;
+                        }
+                        status = "already on a license";
                         return true;
                     }
+
                 });
-                if(status){
+                if(!!status){
                     return status;
                 }
                 return _carryOutStripeTransaction.call(this, userId, email, name, stripeInfo, planInfo);
@@ -2567,6 +2618,10 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                         emailData.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
                         emailData.teacherFirstName = user["FIRST_NAME"];
                         emailData.teacherLastName = user["LAST_NAME"];
+                        if(emailData.teacherFirstName === "temp" && emailData.teacherLastName === "temp"){
+                            emailData.teacherFirstName = user["EMAIL"];
+                            delete emailData.teacherLastName;
+                        }
                     }
                 });
                 var emails = [licenseOwnerEmail,teacherEmail];
@@ -2688,7 +2743,7 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
     }.bind(this));
 }
 
-function _addTeachersEmailResponse(ownerName, approvedUsers, approvedNonUsers, plan, seatsTier, protocol, host){
+function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, plan, seatsTier, protocol, host){
     var data;
     var email;
     var usersTemplate = "educator-user-invited";
@@ -2697,9 +2752,15 @@ function _addTeachersEmailResponse(ownerName, approvedUsers, approvedNonUsers, p
         data = {};
         data.subject = "You’ve Been Invited!";
         data.ownerName = ownerName;
+        data.ownerFirstName = ownerFirstName;
+        data.ownerLastName = ownerLastName;
         data.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
         data.teacherFirstName = user["FIRST_NAME"];
         data.teacherLastName = user["LAST_NAME"];
+        if(data.teacherFirstName === "temp" && data.teacherLastName === "temp"){
+            data.teacherFirstName = user["EMAIL"];
+            delete data.teacherLastName;
+        }
         data.plan = plan;
         data.seats = seatsTier;
 
