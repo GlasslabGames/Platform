@@ -4,6 +4,7 @@
  */
 
 module.exports = {
+    role: {admin: "admin"},
     licenseCodeTypes: {
         'GL-SC-001': 'SimCityEDU Single License',
         'GL-SC-007': 'SimCityEDU Lab/Family Pack',

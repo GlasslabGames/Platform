@@ -300,7 +300,7 @@ Lic_MySQL.prototype.getUsersByEmail = function(emails){
 
 Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
     return when.promise(function(resolve, reject){
-        var Q = "INSERT INTO glasslab_dev.GL_USER (email,username,version,date_created,enabled,first_name,last_name,last_updated," +
+        var Q = "INSERT INTO GL_USER (email,username,version,date_created,enabled,first_name,last_name,last_updated," +
             "password,system_role,collect_telemetry,login_type,verify_code_status) VALUES ";
         var values = [];
         emails.forEach(function(email){
