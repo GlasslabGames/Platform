@@ -515,6 +515,11 @@ function upgradeLicense(req, res){
             }
             emailData.oldPlan = license["package_type"];
             emailData.oldSeats = license["package_size_tier"];
+            emailData.newPlan = planInfo.type;
+            emailData.newSeats = planInfo.seats;
+            if(lConst.seats[emailData.oldSeats].studentSeats > lConst.seats[emailData.newSeats].studentSeats){
+                return "downgrade seats";
+            }
             var subscriptionId = license["subscription_id"];
             var autoRenew = license["auto_renew"] > 0;
             var params = _buildStripeParams(planInfo, customerId, stripeInfo);
@@ -559,6 +564,10 @@ function upgradeLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
                 return;
             }
+            if(status === "downgrade seats"){
+                this.requestUtil.errorResponse(res, { key: "lic.upgrade.invalid"});
+                return;
+            }
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
@@ -568,8 +577,6 @@ function upgradeLicense(req, res){
             emailData.ownerName = req.user.firstName + " " + req.user.lastName;
             emailData.ownerFirstName = req.user.firstName;
             emailData.ownerLastName = req.user.lastName;
-            emailData.newPlan = planInfo.type;
-            emailData.newSeats = planInfo.seats;
             _upgradeLicenseEmailResponse.call(this, licenseOwnerEmail, instructors, emailData, req.protocol, req.headers.host);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
@@ -1616,6 +1623,9 @@ function rejectPurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
+            if(purchaseOrder.status !== "pending" && purchaseOrder.status !== "received"){
+                return "cannot reject";
+            }
             var purchaseOrderId = purchaseOrder.id;
             licenseId = purchaseOrder["license_id"];
             userId = purchaseOrder["user_id"];
@@ -1636,6 +1646,11 @@ function rejectPurchaseOrder(req, res){
         .then(function(results){
             if(results === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.general"});
+                return;
+            }
+            if(results === "cannot approve"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
+                return;
             }
             // proper email response, depending on circumstance
             var ownerData = results[0];
@@ -1686,6 +1701,9 @@ function receivePurchaseOrder(req, res){
             }
             if(purchaseOrder.status === "received"){
                 return "already received";
+            }
+            if(purchaseOrder.status !== "pending"){
+                return "cannot receive";
             }
             purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
@@ -1752,6 +1770,10 @@ function receivePurchaseOrder(req, res){
             }
             if(results === "already received"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.received.already"});
+                return;
+            }
+            if(results === "cannot receive"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
                 return;
             }
             var ownerData = results[0];
@@ -1910,6 +1932,9 @@ function approvePurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
+            if(purchaseOrder.status !== "received"){
+                return "cannot approve";
+            }
             var purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
             billingName = purchaseOrder.name;
@@ -1932,6 +1957,10 @@ function approvePurchaseOrder(req, res){
         .then(function(results){
             if(results === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            if(results === "cannot approve"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
                 return;
             }
             var ownerData = results[0];
