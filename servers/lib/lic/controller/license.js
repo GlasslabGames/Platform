@@ -304,6 +304,22 @@ function updateBillingInfo(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Update Billing Info Error -",err);
+            if(err.code === "card_declined"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
+                return;
+            }
+            if(err.code === "incorrect_cvc"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
+                return;
+            }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -375,9 +391,18 @@ function subscribeToLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
                 return;
             }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
+
 function subscribeToTrialLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -448,14 +473,6 @@ function subscribeToTrialLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe To Trial License Error -",err);
-            if(err.code === "card_declined"){
-                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
-                return;
-            }
-            if(err.code === "incorrect_cvc"){
-                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
-                return;
-            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -566,6 +583,14 @@ function upgradeLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
                 return;
             }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -640,6 +665,22 @@ function upgradeTrialLicense(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Upgrade Trial License Error -",err);
+            if(err.code === "card_declined"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
+                return;
+            }
+            if(err.code === "incorrect_cvc"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.cvc.incorrect"});
+                return;
+            }
+            if(err.code === "expired_card"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.expired"});
+                return;
+            }
+            if(err.code === "processing_error"){
+                this.requestUtil.errorResponse(res, { key: "lic.card.processing.error"});
+                return;
+            }
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1307,7 +1348,6 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     return values;
 }
 
-// highly similar to subscribe
 function upgradeTrialLicensePurchaseOrder(req, res){
     // do subscribe purchase order stuff
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
@@ -1491,16 +1531,6 @@ function cancelActivePurchaseOrder(req, res){
         })
         .then(function(status){
             if(status === "no active order"){
-                return status;
-            }
-            delete req.user.licenseId;
-            delete req.user.licenseStatus;
-            delete req.user.licenseOwnerId;
-            delete req.user.paymentType;
-            return Util.updateSession(req);
-        })
-        .then(function(status){
-            if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
                 return;
             }
@@ -1553,7 +1583,6 @@ function setLicenseMapStatusToNull(req, res){
         }.bind(this));
 }
 
-// next in line
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
@@ -1661,7 +1690,6 @@ function receivePurchaseOrder(req, res){
             licenseId = purchaseOrder["license_id"];
             billingName = purchaseOrder["name"];
             action = purchaseOrder["action"];
-            payment = purchaseOrder["payment"];
             purchaseOrderInfo.action = action;
             if(action !== "upgrade"){
                 var date = new Date(Date.now());
@@ -1687,11 +1715,12 @@ function receivePurchaseOrder(req, res){
             if(action === "trial upgrade"){
                 return _receivedTrialUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, expirationDate);
             }
-            if(action === "upgrade"){
-                // problem: if we let them upgrade, but then payment does not go through, how do we know what their old plan was?
-                //put info in purchase order table
-                return _receivedUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, purchaseOrderId);
-            }
+            // not currently supported
+            //if(action === "upgrade"){
+            //    // problem: if we let them upgrade, but then payment does not go through, how do we know what their old plan was?
+            //    //put info in purchase order table
+            //    return _receivedUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, purchaseOrderId);
+            //}
             // need to make renew eventually
             //if(action === "renew"){
             //    return _receivedRenewPurchaseOrder.call(this);

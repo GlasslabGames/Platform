@@ -134,5 +134,7 @@ module.exports = {
     "lic.order.received.already":           "This purchase order has already been marked as received by our system",
     "lic.card.declined":                    "Your card was declined.",
     "lic.card.cvc.incorrect":               "Your card's security code is incorrect.",
-    "lic.access.invited":                   "You are already invited to another license.  Log out and log in again to join."
+    "lic.access.invited":                   "You are already invited to another license.  Log out and log in again to join.",
+    "lic.card.expired":                     "Your card has expired.",
+    "lic.card.processing.error":            "An error occurred while processing your card.  Try again in a little bit."
 };

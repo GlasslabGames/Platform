@@ -194,7 +194,7 @@ Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
                 reject(err);
             }.bind(this));
     }.bind(this));
-}
+};
 
 Lic_MySQL.prototype.userHasLicenseMap = function(userId){
     return when.promise(function(resolve, reject){
