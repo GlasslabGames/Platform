@@ -1531,16 +1531,6 @@ function cancelActivePurchaseOrder(req, res){
         })
         .then(function(status){
             if(status === "no active order"){
-                return status;
-            }
-            delete req.user.licenseId;
-            delete req.user.licenseStatus;
-            delete req.user.licenseOwnerId;
-            delete req.user.paymentType;
-            return Util.updateSession(req);
-        })
-        .then(function(status){
-            if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
                 return;
             }
@@ -1700,7 +1690,6 @@ function receivePurchaseOrder(req, res){
             licenseId = purchaseOrder["license_id"];
             billingName = purchaseOrder["name"];
             action = purchaseOrder["action"];
-            payment = purchaseOrder["payment"];
             purchaseOrderInfo.action = action;
             if(action !== "upgrade"){
                 var date = new Date(Date.now());
@@ -1726,11 +1715,12 @@ function receivePurchaseOrder(req, res){
             if(action === "trial upgrade"){
                 return _receivedTrialUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, expirationDate);
             }
-            if(action === "upgrade"){
-                // problem: if we let them upgrade, but then payment does not go through, how do we know what their old plan was?
-                //put info in purchase order table
-                return _receivedUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, purchaseOrderId);
-            }
+            // not currently supported
+            //if(action === "upgrade"){
+            //    // problem: if we let them upgrade, but then payment does not go through, how do we know what their old plan was?
+            //    //put info in purchase order table
+            //    return _receivedUpgradePurchaseOrder.call(this, userId, licenseId, planInfo, purchaseOrderId);
+            //}
             // need to make renew eventually
             //if(action === "renew"){
             //    return _receivedRenewPurchaseOrder.call(this);
