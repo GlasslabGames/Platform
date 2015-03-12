@@ -1444,6 +1444,16 @@ function cancelActivePurchaseOrder(req, res){
 
             return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false, "cancel");
         }.bind(this))
+        .then(function (status) {
+            if (status === "no active order") {
+                return status;
+            }
+            delete req.user.licenseId;
+            delete req.user.licenseStatus;
+            delete req.user.licenseOwnerId;
+            delete req.user.paymentType;
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
@@ -1605,13 +1615,13 @@ function receivePurchaseOrder(req, res){
             licenseId = purchaseOrder["license_id"];
             billingName = purchaseOrder["name"];
             action = purchaseOrder["action"];
+            payment = purchaseOrder["payment"];
             purchaseOrderInfo.action = action;
             if(action !== "upgrade"){
                 var date = new Date(Date.now());
                 date.setFullYear(date.getFullYear()+1);
                 expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
             }
-
             var updateFields = [];
             var status = "status = 'received'";
             updateFields.push(status);
@@ -1916,7 +1926,7 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
                 var purchaseOrderIdString = "purchase_order_id = NULL";
                 var licenseUpdateFields = [active, purchaseOrderIdString];
                 var licenseMapStatus;
-                if(status = "rejected"){
+                if(status === "rejected"){
                     licenseMapStatus = "status = 'po-rejected'";
                 } else{
                     licenseMapStatus = "status = NULL";
