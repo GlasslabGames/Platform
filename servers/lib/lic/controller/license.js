@@ -1437,6 +1437,16 @@ function cancelActivePurchaseOrder(req, res){
 
             return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false, "cancel");
         }.bind(this))
+        .then(function (status) {
+            if (status === "no active order") {
+                return status;
+            }
+            delete req.user.licenseId;
+            delete req.user.licenseStatus;
+            delete req.user.licenseOwnerId;
+            delete req.user.paymentType;
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
