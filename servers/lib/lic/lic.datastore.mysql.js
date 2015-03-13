@@ -170,7 +170,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
 Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     return when.promise(function(resolve, reject){
         var userIdsString = userIds.join(",");
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending','po-received','po-rejected') and user_id in (" + userIdsString + ");";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending', 'po-pending', 'po-received','po-rejected') and user_id in (" + userIdsString + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -512,6 +512,20 @@ Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
             })
             .then(null, function(err){
                 console.error("Get Purchase Order By Purchase Order Key Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getPurchaseOrderById = function(purchaseOrderId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE id = " + purchaseOrderId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]);
+            })
+            .then(null, function(err){
+                console.error("Get Purchase Order By Id Error -",err);
                 reject(err);
             });
     }.bind(this));

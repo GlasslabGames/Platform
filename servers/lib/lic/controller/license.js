@@ -515,6 +515,11 @@ function upgradeLicense(req, res){
             }
             emailData.oldPlan = license["package_type"];
             emailData.oldSeats = license["package_size_tier"];
+            emailData.newPlan = planInfo.type;
+            emailData.newSeats = planInfo.seats;
+            if(lConst.seats[emailData.oldSeats].studentSeats > lConst.seats[emailData.newSeats].studentSeats){
+                return "downgrade seats";
+            }
             var subscriptionId = license["subscription_id"];
             var autoRenew = license["auto_renew"] > 0;
             var params = _buildStripeParams(planInfo, customerId, stripeInfo);
@@ -559,6 +564,10 @@ function upgradeLicense(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
                 return;
             }
+            if(status === "downgrade seats"){
+                this.requestUtil.errorResponse(res, { key: "lic.upgrade.invalid"});
+                return;
+            }
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
@@ -568,8 +577,6 @@ function upgradeLicense(req, res){
             emailData.ownerName = req.user.firstName + " " + req.user.lastName;
             emailData.ownerFirstName = req.user.firstName;
             emailData.ownerLastName = req.user.lastName;
-            emailData.newPlan = planInfo.type;
-            emailData.newSeats = planInfo.seats;
             _upgradeLicenseEmailResponse.call(this, licenseOwnerEmail, instructors, emailData, req.protocol, req.headers.host);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
@@ -1198,11 +1205,25 @@ function subscribeToLicensePurchaseOrder(req, res){
     var action = "subscribe";
 
    _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
+       .then(function(licenseId){
+           if(typeof licenseId === "string"){
+               return licenseId;
+           }
+           req.user.licenseId = licenseId;
+           req.user.licenseStatus = "po-pending";
+           req.user.licenseOwnerId = userId;
+           req.user.paymentType = "purchase-order";
+           return Util.updateSession(req);
+       })
         .then(function(status){
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
                 return;
             }
+           if(status === "already on license"){
+               this.requestUtil.errorResponse(res, { key: "lic.create.denied"});
+               return;
+           }
             //email + conclusion stuff, go to dashboard
            // email here goes to accounting/mat
            // for now, i will send it to the billing email
@@ -1261,6 +1282,12 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                         status = license.status;
                         return true;
                     }
+                    if(action === "trial upgrade" && license.status !== null && license.status !== "active"){
+                        status = "already on license";
+                    }
+                    if(action === "subscribe" && license.status !== null){
+                        status = "already on license";
+                    }
                 });
                 if(status){
                     return status;
@@ -1268,7 +1295,8 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                 var params = {
                     metadata: {
                         purchaseOrder: true
-                    }
+                    },
+                    email: purchaseOrderInfo.email
                 };
                 return _createStripeCustomer.call(this, userId, params);
             }.bind(this))
@@ -1309,7 +1337,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                     resolve(status);
                     return;
                 }
-                resolve();
+                resolve(licenseId);
             })
             .then(null, function(err){
                 console.error("Purchase Order Subscribe Error -",err);
@@ -1326,8 +1354,9 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     values.push(status);
     var purchaseOrderNumber = "NULL";
     values.push(purchaseOrderNumber);
-    var purchaseOrderKey = "'" + Util.CreateUUID() + "'";
+    var purchaseOrderKey = Util.CreateUUID();
     purchaseOrderInfo.key = purchaseOrderKey;
+    purchaseOrderKey = "'" + purchaseOrderKey + "'";
     values.push(purchaseOrderKey);
     var phone = "'" + purchaseOrderInfo.phone + "'";
     values.push(phone);
@@ -1335,13 +1364,18 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     values.push(email);
     var name;
     if(purchaseOrderInfo.lastName){
-        name = "'" + purchaseOrderInfo.firstName + " " + purchaseOrderInfo.lastName + "'";
+        name = purchaseOrderInfo.firstName + " " + purchaseOrderInfo.lastName;
     } else{
-        name = "'" + purchaseOrderInfo.firstName + "'";
+        name = purchaseOrderInfo.firstName;
     }
     purchaseOrderInfo.name = name;
+    name = "'" + name + "'";
     values.push(name);
-    var payment = parseInt(purchaseOrderInfo.payment);
+    var payment = "" + purchaseOrderInfo.payment;
+    if(payment.indexOf(".") === -1){
+        payment = purchaseOrderInfo.payment + ".00";
+    }
+    payment = "'" + payment + "'";
     values.push(payment);
     action = "'" + action + "'";
     values.push(action);
@@ -1364,9 +1398,23 @@ function upgradeTrialLicensePurchaseOrder(req, res){
     var action = "trial upgrade";
 
     _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
+        .then(function(licenseId){
+            if(typeof licenseId === "string"){
+                return licenseId;
+            }
+            req.user.licenseId = licenseId;
+            req.user.licenseStatus = "po-pending";
+            req.user.licenseOwnerId = userId;
+            req.user.paymentType = "purchase-order";
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
+                return;
+            }
+            if(status === "already on license"){
+                this.requestUtil.errorResponse(res, { key: "lic.create.denied" });
                 return;
             }
             //email + conclusion stuff, go to dashboard
@@ -1476,22 +1524,31 @@ function getActivePurchaseOrderInfo(req, res){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
-    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
     // get name, phone, email, and license status from purchase_order table
-    this.myds.getActivePurchaseOrderByUserId(userId)
-        .then(function(purchaseOrders){
-            if(!purchaseOrders === "no active order"){
+    this.myds.getLicenseById(licenseId)
+        .then(function(results){
+            var license = results[0];
+            var purchaseOrderId = license["purchase_order_id"];
+            if(purchaseOrderId === null){
+                return "no purchase order";
+            }
+            return this.myds.getPurchaseOrderById(purchaseOrderId);
+        }.bind(this))
+        .then(function(purchaseOrder){
+            if(!purchaseOrder || purchaseOrder === "no purchase order"){
                 this.requestUtil.errorResponse(res, {key: "lic.order.absent"});
+                return;
             }
             var output = {};
-            output.name = purchaseOrders.name;
-            output.phone = purchaseOrders.phone;
-            output.email = purchaseOrders.email;
-            if (purchaseOrders.status === 'pending') {
+            output.name = purchaseOrder.name;
+            output.phone = purchaseOrder.phone;
+            output.email = purchaseOrder.email;
+            if (purchaseOrder.status === 'pending') {
                 output.status = 1;
-            } else if (purchaseOrders.status === 'received' || purchaseOrders.status === 'rejected') {
+            } else if (purchaseOrder.status === 'received' || purchaseOrders.status === 'rejected') {
                 output.status = 2;
-            } else if (purchaseOrders.status === 'approved') {
+            } else if (purchaseOrder.status === 'approved') {
                 output.status = 3;
             }
 
@@ -1515,12 +1572,15 @@ function cancelActivePurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
+            if(purchaseOrder.status !== "pending"){
+                return "invalid cancel";
+            }
             var purchaseOrderId = purchaseOrder.id;
 
             return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false, "cancel");
         }.bind(this))
         .then(function (status) {
-            if (status === "no active order") {
+            if (typeof status === "string") {
                 return status;
             }
             delete req.user.licenseId;
@@ -1532,6 +1592,10 @@ function cancelActivePurchaseOrder(req, res){
         .then(function(status){
             if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            if(status === "invalid cancel"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.processing"});
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: "ok"});
@@ -1613,6 +1677,9 @@ function rejectPurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
+            if(purchaseOrder.status !== "pending" && purchaseOrder.status !== "received"){
+                return "cannot reject";
+            }
             var purchaseOrderId = purchaseOrder.id;
             licenseId = purchaseOrder["license_id"];
             userId = purchaseOrder["user_id"];
@@ -1624,7 +1691,7 @@ function rejectPurchaseOrder(req, res){
             return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber, action);
         }.bind(this))
         .then(function(status){
-            if(status === "no active order"){
+            if(typeof status === "string"){
                 return status;
             }
             var subject = "Please Check Your Purchase Order";
@@ -1633,6 +1700,11 @@ function rejectPurchaseOrder(req, res){
         .then(function(results){
             if(results === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.general"});
+                return;
+            }
+            if(results === "cannot approve"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
+                return;
             }
             // proper email response, depending on circumstance
             var ownerData = results[0];
@@ -1664,7 +1736,7 @@ function receivePurchaseOrder(req, res){
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var purchaseOrderNumber = purchaseOrderInfo.number;
     var purchaseOrderKey = purchaseOrderInfo.key;
-    var payment = purchaseOrderInfo.payment;
+    var payment = purchaseOrderInfo.amount;
     var planInfo = req.body.planInfo;
 
     var licenseId;
@@ -1684,6 +1756,9 @@ function receivePurchaseOrder(req, res){
             if(purchaseOrder.status === "received"){
                 return "already received";
             }
+            if(purchaseOrder.status !== "pending"){
+                return "cannot receive";
+            }
             purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
             userId = purchaseOrder["user_id"];
@@ -1701,7 +1776,7 @@ function receivePurchaseOrder(req, res){
             updateFields.push(status);
             var number = "purchase_order_number = '" + purchaseOrderNumber + "'";
             updateFields.push(number);
-            var paymentAmount = "payment = " + payment;
+            var paymentAmount = "payment = '" + payment + "'";
             updateFields.push(paymentAmount);
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
@@ -1749,6 +1824,10 @@ function receivePurchaseOrder(req, res){
             }
             if(results === "already received"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.received.already"});
+                return;
+            }
+            if(results === "cannot receive"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
                 return;
             }
             var ownerData = results[0];
@@ -1907,6 +1986,9 @@ function approvePurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
+            if(purchaseOrder.status !== "received"){
+                return "cannot approve";
+            }
             var purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
             billingName = purchaseOrder.name;
@@ -1920,7 +2002,7 @@ function approvePurchaseOrder(req, res){
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
         .then(function(status){
-            if(status === "no active order"){
+            if(typeof status === "string"){
                 return status;
             }
             var subject = "Your Purchase Order has Been Approved";
@@ -1929,6 +2011,10 @@ function approvePurchaseOrder(req, res){
         .then(function(results){
             if(results === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            if(results === "cannot approve"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
                 return;
             }
             var ownerData = results[0];

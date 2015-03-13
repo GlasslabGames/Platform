@@ -136,5 +136,8 @@ module.exports = {
     "lic.card.cvc.incorrect":               "Your card's security code is incorrect.",
     "lic.access.invited":                   "You are already invited to another license.  Log out and log in again to join.",
     "lic.card.expired":                     "Your card has expired.",
-    "lic.card.processing.error":            "An error occurred while processing your card.  Try again in a little bit."
+    "lic.card.processing.error":            "An error occurred while processing your card.  Try again in a little bit.",
+    "lic.order.action.denied":              "This action cannot be done for this purchase order.  Check the purchase order table.",
+    "lic.upgrade.invalid":                  "You cannot decrease student seats in an upgrade",
+    "lic.order.processing":                 "Your purchase order is being processed.  Please reach out to our billing department if you would like to alter it."
 };
