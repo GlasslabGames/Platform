@@ -1205,6 +1205,16 @@ function subscribeToLicensePurchaseOrder(req, res){
     var action = "subscribe";
 
    _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
+       .then(function(licenseId){
+           if(typeof licenseId === "string"){
+               return licenseId;
+           }
+           req.user.licenseId = licenseId;
+           req.user.licenseStatus = "po-pending";
+           req.user.licenseOwnerId = userId;
+           req.user.paymentType = "purchase-order";
+           return Util.updateSession(req);
+       })
         .then(function(status){
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
@@ -1327,7 +1337,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                     resolve(status);
                     return;
                 }
-                resolve();
+                resolve(licenseId);
             })
             .then(null, function(err){
                 console.error("Purchase Order Subscribe Error -",err);
@@ -1361,13 +1371,11 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     purchaseOrderInfo.name = name;
     name = "'" + name + "'";
     values.push(name);
-    var payment = "'" + purchaseOrderInfo.payment;
+    var payment = "" + purchaseOrderInfo.payment;
     if(payment.indexOf(".") === -1){
-        payment = purchaseOrderInfo.payment + ".00'";
-    } else{
-        payment = purchaseOrderInfo.payment + "'";
+        payment = purchaseOrderInfo.payment + ".00";
     }
-
+    payment = "'" + payment + "'";
     values.push(payment);
     action = "'" + action + "'";
     values.push(action);
@@ -1390,6 +1398,16 @@ function upgradeTrialLicensePurchaseOrder(req, res){
     var action = "trial upgrade";
 
     _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
+        .then(function(licenseId){
+            if(typeof licenseId === "string"){
+                return licenseId;
+            }
+            req.user.licenseId = licenseId;
+            req.user.licenseStatus = "po-pending";
+            req.user.licenseOwnerId = userId;
+            req.user.paymentType = "purchase-order";
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
@@ -1520,6 +1538,7 @@ function getActivePurchaseOrderInfo(req, res){
         .then(function(purchaseOrder){
             if(!purchaseOrder || purchaseOrder === "no purchase order"){
                 this.requestUtil.errorResponse(res, {key: "lic.order.absent"});
+                return;
             }
             var output = {};
             output.name = purchaseOrder.name;
