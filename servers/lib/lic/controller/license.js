@@ -1210,6 +1210,10 @@ function subscribeToLicensePurchaseOrder(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
                 return;
             }
+           if(status === "already on license"){
+               this.requestUtil.errorResponse(res, { key: "lic.create.denied"});
+               return;
+           }
             //email + conclusion stuff, go to dashboard
            // email here goes to accounting/mat
            // for now, i will send it to the billing email
@@ -1267,6 +1271,12 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                     if(license.status === "po-pending"){
                         status = license.status;
                         return true;
+                    }
+                    if(action === "trial upgrade" && license.status !== null && license.status !== "active"){
+                        status = "already on license";
+                    }
+                    if(action === "subscribe" && license.status !== null){
+                        status = "already on license";
                     }
                 });
                 if(status){
@@ -1351,7 +1361,13 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     purchaseOrderInfo.name = name;
     name = "'" + name + "'";
     values.push(name);
-    var payment = parseInt(purchaseOrderInfo.payment);
+    var payment = "'" + purchaseOrderInfo.payment;
+    if(payment.indexOf(".") === -1){
+        payment = purchaseOrderInfo.payment + ".00'";
+    } else{
+        payment = purchaseOrderInfo.payment + "'";
+    }
+
     values.push(payment);
     action = "'" + action + "'";
     values.push(action);
@@ -1377,6 +1393,10 @@ function upgradeTrialLicensePurchaseOrder(req, res){
         .then(function(status){
             if(status === "po-pending"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
+                return;
+            }
+            if(status === "already on license"){
+                this.requestUtil.errorResponse(res, { key: "lic.create.denied" });
                 return;
             }
             //email + conclusion stuff, go to dashboard
@@ -1486,22 +1506,30 @@ function getActivePurchaseOrderInfo(req, res){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
-    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
     // get name, phone, email, and license status from purchase_order table
-    this.myds.getActivePurchaseOrderByUserId(userId)
-        .then(function(purchaseOrders){
-            if(!purchaseOrders === "no active order"){
+    this.myds.getLicenseById(licenseId)
+        .then(function(results){
+            var license = results[0];
+            var purchaseOrderId = license["purchase_order_id"];
+            if(purchaseOrderId === null){
+                return "no purchase order";
+            }
+            return this.myds.getPurchaseOrderById(purchaseOrderId);
+        }.bind(this))
+        .then(function(purchaseOrder){
+            if(!purchaseOrder || purchaseOrder === "no purchase order"){
                 this.requestUtil.errorResponse(res, {key: "lic.order.absent"});
             }
             var output = {};
-            output.name = purchaseOrders.name;
-            output.phone = purchaseOrders.phone;
-            output.email = purchaseOrders.email;
-            if (purchaseOrders.status === 'pending') {
+            output.name = purchaseOrder.name;
+            output.phone = purchaseOrder.phone;
+            output.email = purchaseOrder.email;
+            if (purchaseOrder.status === 'pending') {
                 output.status = 1;
-            } else if (purchaseOrders.status === 'received' || purchaseOrders.status === 'rejected') {
+            } else if (purchaseOrder.status === 'received' || purchaseOrders.status === 'rejected') {
                 output.status = 2;
-            } else if (purchaseOrders.status === 'approved') {
+            } else if (purchaseOrder.status === 'approved') {
                 output.status = 3;
             }
 
@@ -1525,12 +1553,15 @@ function cancelActivePurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
+            if(purchaseOrder.status !== "pending"){
+                return "invalid cancel";
+            }
             var purchaseOrderId = purchaseOrder.id;
 
             return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false, "cancel");
         }.bind(this))
         .then(function (status) {
-            if (status === "no active order") {
+            if (typeof status === "string") {
                 return status;
             }
             delete req.user.licenseId;
@@ -1542,6 +1573,10 @@ function cancelActivePurchaseOrder(req, res){
         .then(function(status){
             if(status === "no active order"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            if(status === "invalid cancel"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.processing"});
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: "ok"});
@@ -1637,7 +1672,7 @@ function rejectPurchaseOrder(req, res){
             return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber, action);
         }.bind(this))
         .then(function(status){
-            if(status === "no active order"){
+            if(typeof status === "string"){
                 return status;
             }
             var subject = "Please Check Your Purchase Order";
@@ -1722,7 +1757,7 @@ function receivePurchaseOrder(req, res){
             updateFields.push(status);
             var number = "purchase_order_number = '" + purchaseOrderNumber + "'";
             updateFields.push(number);
-            var paymentAmount = "payment = " + payment;
+            var paymentAmount = "payment = '" + payment + "'";
             updateFields.push(paymentAmount);
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
@@ -1948,7 +1983,7 @@ function approvePurchaseOrder(req, res){
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
         .then(function(status){
-            if(status === "no active order"){
+            if(typeof status === "string"){
                 return status;
             }
             var subject = "Your Purchase Order has Been Approved";

@@ -517,6 +517,20 @@ Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getPurchaseOrderById = function(purchaseOrderId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE id = " + purchaseOrderId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]);
+            })
+            .then(null, function(err){
+                console.error("Get Purchase Order By Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.updatePurchaseOrderById = function(purchaseOrderId, updateFields){
     return when.promise(function(resolve, reject){
         var updateFieldsString = updateFields.join(",");
