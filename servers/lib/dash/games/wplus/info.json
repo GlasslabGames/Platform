@@ -2,7 +2,7 @@
     "basic": {
         "gameId": "WPLUS",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Water Bears EDU",
         "longName": "Water Bears EDU",
