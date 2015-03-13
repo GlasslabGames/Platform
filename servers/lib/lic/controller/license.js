@@ -1330,7 +1330,10 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                 //update license table with po id
                 purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
                 var updateFields = [purchaseOrderId];
-                return this.myds.updateLicenseById(licenseId, updateFields);
+                var promiseList = [];
+                promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
+                promiseList.push(this.cbds.createLicenseStudentObject(licenseId));
+                return when.all(promiseList);
             }.bind(this))
             .then(function(status){
                 if(typeof status === "string"){
