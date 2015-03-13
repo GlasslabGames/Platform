@@ -216,7 +216,7 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
         var Q = "SELECT u.id,u.first_name as firstName,u.last_name as lastName,u.email,lm.status FROM GL_USER as u\n" +
             "JOIN GL_LICENSE_MAP as lm\n" +
             "ON lm.user_id = u.id\n" +
-            "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending');";
+            "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending','po-received','po-pending');";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
