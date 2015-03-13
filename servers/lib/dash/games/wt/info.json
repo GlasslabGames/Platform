@@ -9,8 +9,8 @@
         "grades": "2 - 7",
         "subject": "Math",
         "type": "App",
-        "release": "dev",
-        "releaseDate": "TBD",
+        "release": "live",
+        "releaseDate": "March 13, 2015",
         "platform": {
             "type": "iPad",
             "icon": {
@@ -18,7 +18,7 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "price": "Coming Soon",
+        "price": "Free",
         "shortDescription": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
         "description": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
         "developer": {
@@ -236,6 +236,7 @@
                 "id": "product",
                 "title": "Product Description",
                 "about": "Wuzzit Trouble is a seemingly simple game that will challenge and engage your students – and even you – like never before! While saving the trapped Wuzzits, your students will engage in completing complex performance tasks that aren’t just aligned to the Common Core, but that develop number sense and the ability to use mathematics as a problem-solving language. Featuring a casual game look and feel, don’t be surprised if your students start playing at home, too!",
+                "video": "http://youtu.be/a4C9dqDfRLE",
                 "curriculum": [
                     "Addresses Common Core Operations & Algebraic Thinking, Number & Operations in Base Ten and Standards for Mathematical Practice",
                     "Simultaneously addresses and calls upon multiple Common Core standards, just as mathematical thinking is used in the real world",
@@ -351,6 +352,28 @@
                                         "description": "Find and position integers and other rational numbers on a horizontal or vertical number line diagram; find and position pairs of integers and other rational numbers on a coordinate plane."
                                     }
                                 ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans and Guides",
+                "list": [
+                    {
+                        "category": "Lesson Plans and Guides",
+                        "list": [
+                            {
+                                "name": "Teacher's Guide",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WT/guides/WT_Introductory_Instructional_Guide_GLedit.pdf"
+                            },
+                            {
+                                "name": "Lesson Plans",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WT/guides/WT_Formative_Assessment_Lesson_Plan_edits.pdf"
                             }
                         ]
                     }

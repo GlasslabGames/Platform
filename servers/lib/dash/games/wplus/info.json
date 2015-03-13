@@ -28,7 +28,7 @@
                 "small": "assets/dev-logo-schellgames.png",
                 "large": "assets/dev-logo-schellgames@2x.png"
             },
-            "description": ""
+            "description": "Schell Games is a full-service game design and development company, which specializes in creating transformational games and innovative, interactive experiences. Founded in 2002 by world-class game designer and esteemed author Jesse Schell and located in Pittsburgh, we are the largest game studio in Pennsylvania and one of the biggest independent game studios in the country. The company crafts transformational games, or games that change people for the better. Not only do our games educate players and advocate for change, but they are fun! Our team of highly talented artists, programmers, producers and game designers is adept at creating these transformative experiences for some of the world’s most respected companies. Projects in our vast portfolio include mobile, PC, online, console, hand-held, casual and social games; interactive installations and theme park attractions; connected toys and virtual worlds."
         },
         "settings": {
             "canCreateMatches": false
@@ -182,27 +182,85 @@
                                 {
                                     "id": "wo1",
                                     "title": "Stuck on Pack 1",
-                                    "description": "Student has spent an irregular amount of time on a pack 1 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 1 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo2",
                                     "title": "Stuck on Pack 2",
-                                    "description": "Student has spent an irregular amount of time on a pack 2 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 2 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo3",
                                     "title": "Stuck on Pack 3",
-                                    "description": "Student has spent an irregular amount of time on a pack 3 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 3 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo4",
                                     "title": "Stuck on Pack 4",
-                                    "description": "Student has spent an irregular amount of time on a pack 4 level. Consider looking into it."
+                                    "description": "Student has spent an irregular amount of time on a pack 4 level. Consider looking into it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
+                                        "actionPoints":
+                                            [
+                                                "Color and number of Water Bears",
+                                                "How can they create those colors with the given water flows?",
+                                                "Where are the Water Bears?",
+                                                "How can they reach the Water Bears with the given pieces?"
+                                            ],
+                                        "summary": ""
+                                    }
                                 },
                                 {
                                     "id": "wo5",
                                     "title": "Avoiding Challenges",
-                                    "description": "Student is doing great on the base levels, but they haven't completed any challenges yet. Encourage them to try one!"
+                                    "description": "Student is doing great on the base levels, but they haven't completed any challenges yet. Encourage them to try one!",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student why they haven't tried any challenge levels yet. It's possible that they have tried one but were unable to finish it.",
+                                        "actionPoints":
+                                            [
+                                                "Encourage them to try the first challenge level of Pack 1, and help them analyze the level if necessary",
+                                                "Remind them that they can jump around challenge levels, so they can try different ones until they find one  they like"
+                                            ],
+                                        "summary": ""
+                                    }
                                 }
                             ]
                         }
@@ -221,7 +279,7 @@
                 "title": "Product Description",
                 "header": "About the Game",
                 "about": "Water Bears EDU is a 3D puzzle game that requires students to use spatial reasoning and color-mixing skills to redirect water through pipes in a grid-based environment. The end goal of each puzzle is to fill each water bear’s bubble with the correct color water. Each puzzle has been designed to give students hands-on experience with different Systems Thinking concepts, such as identifying interconnections, using leverage points, and managing limited resources. Some puzzles introduce game mechanics or Systems Thinking concepts, while others provide engaging challenges that help students develop deeper problem-solving skills.<br /><br />After working with systems in the game, students have the tools to participate in meaningful classroom discussions about Systems Thinking concepts that can be difficult to grasp without concrete experience. This guide includes lesson plans that give an introduction to Systems Thinking in the context of Next Generation Science Standards, as well as provides a framework to customize lesson plans to suit the needs of different classrooms and students.",
-                "video": "",
+                "video": "https://vimeo.com/121799097",
                 "brochure": "",
                 "curriculum": [
                     "Allows students to apply Systems Thinking concepts while exercising problem-solving skills",
@@ -230,23 +288,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_1.jpg"
+                        "url": "assets/WPLUS-carousel_1.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_2.jpg"
+                        "url": "assets/WPLUS-carousel_2.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_3.jpg"
+                        "url": "assets/WPLUS-carousel_3.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_4.jpg"
+                        "url": "assets/WPLUS-carousel_4.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_5.jpg"
+                        "url": "assets/WPLUS-carousel_5.png"
                     }
                 ]
             },
@@ -345,7 +403,15 @@
                         "list": [
                             {
                                 "name": "Teacher's Guide",
-                                "link": "http://watersfoundation.org/systems-thinking/what/"
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WPLUS/guides/WaterBearsTeachersGuide_NGSS.pdf"
+                            },
+                            {
+                                "name": "Puzzle Guide",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WPLUS/guides/PuzzleGuideForTeachers.pdf"
+                            },
+                            {
+                                "name": "Lesson Plans",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WPLUS/guides/LessonPlans_NGSS.pdf"
                             }
                         ]
                     }
