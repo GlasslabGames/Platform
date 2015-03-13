@@ -621,7 +621,7 @@ function upgradeTrialLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return _endLicense.call(this, userId, licenseId);
+            return _endLicense.call(this, userId, licenseId, true);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -1550,7 +1550,7 @@ function getActivePurchaseOrderInfo(req, res){
             output.email = purchaseOrder.email;
             if (purchaseOrder.status === 'pending') {
                 output.status = 1;
-            } else if (purchaseOrder.status === 'received' || purchaseOrders.status === 'rejected') {
+            } else if (purchaseOrder.status === 'received' || purchaseOrder.status === 'rejected') {
                 output.status = 2;
             } else if (purchaseOrder.status === 'approved') {
                 output.status = 3;
@@ -1571,6 +1571,7 @@ function cancelActivePurchaseOrder(req, res){
         return;
     }
     var userId = req.user.id;
+    var licenseId = req.user.licenseId;
     this.myds.getActivePurchaseOrderByUserId(userId)
         .then(function(purchaseOrder){
             if(purchaseOrder === "no active order"){
@@ -1581,7 +1582,7 @@ function cancelActivePurchaseOrder(req, res){
             }
             var purchaseOrderId = purchaseOrder.id;
 
-            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "cancelled", false, "cancel");
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, licenseId, purchaseOrderId, "cancelled", false, "cancel");
         }.bind(this))
         .then(function (status) {
             if (typeof status === "string") {
@@ -1695,7 +1696,7 @@ function rejectPurchaseOrder(req, res){
             billingEmail = purchaseOrder.email;
             billingName = purchaseOrder.name;
 
-            return _updateTablesUponPurchaseOrderReject.call(this, userId, purchaseOrderId, "rejected", purchaseOrderNumber, action);
+            return _updateTablesUponPurchaseOrderReject.call(this, userId, licenseId, purchaseOrderId, "rejected", purchaseOrderNumber, action);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -2091,7 +2092,7 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
     }.bind(this));
 }
 
-function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, purchaseOrderNumber, action){
+function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId, status, purchaseOrderNumber, action){
     return when.promise(function(resolve, reject){
         var updateFields = [];
         var statusUpdate = "status = '" + status + "'";
@@ -2102,23 +2103,31 @@ function _updateTablesUponPurchaseOrderReject(userId, purchaseOrderId, status, p
         }
         this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
             .then(function(){
-                var active = "active = 0";
-                var purchaseOrderIdString = "purchase_order_id = NULL";
-                var licenseUpdateFields = [active, purchaseOrderIdString];
-                var licenseMapStatus;
+                return _endLicense.call(this, userId, licenseId);
+                //var active = "active = 0";
+                //var purchaseOrderIdString = "purchase_order_id = NULL";
+                //var licenseUpdateFields = [active, purchaseOrderIdString];
+                //var licenseMapStatus;
+                //if(status === "rejected"){
+                //    licenseMapStatus = "status = 'po-rejected'";
+                //} else{
+                //    licenseMapStatus = "status = NULL";
+                //}
+                //var licenseMapUpdateFields = [licenseMapStatus];
+                //var promiseList = [];
+                //promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
+                //if(action === "subscribe" || action === "trial upgrade" || action === "cancel"){
+                //    //var statuses = ["'po-pending'", "'po-received'", "'active'"];
+                //    promiseList.push(this.myds.updateRecentLicenseMapByUserId(userId, licenseMapUpdateFields));
+                //}
+                //return when.all(promiseList);
+            }.bind(this))
+            .then(function(){
                 if(status === "rejected"){
-                    licenseMapStatus = "status = 'po-rejected'";
-                } else{
-                    licenseMapStatus = "status = NULL";
+                    var licenseMapStatus = "status = 'po-rejected'";
+                    var updateFields = [licenseMapStatus];
+                    return this.myds.updateRecentLicenseMapByUserId(userId, updateFields);
                 }
-                var licenseMapUpdateFields = [licenseMapStatus];
-                var promiseList = [];
-                promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
-                if(action === "subscribe" || action === "trial upgrade" || action === "cancel"){
-                    //var statuses = ["'po-pending'", "'po-received'", "'active'"];
-                    promiseList.push(this.myds.updateRecentLicenseMapByUserId(userId, licenseMapUpdateFields));
-                }
-                return when.all(promiseList);
             }.bind(this))
             .then(function(){
                 resolve();
@@ -2563,10 +2572,16 @@ function _cancelAutoRenew(userId, licenseId){
     }.bind(this));
 }
 
-function _endLicense(userId, licenseId){
+function _endLicense(userId, licenseId, autoRenew){
     return when.promise(function(resolve, reject){
         var emailList;
-        _cancelAutoRenew.call(this, userId, licenseId)
+        var promise;
+        if(autoRenew){
+            promise = _cancelAutoRenew.call(this, userId, licenseId);
+        } else{
+            promise = Util.PromiseContinue();
+        }
+        promise
             .then(function(status){
                 if(typeof status === "string" && status !== "already cancelled"){
                     return status;
@@ -2591,12 +2606,18 @@ function _endLicense(userId, licenseId){
                 if(typeof emails === "string"){
                     return emails;
                 }
+                if(emails.length === 0){
+
+                }
                 emailList = [emails[0][0]];
                 emails.forEach(function(email){
-                    emailList.push(email[1]);
+                    if(email[1]){
+                        emailList.push(email[1]);
+                    }
                 });
                 var active = "active = 0";
-                var updateFields = [active];
+                var purchaseOrderId = "purchase_order_id = NULL";
+                var updateFields = [active, purchaseOrderId];
                 return this.myds.updateLicenseById(licenseId, updateFields)
             }.bind(this))
             .then(function(status){
