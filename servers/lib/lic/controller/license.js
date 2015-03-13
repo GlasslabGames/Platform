@@ -1330,7 +1330,10 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                 //update license table with po id
                 purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
                 var updateFields = [purchaseOrderId];
-                return this.myds.updateLicenseById(licenseId, updateFields);
+                var promiseList = [];
+                promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
+                promiseList.push(this.cbds.createLicenseStudentObject(licenseId));
+                return when.all(promiseList);
             }.bind(this))
             .then(function(status){
                 if(typeof status === "string"){
@@ -1375,6 +1378,7 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     if(payment.indexOf(".") === -1){
         payment = purchaseOrderInfo.payment + ".00";
     }
+    purchaseOrderInfo.payment = payment;
     payment = "'" + payment + "'";
     values.push(payment);
     action = "'" + action + "'";
@@ -1680,6 +1684,9 @@ function rejectPurchaseOrder(req, res){
             if(purchaseOrder.status !== "pending" && purchaseOrder.status !== "received"){
                 return "cannot reject";
             }
+            if(purchaseOrder.status === "received" && purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
+                return "key number mismatch";
+            }
             var purchaseOrderId = purchaseOrder.id;
             licenseId = purchaseOrder["license_id"];
             userId = purchaseOrder["user_id"];
@@ -1704,6 +1711,10 @@ function rejectPurchaseOrder(req, res){
             }
             if(results === "cannot approve"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
+                return;
+            }
+            if(results === "key number mismatch"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.mismatch"});
                 return;
             }
             // proper email response, depending on circumstance
@@ -1974,6 +1985,7 @@ function approvePurchaseOrder(req, res){
     }
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     var purchaseOrderKey = purchaseOrderInfo.key;
+    var purchaseOrderNumber = purchaseOrderInfo.number;
     var planInfo = req.body.planInfo;
 
     var licenseId;
@@ -1988,6 +2000,9 @@ function approvePurchaseOrder(req, res){
             }
             if(purchaseOrder.status !== "received"){
                 return "cannot approve";
+            }
+            if(purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
+                return "key number mismatch";
             }
             var purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
@@ -2015,6 +2030,10 @@ function approvePurchaseOrder(req, res){
             }
             if(results === "cannot approve"){
                 this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
+                return;
+            }
+            if(results === "key number mismatch"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.mismatch"});
                 return;
             }
             var ownerData = results[0];
