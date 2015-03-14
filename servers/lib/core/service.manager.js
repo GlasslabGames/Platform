@@ -382,13 +382,13 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         this.app[ m ](a.api, function(req, res, next) {
                             this.stats.increment("info", "Route.AuthCheck");
 
-                            /*// Validate against requireHttps
-                            if( a.requireHttps ) {
+                            // Validate against requireHttps
+                            if( a.requireHttps && this.options.env !== "dev" ) {
                                 if( !req.connection.encrypted ) {
                                     res.status(403).end();
                                     return;
                                 }
-                            }*/
+                            }
 
                             // auth
                             if( req.isAuthenticated() ) {
@@ -413,13 +413,13 @@ ServiceManager.prototype.setupApiRoutes = function() {
                     } else {
                         console.log("API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
 
-                        /*// Validate against requireHttps
-                        if( a.requireHttps ) {
+                        // Validate against requireHttps
+                        if( a.requireHttps && this.options.env !== "dev" ) {
                             if( !req.connection.encrypted ) {
                                 res.status(403).end();
                                 return;
                             }
-                        }*/
+                        }
 
                         // no login required
                         this.app[ m ](a.api, function(req, res, next) {

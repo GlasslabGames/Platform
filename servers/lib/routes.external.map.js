@@ -579,6 +579,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/subscribe/po",
             service: "lic",
             controller: "license",
@@ -588,6 +589,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/trial/upgrade/po",
             service: "lic",
             controller: "license",
@@ -606,6 +608,7 @@ module.exports = {
         //},
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/po",
             service: "lic",
             controller: "license",
@@ -615,6 +618,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/po/cancel",
             service: "lic",
             controller: "license",
@@ -633,6 +637,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/po/receive",
             service: "lic",
             controller: "license",
@@ -642,6 +647,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/po/reject",
             service: "lic",
             controller: "license",
@@ -651,6 +657,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/po/approve",
             service: "lic",
             controller: "license",
