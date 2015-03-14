@@ -3,7 +3,7 @@
         "CCSS": [
             {
                 "id": "a",
-                "description": "Common Core Standards",
+                "description": "Systems Thinking Concepts",
                 "title": "Standards",
                 "subGroups": [
                     {
@@ -34,7 +34,7 @@
                         "id": "d",
                         "title": "Design a System",
                         "name": "",
-                        "description": "Thinking deeply about the state of an envisioned system and how the particular components that are available might need to interconnect for that state to be realized.",
+                        "description": "Think deeply about the state of an envisioned system and how the particular components that are available might need to interconnect for that state to be realized.",
                         "info": "",
                         "icon": "achievement-light-green"
                     },
@@ -42,7 +42,7 @@
                         "id": "e",
                         "title": "Identify Interconnections",
                         "name": "",
-                        "description": "The different ways that a system’s parts, or components, interact with each other through their behaviors and change the behaviors of other components through those interactions.",
+                        "description": "Identify different ways that a system’s components interact with each other through their behaviors and change the behaviors of other components through those interactions.",
                         "info": "",
                         "icon": "achievement-light-red"
                     },
@@ -66,7 +66,7 @@
                         "id": "h",
                         "title": "Limited Resources",
                         "name": "",
-                        "description": "In any system, it is important to understand which resources are finite, ones that will run out at a certain point?",
+                        "description": "In any system, it is important to understand which resources are finite.",
                         "info": "",
                         "icon": "achievement-blue"
                     },
@@ -74,7 +74,7 @@
                         "id": "i",
                         "title": "Fixes That Fail",
                         "name": "",
-                        "description": "Any kind of solution to a problem that fixes the problem temporarily but fails fix it in the long term, and might even make it worse over time.",
+                        "description": "Recognize when a solution fixes a problem temporarily, but fails to fix it in the long term. Sometimes a solution even makes the problem worse in the long run.",
                         "info": "",
                         "icon": "achievement-magenta"
                     },
@@ -82,7 +82,7 @@
                         "id": "j",
                         "title": "Unintended Consequences",
                         "name": "",
-                        "description": "The unexpected result of an action taken in a system. Unintended consequences are often the result of fixes that fail or someone aiming to find a leverage point in a system but not considering long-term implications to those actions.",
+                        "description": "Identify unexpected results of an action taken in a system. Unintended consequences are often the result of fixes that fail or someone aiming to find a leverage point in a system but not considering long-term implications to those actions.",
                         "info": "",
                         "icon": "achievement-green"
                     },
@@ -90,7 +90,7 @@
                         "id": "k",
                         "title": "Leverage Points",
                         "name": "",
-                        "description": "Particular places within a system where a small shift in one thing can produce big changes in everything.",
+                        "description": "Find particular places within a system where a small shift in one thing can produce big changes in everything.",
                         "info": "",
                         "icon": "achievement-red"
                     }
@@ -124,7 +124,7 @@
         {
             "id": "Systems Designer",
             "title": "Systems Designer",
-            "info": "Student has solved levels that require moderately difficult problem solving and mixing colors.",
+            "info": "Student has solved puzzles that require mixing colors and solving moderately difficult problems.",
             "standards": [
                 {
                     "id": "CCSS",
@@ -136,7 +136,7 @@
         {
             "id": "Interconnector",
             "title": "Interconnector",
-            "info": "Student has mastered basic pieces as well as splitters and blenders and used them in conjunction to design tricky systems.",
+            "info": "Student has mastered basic pieces as well as splitters and blenders, and used them in conjunction to design tricky systems.",
             "standards": [
                 {
                     "id": "CCSS",
@@ -148,7 +148,7 @@
         {
             "id": "Dynamics Designer",
             "title": "Dynamics Designer",
-            "info": "Student has completed all basic levels and has a good grasp of how to leverage the abilities of all components.",
+            "info": "Student has completed all basic puzzles and has a good grasp of how to leverage the abilities of all components.",
             "standards": [
                 {
                     "id": "CCSS",
@@ -160,7 +160,7 @@
         {
             "id": "Systems Fixer",
             "title": "Systems Fixer",
-            "info": "Student has shown proficiency at solving levels taht are pre-populated with incorrect solutions.",
+            "info": "Student has shown proficiency at solving puzzles that are pre-populated with incorrect solutions.",
             "standards": [
                 {
                     "id": "CCSS",
@@ -201,7 +201,7 @@
         {
             "id": "Resource Manager",
             "title": "Resource Manager",
-            "info": "Student has solved a considerable amount of the game's limited pieces levels.",
+            "info": "Student has solved all of the game's limited pieces puzzles.",
             "standards": [
                 {
                     "id": "CCSS",
