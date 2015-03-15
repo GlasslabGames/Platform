@@ -32,7 +32,7 @@ module.exports = {
             description: 'All Games in this package are optimized to work on iPads.',
             pricePerSeat: 3.5,
             browserGames: [],
-            iPadGames: ['AA-1','PVZ','WT'],
+            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
             downloadableGames: [],
             planId: 'ipad'
         },
@@ -53,7 +53,7 @@ module.exports = {
             description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
             browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: ['AA-1','PVZ','WT'],
+            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'allGames'
         },
@@ -63,7 +63,7 @@ module.exports = {
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1/30,
             browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: ['AA-1','PVZ','WT'],
+            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'trial'
         }

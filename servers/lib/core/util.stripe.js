@@ -18,8 +18,13 @@ function StripeUtil(options){
         return;
     }
 
-    // Set the Stripe object
-    this.stripe = new stripe( this.options.stripe.test.secretKey );
+    // Set the Stripe object to "test" or "live", depending on the setting
+    var stripeEnv = "test";
+    if( this.options.stripe &&
+        this.options.stripe.env ) {
+        stripeEnv = this.options.stripe.env;
+    }
+    this.stripe = new stripe( this.options.stripe[ stripeEnv ].secretKey );
 }
 
 
