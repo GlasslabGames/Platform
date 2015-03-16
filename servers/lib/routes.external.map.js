@@ -658,6 +658,16 @@ module.exports = {
         {
             requireAuth: true,
             requireHttps: true,
+            api: "/api/v2/license/po/invoice",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "invoicePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/po/approve",
             service: "lic",
             controller: "license",

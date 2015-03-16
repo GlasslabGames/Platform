@@ -30,6 +30,7 @@ module.exports = {
     cancelActivePurchaseOrder: cancelActivePurchaseOrder,
     receivePurchaseOrder: receivePurchaseOrder,
     rejectPurchaseOrder: rejectPurchaseOrder,
+    invoicePurchaseOrder: invoicePurchaseOrder,
     approvePurchaseOrder: approvePurchaseOrder,
     // vestigial apis
     verifyLicense:   verifyLicense,
@@ -1226,31 +1227,39 @@ function subscribeToLicensePurchaseOrder(req, res){
            req.user.paymentType = "purchase-order";
            return Util.updateSession(req);
        })
-        .then(function(status){
-            if(status === "po-pending"){
-                this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
-                return;
-            }
+       .then(function(status){
+           if(status === "po-pending"){
+               this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
+               return;
+           }
            if(status === "already on license"){
                this.requestUtil.errorResponse(res, { key: "lic.create.denied"});
                return;
            }
-            //email + conclusion stuff, go to dashboard
+           //email + conclusion stuff, go to dashboard
            // email here goes to accounting/mat
            // for now, i will send it to the billing email
-           var email = purchaseOrderInfo.email;
-            var data = {};
-            _.merge(data, purchaseOrderInfo, planInfo);
-            // template's data pipeline and desired variables needs scoping out
-            data.subject = "Subscribe Purchase Order";
-            var template = "invoice-order";
-            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
-            this.requestUtil.jsonResponse(res, { status: "ok"});
-        }.bind(this))
-        .then(null, function(err){
-            console.error("Subscribe to License Purchase Order Error -",err);
-            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
-        }.bind(this));
+           var emails = [];
+           if(this.options.env === "prod"){
+              emails.push("purchaseOrder@glasslabgames.org");
+           } else{
+              emails.push("ben@glasslabgames.org");
+              emails.push("michael.mulligan@glasslabgames.org");
+           }
+           var data = {};
+           _.merge(data, purchaseOrderInfo, planInfo);
+           // template's data pipeline and desired variables needs scoping out
+           data.subject = "Subscribe Purchase Order";
+           var template = "accounting-order";
+           _(emails).forEach(function(email){
+                _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+           }.bind(this));
+           this.requestUtil.jsonResponse(res, { status: "ok"});
+       }.bind(this))
+       .then(null, function(err){
+           console.error("Subscribe to License Purchase Order Error -",err);
+           this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+       }.bind(this));
 }
 
 // if user is not on stripe, set up a customer account on stripe.
@@ -1435,14 +1444,22 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             //email + conclusion stuff, go to dashboard
             // email here goes to accounting/mat
             // for now, i will send it to the billing email
-            var email = purchaseOrderInfo.email;
+            var emails = [];
+            if(this.options.env === "prod"){
+                emails.push("purchaseOrder@glasslabgames.org");
+            } else{
+                emails.push("ben@glasslabgames.org");
+                emails.push("michael.mulligan@glasslabgames.org");
+            }
             var data = {};
             _.merge(data, purchaseOrderInfo, planInfo);
             // template's data pipeline and desired variables needs scoping out
             data.subject = "Upgrade Trial Purchase Order";
             // template's data pipeline and desired variables needs scoping out
             var template = "invoice-order";
-            _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            _(emails).forEach(function(email){
+                _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            }.bind(this));
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
@@ -1561,7 +1578,7 @@ function getActivePurchaseOrderInfo(req, res){
             output.email = purchaseOrder.email;
             if (purchaseOrder.status === 'pending') {
                 output.status = 1;
-            } else if (purchaseOrder.status === 'received' || purchaseOrder.status === 'rejected') {
+            } else if (purchaseOrder.status === 'received' || purchaseOrder.status === 'rejected'|| purchaseOrder.status === 'invoiced') {
                 output.status = 2;
             } else if (purchaseOrder.status === 'approved') {
                 output.status = 3;
@@ -1693,10 +1710,10 @@ function rejectPurchaseOrder(req, res){
             if(purchaseOrder === "no active order"){
                 return purchaseOrder;
             }
-            if(purchaseOrder.status !== "pending" && purchaseOrder.status !== "received"){
+            if(purchaseOrder.status !== "pending" && purchaseOrder.status !== "received" && purchaseOrder.status !== "invoiced"){
                 return "cannot reject";
             }
-            if(purchaseOrder.status === "received" && purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
+            if((purchaseOrder.status === "received" || purchaseOrder.status === "invoiced") && purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
                 return "key number mismatch";
             }
             var purchaseOrderId = purchaseOrder.id;
@@ -1859,6 +1876,14 @@ function receivePurchaseOrder(req, res){
             var template = "owner-purchase-order-received";
             _sendEmailResponse.call(this, ownerData.email, ownerData, req.protocol, req.headers.host, template);
             _sendEmailResponse.call(this, billerData.email, billerData, req.protocol, req.headers.host, template);
+            if(this.options.env === "prod"){
+                var email = "meghan@glasslabgames.org";
+                var data = {};
+                data.key = purchaseOrderKey;
+                data.number = purchaseOrderNumber;
+                template = "accounting-received";
+                _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            }
             this.requestUtil.jsonResponse(res, { status: "ok "});
         }.bind(this))
         .then(null, function(err){
@@ -1983,7 +2008,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
     }.bind(this));
 }
 
-function approvePurchaseOrder(req, res){
+function invoicePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
@@ -2011,6 +2036,67 @@ function approvePurchaseOrder(req, res){
                 return purchaseOrder;
             }
             if(purchaseOrder.status !== "received"){
+                return "cannot approve";
+            }
+            if(purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
+                return "key number mismatch";
+            }
+            var purchaseOrderId = purchaseOrder.id;
+
+            var updateFields = [];
+            var status = "status = 'invoiced'";
+            updateFields.push(status);
+            return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
+        }.bind(this))
+        .then(function(status){
+            if(status === "no active order"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.absent"});
+                return;
+            }
+            if(status === "cannot approve"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.action.denied"});
+                return;
+            }
+            if(status === "key number mismatch"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.mismatch"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Invoice Purchase Order Error -",err);
+            this.requestUtil.errorReponse(res, err);
+        }.bind(this));
+}
+
+function approvePurchaseOrder(req, res){
+    // Only admins should be allowed to perform this operation
+    if( req.user.role !== lConst.role.admin ) {
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+
+    // validate with code
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    var purchaseOrderKey = purchaseOrderInfo.key;
+    var purchaseOrderNumber = purchaseOrderInfo.number;
+    var planInfo = req.body.planInfo;
+
+    var licenseId;
+    var userId;
+    var billingEmail;
+    var billingName;
+
+    this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
+        .then(function(purchaseOrder){
+            if(purchaseOrder === "no active order"){
+                return purchaseOrder;
+            }
+            if(purchaseOrder.status !== "invoiced"){
                 return "cannot approve";
             }
             if(purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
