@@ -383,7 +383,15 @@ ServiceManager.prototype.setupApiRoutes = function() {
                             this.stats.increment("info", "Route.AuthCheck");
 
                             // Validate against requireHttps
-                            if( a.requireHttps && this.options.env !== "dev" ) {
+                            if( a.requireHttps ) {//} && this.options.env !== "dev" ) {
+                                console.log( "-------- Request information ---------" );
+                                console.log( "Request: " + req );
+                                //console.log( "Request stringified: " + JSON.stringify( req ) );
+                                console.log( "Request secure: " + req.secure );
+                                console.log( "Request connection: " + req.connection );
+                                //console.log( "Request connection stringified: " + JSON.stringify( req.connection ) );
+                                console.log( "Request connection encrypted: " + req.connection.encrypted );
+                                console.log( "--------------------------------------" );
                                 if( !req.connection.encrypted ) {
                                     res.status(403).end();
                                     return;
