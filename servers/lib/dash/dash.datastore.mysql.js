@@ -125,7 +125,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     user.licenseStatus = license["status"];
                     user.paymentType = license["payment_type"];
                     var packageType = license["package_type"];
-                    if(packageType === "trial"){
+                    if(packageType === "trial" || packageType === "trialLegacy"){
                         user.isTrial = true;
                     } else{
                         user.isTrial = false;
