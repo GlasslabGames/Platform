@@ -66,6 +66,16 @@ module.exports = {
             iPadGames: ['AA-1','PVZ','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'trial'
+        },
+        trialLegacy: {
+            stripe_planId: 'test_trial_legacy',
+            name: 'Trial',
+            description: 'This trial includes all games available on this site.',
+            pricePerSeat: 1,
+            browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
+            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
+            downloadableGames: ['SC'],
+            planId: 'trialLegacy'
         }
     },
     seats: {
