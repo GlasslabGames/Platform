@@ -91,6 +91,7 @@ function getCurrentPlan(req, res){
             output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
             output["expirationDate"] = license["expiration_date"];
             output["autoRenew"] = license["auto_renew"] === 1 ? true : false;
+            output["promoCode"] = license["promo"];
             var packageType = license["package_type"];
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
@@ -493,6 +494,7 @@ function upgradeLicense(req, res){
     var stripeInfo = req.body.stripeInfo || {};
     var emailData = {};
     var instructors;
+    var promoCode = null;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -517,6 +519,9 @@ function upgradeLicense(req, res){
             emailData.oldSeats = license["package_size_tier"];
             emailData.newPlan = planInfo.type;
             emailData.newSeats = planInfo.seats;
+            if(!license["promo"] && planInfo.promoCode){
+                promoCode = planInfo.promoCode;
+            }
             if(lConst.seats[emailData.oldSeats].studentSeats > lConst.seats[emailData.newSeats].studentSeats){
                 return "downgrade seats";
             }
@@ -545,9 +550,15 @@ function upgradeLicense(req, res){
                 return status;
             }
             var promiseList = [{},{},{},{}];
+            var updateFields = [];
             var packageType = "package_type = '" +  planInfo.type + "'";
+            updateFields.push(packageType);
             var packageSizeTier = "package_size_tier = '" + planInfo.seats + "'";
-            var updateFields = [packageType, packageSizeTier];
+            updateFields.push(packageSizeTier);
+            if(promoCode){
+                var promoCodeString = "promo = '" + planInfo.promoCode + "'";
+                updateFields.push(promoCodeString);
+            }
             promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
             var seats = lConst.seats[planInfo.seats];
             var educatorSeats = seats.educatorSeats;
@@ -2351,8 +2362,8 @@ function _createLicenseSQL(userId, planInfo, data){
             licenseKey = "NULL";
         }
         var promo;
-        if(planInfo.promo){
-            promo = "'" + planInfo.promo + "'";
+        if(planInfo.promoCode){
+            promo = "'" + planInfo.promoCode + "'";
         } else{
             promo = "NULL";
         }
