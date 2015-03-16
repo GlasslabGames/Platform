@@ -42,7 +42,7 @@ function getSubscriptionPackages(req, res){
         var plans = [];
         var plan;
         _(lConst.plan).forEach(function(value, key){
-            if(key !== "trial"){
+            if(key !== "trial" && key !== "trialLegacy"){
                 plan = _.clone(value);
                 delete plan["stripe_planId"];
                 plans.push(plan);
