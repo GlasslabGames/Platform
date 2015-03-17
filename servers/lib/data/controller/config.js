@@ -71,6 +71,7 @@ function index(req, res, next, serviceManager)
 // http://127.0.0.1:8001/sdk/connect
 function connect(req, res, next)
 {
+    // host
     var host = req.headers.host;
     if( this.options.sdk &&
         this.options.sdk.connect ) {
@@ -78,5 +79,11 @@ function connect(req, res, next)
             host = this.options.sdk.connect;
         }
     }
-    res.send("http://"+host);
+    // protocol
+    var protocol = "http://";
+    if( this.options.env !== "dev" ) {
+        protocol = "https://";
+    }
+    //send
+    res.send( protocol + host );
 }
