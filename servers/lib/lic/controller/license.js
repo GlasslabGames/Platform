@@ -673,10 +673,10 @@ function upgradeTrialLicense(req, res){
             var data = {};
             data.firstName = req.user.firstName;
             data.lastName = req.user.lastName;
-            data.name = req.user.firstName + ' ' + req.user.lastName;
+            //data.name = req.user.firstName + ' ' + req.user.lastName;
             data.subject = "Welcome to GlassLab Games Premium!";
-            data.plan = planInfo.type;
-            data.seats = planInfo.seats;
+            data.plan = lConst.plan[planInfo.type].name;
+            data.seats = lConst.seats[planInfo.seats].size;
             data.expirationDate = expirationDate;
             var template = "owner-upgrade-trial";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -1325,7 +1325,8 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                     return status;
                 }
                 var data = {};
-                var date = new Date(Date.now());
+                var date = new Date();
+
                 date.setFullYear(date.getFullYear()+1);
                 data.expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
                 data.subscriptionId = null;
@@ -2282,6 +2283,92 @@ function _switchToCreditCard(licenseId){
     }.bind(this));
 }
 
+// to give existing instructors 1 year of premium access when we launch licensing
+function migrateToTrialLegacy(req, res){
+    // Only admins should be allowed to perform this operation
+    if( req.user.role !== lConst.role.admin ) {
+        this.requestUtil.errorResponse(res, "lic.access.invalid");
+        return;
+    }
+    var planInfo = {
+        type: "trialLegacy",
+        seats: "school"
+    };
+    var stripeInfo = {};
+    var instructors;
+    var failures;
+    var index = 0;
+    failures = {};
+    this.myds.getAllInstructorNonCustomers()
+        .then(function(results){
+            instructors = results;
+            var promiseList = [];
+            function _subscribeInstructor(input, userId, stripeInfo, planInfo){
+                return when.promise(function(resolve, reject){
+                    _createSubscription.call(this, input, userId, stripeInfo, planInfo)
+                        .then(function(status){
+                            if(status === "duplicate customer account"){
+                                failures[input.user.id] = "lic.records.invalid";
+                                return;
+                            }
+                            if(status === "account inactive"){
+                                failures[input.user.id] = "lic.account.inactive";
+                                return;
+                            }
+                            if(status === "po-pending"){
+                                failures[input.user.id] = "lic.order.pending";
+                                return;
+                            }
+                            if(status === "already on a license"){
+                                failures[input.user.id] = "lic.access.invited";
+                                return;
+                            }
+                            var email = input.user["EMAIL"];
+                            var template = "owner-legacy-trial";
+                            var data = {};
+                            data.firstName = input.user["FIRST_NAME"];
+                            data.lastName = input.user["LAST_NAME"];
+                            data.subject = "Welcome to Glass Lab Premium!";
+                            return _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+                        }.bind(this))
+                        .then(function(){
+                            resolve()
+                        })
+                        .then(function(err){
+                            console.error("Create Trial Legacy User Error -", err);
+                            err.errorUserId = userId;
+                            err.instructors = instructors;
+                            err.index = index;
+                            reject(err);
+                        });
+                }.bind(this));
+            }
+            var _subscribeInstructor = _subscribeInstructor.bind(this);
+            instructors.forEach(function(instructor){
+                var input = {};
+                input.user = instructor;
+                var userId = instructor.id;
+                promiseList.push(_subscribeInstructor(input, userId, stripeInfo, planInfo));
+            }.bind(this));
+            return when.reduce(promiseList, function(){
+                index++;
+                return index;
+            }, index);
+        }.bind(this))
+        .then(function(){
+            var keys = Object.keys(failures);
+            if(keys.length > 0){
+                this.requestUtil.jsonResponse(res, { status: "failed", failures: failures });
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Migrate to Trial Legacy Error -",err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
 function _buildBillingInfo(cardData){
     var output = {};
     output.last4 = cardData.last4;
@@ -2694,7 +2781,7 @@ function _endLicense(userId, licenseId, autoRenew){
                     promiseList.push(_removeInstructorFromLicense.call(this, licenseId, [educator["email"]], userId, {}, users));
                 }.bind(this));
 
-                return when.reduce(promiseList, function(results, emails, index){
+                return when.reduce(promiseList, function(results, emails){
                     results.push(emails);
                     return results;
                 }, []);
@@ -2967,30 +3054,30 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
             template = ownerTemplate;
         } else{
             template = educatorTemplate;
-            var name;
+            //var name;
             var firstName;
             var lastName;
             // if user is a temporary user who has not yet registered, set name to email
             if(user.firstName === "temp" && user.lastName === "temp"){
-                name = email;
+                //name = email;
                 firstName = email;
             } else{
-                name = user.firstName + " " + user.firstName;
+                //name = user.firstName + " " + user.firstName;
                 firstName = user.firstName;
                 lastName = user.lastName;
             }
-            emailData.teacherName = name;
+            //emailData.teacherName = name;
             emailData.teacherFirstName = firstName;
             emailData.teacherLastName = lastName;
         }
         emailData.subject = "Your Account has Been Upgraded!";
-        emailData.ownerName = data.ownerName;
+        //emailData.ownerName = data.ownerName;
         emailData.ownerFirstName = data.ownerFirstName;
         emailData.ownerLastName = data.ownerLastName;
-        emailData.oldPlan = data.oldPlan;
-        emailData.oldSeats = data.oldSeats;
-        emailData.newPlan = data.newPlan;
-        emailData.newSeats = data.newSeats;
+        //emailData.oldPlan = data.oldPlan;
+        //emailData.oldSeats = data.oldSeats;
+        emailData.newPlan = lConst.plan[data.newPlan].name;
+        emailData.newSeats = lConst.seats[data.newSeats].size;
         _sendEmailResponse.call(this, email, emailData, protocol, host, template);
     }.bind(this));
 }
