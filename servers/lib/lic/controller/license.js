@@ -1190,7 +1190,7 @@ function teacherLeavesLicense(req, res){
             data.teacherLastName = emailData.teacherLastName;
             data.plan = emailData.plan;
             var template = "owner-educator-left";
-            _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, template);
+            _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
             this.requestUtil.jsonResponse(res, { status: 'success' });
         }.bind(this))
         .then(null, function(err){
@@ -1458,7 +1458,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             // template's data pipeline and desired variables needs scoping out
             data.subject = "Upgrade Trial Purchase Order";
             // template's data pipeline and desired variables needs scoping out
-            var template = "invoice-order";
+            var template = "accounting-order";
             _(emails).forEach(function(email){
                 _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             }.bind(this));
@@ -2300,10 +2300,9 @@ function migrateToTrialLegacy(req, res){
     var failures;
     var index = 0;
     failures = {};
-    this.myds.getAllInstructorNonCustomers()
+    this.myds.getAllInstructorsNonCustomers()
         .then(function(results){
-            instructors = results.slice(0,4);
-            var promiseList = [];
+            instructors = results;
             function _subscribeInstructor(input, userId, stripeInfo, planInfo){
                 return when.promise(function(resolve, reject){
                     _createSubscription.call(this, input, userId, stripeInfo, planInfo)
@@ -2335,7 +2334,7 @@ function migrateToTrialLegacy(req, res){
                         .then(function(){
                             resolve()
                         })
-                        .then(function(err){
+                        .then(null, function(err){
                             console.error("Create Trial Legacy User Error -", err);
                             err.errorUserId = userId;
                             err.instructors = instructors;
@@ -2345,13 +2344,14 @@ function migrateToTrialLegacy(req, res){
                 }.bind(this));
             }
             var _subscribeInstructor = _subscribeInstructor.bind(this);
+            var promiseList = [];
             instructors.forEach(function(instructor){
                 var input = {};
                 input.user = instructor;
                 var userId = instructor.id;
                 promiseList.push(_subscribeInstructor(input, userId, stripeInfo, planInfo));
             }.bind(this));
-            return when.reduce(promiseList, function(){
+            return when.reduce(promiseList, function(index, result){
                 index++;
                 return index;
             }, index);
@@ -3113,7 +3113,9 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
         email = user["EMAIL"];
         data = {};
         data.subject = "You’ve Been Invited!";
-        data.ownerName = ownerName;
+        //data.ownerName = ownerName;
+        data.ownerFirstName = ownerFirstName;
+        data.ownerLastName = ownerLastName;
         // temporary users do not have a name yet, so use email
         data.teacherEmail = email;
         data.plan = plan;
@@ -3125,25 +3127,32 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
 function _sendEmailResponse(email, data, protocol, host, template){
     // to remove testing email spam, i've added a return. remove to test
     //return;
-    if(data.expirationDate){
-        data.expirationDate = new Date(data.expirationDate);
-    }
-    var emailData = {
-        subject: data.subject,
-        to: email,
-        data: data,
-        host: protocol + "://" + host
-    };
-    var pathway = path.join(__dirname,"../email-templates");
-    var options = this.options.auth.email;
-    var email = new Util.Email(
-        this.options.auth.email,
-        path.join( __dirname, "../email-templates" ),
-        this.stats );
-    email.send( template, emailData )
-        .then(null, function(err){
-            console.error("Send Email Response Error -",err);
-        });
+    data.toEmail = email;
+    return when.promise(function(resolve, reject){
+        if(data.expirationDate){
+            data.expirationDate = new Date(data.expirationDate);
+        }
+        var emailData = {
+            subject: data.subject,
+            to: data.toEmail,
+            data: data,
+            host: protocol + "://" + host
+        };
+        var pathway = path.join(__dirname,"../email-templates");
+        var options = this.options.auth.email;
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join( __dirname, "../email-templates" ),
+            this.stats );
+        email.send( template, emailData )
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Send Email Response Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 var exampleOut = {}, exampleIn = {};
