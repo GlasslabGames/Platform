@@ -25,6 +25,7 @@ module.exports = {
     teacherLeavesLicense: teacherLeavesLicense,
     subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
     upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
+    migrateToTrialLegacy: migrateToTrialLegacy,
     //upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
     getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
     cancelActivePurchaseOrder: cancelActivePurchaseOrder,
@@ -2301,7 +2302,7 @@ function migrateToTrialLegacy(req, res){
     failures = {};
     this.myds.getAllInstructorNonCustomers()
         .then(function(results){
-            instructors = results;
+            instructors = results.slice(0,4);
             var promiseList = [];
             function _subscribeInstructor(input, userId, stripeInfo, planInfo){
                 return when.promise(function(resolve, reject){
