@@ -17,7 +17,7 @@ module.exports = {
     },
     plan: {
         chromebook: {
-            stripe_planId: 'test_chromebook',
+            stripe_planId: 'GLG_CHROMEBOOK_P03',
             name: 'Chromebook/Web',
             description: 'All Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
@@ -27,7 +27,7 @@ module.exports = {
             planId: 'chromebook'
         },
         ipad: {
-            stripe_planId: 'test_ipad',
+            stripe_planId: 'GLG_IPAD_P04',
             name: 'iPad',
             description: 'All Games in this package are optimized to work on iPads.',
             pricePerSeat: 3.5,
@@ -38,7 +38,7 @@ module.exports = {
         },
 
         pcMac: {
-            stripe_planId: 'test_pcmac',
+            stripe_planId: 'GLG_PCMAC_P05',
             name: 'PC/MAC',
             description: 'Games in this package run on PC or Mac computers.',
             pricePerSeat: 2.5,
@@ -48,7 +48,7 @@ module.exports = {
             planId: 'pcMac'
         },
         allGames: {
-            stripe_planId: 'test_all',
+            stripe_planId: 'GLG_ALLGAMES_P06',
             name: 'All Games',
             description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
@@ -58,7 +58,7 @@ module.exports = {
             planId: 'allGames'
         },
         trial: {
-            stripe_planId: 'test_trial',
+            stripe_planId: 'GLG_TRIAL_P01',
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1/30,
@@ -68,7 +68,7 @@ module.exports = {
             planId: 'trial'
         },
         trialLegacy: {
-            stripe_planId: 'test_trial_legacy',
+            stripe_planId: 'GLG_LEGACYTRIAL_P02',
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1,
