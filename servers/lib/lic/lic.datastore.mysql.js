@@ -228,6 +228,20 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getAllInstructorsNonCustomers = function(){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_USER WHERE SYSTEM_ROLE IN('instructor', 'manager') and customer_id IS NULL";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get All Instructors Non Customers Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + userId + ";";

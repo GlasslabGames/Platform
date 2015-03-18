@@ -675,6 +675,16 @@ module.exports = {
                 post: "approvePurchaseOrder"
             }
         },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/trial/legacy",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "migrateToTrialLegacy"
+            }
+        },
         // old api methods, not in use
         {
             requireAuth: true,
