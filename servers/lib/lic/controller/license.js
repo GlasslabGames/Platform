@@ -1643,13 +1643,13 @@ function cancelActivePurchaseOrder(req, res){
 }
 
 function setLicenseMapStatusToNull(req, res){
-    if(!(req.user && req.user.licenseId && req.user.licenseStatus && req.user.licenseStatus === "po-rejected")){
+    if(!(req.user && req.user.licenseId && req.user.purchaseOrderLicenseStatus && req.user.purchaseOrderLicenseStatus === "po-rejected")){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
     var userId = req.user.id;
     var licenseId;
-    if(req.user.purchaseOrderStatus){
+    if(req.user.purchaseOrderLicenseStatus){
         licenseId = req.user.purchaseOrderLicenseId;
     } else{
         licenseId = req.user.licenseId;
@@ -1657,7 +1657,7 @@ function setLicenseMapStatusToNull(req, res){
 
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
-            if(typeof status === "string"){
+            if(typeof status === "string" && status !== "inconsistent"){
                 return status;
             }
             var userIdList = [req.user.id];
@@ -1670,10 +1670,14 @@ function setLicenseMapStatusToNull(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            delete req.user.licenseStatus;
-            delete req.user.licenseId;
-            delete req.user.licenseOwnerId;
-            delete req.user.paymentType;
+            if(!req.user.purchaseOrderLicenseId || req.user.purchaseOrderLicenseId === req.user.licenseId){
+                delete req.user.licenseStatus;
+                delete req.user.licenseId;
+                delete req.user.licenseOwnerId;
+                delete req.user.paymentType;
+            }
+            delete req.user.purchaseOrderLicenseId;
+            delete req.user.purchaseOrderLicenseStatus;
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -1938,7 +1942,7 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
         this.myds.getLicenseMapByUser(userId)
             .then(function(results){
                 var license = results[0];
-                var trialLicenseId = license.id;
+                var trialLicenseId = license.license_id;
                 if(trialLicenseId >= licenseId){
                     return "invalid records";
                 }
@@ -2982,7 +2986,8 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 var state;
                 if (results.length === 0) {
                     state = "access absent";
-                } else if (results.length > 1 && !(results.length === 2 && results[1].status === "po-pending")) {
+                } else if (results.length > 1 &&
+                    !(results.length === 2 && (results[1].status === "po-pending" || results[1].status === "po-rejected"))) {
                     state = "invalid records";
                 } else if (results[0]['license_id'] !== licenseId) {
                     state = "inconsistent";

@@ -135,8 +135,8 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                         user.purchaseOrderLicenseStatus = license["status"];
                         user.purchaseOrderLicenseId = license.id;
                     }
-                    if(results.length === 2 && results[1]["status"] === "po-pending"){
-                        user.purchaseOrderLicenseStatus = "po-pending";
+                    if(results.length === 2 && (results[1]["status"] === "po-pending" || results[1]["status"] === "po-rejected")){
+                        user.purchaseOrderLicenseStatus = results[1]["status"];
                         user.purchaseOrderLicenseId = results[1].id;
                     }
                     if( user.licenseStatus === "active" ||
