@@ -3077,7 +3077,7 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
             emailData.teacherFirstName = firstName;
             emailData.teacherLastName = lastName;
         }
-        emailData.subject = "Your Account has Been Upgraded!";
+        emailData.subject = "Your Account has Been Updated!";
         //emailData.ownerName = data.ownerName;
         emailData.ownerFirstName = data.ownerFirstName;
         emailData.ownerLastName = data.ownerLastName;
