@@ -1456,7 +1456,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             // template's data pipeline and desired variables needs scoping out
             data.subject = "Upgrade Trial Purchase Order";
             // template's data pipeline and desired variables needs scoping out
-            var template = "invoice-order";
+            var template = "accounting-order";
             _(emails).forEach(function(email){
                 _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             }.bind(this));
