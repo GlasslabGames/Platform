@@ -115,11 +115,12 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     return "none";
                 }
             }.bind(this))
-            .then(function(license){
-                if(license === "none"){
+            .then(function(results){
+                if(results === "none"){
                     reject({"error": "none found"}, 500);
                     return;
-                } else if(!Array.isArray(license)){
+                } else if(results.length > 0){
+                    var license = results[0];
                     user.licenseId = license["id"];
                     user.licenseOwnerId = license["user_id"];
                     user.licenseStatus = license["status"];
@@ -129,6 +130,14 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                         user.isTrial = true;
                     } else{
                         user.isTrial = false;
+                    }
+                    if(license["status"] === "po-pending" || license["status"] === "po-received" || license["status"] === "po-rejected"){
+                        user.purchaseOrderLicenseStatus = license["status"];
+                        user.purchaseOrderLicenseId = license.id;
+                    }
+                    if(results.length === 2 && results[1]["status"] === "po-pending"){
+                        user.purchaseOrderLicenseStatus = "po-pending";
+                        user.purchaseOrderLicenseId = results[1].id;
                     }
                     if( user.licenseStatus === "active" ||
                         user.licenseStatus === "pending" ||
@@ -259,8 +268,7 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                     resolve([]);
                     return;
                 }
-                licenseInfo = results[0];
-                resolve(licenseInfo);
+                resolve(results);
             }.bind(this))
             .then(null, function(err){
                 console.error("Get License Info By Instructor Error -",err);

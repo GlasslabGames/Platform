@@ -1226,6 +1226,8 @@ function subscribeToLicensePurchaseOrder(req, res){
            req.user.licenseStatus = "po-pending";
            req.user.licenseOwnerId = userId;
            req.user.paymentType = "purchase-order";
+           req.user.purchaseOrderLicenseStatus = "po-pending";
+           req.user.purchaseOrderLicenseId = licenseId;
            return Util.updateSession(req);
        })
        .then(function(status){
@@ -1428,10 +1430,9 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             if(typeof licenseId === "string"){
                 return licenseId;
             }
-            req.user.licenseId = licenseId;
-            req.user.licenseStatus = "po-pending";
-            req.user.licenseOwnerId = userId;
             req.user.paymentType = "purchase-order";
+            req.user.purchaseOrderLicenseStatus = "po-pending";
+            req.user.purchaseOrderLicenseId = licenseId;
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -2976,7 +2977,7 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 var state;
                 if (results.length === 0) {
                     state = "access absent";
-                } else if (results.length > 1) {
+                } else if (results.length > 1 && !(results.length === 2 && results[1].status === "po-pending")) {
                     state = "invalid records";
                 } else if (results[0]['license_id'] !== licenseId) {
                     state = "inconsistent";

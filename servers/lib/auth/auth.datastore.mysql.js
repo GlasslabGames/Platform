@@ -306,11 +306,12 @@ return when.promise(function(resolve, reject) {
                 reject({"error": "user not found"});
             }
         }.bind(this))
-        .then(function(license){
-            if(typeof license === "string"){
+        .then(function(results){
+            if(typeof results === "string"){
                 reject({"error": "user not found"});
             }
-            if(!Array.isArray(license)){
+            if(results.length > 0){
+                var license = results[0];
                 user.licenseId = license["id"];
                 user.licenseOwnerId = license["user_id"];
                 user.licenseStatus = license["status"];
@@ -320,6 +321,14 @@ return when.promise(function(resolve, reject) {
                     user.isTrial = true;
                 } else {
                     user.isTrial = false;
+                }
+                if(license["status"] === "po-pending" || license["status"] === "po-received" || license["status"] === "po-rejected"){
+                    user.purchaseOrderLicenseStatus = license["status"];
+                    user.purchaseOrderLicenseId = license.id;
+                }
+                if(results.length === 2 && results[1]["status"] === "po-pending"){
+                    user.purchaseOrderLicenseStatus = "po-pending";
+                    user.purchaseOrderLicenseId = results[1].id;
                 }
                 if( user.licenseStatus === "active" ||
                     user.licenseStatus === "pending" ||
@@ -636,8 +645,7 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                 }
                 // if a user is on a trial and has a pending purchase order subscription
                 // I cannot show that user's po-pending license map status, because i have to show the trial status
-                licenseInfo = results[0];
-                resolve(licenseInfo);
+                resolve(results);
             }.bind(this))
             .then(null, function(err){
                 console.error("Get License Info By Instructor Error -",err);
