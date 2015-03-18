@@ -1226,6 +1226,8 @@ function subscribeToLicensePurchaseOrder(req, res){
            req.user.licenseStatus = "po-pending";
            req.user.licenseOwnerId = userId;
            req.user.paymentType = "purchase-order";
+           req.user.purchaseOrderLicenseStatus = "po-pending";
+           req.user.purchaseOrderLicenseId = licenseId;
            return Util.updateSession(req);
        })
        .then(function(status){
@@ -1428,10 +1430,9 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             if(typeof licenseId === "string"){
                 return licenseId;
             }
-            req.user.licenseId = licenseId;
-            req.user.licenseStatus = "po-pending";
-            req.user.licenseOwnerId = userId;
             req.user.paymentType = "purchase-order";
+            req.user.purchaseOrderLicenseStatus = "po-pending";
+            req.user.purchaseOrderLicenseId = licenseId;
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -1558,7 +1559,7 @@ function getActivePurchaseOrderInfo(req, res){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
-    var licenseId = req.user.licenseId;
+    var licenseId = req.user.purchaseOrderLicenseId;
     // get name, phone, email, and license status from purchase_order table
     this.myds.getLicenseById(licenseId)
         .then(function(results){
@@ -1601,7 +1602,7 @@ function cancelActivePurchaseOrder(req, res){
         return;
     }
     var userId = req.user.id;
-    var licenseId = req.user.licenseId;
+    var licenseId = req.user.purchaseOrderLicenseId;
     this.myds.getActivePurchaseOrderByUserId(userId)
         .then(function(purchaseOrder){
             if(purchaseOrder === "no active order"){
@@ -1647,7 +1648,12 @@ function setLicenseMapStatusToNull(req, res){
         return;
     }
     var userId = req.user.id;
-    var licenseId = req.user.licenseId;
+    var licenseId;
+    if(req.user.purchaseOrderStatus){
+        licenseId = req.user.purchaseOrderLicenseId;
+    } else{
+        licenseId = req.user.licenseId;
+    }
 
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
@@ -2976,7 +2982,7 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 var state;
                 if (results.length === 0) {
                     state = "access absent";
-                } else if (results.length > 1) {
+                } else if (results.length > 1 && !(results.length === 2 && results[1].status === "po-pending")) {
                     state = "invalid records";
                 } else if (results[0]['license_id'] !== licenseId) {
                     state = "inconsistent";
