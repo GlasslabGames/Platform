@@ -259,6 +259,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/games/available",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAvailableGamesObj"
+            }
+        },
+        {
             api: "/api/v2/dash/games/plan/:planId/basic",
             service: "dash",
             controller: "games",
