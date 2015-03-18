@@ -117,7 +117,7 @@ module.exports = {
     "lic.records.inconsistent":             "The license records are inconsistent.  Review records",
     "lic.educators.full":                   "There are not enough seats in the license for this list of educators",
     "lic.students.full":                    "This class is already full. Please contact your teacher.",
-    "lic.students.full.enable.premium":     "This license does not have enough student seats left to accommodate for all the students in this class. To enable premium games, please upgrade your plan or reduce the number of students in this class.",
+    "lic.students.full.enable.premium":     "This license does not have enough student seats left to accommodate for all the students in this class. To enable premium games, please update your plan or reduce the number of students in this class.",
     "lic.create.denied":                    "An instructor currently on a license cannot create a new license",
     "lic.account.inactive":                 "The payment transaction did not go through",
     "lic.trial.expired":                    "Instructor was part of a license in the past",
@@ -138,7 +138,7 @@ module.exports = {
     "lic.card.expired":                     "Your card has expired.",
     "lic.card.processing.error":            "An error occurred while processing your card.  Try again in a little bit.",
     "lic.order.action.denied":              "This action cannot be done for this purchase order.  Check the purchase order table.",
-    "lic.upgrade.invalid":                  "You cannot decrease student seats in an upgrade",
+    "lic.upgrade.invalid":                  "You cannot decrease student seats in an update",
     "lic.order.processing":                 "Your purchase order is being processed.  Please reach out to our billing department if you would like to alter it.",
     "lic.order.mismatch":                   "The purchase order key and purchase order number do not match in the database. Check again"
 };

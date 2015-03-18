@@ -1244,7 +1244,7 @@ function subscribeToLicensePurchaseOrder(req, res){
            // for now, i will send it to the billing email
            var emails = [];
            if(this.options.env === "prod"){
-              emails.push("purchaseOrder@glasslabgames.org");
+              emails.push("purchase_order@glasslabgames.org");
            } else{
               emails.push("ben@glasslabgames.org");
               emails.push("michael.mulligan@glasslabgames.org");
@@ -1449,7 +1449,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             // for now, i will send it to the billing email
             var emails = [];
             if(this.options.env === "prod"){
-                emails.push("purchaseOrder@glasslabgames.org");
+                emails.push("purchase_order@glasslabgames.org");
             } else{
                 emails.push("ben@glasslabgames.org");
                 emails.push("michael.mulligan@glasslabgames.org");
@@ -3077,7 +3077,7 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
             emailData.teacherFirstName = firstName;
             emailData.teacherLastName = lastName;
         }
-        emailData.subject = "Your Account has Been Upgraded!";
+        emailData.subject = "Your Account has Been Updated!";
         //emailData.ownerName = data.ownerName;
         emailData.ownerFirstName = data.ownerFirstName;
         emailData.ownerLastName = data.ownerLastName;
