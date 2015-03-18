@@ -1559,7 +1559,7 @@ function getActivePurchaseOrderInfo(req, res){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
-    var licenseId = req.user.licenseId;
+    var licenseId = req.user.purchaseOrderLicenseId;
     // get name, phone, email, and license status from purchase_order table
     this.myds.getLicenseById(licenseId)
         .then(function(results){
@@ -1602,7 +1602,7 @@ function cancelActivePurchaseOrder(req, res){
         return;
     }
     var userId = req.user.id;
-    var licenseId = req.user.licenseId;
+    var licenseId = req.user.purchaseOrderLicenseId;
     this.myds.getActivePurchaseOrderByUserId(userId)
         .then(function(purchaseOrder){
             if(purchaseOrder === "no active order"){
@@ -1648,7 +1648,12 @@ function setLicenseMapStatusToNull(req, res){
         return;
     }
     var userId = req.user.id;
-    var licenseId = req.user.licenseId;
+    var licenseId;
+    if(req.user.purchaseOrderStatus){
+        licenseId = req.user.purchaseOrderLicenseId;
+    } else{
+        licenseId = req.user.licenseId;
+    }
 
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
