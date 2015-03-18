@@ -2323,13 +2323,6 @@ function migrateToTrialLegacy(req, res){
                                 failures[input.user.id] = "lic.access.invited";
                                 return;
                             }
-                            var email = input.user["EMAIL"];
-                            var template = "owner-legacy-trial";
-                            var data = {};
-                            data.firstName = input.user["FIRST_NAME"];
-                            data.lastName = input.user["LAST_NAME"];
-                            data.subject = "Welcome to Glass Lab Premium!";
-                            return _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
                         }.bind(this))
                         .then(function(){
                             resolve()
@@ -2359,7 +2352,9 @@ function migrateToTrialLegacy(req, res){
         .then(function(){
             var keys = Object.keys(failures);
             if(keys.length > 0){
-                this.requestUtil.jsonResponse(res, { status: "failed", failures: failures });
+                // if some user was not added to trialLegacy, check to see if that should be the case, investigate particular error
+                // if a user was already on a license in some way, such as being an invited teacher, they should be in check
+                this.requestUtil.jsonResponse(res, { status: "not all legacies", check: failures });
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: "ok" });
@@ -3127,32 +3122,25 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
 function _sendEmailResponse(email, data, protocol, host, template){
     // to remove testing email spam, i've added a return. remove to test
     //return;
-    data.toEmail = email;
-    return when.promise(function(resolve, reject){
-        if(data.expirationDate){
-            data.expirationDate = new Date(data.expirationDate);
-        }
-        var emailData = {
-            subject: data.subject,
-            to: data.toEmail,
-            data: data,
-            host: protocol + "://" + host
-        };
-        var pathway = path.join(__dirname,"../email-templates");
-        var options = this.options.auth.email;
-        var email = new Util.Email(
-            this.options.auth.email,
-            path.join( __dirname, "../email-templates" ),
-            this.stats );
-        email.send( template, emailData )
-            .then(function(){
-                resolve();
-            })
-            .then(null, function(err){
-                console.error("Send Email Response Error -",err);
-                reject(err);
-            });
-    }.bind(this));
+    if(data.expirationDate){
+        data.expirationDate = new Date(data.expirationDate);
+    }
+    var emailData = {
+        subject: data.subject,
+        to: email,
+        data: data,
+        host: protocol + "://" + host
+    };
+    var pathway = path.join(__dirname,"../email-templates");
+    var options = this.options.auth.email;
+    var email = new Util.Email(
+        this.options.auth.email,
+        path.join( __dirname, "../email-templates" ),
+        this.stats );
+    email.send( template, emailData )
+        .then(null, function(err){
+            console.error("Send Email Response Error -",err);
+        });
 }
 
 var exampleOut = {}, exampleIn = {};
