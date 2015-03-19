@@ -1559,7 +1559,13 @@ function getActivePurchaseOrderInfo(req, res){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
-    var licenseId = req.user.purchaseOrderLicenseId;
+    var licenseId;
+    if (req.purchaseOrderLicenseId) {
+        licenseId = req.user.purchaseOrderLicenseId;
+    } else {
+        licenseId = req.user.licenseId;
+    }
+
     // get name, phone, email, and license status from purchase_order table
     this.myds.getLicenseById(licenseId)
         .then(function(results){
