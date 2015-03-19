@@ -9,6 +9,7 @@ module.exports = {
     getActiveGamesBasicInfo:         getActiveGamesBasicInfo,
     getGamesBasicInfo:               getGamesBasicInfo,
     getPlanLicenseGamesBasicInfo:    getPlanLicenseGamesBasicInfo,
+    getAvailableGamesObj:            getAvailableGamesObj,
     getGamesBasicInfoByPlan:         getGamesBasicInfoByPlan,
     getActiveGamesDetails:           getActiveGamesDetails,
     getMyGames:                      getMyGames,
@@ -138,6 +139,53 @@ function getPlanLicenseGamesBasicInfo(req, res){
         .then(null, function(err){
             console.error("Get License Games Basic Info Error -",err);
             this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function getAvailableGamesObj(req, res){
+    if(!(req && req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "dash.permission.denied"});
+        return;
+    }
+    var licenseId = req.user.licenseId;
+    var promise;
+    if(licenseId){
+        var licService = this.serviceManager.get("lic").service;
+        promise = licService.myds.getLicenseById(licenseId);
+    } else{
+        var dashService = this.serviceManager.get("dash").service;
+        promise = dashService.getListOfAllFreeGameIds();
+    }
+    promise
+        .then(function(results){
+            var availableGames = {};
+            var  licConst = require("../../lic/lic.const.js");
+            if(licenseId){
+                var license = results[0];
+                var plan = licConst.plan[license["package_type"]];
+                var browserGames = plan.browserGames;
+                browserGames.forEach(function(gameId){
+                    availableGames[gameId] = true;
+                });
+                var ipadGames = plan.iPadGames;
+                ipadGames.forEach(function(gameId){
+                    availableGames[gameId] = true;
+                });
+                var downloadableGames = plan.downloadableGames;
+                downloadableGames.forEach(function(gameId){
+                    availableGames[gameId] = true;
+                });
+            } else{
+                var freeGames = results;
+                freeGames.forEach(function(gameId){
+                    availableGames[gameId] = true;
+                });
+            }
+            this.requestUtil.jsonResponse(res, availableGames);
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Available Game Map Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
 
