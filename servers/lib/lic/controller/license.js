@@ -81,6 +81,9 @@ function getCurrentPlan(req, res){
             if(typeof status === "string"){
                 return status;
             }
+            if(typeof status === "number"){
+                licenseId = status;
+            }
             return this.myds.getLicenseById(licenseId);
         }.bind(this))
         .then(function(license){
@@ -1334,6 +1337,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                 data.expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
                 data.subscriptionId = null;
                 data.purchaseOrder = true;
+                data.coupon = purchaseOrderInfo.promoCode;
                 return _createLicenseSQL.call(this, userId, planInfo, data);
             }.bind(this))
             .then(function(id){
@@ -1625,10 +1629,15 @@ function cancelActivePurchaseOrder(req, res){
             if (typeof status === "string") {
                 return status;
             }
-            delete req.user.licenseId;
-            delete req.user.licenseStatus;
-            delete req.user.licenseOwnerId;
-            delete req.user.paymentType;
+            if(req.user.purchaseOrderLicenseId === req.user.licenseId){
+                delete req.user.licenseId;
+                delete req.user.licenseStatus;
+                delete req.user.licenseOwnerId;
+                delete req.user.paymentType;
+            }
+            delete req.user.purchaseOrderLicenseId;
+            delete req.user.purchaseOrderLicenseStatus;
+
             return Util.updateSession(req);
         })
         .then(function(status){
@@ -2547,8 +2556,8 @@ function _createLicenseSQL(userId, planInfo, data){
             licenseKey = "NULL";
         }
         var promo;
-        if(planInfo.promoCode){
-            promo = "'" + planInfo.promoCode + "'";
+        if(data.coupon){
+            promo = "'" + data.coupon + "'";
         } else{
             promo = "NULL";
         }
@@ -2995,8 +3004,10 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 } else if (results.length > 1 &&
                     !(results.length === 2 && (results[1].status === "po-pending" || results[1].status === "po-rejected"))) {
                     state = "invalid records";
-                } else if (results[0]['license_id'] !== licenseId) {
+                } else if (results[0]['license_id'] !== licenseId && results[0].status !== "po-received") {
                     state = "inconsistent";
+                } else if(results[0]['license_id'] !== licenseId && results[0].status === "po-received"){
+                    state = results[0]['license_id'];
                 }
                 resolve(state);
             })
