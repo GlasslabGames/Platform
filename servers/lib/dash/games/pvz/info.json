@@ -22,6 +22,7 @@
             "description": ""
         },
         "price": "TBD",
+        "packages": "iPad Games",
         "license": {
             "type": "loginType",
             "loginType": "glasslabv2",
