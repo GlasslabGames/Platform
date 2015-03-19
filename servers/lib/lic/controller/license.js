@@ -1337,7 +1337,6 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                 data.expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
                 data.subscriptionId = null;
                 data.purchaseOrder = true;
-                data.coupon = purchaseOrderInfo.promoCode;
                 return _createLicenseSQL.call(this, userId, planInfo, data);
             }.bind(this))
             .then(function(id){
@@ -2556,8 +2555,8 @@ function _createLicenseSQL(userId, planInfo, data){
             licenseKey = "NULL";
         }
         var promo;
-        if(data.coupon){
-            promo = "'" + data.coupon + "'";
+        if(planInfo.promoCode){
+            promo = "'" + planInfo.promoCode + "'";
         } else{
             promo = "NULL";
         }
