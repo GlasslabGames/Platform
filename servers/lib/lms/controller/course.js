@@ -14,7 +14,8 @@ module.exports = {
     updateGamesInCourse:    updateGamesInCourse,
     blockPremiumGamesBasicCourses: blockPremiumGamesBasicCourses,
     verifyCode:             verifyCode,
-    verifyGameInCourse:     verifyGameInCourse
+    verifyGameInCourse:     verifyGameInCourse,
+    verifyAccessToGameInCourse: verifyAccessToGameInCourse
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -994,9 +995,10 @@ function verifyGameInCourse(req, res, next) {
 
 function verifyAccessToGameInCourse(req, res, next) {
 
-    this.requestUtil.errorResponse(res, {key: "dash.gameId.access.denied"});
-    return;
-
+    if (req.user && req.user.role !== "student"){
+        this.requestUtil.jsonResponse(res, { status: "ok"});
+        return;
+    }
     if (!req.params || !req.params.hasOwnProperty("courseId")) {
         this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.missing"});
         return;
@@ -1005,22 +1007,31 @@ function verifyAccessToGameInCourse(req, res, next) {
         this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.game.missing"});
         return;
     }
-
-    this.telmStore.getGamesForCourse(req.params.courseId)
+    var userId = req.user.id;
+    var courseId = req.params.courseId;
+    var gameId = req.params.gameId;
+    this.myds.isUserInCourse(userId, courseId)
+        .then(function(state){
+            if(!state){
+                return "not in class";
+            }
+            return this.telmStore.getGamesForCourse(req.params.courseId);
+        }.bind(this))
         .then(function(games) {
-            var hasGameInCourse = false;
-            var gameList = Object.keys(games);
-            for (var i = 0; i < gameList.length; i++) {
-                if (gameList[i] === req.params.gameId) {
-                    hasGameInCourse = true;
-                    break;
-                }
+            if(games === "not in class"){
+                this.requestUtil.errorResponse(res, { key: "lms.access.invalid"});
+                return;
             }
-            if (hasGameInCourse) {
-                var courseInfo = {status: "game found in course", games: gameList};
-                this.requestUtil.jsonResponse(res, courseInfo);
-            } else {
-                this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.invalid", statusCode:404});
+            var gameInCourse = games[gameId];
+            // if game is in the course and game is assigned, things are good.
+            if(gameInCourse && gameInCourse.assigned){
+                this.requestUtil.jsonResponse(res, { status: "ok"});
+                return;
             }
+            this.requestUtil.errorResponse(res, { key: "lms.access.invalid"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Verify Access to Game In Course Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
