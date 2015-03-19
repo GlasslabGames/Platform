@@ -991,3 +991,36 @@ function verifyGameInCourse(req, res, next) {
             }
         }.bind(this));
 }
+
+function verifyAccessToGameInCourse(req, res, next) {
+
+    this.requestUtil.errorResponse(res, {key: "dash.gameId.access.denied"});
+    return;
+
+    if (!req.params || !req.params.hasOwnProperty("courseId")) {
+        this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.missing"});
+        return;
+    }
+    if (!req.params || !req.params.hasOwnProperty("gameId")) {
+        this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.game.missing"});
+        return;
+    }
+
+    this.telmStore.getGamesForCourse(req.params.courseId)
+        .then(function(games) {
+            var hasGameInCourse = false;
+            var gameList = Object.keys(games);
+            for (var i = 0; i < gameList.length; i++) {
+                if (gameList[i] === req.params.gameId) {
+                    hasGameInCourse = true;
+                    break;
+                }
+            }
+            if (hasGameInCourse) {
+                var courseInfo = {status: "game found in course", games: gameList};
+                this.requestUtil.jsonResponse(res, courseInfo);
+            } else {
+                this.requestUtil.errorResponse(res, {key: "user.enroll.sdk.course.invalid", statusCode:404});
+            }
+        }.bind(this));
+}

@@ -380,6 +380,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/lms/course/:courseId/game/:gameId/verify-access",
+            service: "lms",
+            controller: "course",
+            method: {
+                get: "verifyAccessToGameInCourse"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/lms/course/enroll",
             service: "lms",

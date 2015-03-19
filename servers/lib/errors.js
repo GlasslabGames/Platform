@@ -93,6 +93,7 @@ module.exports = {
     "report.body.missing":                  "Missing Body",
     // dash
     "dash.permission.denied":               "You do not have permission to perform this operation.",
+    "dash.gameId.access.denied":            "You do not have access to this game.",
     "dash.messageId.invalid":               "Invalid messageId",
     "dash.messageId.missing":               "Missing messageId",
     "dash.icon.missing":                    "Missing icon when posting a new message",
