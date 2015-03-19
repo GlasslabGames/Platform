@@ -1560,7 +1560,7 @@ function getActivePurchaseOrderInfo(req, res){
         return;
     }
     var licenseId;
-    if (req.purchaseOrderLicenseId) {
+    if (req.user.purchaseOrderLicenseId) {
         licenseId = req.user.purchaseOrderLicenseId;
     } else {
         licenseId = req.user.licenseId;
