@@ -2435,7 +2435,7 @@ function _storeSchoolInformation(schoolInfo){
                 var enabled = 1;
                 var secret = "NULL";
                 var shared = "NULL";
-                var zip = "'" + schoolInfo.zip + "'";
+                var zip = "'" + schoolInfo.zipCode + "'";
                 var address = "'" + schoolInfo.address + "'";
                 var dateCreated = "NOW()";
                 var lastUpdated = "NOW()";
@@ -2992,6 +2992,9 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
 function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, emailData, instructors){
     return when.promise(function(resolve, reject){
         var promiseList = [];
+        // poPendingStatus variable used to check for edge case where we are ending a pending purchase order license, but a trial is still active
+        // in that case, we do not want to disable premium classes, because the educator's premium classes would belong to the trial
+        var poPendingStatus = false;
         // if licenseMap not already computed, find it. else, use existing value
         if(!instructors){
             promiseList.push(this.myds.getInstructorsByLicense(licenseId));
@@ -3008,6 +3011,9 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 var state = false;
                 licenseMap.some(function(instructor){
                     if(instructor.email === teacherEmail[0]){
+                        if(instructor.status === "po-pending"){
+                            poPendingStatus = true;
+                        }
                         state = true;
                         return true;
                     }
@@ -3027,7 +3033,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 if(courseIds === "email not in license"){
                     return courseIds;
                 }
-                if(Array.isArray(courseIds) && courseIds.length > 0){
+                if(Array.isArray(courseIds) && courseIds.length > 0 && !poPendingStatus){
                     return this.unassignPremiumCourses(courseIds, licenseId);
                 }
             }.bind(this))
