@@ -141,5 +141,6 @@ module.exports = {
     "lic.order.action.denied":              "This action cannot be done for this purchase order.  Check the purchase order table.",
     "lic.upgrade.invalid":                  "You cannot decrease student seats in an update",
     "lic.order.processing":                 "Your purchase order is being processed.  Please reach out to our billing department if you would like to alter it.",
-    "lic.order.mismatch":                   "The purchase order key and purchase order number do not match in the database. Check again"
+    "lic.order.mismatch":                   "The purchase order key and purchase order number do not match in the database. Check again",
+    "lic.form.invalid":                     "Please properly enter the form data"
 };

@@ -45,6 +45,12 @@ function getUserProfileData(req, res, next) {
                     }
                     req.user[property] = value;
                 });
+                _(req.user).forEach(function(value, property){
+                    if(userData[property] === undefined){
+                        delete req.user[property];
+                        update = true;
+                    }
+                });
                 if(update){
                     return Util.updateSession(req);
                 }
