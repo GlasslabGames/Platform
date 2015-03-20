@@ -1217,6 +1217,14 @@ function subscribeToLicensePurchaseOrder(req, res){
     }
     var userId = req.user.id;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
+
+    if( purchaseOrderInfo.firstName === null ||
+        purchaseOrderInfo.lastName === null ||
+        purchaseOrderInfo.phone === null ||
+        purchaseOrderInfo.email === null){
+        this.requestUtil.errorResponse(res, { key: "lic.form.invalid"});
+        return;
+    }
     var planInfo = req.body.planInfo;
     var action = "subscribe";
 
@@ -1425,6 +1433,14 @@ function upgradeTrialLicensePurchaseOrder(req, res){
     }
     var userId = req.user.id;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
+
+    if( purchaseOrderInfo.firstName === null ||
+        purchaseOrderInfo.lastName === null ||
+        purchaseOrderInfo.phone === null ||
+        purchaseOrderInfo.email === null){
+        this.requestUtil.errorResponse(res, { key: "lic.form.invalid"});
+        return;
+    }
     var planInfo = req.body.planInfo;
     var action = "trial upgrade";
 
