@@ -36,7 +36,20 @@ function getUserProfileData(req, res, next) {
         // check perms before returning user info
         this.webstore.getUserInfoById(userData.id)
             // ok, send mdata
-            .then(function(userData){
+            .then(function(data){
+                userData = data;
+                var update = false;
+                _(userData).forEach(function(value, property){
+                    if(value !== req.user[property]){
+                        update = true;
+                    }
+                    req.user[property] = value;
+                });
+                if(update){
+                    return Util.updateSession(req);
+                }
+            }.bind(this))
+            .then(function(){
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error
