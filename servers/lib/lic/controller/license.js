@@ -1606,7 +1606,7 @@ function getActivePurchaseOrderInfo(req, res){
 }
 
 function cancelActivePurchaseOrder(req, res){
-    if(!(req && req.user && req.user.id && req.user.role === "instructor")){
+    if(!(req && req.user && req.user.id && req.user.role === "instructor" && req.user.purchaseOrderLicenseId)){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
