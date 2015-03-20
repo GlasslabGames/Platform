@@ -259,6 +259,7 @@ function getBillingInfo(req, res){
             if(cardData){
                 billingInfo = _buildBillingInfo(cardData);
             }
+            billingInfo.accountBalance = customer.account_balance;
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
