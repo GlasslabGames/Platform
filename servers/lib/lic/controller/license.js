@@ -335,7 +335,7 @@ function subscribeToLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.body && req.body.stripeInfo && req.body.planInfo)){
+    if(!(req.body && req.body.stripeInfo && req.body.planInfo && req.body.schoolInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -346,9 +346,10 @@ function subscribeToLicense(req, res){
     var userId = req.user.id;
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
+    var schoolInfo = req.body.schoolInfo;
     var expirationDate;
 
-    _createSubscription.call(this, req, userId, stripeInfo, planInfo)
+    _createSubscription.call(this, req, userId, schoolInfo, stripeInfo, planInfo)
         .then(function(results){
             if(typeof results === "string"){
                 return results;
@@ -434,7 +435,7 @@ function subscribeToTrialLicense(req, res){
             if(state){
                 return "no trial"
             }
-            return _createSubscription.call(this, req, userId, stripeInfo, planInfo);
+            return _createSubscription.call(this, req, userId, "NULL", stripeInfo, planInfo);
         }.bind(this))
         .then(function(results){
             if(typeof results === "string"){
@@ -623,7 +624,7 @@ function upgradeTrialLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo)){
+    if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo && req.body.schoolInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -631,6 +632,7 @@ function upgradeTrialLicense(req, res){
     var licenseId = req.user.licenseId;
     var stripeInfo = req.body.stripeInfo;
     var planInfo = req.body.planInfo;
+    var schoolInfo = req.body.schoolInfo;
     var expirationDate;
     _validateLicenseUpgradeTrial.call(this, userId, licenseId)
         .then(function(status){
@@ -643,7 +645,7 @@ function upgradeTrialLicense(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return _createSubscription.call(this, req, userId, stripeInfo, planInfo);
+            return _createSubscription.call(this, req, userId, schoolInfo, stripeInfo, planInfo);
         }.bind(this))
         .then(function(results){
             if(typeof results === "string"){
@@ -1207,7 +1209,7 @@ function subscribeToLicensePurchaseOrder(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo && req.body.schoolInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -1217,7 +1219,6 @@ function subscribeToLicensePurchaseOrder(req, res){
     }
     var userId = req.user.id;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
-
     if( purchaseOrderInfo.firstName === null ||
         purchaseOrderInfo.lastName === null ||
         purchaseOrderInfo.phone === null ||
@@ -1226,54 +1227,55 @@ function subscribeToLicensePurchaseOrder(req, res){
         return;
     }
     var planInfo = req.body.planInfo;
+    var schoolInfo = req.body.schoolInfo;
     var action = "subscribe";
 
-   _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
-       .then(function(licenseId){
-           if(typeof licenseId === "string"){
-               return licenseId;
-           }
-           req.user.licenseId = licenseId;
-           req.user.licenseStatus = "po-pending";
-           req.user.licenseOwnerId = userId;
-           req.user.paymentType = "purchase-order";
-           req.user.purchaseOrderLicenseStatus = "po-pending";
-           req.user.purchaseOrderLicenseId = licenseId;
-           return Util.updateSession(req);
-       })
-       .then(function(status){
-           if(status === "po-pending"){
-               this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
-               return;
-           }
-           if(status === "already on license"){
-               this.requestUtil.errorResponse(res, { key: "lic.create.denied"});
-               return;
-           }
-           //email + conclusion stuff, go to dashboard
-           // email here goes to accounting/mat
-           // for now, i will send it to the billing email
-           var emails = [];
-           if(this.options.env === "prod"){
-              emails.push("purchase_order@glasslabgames.org");
-           } else{
-              emails.push("ben@glasslabgames.org");
-              emails.push("michael.mulligan@glasslabgames.org");
-           }
-           var data = {};
-           _.merge(data, purchaseOrderInfo, planInfo);
-           // template's data pipeline and desired variables needs scoping out
-           data.subject = "Subscribe Purchase Order";
-           var template = "accounting-order";
-           _(emails).forEach(function(email){
+    _purchaseOrderSubscribe.call(this, userId, schoolInfo, planInfo, purchaseOrderInfo, action)
+        .then(function(licenseId){
+            if(typeof licenseId === "string"){
+                return licenseId;
+            }
+            req.user.licenseId = licenseId;
+            req.user.licenseStatus = "po-pending";
+            req.user.licenseOwnerId = userId;
+            req.user.paymentType = "purchase-order";
+            req.user.purchaseOrderLicenseStatus = "po-pending";
+            req.user.purchaseOrderLicenseId = licenseId;
+            return Util.updateSession(req);
+        })
+        .then(function(status){
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.pending"});
+                return;
+            }
+            if(status === "already on license"){
+                this.requestUtil.errorResponse(res, { key: "lic.create.denied"});
+                return;
+            }
+            //email + conclusion stuff, go to dashboard
+            // email here goes to accounting/mat
+            // for now, i will send it to the billing email
+            var emails = [];
+            if(this.options.env === "prod"){
+                emails.push("purchase_order@glasslabgames.org");
+            } else{
+                emails.push("ben@glasslabgames.org");
+                emails.push("michael.mulligan@glasslabgames.org");
+            }
+            var data = {};
+            _.merge(data, purchaseOrderInfo, planInfo);
+            // template's data pipeline and desired variables needs scoping out
+            data.subject = "Subscribe Purchase Order";
+            var template = "accounting-order";
+            _(emails).forEach(function(email){
                 _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
-           }.bind(this));
-           this.requestUtil.jsonResponse(res, { status: "ok"});
-       }.bind(this))
-       .then(null, function(err){
-           console.error("Subscribe to License Purchase Order Error -",err);
-           this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
-       }.bind(this));
+            }.bind(this));
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Subscribe to License Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+        }.bind(this));
 }
 
 // if user is not on stripe, set up a customer account on stripe.
@@ -1303,7 +1305,7 @@ function _createStripeCustomer(userId, params){
     }.bind(this));
 }
 
-function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
+function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo, action){
     return when.promise(function(resolve, reject){
         var licenseId;
         //create stripe customer id
@@ -1345,7 +1347,7 @@ function _purchaseOrderSubscribe(userId, planInfo, purchaseOrderInfo, action){
                 data.expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
                 data.subscriptionId = null;
                 data.purchaseOrder = true;
-                return _createLicenseSQL.call(this, userId, planInfo, data);
+                return _createLicenseSQL.call(this, userId, schoolInfo, planInfo, data);
             }.bind(this))
             .then(function(id){
                 if(typeof id === "string"){
@@ -1418,6 +1420,8 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     values.push(payment);
     action = "'" + action + "'";
     values.push(action);
+    var dateCreated = "NOW()";
+    values.push(dateCreated);
     return values;
 }
 
@@ -1427,7 +1431,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo)){
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo && req.body.schoolInfo)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -1442,9 +1446,10 @@ function upgradeTrialLicensePurchaseOrder(req, res){
         return;
     }
     var planInfo = req.body.planInfo;
+    var schoolInfo = req.body.schoolInfo;
     var action = "trial upgrade";
 
-    _purchaseOrderSubscribe.call(this, userId, planInfo, purchaseOrderInfo, action)
+    _purchaseOrderSubscribe.call(this, userId, schoolInfo, planInfo, purchaseOrderInfo, action)
         .then(function(licenseId){
             if(typeof licenseId === "string"){
                 return licenseId;
@@ -2345,7 +2350,7 @@ function migrateToTrialLegacy(req, res){
             instructors = results;
             function _subscribeInstructor(input, userId, stripeInfo, planInfo){
                 return when.promise(function(resolve, reject){
-                    _createSubscription.call(this, input, userId, stripeInfo, planInfo)
+                    _createSubscription.call(this, input, userId, "NULL", stripeInfo, planInfo)
                         .then(function(status){
                             if(status === "duplicate customer account"){
                                 failures[input.user.id] = "lic.records.invalid";
@@ -2405,6 +2410,61 @@ function migrateToTrialLegacy(req, res){
         }.bind(this));
 }
 
+function _storeSchoolInformation(schoolInfo){
+    return when.promise(function(resolve, reject){
+        var title = "'" + schoolInfo.name + "'";
+        var city = "'" + schoolInfo.city + "'";
+        var state = "'" + schoolInfo.state + "'";
+
+        var institutionId;
+
+        var keys = [];
+        keys.push("TITLE = " + title);
+        keys.push("CITY = "+ city);
+        keys.push("STATE = " + state);
+        this.myds.getInstitutionIdByKeys(keys)
+            .then(function(results){
+                if(typeof results === "number"){
+                    institutionId = results;
+                    return "exists";
+                }
+                var version = 3;
+                var code = "NULL";
+                var enabled = 1;
+                var secret = "NULL";
+                var shared = "NULL";
+                var zip = "'" + schoolInfo.zip + "'";
+                var address = "'" + schoolInfo.address + "'";
+                var dateCreated = "NOW()";
+
+                var values = [];
+                values.push(version);
+                values.push(city);
+                values.push(code);
+                values.push(enabled);
+                values.push(secret);
+                values.push(shared);
+                values.push(state);
+                values.push(title);
+                values.push(zip);
+                values.push(address);
+                values.push(dateCreated);
+
+                return this.myds.insertToInstitutionTable(values);
+            }.bind(this))
+            .then(function(id){
+                if(typeof id === "number"){
+                    institutionId = id;
+                }
+                resolve(institutionId);
+            })
+            .then(null, function(err){
+                console.error("Store School Information Error -", err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
 function _buildBillingInfo(cardData){
     var output = {};
     output.last4 = cardData.last4;
@@ -2422,7 +2482,7 @@ function _buildBillingInfo(cardData){
     return output;
 }
 
-function _createSubscription(req, userId, stripeInfo, planInfo){
+function _createSubscription(req, userId, schoolInfo, stripeInfo, planInfo){
     return when.promise(function(resolve, reject){
         var email = req.user.email;
         var name = req.user.firstName + " " + req.user.lastName;
@@ -2451,7 +2511,7 @@ function _createSubscription(req, userId, stripeInfo, planInfo){
                     return stripeData;
                 }
                 expirationDate = stripeData.expirationDate;
-                return _createLicenseSQL.call(this, userId, planInfo, stripeData);
+                return _createLicenseSQL.call(this, userId, schoolInfo, planInfo, stripeData);
             }.bind(this))
             .then(function(licenseId){
                 if(typeof licenseId === "string"){
@@ -2560,57 +2620,71 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     return params;
 }
 
-function _createLicenseSQL(userId, planInfo, data){
+function _createLicenseSQL(userId, schoolInfo, planInfo, data){
     return when.promise(function(resolve, reject){
-        var seatsTier = planInfo.seats;
-        var type = "'" + planInfo.type + "'";
-        var licenseKey;
-        if(planInfo.licenseKey){
-            licenseKey = "'" + planInfo.licenseKey + "'";
-        } else{
-            licenseKey = "NULL";
-        }
-        var promo;
-        if(planInfo.promoCode){
-            promo = "'" + planInfo.promoCode + "'";
-        } else{
-            promo = "NULL";
-        }
-        var expirationDate = "'" + data.expirationDate + "'";
-        var educatorSeatsRemaining = lConst.seats[seatsTier].educatorSeats;
-        var studentSeatsRemaining = lConst.seats[seatsTier].studentSeats;
-        seatsTier = "'" + seatsTier + "'";
-        var subscriptionId;
-        if(!data.subscriptionId){
-            subscriptionId = "NULL";
-        } else{
-            subscriptionId = "'" + data.subscriptionId + "'";
-        }
-        var active;
-        var autoRenew = 0;
-        var paymentType;
-        if(data.purchaseOrder){
-            active = 0;
-            paymentType = "'purchase-order'";
-        } else{
-            active = 1;
-            paymentType = "'credit-card'";
-        }
-        var values = [];
-        values.push(userId);
-        values.push(licenseKey);
-        values.push(type);
-        values.push(seatsTier);
-        values.push(expirationDate);
-        values.push(active);
-        values.push(educatorSeatsRemaining);
-        values.push(studentSeatsRemaining);
-        values.push(promo);
-        values.push(subscriptionId);
-        values.push(autoRenew);
-        values.push(paymentType);
         var licenseId;
-        this.myds.insertToLicenseTable(values)
+        var values;
+        var promise;
+        if(schoolInfo === "NULL"){
+            promise = Util.PromiseContinue("NULL");
+        } else{
+            promise = _storeSchoolInformation.call(this, schoolInfo);
+        }
+        promise
+            .then(function(institutionId){
+                var seatsTier = planInfo.seats;
+                var type = "'" + planInfo.type + "'";
+                var licenseKey;
+                if(planInfo.licenseKey){
+                    licenseKey = "'" + planInfo.licenseKey + "'";
+                } else{
+                    licenseKey = "NULL";
+                }
+                var promo;
+                if(planInfo.promoCode){
+                    promo = "'" + planInfo.promoCode + "'";
+                } else{
+                    promo = "NULL";
+                }
+                var expirationDate = "'" + data.expirationDate + "'";
+                var educatorSeatsRemaining = lConst.seats[seatsTier].educatorSeats;
+                var studentSeatsRemaining = lConst.seats[seatsTier].studentSeats;
+                seatsTier = "'" + seatsTier + "'";
+                var subscriptionId;
+                if(!data.subscriptionId){
+                    subscriptionId = "NULL";
+                } else{
+                    subscriptionId = "'" + data.subscriptionId + "'";
+                }
+                var active;
+                var autoRenew = 0;
+                var paymentType;
+                if(data.purchaseOrder){
+                    active = 0;
+                    paymentType = "'purchase-order'";
+                } else{
+                    active = 1;
+                    paymentType = "'credit-card'";
+                }
+                var dateCreated = "NOW()";
+                var values = [];
+                values.push(userId);
+                values.push(licenseKey);
+                values.push(type);
+                values.push(seatsTier);
+                values.push(expirationDate);
+                values.push(active);
+                values.push(educatorSeatsRemaining);
+                values.push(studentSeatsRemaining);
+                values.push(promo);
+                values.push(subscriptionId);
+                values.push(autoRenew);
+                values.push(paymentType);
+                values.push(institutionId);
+                values.push(dateCreated);
+
+                return this.myds.insertToLicenseTable(values);
+            }.bind(this))
             .then(function(insertId){
                 licenseId = insertId;
                 values = [];
@@ -2621,6 +2695,8 @@ function _createLicenseSQL(userId, planInfo, data){
                 } else{
                     values.push("'active'");
                 }
+                var dateCreated = "NOW()";
+                values.push(dateCreated);
                 return this.myds.insertToLicenseMapTable(values);
             }.bind(this))
             .then(function(state){
