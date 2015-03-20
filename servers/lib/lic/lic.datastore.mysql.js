@@ -52,7 +52,7 @@ Lic_MySQL.prototype.insertToLicenseTable = function(values){
         var Q = "INSERT INTO GL_LICENSE\n" +
             "(user_id,license_key,package_type,package_size_tier,expiration_date," +
             "active,educator_seats_remaining,student_seats_remaining,promo," +
-            "subscription_id,auto_renew,payment_type)\n" +
+            "subscription_id,auto_renew,payment_type,institution_id,date_created)\n" +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -68,7 +68,7 @@ Lic_MySQL.prototype.insertToLicenseTable = function(values){
 Lic_MySQL.prototype.insertToLicenseMapTable = function(values){
     return when.promise(function(resolve, reject){
         var valuesString = values.join(",");
-        var Q = "INSERT INTO GL_LICENSE_MAP (user_id,license_id,status)\n" +
+        var Q = "INSERT INTO GL_LICENSE_MAP (user_id,license_id,status,date_created)\n" +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -341,13 +341,13 @@ function _insertTempUserValueWithEmail(email){
 Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
     return when.promise(function(resolve, reject){
         var inputs = [];
-        var startValues = "('pending'," + licenseId + ",";
+        var startValues = "('pending',NOW()," + licenseId + ",";
         userIds.forEach(function(id){
             inputs.push(startValues + id + ")")
         });
         var insertValues = inputs.join(',');
 
-        var Q = "INSERT INTO GL_LICENSE_MAP (status,license_id,user_id) VALUES " + insertValues + ";";
+        var Q = "INSERT INTO GL_LICENSE_MAP (status,date_created,license_id,user_id) VALUES " + insertValues + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -477,7 +477,7 @@ Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
         var valuesString = values.join(",");
         var Q = "INSERT INTO GL_PURCHASE_ORDER " +
             "(user_id,license_id,status,purchase_order_number," +
-            "purchase_order_key,phone,email,name,payment,action) " +
+            "purchase_order_key,phone,email,name,payment,action,date_created) " +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -588,6 +588,43 @@ Lic_MySQL.prototype.updateRecentLicenseMapByUserId = function(userId, updateFiel
                 console.error("Update License Map By User Id Status Error -",err);
                 reject(err);
             });
+    }.bind(this));
+};
+
+// discovers the institution id from a given set of keys
+Lic_MySQL.prototype.getInstitutionIdByKeys = function(keys){
+    return when.promise(function(resolve, reject){
+        var keysString = keys.join(" and ");
+        var Q = "SELECT * FROM GL_INSTITUTION WHERE " + keysString + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                if(results && results.length > 0){
+                    resolve(results[0].id);
+                } else{
+                    resolve();
+                }
+            })
+            .then(null, function(err){
+                console.error("Get Institution Id By Keys Error -",err);
+                reject(err);
+            })
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.insertToInstitutionTable = function(values){
+    return when.promise(function(resolve, reject){
+        var valuesString = values.join(",");
+        var Q = "INSERT INTO GL_INSTITUTION\n" +
+            "(version,CITY,code,ENABLED,SECRET,SHARED,STATE,TITLE,ZIP,ADDRESS,DATE_CREATED,LAST_UPDATED)\n" +
+            "VALUES (" + valuesString + ");";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results.insertId);
+            })
+            .then(null, function(err){
+                console.error("Insert To Institution Table Error -",err);
+                reject(err);
+            })
     }.bind(this));
 };
 
