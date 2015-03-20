@@ -615,7 +615,7 @@ Lic_MySQL.prototype.insertToInstitutionTable = function(values){
     return when.promise(function(resolve, reject){
         var valuesString = values.join(",");
         var Q = "INSERT INTO GL_INSTITUTION\n" +
-            "(version,CITY,code,ENABLED,SECRET,SHARED,STATE,TITLE,ZIP,ADDRESS,DATE_CREATED)\n" +
+            "(version,CITY,code,ENABLED,SECRET,SHARED,STATE,TITLE,ZIP,ADDRESS,DATE_CREATED,LAST_UPDATED)\n" +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){

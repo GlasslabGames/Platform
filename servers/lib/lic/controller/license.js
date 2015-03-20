@@ -1394,7 +1394,8 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     values.push(status);
     var purchaseOrderNumber = "NULL";
     values.push(purchaseOrderNumber);
-    var purchaseOrderKey = Util.CreateUUID();
+    // license id added to guarantee uniqueness.  table also requires a unique value
+    var purchaseOrderKey = Util.CreateUUID() + licenseId;
     purchaseOrderInfo.key = purchaseOrderKey;
     purchaseOrderKey = "'" + purchaseOrderKey + "'";
     values.push(purchaseOrderKey);
@@ -2436,6 +2437,7 @@ function _storeSchoolInformation(schoolInfo){
                 var zip = "'" + schoolInfo.zip + "'";
                 var address = "'" + schoolInfo.address + "'";
                 var dateCreated = "NOW()";
+                var lastUpdated = "NOW()";
 
                 var values = [];
                 values.push(version);
@@ -2449,6 +2451,7 @@ function _storeSchoolInformation(schoolInfo){
                 values.push(zip);
                 values.push(address);
                 values.push(dateCreated);
+                values.push(lastUpdated);
 
                 return this.myds.insertToInstitutionTable(values);
             }.bind(this))
