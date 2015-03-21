@@ -39,6 +39,7 @@ module.exports = {
     getLicenses:     getLicenses
 };
 
+// provides license package information for the subscription/packages page
 function getSubscriptionPackages(req, res){
     try{
         var plans = [];
@@ -67,6 +68,7 @@ function getSubscriptionPackages(req, res){
     }
 }
 
+// gets information necessary for the premium manager page
 function getCurrentPlan(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -127,6 +129,7 @@ function getCurrentPlan(req, res){
             }
             output.ownerName = ownerName;
             output.ownerEmail = owner['EMAIL'];
+            // only appears after the addTeachersToLicense api is called
             output.rejectedTeachers = req.rejectedTeachers || [];
             output.approvedTeachers = req.approvedTeachers || [];
             delete output["packageDetails"]["stripe_planId"];
@@ -138,6 +141,8 @@ function getCurrentPlan(req, res){
         }.bind(this));
 }
 
+// for instructors, this api shows there students who are taking up seats in the license
+// for the license owner, this api shows all students who are taking up seats in the license
 function getStudentsInLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -222,6 +227,8 @@ function getStudentsInLicense(req, res){
         }.bind(this));
 }
 
+// grabs credit card information for the license owner
+// also reveals how much credited cash a license owner has on his or her customer account
 function getBillingInfo(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -268,6 +275,8 @@ function getBillingInfo(req, res){
         }.bind(this))
 }
 
+
+// updates credit card information
 function updateBillingInfo(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -331,6 +340,8 @@ function updateBillingInfo(req, res){
         }.bind(this));
 }
 
+// subscribes to license via credit card
+// if charge successful, user will get access to license right away
 function subscribeToLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -411,6 +422,10 @@ function subscribeToLicense(req, res){
         }.bind(this));
 }
 
+// gives instructor user a 30 student, 0 educator, all game access license that lasts for 60 days
+// no billing information is required
+// instructor can upgrade the trial to premium at any time, via credit card or purchase order
+// if a user has ever been part of another active license, the user cannot have a trial
 function subscribeToTrialLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -485,6 +500,10 @@ function subscribeToTrialLicense(req, res){
         }.bind(this));
 }
 
+// transitions a license to a different seat/game package plan.  Seat plans cannot downgrade
+// however, game packages can be changed freely, with charges or credits assigned to the account based on prorating in stripe
+// upgrade only charges the upgrade till the user's expiration date, does not start new year
+// charge is by credit card, there is no way upgrade via purchase orders
 function upgradeLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -620,6 +639,9 @@ function upgradeLicense(req, res){
         }.bind(this));
 }
 
+// ends a trial license, and then creates a new year long subscription based on the user's pick
+// in ending the trial license, game access rights may change, so all classes with premium games are closed before the new license is started
+// charge by credit card
 function upgradeTrialLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -711,6 +733,8 @@ function upgradeTrialLicense(req, res){
         }.bind(this));
 }
 
+// checks if promo code on stripe is available to be used
+// on front end, promo code info used to determine a user's potential plan price
 function validatePromoCode(req, res) {
     // Validate the user role as instructor
     if(!(req && req.user && req.user.id && req.user.role === "instructor")) {
@@ -753,6 +777,9 @@ function validatePromoCode(req, res) {
         }.bind(this));
 }
 
+// cancels auto renew on stripe. in our system, autorenew is set to false by default
+// at end of year, if auto renew is cancelled, a stripe subscription will end
+// autorenew only relevant to stripe/credit cards
 function cancelLicenseAutoRenew(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -789,6 +816,9 @@ function cancelLicenseAutoRenew(req, res){
         }.bind(this));
 }
 
+// enables autorenew on stripe. by default in our system, autorenew is set to false
+// if enabled, a user will be charged the new subscription price for the next year on the day their prior year ends
+// autorenew is only relevant to stripe/credit cards
 function enableLicenseAutoRenew(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -852,6 +882,9 @@ function enableLicenseAutoRenew(req, res){
         }.bind(this));
 }
 
+// adds teachers to a license, if there are enough teacher seats and if the teachers are available to be added to the license
+// teacher cannot be added to license if they are on another license
+// can add both teachers who have accounts on glasslabgames, as well as teachers who do not yet have accounts
 function addTeachersToLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -1052,6 +1085,8 @@ function addTeachersToLicense(req, res){
         }.bind(this));
 }
 
+// called after modal on front end informs a user of their new access to their license
+// user now has full access to the license
 function setLicenseMapStatusToActive(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -1094,6 +1129,8 @@ function setLicenseMapStatusToActive(req, res){
         }.bind(this));
 }
 
+// removes teacher from license and removes access to premium games from teacher's classes
+// caused by a license owner deciding to remove a teacher through the premium manager
 function removeTeacherFromLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -1144,6 +1181,8 @@ function removeTeacherFromLicense(req, res){
         }.bind(this));
 }
 
+// removes teacher from license and removes access to premium games from teacher's classes
+// caused by a teacher's decision to leave a license
 function teacherLeavesLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -1205,6 +1244,9 @@ function teacherLeavesLicense(req, res){
         }.bind(this));
 }
 
+// begins license subscription process through purchase orders
+// this initially marks the purchase order process as pending
+// user will not have access to their license until they send us a filled out purchase order and we mark it as received
 function subscribeToLicensePurchaseOrder(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -1427,6 +1469,10 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     return values;
 }
 
+// upgrades a trial to a premium license through purchase orders
+// this initially marks the purchase order process as pending
+// user will not have access to their license until they send us a filled out purchase order and we mark it as received
+// the trial remains active until the purchase order is marked as received, at which point the trial is destroyed
 function upgradeTrialLicensePurchaseOrder(req, res){
     // do subscribe purchase order stuff
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
@@ -1580,6 +1626,8 @@ function upgradeLicensePurchaseOrder(req, res){
         }.bind(this));
 }
 
+// gets information from a license owner's currently relevant purchase order
+// either from a purchase order that is currently in progress, or the last one that finished
 function getActivePurchaseOrderInfo(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor")){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
@@ -1628,6 +1676,8 @@ function getActivePurchaseOrderInfo(req, res){
         }.bind(this));
 }
 
+// cancels a purchase order application process that has the status of pending
+// once a purchase order is marked as received, a purchase order license cannot be cancelled through these means
 function cancelActivePurchaseOrder(req, res){
     if(!(req && req.user && req.user.id && req.user.role === "instructor" && req.user.purchaseOrderLicenseId)){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
@@ -1679,6 +1729,7 @@ function cancelActivePurchaseOrder(req, res){
         }.bind(this));
 }
 
+// called by front end modal. temp state used to inform users that their license access has been closed off
 function setLicenseMapStatusToNull(req, res){
     if(!(req.user && req.user.licenseId && req.user.purchaseOrderLicenseStatus && req.user.purchaseOrderLicenseStatus === "po-rejected")){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
@@ -1729,6 +1780,10 @@ function setLicenseMapStatusToNull(req, res){
         }.bind(this));
 }
 
+// admin dashboard rejects a purchase order application process
+// can be rejected at the stages of pending, received or invoiced, but not after approved
+// the purchase order related license is disabled, and all game access from that purchase order license removed
+// admin needs both the glasslab key for that purchase order as well as the purchase order number (if defined in our db) to reject
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
@@ -1810,6 +1865,10 @@ function rejectPurchaseOrder(req, res){
         }.bind(this));
 }
 
+// marks a purchase order as received, granting full access to the chosen license plan while the payment process continues
+// this access is dependent on the progress of the payment process though, access can be removed by glass lab admins
+// admin needs glasslab key for that purchase order to mark as received. admin also enters the form's purchase order number into our system here
+// if a user was on a trial before being marked as received, that trial is terminated
 function receivePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
@@ -1956,6 +2015,10 @@ function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expiration
         updateFields.push(plan);
         var expirationDateString = "expiration_date = '" + expirationDate + "'";
         updateFields.push(expirationDateString);
+        if(planInfo.promoCode){
+            var promoString = "promo = '" + planInfo.promoCode + "'";
+            updateFields.push(promoString);
+        }
 
         this.myds.updateLicenseById(licenseId, updateFields)
             .then(function () {
@@ -2057,6 +2120,9 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
     }.bind(this));
 }
 
+// mark a purchase order as invoiced, to message on our end that we have invoiced the school's billing department
+// called by our admin, and needs both the correct glass lab purchase order key and the purchase order number to carry out
+// purchase order marked invoiced after it has been received, and before a purchase order is marked as approved
 function invoicePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
@@ -2118,6 +2184,9 @@ function invoicePurchaseOrder(req, res){
         }.bind(this));
 }
 
+// marks a purchase order as approved, meaning we have received payment for the plan
+// admin marks as approved, and needs purchase order key and purchase order number to carry out action
+// can only approve an purchase order after it has been marked received and invoiced
 function approvePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
@@ -2250,23 +2319,6 @@ function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId
         this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
             .then(function(){
                 return _endLicense.call(this, userId, licenseId);
-                //var active = "active = 0";
-                //var purchaseOrderIdString = "purchase_order_id = NULL";
-                //var licenseUpdateFields = [active, purchaseOrderIdString];
-                //var licenseMapStatus;
-                //if(status === "rejected"){
-                //    licenseMapStatus = "status = 'po-rejected'";
-                //} else{
-                //    licenseMapStatus = "status = NULL";
-                //}
-                //var licenseMapUpdateFields = [licenseMapStatus];
-                //var promiseList = [];
-                //promiseList.push(this.myds.updateLicenseByPurchaseOrderId(purchaseOrderId, licenseUpdateFields));
-                //if(action === "subscribe" || action === "trial upgrade" || action === "cancel"){
-                //    //var statuses = ["'po-pending'", "'po-received'", "'active'"];
-                //    promiseList.push(this.myds.updateRecentLicenseMapByUserId(userId, licenseMapUpdateFields));
-                //}
-                //return when.all(promiseList);
             }.bind(this))
             .then(function(){
                 if(status === "rejected"){
@@ -2331,7 +2383,10 @@ function _switchToCreditCard(licenseId){
     }.bind(this));
 }
 
-// to give existing instructors 1 year of premium access when we launch licensing
+// gives existing instructors 1 year of premium access when we launch licensing
+// hybrid of premium and trial account settings, users do not provide billing info like in trials, can access all games, and see the trial banner
+// but users instead of 30 students, 0 educators, have access to 500 student seats and can invite 15 teachers
+// user cannot update this trial or go premium, until the trial is about to expire at year end
 function migrateToTrialLegacy(req, res){
     // Only admins should be allowed to perform this operation
     if( req.user.role !== lConst.role.admin ) {
@@ -2435,7 +2490,7 @@ function _storeSchoolInformation(schoolInfo){
                 var enabled = 1;
                 var secret = "NULL";
                 var shared = "NULL";
-                var zip = "'" + schoolInfo.zip + "'";
+                var zip = "'" + schoolInfo.zipCode + "'";
                 var address = "'" + schoolInfo.address + "'";
                 var dateCreated = "NOW()";
                 var lastUpdated = "NOW()";
@@ -2992,6 +3047,9 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
 function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, emailData, instructors){
     return when.promise(function(resolve, reject){
         var promiseList = [];
+        // poPendingStatus variable used to check for edge case where we are ending a pending purchase order license, but a trial is still active
+        // in that case, we do not want to disable premium classes, because the educator's premium classes would belong to the trial
+        var poPendingStatus = false;
         // if licenseMap not already computed, find it. else, use existing value
         if(!instructors){
             promiseList.push(this.myds.getInstructorsByLicense(licenseId));
@@ -3008,6 +3066,9 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 var state = false;
                 licenseMap.some(function(instructor){
                     if(instructor.email === teacherEmail[0]){
+                        if(instructor.status === "po-pending"){
+                            poPendingStatus = true;
+                        }
                         state = true;
                         return true;
                     }
@@ -3027,7 +3088,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 if(courseIds === "email not in license"){
                     return courseIds;
                 }
-                if(Array.isArray(courseIds) && courseIds.length > 0){
+                if(Array.isArray(courseIds) && courseIds.length > 0 && !poPendingStatus){
                     return this.unassignPremiumCourses(courseIds, licenseId);
                 }
             }.bind(this))
