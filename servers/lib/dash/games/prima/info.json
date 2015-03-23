@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "PRIMA",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Prima",
         "longName": "Prima",

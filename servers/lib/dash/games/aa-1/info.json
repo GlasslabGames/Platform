@@ -371,6 +371,10 @@
                         "category": "   ",
                         "list": [
                             {
+                                "name": "Case Studies and Findings",
+                                "link": "http://about.glasslabgames.org/research/"
+                            },
+                            {
                                 "name": "Resources from the National Writing Project",
                                 "link": "http://www.nwp.org/cs/public/print/resource_topic/persuasive_writing"
                             },
