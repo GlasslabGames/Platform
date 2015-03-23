@@ -266,7 +266,14 @@ function getBillingInfo(req, res){
             if(cardData){
                 billingInfo = _buildBillingInfo(cardData);
             }
+            // Get the account balance
             billingInfo.accountBalance = customer.account_balance;
+
+            // Get the start/end times of the current subscription
+            if( customer.subscriptions.total_count > 0 ) {
+                billingInfo.currentPeriodStart = customer.subscriptions.data[ 0 ].current_period_start;
+                billingInfo.currentPeriodEnd = customer.subscriptions.data[ 0 ].current_period_end;
+            }
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){

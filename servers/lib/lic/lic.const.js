@@ -19,24 +19,13 @@ module.exports = {
         chromebook: {
             stripe_planId: 'GLG_CHROMEBOOK_P03',
             name: 'Chromebook/Web',
-            description: 'All Games in this package are optimized to work on Chromebooks.',
+            description: 'Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
             browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
             iPadGames: ['AA-1'],
             downloadableGames: [],
             planId: 'chromebook'
         },
-        ipad: {
-            stripe_planId: 'GLG_IPAD_P04',
-            name: 'iPad',
-            description: 'All Games in this package are optimized to work on iPads.',
-            pricePerSeat: 3.5,
-            browserGames: [],
-            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
-            downloadableGames: [],
-            planId: 'ipad'
-        },
-
         pcMac: {
             stripe_planId: 'GLG_PCMAC_P05',
             name: 'PC/MAC',
@@ -46,6 +35,16 @@ module.exports = {
             iPadGames: ['AA-1'],
             downloadableGames: ['SC'],
             planId: 'pcMac'
+        },
+        ipad: {
+            stripe_planId: 'GLG_IPAD_P04',
+            name: 'iPad',
+            description: 'Games in this package are optimized to work on iPads.',
+            pricePerSeat: 3.5,
+            browserGames: [],
+            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
+            downloadableGames: [],
+            planId: 'ipad'
         },
         allGames: {
             stripe_planId: 'GLG_ALLGAMES_P06',
