@@ -38,22 +38,7 @@ function getUserProfileData(req, res, next) {
             // ok, send mdata
             .then(function(data){
                 userData = data;
-                var update = false;
-                _(userData).forEach(function(value, property){
-                    if(value !== req.user[property]){
-                        update = true;
-                    }
-                    req.user[property] = value;
-                });
-                _(req.user).forEach(function(value, property){
-                    if(userData[property] === undefined){
-                        delete req.user[property];
-                        update = true;
-                    }
-                });
-                if(update){
-                    return Util.updateSession(req);
-                }
+                return _updateUserSession(userData, req);
             }.bind(this))
             .then(function(){
                 this.requestUtil.jsonResponse(res, userData);
@@ -64,6 +49,25 @@ function getUserProfileData(req, res, next) {
             }.bind(this))
     } else {
         this.requestUtil.errorResponse(res, { status: "error", error: {key:'user.login.notLoggedIn'}}, 200);
+    }
+}
+
+function _updateUserSession(userData, req){
+    var update = false;
+    _(userData).forEach(function(value, property){
+        if(value !== req.user[property]){
+            update = true;
+        }
+        req.user[property] = value;
+    });
+    _(req.user).forEach(function(value, property){
+        if(userData[property] === undefined){
+            delete req.user[property];
+            update = true;
+        }
+    });
+    if(update){
+        return Util.updateSession(req);
     }
 }
 

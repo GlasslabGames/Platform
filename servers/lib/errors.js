@@ -115,6 +115,7 @@ module.exports = {
     "lic.access.invalid":                   "Invalid Access",
     "lic.records.invalid":                  "User tied to to more than one license",
     "lic.access.absent":                    "Only instructors who are part of an active license should have access",
+    "lic.access.removed":                   "You have been removed from license access. Please check your email for more information.",
     "lic.records.inconsistent":             "The license records are inconsistent.  Review records",
     "lic.educators.full":                   "There are not enough seats in the license for this list of educators",
     "lic.students.full":                    "This class is already full. Please contact your teacher.",
