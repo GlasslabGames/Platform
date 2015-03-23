@@ -796,6 +796,7 @@ function updateGamesInCourse(req, res, next, serviceManager)
                 }
                 if(status === "not in license"){
                     this.requestUtil.errorResponse(res, { key: "lic.access.removed"});
+                    return;
                 }
                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next, serviceManager]);
             }.bind(this))
