@@ -573,7 +573,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.getUserCourses = function(userId) {
+LMS_MySQL.prototype.getCoursesByStudentId = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -956,7 +956,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.getCourseIdsFromUserId = function(userId) {
+LMS_MySQL.prototype.getCourseIdsFromInstructorId = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
