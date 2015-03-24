@@ -271,6 +271,22 @@
         ]
     },
     "details": {
+        "applink": "https://itunes.apple.com/us/app/water-bears-edu/id964924572?ls=1&mt=8",
+        "buttons": [
+            {
+                "name": "Download",
+                "type": "download",
+                "authRequired": false,
+                "links": [
+                    {
+                        "target": "_blank",
+                        "name": "iPad",
+                        "link": "https://itunes.apple.com/us/app/water-bears-edu/id964924572?ls=1&mt=8",
+                        "type": "ios-appstore"
+                    }
+                ]
+            }
+        ],
         "pages": {
             "product": {
                 "order": 1,
