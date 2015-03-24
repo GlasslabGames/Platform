@@ -355,7 +355,6 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
     return when.promise(function(resolve, reject){
         var licenseId;
         var seats;
-        var newStudent;
         this.myds.getLicenseFromPremiumCourse(courseId)
             .then(function (license) {
                 licenseId = license.id;
@@ -371,10 +370,8 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if (studentMap === "lic.students.full") {
                     return studentMap;
                 }
-                newStudent = false;
                 if (studentMap[userId] === undefined) {
                     studentMap[userId] = {};
-                    newStudent = true;
                 }
                 var student = studentMap[userId];
                 student[courseId] = true;
@@ -386,10 +383,6 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if (status === "lic.students.full") {
                     return status;
                 }
-                if (!newStudent) {
-                    return;
-                }
-                // if student is a new premium student, update the seat count
                 var studentSeats = lConst.seats[seats].studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
