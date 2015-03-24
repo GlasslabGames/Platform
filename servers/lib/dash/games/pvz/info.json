@@ -25,7 +25,7 @@
         "packages": "iPad Games",
         "license": {
             "type": "loginType",
-            "loginType": "glasslabv2",
+            "loginType": "glasslabv2,edmodo,icivics",
             "valid": false,
             "message": {
                 "invalid": "In Development"
