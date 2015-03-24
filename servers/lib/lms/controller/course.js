@@ -924,6 +924,7 @@ function blockPremiumGamesBasicCourses(req, res){
             });
             _(basicCourses).forEach(function(course, key){
                 _(course).forEach(function(game, gameId){
+                    game.id = gameId;
                     if(game.assigned === undefined){
                         if(freeGameIds[gameId]){
                             game.assigned = true;
