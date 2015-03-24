@@ -16,9 +16,9 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "price": "Coming Soon",
-        "release": "dev",
-        "releaseDate": "March 13, 2015",
+        "price": "Free",
+        "release": "live",
+        "releaseDate": "March 23, 2015",
         "shortDescription": "Water Bears EDU",
         "description": "Water Bears EDU is a 3D puzzle game that requires students to use spatial reasoning and color-mixing skills to redirect water through pipes in a grid-based environment. Each puzzle has been designed to give students hands-on experience with different Systems Thinking concepts.",
         "developer": {
@@ -271,6 +271,22 @@
         ]
     },
     "details": {
+        "applink": "https://itunes.apple.com/us/app/water-bears-edu/id964924572?ls=1&mt=8",
+        "buttons": [
+            {
+                "name": "Download",
+                "type": "download",
+                "authRequired": false,
+                "links": [
+                    {
+                        "target": "_blank",
+                        "name": "iPad",
+                        "link": "https://itunes.apple.com/us/app/water-bears-edu/id964924572?ls=1&mt=8",
+                        "type": "ios-appstore"
+                    }
+                ]
+            }
+        ],
         "pages": {
             "product": {
                 "order": 1,
