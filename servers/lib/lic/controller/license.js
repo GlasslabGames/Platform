@@ -99,6 +99,7 @@ function getCurrentPlan(req, res){
             output["expirationDate"] = license["expiration_date"];
             output["autoRenew"] = license["auto_renew"] === 1 ? true : false;
             output["promoCode"] = license["promo"];
+            output["lastUpgraded"] = license["last_upgraded"] || null;
             var packageType = license["package_type"];
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
@@ -548,6 +549,18 @@ function upgradeLicense(req, res){
             if(license["purchase_order_id"] !== null){
                 return "po-id";
             }
+            var lastUpgraded = license["last_upgraded"];
+            if(lastUpgraded){
+                var upgradeDate = new Date(lastUpgraded);
+                var currentDate = new Date();
+                // number of milliseconds since last upgrade
+                var timeSinceUpgrade = currentDate - upgradeDate;
+                // 90 days in milliseconds
+                var ninetyDays = 7776000000;
+                if(timeSinceUpgrade <= ninetyDays && (this.options.env === "prod" || this.options.env === "stage")){
+                    return "recent upgrade";
+                }
+            }
             emailData.oldPlan = license["package_type"];
             emailData.oldSeats = license["package_size_tier"];
             emailData.newPlan = planInfo.type;
@@ -562,9 +575,6 @@ function upgradeLicense(req, res){
             var autoRenew = license["auto_renew"] > 0;
             var params = _buildStripeParams(planInfo, customerId, stripeInfo);
             var promiseList = [];
-            //if(license["payment_type"] === "purchase_order"){
-            //    promiseList.push(_switchToCreditCard.call(this, licenseId));
-            //}
             if(!params.card){
                 delete params.card;
             }
@@ -588,6 +598,9 @@ function upgradeLicense(req, res){
             updateFields.push(packageType);
             var packageSizeTier = "package_size_tier = '" + planInfo.seats + "'";
             updateFields.push(packageSizeTier);
+            var lastUpgraded = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            var lastUpgradedString = "last_upgraded = '" + lastUpgraded + "'";
+            updateFields.push(lastUpgradedString);
             if(promoCode){
                 var promoCodeString = "promo = '" + planInfo.promoCode + "'";
                 updateFields.push(promoCodeString);
@@ -610,6 +623,10 @@ function upgradeLicense(req, res){
             }
             if(status === "downgrade seats"){
                 this.requestUtil.errorResponse(res, { key: "lic.upgrade.invalid"});
+                return;
+            }
+            if(status === "recent upgrade"){
+                this.requestUtil.errorResponse(res, { key: "lic.upgrade.recent"});
                 return;
             }
             if(typeof status === "string"){
@@ -2733,6 +2750,7 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                     paymentType = "'credit-card'";
                 }
                 var dateCreated = "NOW()";
+                var lastUpgraded = "NULL";
                 var values = [];
                 values.push(userId);
                 values.push(licenseKey);
@@ -2748,6 +2766,7 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                 values.push(paymentType);
                 values.push(institutionId);
                 values.push(dateCreated);
+                values.push(lastUpgraded);
 
                 return this.myds.insertToLicenseTable(values);
             }.bind(this))
