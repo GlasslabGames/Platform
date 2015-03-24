@@ -82,7 +82,7 @@ function connect(req, res, next)
     // protocol
     var protocol = "http://";
     if( this.options.env !== "dev" ) {
-        protocol = "https://";
+        protocol = "http://";
     }
     //send
     res.send( protocol + host );
