@@ -143,5 +143,6 @@ module.exports = {
     "lic.upgrade.invalid":                  "You cannot decrease student seats in an update",
     "lic.order.processing":                 "Your purchase order is being processed.  Please reach out to our billing department if you would like to alter it.",
     "lic.order.mismatch":                   "The purchase order key and purchase order number do not match in the database. Check again",
-    "lic.form.invalid":                     "Please properly enter the form data"
+    "lic.form.invalid":                     "Please properly enter the form data",
+    "lic.upgrade.recent":                   "Updating accounts can only happen once every 90 days.  Please contact support@glasslabgames.org with any concerns"
 };

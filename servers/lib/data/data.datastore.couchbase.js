@@ -3027,11 +3027,31 @@ TelemDS_Couchbase.prototype.multiSetCourseGameProfiles = function(courses){
     return when.promise(function(resolve, reject){
         this._chunk_setMulti(courses, {}, function(err, results){
             if(err){
-                console.error("Couchbase DataStore: Updat Course Game Profiles Error -",err);
+                console.error("Couchbase DataStore: Update Course Game Profiles Error -",err);
                 reject(err);
                 return;
             }
             resolve(results.value);
         });
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.multiGetCourseGameProfiles = function(courseIds){
+    return when.promise(function(resolve, reject){
+        var keys = [];
+        var key;
+        courseIds.forEach(function(courseId){
+            key = tConst.lms.key + ":" + tConst.lms.courseKey + ":" + courseId + ":" + tConst.lms.gameKey;
+            keys.push(key);
+        });
+        this._chunk_getMulti(keys, {}, function(err, results){
+            if(err){
+                console.error("CouchBase TelemetryStore: Multi Get Course Game Profiles Error -", err);
+                reject(err);
+                return;
+            }
+            //var outputs = _.pluck(results, 'value');
+            resolve(results);
+        }.bind(this));
     }.bind(this));
 };

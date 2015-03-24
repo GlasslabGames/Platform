@@ -496,7 +496,7 @@ function getMyGames(req, res) {
         var userData = req.session.passport.user;
 
         // 1) get list of all classes for this user
-        this.lmsStore.getCourseIdsFromUserId(userData.id)
+        this.lmsStore.getCourseIdsFromInstructorId(userData.id)
             .then(function(courseIds) {
                 // 3) use full list of games to build set of distinct
                 return this.telmStore.multiGetDistinctGamesForCourses( courseIds );

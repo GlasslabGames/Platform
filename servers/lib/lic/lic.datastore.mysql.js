@@ -52,7 +52,7 @@ Lic_MySQL.prototype.insertToLicenseTable = function(values){
         var Q = "INSERT INTO GL_LICENSE\n" +
             "(user_id,license_key,package_type,package_size_tier,expiration_date," +
             "active,educator_seats_remaining,student_seats_remaining,promo," +
-            "subscription_id,auto_renew,payment_type,institution_id,date_created)\n" +
+            "subscription_id,auto_renew,payment_type,institution_id,date_created,last_upgraded)\n" +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){

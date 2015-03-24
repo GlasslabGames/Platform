@@ -891,6 +891,7 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId, userId){
     }.bind(this));
 }
 
+// blocks all premium games in all basic courses
 function blockPremiumGamesBasicCourses(req, res){
     if(req.params.code !== lConst.accessCode.block){
         this.requestUtil.errorResponse(res, { key: "lms.access.invalid"});
