@@ -99,7 +99,35 @@ function getCurrentPlan(req, res){
             output["expirationDate"] = license["expiration_date"];
             output["autoRenew"] = license["auto_renew"] === 1 ? true : false;
             output["promoCode"] = license["promo"];
-            output["lastUpgraded"] = license["last_upgraded"] || null;
+
+            // if paid by purchase order or a user is on a trial or trialLegacy plan, the owner should not be able to upgrade
+            if(license["payment_type"] === "credit-card" && license["package_type"] !== "trial" && license["package_type"] !== "trialLegacy"){
+                var lastUpgraded = license["last_upgraded"];
+                // if lastUpgraded is undefined, owner can upgrade at any time
+                if(lastUpgraded){
+                    var upgradeDate = new Date(lastUpgraded);
+                    var currentDate = new Date();
+                    // number of milliseconds since last upgrade
+                    var timeSinceUpgrade = currentDate - upgradeDate;
+                    // 90 days in milliseconds
+                    var ninetyDays = 7776000000;
+                    // if owner has upgraded within 90 days, owner cannot upgrade
+                    if(timeSinceUpgrade <= ninetyDays && (this.options.env === "prod" || this.options.env === "stage")){
+                        output["canUpgrade"] = false;
+                        var ninetyOneDays = 7862000000;
+                        // tell front end when to let owner know when upgrading is allowed
+                        output["nextUpgrade"] = new Date(Date.parse(lastUpgraded) + ninetyOneDays);
+                    } else{
+                        // canUpgrade is true, user can upgrade at any time
+                        output["canUpgrade"] = true;
+                    }
+                } else{
+                    output["canUpgrade"] = true;
+                }
+            } else{
+                output["canUpgrade"] = false;
+            }
+
             var packageType = license["package_type"];
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
