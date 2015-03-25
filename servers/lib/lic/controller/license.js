@@ -25,7 +25,6 @@ module.exports = {
     teacherLeavesLicense: teacherLeavesLicense,
     subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
     upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
-    migrateToTrialLegacy: migrateToTrialLegacy,
     //upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
     getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
     cancelActivePurchaseOrder: cancelActivePurchaseOrder,
@@ -33,6 +32,8 @@ module.exports = {
     rejectPurchaseOrder: rejectPurchaseOrder,
     invoicePurchaseOrder: invoicePurchaseOrder,
     approvePurchaseOrder: approvePurchaseOrder,
+    migrateToTrialLegacy: migrateToTrialLegacy,
+    cancelLicense: cancelLicense,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -2518,6 +2519,34 @@ function migrateToTrialLegacy(req, res){
         .then(null, function(err){
             console.error("Migrate to Trial Legacy Error -",err);
             this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
+function cancelLicense(req, res){
+    if(!(req.user.id && req.user.licenseId)){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"} );
+        return;
+    }
+    var userId = req.user.id;
+    var licenseId = req.user.licenseId;
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return _endLicense.call(this, userId, licenseId, false);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                _errorLicensingAccess.call(this, res, status);
+                return;
+            }
+            // maybe add cancel email here, goes to all teachers on plan as well as the owner
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Cancel License Error -", err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
 
