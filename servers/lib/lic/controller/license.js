@@ -124,6 +124,8 @@ function getCurrentPlan(req, res){
                 } else{
                     output["canUpgrade"] = true;
                 }
+            } else if(license["package_type"] === "trial"){
+                output["canUpgrade"] = true;
             } else{
                 output["canUpgrade"] = false;
             }

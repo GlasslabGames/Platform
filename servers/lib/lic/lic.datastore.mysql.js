@@ -40,10 +40,128 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     resolve();
+//    this.createLicensingTables()
+//        .then(function(created){
+//            if(created){
+//                console.log("Lic MySQL: Created Licensing Tables!");
+//            }
+//            resolve();
+//        })
+//        .then(null, function(err){
+//            reject(err);
+//        });
 
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+Lic_MySQL.prototype.createLicensingTables = function(){
+    return when.promise(function(resolve, reject){
+        var Q = "CREATE TABLE GL_LICENSE\n" +
+            "(\n" +
+                "id BIGINT(20) NULL AUTO_INCREMENT,\n" +
+                "user_id BIGINT(20) NULL,\n" +
+                "license_key VARCHAR(20) NULL,\n" +
+                "package_type VARCHAR(20) NULL,\n" +
+                "package_size_tier VARCHAR(20) NULL,\n" +
+                "expiration_date DATETIME,\n" +
+                "active TINYINT(1),\n" +
+                "educator_seats_remaining INT(10) NULL,\n" +
+                "student_seats_remaining INT(10) NULL,\n" +
+                "promo VARCHAR(20) NULL,\n" +
+                "subscription_id VARCHAR(20) NULL,\n" +
+                "auto_renew TINYINT(1) DEFAULT 1,\n" +
+                "purchase_order_id BIGINT(20) NULL,\n" +
+                "payment_type VARCHAR(20),\n" +
+                "institution_id BIGINT(20) NULL,\n" +
+                "date_created DATETIME NULL,\n" +
+                "last_upgraded DATETIME NULL,\n" +
+                "PRIMARY KEY (id),\n"+
+                "INDEX fk_user_id_idx (user_id ASC),\n" +
+                "INDEX fk_school_id_idx (institution_id ASC),\n" +
+                "CONSTRAINT fk_owner_id\n" +
+                    "FOREIGN KEY (user_id)\n" +
+                    "REFERENCES GL_USER (id)\n" +
+                    "ON DELETE NO ACTION\n" +
+                    "ON UPDATE NO ACTION\n" +
+                "CONSTRAINT fk_school_id\n" +
+                    "FOREIGN KEY (institution_id)\n" +
+                    "REFERENCES GL_INSTITUTION (id)\n" +
+                    "ON DELETE NO ACTION\n" +
+                    "ON UPDATE NO ACTION\n" +
+            ");";
+        this.ds.query(Q)
+            .then(function(){
+                Q = "CREATE TABLE GL_LICENSE_MAP\n" +
+                    "(" +
+                        "id BIGINT(20) NULL AUTO_INCREMENT,\n" +
+                        "user_id BIGINT(20) NULL,\n" +
+                        "license_id BIGINT(20) NULL,\n" +
+                        "status VARCHAR(20) NULL,\n" +
+                        "date_created DATETIME NULL,\n" +
+                        "PRIMARY KEY (id),\n" +
+                        "INDEX fk_user_id_idx (user_id ASC),\n" +
+                        "INDEX fk_license_id_idx (license_id ASC),\n" +
+                        "UNIQUE INDEX uq_user_license (user_id ASC, license_id ASC),\n" +
+                        "CONSTRAINT fk_educator_id\n" +
+                            "FOREIGN KEY (user_id)\n" +
+                            "REFERENCES GL_USER (id)\n" +
+                            "ON DELETE NO ACTION\n" +
+                            "ON UPDATE NO ACTION,\n" +
+                        "CONSTRAINT fk_license_id\n" +
+                            "FOREIGN KEY (license_id)\n" +
+                            "REFERENCES GL_LICENSE (id)\n" +
+                            "ON DELETE NO ACTION\n" +
+                            "ON UPDATE NO ACTION\n" +
+                    ");";
+                return this.ds.query(Q);
+            }.bind(this))
+            .then(function(){
+                Q = "CREATE TABLE GL_PURCHASE_ORDER\n" +
+                    "(\n" +
+                        "id BIGINT(20) NULL AUTO_INCREMENT,\n" +
+                        "user_id BIGINT(20) NULL,\n" +
+                        "license_id BIGINT(20) NULL,\n" +
+                        "status VARCHAR(20) NULL,\n" +
+                        "purchase_order_number VARCHAR(20) NULL,\n" +
+                        "purchase_order_key VARCHAR(50) NULL,\n" +
+                        "phone VARCHAR(20),\n" +
+                        "email VARCHAR(255),\n" +
+                        "name VARCHAR(255),\n" +
+                        "payment VARCHAR(20),\n" +
+                        "current_package_type VARCHAR(20) NULL,\n" +
+                        "current_package_size_tier VARCHAR(20) NULL,\n" +
+                        "action VARCHAR(20) NULL,\n" +
+                        "date_created DATETIME NULL,\n" +
+                        "UNIQUE(purchase_order_key),\n" +
+                        "PRIMARY KEY (id),\n" +
+                        "INDEX fk_user_id_idx (user_id ASC),\n" +
+                        "INDEX fk_license_id_idx (license_id ASC),\n" +
+                        "CONSTRAINT fk_purchase_owner_id\n" +
+                            "FOREIGN KEY (user_id)\n" +
+                            "REFERENCES GL_USER (id)\n" +
+                            "ON DELETE NO ACTION\n" +
+                            "ON UPDATE NO ACTION,\n" +
+                        "CONSTRAINT fk_purchase_license_id\n" +
+                            "FOREIGN KEY (license_id)\n" +
+                            "REFERENCES GL_LICENSE (id)\n" +
+                            "ON DELETE NO ACTION\n" +
+                            "ON UPDATE NO ACTION\n" +
+                    ");";
+                return this.ds.query(Q);
+            }.bind(this))
+            .then(function(){
+                resolve(true);
+            })
+            .then(null, function(err){
+                if(err.code === "ER_TABLE_EXISTS_ERROR"){
+                    resolve(false);
+                } else {
+                    reject(err);
+                }
+            });
+    }.bind(this));
 };
 
 Lic_MySQL.prototype.insertToLicenseTable = function(values){
