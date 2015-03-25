@@ -353,22 +353,21 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
 
 LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
     return when.promise(function(resolve, reject){
+        var license;
         var licenseId;
         var seats;
         this.myds.getLicenseFromPremiumCourse(courseId)
-            .then(function (license) {
+            .then(function (results) {
+                license = results;
                 licenseId = license.id;
                 seats = license["package_size_tier"];
-                var studentSeatsRemaining = license["student_seats_remaining"];
-                if (studentSeatsRemaining === 0) {
-                    return "lic.students.full";
-                }
                 // get active student list
                 return this.cbds.getStudentsByLicense(licenseId);
             }.bind(this))
             .then(function (studentMap) {
-                if (studentMap === "lic.students.full") {
-                    return studentMap;
+                var studentSeatsRemaining = license["student_seats_remaining"];
+                if (studentSeatsRemaining === 0 && !studentMap[userId]) {
+                    return "lic.students.full";
                 }
                 if (studentMap[userId] === undefined) {
                     studentMap[userId] = {};

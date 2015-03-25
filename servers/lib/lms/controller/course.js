@@ -924,6 +924,7 @@ function blockPremiumGamesBasicCourses(req, res){
             });
             _(basicCourses).forEach(function(course, key){
                 _(course).forEach(function(game, gameId){
+                    game.id = gameId;
                     if(game.assigned === undefined){
                         if(freeGameIds[gameId]){
                             game.assigned = true;
@@ -970,14 +971,15 @@ function verifyCode(req, res, next) {
     }
     var code = req.params.code;
     var courseInfo;
-
+    var licService;
+    var license;
     this.myds.getCourseInfoFromCourseCode(code)
         .then(function(info) {
             courseInfo = info;
             if (courseInfo) {
                 var isPremium = courseInfo.premiumGamesAssigned;
                 if (isPremium) {
-                    var licService = this.serviceManager.get("lic").service;
+                    licService = this.serviceManager.get("lic").service;
                     return licService.myds.getLicenseFromPremiumCourse(courseInfo.id);
                 }
                 return "not premium";
@@ -985,13 +987,23 @@ function verifyCode(req, res, next) {
                 return "no course found";
             }
         }.bind(this))
-        .then(function(license){
-            if(typeof license === "string") {
-                return license;
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
+            }
+            license = results;
+            var licenseId = license.id;
+            return licService.cbds.getStudentsByLicense(licenseId);
+        }.bind(this))
+        .then(function(studentMap){
+            if(typeof studentMap === "string") {
+                return studentMap;
             }
             var studentSeatsRemaining = license["student_seats_remaining"];
             if(studentSeatsRemaining < 1){
-                return "denied";
+                if(!(req.user && req.user.id && studentMap[req.user.id])){
+                    return "denied";
+                }
             }
         }.bind(this))
         .then(function(status){
