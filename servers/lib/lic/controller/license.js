@@ -286,14 +286,19 @@ function getBillingInfo(req, res){
                 return user;
             }
             customerId = user["customer_id"];
-            return this.serviceManager.stripe.retrieveCustomer(customerId);
+            var promiseList = [];
+            promiseList.push(this.serviceManager.stripe.retrieveCustomer(customerId));
+            promiseList.push(this.myds.getLicenseById(licenseId));
+            return when.all(promiseList);
         }.bind(this))
-        .then(function(customer){
-            if(typeof cardData === "string"){
-                _errorLicensingAccess.call(this, res, cardData);
+        .then(function(results){
+            if(typeof results === "string"){
+                _errorLicensingAccess.call(this, res, results);
                 return;
             }
+            var customer = results[0];
             var cardData = customer.cards.data[0];
+            var license = results[1][0];
             var billingInfo = {};
             if(cardData){
                 billingInfo = _buildBillingInfo(cardData);
@@ -301,17 +306,24 @@ function getBillingInfo(req, res){
             // Get the account balance
             billingInfo.accountBalance = customer.account_balance;
 
+            var subscriptionId = license["subscription_id"];
             // Get the start/end times of the current subscription
-            if( customer.subscriptions.total_count > 0 ) {
-                billingInfo.currentPeriodStart = customer.subscriptions.data[ 0 ].current_period_start;
-                billingInfo.currentPeriodEnd = customer.subscriptions.data[ 0 ].current_period_end;
+            _(customer.subscriptions.data).forEach(function(subscription){
+                if(subscriptionId === subscription.id){
+                    billingInfo.currentPeriodStart = subscription.current_period_start;
+                    billingInfo.currentPeriodEnd = subscription.current_period_end;
+                }
+            });
+            if(!(billingInfo.currentPeriodStart && billingInfo.currentPeriodEnd)){
+                this.requestUtil.errorResponse(res, { key: "lic.general"});
+                return;
             }
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
             console.error("Get Customer Id Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
-        }.bind(this))
+        }.bind(this));
 }
 
 
