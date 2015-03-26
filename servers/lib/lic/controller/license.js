@@ -292,13 +292,13 @@ function getBillingInfo(req, res){
             return when.all(promiseList);
         }.bind(this))
         .then(function(results){
-            if(typeof cardData === "string"){
-                _errorLicensingAccess.call(this, res, cardData);
+            if(typeof results === "string"){
+                _errorLicensingAccess.call(this, res, results);
                 return;
             }
             var customer = results[0];
-            var license = results[1][0];
             var cardData = customer.cards.data[0];
+            var license = results[1][0];
             var billingInfo = {};
             if(cardData){
                 billingInfo = _buildBillingInfo(cardData);
