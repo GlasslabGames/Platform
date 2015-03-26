@@ -579,7 +579,8 @@ Lic_MySQL.prototype.getLicenseFromPremiumCourse = function(courseId){
             "ON lm.license_id = l.id;";
         this.ds.query(Q)
             .then(function(results){
-                results = results[0];
+                // if courseId does not refer to a premium course, output will be false
+                results = results[0] || false;
                 resolve(results);
             })
             .then(null, function(err){

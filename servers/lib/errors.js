@@ -46,6 +46,9 @@ module.exports = {
     "user.create.input.missing.school":     "Missing School",
     "user.notUnique.email":                 "The email address is already in use by another user. Please provide a different email address.",
     "user.notUnique.screenName":            "The screen name is already in use by another user.",
+    "user.delete.information":              "There was an error with the information you entered.",
+    "user.delete.access":                   "You can only delete student accounts in your classes",
+    "user.delete.general":                  "We encountered an error and cannot delete your account at this time",
     // not used any more
     //"user.notUnique.institution":  "The institution name is already in use. Please provide a different institution name.",
     "user.login.general":                   "There was an error with the information you entered.",
@@ -111,6 +114,7 @@ module.exports = {
     "lms.game.invalid":                     "Cannot access another license's premium game",
     "lms.course.premium.corrupted":         "Course labels itself as a premium course, but it is not associated with a license",
     "lms.access.invalid":                   "Invalid Access",
+    "lms.course.not.premium":               "This course is not a associated with a license",
     // lic
     "lic.access.invalid":                   "Invalid Access",
     "lic.records.invalid":                  "User tied to to more than one license",

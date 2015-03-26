@@ -20,7 +20,8 @@ module.exports = {
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
     requestDeveloperGameAccess: requestDeveloperGameAccess,
-    approveDeveloperGameAccess: approveDeveloperGameAccess
+    approveDeveloperGameAccess: approveDeveloperGameAccess,
+    deleteUser: deleteUser
 };
 
 var exampleIn = {};
@@ -533,6 +534,11 @@ function registerUserV2(req, res, next, serviceManager) {
                                 if(status === "lic.students.full"){
                                     registerErr({key:status}, 404);
                                     this.stats.increment("error", "Route.Register.User.LicStudentsFull");
+                                    return;
+                                }
+                                if(status === "lms.course.not.premium"){
+                                    registerErr({key:status}, 404);
+                                    this.stats.increment("error", "Route.Register.User.LmsCourseNotPremium");
                                     return;
                                 }
                                 this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
@@ -1533,5 +1539,95 @@ function _getDeveloperByCode(code, gameId){
             .then(null, function(err){
                 reject(err);
             });
+    }.bind(this));
+}
+
+function deleteUser(req, res){
+    if(!(req.user.role === "instructor" || req.user.role === "manager")){
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+    if(!(req.params && req.params.userId)){
+        this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+        return;
+    }
+    var userId = req.user.id;
+    var role = req.user.role;
+    var deleteUserId = req.params.userId;
+    var promise;
+    if(userId !== deleteUserId){
+        promise = _deleteStudentAccount(deleteUserId, userId)
+    } else{
+        promise = _deleteInstructorAccount();
+    }
+    promise
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Delete User Error -",err);
+            if(err.error === "user not found"){
+                this.requestUtil.errorResponse(res, { key: "user.delete.access"});
+                return;
+            }
+            this.requestUtil.errorResponse(res, { key: "user.delete.general"});
+        }.bind(this));
+}
+
+function _deleteStudentAccount(studentId, instructorId){
+    return when.promise(function(resolve, reject){
+        var lmsService = this.serviceManager.get("lms").service;
+        var licService = this.serviceManager.get("lic").service;
+        var courses;
+        var licenses;
+        // method will reject if student is not in this instructor's class
+        lmsService.isEnrolledInInstructorCourse(studentId, instructorId)
+            .then(function(){
+                return lmsService.myds.getCoursesByStudentId(studentId);
+            })
+            .then(function(results){
+                courses = results;
+                var promiseList = [];
+                courses.forEach(function(course){
+                    promiseList.push(licService.getLicenseFromPremiumCourse(course.id));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(results){
+                licenses = results;
+                var promiseList = [];
+                _(licenses).forEach(function(license){
+                    if(license){
+                        promiseList.push(licService.cbds.getStudentsByLicense(license.id));
+                    }
+                });
+                return when.all(promiseList);
+            })
+            .then(function(studentMaps){
+                var promiseList = [];
+                _(studentMaps).forEach(function(map, index){
+                    delete map[studentId];
+                    //_(student).forEach(function(course, key){
+                    //    student[key] = false;
+                    //});
+                    var licenseId = licenses[index].id;
+                    var data = { students: map };
+                    promiseList.push(licService.cbds.updateStudentsByLicense(licenseId, data));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(){
+
+            })
+            .then(null, function(err){
+                console.error("Delete Student Account Error");
+                reject(err);
+            }.bind(this))
+    }.bind(this));
+}
+
+function _deleteInstructorAccount(userId){
+    return when.promise(function(resolve, reject){
+
     }.bind(this));
 }

@@ -313,12 +313,18 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
         var inLicense;
         this.myds.getLicenseFromPremiumCourse(courseId)
             .then(function(license){
+                if(!license){
+                    return "lms.course.not.premium";
+                }
                 licenseId = license.id;
                 seats = license["package_size_tier"];
                 // get student map
                 return this.cbds.getStudentsByLicense(licenseId);
             }.bind(this))
             .then(function(studentMap){
+                if(typeof studentMap === "string"){
+                    return studentMap;
+                }
                 var student = studentMap[userId];
                 student[courseId] = false;
                 inLicense = false;
@@ -333,7 +339,10 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                 data.students = studentMap;
                 return this.cbds.updateStudentsByLicense(licenseId, data);
             }.bind(this))
-            .then(function(){
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
                 if(inLicense){
                     return;
                 }
@@ -341,7 +350,11 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                 var studentSeats = lConst.seats[seats].studentSeats;
                 this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
-            .then(function(){
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                    return;
+                }
                 resolve();
             }.bind(this))
             .then(null, function(err){
@@ -358,6 +371,9 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
         var seats;
         this.myds.getLicenseFromPremiumCourse(courseId)
             .then(function (results) {
+                if(!results){
+                    return "lms.course.not.premium";
+                }
                 license = results;
                 licenseId = license.id;
                 seats = license["package_size_tier"];
@@ -365,6 +381,9 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 return this.cbds.getStudentsByLicense(licenseId);
             }.bind(this))
             .then(function (studentMap) {
+                if(typeof studentMap === "string"){
+                    return studentMap;
+                }
                 var studentSeatsRemaining = license["student_seats_remaining"];
                 if (studentSeatsRemaining === 0 && !studentMap[userId]) {
                     return "lic.students.full";
@@ -379,14 +398,14 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 return this.cbds.updateStudentsByLicense(licenseId, data);
             }.bind(this))
             .then(function (status) {
-                if (status === "lic.students.full") {
+                if (typeof status === "string") {
                     return status;
                 }
                 var studentSeats = lConst.seats[seats].studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function (status) {
-                if (status === "lic.students.full") {
+                if (typeof status === "string") {
                     resolve(status);
                     return;
                 }

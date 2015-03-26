@@ -481,6 +481,9 @@ return when.promise(function(resolve, reject) {
         if(typeof status === "string"){
             return status;
         }
+        if(status === false){
+            return "lms.course.not.premium";
+        }
         return this.myds.addUserToCourse(userData.id, courseInfo.id, userData.role);
     }.bind(this))
     .then(function(status){
