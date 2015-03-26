@@ -2523,25 +2523,66 @@ function migrateToTrialLegacy(req, res){
 }
 
 function cancelLicense(req, res){
-    if(!(req.user.id && req.user.licenseId)){
+    if(!(req.user.id && req.user.licenseId && req.user.licenseOwnerId && req.user.licenseOwnerId === req.user.id)){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"} );
         return;
     }
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
+    var instructors;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
+            return this.myds.getInstructorsByLicense(licenseId);
+        }.bind(this))
+        .then(function(users){
+            if(typeof users === "string"){
+                return users;
+            }
+            instructors = users;
             return _endLicense.call(this, userId, licenseId, false);
         }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            delete req.user.licenseId;
+            delete req.user.licenseStatus;
+            delete req.user.paymentType;
+            delete req.user.licenseOwnerId;
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
             }
             // maybe add cancel email here, goes to all teachers on plan as well as the owner
+            var licenseOwnerEmail = req.user.email;
+            var ownerTemplate = "owner-license-cancel";
+            var data = {};
+            data.subject = "License Cancelled";
+            data.firstName = req.user.firstName;
+            data.lastName = req.user.lastName;
+            _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, ownerTemplate);
+            var teacherEmail;
+            var teacherTemplate = "educator-license-cancel";
+            instructors.forEach(function(user){
+                if(user.id !== userId){
+                    teacherEmail = user.email;
+                    data = {};
+                    data.subject = "License Cancelled";
+                    if(user.firstName === "temp" && user.lastName === "temp"){
+                        data.firstName = user.email;
+                    } else{
+                        data.firstName = user.firstName;
+                        data.lastName = user.lastName;
+                    }
+                    _sendEmailResponse.call(this, teacherEmail, data, req.protocol, req.headers.host, teacherTemplate);
+                }
+            }.bind(this));
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
