@@ -314,6 +314,10 @@ function getBillingInfo(req, res){
                     billingInfo.currentPeriodEnd = subscription.current_period_end;
                 }
             });
+            if(!(billingInfo.currentPeriodStart && billingInfo.currentPeriodEnd)){
+                this.requestUtil.errorResponse(res, { key: "lic.general"});
+                return;
+            }
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
