@@ -1862,6 +1862,7 @@ function rejectPurchaseOrder(req, res){
     var action;
     var billingEmail;
     var billingName;
+    var instructors;
 
     // if legit, update license table, license map, and purchase order table
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
@@ -1883,12 +1884,16 @@ function rejectPurchaseOrder(req, res){
             billingEmail = purchaseOrder.email;
             billingName = purchaseOrder.name;
 
-            return _updateTablesUponPurchaseOrderReject.call(this, userId, licenseId, purchaseOrderId, "rejected", purchaseOrderNumber, action);
+            var promiseList = [];
+            promiseList.push(_updateTablesUponPurchaseOrderReject.call(this, userId, licenseId, purchaseOrderId, "rejected", purchaseOrderNumber, action));
+            promiseList.push(this.myds.getInstructorsByLicense(licenseId));
+            return when.all(promiseList);
         }.bind(this))
-        .then(function(status){
-            if(typeof status === "string"){
-                return status;
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
             }
+            instructors = results[1];
             var subject = "Please Check Your Purchase Order";
             return _gatherPurchaseOrderEmailData.call(this, userId, licenseId, subject, billingName, billingEmail, planInfo, purchaseOrderInfo);
         }.bind(this))
@@ -1910,8 +1915,24 @@ function rejectPurchaseOrder(req, res){
             var billerData = results[1];
             // two emails, license owner and billing email
             var template = "owner-purchase-order-rejected";
+            var email;
             _sendEmailResponse.call(this, ownerData.email, ownerData, req.protocol, req.headers.host, template);
             _sendEmailResponse.call(this, billerData.email, billerData, req.protocol, req.headers.host, template);
+            template = "educator-purchase-order-rejected";
+            instructors.forEach(function(user){
+                if(userId !== user.id){
+                    var data = {};
+                    data.subject = "Loss of Access";
+                    email = user.email;
+                    if(user.firstName === "temp" && user.lastName === "temp"){
+                        data.firstName = email;
+                    } else{
+                        data.firstName = user.firstName;
+                        data.lastName = user.lastName;
+                    }
+                    _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+                }
+            }.bind(this));
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){

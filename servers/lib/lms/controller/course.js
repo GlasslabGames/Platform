@@ -54,6 +54,10 @@ function enrollInCourse(req, res, next) {
                         this.requestUtil.errorResponse(res, { key: "lic.students.full"});
                         return;
                     }
+                    if(status === "lms.course.not.premium"){
+                        this.requestUtil.errorResponse(res, { key: "lms.course.not.premium"});
+                        return;
+                    }
                     this.requestUtil.jsonResponse(res, {});
                 }.bind(this),
                 function(err){
@@ -147,7 +151,11 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
                                 var licService = this.serviceManager.get("lic").service;
                                 return licService.removeStudentFromPremiumCourse(userId, courseId);
                             }.bind(this))
-                            .then(function() {
+                            .then(function(status) {
+                                if(status === "lms.course.not.premium"){
+                                    this.requestUtil.errorResponse(res, { key: "lms.course.not.premium"});
+                                    return;
+                                }
                                 req.query.showMembers = req.body.showMembers;
                                 req.params.courseId = courseId;
                                 // get and respond with course
@@ -991,6 +999,9 @@ function verifyCode(req, res, next) {
             if(typeof results === "string"){
                 return results;
             }
+            if(!results){
+                return "lms.course.not.premium";
+            }
             license = results;
             var licenseId = license.id;
             return licService.cbds.getStudentsByLicense(licenseId);
@@ -1009,13 +1020,20 @@ function verifyCode(req, res, next) {
         .then(function(status){
             if(status === "denied") {
                 this.requestUtil.errorResponse(res, {key:"lic.students.full"});
+                return;
             }
             if (status === "no course found") {
                 this.requestUtil.errorResponse(res, {key: "user.enroll.code.invalid", statusCode: 404});
+                return;
+            }
+            if(status === "lms.course.not.premium"){
+                this.requestUtil.errorResponse(res, { key: "lms.course.not.premium"});
+                return;
             }
             if( courseInfo &&
                 courseInfo.locked) {
                 this.requestUtil.errorResponse(res, {key:"course.locked", statusCode:400});
+                return;
             }
             else if(courseInfo) {
                 courseInfo = _.merge(
@@ -1023,7 +1041,7 @@ function verifyCode(req, res, next) {
                 );
                 this.requestUtil.jsonResponse(res, courseInfo);
             }
-        }.bind(this))
+        }.bind(this));
 }
 
 // check course

@@ -884,6 +884,15 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
+        //{
+        //    requireAuth: true,
+        //    api: "/api/v2/auth/user/:userId/delete",
+        //    service: "auth",
+        //    controller: "user",
+        //    method: {
+        //        post: "deleteUser"
+        //    }
+        //},
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------
