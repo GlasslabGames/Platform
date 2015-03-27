@@ -20,7 +20,8 @@ module.exports = {
     resetPasswordVerify: resetPasswordVerify,
     resetPasswordUpdate: resetPasswordUpdate,
     requestDeveloperGameAccess: requestDeveloperGameAccess,
-    approveDeveloperGameAccess: approveDeveloperGameAccess
+    approveDeveloperGameAccess: approveDeveloperGameAccess,
+    deleteUser: deleteUser
 };
 
 var exampleIn = {};
@@ -35,8 +36,12 @@ function getUserProfileData(req, res, next) {
         var userData = req.session.passport.user;
         // check perms before returning user info
         this.webstore.getUserInfoById(userData.id)
-            // ok, send data
-            .then(function(userData){
+            // ok, send mdata
+            .then(function(data){
+                userData = data;
+                return _updateUserSession(userData, req);
+            }.bind(this))
+            .then(function(){
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error
@@ -45,6 +50,25 @@ function getUserProfileData(req, res, next) {
             }.bind(this))
     } else {
         this.requestUtil.errorResponse(res, { status: "error", error: {key:'user.login.notLoggedIn'}}, 200);
+    }
+}
+
+function _updateUserSession(userData, req){
+    var update = false;
+    _(userData).forEach(function(value, property){
+        if(value !== req.user[property]){
+            update = true;
+        }
+        req.user[property] = value;
+    });
+    _(req.user).forEach(function(value, property){
+        if(userData[property] === undefined){
+            delete req.user[property];
+            update = true;
+        }
+    });
+    if(update){
+        return Util.updateSession(req);
     }
 }
 
@@ -354,7 +378,9 @@ function registerUserV2(req, res, next, serviceManager) {
         state:         "",
         school:        "",
         role:          req.body.role,
-        loginType:     aConst.login.type.glassLabV2
+        loginType:     aConst.login.type.glassLabV2,
+        trial:         false,
+        subscribe:     false
     };
 
     if(regData.role == lConst.role.student) {
@@ -422,6 +448,19 @@ function registerUserV2(req, res, next, serviceManager) {
         if (!regData.standards) {
             regData.standards = "CCSS";
         }
+        if(req.query.hasOwnProperty('upgrade')){
+            regData.trial = req.query.upgrade === 'trial';
+            regData.subscribe = req.query.upgrade === 'subscribe';
+        }
+        if (regData.subscribe) {
+            if (req.query.hasOwnProperty('seatsSelected')) {
+                regData.seatsSelected = parseInt(req.query.seatsSelected);
+            }
+            if (req.query.hasOwnProperty('packageType')) {
+                regData.packageType = req.query.packageType;
+            }
+        }
+
     }
     else if( regData.role == lConst.role.developer ) {
         // email and username is the same
@@ -472,7 +511,8 @@ function registerUserV2(req, res, next, serviceManager) {
     }.bind(this);
 
     var userID;
-    var register = function(regData, courseId) {
+    var licService = this.serviceManager.get("lic").service;
+    var register = function(regData, courseId, hasLicense) {
         return this.registerUser(regData)
             .then(function(userId){
                 userID = userId;
@@ -483,13 +523,32 @@ function registerUserV2(req, res, next, serviceManager) {
                     if(courseId) {
                         // courseId
                         this.stats.increment("info", "AddUserToCourse");
-                        this.lmsStore.addUserToCourse(userId, courseId, regData.role)
-                            .then(function() {
+                        _enrollPremiumIfPremium.call(this, userId, courseId, hasLicense)
+                            .then(function(status){
+                                if(typeof status === "string"){
+                                    return status;
+                                }
+                                return this.lmsStore.addUserToCourse(userId, courseId, regData.role)
+                            }.bind(this))
+                            .then(function(status) {
+                                if(status === "lic.students.full"){
+                                    registerErr({key:status}, 404);
+                                    this.stats.increment("error", "Route.Register.User.LicStudentsFull");
+                                    return;
+                                }
+                                if(status === "lms.course.not.premium"){
+                                    registerErr({key:status}, 404);
+                                    this.stats.increment("error", "Route.Register.User.LmsCourseNotPremium");
+                                    return;
+                                }
                                 this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
                                 serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                             }.bind(this))
                             // catch all errors
-                            .then(null, registerErr);
+                            .then(null, function(err){
+                                console.error("Register Error -",err);
+                                registerErr(err, 404);
+                            });
                     } else {
                         this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
                         serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
@@ -596,28 +655,80 @@ function registerUserV2(req, res, next, serviceManager) {
     else if(regData.role == lConst.role.student) {
         if(regData.regCode)
         {
+            var courseId;
             // get course Id from course code
             this.lmsStore.getCourseIdFromCourseCode(regData.regCode)
                 // register, passing in institutionId
-                .then(function(courseId){
+                .then(function(id){
+                    courseId = id;
                     if(courseId) {
                         // get rid of reg code, not longer needed
                         delete regData.regCode;
-
-                        register(regData, courseId);
+                        return this.lmsStore.isCoursePremium(courseId);
                     } else {
-                        this.stats.increment("error", "Route.Register.User.InvalidInstitution");
-                        registerErr({key:"user.enroll.code.invalid"}, 404);
+                        return "user.enroll.code.invalid"
                     }
                 }.bind(this))
+                .then(function(isPremium){
+                    if(typeof isPremium === "string"){
+                        return isPremium;
+                    }
+                    if(isPremium === false){
+                        return false;
+                    }
+                    return licService.myds.getLicenseFromPremiumCourse(courseId);
+                })
+                .then(function(license){
+                    if(license === "user.enroll.code.invalid"){
+                        registerErr({key:license}, 404);
+                        this.stats.increment("error", "Route.Register.User.InvalidInstitution");
+                        return;
+                    }
+                    var hasLicense;
+                    if(license === false){
+                        hasLicense = false;
+                    } else{
+                        hasLicense = true;
+                    }
+                    var studentSeatsRemaining = license["student_seats_remaining"];
+                    if(studentSeatsRemaining === 0){
+                        this.requestUtil.errorResponse(res, {key: "lic.students.full"}, 404);
+                        this.stats.increment("error", "Route.Register.User.licStudentsFull");
+                        return;
+                    }
+                    register(regData, courseId, hasLicense);
+                }.bind(this))
                 // catch all errors
-                .then(null, registerErr);
+                .then(null, function(err){
+                    registerErr(err, 404);
+                    console.error("Student Registration Error -",err);
+                });
         } else {
             register(regData);
         }
     }
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
+}
+// if a course is a premium course, enroll student in license. else, do nothing
+function _enrollPremiumIfPremium(userId, courseId, hasLicense){
+    return when.promise(function(resolve, reject){
+        if(hasLicense){
+            var licService = this.serviceManager.get("lic").service;
+            licService.enrollStudentInPremiumCourse(userId, courseId)
+                .then(function(status){
+                    if(typeof status === "string"){
+                        resolve(status);
+                    }
+                    resolve();
+                })
+                .then(null, function(err){
+                    reject(err);
+                });
+        } else {
+            resolve();
+        }
+    }.bind(this));
 }
 
 function sendBetaConfirmEmail(regData, protocol, host) {
@@ -857,6 +968,10 @@ function sendVerifyEmail(regData, protocol, host) {
             userData.verifyCode           = verifyCode;
             userData.verifyCodeExpiration = expirationTime;
             userData.verifyCodeStatus     = aConst.verifyCode.status.sent;
+            userData.trial                = regData.trial;
+            userData.subscribe            = regData.subscribe;
+            userData.seatsSelected        = regData.seatsSelected;
+            userData.packageType          = regData.packageType;
 
             return this.glassLabStrategy.updateUserData(userData)
                 .then(function(){
@@ -980,7 +1095,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
                         .then(function() {
                             return when.promise(function(resolve,reject) {
                                 req.body.verifyCode = req.params.code;
-                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next])
+                                serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                                 resolve();
                             }).then(function() {
                                 return userData;
@@ -1424,5 +1539,95 @@ function _getDeveloperByCode(code, gameId){
             .then(null, function(err){
                 reject(err);
             });
+    }.bind(this));
+}
+
+function deleteUser(req, res){
+    if(!(req.user.role === "instructor" || req.user.role === "manager")){
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+    if(!(req.params && req.params.userId)){
+        this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+        return;
+    }
+    var userId = req.user.id;
+    var role = req.user.role;
+    var deleteUserId = req.params.userId;
+    var promise;
+    if(userId !== deleteUserId){
+        promise = _deleteStudentAccount(deleteUserId, userId)
+    } else{
+        promise = _deleteInstructorAccount();
+    }
+    promise
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Delete User Error -",err);
+            if(err.error === "user not found"){
+                this.requestUtil.errorResponse(res, { key: "user.delete.access"});
+                return;
+            }
+            this.requestUtil.errorResponse(res, { key: "user.delete.general"});
+        }.bind(this));
+}
+
+function _deleteStudentAccount(studentId, instructorId){
+    return when.promise(function(resolve, reject){
+        var lmsService = this.serviceManager.get("lms").service;
+        var licService = this.serviceManager.get("lic").service;
+        var courses;
+        var licenses;
+        // method will reject if student is not in this instructor's class
+        lmsService.isEnrolledInInstructorCourse(studentId, instructorId)
+            .then(function(){
+                return lmsService.myds.getCoursesByStudentId(studentId);
+            })
+            .then(function(results){
+                courses = results;
+                var promiseList = [];
+                courses.forEach(function(course){
+                    promiseList.push(licService.getLicenseFromPremiumCourse(course.id));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(results){
+                licenses = results;
+                var promiseList = [];
+                _(licenses).forEach(function(license){
+                    if(license){
+                        promiseList.push(licService.cbds.getStudentsByLicense(license.id));
+                    }
+                });
+                return when.all(promiseList);
+            })
+            .then(function(studentMaps){
+                var promiseList = [];
+                _(studentMaps).forEach(function(map, index){
+                    delete map[studentId];
+                    //_(student).forEach(function(course, key){
+                    //    student[key] = false;
+                    //});
+                    var licenseId = licenses[index].id;
+                    var data = { students: map };
+                    promiseList.push(licService.cbds.updateStudentsByLicense(licenseId, data));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(){
+
+            })
+            .then(null, function(err){
+                console.error("Delete Student Account Error");
+                reject(err);
+            }.bind(this))
+    }.bind(this));
+}
+
+function _deleteInstructorAccount(userId){
+    return when.promise(function(resolve, reject){
+
     }.bind(this));
 }
