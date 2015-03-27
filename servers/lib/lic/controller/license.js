@@ -2530,6 +2530,9 @@ function migrateToTrialLegacy(req, res){
             var promiseList = [];
             instructors.forEach(function(instructor){
                 var input = {};
+                instructor.email = instructor.EMAIL;
+                instructor.firstName = instructor.FIRST_NAME;
+                instructor.lastName = instructor.LAST_NAME;
                 input.user = instructor;
                 var userId = instructor.id;
                 promiseList.push(_subscribeInstructor(input, userId, stripeInfo, planInfo));
