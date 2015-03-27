@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "PRIMA",
-        "enabled": true,
-        "visible": true,
+        "enabled": false,
+        "visible": false,
         "maintenance": null,
         "shortName": "Prima",
         "longName": "Prima",
@@ -16,7 +16,8 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "TBD",
+        "price": "Free",
+        "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
         "releaseDate": "TBD",
         "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
@@ -43,7 +44,7 @@
         },
         "thumbnail": {
             "small": "assets/thumb-game-PRIMA.png",
-            "large": "assets/thumb-game-PRIMA.png"
+            "large": "assets/thumb-game-PRIMA@2x.png"
         },
         "card": {
             "small": "assets/game-card-PRIMA.png",

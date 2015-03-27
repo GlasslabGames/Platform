@@ -193,6 +193,7 @@ return when.promise(function(resolve, reject) {
                         // if not settings default to empty object
                         course.games.push( {
                             id:       g,
+                            assigned: games[g].assigned,
                             settings: games[g].settings || {}
                         } );
 
@@ -246,21 +247,22 @@ return when.promise(function(resolve, reject) {
         userData.role == lConst.role.admin ) {
 
         var courseData = {
-            title:         _courseData.title,
-            grade:         _courseData.grade,
-            institutionId: _courseData.institution || _courseData.institutionId,
-            games:         _courseData.games,
-            id:            0,
-            code:          "",
-            studentCount:  0,
-            freePlay:      false,
-            locked:        false,
-            archived:      _courseData.archived || false,
-            archivedDate:  null,
-            lmsType:       _courseData.lmsType || 'glasslab',
-            lmsId:         _courseData.lmsId,
-            labels:        _courseData.labels || "",
-            meta:          _courseData.meta || ""
+            title:                  _courseData.title,
+            grade:                  _courseData.grade,
+            institutionId:          _courseData.institution || _courseData.institutionId,
+            games:                  _courseData.games,
+            id:                     0,
+            code:                   "",
+            studentCount:           0,
+            freePlay:               false,
+            locked:                 false,
+            archived:               _courseData.archived || false,
+            archivedDate:           null,
+            lmsType:                _courseData.lmsType || 'glasslab',
+            lmsId:                  _courseData.lmsId,
+            labels:                 _courseData.labels || "",
+            meta:                   _courseData.meta || "",
+            premiumGamesAssigned:   _courseData.premiumGamesAssigned || false
         };
 
         // validate gameId's
@@ -286,8 +288,13 @@ return when.promise(function(resolve, reject) {
                             userData.role == lConst.role.manager) {
                             // create games map
                             var games = {};
+                            var gameId;
                             for(var i = 0; i < courseData.games.length; i++) {
-                                games[ courseData.games[i].id ] = courseData.games[i].settings || {};
+                                gameId = courseData.games[i].id;
+                                games[gameId] = {};
+                                games[gameId].id = gameId;
+                                games[gameId].settings = courseData.games[i].settings || {};
+                                games[gameId].assigned = true;
                             }
 
                             return this.telmStore.updateGamesForCourse(courseId, games)
@@ -332,17 +339,18 @@ return when.promise(function(resolve, reject) {
         userData.role == lConst.role.admin ) {
 
         var courseData = {
-            id:            _courseData.id,
-            title:         _courseData.title,
-            grade:         _courseData.grade,
-            institutionId: _courseData.institutionId || _courseData.institution,
-            archived:      _courseData.archived,
-            locked:        _courseData.lockedRegistration || _courseData.locked,
-            games:         _courseData.games,
-            lmsType:       _courseData.lmsType || 'glasslab',
-            lmsId:         _courseData.lmsId,
-            labels:        _courseData.labels || "",
-            meta:          _courseData.meta || ""
+            id:                     _courseData.id,
+            title:                  _courseData.title,
+            grade:                  _courseData.grade,
+            institutionId:          _courseData.institutionId || _courseData.institution,
+            archived:               _courseData.archived,
+            locked:                 _courseData.lockedRegistration || _courseData.locked,
+            premium_games_assigned: _courseData.premiumGamesAssigned,
+            games:                  _courseData.games,
+            lmsType:                _courseData.lmsType || 'glasslab',
+            lmsId:                  _courseData.lmsId,
+            labels:                 _courseData.labels || "",
+            meta:                   _courseData.meta || ""
         };
 
         if(courseData.archived) {
@@ -442,32 +450,52 @@ return when.promise(function(resolve, reject) {
     //
     .then(function(_courseInfo) {
         if(!_courseInfo) {
-            reject({key:"user.enroll.code.invalid", statusCode:404});
-            return null;
+            return "user.enroll.code.invalid";
         }
 
         courseInfo = _courseInfo;
         if(!courseInfo.locked) {
             return this.myds.isUserInCourse(userData.id, courseInfo.id);
         } else {
-            reject({key:"course.locked", statusCode:400});
-            return null;
+            return "course.locked";
         }
     }.bind(this))
     //
     .then(function(inCourse) {
         // skip if no inCourse
-        if(inCourse === null) return;
+        if(typeof inCourse === "string"){
+            return inCourse;
+        }
 
         // only if they are NOT in the class
-        if(inCourse === false) {
-            this.myds.addUserToCourse(userData.id, courseInfo.id, userData.role)
-                .then(resolve, reject);
+        if(inCourse === false && courseInfo.premiumGamesAssigned) {
+            var licService = this.serviceManager.get("lic").service;
+            return licService.enrollStudentInPremiumCourse(userData.id, courseInfo.id);
+        } else if(inCourse === false){
+            return;
         } else {
-            reject({key:"user.enroll.code.used", statusCode:400});
+            return "user.enroll.code.used";
         }
-    }.bind(this));
-
+    }.bind(this))
+    .then(function(status) {
+        if(typeof status === "string"){
+            return status;
+        }
+        if(status === false){
+            return "lms.course.not.premium";
+        }
+        return this.myds.addUserToCourse(userData.id, courseInfo.id, userData.role);
+    }.bind(this))
+    .then(function(status){
+        if(typeof status === "string"){
+            resolve(status)
+        }
+        resolve();
+    })
+    .then(null, function(err){
+        console.error("Enroll in Course Error -",err);
+        reject(err);
+    });
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -480,4 +508,26 @@ LMSService.prototype.getStudentsOfCourse = function(courseId) {
             var authService = this.serviceManager.get("auth").service;
             return authService.getUsersData(studentIds);
         }.bind(this));
+};
+
+// method giving couchbase course object that lists which games would be assigned if class were enabled
+// check if class is enabled, if so update couchbase course object with courseGames
+LMSService.prototype.updateCBLMSInEnabledCourse = function(courseId, courseGames){
+    return when.promise(function(resolve, reject){
+        this.myds.getCourse(courseId)
+            .then(function(course){
+                var promiseList = [];
+                if(course.premiumGamesAssigned){
+                    promiseList.push(this.telmStore.updateGamesForCourse(courseId, courseGames));
+                }
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Update CB LMS In Enabled Course Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
 };

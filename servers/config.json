@@ -158,6 +158,21 @@
             }
         }
     },
+    "lic":{
+      "datastore":{
+        "mysql": {
+          "host"    : "localhost",
+          "user"    : "glasslab",
+          "password": "glasslab",
+          "database": "glasslab_dev"
+        },
+        "couchbase": {
+          "host":     "localhost:8091",
+          "bucket":   "glasslab_dashdata",
+          "password": "glasslab"
+        }
+      }
+    },
     "sdk": {
         "connect": "$host", "//": "$host is default, returns req.headers.host"
     }
