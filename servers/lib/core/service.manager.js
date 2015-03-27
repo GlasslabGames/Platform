@@ -61,6 +61,57 @@ function ServiceManager(configFiles){
     process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
     this.stats            = new Util.Stats(this.options, "ServiceManager");
     this.awss3            = new Util.S3Util(this.options);
+    this.stripe           = new Util.StripeUtil(this.options);
+
+
+    // test customer APIs
+    /*this.stripe.createCustomer({
+        card: "tok_15SG1TKpKFgczHmqa4GUNm7j",
+        description: "Customer for ben@glasslabgames.org",
+        email: "ben@glasslabgames.org"
+    });*/
+    /*this.stripe.createCustomer({
+        //card: "tok_15SG1TKpKFgczHmqa4GUNm7j",
+        card: {
+            number: 4242424242424242,
+            exp_month: 1,
+            exp_year: 2020,
+            cvc: 123
+        },
+        description: "Customer for Ben Dapkiewicz",
+        email: "ben@glasslabgames.org",
+        plan: 'test_chromebook',
+        quantity: 12475
+    });*/
+    //this.stripe.retrieveCustomer( "cus_5soWj36tEnUT8x" );
+    //this.stripe.retrieveSubscription( "cus_5soWj36tEnUT8x", "sub_5soW5S5k2b0Szt" );
+    //this.stripe.retrieveCoupon( "TEST_AMOUNTOFF" );
+    /*this.stripe.updateCustomer( "cus_5dvnWd0fs5Icru", {
+        description: "Customer for Ben Dapkiewicz"
+    });*/
+
+    // test subscription APIs
+    /*this.stripe.createSubscription("cus_5eBOgRMql5L1yF", {
+        card: {
+            number: 4242424242424242,
+            exp_month: 1,
+            exp_year: 2020,
+            cvc: 123
+        },
+        plan: 'test_chromebook',
+        quantity: 12475
+    });*/
+
+    /*this.stripe.listCustomers( { limit: 100 } )
+        .then(function(data) {
+            for( var i = 0; i < data.data.length; i++ ) {
+                _deleteCustomer.call( this, data.data[i].id );
+            }
+        }.bind(this));*/
+
+    // test plan APIs
+    //this.stripe.listPlans();
+    //this.stripe.retrievePlan( 'test_pcmac' );
 
 
     try{
@@ -72,6 +123,15 @@ function ServiceManager(configFiles){
     this.services  = {};
     this.routeList = {};
 }
+
+/*function _deleteCustomer( custId ) {
+    return when.promise(function(resolve, reject){
+        this.stripe.deleteCustomer( custId )
+            .then(function(results) {
+                resolve();
+            }.bind(this))
+    }.bind(this));
+}*/
 
 ServiceManager.prototype.loadVersionFile = function() {
 // add promise wrapper
@@ -340,6 +400,22 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         this.app[ m ](a.api, function(req, res, next) {
                             this.stats.increment("info", "Route.AuthCheck");
 
+                            // Validate against requireHttps
+                            /*if( a.requireHttps && this.options.env !== "dev" ) {
+                                console.log( "-------- Request information ---------" );
+                                console.log( "Request: " + req );
+                                //console.log( "Request stringified: " + JSON.stringify( req ) );
+                                console.log( "Request secure: " + req.secure );
+                                console.log( "Request connection: " + req.connection );
+                                //console.log( "Request connection stringified: " + JSON.stringify( req.connection ) );
+                                console.log( "Request connection encrypted: " + req.connection.encrypted );
+                                console.log( "--------------------------------------" );
+                                if( !req.connection.encrypted ) {
+                                    res.status(403).end();
+                                    return;
+                                }
+                            }*/
+
                             // auth
                             if( req.isAuthenticated() ) {
                                 this.stats.increment("info", "Route.Auth.Ok");
@@ -362,6 +438,14 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         }.bind(this));
                     } else {
                         console.log("API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
+
+                        // Validate against requireHttps
+                        /*if( a.requireHttps && this.options.env !== "dev" ) {
+                            if( !req.connection.encrypted ) {
+                                res.status(403).end();
+                                return;
+                            }
+                        }*/
 
                         // no login required
                         this.app[ m ](a.api, function(req, res, next) {

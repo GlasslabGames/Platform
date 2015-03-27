@@ -18,7 +18,8 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "price": "Free",
+        "price": "Premium",
+        "packages": "iPad Games",
         "shortDescription": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
         "description": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
         "developer": {
@@ -35,7 +36,7 @@
         },
         "license": {
             "type": "loginType",
-            "loginType": "glasslabv2",
+            "loginType": "glasslabv2,edmodo,icivics",
             "valid": false,
             "message": {
                 "invalid": "In Development"

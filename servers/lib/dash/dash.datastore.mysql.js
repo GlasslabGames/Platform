@@ -68,6 +68,7 @@ exampleOutput.getUserInfo = {
             }
         ]
 };
+
 WebStore_MySQL.prototype.getUserInfoById = function(id) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -94,26 +95,62 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 standards_view as standards \
             FROM GL_USER  \
             WHERE id="+ this.ds.escape(id);
+
+        var user;
         this.ds.query(Q)
             .then(function(results) {
                 if(results.length > 0) {
                     results = results[0];
                     results.collectTelemetry = results.collectTelemetry ? true : false;
                     results.enabled          = results.enabled ? true : false;
-
                     // Returning default standards to display in the front-end
                     // TODO: remove this when we have clarity on the multi-standards design
                     results.standards = results.standards ? results.standards : "CCSS";
-
-                    resolve(results);
+                    user = results;
+                    if(results.role === "instructor"){
+                        return this.getLicenseInfoByInstructor(id);
+                    }
+                    return [];
                 } else {
-                    reject({"error": "none found"}, 500);
+                    return "none";
                 }
-            }.bind(this),
-                function(err) {
+            }.bind(this))
+            .then(function(results){
+                if(results === "none"){
+                    reject({"error": "none found"}, 500);
+                    return;
+                } else if(results.length > 0){
+                    var license = results[0];
+                    user.licenseId = license["id"];
+                    user.licenseOwnerId = license["user_id"];
+                    user.licenseStatus = license["status"];
+                    user.paymentType = license["payment_type"];
+                    var packageType = license["package_type"];
+                    if(packageType === "trial" || packageType === "trialLegacy"){
+                        user.isTrial = true;
+                    } else{
+                        user.isTrial = false;
+                    }
+                    if(license["status"] === "po-pending" || license["status"] === "po-received" || license["status"] === "po-rejected"){
+                        user.purchaseOrderLicenseStatus = license["status"];
+                        user.purchaseOrderLicenseId = license.id;
+                    }
+                    if(results.length === 2 && (results[1]["status"] === "po-pending" || results[1]["status"] === "po-rejected")){
+                        user.purchaseOrderLicenseStatus = results[1]["status"];
+                        user.purchaseOrderLicenseId = results[1].id;
+                    }
+                    if( user.licenseStatus === "active" ||
+                        user.licenseStatus === "pending" ||
+                        user.licenseStatus === "po-received" ||
+                        user.licenseStatus === "po-rejected") {
+                        user.expirationDate = license["expiration_date"];
+                    }
+                }
+                resolve(user);
+            }.bind(this))
+            .then(null, function(err) {
                     reject({"error": "failure", "exception": err}, 500);
-                }.bind(this)
-            );
+            }.bind(this));
 
 // ------------------------------------------------
     }.bind(this));
@@ -172,7 +209,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-}
+};
 
 
 exampleOut.getLicensedGameIdsFromUserId = {
@@ -182,6 +219,7 @@ WebStore_MySQL.prototype.getLicensedGameIdsFromUserId = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+
     resolve( {} );
     return;
     var Q = "SELECT DISTINCT(game_id) as gameId \
@@ -215,4 +253,26 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
+            "WHERE status in ('active','pending', 'po-received', 'po-rejected', 'po-pending') and user_id = " + userId+ ") as lm\n" +
+            "ON lic.id = lm.license_id;";
+        var licenseInfo;
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length === 0){
+                    resolve([]);
+                    return;
+                }
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Get License Info By Instructor Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 };

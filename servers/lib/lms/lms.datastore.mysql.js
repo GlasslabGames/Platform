@@ -153,6 +153,7 @@ return when.promise(function(resolve, reject) {
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
+            c.premium_games_assigned > 0 as premiumGamesAssigned,      \
             c.institution_id as institution,     \
             c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
@@ -164,6 +165,7 @@ return when.promise(function(resolve, reject) {
                 for(var i = 0; i < results.length; i++) {
                     results[i].archived = results[i].archived ? true : false;
                     results[i].lockedRegistration = results[i].lockedRegistration   ? true : false;
+                    results[i].premiumGamesAssigned = results[i].premiumGamesAssigned ? true : false;
 
                     // convert string to array
                     results[i].grade = this._splitGrade(results[i].grade);
@@ -185,7 +187,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.getCourse = function(couserId) {
+LMS_MySQL.prototype.getCourse = function(courseId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -197,13 +199,14 @@ return when.promise(function(resolve, reject) {
             c.grade,    \
             c.locked > 0 as locked,      \
             c.archived > 0 as archived,  \
+            c.premium_games_assigned > 0 as premiumGamesAssigned,\
             (SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
             IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
             c.archived_Date as archivedDate,    \
             c.institution_id as institution,     \
             c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
-        WHERE c.id="+ this.ds.escape(couserId);
+        WHERE c.id="+ this.ds.escape(courseId);
 
     this.ds.query(Q)
         .then(function(results) {
@@ -211,6 +214,7 @@ return when.promise(function(resolve, reject) {
                 results = results[0];
                 results.archived = results.archived ? true : false;
                 results.locked   = results.locked   ? true : false;
+                results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
 
                 // convert string to array
                 results.grade = this._splitGrade(results.grade);
@@ -354,6 +358,7 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
                 c.archived > 0 as archived,  \
                 c.archived_Date as archivedDate, \
                 c.institution_id as institution, \
+                c.premium_games_assigned > 0 as premiumGamesAssigned,\
                 u.first_name as firstName, \
                 u.last_name as lastName \
             FROM GL_CODE co \
@@ -366,8 +371,9 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
             .then(function(results) {
                 if(results.length > 0) {
                     results = results[0];
-                    results.archived = results.archived ? true : false;
-                    results.locked   = results.locked   ? true : false;
+                    results.archived             = results.archived ? true : false;
+                    results.locked               = results.locked   ? true : false;
+                    results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
 
                     // move teacher info inside object
                     results.teacher = {
@@ -567,7 +573,7 @@ return when.promise(function(resolve, reject) {
 };
 
 
-LMS_MySQL.prototype.getUserCourses = function(userId) {
+LMS_MySQL.prototype.getCoursesByStudentId = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -677,7 +683,8 @@ return when.promise(function(resolve, reject) {
             courseData.lmsType,               // lmsType for sso lms
             courseData.lmsId,                 // lmsId for sso lms
             courseData.labels,                // labels
-            courseData.meta                   // meta data
+            courseData.meta,                  // meta data
+            courseData.premiumGamesAssigned   // do the course's students count against the student cap in the license
         ];
         values = values.join(',');
 
@@ -698,7 +705,8 @@ return when.promise(function(resolve, reject) {
             "lmsType," +
             "lmsId," +
             "labels," +
-            "meta" +
+            "meta," +
+            "premium_games_assigned" +
             ") ";
 
         // if institutionId == NULL unique constraint will not apply so we need to check it
@@ -775,6 +783,7 @@ return when.promise(function(resolve, reject) {
                 values.lmsId   = courseData.lmsId ? this.ds.escape(courseData.lmsId) : "NULL";   // lmsId for sso lms
                 values.labels  = courseData.labels ? this.ds.escape(courseData.labels) : "NULL"; // labels
                 values.meta    = courseData.meta ? this.ds.escape(courseData.meta) : "NULL";     // meta data
+                values.premium_games_assigned = courseData.premium_games_assigned ? 1 : 0;
 
                 if(!courseData.institutionId ||
                     courseData.institutionId === "NULL"
@@ -947,7 +956,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-LMS_MySQL.prototype.getCourseIdsFromUserId = function(userId) {
+LMS_MySQL.prototype.getCourseIdsFromInstructorId = function(userId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -992,6 +1001,7 @@ return when.promise(function(resolve, reject) {
             c.lmsId, \
             c.labels, \
             c.meta, \
+            c.premium_games_assigned as premiumGamesAssigned, \
             co.code \
         FROM GL_COURSE c \
         JOIN GL_CODE co on co.course_id=c.id \
@@ -1003,6 +1013,7 @@ return when.promise(function(resolve, reject) {
                 results = results[0];
                 results.archived = results.archived ? true : false;
                 results.locked   = results.locked   ? true : false;
+                results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
 
                 // convert string to array
                 results.grade = this._splitGrade(results.grade);
@@ -1023,4 +1034,20 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+LMS_MySQL.prototype.isCoursePremium = function(courseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT premium_games_assigned > 0 as premiumGamesAssigned FROM GL_COURSE WHERE id = " + courseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                results = results[0];
+                var state = results.premiumGamesAssigned ? true : false;
+                resolve(state);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Is Course Premium Error -", err);
+                reject(err);
+            });
+    }.bind(this));
 };

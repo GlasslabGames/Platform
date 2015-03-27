@@ -187,23 +187,25 @@ function reshape(array, n){
 }
 
 module.exports = {
-    Request: require('./util.request.js'),
-    Stats:   require('./util.stats.js'),
-    Email:   require('./util.email.js'),
-    S3Util:   require('./util.s3.js'),
-    ConvertToString:  convertToString,
-    PromiseContinue:  promiseContinue,
-    PromiseError:     promiseError,
-    GetExpressLogger: getExpressLogger,
-    GetTimeStamp:     getTimeStamp,
-    CheckTimeStamp:   checkTimeStamp,
-    BuildURI:         buildUri,
-    CreateUUID:       createUUID,
+    Request:            require('./util.request.js'),
+    Stats:              require('./util.stats.js'),
+    Email:              require('./util.email.js'),
+    S3Util:             require('./util.s3.js'),
+    StripeUtil:         require('./util.stripe.js'),
+    ConvertToString:    convertToString,
+    PromiseContinue:    promiseContinue,
+    PromiseError:       promiseError,
+    GetExpressLogger:   getExpressLogger,
+    GetTimeStamp:       getTimeStamp,
+    CheckTimeStamp:     checkTimeStamp,
+    BuildURI:           buildUri,
+    CreateUUID:         createUUID,
     String: {
-        capitalize: capitalize
+        capitalize:     capitalize
     },
-    Reshape: reshape,
-    WriteToCSV: writeToCSV
+    Reshape:            reshape,
+    writeToCSV:         writeToCSV,
+    updateSession:      updateSession
 };
 
 // writes data to a chosen file
@@ -216,5 +218,18 @@ function writeToCSV(data, file){
             }
             resolve()
         }.bind(this))
+    }.bind(this));
+}
+
+function updateSession(req){
+    return when.promise(function(resolve, reject){
+        try{
+            req.session.save(function(){
+                resolve()
+            });
+        } catch(err){
+            console.error("Session Reload Error -",err);
+            reject(err);
+        }
     }.bind(this));
 }

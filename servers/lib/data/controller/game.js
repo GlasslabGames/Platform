@@ -361,13 +361,14 @@ function releases(req, res, next, serviceManager) {
     var gameId = req.params.gameId;
 
     var dash = serviceManager.get("dash").service;
+    var outType;
     // TODO: replace this with DB lookup, return promise
     dash.isValidGameId(gameId)
         .then(function(state) {
             if (!state) {
                 return when.reject({error: "invalid gameId"});
             }
-            var outType = '.ini';
+            outType = '.ini';
             if (req.params && req.params.hasOwnProperty("type")) {
                 outType = req.params.type;
             }
@@ -469,7 +470,7 @@ function updateMatches(req, res){
     }
     var gameId = req.params.gameId;
 
-    if(!(req.body && typeof req.body === "object")){
+    if(!(req.body && typeof req.body === "object" && Object.keys(req.body).length > 0)){
         this.requestUtil.errorResponse(res, {key: "data.turnData.missing"});
         return;
     }

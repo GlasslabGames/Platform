@@ -16,7 +16,8 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "price": "Free",
+        "packages": "iPad Games",
+        "price": "Premium",
         "release": "live",
         "releaseDate": "March 23, 2015",
         "shortDescription": "Water Bears EDU",
