@@ -306,6 +306,7 @@ StripeUtil.prototype.chargeInvoice = function(customerId){
         }, function(err, invoice){
             if( err ) {
                 if( err.message === "Nothing to invoice for customer" ){
+                    console.log("Stripe Utility No Invoice: ", err.message);
                     resolve();
                     return;
                 }
