@@ -105,9 +105,7 @@ function ServiceManager(configFiles){
     /*this.stripe.listCustomers( { limit: 100 } )
         .then(function(data) {
             for( var i = 0; i < data.data.length; i++ ) {
-                if( data.data[i].id !== "cus_5tLjNCAQybEBGO" ) {
-                    _deleteCustomer.call( this, data.data[i].id );
-                }
+                _deleteCustomer.call( this, data.data[i].id );
             }
         }.bind(this));*/
 
