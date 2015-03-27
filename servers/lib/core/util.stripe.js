@@ -79,6 +79,38 @@ StripeUtil.prototype.updateCustomer = function( customerId, params ) {
     }.bind(this));
 };
 
+StripeUtil.prototype.deleteCustomer = function( customerId ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe customers.del API
+        this.stripe.customers.del( customerId, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to delete the customer: ", customerId, err );
+                reject( err );
+            }
+            else {
+                console.log( "Stripe Utility Successfully deleted the Customer: ", customerId, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
+StripeUtil.prototype.listCustomers = function( params ) {
+    return when.promise(function(resolve, reject) {
+        // Call the Stripe customers.list API
+        this.stripe.customers.list( params, function( err, result ) {
+            if( err ) {
+                console.error( "Stripe Utility Error - failed to list the customers: ", params, err );
+                reject( err );
+            }
+            else {
+                //console.log( "Stripe Utility Successfully listed the Customers: ", params, result );
+                resolve( result );
+            }
+        });
+    }.bind(this));
+};
+
 /*
  * Subscription APIs
  */
