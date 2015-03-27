@@ -278,6 +278,9 @@ return when.promise(function(resolve, reject) {
                     user[i] = data[i];
                     user[i].collectTelemetry = user[i].collectTelemetry ? true : false;
                     user[i].enabled = true;
+                    if(user[i].role === "manager"){
+                        user[i].role = "instructor";
+                    }
 
                     // if not glasslab login type then set username to lms username
                     if( (user[i].loginType !== aConst.login.type.glassLabV2) &&
