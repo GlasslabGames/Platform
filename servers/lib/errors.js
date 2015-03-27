@@ -133,7 +133,7 @@ module.exports = {
     "lic.promoCode.missing":                "No promo code was supplied",
     "lic.promoCode.invalid":                "The promo code supplied was invalid",
     "lic.promoCode.noMoreRedemptions":      "This promo code has already been used and has no redemptions remaining",
-    "lic.general":                          "We encountered an error. Please Try again",
+    "lic.general":                          "We encountered an error. Please try again",
     "lic.order.pending":                    "You currently have a pending purchase order. Please consult your billing department",
     "lic.order.absent":                     "No purchase order was found",
     "lic.action.invalid":                   "The action you listed is not supported by our system.  Please recheck your options",

@@ -2786,6 +2786,9 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
                     subscription = stripeOutput;
                 }
                 subscriptionId = subscription.id;
+                return this.serviceManager.stripe.chargeInvoice(customerId);
+            }.bind(this))
+            .then(function(){
                 return this.serviceManager.stripe.cancelSubscription(customerId, subscriptionId);
             }.bind(this))
             .then(function(results) {
