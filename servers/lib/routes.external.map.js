@@ -251,6 +251,30 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/games/plan/basic",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getPlanLicenseGamesBasicInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/available",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAvailableGamesObj"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/plan/:planId/basic",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getGamesBasicInfoByPlan"
+            }
+        },
+        {
             api: "/api/v2/dash/games",
             service: "dash",
             controller: "games",
@@ -357,6 +381,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/lms/course/:courseId/game/:gameId/verify-access",
+            service: "lms",
+            controller: "course",
+            method: {
+                get: "verifyAccessToGameInCourse"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/lms/course/enroll",
             service: "lms",
             controller: "course",
@@ -401,7 +434,285 @@ module.exports = {
                 post: "updateGamesInCourse"
             }
         },
+        {
+            api: "/api/v2/lms/course/block/code/:code",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "blockPremiumGamesBasicCourses"
+            }
+        },
+
         // ---------------------------------------------------
+        {
+            api: "/api/v2/license/packages",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getSubscriptionPackages"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/plan",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getCurrentPlan"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/students",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getStudentsInLicense"
+            }
+        },
+
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/billing",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getBillingInfo",
+                post: "updateBillingInfo"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/subscribe",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "subscribeToLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/trial",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "subscribeToTrialLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/upgrade",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "upgradeLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/trial/upgrade",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "upgradeTrialLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/promo-code/:code",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "validatePromoCode"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/cancel",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelLicenseAutoRenew"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/renew",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "enableLicenseAutoRenew"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/invite",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "addTeachersToLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/activate",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "setLicenseMapStatusToActive"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/remove",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "removeTeacherFromLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/leave",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "teacherLeavesLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/subscribe/po",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "subscribeToLicensePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/trial/upgrade/po",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "upgradeTrialLicensePurchaseOrder"
+            }
+        },
+        //{
+        //    requireAuth: true,
+        //    api: "/api/v2/license/upgrade/po",
+        //    service: "lic",
+        //    controller: "license",
+        //    method: {
+        //        post: "upgradeLicensePurchaseOrder"
+        //    }
+        //},
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getActivePurchaseOrderInfo"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/cancel",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelActivePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/nullify",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "setLicenseMapStatusToNull"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/receive",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "receivePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/reject",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "rejectPurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/invoice",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "invoicePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/approve",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "approvePurchaseOrder"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/trial/legacy",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "migrateToTrialLegacy"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/end",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelLicense"
+            }
+        },
+        // old api methods, not in use
         {
             requireAuth: true,
             api: "/api/v2/license/:licenseKey/verify",
@@ -573,6 +884,15 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
+        //{
+        //    requireAuth: true,
+        //    api: "/api/v2/auth/user/:userId/delete",
+        //    service: "auth",
+        //    controller: "user",
+        //    method: {
+        //        post: "deleteUser"
+        //    }
+        //},
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------

@@ -27,5 +27,8 @@ module.exports = {
             course: "course",
             institution: "institution"
         }
+    },
+    accessCode: {
+        block: "12345"
     }
 };

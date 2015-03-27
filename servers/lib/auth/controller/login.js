@@ -119,7 +119,7 @@ return when.promise(function(resolve, reject) {
             (user.role == lConst.role.instructor) ||
             (user.role == lConst.role.manager) ||
             (user.role == lConst.role.admin) ) {
-            this.lmsStore.getUserCourses(user.id)
+            this.lmsStore.getCoursesByStudentId(user.id)
                 .then(function(courses){
                     // add courses
                     var tuser = _.clone(user);

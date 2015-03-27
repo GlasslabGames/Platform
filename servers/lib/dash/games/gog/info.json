@@ -16,7 +16,8 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Free",
+        "price": "Premium",
+        "packages": "PC/Mac, Chromebook/Web Games",
         "release": "live",
         "releaseDate": "Dec 21, 2014",
         "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
