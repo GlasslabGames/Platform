@@ -337,6 +337,10 @@ StripeUtil.prototype.chargeInvoice = function(customerId){
             customer: customerId
         }, function(err, invoice){
             if( err ) {
+                if( err.message === "Nothing to invoice for customer" ){
+                    resolve();
+                    return;
+                }
                 console.error( "Stripe Utility Error - failed to create invoice: ", customerId, err);
                 reject(err);
             }
