@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "PRIMA",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Prima",
         "longName": "Prima",
@@ -16,7 +16,7 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Free",
+        "price": "TBD",
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
         "releaseDate": "TBD",
