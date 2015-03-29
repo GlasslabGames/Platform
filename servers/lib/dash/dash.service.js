@@ -183,7 +183,7 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
             if( this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
-                this._games[g].info.basic.price === "Free") {
+                this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD") {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
@@ -435,9 +435,10 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
 // couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
 DashService.prototype._loadGameFiles = function(){
     return when.promise(function(resolve, reject){
-
+        console.log( "loadgamefiles" );
         this.telmStore.getAllGameInformationAndGameAchievements()
             .then(function(results){
+                console.log( "success with load game files: " + results );
                 var ids;
                 var type;
                 var gameId;
@@ -473,12 +474,13 @@ DashService.prototype._loadGameFiles = function(){
 DashService.prototype._buildGamesObject = function(gameInformation, gameAchievements){
     return when.promise(function(resolve, reject){
         try {
+            console.log( "build games object" );
             var gameId;
             var index = 0;
             var achievements = [];
             var gameIds = [];
             _.forEach(gameInformation, function (data, gameId) {
-
+                console.log( "in a game"  + gameId);
                 gameIds.push(gameId);
                 this._games[gameId] = {};
                 if(gameAchievements[gameId] !== undefined){
