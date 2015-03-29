@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "WWF",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Unannounced Game",
         "longName": "Unannounced Game",
