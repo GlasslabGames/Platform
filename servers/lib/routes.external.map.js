@@ -614,15 +614,6 @@ module.exports = {
                 post: "upgradeTrialLicensePurchaseOrder"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/license/upgrade/po",
-        //    service: "lic",
-        //    controller: "license",
-        //    method: {
-        //        post: "upgradeLicensePurchaseOrder"
-        //    }
-        //},
         {
             requireAuth: true,
             requireHttps: true,

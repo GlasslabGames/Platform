@@ -34,6 +34,7 @@ module.exports = {
     approvePurchaseOrder: approvePurchaseOrder,
     migrateToTrialLegacy: migrateToTrialLegacy,
     cancelLicense: cancelLicense,
+    expireLicense: expireLicense,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -2627,6 +2628,94 @@ function cancelLicense(req, res){
         }.bind(this));
 }
 
+function expireLicense(license, protocol, host){
+    return when.promise(function(resolve, reject) {
+        var userId = license.user_id;
+        var licenseId = license.id;
+        var isTrial = false;
+        if(license.package_type === "trial"){
+            isTrial = true;
+        }
+        var expDate = new Date(license.expiration_date);
+        var today = new Date();
+        var dayInMS = 86400000;
+        if(today - expDate > dayInMS){
+            resolve("no expire");
+            return;
+        }
+        var instructors;
+        var promise;
+        if(isTrial){
+            promise = this.myds.getUserById(userId);
+        } else{
+            promise = this.myds.getInstructorsByLicense(licenseId);
+        }
+        promise
+            .then(function (users) {
+                if(isTrial){
+                    var user = {};
+                    user.email = users["EMAIL"];
+                    user.firstName = users["FIRST_NAME"];
+                    user.lastName = users["LAST_NAME"];
+                    instructors = [user];
+                } else{
+                    instructors = users;
+                }
+                return _endLicense.call(this, userId, licenseId, false);
+            }.bind(this))
+            .then(function (status) {
+                if (typeof status === "string") {
+                    return status;
+                }
+                var data;
+                var email;
+                var template;
+                // no req object, needs to change
+                //var protocol = req.protocol; // does not work
+                //var host = req.headers.host; // does not work
+                var promiseList = [];
+                instructors.forEach(function (user) {
+                    email = user.email;
+                    data = {};
+                    data.subject = "It's Time to Renew!";
+                    if (user.id === userId) {
+                        //license owner email
+                        template = "owner-subscription-expires";
+                        if(isTrial){
+                            data.subject = "Your Trial has Expired!";
+                            template = "owner-trial-expires";
+                        }
+                        data.firstName = user.firstName;
+                        data.lastname = user.lastName;
+                    } else{
+                        // DANGER! in 1 year, thousands of expiration or renew emails will go out
+                        // end of trial legacy.  how would we send all that?
+                        // educator email
+                        template = "educator-subscription-expires";
+                        if (user.firstName === "temp" && user.lastName === "temp") {
+                            data.firstName = user.email;
+                        } else {
+                            data.firstName = user.firstName;
+                            data.lastName = user.lastName;
+                        }
+                    }
+                    promiseList.push(_sendEmailResponse.call(this, email, data, protocol, host, template));
+                }.bind(this));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(status){
+                if (typeof status === "string") {
+                    reject(status);
+                }
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Expire License Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
 function _storeSchoolInformation(schoolInfo){
     return when.promise(function(resolve, reject){
         var title = "'" + schoolInfo.name + "'";
@@ -3467,26 +3556,34 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
 
 function _sendEmailResponse(email, data, protocol, host, template){
     // to remove testing email spam, i've added a return. remove to test
-    //return;
-    if(data.expirationDate){
-        data.expirationDate = new Date(data.expirationDate);
-    }
-    var emailData = {
-        subject: data.subject,
-        to: email,
-        data: data,
-        host: protocol + "://" + host
-    };
-    var pathway = path.join(__dirname,"../email-templates");
-    var options = this.options.auth.email;
-    var email = new Util.Email(
-        this.options.auth.email,
-        path.join( __dirname, "../email-templates" ),
-        this.stats );
-    email.send( template, emailData )
-        .then(null, function(err){
-            console.error("Send Email Response Error -",err);
-        });
+    data._emailStored = email;
+    return when.promise(function(resolve, reject){
+        email = data._emailStored;
+        delete data._emailStored;
+        if(data.expirationDate){
+            data.expirationDate = new Date(data.expirationDate);
+        }
+        var emailData = {
+            subject: data.subject,
+            to: email,
+            data: data,
+            host: protocol + "://" + host
+        };
+        var pathway = path.join(__dirname,"../email-templates");
+        var options = this.options.auth.email;
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join( __dirname, "../email-templates" ),
+            this.stats );
+        email.send( template, emailData )
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Send Email Response Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 var exampleOut = {}, exampleIn = {};
