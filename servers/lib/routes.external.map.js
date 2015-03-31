@@ -740,6 +740,15 @@ module.exports = {
                 post: "registerLicense"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/inspect",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "inspectLicenses"
+            }
+        },
         // ---------------------------------------------------
         {
             api: "/api/v2/auth/user/register",

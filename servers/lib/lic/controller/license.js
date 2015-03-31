@@ -34,7 +34,7 @@ module.exports = {
     approvePurchaseOrder: approvePurchaseOrder,
     migrateToTrialLegacy: migrateToTrialLegacy,
     cancelLicense: cancelLicense,
-    expireLicense: expireLicense,
+    inspectLicenses: inspectLicenses,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -2628,7 +2628,50 @@ function cancelLicense(req, res){
         }.bind(this));
 }
 
-function expireLicense(license, today, protocol, host){
+function inspectLicenses(req, res){
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+    }
+    var errors = {};
+    var hasErrors = false;
+    //job should run at midnight evey day.  eventually handles all time running out emails and does expire/renew operations
+    this.myds.getLicensesForExpireRenew()
+        .then(function(licenses){
+            var today = new Date();
+            var protocol = req.protocol;
+            var host = req.headers.host;
+            var promiseList = [];
+            licenses.forEach(function(license){
+                if(license.active === 1){
+                    promiseList.push(_expireLicense.call(this, license, today, protocol, host));
+                } else{
+                    //need to do more work on renew flow
+                    //promiseList.push(_renewLicense.call(this, license, protocol, host));
+                }
+            }.bind(this));
+            return when.reduce(promiseList, function(results, status, index){
+                if(status){
+                    hasErrors = true;
+                    var licenseId = licenses[index].id;
+                    errors[licenseId] = status
+                }
+                return results;
+            }, []);
+        }.bind(this))
+        .then(function(){
+            if(hasErrors){
+                this.requestUtil.jsonResponse(res, {status: "not all handled", errors: errors});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Inspect Licenses Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function _expireLicense(license, today, protocol, host){
     return when.promise(function(resolve, reject) {
         var userId = license.user_id;
         var licenseId = license.id;
@@ -2656,6 +2699,7 @@ function expireLicense(license, today, protocol, host){
                     user.email = users["EMAIL"];
                     user.firstName = users["FIRST_NAME"];
                     user.lastName = users["LAST_NAME"];
+                    user.id = users.id;
                     instructors = [user];
                 } else{
                     instructors = users;
@@ -2669,9 +2713,6 @@ function expireLicense(license, today, protocol, host){
                 var data;
                 var email;
                 var template;
-                // no req object, needs to change
-                //var protocol = req.protocol; // does not work
-                //var host = req.headers.host; // does not work
                 var promiseList = [];
                 instructors.forEach(function (user) {
                     email = user.email;
@@ -2685,7 +2726,7 @@ function expireLicense(license, today, protocol, host){
                             template = "owner-trial-expires";
                         }
                         data.firstName = user.firstName;
-                        data.lastname = user.lastName;
+                        data.lastName = user.lastName;
                     } else{
                         // DANGER! in 1 year, thousands of expiration or renew emails will go out
                         // end of trial legacy.  how would we send all that?
@@ -2704,7 +2745,7 @@ function expireLicense(license, today, protocol, host){
             }.bind(this))
             .then(function(status){
                 if (typeof status === "string") {
-                    reject(status);
+                    resolve(status);
                 }
                 resolve();
             }.bind(this))
@@ -2712,6 +2753,66 @@ function expireLicense(license, today, protocol, host){
                 console.error("Expire License Error -",err);
                 reject(err);
             }.bind(this));
+    }.bind(this));
+}
+
+function _renewLicense(license, protocol, host){
+    return when.promise(function(resolve, reject){
+        var userId = license.user_id;
+        var licenseId = license.id;
+        var user;
+
+        var expDate = new Date(license.expiration_date);
+        expDate.setFullYear(expDate.getFullYear() + 1);
+        expDate = date.toISOString().slice(0, 19).replace('T', ' ');
+
+        this.myds.getUserById(userId)
+            .then(function (results) {
+                user = results;
+                return _endLicense.call(this, userId, licenseId, false);
+            }.bind(this))
+            .then(function(){
+                var updateFields = [];
+                var active = "active = 1";
+                updateFields.push(active);
+                var expirationDate = "expiration_date = '" + expDate + "'";
+                updateFields.push(expirationDate);
+                var promiseList = [];
+                promiseList.push(this.myds.getLicenseMapByLicenseId(licenseId));
+                promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(results){
+                var licenseMaps = results[0];
+                var userIds = _.pluck(licenseMaps, "user_id");
+                var updateFields = [];
+                var status = "status = 'active'";
+                updateFields.push('active');
+                return this.updateLicenseMapByLicenseInstructor(licenseId, userIds, updateFields);
+            }.bind(this))
+            .then(function(status){
+                if (typeof status === "string") {
+                    return status;
+                }
+                var data = {};
+                var email = user["EMAIL"];
+                data.subject = "Your Account has Been Renewed!";
+                data.firstName = user["FIRST_NAME"];
+                data.lastName = user["LAST_NAME"];
+                var template = "owner-renew";
+                return _sendEmailResponse.call(this, email, data, protocol, host, template);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                    return;
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Renew License Error -",err);
+                reject(err);
+            });
     }.bind(this));
 }
 

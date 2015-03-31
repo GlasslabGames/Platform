@@ -764,6 +764,20 @@ Lic_MySQL.prototype.getLicensesForExpireRenew = function(){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getLicenseMapByLicenseId = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get License Map By License Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 ///////////////////////////////////////////
 /////////////OUTDATED METHODS/////////////
 /////////////////////////////////////////
