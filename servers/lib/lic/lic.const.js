@@ -21,38 +21,38 @@ module.exports = {
             name: 'Chromebook/Web',
             description: 'Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
-            browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
+            browserGames: ['AW-1','GOG', 'SLFR'],
             iPadGames: ['AA-1'],
             downloadableGames: [],
             planId: 'chromebook'
-        },
-        pcMac: {
-            stripe_planId: 'GLG_PCMAC_P05',
-            name: 'PC/MAC',
-            description: 'Games in this package run on PC or Mac computers.',
-            pricePerSeat: 2.5,
-            browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: ['AA-1'],
-            downloadableGames: ['SC'],
-            planId: 'pcMac'
         },
         ipad: {
             stripe_planId: 'GLG_IPAD_P04',
             name: 'iPad',
             description: 'Games in this package are optimized to work on iPads.',
-            pricePerSeat: 3.5,
+            pricePerSeat: 3,
             browserGames: [],
-            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
+            iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: [],
             planId: 'ipad'
+        },
+        pcMac: {
+            stripe_planId: 'GLG_PCMAC_P05',
+            name: 'PC/MAC',
+            description: 'Games in this package run on PC or Mac computers.',
+            pricePerSeat: 3.5,
+            browserGames: ['AW-1','GOG', 'SLFR'],
+            iPadGames: ['AA-1'],
+            downloadableGames: ['SC'],
+            planId: 'pcMac'
         },
         allGames: {
             stripe_planId: 'GLG_ALLGAMES_P06',
             name: 'All Games',
             description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
-            browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
+            browserGames: ['AW-1','GOG', 'SLFR'],
+            iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'allGames'
         },
@@ -61,8 +61,8 @@ module.exports = {
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1/30,
-            browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
+            browserGames: ['AW-1','GOG', 'SLFR'],
+            iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'trial'
         },
@@ -71,8 +71,8 @@ module.exports = {
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1,
-            browserGames: ['AW-1','GOG', 'PRIMA', 'SLFR'],
-            iPadGames: ['AA-1','PVZ','WT','WPLUS'],
+            browserGames: ['AW-1','GOG', 'SLFR'],
+            iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'trialLegacy'
         }

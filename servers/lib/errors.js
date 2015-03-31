@@ -84,6 +84,7 @@ module.exports = {
     "data.userId.invalid":                  "Invalid UserId",
     "data.gameId.match":                    "Game cannot create a match",
     "data.turnData.missing":                "Turn data is missing",
+    "data.access.invalid":                  "Invalid Access",
     // report
     "report.general":                       "There is a problem with this report",
     "report.access.invalid":                "Invalid Access",

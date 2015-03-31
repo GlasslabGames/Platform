@@ -102,6 +102,13 @@ function ServiceManager(configFiles){
         quantity: 12475
     });*/
 
+    /*this.stripe.listCustomers( { limit: 100 } )
+        .then(function(data) {
+            for( var i = 0; i < data.data.length; i++ ) {
+                _deleteCustomer.call( this, data.data[i].id );
+            }
+        }.bind(this));*/
+
     // test plan APIs
     //this.stripe.listPlans();
     //this.stripe.retrievePlan( 'test_pcmac' );
@@ -116,6 +123,15 @@ function ServiceManager(configFiles){
     this.services  = {};
     this.routeList = {};
 }
+
+/*function _deleteCustomer( custId ) {
+    return when.promise(function(resolve, reject){
+        this.stripe.deleteCustomer( custId )
+            .then(function(results) {
+                resolve();
+            }.bind(this))
+    }.bind(this));
+}*/
 
 ServiceManager.prototype.loadVersionFile = function() {
 // add promise wrapper
