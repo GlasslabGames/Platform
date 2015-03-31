@@ -71,6 +71,116 @@
     ],
     "reports": {
         "list": [
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.png",
+                    "large": "assets/skinny-banner-PRIMA@2x.png"
+                },
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "title": "Good Gameplay Knowledge",
+                                    "description": "The player knows how to play the game and use it's features."
+                                },
+                                {
+                                    "id": "so2",
+                                    "title": "Successful Feeding!",
+                                    "description": "The player successfully fed their first pen of creatures."
+                                },
+                                {
+                                    "id": "so3",
+                                    "title": "Successful Shipment!",
+                                    "description": "This player has successfully made their first shipment of creatures."
+                                },
+                                {
+                                    "id": "so4",
+                                    "title": "Success with Early Skills",
+                                    "description": "Player successfully completed the first two challenge types on their first attempt."
+                                },
+                                {
+                                    "id": "so5",
+                                    "title": "Success with Complex Skills",
+                                    "description": "Player successfully completed the second two challenge types on their first attempt."
+                                },
+                                {
+                                    "id": "so6",
+                                    "title": "Success with Advanced Skills",
+                                    "description": "Player successfully completed the first advanced challenge type on their first attempt."
+                                },
+                                {
+                                    "id": "so7",
+                                    "title": "Early Mastery!",
+                                    "description": "Master performance! The player has completed Part I and Part II of the game without any mistakes!"
+                                },
+                                {
+                                    "id": "so8",
+                                    "title": "Completed Advanced Challenges!",
+                                    "description": "Super performance! This player successfully completed one or more advanced level challenges."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "title": "Trouble with Gameplay Knowledge",
+                                    "description": "The player may not understand how the game works - they needed four or more attempts to finish one or more of the introductory challenges."
+                                },
+                                {
+                                    "id": "wo2",
+                                    "title": "Trouble with Shipping Activities",
+                                    "description": "The player has experienced multiple failures when shipping creatures."
+                                },
+                                {
+                                    "id": "wo3",
+                                    "title": "Trouble Feeding Creatures",
+                                    "description": "The player has experienced multiple failures when feeding creatures."
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "Trouble with Early Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: ND types."
+                                },
+                                {
+                                    "id": "wo5",
+                                    "title": "Trouble with Early Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: MD types."
+                                },
+                                {
+                                    "id": "wo6",
+                                    "title": "Trouble with Early Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: MS types."
+                                },
+                                {
+                                    "id": "wo7",
+                                    "title": "Trouble with Complex Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: NS types."
+                                },
+                                {
+                                    "id": "wo8",
+                                    "title": "Trouble with Advanced Skills",
+                                    "description": "Difficulty with \"advanced\" skills: player has been unsuccessful working with advanced problem types: MT types."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+            }
         ]
     },
     "details": {
