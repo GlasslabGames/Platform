@@ -159,6 +159,15 @@ module.exports = {
                 get: "pollMatches"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/saves/delete",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "deleteGameSaves"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,

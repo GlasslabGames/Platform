@@ -323,6 +323,14 @@ var gdv_getAllCourseGameProfiles = function(doc, meta){
         emit(meta.id);
     }
 };
+
+var gdv_getAllGameSaves = function(doc, meta){
+    var values = meta.id.split(':');
+    if((values[0] === "gd") &&
+       (values[1] === "save")){
+        emit(meta.id);
+    }
+};
 // ------------------------------------
 
     this.telemDDoc = {
@@ -368,6 +376,9 @@ var gdv_getAllCourseGameProfiles = function(doc, meta){
             },
             getAllCourseGameProfiles: {
                 map: gdv_getAllCourseGameProfiles
+            },
+            getAllGameSaves: {
+                map: gdv_getAllGameSaves
             }
         }
     };
@@ -3054,6 +3065,32 @@ TelemDS_Couchbase.prototype.multiGetCourseGameProfiles = function(courseIds){
                 return;
             }
             //var outputs = _.pluck(results, 'value');
+            resolve(results);
+        }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.deleteGameSavesByGameId = function(gameId){
+    return when.promise(function(resolve, reject){
+        var map = "getAllGameSaves";
+        var key = "gd:save:" + gameId.toUpperCase();
+        this.client.view("telemetry", map).query({
+            startkey: key
+        }, function(err, results){
+            if(err){
+                console.error("CouchBase TelemetryStore: Delete Game Saves By Game Id Error -", err);
+                reject(err);
+                return;
+            }
+            var keys = _.pluck(results, "key");
+            this._removeKeys(keys)
+                .then(function(){
+                    resolve()
+                })
+                .then(null, function(err){
+                    console.error("Delete Game Saves By Game Id -", gameId, " Error -", err);
+                    reject(err);
+                });
             resolve(results);
         }.bind(this));
     }.bind(this));
