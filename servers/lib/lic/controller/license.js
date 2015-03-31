@@ -2628,7 +2628,7 @@ function cancelLicense(req, res){
         }.bind(this));
 }
 
-function expireLicense(license, protocol, host){
+function expireLicense(license, today, protocol, host){
     return when.promise(function(resolve, reject) {
         var userId = license.user_id;
         var licenseId = license.id;
@@ -2637,9 +2637,8 @@ function expireLicense(license, protocol, host){
             isTrial = true;
         }
         var expDate = new Date(license.expiration_date);
-        var today = new Date();
-        var dayInMS = 86400000;
-        if(today - expDate > dayInMS){
+        // today is a date object as well
+        if(today - expDate < 0){
             resolve("no expire");
             return;
         }

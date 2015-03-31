@@ -7,6 +7,7 @@ var http       = require('http');
 // Third-party libs
 var _          = require('lodash');
 var when       = require('when');
+var CronJob    = require('cron').CronJob;
 // load at runtime
 var Util, lConst;
 
@@ -71,6 +72,26 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+LicService.prototype.inspectLicenses = function(){
+    var job = new CronJob('00 00 00 * * *', function(){
+        this.myds.getLicensesForExpireRenew()
+            .then(function(licenses){
+                var today = new Date();
+                var protocol = "http";
+                var host = "localhost:8001";
+                var promiseList = [];
+                var licenseController = this.serviceManager.get("lic").lib.Controller.license;
+                licenses.forEach(function(license){
+                    if(license.active === 1){
+                        promiseList.push(licenseController.expireLicense(license, today, protocol, host));
+                    } else{
+                        promiseList.push(licenseController.renewLicense(license, protocol, host));
+                    }
+                })
+            })
+    }.bind(this));
 };
 
 LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
