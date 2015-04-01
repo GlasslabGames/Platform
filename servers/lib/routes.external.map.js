@@ -159,6 +159,15 @@ module.exports = {
                 get: "pollMatches"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/saves/delete",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "deleteGameSaves"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
@@ -614,15 +623,6 @@ module.exports = {
                 post: "upgradeTrialLicensePurchaseOrder"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/license/upgrade/po",
-        //    service: "lic",
-        //    controller: "license",
-        //    method: {
-        //        post: "upgradeLicensePurchaseOrder"
-        //    }
-        //},
         {
             requireAuth: true,
             requireHttps: true,
@@ -738,6 +738,15 @@ module.exports = {
             controller: "license",
             method: {
                 post: "registerLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/inspect",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "inspectLicenses"
             }
         },
         // ---------------------------------------------------

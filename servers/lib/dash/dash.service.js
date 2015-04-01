@@ -183,7 +183,7 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
             if( this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
-                this._games[g].info.basic.price === "Free") {
+                this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD") {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
@@ -435,7 +435,6 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
 // couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
 DashService.prototype._loadGameFiles = function(){
     return when.promise(function(resolve, reject){
-
         this.telmStore.getAllGameInformationAndGameAchievements()
             .then(function(results){
                 var ids;
@@ -478,7 +477,6 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
             var achievements = [];
             var gameIds = [];
             _.forEach(gameInformation, function (data, gameId) {
-
                 gameIds.push(gameId);
                 this._games[gameId] = {};
                 if(gameAchievements[gameId] !== undefined){

@@ -747,6 +747,37 @@ Lic_MySQL.prototype.insertToInstitutionTable = function(values){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getLicensesForExpireRenew = function(){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT l.* FROM GL_LICENSE as l\n" +
+        "JOIN (SELECT * FROM GL_LICENSE_MAP WHERE status in ('cc-renew', 'po-renew', 'active', 'po-received')) as lm\n" +
+        "WHERE (l.id = lm.license_id AND l.user_id = lm.user_id)\n" +
+        "AND (lm.status IN('cc-renew','po-pending') OR (lm.status IN ('active', 'po-received') AND l.expiration_date < NOW()));";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get Licenses For Expire Renew Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getLicenseMapByLicenseId = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get License Map By License Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 ///////////////////////////////////////////
 /////////////OUTDATED METHODS/////////////
 /////////////////////////////////////////

@@ -34,6 +34,7 @@ module.exports = {
     approvePurchaseOrder: approvePurchaseOrder,
     migrateToTrialLegacy: migrateToTrialLegacy,
     cancelLicense: cancelLicense,
+    inspectLicenses: inspectLicenses,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -2627,6 +2628,194 @@ function cancelLicense(req, res){
         }.bind(this));
 }
 
+function inspectLicenses(req, res){
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+    }
+    var errors = {};
+    var hasErrors = false;
+    //job should run at midnight evey day.  eventually handles all time running out emails and does expire/renew operations
+    this.myds.getLicensesForExpireRenew()
+        .then(function(licenses){
+            var today = new Date();
+            var protocol = req.protocol;
+            var host = req.headers.host;
+            var promiseList = [];
+            licenses.forEach(function(license){
+                if(license.active === 1){
+                    promiseList.push(_expireLicense.call(this, license, today, protocol, host));
+                } else{
+                    //need to do more work on renew flow
+                    //promiseList.push(_renewLicense.call(this, license, protocol, host));
+                }
+            }.bind(this));
+            return when.reduce(promiseList, function(results, status, index){
+                if(status){
+                    hasErrors = true;
+                    var licenseId = licenses[index].id;
+                    errors[licenseId] = status
+                }
+                return results;
+            }, []);
+        }.bind(this))
+        .then(function(){
+            if(hasErrors){
+                this.requestUtil.jsonResponse(res, {status: "not all handled", errors: errors});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Inspect Licenses Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function _expireLicense(license, today, protocol, host){
+    return when.promise(function(resolve, reject) {
+        var userId = license.user_id;
+        var licenseId = license.id;
+        var isTrial = false;
+        if(license.package_type === "trial"){
+            isTrial = true;
+        }
+        var expDate = new Date(license.expiration_date);
+        // today is a date object as well
+        if(today - expDate < 0){
+            resolve("no expire");
+            return;
+        }
+        var instructors;
+        var promise;
+        if(isTrial){
+            promise = this.myds.getUserById(userId);
+        } else{
+            promise = this.myds.getInstructorsByLicense(licenseId);
+        }
+        promise
+            .then(function (users) {
+                if(isTrial){
+                    var user = {};
+                    user.email = users["EMAIL"];
+                    user.firstName = users["FIRST_NAME"];
+                    user.lastName = users["LAST_NAME"];
+                    user.id = users.id;
+                    instructors = [user];
+                } else{
+                    instructors = users;
+                }
+                return _endLicense.call(this, userId, licenseId, false);
+            }.bind(this))
+            .then(function (status) {
+                if (typeof status === "string") {
+                    return status;
+                }
+                var data;
+                var email;
+                var template;
+                var promiseList = [];
+                instructors.forEach(function (user) {
+                    email = user.email;
+                    data = {};
+                    data.subject = "It's Time to Renew!";
+                    if (user.id === userId) {
+                        //license owner email
+                        template = "owner-subscription-expires";
+                        if(isTrial){
+                            data.subject = "Your Trial has Expired!";
+                            template = "owner-trial-expires";
+                        }
+                        data.firstName = user.firstName;
+                        data.lastName = user.lastName;
+                    } else{
+                        // DANGER! in 1 year, thousands of expiration or renew emails will go out
+                        // end of trial legacy.  how would we send all that?
+                        // educator email
+                        template = "educator-subscription-expires";
+                        if (user.firstName === "temp" && user.lastName === "temp") {
+                            data.firstName = user.email;
+                        } else {
+                            data.firstName = user.firstName;
+                            data.lastName = user.lastName;
+                        }
+                    }
+                    promiseList.push(_sendEmailResponse.call(this, email, data, protocol, host, template));
+                }.bind(this));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(status){
+                if (typeof status === "string") {
+                    resolve(status);
+                }
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Expire License Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
+function _renewLicense(license, protocol, host){
+    return when.promise(function(resolve, reject){
+        var userId = license.user_id;
+        var licenseId = license.id;
+        var user;
+
+        var expDate = new Date(license.expiration_date);
+        expDate.setFullYear(expDate.getFullYear() + 1);
+        expDate = date.toISOString().slice(0, 19).replace('T', ' ');
+
+        this.myds.getUserById(userId)
+            .then(function (results) {
+                user = results;
+                return _endLicense.call(this, userId, licenseId, false);
+            }.bind(this))
+            .then(function(){
+                var updateFields = [];
+                var active = "active = 1";
+                updateFields.push(active);
+                var expirationDate = "expiration_date = '" + expDate + "'";
+                updateFields.push(expirationDate);
+                var promiseList = [];
+                promiseList.push(this.myds.getLicenseMapByLicenseId(licenseId));
+                promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(results){
+                var licenseMaps = results[0];
+                var userIds = _.pluck(licenseMaps, "user_id");
+                var updateFields = [];
+                var status = "status = 'active'";
+                updateFields.push('active');
+                return this.updateLicenseMapByLicenseInstructor(licenseId, userIds, updateFields);
+            }.bind(this))
+            .then(function(status){
+                if (typeof status === "string") {
+                    return status;
+                }
+                var data = {};
+                var email = user["EMAIL"];
+                data.subject = "Your Account has Been Renewed!";
+                data.firstName = user["FIRST_NAME"];
+                data.lastName = user["LAST_NAME"];
+                var template = "owner-renew";
+                return _sendEmailResponse.call(this, email, data, protocol, host, template);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                    return;
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Renew License Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
 function _storeSchoolInformation(schoolInfo){
     return when.promise(function(resolve, reject){
         var title = "'" + schoolInfo.name + "'";
@@ -3467,26 +3656,34 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
 
 function _sendEmailResponse(email, data, protocol, host, template){
     // to remove testing email spam, i've added a return. remove to test
-    //return;
-    if(data.expirationDate){
-        data.expirationDate = new Date(data.expirationDate);
-    }
-    var emailData = {
-        subject: data.subject,
-        to: email,
-        data: data,
-        host: protocol + "://" + host
-    };
-    var pathway = path.join(__dirname,"../email-templates");
-    var options = this.options.auth.email;
-    var email = new Util.Email(
-        this.options.auth.email,
-        path.join( __dirname, "../email-templates" ),
-        this.stats );
-    email.send( template, emailData )
-        .then(null, function(err){
-            console.error("Send Email Response Error -",err);
-        });
+    data._emailStored = email;
+    return when.promise(function(resolve, reject){
+        email = data._emailStored;
+        delete data._emailStored;
+        if(data.expirationDate){
+            data.expirationDate = new Date(data.expirationDate);
+        }
+        var emailData = {
+            subject: data.subject,
+            to: email,
+            data: data,
+            host: protocol + "://" + host
+        };
+        var pathway = path.join(__dirname,"../email-templates");
+        var options = this.options.auth.email;
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join( __dirname, "../email-templates" ),
+            this.stats );
+        email.send( template, emailData )
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Send Email Response Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 var exampleOut = {}, exampleIn = {};
