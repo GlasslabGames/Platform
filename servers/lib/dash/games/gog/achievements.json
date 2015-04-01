@@ -32,6 +32,39 @@
                     }
                 ]
             }
+        ],
+        "TEKS": [
+            {
+                "id": "TEKS.Math",
+                "description": "Texas Essential Knowledge and Skills",
+                "title": "Standards",
+                "subGroups": [
+                    {
+                        "id": "a",
+                        "title": "TEKS.Math.5.8.A,B",
+                        "name": "",
+                        "description": "Geometry and measurement. The student applies mathematical process standards to identify locations on a coordinate plane.",
+                        "info": "",
+                        "icon": "achievement-light-blue"
+                    },
+                    {
+                        "id": "b",
+                        "title": "TEKS.Math.6.11",
+                        "name": "",
+                        "description": "Measurement and data. The student applies mathematical process standards to use coordinate geometry to identify locations on a plane. The student is expected to graph points in all four quadrants using ordered pairs of rational numbers.",
+                        "info": "",
+                        "icon": "achievement-light-green"
+                    },
+                    {
+                        "id": "c",
+                        "title": "TEKS.Math.5.8.C",
+                        "name": "",
+                        "description": "Two-dimensional shapes. The student applies mathematical process standards to develop transformational geometry concepts.",
+                        "info": "",
+                        "icon": "achievement-yellow"
+                    }
+                ]
+            }
         ]
     },
     "achievements": [
@@ -49,6 +82,16 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "a"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -61,6 +104,11 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "a"
                 }
             ]
         },
@@ -73,6 +121,11 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "a"
                 }
             ]
         },
@@ -90,6 +143,16 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "a"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -102,6 +165,11 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -114,6 +182,11 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -126,6 +199,11 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "6c"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "b"
                 }
             ]
         },
@@ -148,6 +226,21 @@
                     "id": "CCSS",
                     "group": "CCSS Math 6.NS",
                     "subGroup": "8"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "a"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "b"
+                },
+                {
+                    "id": "TEKS",
+                    "group": "TEKS.Math",
+                    "subGroup": "c"
                 }
             ]
         }
