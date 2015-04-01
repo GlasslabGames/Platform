@@ -712,6 +712,15 @@ module.exports = {
                 post: "cancelLicense"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/inspect",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "inspectLicenses"
+            }
+        },
         // old api methods, not in use
         {
             requireAuth: true,
@@ -738,15 +747,6 @@ module.exports = {
             controller: "license",
             method: {
                 post: "registerLicense"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/license/inspect",
-            service: "lic",
-            controller: "license",
-            method: {
-                post: "inspectLicenses"
             }
         },
         // ---------------------------------------------------

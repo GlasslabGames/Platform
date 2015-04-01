@@ -3895,7 +3895,7 @@ exampleIn.registerLicense = {
     "key": "ZQRD-NC7F4-W7LR"
 };
 function registerLicense(req, res, next) {
-    res.end('api no longer user');
+    res.end('api no longer used');
     return;
     if( req.body &&
         req.body.key &&
