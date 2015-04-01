@@ -747,12 +747,12 @@ Lic_MySQL.prototype.insertToInstitutionTable = function(values){
     }.bind(this));
 };
 
-Lic_MySQL.prototype.getLicensesForExpireRenew = function(){
+Lic_MySQL.prototype.getLicensesForInspection = function(){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT l.* FROM GL_LICENSE as l\n" +
-        "JOIN (SELECT * FROM GL_LICENSE_MAP WHERE status in ('cc-renew', 'po-renew', 'active', 'po-received')) as lm\n" +
-        "WHERE (l.id = lm.license_id AND l.user_id = lm.user_id)\n" +
-        "AND (lm.status IN('cc-renew','po-pending') OR (lm.status IN ('active', 'po-received') AND l.expiration_date < NOW()));";
+        var Q = "SELECT lm.status, l.* FROM GL_LICENSE as l\n" +
+        "JOIN (SELECT * FROM GL_LICENSE_MAP WHERE status in ('renew', 'active', 'po-received')) as lm\n" +
+        "ON l.id = lm.license_id AND l.user_id = lm.user_id\n" +
+        "WHERE (l.active = 1) OR (l.active = 0 AND lm.status = 'renew');";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);

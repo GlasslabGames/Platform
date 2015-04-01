@@ -2635,20 +2635,63 @@ function inspectLicenses(req, res){
     var errors = {};
     var hasErrors = false;
     //job should run at midnight evey day.  eventually handles all time running out emails and does expire/renew operations
-    this.myds.getLicensesForExpireRenew()
+    this.myds.getLicensesForInspection()
         .then(function(licenses){
             var today = new Date();
             var protocol = req.protocol;
             var host = req.headers.host;
             var promiseList = [];
+            var inspecter = {};
+            var ownerId;
             licenses.forEach(function(license){
-                if(license.active === 1){
-                    promiseList.push(_expireLicense.call(this, license, today, protocol, host));
+                ownerId = license.user_id;
+                inspecter[ownerId] = inspecter[ownerId] || [];
+                inspecter[ownerId].push(license);
+            });
+            var license;
+            var renewLicense;
+            var corruptData;
+            var sevenDays = 604800000;
+            _(inspecter).forEach(function(user, userId){
+                if(user.length === 1 && user[0].active === 1){
+                    license = user[0];
+                    var expDate = new Date(license.expiration_date);
+                    if(today - expDate >= 0){
+                        promiseList.push(_expireLicense.call(this, license, today, protocol, host));
+                    } else if (license.packageType === 'trial'){
+                        // add all relevant dates to these checks.  Emails customized to those dates
+                        if(expDate - today <= sevenDays){
+                            // send out the proper email. make helper for this
+                            //promiseList.push(_expiringSoonEmails.call(this, userId, license.id, 7, true, protocol, host));
+                        }
+                    } else{
+                        if(expDate - today <= sevenDays){
+                            // send out the proper email. make helper for this
+                            //promiseList.push(_expiringSoonEmails.call(this, userId, license.id, 7, false, protocol, host));
+                        }
+                    }
+                    // add more else if conditions to know when to send expiring soon emails
+                } else if(user.length === 2){
+                    _(user).forEach(function(lic){
+                        if(lic.active === 1){
+                            license = lic;
+                        } else{
+                            renewLicense = lic;
+                        }
+                    });
+                    if(license && renewLicense){
+                        //need to do more work on renew flow
+                        //promiseList.push(_renewLicense.call(this, license, protocol, host));
+                    } else{
+                        corruptData = true;
+                    }
                 } else{
-                    //need to do more work on renew flow
-                    //promiseList.push(_renewLicense.call(this, license, protocol, host));
+                    corruptData = true;
                 }
             }.bind(this));
+            if(corruptData){
+                return "data corrupted";
+            }
             return when.reduce(promiseList, function(results, status, index){
                 if(status){
                     hasErrors = true;
@@ -2658,7 +2701,11 @@ function inspectLicenses(req, res){
                 return results;
             }, []);
         }.bind(this))
-        .then(function(){
+        .then(function(status){
+            if(status === "data corrupted"){
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
+                return;
+            }
             if(hasErrors){
                 this.requestUtil.jsonResponse(res, {status: "not all handled", errors: errors});
                 return;
@@ -2756,20 +2803,20 @@ function _expireLicense(license, today, protocol, host){
     }.bind(this));
 }
 
-function _renewLicense(license, protocol, host){
+function _renewLicense(oldLicense, newLicenseId, protocol, host){
     return when.promise(function(resolve, reject){
-        var userId = license.user_id;
-        var licenseId = license.id;
+        var userId = oldLicense.user_id;
+        var oldLicenseId = oldLicense.id;
         var user;
 
-        var expDate = new Date(license.expiration_date);
+        var expDate = new Date(oldLicense.expiration_date);
         expDate.setFullYear(expDate.getFullYear() + 1);
         expDate = date.toISOString().slice(0, 19).replace('T', ' ');
 
         this.myds.getUserById(userId)
             .then(function (results) {
                 user = results;
-                return _endLicense.call(this, userId, licenseId, false);
+                return _endLicense.call(this, userId, oldLicenseId, false);
             }.bind(this))
             .then(function(){
                 var updateFields = [];
@@ -2778,8 +2825,8 @@ function _renewLicense(license, protocol, host){
                 var expirationDate = "expiration_date = '" + expDate + "'";
                 updateFields.push(expirationDate);
                 var promiseList = [];
-                promiseList.push(this.myds.getLicenseMapByLicenseId(licenseId));
-                promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
+                promiseList.push(this.myds.getLicenseMapByLicenseId(newLicenseId));
+                promiseList.push(this.myds.updateLicenseById(newLicenseId, updateFields));
                 return when.all(promiseList);
             }.bind(this))
             .then(function(results){
@@ -2788,7 +2835,7 @@ function _renewLicense(license, protocol, host){
                 var updateFields = [];
                 var status = "status = 'active'";
                 updateFields.push('active');
-                return this.updateLicenseMapByLicenseInstructor(licenseId, userIds, updateFields);
+                return this.updateLicenseMapByLicenseInstructor(newLicenseId, userIds, updateFields);
             }.bind(this))
             .then(function(status){
                 if (typeof status === "string") {
@@ -2813,6 +2860,38 @@ function _renewLicense(license, protocol, host){
                 console.error("Renew License Error -",err);
                 reject(err);
             });
+    }.bind(this));
+}
+
+function _expiringSoonEmails(userId, licenseId, daysToGo, isTrial, protocol, host){
+    return when.promise(function(resolve, reject){
+        this.myds.getUserById(userId)
+            .then(function(user){
+                var email = user["EMAIL"];
+                var data = {};
+                data.firstName = user["FIRST_NAME"];
+                data.lastName = user["LAST_NAME"];
+                data.daysToGo = daysToGo;
+                var template;
+                if(isTrial){
+                    data.subject = "You’re Almost Done with Your Trial!";
+                    template = "owner-trial-expires-soon";
+                } else{
+                    data.subject = "It’s Almost Time to Renew!";
+                    template = "owner-subscription-expires-soon";
+                }
+                return _sendEmailResponse.call(this, email, data, protocol, host, template);
+            }.bind(this))
+            .then(function(){
+                // modify license to notify it has sent out relevant email, new column
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Expiring Soon Emails Error -", err);
+                reject(err);
+            }.bind(this));
     }.bind(this));
 }
 
