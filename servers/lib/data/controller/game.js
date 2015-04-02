@@ -520,7 +520,7 @@ function updateMatches(req, res){
                 return matches;
             }
             var data;
-            _(matches).forEach(function(item, key){
+            _(matches).forEach(function(item){
                 delete item.cas;
                 delete item.flags;
 

@@ -623,15 +623,6 @@ module.exports = {
                 post: "upgradeTrialLicensePurchaseOrder"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/license/upgrade/po",
-        //    service: "lic",
-        //    controller: "license",
-        //    method: {
-        //        post: "upgradeLicensePurchaseOrder"
-        //    }
-        //},
         {
             requireAuth: true,
             requireHttps: true,
@@ -719,6 +710,15 @@ module.exports = {
             controller: "license",
             method: {
                 post: "cancelLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/inspect",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "inspectLicenses"
             }
         },
         // old api methods, not in use
@@ -895,7 +895,7 @@ module.exports = {
         },
         //{
         //    requireAuth: true,
-        //    api: "/api/v2/auth/user/:userId/delete",
+        //    api: "/api/v2/auth/user/delete",
         //    service: "auth",
         //    controller: "user",
         //    method: {
