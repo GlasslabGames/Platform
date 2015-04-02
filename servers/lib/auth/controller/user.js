@@ -959,7 +959,9 @@ function sendVerifyEmail(regData, protocol, host) {
         regData.email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
-
+    if(this.options.env === "prod" || this.options.env === "stage"){
+        protocol = "https";
+    }
     var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
@@ -1018,7 +1020,9 @@ function sendDeveloperVerifyEmail(regData, protocol, host) {
         regData.email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
-
+    if(this.options.env === "prod" || this.options.env === "stage"){
+        protocol = "https";
+    }
     var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
