@@ -895,7 +895,7 @@ module.exports = {
         },
         //{
         //    requireAuth: true,
-        //    api: "/api/v2/auth/user/:userId/delete",
+        //    api: "/api/v2/auth/user/delete",
         //    service: "auth",
         //    controller: "user",
         //    method: {

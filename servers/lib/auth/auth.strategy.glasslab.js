@@ -44,9 +44,13 @@ function Glasslab_Strategy(options, service) {
 util.inherits(Glasslab_Strategy, passport.Strategy);
 
 Glasslab_Strategy.prototype.authenticate = function(req) {
-    var username = lookup(req.body, this._usernameField) || lookup(req.query, this._usernameField);
-    var password = lookup(req.body, this._passwordField) || lookup(req.query, this._passwordField);
-    var verifyCode = lookup(req.body, this._verifyCodeField) || lookup(req.query, this._verifyCodeField);
+    if(lookup(req.query, this._usernameField) || lookup(req.query, this._passwordField) || lookup(req.query, this._verifyCodeField)){
+        return this.fail({ key: "user.login.improper"});
+        console.log("Login Should Not Contain Username Password or Very Code Query Params");
+    }
+    var username = lookup(req.body, this._usernameField);
+    var password = lookup(req.body, this._passwordField);
+    var verifyCode = lookup(req.body, this._verifyCodeField);
 
     if ((!username || !password) && !verifyCode) {
         return this.fail({key:"user.login.missing"});
