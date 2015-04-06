@@ -161,6 +161,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/data/game/:gameId/complete",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "completeMatch"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/data/game/saves/delete",
             service: "data",
             controller: "game",

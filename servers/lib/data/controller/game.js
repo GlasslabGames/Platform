@@ -19,6 +19,7 @@ module.exports = {
     createMatch: createMatch,
     updateMatches: updateMatches,
     pollMatches: pollMatches,
+    completeMatch: completeMatch,
     deleteGameSaves: deleteGameSaves
 };
 var exampleIn = {};
@@ -433,8 +434,15 @@ function createMatch(req, res){
                     return "cannot create matches";
                 }
             }
+            var players = {};
+            var player;
+            userIds.forEach(function(userId){
+                player = {};
+                player.playerStatus = "active";
+                players[userId] = player;
+            });
             var data = {
-                players: userIds,
+                players: players,
                 status: "active",
                 history: [],
                 meta: {
@@ -561,6 +569,10 @@ function pollMatches(req, res){
     }
     var gameId = req.params.gameId;
     var userId = req.user.id;
+    var status = "active";
+    if(req.query && req.query.status){
+        status = req.query.status;
+    }
 
     this.cbds.getGameInformation(gameId, true)
         .then(function(info){
@@ -581,8 +593,12 @@ function pollMatches(req, res){
                 return;
             }
             var activeMatches = {};
+            var player;
             _(matches).forEach(function(match, matchId){
-                if(match.data.status === "active"){
+                player = match.data.players[userId];
+                if( (status === "all") ||
+                    (status === "active" && player.playerStatus === "active") ||
+                    (status === "complete" && player.playerStatus === "complete") ){
                     activeMatches[matchId] = match.data;
                 }
             });
@@ -590,6 +606,65 @@ function pollMatches(req, res){
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function completeMatch(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.body && req.body.matchId)){
+        this.requestUtil.errorResponse(res, {key: "data.matchId.missing"});
+        return;
+    }
+    if(!(req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+    var matchId = req.body.matchId;
+    var userId = req.user.id;
+
+    this.cbds.getMatch(gameId, matchId)
+        .then(function(match){
+            var players = match.data.players;
+            var found = false;
+            var complete = true;
+            _(players).forEach(function(player, playerId){
+                if(userId === parseInt(playerId)){
+                    found = true;
+                    player.playerStatus = "complete";
+                } else if(player.playerStatus === "active"){
+                    complete = false;
+                }
+            });
+            if(!found){
+                return "not in match";
+            }
+            if(complete){
+                match.data.status = "complete";
+            }
+            return this.cbds.updateMatch(gameId, matchId, match);
+        }.bind(this))
+        .then(function(status){
+            if(status === "not in match"){
+                this.requestUtil.errorResponse(res, { key: "data.match.access"});
+                return;
+            }
+            if(status === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(status === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Complet Match Error -",err);
+            this.requestUtil.errorResponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }
 
