@@ -177,7 +177,7 @@ function getGameMissions(req, res){
                                     gameId:           gameId,
                                     webSessionId:     req.cookies["connect.sid"],
                                     missionId:        missions[j].id,
-                                    sdkUrl:           this.requestUtil.getFullHostUrl(req),
+                                    sdkUrl:           this.options.sdk.simcity + "://" + req.headers.host, //this.requestUtil.getFullHostUrl(req),
                                     configSessionUrl: req.headers.host,
                                     configDataUrl:    req.headers.host
                                 };
