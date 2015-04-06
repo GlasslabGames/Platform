@@ -52,6 +52,7 @@ module.exports = {
     // not used any more
     //"user.notUnique.institution":  "The institution name is already in use. Please provide a different institution name.",
     "user.login.general":                   "There was an error with the information you entered.",
+    "user.login.improper":                  "We have encountered an error. Please try again later",
     "user.login.invalid":                   "The screen name/email address or password you provided does not match our records. Please try again.",
     "user.login.invalidHashCode":           "The hash code you entered is invalid.",
     "user.login.missing":                   "You forgot to enter your screen name/email address or password.",
@@ -84,6 +85,7 @@ module.exports = {
     "data.userId.invalid":                  "Invalid UserId",
     "data.gameId.match":                    "Game cannot create a match",
     "data.turnData.missing":                "Turn data is missing",
+    "data.access.invalid":                  "Invalid Access",
     // report
     "report.general":                       "There is a problem with this report",
     "report.access.invalid":                "Invalid Access",

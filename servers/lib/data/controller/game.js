@@ -18,7 +18,8 @@ module.exports = {
     releases: releases,
     createMatch: createMatch,
     updateMatches: updateMatches,
-    pollMatches: pollMatches
+    pollMatches: pollMatches,
+    deleteGameSaves: deleteGameSaves
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -519,7 +520,7 @@ function updateMatches(req, res){
                 return matches;
             }
             var data;
-            _(matches).forEach(function(item, key){
+            _(matches).forEach(function(item){
                 delete item.cas;
                 delete item.flags;
 
@@ -589,5 +590,21 @@ function pollMatches(req, res){
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function deleteGameSaves(req, res){
+    if(!(req.user.role === "admin" && req.query.gameId)){
+        this.requestUtil.errorResponse(res, { key: "data.access.invalid"});
+        return;
+    }
+    var gameId = req.query.gameId;
+    this.cbds.deleteGameSavesByGameId(gameId)
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Delete Game Saves Error -", err);
+            this.requestUtil.errorReponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }

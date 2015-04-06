@@ -71,19 +71,24 @@ function index(req, res, next, serviceManager)
 // http://127.0.0.1:8001/sdk/connect
 function connect(req, res, next)
 {
-    // host
+    // protocol and host
+    var protocol = "http://";
     var host = req.headers.host;
-    if( this.options.sdk &&
-        this.options.sdk.connect ) {
-        if( this.options.sdk.connect != "$host" ) {
-            host = this.options.sdk.connect;
+
+    // check config options
+    if( this.options.sdk ) {
+        // protocol
+        if( this.options.sdk.protocol ) {
+            protocol = this.options.sdk.protocol + "://";
+        }
+        // host
+        if( this.options.sdk.connect ) {
+            if( this.options.sdk.connect != "$host" ) {
+                host = this.options.sdk.connect;
+            }
         }
     }
-    // protocol
-    var protocol = "http://";
-    if( this.options.env !== "dev" ) {
-        protocol = "http://";
-    }
+
     //send
     res.send( protocol + host );
 }

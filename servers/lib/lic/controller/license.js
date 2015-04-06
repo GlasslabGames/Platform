@@ -34,6 +34,7 @@ module.exports = {
     approvePurchaseOrder: approvePurchaseOrder,
     migrateToTrialLegacy: migrateToTrialLegacy,
     cancelLicense: cancelLicense,
+    inspectLicenses: inspectLicenses,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -2627,6 +2628,273 @@ function cancelLicense(req, res){
         }.bind(this));
 }
 
+function inspectLicenses(req, res){
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+    }
+    var errors = {};
+    var hasErrors = false;
+    //job should run at midnight evey day.  eventually handles all time running out emails and does expire/renew operations
+    this.myds.getLicensesForInspection()
+        .then(function(licenses){
+            var today = new Date();
+            var protocol = req.protocol;
+            var host = req.headers.host;
+            var promiseList = [];
+            var inspecter = {};
+            var ownerId;
+            licenses.forEach(function(license){
+                ownerId = license.user_id;
+                inspecter[ownerId] = inspecter[ownerId] || [];
+                inspecter[ownerId].push(license);
+            });
+            var license;
+            var renewLicense;
+            var corruptData;
+            var sevenDays = 604800000;
+            _(inspecter).forEach(function(user, userId){
+                if(user.length === 1 && user[0].active === 1){
+                    license = user[0];
+                    var expDate = new Date(license.expiration_date);
+                    if(today - expDate >= 0){
+                        promiseList.push(_expireLicense.call(this, license, today, protocol, host));
+                    } else if (license.packageType === 'trial'){
+                        // add all relevant dates to these checks.  Emails customized to those dates
+                        if(expDate - today <= sevenDays){
+                            // send out the proper email. make helper for this
+                            //promiseList.push(_expiringSoonEmails.call(this, userId, license.id, 7, true, protocol, host));
+                        }
+                    } else{
+                        if(expDate - today <= sevenDays){
+                            // send out the proper email. make helper for this
+                            //promiseList.push(_expiringSoonEmails.call(this, userId, license.id, 7, false, protocol, host));
+                        }
+                    }
+                    // add more else if conditions to know when to send expiring soon emails
+                } else if(user.length === 2){
+                    _(user).forEach(function(lic){
+                        if(lic.active === 1){
+                            license = lic;
+                        } else{
+                            renewLicense = lic;
+                        }
+                    });
+                    if(license && renewLicense){
+                        //need to do more work on renew flow
+                        //promiseList.push(_renewLicense.call(this, license, protocol, host));
+                    } else{
+                        corruptData = true;
+                    }
+                } else{
+                    corruptData = true;
+                }
+            }.bind(this));
+            if(corruptData){
+                return "data corrupted";
+            }
+            return when.reduce(promiseList, function(results, status, index){
+                if(status){
+                    hasErrors = true;
+                    var licenseId = licenses[index].id;
+                    errors[licenseId] = status
+                }
+                return results;
+            }, []);
+        }.bind(this))
+        .then(function(status){
+            if(status === "data corrupted"){
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
+                return;
+            }
+            if(hasErrors){
+                this.requestUtil.jsonResponse(res, {status: "not all handled", errors: errors});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Inspect Licenses Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function _expireLicense(license, today, protocol, host){
+    return when.promise(function(resolve, reject) {
+        var userId = license.user_id;
+        var licenseId = license.id;
+        var isTrial = false;
+        if(license.package_type === "trial"){
+            isTrial = true;
+        }
+        var expDate = new Date(license.expiration_date);
+        // today is a date object as well
+        if(today - expDate < 0){
+            resolve("no expire");
+            return;
+        }
+        var instructors;
+        var promise;
+        if(isTrial){
+            promise = this.myds.getUserById(userId);
+        } else{
+            promise = this.myds.getInstructorsByLicense(licenseId);
+        }
+        promise
+            .then(function (users) {
+                if(isTrial){
+                    var user = {};
+                    user.email = users["EMAIL"];
+                    user.firstName = users["FIRST_NAME"];
+                    user.lastName = users["LAST_NAME"];
+                    user.id = users.id;
+                    instructors = [user];
+                } else{
+                    instructors = users;
+                }
+                return _endLicense.call(this, userId, licenseId, false);
+            }.bind(this))
+            .then(function (status) {
+                if (typeof status === "string") {
+                    return status;
+                }
+                var data;
+                var email;
+                var template;
+                var promiseList = [];
+                instructors.forEach(function (user) {
+                    email = user.email;
+                    data = {};
+                    data.subject = "It's Time to Renew!";
+                    if (user.id === userId) {
+                        //license owner email
+                        template = "owner-subscription-expires";
+                        if(isTrial){
+                            data.subject = "Your Trial has Expired!";
+                            template = "owner-trial-expires";
+                        }
+                        data.firstName = user.firstName;
+                        data.lastName = user.lastName;
+                    } else{
+                        // DANGER! in 1 year, thousands of expiration or renew emails will go out
+                        // end of trial legacy.  how would we send all that?
+                        // educator email
+                        template = "educator-subscription-expires";
+                        if (user.firstName === "temp" && user.lastName === "temp") {
+                            data.firstName = user.email;
+                        } else {
+                            data.firstName = user.firstName;
+                            data.lastName = user.lastName;
+                        }
+                    }
+                    promiseList.push(_sendEmailResponse.call(this, email, data, protocol, host, template));
+                }.bind(this));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(status){
+                if (typeof status === "string") {
+                    resolve(status);
+                }
+                resolve();
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Expire License Error -",err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
+function _renewLicense(oldLicense, newLicenseId, protocol, host){
+    return when.promise(function(resolve, reject){
+        var userId = oldLicense.user_id;
+        var oldLicenseId = oldLicense.id;
+        var user;
+
+        var expDate = new Date(oldLicense.expiration_date);
+        expDate.setFullYear(expDate.getFullYear() + 1);
+        expDate = date.toISOString().slice(0, 19).replace('T', ' ');
+
+        this.myds.getUserById(userId)
+            .then(function (results) {
+                user = results;
+                return _endLicense.call(this, userId, oldLicenseId, false);
+            }.bind(this))
+            .then(function(){
+                var updateFields = [];
+                var active = "active = 1";
+                updateFields.push(active);
+                var expirationDate = "expiration_date = '" + expDate + "'";
+                updateFields.push(expirationDate);
+                var promiseList = [];
+                promiseList.push(this.myds.getLicenseMapByLicenseId(newLicenseId));
+                promiseList.push(this.myds.updateLicenseById(newLicenseId, updateFields));
+                return when.all(promiseList);
+            }.bind(this))
+            .then(function(results){
+                var licenseMaps = results[0];
+                var userIds = _.pluck(licenseMaps, "user_id");
+                var updateFields = [];
+                var status = "status = 'active'";
+                updateFields.push('active');
+                return this.updateLicenseMapByLicenseInstructor(newLicenseId, userIds, updateFields);
+            }.bind(this))
+            .then(function(status){
+                if (typeof status === "string") {
+                    return status;
+                }
+                var data = {};
+                var email = user["EMAIL"];
+                data.subject = "Your Account has Been Renewed!";
+                data.firstName = user["FIRST_NAME"];
+                data.lastName = user["LAST_NAME"];
+                var template = "owner-renew";
+                return _sendEmailResponse.call(this, email, data, protocol, host, template);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                    return;
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Renew License Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
+
+function _expiringSoonEmails(userId, licenseId, daysToGo, isTrial, protocol, host){
+    return when.promise(function(resolve, reject){
+        this.myds.getUserById(userId)
+            .then(function(user){
+                var email = user["EMAIL"];
+                var data = {};
+                data.firstName = user["FIRST_NAME"];
+                data.lastName = user["LAST_NAME"];
+                data.daysToGo = daysToGo;
+                var template;
+                if(isTrial){
+                    data.subject = "You’re Almost Done with Your Trial!";
+                    template = "owner-trial-expires-soon";
+                } else{
+                    data.subject = "It’s Almost Time to Renew!";
+                    template = "owner-subscription-expires-soon";
+                }
+                return _sendEmailResponse.call(this, email, data, protocol, host, template);
+            }.bind(this))
+            .then(function(){
+                // modify license to notify it has sent out relevant email, new column
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Expiring Soon Emails Error -", err);
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+}
+
 function _storeSchoolInformation(schoolInfo){
     return when.promise(function(resolve, reject){
         var title = "'" + schoolInfo.name + "'";
@@ -3467,26 +3735,34 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
 
 function _sendEmailResponse(email, data, protocol, host, template){
     // to remove testing email spam, i've added a return. remove to test
-    //return;
-    if(data.expirationDate){
-        data.expirationDate = new Date(data.expirationDate);
-    }
-    var emailData = {
-        subject: data.subject,
-        to: email,
-        data: data,
-        host: protocol + "://" + host
-    };
-    var pathway = path.join(__dirname,"../email-templates");
-    var options = this.options.auth.email;
-    var email = new Util.Email(
-        this.options.auth.email,
-        path.join( __dirname, "../email-templates" ),
-        this.stats );
-    email.send( template, emailData )
-        .then(null, function(err){
-            console.error("Send Email Response Error -",err);
-        });
+    data._emailStored = email;
+    return when.promise(function(resolve, reject){
+        email = data._emailStored;
+        delete data._emailStored;
+        if(data.expirationDate){
+            data.expirationDate = new Date(data.expirationDate);
+        }
+        var emailData = {
+            subject: data.subject,
+            to: email,
+            data: data,
+            host: protocol + "://" + host
+        };
+        var pathway = path.join(__dirname,"../email-templates");
+        var options = this.options.auth.email;
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join( __dirname, "../email-templates" ),
+            this.stats );
+        email.send( template, emailData )
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Send Email Response Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 var exampleOut = {}, exampleIn = {};
@@ -3619,7 +3895,7 @@ exampleIn.registerLicense = {
     "key": "ZQRD-NC7F4-W7LR"
 };
 function registerLicense(req, res, next) {
-    res.end('api no longer user');
+    res.end('api no longer used');
     return;
     if( req.body &&
         req.body.key &&

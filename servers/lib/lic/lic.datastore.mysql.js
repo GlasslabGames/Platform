@@ -747,6 +747,37 @@ Lic_MySQL.prototype.insertToInstitutionTable = function(values){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getLicensesForInspection = function(){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lm.status, l.* FROM GL_LICENSE as l\n" +
+        "JOIN (SELECT * FROM GL_LICENSE_MAP WHERE status in ('renew', 'active', 'po-received')) as lm\n" +
+        "ON l.id = lm.license_id AND l.user_id = lm.user_id\n" +
+        "WHERE (l.active = 1) OR (l.active = 0 AND lm.status = 'renew');";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get Licenses For Expire Renew Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getLicenseMapByLicenseId = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get License Map By License Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 ///////////////////////////////////////////
 /////////////OUTDATED METHODS/////////////
 /////////////////////////////////////////

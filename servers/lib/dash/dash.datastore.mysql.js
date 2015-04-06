@@ -9,7 +9,7 @@
 var _     = require('lodash');
 var when  = require('when');
 // load at runtime
-var MySQL, waConst, lConst;
+var MySQL, waConst, lConst, aConst;
 
 module.exports = WebStore_MySQL;
 
@@ -20,6 +20,7 @@ function WebStore_MySQL(options){
     MySQL   = require('../core/datastore.mysql.js');
     lConst  = require('../lms/lms.const.js');
     waConst = require('./dash.const.js');
+    aConst  = require('../auth/auth.const.js');
 
     this.options = _.merge(
         {
@@ -102,11 +103,14 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 if(results.length > 0) {
                     results = results[0];
                     results.collectTelemetry = results.collectTelemetry ? true : false;
-                    results.enabled          = results.enabled ? true : false;
+                    results.enabled = results.enabled ? true : false;
                     // Returning default standards to display in the front-end
                     // TODO: remove this when we have clarity on the multi-standards design
                     results.standards = results.standards ? results.standards : "CCSS";
                     user = results;
+                    if (user.role === "instructor" || user.role === "developer" || user.role === "admin"){
+                        user.permits = aConst.permits[user.role];
+                    }
                     if(results.role === "instructor"){
                         return this.getLicenseInfoByInstructor(id);
                     }

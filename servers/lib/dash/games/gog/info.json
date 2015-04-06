@@ -295,6 +295,32 @@
                             }
                         ]
                     }
+                ],
+                "TEKS": [
+                    {
+                        "category": "Texas Essential Knowledge and Skills",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "TEKS.Math.5.8.A,B,C",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter111/ch111a.html",
+                                        "description": "Geometry and measurement. The student applies mathematical process standards to identify locations on a coordinate plane."
+                                    },
+                                    {
+                                        "name": "TEKS.Math.6.11",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter111/ch111b.html",
+                                        "description": "Measurement and data. The student applies mathematical process standards to use coordinate geometry to identify locations on a plane. The student is expected to graph points in all four quadrants using ordered pairs of rational numbers."
+                                    },
+                                    {
+                                        "name": "TEKS.Math.8.10.A,C",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter111/ch111b.html",
+                                        "description": "Two-dimensional shapes. The student applies mathematical process standards to develop transformational geometry concepts."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 ]
             },
             "lessonPlans": {
