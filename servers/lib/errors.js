@@ -48,7 +48,8 @@ module.exports = {
     "user.notUnique.screenName":            "The screen name is already in use by another user.",
     "user.delete.information":              "There was an error with the information you entered.",
     "user.delete.access":                   "You can only delete student accounts in your classes",
-    "user.delete.general":                  "We encountered an error and cannot delete your account at this time",
+    "user.delete.general":                  "We encountered an error and cannot delete the account at this time",
+    "user.delete.owner.license":            "We cannot delete the user account of an active license owner.  First cancel the license",
     // not used any more
     //"user.notUnique.institution":  "The institution name is already in use. Please provide a different institution name.",
     "user.login.general":                   "There was an error with the information you entered.",
