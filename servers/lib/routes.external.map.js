@@ -893,15 +893,15 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/auth/user/delete",
-        //    service: "auth",
-        //    controller: "user",
-        //    method: {
-        //        post: "deleteUser"
-        //    }
-        //},
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/delete/user",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "deleteUser"
+            }
+        },
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------

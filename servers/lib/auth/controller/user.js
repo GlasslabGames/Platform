@@ -1547,24 +1547,26 @@ function _getDeveloperByCode(code, gameId){
 }
 
 function deleteUser(req, res){
-    if(!(req.user.role === "instructor" || req.user.role === "manager")){
+    if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
         return;
     }
-    if(!(req.params && req.params.userId)){
+    if(!(req.body && req.body.userId)){
         this.requestUtil.errorResponse(res, { key: "user.delete.information"});
         return;
     }
-    var userId = req.user.id;
-    var role = req.user.role;
-    var deleteUserId = req.params.userId;
+    var deleteUserId = req.body.userId;
     var promise;
-    if(userId !== deleteUserId){
-        promise = _deleteStudentAccount(deleteUserId, userId)
-    } else{
-        promise = _deleteInstructorAccount();
-    }
-    promise
+
+    this.authStore.findUser("id", deleteUserId)
+        .then(function(deleteUser){
+            if(deleteUser.role === "student"){
+                promise = _deleteStudentAccount.call(this, deleteUserId);
+            } else if (user.role === "instructor"){
+                promise = _deleteInstructorAccount();
+            }
+            return promise;
+        }.bind(this))
         .then(function(){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
@@ -1578,32 +1580,34 @@ function deleteUser(req, res){
         }.bind(this));
 }
 
-function _deleteStudentAccount(studentId, instructorId){
+function _deleteStudentAccount(studentId){
     return when.promise(function(resolve, reject){
         var lmsService = this.serviceManager.get("lms").service;
         var licService = this.serviceManager.get("lic").service;
+        var lConst = require("../../lic/lic.const.js");
         var courses;
         var licenses;
-        // method will reject if student is not in this instructor's class
-        lmsService.isEnrolledInInstructorCourse(studentId, instructorId)
-            .then(function(){
-                return lmsService.myds.getCoursesByStudentId(studentId);
-            })
+        lmsService.myds.getCoursesByStudentId(studentId)
             .then(function(results){
                 courses = results;
                 var promiseList = [];
                 courses.forEach(function(course){
-                    promiseList.push(licService.getLicenseFromPremiumCourse(course.id));
+                    promiseList.push(licService.myds.getLicenseFromPremiumCourse(course.id));
                 });
                 return when.all(promiseList);
             })
             .then(function(results){
-                licenses = results;
+                var licenseObj = {};
+                licenses = [];
+                _(results).forEach(function(license){
+                    if(!licenseObj[license.id]){
+                        licenseObj[license.id] = license;
+                        licenses.push(license);
+                    }
+                });
                 var promiseList = [];
                 _(licenses).forEach(function(license){
-                    if(license){
-                        promiseList.push(licService.cbds.getStudentsByLicense(license.id));
-                    }
+                    promiseList.push(licService.cbds.getStudentsByLicense(license.id));
                 });
                 return when.all(promiseList);
             })
@@ -1611,17 +1615,31 @@ function _deleteStudentAccount(studentId, instructorId){
                 var promiseList = [];
                 _(studentMaps).forEach(function(map, index){
                     delete map[studentId];
-                    //_(student).forEach(function(course, key){
-                    //    student[key] = false;
-                    //});
-                    var licenseId = licenses[index].id;
                     var data = { students: map };
+                    var licenseId = licenses[index].id;
                     promiseList.push(licService.cbds.updateStudentsByLicense(licenseId, data));
                 });
                 return when.all(promiseList);
             })
             .then(function(){
-
+                var promiseList = [];
+                _(licenses).forEach(function(license){
+                    var licenseId = license.id;
+                    var seats = license["package_size_tier"];
+                    var studentSeats = lConst.seats[seats].studentSeats;
+                    promiseList.push(licService.updateStudentSeatsRemaining(licenseId, studentSeats));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(){
+                return lmsService.myds.removeStudentFromAllCourses(studentId);
+            })
+            .then(function(){
+                var userData = _deleteUserTableInfo();
+                return this.authStore.updateUserDBData(userData);
+            }.bind(this))
+            .then(function(){
+                resolve();
             })
             .then(null, function(err){
                 console.error("Delete Student Account Error");
@@ -1631,7 +1649,42 @@ function _deleteStudentAccount(studentId, instructorId){
 }
 
 function _deleteInstructorAccount(userId){
-    return when.promise(function(resolve, reject){
+    //return when.promise(function(resolve, reject){
+    //    var courses;
+    //    var lmsService = this.serviceManager.get("lms").service;
+    //    var licService = this.serviceManager.get("lic").service;
+    //    lmsService.myds.getEnrolledCourses(userId)
+    //        .then(function(results){
+    //            courses = results;
+    //            var promiseList = [];
+    //            courses.forEach(function(course){
+    //                promiseList.push(licService.getLicenseFromPremiumCourse(course.id));
+    //            });
+    //            return when.all(promiseList);
+    //        })
+    //        .then(function(licenses){
+    //
+    //        })
+    //}.bind(this));
+}
 
-    }.bind(this));
+function _deleteUserTableInfo(userId){
+    var userData = {};
+    userData.username = "";
+    userData.firstName = "";
+    userData.lastName = "";
+    userData.email = "";
+    userData.ssoUserName = "";
+    userData.ssoData = "";
+    userData.password = "";
+    userData.enabled = 0;
+    userData.resetCode = "NULL";
+    userData.resetCodeExpiration = "NULL";
+    userData.resetCodeStatus = "NULL";
+    userData.verifyCode = "NULL";
+    userData.verifyCodeExpiration = "NULL";
+    userData.verifyCodeStatus = "NULL";
+    userData.customerId = "NULL";
+    userData.id = userId;
+    return userData;
 }

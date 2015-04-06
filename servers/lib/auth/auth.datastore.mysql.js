@@ -537,7 +537,7 @@ return when.promise(function(resolve, reject) {
         last_updated:   "NOW()"
     };
 
-    if(userData.password) {
+    if(userData.password !== undefined) {
         data.password = this.ds.escape(userData.password);
     }
     if(userData.resetCode) {
@@ -561,7 +561,6 @@ return when.promise(function(resolve, reject) {
             data.reset_code_status = this.ds.escape(userData.resetCodeStatus);
         }
     }
-
     if(userData.verifyCode) {
         if(userData.verifyCode == "NULL") {
             data.verify_code = "NULL";
@@ -595,6 +594,27 @@ return when.promise(function(resolve, reject) {
             data.standards_view = "NULL";
         } else {
             data.standards_view = this.ds.escape(userData.standards);
+        }
+    }
+    if(userData.enabled !== undefined){
+        if(userData.enabled === 1){
+            data.enabled = 1;
+        } else if(userData.enabled === 0){
+            data.enabled = 0;
+        }
+    }
+    if(userData.institutionId){
+        if(userData.institutionId === "NULL"){
+            data.institution_id = "NULL";
+        } else{
+            data.institution_id = this.ds.escape(userData.institutionId);
+        }
+    }
+    if(userData.customerId){
+        if(userData.customerId === "NULL"){
+            data.customer_id = "NULL";
+        } else{
+            data.customer_id = this.ds.escape(userData.customerId);
         }
     }
 
