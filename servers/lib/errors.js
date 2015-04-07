@@ -84,6 +84,7 @@ module.exports = {
     "data.gameConfig.missing":              "You did not input game config",
     "data.userId.missing":                  "Missing UserId",
     "data.userId.invalid":                  "Invalid UserId",
+    "data.match.status.missing":            "Status is missing",
     "data.gameId.match":                    "Game cannot create a match",
     "data.turnData.missing":                "Turn data is missing",
     "data.access.invalid":                  "Invalid Access",
