@@ -2884,6 +2884,34 @@ TelemDS_Couchbase.prototype.createMatch = function(gameId, matchData) {
     }.bind(this));
 };
 
+TelemDS_Couchbase.prototype.getMatch = function(gameId, matchId){
+    return when.promise(function(resolve, reject){
+        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+        this.client.get(key, function(err, results){
+            if(err){
+                console.error("CouchBase DataStore: Get Match Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        });
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.updateMatch = function(gameId, matchId, data){
+    return when.promise(function(resolve, reject){
+        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("CouchBase DataStore: Update Match Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        });
+    }.bind(this));
+};
+
 TelemDS_Couchbase.prototype.multiGetMatches = function(gameId, matchIds){
     return when.promise(function(resolve, reject){
         var keys = [];
@@ -2953,9 +2981,10 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
     return when.promise(function(resolve, reject){
 
         var map = "getAllMatches";
+        var key = "gd:m:" + gameId;
         this.client.view("telemetry", map).query(
             {
-
+                startkey: key
             },
             function(err, results){
                 if(err){
@@ -2964,15 +2993,8 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
                     return;
                 }
 
-                var keys = [];
-                var id;
-                results.forEach(function(result){
-                    id = result.id;
-                    var components = id.split(":");
-                    if(gameId === components[2]){
-                        keys.push(id);
-                    }
-                });
+                var keys = _.pluck(results, "id");
+
                 this._chunk_getMulti(keys, {}, function(err, results){
                     if(err){
                         console.error("CouchBase TelemetryStore: Get Game Matches Error -", err);
@@ -2990,7 +3012,7 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
                             value = JSON.parse(value);
                         }
                         players = value.data.players;
-                        if(_(players).contains(userId)){
+                        if(players[userId]){
                             components = key.split(":");
                             matchId = components[3];
                             output[matchId] = value;

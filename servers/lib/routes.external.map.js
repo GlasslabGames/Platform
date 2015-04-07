@@ -161,6 +161,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/data/game/:gameId/complete",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "completeMatch"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/data/game/saves/delete",
             service: "data",
             controller: "game",
@@ -710,6 +719,16 @@ module.exports = {
             controller: "license",
             method: {
                 post: "cancelLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/end/internal",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelLicenseInternal"
             }
         },
         {

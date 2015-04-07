@@ -1563,11 +1563,16 @@ function deleteUser(req, res){
             if(deleteUser.role === "student"){
                 promise = _deleteStudentAccount.call(this, deleteUserId);
             } else if (user.role === "instructor"){
-                promise = _deleteInstructorAccount();
+                //promise = _deleteInstructorAccount.call(this, deleteUserId);
             }
             return promise;
         }.bind(this))
-        .then(function(){
+        .then(function(status){
+            if(typeof status === "object"){
+                req.body.licenseId = status.licenseId;
+                this.serviceManager.internalRoute("/api/v2/license/end/internal", [req, res]);
+                return;
+            }
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
@@ -1600,7 +1605,7 @@ function _deleteStudentAccount(studentId){
                 var licenseObj = {};
                 licenses = [];
                 _(results).forEach(function(license){
-                    if(!licenseObj[license.id]){
+                    if(license && !licenseObj[license.id]){
                         licenseObj[license.id] = license;
                         licenses.push(license);
                     }
@@ -1635,7 +1640,7 @@ function _deleteStudentAccount(studentId){
                 return lmsService.myds.removeStudentFromAllCourses(studentId);
             })
             .then(function(){
-                var userData = _deleteUserTableInfo();
+                var userData = _deleteUserTableInfo(studentId);
                 return this.authStore.updateUserDBData(userData);
             }.bind(this))
             .then(function(){
@@ -1649,23 +1654,102 @@ function _deleteStudentAccount(studentId){
 }
 
 function _deleteInstructorAccount(userId){
-    //return when.promise(function(resolve, reject){
-    //    var courses;
-    //    var lmsService = this.serviceManager.get("lms").service;
-    //    var licService = this.serviceManager.get("lic").service;
-    //    lmsService.myds.getEnrolledCourses(userId)
-    //        .then(function(results){
-    //            courses = results;
-    //            var promiseList = [];
-    //            courses.forEach(function(course){
-    //                promiseList.push(licService.getLicenseFromPremiumCourse(course.id));
-    //            });
-    //            return when.all(promiseList);
-    //        })
-    //        .then(function(licenses){
+    //delete instructor plan
+    //get courses,
+    //getLicenseMap
+    //get license
+    // if license active, throw error and encourage
+    //archive all courses (also disabling premium games in that process
+    //set license map status to null, if in license
     //
-    //        })
-    //}.bind(this));
+
+    return when.promise(function(resolve, reject){
+        var courses;
+        var licenseMap;
+        var license;
+        var lmsService = this.serviceManager.get("lms").service;
+        var licService = this.serviceManager.get("lic").service;
+        var promiseList = [];
+        promiseList.push(lmsService.myds.getEnrolledCourses(userId));
+        promiseList.push(licService.getLicenseMapByInstructors(userId));
+        when.all(promiseList)
+            .then(function(results){
+                courses = results[0];
+                licenseMap = results[1] || null;
+                if(licenseMap){
+                    var licenseId = licenseMap.license_id;
+                    return licService.myds.getLicenseById(licenseId);
+                }
+            })
+            .then(function(results){
+                if(results){
+                    license = results[0] || null;
+                    // an account can only be deleted after a license is cancelled. run cancel license api first
+                } else{
+                    license = null;
+                }
+                var courseController = require("../../lms/controller/course.js");
+                // non api form of the updateCourseInfo api method
+                // need to mimic the fields required by the api
+                var updateCourseInfo = courseController._updateCourseInfo.bind(lmsService);
+                var promiseList = [];
+                // archive and disable courses before teacher is removed
+                _(courses).forEach(function(course){
+                    var req = {};
+                    var courseData = {};
+                    // needed to archive course if not archived
+                    courseData.archived = true;
+                    // needed to disable course if not disabled
+                    courseData.premiumGamesAssigned = false;
+                    var params = req.params = {};
+                    params.courseId = course.id;
+                    var userData = {};
+                    userData.id = userId;
+                    if(course.premiumGamesAssigned){
+                        userData.licenseId = license.id;
+                    }
+                    userData.role = "instructor";
+                    promiseList.push(updateCourseInfo(courseData, course, userData));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(){
+                var userData = _deleteUserTableInfo(userId);
+                return this.authStore.updateUserDBData(userData);
+            }.bind(this))
+            .then(function(status){
+                if(license && license.active === 1){
+                    if(license.user_id === userId){
+                        var updateFields = [];
+                        var status = "status = NULL";
+                        updateFields.push(status);
+                        var licenseId = license.id;
+                        return licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
+                    } else{
+                        var licenseUpdateFields = [];
+                        var subscriptionId = "subscription_id = NULL";
+                        licenseUpdateFields.push(subscriptionId);
+                        return licService.myds.updateLicenseById(licenseId, licenseUpdateFields);
+                    }
+                }
+            })
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                }
+                if(license && license.active === 1 && license.user_id === userId){
+                    var body = {};
+                    body.userId = userId;
+                    body.licenseId = license.id;
+                    resolve(body);
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Delete Instructor Account Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 function _deleteUserTableInfo(userId){
