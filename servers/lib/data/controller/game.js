@@ -528,6 +528,7 @@ function updateMatches(req, res){
                 return matches;
             }
             var data;
+            var match;
             _(matches).forEach(function(item){
                 delete item.cas;
                 delete item.flags;
