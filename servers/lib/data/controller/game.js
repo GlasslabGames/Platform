@@ -528,6 +528,7 @@ function updateMatches(req, res){
                 return matches;
             }
             var data;
+            var match;
             _(matches).forEach(function(item){
                 delete item.cas;
                 delete item.flags;
@@ -567,12 +568,14 @@ function pollMatches(req, res){
         this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
         return;
     }
+    if(!(req.query && req.query.status)){
+        this.requestUtil.errorResponse(res, {key: "data.match.status.missing"});
+        return
+    }
+
     var gameId = req.params.gameId;
     var userId = req.user.id;
-    var status = "active";
-    if(req.query && req.query.status){
-        status = req.query.status;
-    }
+    var status = req.query.status;
 
     this.cbds.getGameInformation(gameId, true)
         .then(function(info){
