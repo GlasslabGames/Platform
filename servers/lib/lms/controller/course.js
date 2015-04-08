@@ -16,7 +16,8 @@ module.exports = {
     verifyCode:             verifyCode,
     verifyGameInCourse:     verifyGameInCourse,
     verifyAccessToGameInCourse: verifyAccessToGameInCourse,
-    _updateCourseInfo:      _updateCourseInfo
+    _updateCourseInfo:      _updateCourseInfo,
+    getGamesCourseMap:      getGamesCourseMap
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -1184,5 +1185,22 @@ function verifyAccessToGameInCourse(req, res, next) {
         .then(null, function(err){
             console.error("Verify Access to Game In Course Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function getGamesCourseMap(req, res){
+    if(!(req.user && req.user.role === "admin" && req.body && req.body.gameIds)){
+        this.requestUtil.errorResponse(res, { key: "lms.access.invalid"});
+        return;
+    }
+    var gameIds = req.body.gameIds;
+
+    this.telmStore.getGamesCourseMap(gameIds)
+        .then(function(gameCourseMap){
+            this.requestUtil.jsonResponse(res, { status: "ok", data: gameCourseMap});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Game Course Map Error", err);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }

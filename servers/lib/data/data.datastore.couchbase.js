@@ -3067,6 +3067,32 @@ TelemDS_Couchbase.prototype.getAllCourseGameProfiles = function(){
     }.bind(this));
 };
 
+TelemDS_Couchbase.prototype.getGamesCourseMap = function(gameIds){
+    return when.promise(function(resolve, reject){
+
+        this.getAllCourseGameProfiles()
+            .then(function(courses){
+                var gameCourseMap = {};
+                _(gameIds).forEach(function(gameId){
+                    gameCourseMap[gameId] = {};
+                });
+                _(courses).forEach(function(course, key){
+                    var courseId = key.split(":")[2];
+                    _(gameIds).forEach(function(gameId){
+                        if(course[gameId]){
+                            gameCourseMap[gameId][courseId] = true;
+                        }
+                    });
+                });
+                resolve(gameCourseMap);
+            })
+            .then(null, function(err){
+                console.error("Get Games Course Map Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 TelemDS_Couchbase.prototype.multiSetCourseGameProfiles = function(courses){
     return when.promise(function(resolve, reject){
         this._chunk_setMulti(courses, {}, function(err, results){
