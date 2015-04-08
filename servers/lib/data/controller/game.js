@@ -499,6 +499,7 @@ function updateMatches(req, res){
         return;
     }
 
+    var matchStatus;
     var matchesToUpdate;
     this.cbds.getGameInformation(gameId, true)
         .then(function(info){
@@ -510,7 +511,7 @@ function updateMatches(req, res){
             matchesToUpdate = {};
             var matchId;
             var matchIds = [];
-            matchUpdates.forEach(function(item){
+            _(matchUpdates).forEach(function(item){
                 matchId = item.matchId;
                 if(!matchesToUpdate[matchId]){
                     matchesToUpdate[matchId] = {};
@@ -529,16 +530,32 @@ function updateMatches(req, res){
             }
             var data;
             var match;
+            var player;
+            matchStatus = {};
             _(matches).forEach(function(item){
                 delete item.cas;
                 delete item.flags;
 
-                // Only continue if the playerTurn matches the userId
-                if( item.value.data.meta.playerTurn === userId ) {
-                    match = item.value;
-                    data = match.data;
-                    data.history = data.history.concat(matchesToUpdate[match.id].turns);
-                    data.meta.playerTurn = matchesToUpdate[match.id].nextPlayer;
+                match = item.value;
+                var player = match.data.players[userId];
+                // check if player is in match
+                if(player){
+                    // check if match is active for player
+                    if(player.playerStatus === "active"){
+                        // check if it is the player's turn
+                        if(match.data.meta.playerTurn === userId ) {
+                            data = match.data;
+                            data.history = data.history.concat(matchesToUpdate[match.id].turns);
+                            data.meta.playerTurn = matchesToUpdate[match.id].nextPlayer;
+                            matchStatus[match.id] = "updated";
+                        } else{
+                            matchStatus[match.id] = "not your turn";
+                        }
+                    } else{
+                        matchStatus[match.id] = "match complete";
+                    }
+                } else{
+                    matchStatus[match.id] = "not your match";
                 }
             });
             return this.cbds.multiSetMatches(matches);
@@ -552,7 +569,7 @@ function updateMatches(req, res){
                 this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
                 return;
             }
-            this.requestUtil.jsonResponse(res, { status: "ok" });
+            this.requestUtil.jsonResponse(res, { status: "ok", data: matchStatus });
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
