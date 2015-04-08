@@ -48,7 +48,8 @@ module.exports = {
     "user.notUnique.screenName":            "The screen name is already in use by another user.",
     "user.delete.information":              "There was an error with the information you entered.",
     "user.delete.access":                   "You can only delete student accounts in your classes",
-    "user.delete.general":                  "We encountered an error and cannot delete your account at this time",
+    "user.delete.general":                  "We encountered an error and cannot delete the account at this time",
+    "user.delete.owner.license":            "We cannot delete the user account of an active license owner.  First cancel the license",
     // not used any more
     //"user.notUnique.institution":  "The institution name is already in use. Please provide a different institution name.",
     "user.login.general":                   "There was an error with the information you entered.",
@@ -83,9 +84,12 @@ module.exports = {
     "data.gameConfig.missing":              "You did not input game config",
     "data.userId.missing":                  "Missing UserId",
     "data.userId.invalid":                  "Invalid UserId",
+    "data.match.status.missing":            "Status is missing",
     "data.gameId.match":                    "Game cannot create a match",
     "data.turnData.missing":                "Turn data is missing",
     "data.access.invalid":                  "Invalid Access",
+    "data.matchId.missing":                 "Missing MatchId",
+    "data.match.access":                    "This user is not a part of this match",
     // report
     "report.general":                       "There is a problem with this report",
     "report.access.invalid":                "Invalid Access",

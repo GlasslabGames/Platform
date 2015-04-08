@@ -21,7 +21,7 @@ module.exports = {
             name: 'Chromebook/Web',
             description: 'Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
-            browserGames: ['AW-1','GOG', 'SLFR'],
+            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
             iPadGames: ['AA-1'],
             downloadableGames: [],
             planId: 'chromebook'
@@ -31,7 +31,7 @@ module.exports = {
             name: 'iPad',
             description: 'Games in this package are optimized to work on iPads.',
             pricePerSeat: 3,
-            browserGames: [],
+            browserGames: ['PRIMA'],
             iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: [],
             planId: 'ipad'
@@ -41,7 +41,7 @@ module.exports = {
             name: 'PC/MAC',
             description: 'Games in this package run on PC or Mac computers.',
             pricePerSeat: 3.5,
-            browserGames: ['AW-1','GOG', 'SLFR'],
+            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
             iPadGames: ['AA-1'],
             downloadableGames: ['SC'],
             planId: 'pcMac'
@@ -51,7 +51,7 @@ module.exports = {
             name: 'All Games',
             description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
-            browserGames: ['AW-1','GOG', 'SLFR'],
+            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
             iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'allGames'
@@ -61,7 +61,7 @@ module.exports = {
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1/30,
-            browserGames: ['AW-1','GOG', 'SLFR'],
+            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
             iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'trial'
@@ -71,7 +71,7 @@ module.exports = {
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1,
-            browserGames: ['AW-1','GOG', 'SLFR'],
+            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
             iPadGames: ['AA-1','WT','WPLUS'],
             downloadableGames: ['SC'],
             planId: 'trialLegacy'
