@@ -15,7 +15,8 @@ module.exports = {
     blockPremiumGamesBasicCourses: blockPremiumGamesBasicCourses,
     verifyCode:             verifyCode,
     verifyGameInCourse:     verifyGameInCourse,
-    verifyAccessToGameInCourse: verifyAccessToGameInCourse
+    verifyAccessToGameInCourse: verifyAccessToGameInCourse,
+    _updateCourseInfo:      _updateCourseInfo
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -638,6 +639,8 @@ function updateCourseInfo(req, res, next, serviceManager)
                 }
                 var licenseId = req.user.licenseId;
                 var userId = req.user.id;
+                //return _updateCourseInfo.call(this, courseData, oldCourseData, userId, licenseId);
+                // delete between comments if above commented out helper method works well
                 var licService = this.serviceManager.get("lic").service;
                 if(courseData.premiumGamesAssigned && !oldCourseData.premiumGamesAssigned){
                     if(licenseId){
@@ -675,6 +678,7 @@ function updateCourseInfo(req, res, next, serviceManager)
                 }
                 return this.updateCourse(userData, courseData);
             }.bind(this))
+            // delete above these comments if helper method works well
             .then(function(status){
                 if(status === "course.general"){
                     this.requestUtil.errorResponse(res, { key: "course.general"});
@@ -704,6 +708,67 @@ function updateCourseInfo(req, res, next, serviceManager)
         //this.requestUtil.errorResponse(res, "missing arguments or invalid");
         this.requestUtil.errorResponse(res, {key:"course.general"});
     }
+}
+
+// not tested yet. needed tool for deleting instructor accounts (plan to archive deleted instructor classes)
+function _updateCourseInfo(courseData, oldCourseData, userData){
+    return when.promise(function(resolve, reject){
+        var promise;
+        var userId = userData.id;
+        var licenseId = userData.licenseId;
+        var courseId = oldCourseData.id;
+        var licService = this.serviceManager.get("lic").service;
+        if(courseData.premiumGamesAssigned && !oldCourseData.premiumGamesAssigned){
+            if(licenseId){
+                promise = licService.myds.multiGetLicenseMap(licenseId, [userId])
+                    .then(function(results){
+                        var licenseMap = results[0];
+                        if(licenseMap.status === null){
+                            return "not in license";
+                        }
+                        return _canClassEnable.call(this, licenseId, courseData.games);
+                    }.bind(this))
+                    .then(function(state){
+                        if(state === "not in license"){
+                            return "not in license";
+                        }
+                        if(state){
+                            return licService.assignPremiumCourse(courseId, licenseId);
+                        }
+                        return "no game to enable";
+                    })
+                    .then(null, function(err){
+                        return reject(err);
+                    });
+            } else{
+                resolve("not in license");
+                return;
+            }
+        }
+        if(!courseData.premiumGamesAssigned && oldCourseData.premiumGamesAssigned) {
+            promise = licService.unassignPremiumCourses(courseId, licenseId);
+        } else{
+            promise = Util.PromiseContinue();
+        }
+        promise
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
+                return this.updateCourse(userData, courseData);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                    return;
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Update Course Info Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 function _canClassEnable(licenseId, games){

@@ -34,6 +34,7 @@ module.exports = {
     approvePurchaseOrder: approvePurchaseOrder,
     migrateToTrialLegacy: migrateToTrialLegacy,
     cancelLicense: cancelLicense,
+    cancelLicenseInternal: cancelLicenseInternal,
     inspectLicenses: inspectLicenses,
     // vestigial apis
     verifyLicense:   verifyLicense,
@@ -2592,6 +2593,22 @@ function cancelLicense(req, res){
             return Util.updateSession(req);
         })
         .then(function(status){
+            if(status === "duplicate customer account"){
+                this.requestUtil.errorResponse(res,{key:"lic.records.invalid"});
+                return;
+            }
+            if(status === "account inactive"){
+                this.requestUtil.errorResponse(res,{key:"lic.account.inactive"});
+                return;
+            }
+            if(status === "email not in license"){
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
+                return;
+            }
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
+                return;
+            }
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);
                 return;
@@ -2625,6 +2642,72 @@ function cancelLicense(req, res){
         .then(null, function(err){
             console.error("Cancel License Error -", err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function cancelLicenseInternal(req, res){
+    if(!(req.user.role === "admin" && req.body && req.body.userId && req.body.licenseId)){
+
+    }
+    var userId = req.body.userId;
+    var licenseId = req.body.licenseId;
+    var instructors;
+    this.myds.getInstructorsByLicense(licenseId)
+        .then(function(users){
+            if(typeof users === "string"){
+                return users;
+            }
+            instructors = users;
+            return _endLicense.call(this, userId, licenseId, false);
+        }.bind(this))
+        .then(function(status) {
+            if(status === "duplicate customer account"){
+                this.requestUtil.errorResponse(res,{key:"lic.records.invalid"});
+                return;
+            }
+            if(status === "account inactive"){
+                this.requestUtil.errorResponse(res,{key:"lic.account.inactive"});
+                return;
+            }
+            if(status === "email not in license"){
+                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
+                return;
+            }
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, {key:"lic.order.pending"});
+                return;
+            }
+            // maybe add cancel email here, goes to all teachers on plan as well as the owner
+            var email;
+            var ownerTemplate = "owner-license-cancel";
+            var teacherTemplate = "educator-license-cancel";
+            var template;
+            var data;
+            instructors.forEach(function (user) {
+                email = user.email;
+                data = {};
+                if (user.id !== userId) {
+                    template = teacherTemplate;
+                    data.subject = "License Cancelled";
+                    if (user.firstName === "temp" && user.lastName === "temp") {
+                        data.firstName = user.email;
+                    } else {
+                        data.firstName = user.firstName;
+                        data.lastName = user.lastName;
+                    }
+                } else {
+                    template = ownerTemplate;
+                    data.subject = "License Cancelled";
+                    data.firstName = user.firstName;
+                    data.lastName = user.lastName;
+                }
+                _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            }.bind(this));
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Cancel License Internal Error -",err);
+            this.requestUtil.jsonResponse(res, { key: "lic.general"});
         }.bind(this));
 }
 

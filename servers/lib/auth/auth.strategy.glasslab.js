@@ -45,7 +45,7 @@ util.inherits(Glasslab_Strategy, passport.Strategy);
 
 Glasslab_Strategy.prototype.authenticate = function(req) {
     if(lookup(req.query, this._usernameField) || lookup(req.query, this._passwordField) || lookup(req.query, this._verifyCodeField)){
-        return this.fail({ key: "user.login.improper"});
+        return this.fail({ key: "user.login.internal"});
         console.log("Login Should Not Contain Username Password or Very Code Query Params");
     }
     var username = lookup(req.body, this._usernameField);

@@ -161,6 +161,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/data/game/:gameId/complete",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "completeMatch"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/data/game/saves/delete",
             service: "data",
             controller: "game",
@@ -714,6 +723,16 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/end/internal",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelLicenseInternal"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/license/inspect",
             service: "lic",
             controller: "license",
@@ -893,15 +912,15 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/auth/user/delete",
-        //    service: "auth",
-        //    controller: "user",
-        //    method: {
-        //        post: "deleteUser"
-        //    }
-        //},
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/delete/user",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "deleteUser"
+            }
+        },
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------

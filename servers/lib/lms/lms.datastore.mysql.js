@@ -317,6 +317,20 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+LMS_MySQL.prototype.removeStudentFromAllCourses = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "DELETE FROM GL_MEMBERSHIP WHERE ROLE = 'student' AND user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Remove Student From All Courses Error -", err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 
 LMS_MySQL.prototype.getCourseIdFromCourseCode = function(courseCode) {
 // add promise wrapper
