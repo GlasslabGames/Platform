@@ -2922,6 +2922,19 @@ TelemDS_Couchbase.prototype.multiGetMatches = function(gameId, matchIds){
         });
         this._chunk_getMulti(keys, {}, function(err, results){
             if(err){
+                var message = "The key does not exist on the server";
+                var keyExistError = true;
+                keys.forEach(function(key){
+                    if(results[key].error.message === message){
+                        results[key] = "The key does not exist on the server";
+                    } else if(results[key].error && results[key].error.message !== message){
+                        keyExistError = false;
+                    }
+                });
+                if(keyExistError){
+                    resolve(results);
+                    return;
+                }
                 console.error("CouchBase DataStore: Get Matches Error -", err);
                 reject(err);
                 return;

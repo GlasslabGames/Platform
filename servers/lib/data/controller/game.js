@@ -511,8 +511,10 @@ function updateMatches(req, res){
             matchesToUpdate = {};
             var matchId;
             var matchIds = [];
+            matchStatus = {};
             _(matchUpdates).forEach(function(item){
                 matchId = item.matchId;
+                matchStatus[matchId] = "not a valid matchId";
                 if(!matchesToUpdate[matchId]){
                     matchesToUpdate[matchId] = {};
                     matchesToUpdate[matchId].turns = [];
@@ -531,12 +533,17 @@ function updateMatches(req, res){
             var data;
             var match;
             var player;
-            matchStatus = {};
-            _(matches).forEach(function(item){
+            matchStatus;
+            _(matches).forEach(function(item, key){
                 delete item.cas;
                 delete item.flags;
 
+                if(typeof item === "string"){
+                    delete matches[key];
+                    return;
+                }
                 match = item.value;
+                //finish this
                 var player = match.data.players[userId];
                 // check if player is in match
                 if(player){
