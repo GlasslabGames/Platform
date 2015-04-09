@@ -1253,6 +1253,7 @@ function resetPasswordSend(req, res, next) {
                 if( err.error &&
                     err.error == "user not found") {
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.user.emailNotExist"}, 400);
+                    //// when email language/flow has been finallized, uncomment this code and remove the errorResponse
                     //var userData = {};
                     //userData.email = req.body.email;
                     //var emailData = {
@@ -1582,14 +1583,19 @@ function deleteUser(req, res){
     this.authStore.findUser("id", deleteUserId)
         .then(function(deleteUser){
             if(deleteUser.role === "student"){
-                promise = _deleteStudentAccount.call(this, deleteUserId);
+                //largely ready and approved, but still good to have one last review before it is live
+                //promise = _deleteStudentAccount.call(this, deleteUserId);
             } else if (deleteUser.role === "instructor"){
-                promise = _deleteInstructorAccount.call(this, deleteUserId);
+                //delete instructor method workable, but still needs design attention
+                // for example, are we deleting all the info we need to be
+                // how are we going to store the hashed emails, should we keep hashed passwords, etc
+                // email response also needed
+                //promise = _deleteInstructorAccount.call(this, deleteUserId);
             }
             return promise;
         }.bind(this))
         .then(function(status){
-            if(typeof status === "object"){
+            if(status && typeof status === "object"){
                 req.body.licenseId = status.licenseId;
                 req.body.userDelete = status.userDelete;
                 this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
@@ -1682,8 +1688,9 @@ function _deleteInstructorAccount(userId){
     //get license
     // if license active, throw error and encourage
     //archive all courses (also disabling premium games in that process
-    //set license map status to null, if in license
-    //
+    //set license map status to null, if in license and if not license owner
+    //set subscription id of all licenses instructor was owner of in the past to null
+    // in deleteUser method, call internal route for the internal cancel license method
 
     return when.promise(function(resolve, reject){
         var courses;
@@ -1744,17 +1751,19 @@ function _deleteInstructorAccount(userId){
             .then(function(status){
                 if(license && license.active === 1){
                     var licenseId = license.id;
-                    if(license.user_id === userId){
-                        var licenseUpdateFields = [];
-                        var subscriptionId = "subscription_id = NULL";
-                        licenseUpdateFields.push(subscriptionId);
-                        return licService.myds.removeSubscriptionIdsByUserId(userId);
-                    } else{
+                    var promiseList = [];
+                    var licenseUpdateFields = [];
+                    var subscriptionId = "subscription_id = NULL";
+                    licenseUpdateFields.push(subscriptionId);
+                    // finds all licenses an instructor was an owner of in the past, and removes the subscription id
+                    promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
+                    if(license.user_id !== userId){
                         var updateFields = [];
                         var status = "status = NULL";
                         updateFields.push(status);
-                        return licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
+                        promiseList.push(licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields));
                     }
+                    return when.all(promiseList);
                 }
             })
             .then(function(status){
