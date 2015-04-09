@@ -2647,7 +2647,8 @@ function cancelLicense(req, res){
 
 function cancelLicenseInternal(req, res){
     if(!(req.user.role === "admin" && req.body && req.body.userId && req.body.licenseId)){
-
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
     }
     var userId = req.body.userId;
     var licenseId = req.body.licenseId;
@@ -2658,6 +2659,11 @@ function cancelLicenseInternal(req, res){
                 return users;
             }
             instructors = users;
+            instructors.forEach(function(user){
+                if(user.id === userId && user.email === "" && req.body.userDelete){
+                    user.email = userId;
+                }
+            });
             return _endLicense.call(this, userId, licenseId, false);
         }.bind(this))
         .then(function(status) {
@@ -2683,8 +2689,11 @@ function cancelLicenseInternal(req, res){
             var teacherTemplate = "educator-license-cancel";
             var template;
             var data;
-            instructors.forEach(function (user) {
+            _(instructors).forEach(function (user) {
                 email = user.email;
+                if(typeof user.email === "number"){
+                    return;
+                }
                 data = {};
                 if (user.id !== userId) {
                     template = teacherTemplate;
@@ -3461,7 +3470,11 @@ function _endLicense(userId, licenseId, autoRenew){
                     return users;
                 }
                 var promiseList = [];
+                var email;
                 users.forEach(function(educator){
+                    if(educator["email"] === ""){
+                        educator["email"] = userId;
+                    }
                     promiseList.push(_removeInstructorFromLicense.call(this, licenseId, [educator["email"]], userId, {}, users));
                 }.bind(this));
 
@@ -3563,19 +3576,30 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
         // poPendingStatus variable used to check for edge case where we are ending a pending purchase order license, but a trial is still active
         // in that case, we do not want to disable premium classes, because the educator's premium classes would belong to the trial
         var poPendingStatus = false;
+        var license;
+        promiseList.push(this.myds.getLicenseById(licenseId));
+        var teacherId;
+        if(typeof teacherEmail[0] === "number"){
+            teacherId = teacherEmail[0];
+            promiseList.push(teacherId);
+        } else{
+            promiseList.push(this.myds.getUsersByEmail(teacherEmail));
+        }
         // if licenseMap not already computed, find it. else, use existing value
         if(!instructors){
             promiseList.push(this.myds.getInstructorsByLicense(licenseId));
         } else{
             promiseList.push(instructors);
         }
-        promiseList.push(this.myds.getUsersByEmail(teacherEmail));
-        promiseList.push(this.myds.getLicenseById(licenseId));
-        var teacherId;
-        var license;
+        // if user account deleted, pass in an id instead of an email
         when.all(promiseList)
             .then(function(results){
-                var licenseMap = results[0];
+                license = results[0][0];
+                // user account deleted, skip this part
+                if(typeof results[1] === "number"){
+                    return;
+                }
+                var licenseMap = results[2];
                 var state = false;
                 licenseMap.some(function(instructor){
                     if(instructor.email === teacherEmail[0]){
@@ -3591,7 +3615,6 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 }
                 var teacher = results[1][0];
                 teacherId = teacher.id;
-                license = results[2][0];
                 emailData.plan = license["package_type"];
                 return this.myds.getCoursesByInstructor(teacherId);
                 //find out which premium courses that instructor is a part of

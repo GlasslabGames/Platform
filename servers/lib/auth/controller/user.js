@@ -1583,15 +1583,16 @@ function deleteUser(req, res){
         .then(function(deleteUser){
             if(deleteUser.role === "student"){
                 promise = _deleteStudentAccount.call(this, deleteUserId);
-            } else if (user.role === "instructor"){
-                //promise = _deleteInstructorAccount.call(this, deleteUserId);
+            } else if (deleteUser.role === "instructor"){
+                promise = _deleteInstructorAccount.call(this, deleteUserId);
             }
             return promise;
         }.bind(this))
         .then(function(status){
             if(typeof status === "object"){
                 req.body.licenseId = status.licenseId;
-                this.serviceManager.internalRoute("/api/v2/license/end/internal", [req, res]);
+                req.body.userDelete = status.userDelete;
+                this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: "ok"});
@@ -1686,17 +1687,22 @@ function _deleteInstructorAccount(userId){
 
     return when.promise(function(resolve, reject){
         var courses;
-        var licenseMap;
         var license;
+        var userEmail;
         var lmsService = this.serviceManager.get("lms").service;
         var licService = this.serviceManager.get("lic").service;
         var promiseList = [];
         promiseList.push(lmsService.myds.getEnrolledCourses(userId));
-        promiseList.push(licService.getLicenseMapByInstructors(userId));
+        promiseList.push(this.authStore.getUserEmail(userId));
+        promiseList.push(licService.myds.getLicenseMapByInstructors([userId]));
         when.all(promiseList)
             .then(function(results){
                 courses = results[0];
-                licenseMap = results[1] || null;
+                var licenseMap = null;
+                user = results[1];
+                if(results[2]){
+                    licenseMap = results[2][0];
+                }
                 if(licenseMap){
                     var licenseId = licenseMap.license_id;
                     return licService.myds.getLicenseById(licenseId);
@@ -1716,14 +1722,11 @@ function _deleteInstructorAccount(userId){
                 var promiseList = [];
                 // archive and disable courses before teacher is removed
                 _(courses).forEach(function(course){
-                    var req = {};
-                    var courseData = {};
+                    var courseData = _.cloneDeep(course);
                     // needed to archive course if not archived
                     courseData.archived = true;
                     // needed to disable course if not disabled
                     courseData.premiumGamesAssigned = false;
-                    var params = req.params = {};
-                    params.courseId = course.id;
                     var userData = {};
                     userData.id = userId;
                     if(course.premiumGamesAssigned){
@@ -1740,17 +1743,17 @@ function _deleteInstructorAccount(userId){
             }.bind(this))
             .then(function(status){
                 if(license && license.active === 1){
+                    var licenseId = license.id;
                     if(license.user_id === userId){
-                        var updateFields = [];
-                        var status = "status = NULL";
-                        updateFields.push(status);
-                        var licenseId = license.id;
-                        return licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
-                    } else{
                         var licenseUpdateFields = [];
                         var subscriptionId = "subscription_id = NULL";
                         licenseUpdateFields.push(subscriptionId);
-                        return licService.myds.updateLicenseById(licenseId, licenseUpdateFields);
+                        return licService.myds.removeSubscriptionIdsByUserId(userId);
+                    } else{
+                        var updateFields = [];
+                        var status = "status = NULL";
+                        updateFields.push(status);
+                        return licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
                     }
                 }
             })
@@ -1762,6 +1765,8 @@ function _deleteInstructorAccount(userId){
                     var body = {};
                     body.userId = userId;
                     body.licenseId = license.id;
+                    body.userEmail = userEmail;
+                    body.userDelete = true;
                     resolve(body);
                 }
                 resolve();
