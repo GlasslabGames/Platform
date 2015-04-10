@@ -21,9 +21,9 @@ module.exports = {
             name: 'Chromebook/Web',
             description: 'Games in this package are optimized to work on Chromebooks.',
             pricePerSeat: 2.5,
-            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
-            iPadGames: ['AA-1'],
-            downloadableGames: [],
+            browserGames: ['AW-1','GOG','SLFR','PRIMA','WWF'],
+            iPadGames: ['AA-1','PVZ'],
+            downloadableGames: ['WARP'],
             planId: 'chromebook'
         },
         ipad: {
@@ -31,9 +31,9 @@ module.exports = {
             name: 'iPad',
             description: 'Games in this package are optimized to work on iPads.',
             pricePerSeat: 3,
-            browserGames: ['PRIMA'],
-            iPadGames: ['AA-1','WT','WPLUS'],
-            downloadableGames: [],
+            browserGames: ['PRIMA','WWF'],
+            iPadGames: ['AA-1','WT','WPLUS','PVZ'],
+            downloadableGames: ['WARP'],
             planId: 'ipad'
         },
         pcMac: {
@@ -41,9 +41,9 @@ module.exports = {
             name: 'PC/MAC',
             description: 'Games in this package run on PC or Mac computers.',
             pricePerSeat: 3.5,
-            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
-            iPadGames: ['AA-1'],
-            downloadableGames: ['SC'],
+            browserGames: ['AW-1','GOG','SLFR','PRIMA','WWF'],
+            iPadGames: ['AA-1','PVZ'],
+            downloadableGames: ['SC','WARP'],
             planId: 'pcMac'
         },
         allGames: {
@@ -51,9 +51,9 @@ module.exports = {
             name: 'All Games',
             description: 'This package includes all games available on this site.',
             pricePerSeat: 5,
-            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
-            iPadGames: ['AA-1','WT','WPLUS'],
-            downloadableGames: ['SC'],
+            browserGames: ['AW-1','GOG','SLFR','PRIMA','WWF'],
+            iPadGames: ['AA-1','WT','WPLUS','PVZ'],
+            downloadableGames: ['SC','WARP'],
             planId: 'allGames'
         },
         trial: {
@@ -61,9 +61,9 @@ module.exports = {
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1/30,
-            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
-            iPadGames: ['AA-1','WT','WPLUS'],
-            downloadableGames: ['SC'],
+            browserGames: ['AW-1','GOG','SLFR','PRIMA','WWF'],
+            iPadGames: ['AA-1','WT','WPLUS','PVZ'],
+            downloadableGames: ['SC','WARP'],
             planId: 'trial'
         },
         trialLegacy: {
@@ -71,9 +71,9 @@ module.exports = {
             name: 'Trial',
             description: 'This trial includes all games available on this site.',
             pricePerSeat: 1,
-            browserGames: ['AW-1','GOG', 'SLFR', 'PRIMA'],
-            iPadGames: ['AA-1','WT','WPLUS'],
-            downloadableGames: ['SC'],
+            browserGames: ['AW-1','GOG','SLFR','PRIMA','WWF'],
+            iPadGames: ['AA-1','WT','WPLUS','PVZ'],
+            downloadableGames: ['SC','WARP'],
             planId: 'trialLegacy'
         }
     },
