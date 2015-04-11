@@ -1252,29 +1252,27 @@ function resetPasswordSend(req, res, next) {
             .then(null, function(err) {
                 if( err.error &&
                     err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.user.emailNotExist"}, 400);
-                    //// when email language/flow has been finallized, uncomment this code and remove the errorResponse
-                    //var userData = {};
-                    //userData.email = req.body.email;
-                    //var emailData = {
-                    //    subject: "Your GlassLabGames.org Password",
-                    //    to:   userData.email,
-                    //    user: userData,
-                    //    host: req.protocol+"://"+req.headers.host
-                    //};
-                    //var email = new Util.Email(
-                    //    this.options.auth.email,
-                    //    path.join(__dirname, "../email-templates"),
-                    //    this.stats);
-                    //email.send('password-reset-nonuser', emailData)
-                    //    .then(function(){
-                    //        // all ok
-                    //        this.requestUtil.jsonResponse(res, {});
-                    //    }.bind(this))
-                    //    // error
-                    //    .then(null, function(err){
-                    //        this.requestUtil.errorResponse(res, err, 500);
-                    //    }.bind(this));
+                    var userData = {};
+                    userData.email = req.body.email;
+                    var emailData = {
+                        subject: "Your GlassLabGames.org Password",
+                        to:   userData.email,
+                        user: userData,
+                        host: req.protocol+"://"+req.headers.host
+                    };
+                    var email = new Util.Email(
+                        this.options.auth.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    email.send('password-reset-nonuser', emailData)
+                        .then(function(){
+                            // all ok
+                            this.requestUtil.jsonResponse(res, {});
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            this.requestUtil.errorResponse(res, err, 500);
+                        }.bind(this));
                 } else {
                     console.error("AuthService: resetPasswordSend Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
