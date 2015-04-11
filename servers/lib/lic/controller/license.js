@@ -2714,6 +2714,7 @@ function cancelLicenseInternal(req, res){
 function inspectLicenses(req, res){
     if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
     }
     var errors = {};
     var hasErrors = false;
