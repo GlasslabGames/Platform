@@ -2922,6 +2922,19 @@ TelemDS_Couchbase.prototype.multiGetMatches = function(gameId, matchIds){
         });
         this._chunk_getMulti(keys, {}, function(err, results){
             if(err){
+                var message = "The key does not exist on the server";
+                var keyExistError = true;
+                keys.forEach(function(key){
+                    if(results[key].error.message === message){
+                        results[key] = "The key does not exist on the server";
+                    } else if(results[key].error && results[key].error.message !== message){
+                        keyExistError = false;
+                    }
+                });
+                if(keyExistError){
+                    resolve(results);
+                    return;
+                }
                 console.error("CouchBase DataStore: Get Matches Error -", err);
                 reject(err);
                 return;
@@ -3051,6 +3064,32 @@ TelemDS_Couchbase.prototype.getAllCourseGameProfiles = function(){
                     resolve(courses);
                 });
             }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getGamesCourseMap = function(gameIds){
+    return when.promise(function(resolve, reject){
+
+        this.getAllCourseGameProfiles()
+            .then(function(courses){
+                var gameCourseMap = {};
+                _(gameIds).forEach(function(gameId){
+                    gameCourseMap[gameId] = {};
+                });
+                _(courses).forEach(function(course, key){
+                    var courseId = key.split(":")[2];
+                    _(gameIds).forEach(function(gameId){
+                        if(course[gameId]){
+                            gameCourseMap[gameId][courseId] = true;
+                        }
+                    });
+                });
+                resolve(gameCourseMap);
+            })
+            .then(null, function(err){
+                console.error("Get Games Course Map Error -",err);
+                reject(err);
+            });
     }.bind(this));
 };
 

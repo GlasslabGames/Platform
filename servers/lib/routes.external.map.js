@@ -460,6 +460,14 @@ module.exports = {
                 post: "blockPremiumGamesBasicCourses"
             }
         },
+        {
+            api: "/api/v2/lms/course/games/map",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "getGamesCourseMap"
+            }
+        },
 
         // ---------------------------------------------------
         {
