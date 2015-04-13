@@ -128,9 +128,11 @@ return when.promise(function(resolve, reject) {
     if( courses &&
         courses.length) {
 
+        //console.log( "\n\nabout to get individual courses for a student" );
+
         when.reduce(courses, function(data, course, i){
             if(course.id) {
-                //console.log("id:", course.id);
+                //console.log("\tid:", course.id);
 
                 // convert showMembers to int and then check it's value
                 var p;
@@ -153,8 +155,10 @@ return when.promise(function(resolve, reject) {
                             }.bind(this));
                     }
                     else {
+                        //console.log( "\tset promise for get teacher of course" );
                         p = this.myds.getTeacherOfCourse(course.id)
                             .then(function(teacherInfo) {
+                                //console.log( "\t\treceived teacher" );
                                 course.teacher = _.clone(teacherInfo);
                                 return this.telmStore.getGamesForCourse(course.id);
                             }.bind(this));
@@ -176,7 +180,7 @@ return when.promise(function(resolve, reject) {
                         p = this.telmStore.getGamesForCourse(course.id);
                     }
                 }
-
+                //console.log( "\texecute promise" );
                 p.then(function(games) {
                     // If we are filtering for games, filter this course out at the end
                     if( gameFilter ) {
@@ -204,9 +208,11 @@ return when.promise(function(resolve, reject) {
                     }
 
                     // need to return something for reduce to continue
+                    //console.log( "\t\tgot games for the course, return 1" );
                     return 1;
                 }.bind(this));
 
+                //console.log( "\treturn the executed promise" );
                 return p;
             }
         }.bind(this), {})
@@ -215,6 +221,7 @@ return when.promise(function(resolve, reject) {
             }.bind(this))
 
             .done(function(){
+                //console.log( "resolving\n\n" );
                 //console.log("done");
                 // Filter out courses for certain games
                 if( gameFilter ) {
