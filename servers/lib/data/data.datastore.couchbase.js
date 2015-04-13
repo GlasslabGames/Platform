@@ -226,6 +226,20 @@ var gdv_getStartedSessionsByDeviceId = function (doc, meta)
     }
 };
 
+var gdv_getEndedSessionsByDeviceId = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'gs') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('deviceId') &&
+        doc.hasOwnProperty('state') &&
+        doc['state'] == 'ended' )
+    {
+        emit( doc['deviceId'] );
+    }
+};
+
 // used to process all sessions, migration
 var gdv_getAllGameSessionsByGameId = function (doc, meta)
 {
@@ -346,6 +360,9 @@ var gdv_getAllGameSaves = function(doc, meta){
             },
             getStartedSessionsByDeviceId : {
                 map: gdv_getStartedSessionsByDeviceId
+            },
+            getEndedSessionsByDeviceId : {
+                map: gdv_getEndedSessionsByDeviceId
             },
             getAllGameSessionsByGameId : {
                 map: gdv_getAllGameSessionsByGameId
@@ -1601,9 +1618,9 @@ TelemDS_Couchbase.prototype.cleanUpOldGameSessionsV2 = function(deviceId){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // use view to find started session for a deviceId
-    // tConst.game.session.started
-    this.client.view("telemetry", 'getStartedSessionsByDeviceId').query(
+    // use view to find ended session for a deviceId
+    // tConst.game.session.ended
+    this.client.view("telemetry", 'getEndedSessionsByDeviceId').query(
         {
             key: deviceId
         },
