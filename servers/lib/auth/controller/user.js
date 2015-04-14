@@ -1615,7 +1615,7 @@ function _deleteStudentAccount(studentId){
     return when.promise(function(resolve, reject){
         var lmsService = this.serviceManager.get("lms").service;
         var licService = this.serviceManager.get("lic").service;
-        var lConst = require("../../lic/lic.const.js");
+        var lConst = this.serviceManager.get("lic").lib.Const;
         var courses;
         var licenses;
         lmsService.myds.getCoursesByStudentId(studentId)

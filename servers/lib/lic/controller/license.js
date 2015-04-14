@@ -3,7 +3,7 @@ var _      = require('lodash');
 var when   = require('when');
 var moment = require('moment');
 var Util   = require('../../core/util.js');
-var lConst = require('../lic.const.js');
+var lConst;
 
 module.exports = {
     getSubscriptionPackages: getSubscriptionPackages,
@@ -45,6 +45,7 @@ module.exports = {
 // provides license package information for the subscription/packages page
 function getSubscriptionPackages(req, res){
     try{
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var plans = [];
         var plan;
         _(lConst.plan).forEach(function(value, key){
@@ -77,6 +78,7 @@ function getCurrentPlan(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
@@ -566,7 +568,7 @@ function upgradeLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var planInfo = req.body.planInfo;
@@ -720,6 +722,7 @@ function upgradeTrialLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var stripeInfo = req.body.stripeInfo;
@@ -889,6 +892,7 @@ function cancelLicenseAutoRenew(req, res){
 // if enabled, a user will be charged the new subscription price for the next year on the day their prior year ends
 // autorenew is only relevant to stripe/credit cards
 function enableLicenseAutoRenew(req, res){
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
@@ -959,6 +963,7 @@ function addTeachersToLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
@@ -1855,6 +1860,7 @@ function setLicenseMapStatusToNull(req, res){
 // admin needs both the glasslab key for that purchase order as well as the purchase order number (if defined in our db) to reject
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -1961,6 +1967,7 @@ function rejectPurchaseOrder(req, res){
 // if a user was on a trial before being marked as received, that trial is terminated
 function receivePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -2092,6 +2099,7 @@ function receivePurchaseOrder(req, res){
 
 function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expirationDate){
     return when.promise(function(resolve, reject) {
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var updateFields = [];
         var active = "active = 1";
         updateFields.push(active);
@@ -2162,6 +2170,7 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
 // upgrade email seems fairly different.  how do?
 function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrderId){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var plan = planInfo.type;
         var status;
         _unassignCoursesWhenUpgrading.call(this, licenseId, plan)
@@ -2215,6 +2224,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
 // purchase order marked invoiced after it has been received, and before a purchase order is marked as approved
 function invoicePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -2279,6 +2289,7 @@ function invoicePurchaseOrder(req, res){
 // can only approve an purchase order after it has been marked received and invoiced
 function approvePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -2479,6 +2490,7 @@ function _switchToCreditCard(licenseId){
 // user cannot update this trial or go premium, until the trial is about to expire at year end
 function migrateToTrialLegacy(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -3177,6 +3189,7 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     var card = stripeInfo.id;
     var plan = planInfo.type;
     var seats = planInfo.seats;
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var stripePlan = lConst.plan[plan]["stripe_planId"];
     var baseStripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
     var discountRate = lConst.seats[seats].discount;
@@ -3201,6 +3214,7 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
 
 function _createLicenseSQL(userId, schoolInfo, planInfo, data){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var licenseId;
         var values;
         var promise;
@@ -3320,6 +3334,7 @@ function _updateStripeSubscription(customerId, subscriptionId, params, autoRenew
 
 function _unassignCoursesWhenUpgrading(licenseId, plan){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var status;
         var availableGames = {};
         var courseIds;
@@ -3572,6 +3587,7 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
 
 function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, emailData, instructors){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var promiseList = [];
         // poPendingStatus variable used to check for edge case where we are ending a pending purchase order license, but a trial is still active
         // in that case, we do not want to disable premium classes, because the educator's premium classes would belong to the trial
@@ -3758,6 +3774,7 @@ function _errorLicensingAccess(res, status){
 }
 
 function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, protocol, host){
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var ownerTemplate = "owner-upgrade";
     var educatorTemplate = "educator-upgrade";
     var emailData;
@@ -3969,6 +3986,7 @@ function getLicenses(req, res, next) {
                         outItem.purchasedFrom = licenseCodeType.shift();
 
                         licenseCodeType = licenseCodeType.join('-');
+                        lConst = lConst || this.serviceManager.get("lic").lib.Const;
                         if(lConst.licenseCodeTypes.hasOwnProperty(licenseCodeType)) {
                             outItem.type = lConst.licenseCodeTypes[licenseCodeType];
                         }
