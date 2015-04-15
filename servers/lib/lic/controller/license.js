@@ -36,6 +36,7 @@ module.exports = {
     cancelLicense: cancelLicense,
     cancelLicenseInternal: cancelLicenseInternal,
     inspectLicenses: inspectLicenses,
+    trialMoveToTeacher: trialMoveToTeacher,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -2997,6 +2998,66 @@ function _expiringSoonEmails(userId, licenseId, daysToGo, isTrial, protocol, hos
                 reject(err);
             }.bind(this));
     }.bind(this));
+}
+
+function trialMoveToTeacher(req, res){
+  //  new from trial added to license api
+  //— pass in new license id to switch from trial to license api
+  //      cancel trial license
+  //      get license you want to join
+  //      check if there are enough teacher seats open
+  //      grab license map for that teacher and that license —update license map entry
+  //      update educator seats remaining
+    if(!(req.user.id && req.user.licenseId && req.user.licenseOwnerId &&
+        req.user.licenseOwnerId === req.user.id && req.body.licenseId)){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"} );
+        return;
+    }
+    var userId =req.user.id;
+    var email = req.user.email;
+    var licenseId =req.user.licenseId;
+    var newLicenseId = req.body.licenseId;
+    var license;
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return _endLicense.call(this, userId, licenseId, false);
+        }.bind(this))
+        .then(function(){
+            if(typeof status === "string"){
+                return status;
+            }
+            return this.myds.getLicenseById(newLicenseId);
+        }.bind(this))
+        .then(function(results){
+            license = results;
+            //var licenseOwnerId = license.user_id;
+            //var promiseList = [];
+            //promiseList.push(this.myds.getUserById(userId));
+            var updateFields = [];
+            var status = "status = 'active'";
+            updateFields.push(status);
+            return this.myds.updateLicenseMapByLicenseInstructor(newLicenseId,[userId], updateFields);
+            //return when.all(promiseList);
+        }.bind(this))
+        .then(function(){
+            var seatType = license.package_type;
+            lConst = lConst || this.serviceManager.get("lic").lib.Const;
+            var seats = lConst.plan[seatType].educatorSeats;
+            return this.updateEducatorSeatsRemaining(licenseId, seats);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                _errorLicensingAccess.call(this, res, status);
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
 }
 
 function _storeSchoolInformation(schoolInfo){
