@@ -118,25 +118,7 @@ function _buildLicPackages(){
             var price = gameInfo.price;
             var release = gameInfo.release;
             packages.forEach(function(package){
-                if(release === "live"){
-                    if(price === "Premium"){
-                        if(package === "Chromebook/Web Games"){
-                            premiumGames.browserGames.push(gameInfo.gameId);
-                        } else if(package === "iPad Games"){
-                            premiumGames.iPadGames.push(gameInfo.gameId);
-                        } else if(package === "PC/Mac Games") {
-                            premiumGames.downloadableGames.push(gameInfo.gameId);
-                        }
-                    } else if(price === "Free"){
-                        if(package === "Chromebook/Web Games"){
-                            freeGames.browserGames.push(gameInfo.gameId);
-                        } else if(package === "iPad Games"){
-                            freeGames.iPadGames.push(gameInfo.gameId);
-                        } else if(package === "PC/Mac Games") {
-                            freeGames.downloadableGames.push(gameInfo.gameId);
-                        }
-                    }
-                } else if(release === "dev" && this.options.env !== "prod"){
+                if(release === "live" || (release === "dev" && this.options.env !== "prod")){
                     if(price === "Premium"){
                         if(package === "Chromebook/Web Games"){
                             premiumGames.browserGames.push(gameInfo.gameId);
