@@ -672,6 +672,194 @@
                             }
                         ]
                     }
+                ],
+                "TEKS": [
+                    {
+                        "category": "Framework for 21st Century Learning",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "Critical Thinking and Problem Solving",
+                                        "link": "http://www.p21.org/about-us/p21-framework/260",
+                                        "description": "Use Systems Thinking and Make Judgements and Decisions"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Next Generation Science Standards (NGSS):Itemized Standards",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "MS-LS2-1",
+                                        "link": "http://www.nextgenscience.org/ms-ls2-1-ecosystems-interactions-energy-and-dynamics",
+                                        "description": "Interdependent relationships in ecosystems: resource allocation"
+                                    },
+                                    {
+                                        "name": "MS-LS2-4",
+                                        "link": "http://www.nextgenscience.org/ms-ls2-4-ecosystems-interactions-energy-and-dynamics",
+                                        "description": "Evaluate effect of resource changes on ecosystem population"
+                                    },
+                                    {
+                                        "name": "MS-LS2-5",
+                                        "link": "http://www.nextgenscience.org/ms-ls2-5-ecosystems-interactions-energy-and-dynamics",
+                                        "description": "Evaluate interdependent relationships in ecosystems"
+                                    },
+                                    {
+                                        "name": "MS-ETS1-1",
+                                        "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                        "description": "Defining and delimiting the scope of a problem"
+                                    },
+                                    {
+                                        "name": "MS-ETS1-2",
+                                        "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                        "description": "Designing and evaluating solutions>"
+                                    },
+                                    {
+                                        "name": "MS-ETS1-3",
+                                        "link": "http://www.nextgenscience.org/msets1-engineering-design",
+                                        "description": "Optimizing solutions through systematic evaluation"
+                                    },
+                                    {
+                                        "name": "MS-ESS3-3",
+                                        "link": "http://www.nextgenscience.org/msess-hi-human-impacts",
+                                        "description": "Evaluating human impact on the environment"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Next Generation Science Standards (NGSS):Crosscutting Concepts",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "Cause and Effect",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "investigating and explaining causal relationships"
+                                    },
+                                    {
+                                        "name": "Systems and System Models",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "defining and explaining systems of study"
+                                    },
+                                    {
+                                        "name": "Scale, Proportion, and Quantity",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "Understanding impact of scale, proportion, and quantity on a system>"
+                                    },
+                                    {
+                                        "name": "Stability and Change",
+                                        "link": "http://www.nextgenscience.org/three-dimensions",
+                                        "description": "Studying factors of system stability and change"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Connections to Engineering, Technology, and Applications of Science",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name":"Influence of Science, Engineering, and Technology on Society and Nature",
+                                        "link":"http://www.nap.edu/openbook.php?record_id=13165&page=201",
+                                        "description": "Core interdisciplinary connections"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Texas Essential Knowledge and Skills",
+                        "groups": [
+                            {
+                                "list":[
+                                    {
+                                        "name": "Middle School Social Studies: Social Studies Skills (Grade 6, Grade 7)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter113/ch113b.html",
+                                        "description": "Application of critical-thinking skills to organize and use information acquired through established research methodologies from a variety of valid sources, including electronic technology: analyzing information (e.g. sequencing, categorizing, identifying cause-and-effect relationships, making generalizations and predictions, and drawing inferences and conclusions)."
+                                    },
+                                    {
+                                        "name": "Middle School Social Studies: Social Studies Skills (Grade 8)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter113/ch113b.html",
+                                        "description": "Problem-solving and decision-making: using a decision-making process to identify a situation that requires a decision, gather information, identify options, predict consequences, and take action to implement a decision."
+                                    },
+                                    {
+                                        "name": "High School Economics: Knowledge and Skills (1-A)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter118/ch118a.html",
+                                        "description": "Conceptualizing scarcity and opportunity costs: understanding scarcity and choice as basic economic problems faced by society."
+                                    },
+                                    {
+                                        "name": "Middle School Mathematics: Knowledge and Skills (1-B)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter111/ch111b.html",
+                                        "description": "Mathematical processes for acquisition and demonstration of mathematical understanding: using a problem-solving model that incorporates analyzing given information, formulating a plan or strategy, determining a solution, justifying the solution, and evaluating the problem-solving process and the reasonableness of the solution."
+                                    },
+                                    {
+                                        "name": "Middle School Mathematics: Knowledge and Skills (1-C)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter111/ch111b.html",
+                                        "description": "Mathematical processes for acquisition and demonstration of mathematical understanding: to effectively solve problems, utilize tools and techniques (including manipulatives and digital technology) as appropriate."
+                                    },
+                                    {
+                                        "name": "High School Science: Environmental Systems (5-E)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter112/ch112c.html",
+                                        "description": "Interrelationships among the resources within the local environmental system: analyze and evaluate the economic significance and interdependence of resources within the environmental system."
+                                    },
+                                    {
+                                        "name": "High School Science: Environmental Systems (7-C)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter112/ch112c.html",
+                                        "description": "Relationships between changes in populations and ecosystems: analyze and predict the effects of non-renewable resource depletion."
+                                    },
+                                    {
+                                        "name": "High School Science: Environmental Systems (9-E)",
+                                        "link": "http://ritter.tea.state.tx.us/rules/tac/chapter112/ch112c.html",
+                                        "description": "The impact of humans on the environment: evaluate the effect of human activities on the environment."
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Council for Economic Education (CEE)",
+                        "groups": [
+                            {
+                                "list":[
+
+
+                                    {
+                                        "name":"Standard 1 (Scarcity: Productive Resources)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Productive Resources"
+                                    },
+                                    {
+                                        "name":"Standard 1 (Scarcity: Human Capital)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Human Capital"
+                                    },
+                                    {
+                                        "name":"Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Cost/Benefit Analysis"
+                                    },
+                                    {
+                                        "name":"Standard 6 (Specialization and Trade: Division of Labor)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Division of Labor"
+                                    },
+                                    {
+                                        "name":"Standard 6 (Specialization and Trade: Employment/Unemployment)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Employment/Unemployment"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 ]
             },
             "lessonPlans": {
@@ -686,19 +874,43 @@
                     "list": [
                         {
                             "name": "Mission 1 Lesson Plan",
-                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1.pdf",
+                            "standard": "CCSS"
                         },
                         {
                             "name": "Mission 2 Lesson Plan",
-                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2.pdf",
+                            "standard": "CCSS"
                         },
                         {
                             "name": "Mission 3 Lesson Plan",
-                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3.pdf",
+                            "standard": "CCSS"
                         },
                         {
                             "name": "Mission 4 Lesson Plan",
-                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4.pdf"
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4.pdf",
+                            "standard": "CCSS"
+                        },
+                        {
+                            "name": "Mission 1 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1_TEKS.pdf",
+                            "standard": "TEKS"
+                        },
+                        {
+                            "name": "Mission 2 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2_TEKS.pdf",
+                            "standard": "TEKS"
+                        },
+                        {
+                            "name": "Mission 3 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3_TEKS.pdf",
+                            "standard": "TEKS"
+                        },
+                        {
+                            "name": "Mission 4 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4_TEKS.pdf",
+                            "standard": "TEKS"
                         }
                     ]
                   },
