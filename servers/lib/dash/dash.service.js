@@ -183,15 +183,15 @@ function _buildLicPackages(){
         lConst.plan.trialLegacy.iPadGames = freeGames.iPadGames.concat(premiumGames.iPadGames);
         lConst.plan.trialLegacy.downloadableGames = freeGames.downloadableGames.concat(premiumGames.downloadableGames);
 
-        var file = "module.exports = " + JSON.stringify(lConst, null, 4) + ";\n";
-        var directory = __dirname + "/../lic/lic.const.js";
-        fs.writeFile(directory, file, function(err){
-            if(err){
-                console.log("Build Lic Packages Error -",err);
-                reject(err);
-            }
-            resolve();
-        }.bind(this));
+        //var file = "module.exports = " + JSON.stringify(lConst, null, 4) + ";\n";
+        //var directory = __dirname + "/../lic/lic.const.js";
+        //fs.writeFile(directory, file, function(err){
+        //    if(err){
+        //        console.log("Build Lic Packages Error -",err);
+        //        reject(err);
+        //    }
+        //    resolve();
+        //}.bind(this));
     }.bind(this));
 }
 
