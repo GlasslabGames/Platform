@@ -1069,13 +1069,13 @@ function addTeachersToLicense(req, res){
                     approvedTeachers.push(key);
                 } else if(typeof value === "number"){
                     otherLicenseId = value;
-                    invitedUserId = key;
+                    invitedUserId = parseInt(key);
                     invitedTeacherCheck.push([invitedUserId, otherLicenseId]);
                     promiseList.push(this.myds.getLicenseById(otherLicenseId));
                 } else{
                     rejectedTeachers[key] = "user already on another license";
                 }
-            });
+            }.bind(this));
             return when.all(promiseList);
         }.bind(this))
         .then(function(otherLicenses){

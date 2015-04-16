@@ -517,7 +517,7 @@ Lic_MySQL.prototype.multiUpdateLicenseMapStatus = function(licenseId, userIds, s
             status = "'" + status + "'";
         }
         var userIdsString = userIds.join(',');
-        var Q = "UPDATE GL_LICENSE_MAP SET status = " + status + " WHERE user_id in(" + userIdsString + ");";
+        var Q = "UPDATE GL_LICENSE_MAP SET status = " + status + " WHERE user_id in(" + userIdsString + ") and license_id = " + licenseId + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
