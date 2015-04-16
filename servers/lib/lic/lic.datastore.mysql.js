@@ -241,6 +241,20 @@ Lic_MySQL.prototype.setCustomerIdByUserId = function(userId, customerId){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.removeSubscriptionIdsByUserId = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "UPDATE GL_LICENSE SET subscription_id = NULL where user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Remove Subscription Ids By User Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.countEducatorSeatsByLicense = function(licenseId, seats){
     return when.promise(function(resolve, reject){
         var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP WHERE status in ('active','pending') and license_id = " + licenseId + ";";
