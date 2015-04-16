@@ -332,7 +332,19 @@ return when.promise(function(resolve, reject) {
 
 function _addLicenseInfoToUser(user, results){
     return when.promise(function(resolve, reject){
-        var license = results[0];
+        var license;
+        var futureLicense;
+        if(results.length === 1){
+            license = results[0];
+        } else if(results.length === 2){
+            if(results[0].status === "active" || results[0].status === "po-received"){
+                license = results[0];
+                futureLicense = results[1];
+            } else{
+                license = results[1];
+                futureLicense = results[0];
+            }
+        }
         var inviteLicense;
         user.licenseId = license["id"];
         user.licenseOwnerId = license["user_id"];
@@ -350,22 +362,22 @@ function _addLicenseInfoToUser(user, results){
         }
         if(license["status"] === "invite-pending"){
             inviteLicense = user.inviteLicense = {};
-            inviteLicense.licenseId = results[1].id;
-            inviteLicense.packageType = results[1].package_type;
+            inviteLicense.licenseId = futureLicense.id;
+            inviteLicense.packageType = futureLicense.package_type;
             inviteLicense.owner = {};
-            inviteLicense.owner.id = results[1].user_id;
+            inviteLicense.owner.id = futureLicense.user_id;
         }
         if(results.length === 2){
-            if(results[1]["status"] === "po-pending" || results[1]["status"] === "po-rejected"){
-                user.purchaseOrderLicenseStatus = results[1]["status"];
-                user.purchaseOrderLicenseId = results[1].id;
+            if(futureLicense["status"] === "po-pending" || futureLicense["status"] === "po-rejected"){
+                user.purchaseOrderLicenseStatus = futureLicense["status"];
+                user.purchaseOrderLicenseId = futureLicense.id;
             }
-            if(results[1]["status"] === "invite-pending") {
+            if(futureLicense["status"] === "invite-pending") {
                 inviteLicense = user.inviteLicense = {};
-                inviteLicense.licenseId = results[1].id;
-                inviteLicense.packageType = results[1].package_type;
+                inviteLicense.licenseId = futureLicense.id;
+                inviteLicense.packageType = futureLicense.package_type;
                 inviteLicense.owner = {};
-                inviteLicense.owner.id = results[1].user_id;
+                inviteLicense.owner.id = futureLicense.user_id;
             }
         }
         if( user.licenseStatus === "active" ||
