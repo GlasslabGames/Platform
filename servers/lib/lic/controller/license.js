@@ -1966,7 +1966,8 @@ function cancelActivePurchaseOrder(req, res){
 
 // called by front end modal. temp state used to inform users that their license access has been closed off
 function setLicenseMapStatusToNull(req, res){
-    if(!(req.user && req.user.licenseId && req.user.purchaseOrderLicenseStatus && req.user.purchaseOrderLicenseStatus === "po-rejected")){
+    if(!(req.user && req.user.licenseId && ((req.user.inviteLicense) ||
+        (req.user.purchaseOrderLicenseStatus && req.user.purchaseOrderLicenseStatus === "po-rejected")))){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
@@ -3164,13 +3165,13 @@ function _expiringSoonEmails(userId, licenseId, daysToGo, isTrial, protocol, hos
 }
 
 function trialMoveToTeacher(req, res){
-  //  new from trial added to license api
-  //— pass in new license id to switch from trial to license api
-  //      cancel trial license
-  //      get license you want to join
-  //      check if there are enough teacher seats open
-  //      grab license map for that teacher and that license —update license map entry
-  //      update educator seats remaining
+    // new from trial added to license api
+    // pass in new license id to switch from trial to license api
+    // cancel trial license
+    // get license you want to join
+    // check if there are enough teacher seats open
+    // grab license map for that teacher and that license —update license map entry
+    // update educator seats remaining
     if(!(req.user.id && req.user.licenseId && req.user.licenseOwnerId &&
         req.user.licenseOwnerId === req.user.id && req.user.inviteLicense)){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"} );
@@ -3179,7 +3180,8 @@ function trialMoveToTeacher(req, res){
     var userId =req.user.id;
     var email = req.user.email;
     var licenseId =req.user.licenseId;
-    var newLicenseId = req.user.inviteLicense.licenseId;
+    var inviteLicense = req.user.inviteLicense;
+    var inviteLicenseId = inviteLicense.licenseId;
     var license;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
@@ -3192,7 +3194,7 @@ function trialMoveToTeacher(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return this.myds.getLicenseById(newLicenseId);
+            return this.myds.getLicenseById(inviteLicenseId);
         }.bind(this))
         .then(function(results){
             license = results;
@@ -3202,7 +3204,7 @@ function trialMoveToTeacher(req, res){
             var updateFields = [];
             var status = "status = 'active'";
             updateFields.push(status);
-            return this.myds.updateLicenseMapByLicenseInstructor(newLicenseId,[userId], updateFields);
+            return this.myds.updateLicenseMapByLicenseInstructor(inviteLicenseId,[userId], updateFields);
             //return when.all(promiseList);
         }.bind(this))
         .then(function(){
