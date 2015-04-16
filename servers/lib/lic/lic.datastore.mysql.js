@@ -302,7 +302,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
 Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     return when.promise(function(resolve, reject){
         var userIdsString = userIds.join(",");
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending', 'po-pending', 'po-received','po-rejected') and user_id in (" + userIdsString + ");";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending', 'po-pending', 'po-received','po-rejected', 'invite-pending') and user_id in (" + userIdsString + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -470,10 +470,15 @@ function _insertTempUserValueWithEmail(email){
     return value;
 }
 
-Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
+Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds, invite){
     return when.promise(function(resolve, reject){
         var inputs = [];
-        var startValues = "('pending',NOW()," + licenseId + ",";
+        var startValues;
+        if(invite){
+            startValues = "('invite-pending',NOW()," + licenseId + ",";
+        } else{
+            startValues = "('pending',NOW()," + licenseId + ",";
+        }
         userIds.forEach(function(id){
             inputs.push(startValues + id + ")")
         });

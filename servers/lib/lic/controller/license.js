@@ -978,6 +978,8 @@ function addTeachersToLicense(req, res){
     var existingTeachers;
     var licenseSeats;
     var approvedTeachers;
+    var invitedTeachers;
+    var invitedTeacherCheck;
     var users;
     var rejectedTeachers = {};
     var plan;
@@ -1016,7 +1018,7 @@ function addTeachersToLicense(req, res){
                 newInstructors[email] = true;
             });
             existingTeachers = [];
-            teachers.forEach(function(teacher){
+            _(teachers).forEach(function(teacher){
                 if(teacher["SYSTEM_ROLE"] !== 'instructor' && teacher["SYSTEM_ROLE"] !== "manager"){
                     delete newInstructors[teacher["EMAIL"]];
                     rejectedTeachers[teacher.id] = "user role not instructor";
@@ -1057,31 +1059,59 @@ function addTeachersToLicense(req, res){
                 hasLicenseObject[id] = false;
             }
             approvedTeachers = [];
+            invitedTeacherCheck = [];
+            var promiseList = [];
+            var otherLicenseId;
+            var invitedUserId;
             _(hasLicenseObject).forEach(function(value, key){
                 if(value === false){
                     approvedTeachers.push(key);
+                } else if(typeof value === "number"){
+                    otherLicenseId = value;
+                    invitedUserId = key;
+                    invitedTeacherCheck.push([invitedUserId, otherLicenseId]);
+                    promiseList.push(this.myds.getLicenseById(otherLicenseId));
                 } else{
                     rejectedTeachers[key] = "user already on another license";
                 }
             });
+            return when.all(promiseList);
+        }.bind(this))
+        .then(function(otherLicenses){
+            var invitedUserId;
+            invitedTeachers = [];
+            _(otherLicenses).forEach(function(license, index){
+                license = license[0];
+                invitedUserId = invitedTeacherCheck[index][0];
+                if(license.user_id === invitedUserId){
+                    if(license.package_type === "trial"){
+                        invitedTeachers.push(invitedUserId);
+                    } else{
+                        rejectedTeachers[invitedUserId] = "user already on another license";
+                    }
+                } else{
+                    rejectedTeachers[invitedUserId] = "user already on another license";
+                }
+            });
             var approvedExistingTeachers = [];
-            existingTeachers.forEach(function(id){
+            _(existingTeachers).forEach(function(id){
                 if(!rejectedTeachers[id]){
                     approvedExistingTeachers.push(id);
                 }
             });
             existingTeachers = approvedExistingTeachers;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
-            if(approvedTeachers.length > 0){
-                return this.myds.multiGetLicenseMap(licenseId, approvedTeachers);
+            if(approvedTeachers.length > 0 || invitedTeachers.length > 0){
+                return this.myds.multiGetLicenseMap(licenseId, approvedTeachers.concat(invitedTeachers));
             }
             return "reject all";
         }.bind(this))
-        .then(function(licenseMap){
-            if(typeof licenseMap === "string"){
-                return licenseMap;
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
             }
             var map = {};
+            var licenseMap = results;
             licenseMap.forEach(function(teacher){
                 map[teacher.user_id] = true;
             });
@@ -1094,12 +1124,28 @@ function addTeachersToLicense(req, res){
                     teachersToInsert.push(teacherId);
                 }
             });
-            var promiseList = [{},{}];
+            var teachersToInsertInvite = [];
+            var teachersToUpdateInvite = [];
+            invitedTeachers.forEach(function(teacherId){
+                if(map[teacherId]){
+                    teachersToUpdateInvite.push(teacherId);
+                } else{
+                    teachersToInsertInvite.push(teacherId);
+                }
+            });
+            var promiseList = [{},{},{},{}];
             if(teachersToInsert.length > 0){
                 promiseList[0] = this.myds.multiInsertLicenseMap(licenseId, teachersToInsert);
             }
             if(teachersToUpdate.length > 0){
                 promiseList[1] = this.myds.multiUpdateLicenseMapStatus(licenseId, teachersToUpdate, "pending");
+            }
+            if(teachersToInsertInvite.length > 0){
+                var shouldInvite = true;
+                promiseList[2] = this.myds.multiInsertLicenseMap(licenseId, teachersToInsertInvite, shouldInvite);
+            }
+            if(teachersToUpdateInvite.length > 0){
+                promiseList[3] = this.myds.multiUpdateLicenseMapStatus(licenseId, teachersToUpdateInvite, "invite-pending");
             }
             return when.all(promiseList);
         }.bind(this))
@@ -1109,7 +1155,7 @@ function addTeachersToLicense(req, res){
             }
             var promiseList = [];
             var rejectedIds = Object.keys(rejectedTeachers);
-            promiseList.push(_grabInstructorsByType.call(this, existingTeachers, rejectedIds, createTeachers));
+            promiseList.push(_grabInstructorsByType.call(this, existingTeachers, rejectedIds, createTeachers, invitedTeachers));
             promiseList.push(this.updateEducatorSeatsRemaining(licenseId, licenseSeats));
             return when.all(promiseList);
         }.bind(this))
@@ -1132,12 +1178,16 @@ function addTeachersToLicense(req, res){
             var approvedUsers = users[0];
             var approvedNonUsers = users[1];
             var rejectedEmails = users[2];
+            var invitedUsers = users[3];
 
             var approvedTeachersOutput = [];
             approvedUsers.forEach(function(user){
                 approvedTeachersOutput.push(user["EMAIL"]);
             });
             approvedNonUsers.forEach(function(user){
+                approvedTeachersOutput.push(user["EMAIL"]);
+            });
+            invitedUsers.forEach(function(user){
                 approvedTeachersOutput.push(user["EMAIL"]);
             });
             var rejectedTeachersOutput = [];
@@ -1151,7 +1201,7 @@ function addTeachersToLicense(req, res){
             var ownerName = req.user.firstName + " " + req.user.lastName;
             var ownerFirstName = req.user.firstName;
             var ownerLastName = req.user.lastName;
-            _addTeachersEmailResponse.call(this, ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, plan, seatsTier, req.protocol, req.headers.host);
+            _addTeachersEmailResponse.call(this, ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, invitedUsers, plan, seatsTier, req.protocol, req.headers.host);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -3704,11 +3754,32 @@ function _multiHasLicense(userIds){
         this.myds.getLicenseMapByInstructors(userIds)
             .then(function(licenseMaps){
                 var output = {};
-                userIds.forEach(function(id){
+                _(userIds).forEach(function(id){
                     output[id] = false;
                 });
-                licenseMaps.forEach(function(map){
-                    output[map["user_id"]] = true;
+                var userId;
+                var userMapStatus = {};
+                _(licenseMaps).forEach(function(map){
+                    userId = map["user_id"];
+                    if(!userMapStatus[userId]){
+                        userMapStatus[userId] = [];
+                    }
+                    userMapStatus[userId].push(map);
+                });
+                _(userMapStatus).forEach(function(maps, userId){
+                    if(maps.length === 0){
+                        output[userId] = true;
+                    } else if(maps.length > 1){
+                        output[userId] = false
+                    } else{
+                        var map = maps[0];
+                        if(map.status === "active") {
+                            // possible invite sent, need to check if eligible first
+                            output[userId] = map.license_id;
+                        } else{
+                            output[userId] = false;
+                        }
+                    }
                 });
                 resolve(output);
             })
@@ -3718,9 +3789,9 @@ function _multiHasLicense(userIds){
     }.bind(this));
 }
 
-function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUserEmails){
+function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUserEmails, invitedUserIds){
     return when.promise(function(resolve, reject){
-        var promiseList = [[],[], []];
+        var promiseList = [[],[], [], []];
         if(approvedUserIds.length > 0){
             promiseList[0] = this.myds.getUsersByIds(approvedUserIds);
         }
@@ -3729,6 +3800,9 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
         }
         if(rejectedUserIds.length > 0){
             promiseList[2] = this.myds.getUsersByIds(rejectedUserIds);
+        }
+        if(invitedUserIds.length > 0){
+            promiseList[3] = this.myds.getUsersByIds(invitedUserIds);
         }
         return when.all(promiseList)
             .then(function(results){
@@ -3744,6 +3818,8 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
                     emails[user.id] = user["EMAIL"];
                 });
                 output.push(emails);
+                var invitedUsers = results[3];
+                output.push(invitedUsers);
 
                 resolve(output);
             })
@@ -3985,7 +4061,7 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
     }.bind(this));
 }
 
-function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, plan, seatsTier, protocol, host){
+function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, invitedUsers, plan, seatsTier, protocol, host){
     var data;
     var email;
     var usersTemplate = "educator-user-invited";
@@ -4009,7 +4085,6 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
         _sendEmailResponse.call(this, email, data, protocol, host, usersTemplate);
     }.bind(this));
 
-    var data;
     var nonUsersTemplate = "educator-nonuser-invited";
     approvedNonUsers.forEach(function(user){
         email = user["EMAIL"];
@@ -4023,6 +4098,24 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
         data.plan = plan;
         data.seats = seatsTier;
         _sendEmailResponse.call(this, email, data, protocol, host, nonUsersTemplate);
+    }.bind(this));
+    // make new email for invited users
+    // just has messaging from educator-user-invited template for now
+    var invitedUserTemplate = "educator-invited-optional";
+    invitedUsers.forEach(function(user){
+        email = user["EMAIL"];
+        data = {};
+        data.subject = "You’ve Been Invited!";
+        data.ownerName = ownerName;
+        data.ownerFirstName = ownerFirstName;
+        data.ownerLastName = ownerLastName;
+        data.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
+        data.teacherFirstName = user["FIRST_NAME"];
+        data.teacherLastName = user["LAST_NAME"];
+        data.plan = plan;
+        data.seats = seatsTier;
+
+        _sendEmailResponse.call(this, email, data, protocol, host, usersTemplate);
     }.bind(this));
 }
 
