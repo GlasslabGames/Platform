@@ -815,6 +815,7 @@ function validatePromoCode(req, res) {
         return;
     }
 
+    var acceptInvalid = req.query.acceptInvalid || false;
     // Verify a promo code was passed in
     var code;
     if( req.params &&
@@ -833,11 +834,12 @@ function validatePromoCode(req, res) {
             // sanitize the coupon and ensure it's valid
             // then only return the amount off and percent off
             var promoCodeInfo = {};
-            if( coupon.valid === true ) {
+            if( coupon.valid === true || acceptInvalid ) {
                 promoCodeInfo.id = coupon.id;
                 promoCodeInfo.percent_off = coupon.percent_off;
                 promoCodeInfo.amount_off = coupon.amount_off;
                 promoCodeInfo.duration = coupon.duration;
+                promoCodeInfo.valid = coupon.valid;
             }
             else {
                 this.requestUtil.errorResponse(res, {key: "lic.promoCode.noMoreRedemptions"});
