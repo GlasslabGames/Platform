@@ -1974,6 +1974,8 @@ function setLicenseMapStatusToNull(req, res){
     var licenseId;
     if(req.user.purchaseOrderLicenseStatus){
         licenseId = req.user.purchaseOrderLicenseId;
+    } else if(req.user.inviteLicense){
+        licenseId = req.user.inviteLicense.licenseId;
     } else{
         licenseId = req.user.licenseId;
     }
@@ -3170,14 +3172,14 @@ function trialMoveToTeacher(req, res){
   //      grab license map for that teacher and that license —update license map entry
   //      update educator seats remaining
     if(!(req.user.id && req.user.licenseId && req.user.licenseOwnerId &&
-        req.user.licenseOwnerId === req.user.id && req.body.licenseId)){
+        req.user.licenseOwnerId === req.user.id && req.user.inviteLicense)){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"} );
         return;
     }
     var userId =req.user.id;
     var email = req.user.email;
     var licenseId =req.user.licenseId;
-    var newLicenseId = req.body.licenseId;
+    var newLicenseId = req.user.inviteLicense.licenseId;
     var license;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
