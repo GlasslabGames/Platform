@@ -3957,9 +3957,9 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                     state = "access absent";
                 } else if (results.length > 1 &&
                     !(results.length === 2 && (results[1].status === "po-pending" || results[1].status === "po-rejected" ||
-                    (results[0] === "invite-pending" || results[1] === "invite-pending")))) {
+                    (results[0].status === "invite-pending" || results[1].status === "invite-pending")))) {
                     state = "invalid records";
-                } else if (results[0]['license_id'] !== licenseId && results[0].status !== "po-received") {
+                } else if ((results[0]['license_id'] !== licenseId && results[1]['license_id'] !== licenseId) && results[0].status !== "po-received") {
                     state = "inconsistent";
                 } else if(results[0]['license_id'] !== licenseId && results[0].status === "po-received"){
                     state = results[0]['license_id'];
