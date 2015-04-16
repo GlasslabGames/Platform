@@ -833,10 +833,11 @@ function validatePromoCode(req, res) {
             // sanitize the coupon and ensure it's valid
             // then only return the amount off and percent off
             var promoCodeInfo = {};
-            if( coupon.valid == true ) {
+            if( coupon.valid === true ) {
                 promoCodeInfo.id = coupon.id;
                 promoCodeInfo.percent_off = coupon.percent_off;
                 promoCodeInfo.amount_off = coupon.amount_off;
+                promoCodeInfo.duration = coupon.duration;
             }
             else {
                 this.requestUtil.errorResponse(res, {key: "lic.promoCode.noMoreRedemptions"});
