@@ -1622,7 +1622,7 @@ function _deleteStudentAccount(studentId){
             .then(function(results){
                 courses = results;
                 var promiseList = [];
-                courses.forEach(function(course){
+                _(courses).forEach(function(course){
                     promiseList.push(licService.myds.getLicenseFromPremiumCourse(course.id));
                 });
                 return when.all(promiseList);
@@ -1675,7 +1675,7 @@ function _deleteStudentAccount(studentId){
             .then(null, function(err){
                 console.error("Delete Student Account Error");
                 reject(err);
-            }.bind(this))
+            }.bind(this));
     }.bind(this));
 }
 
