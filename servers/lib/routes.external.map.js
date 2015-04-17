@@ -748,6 +748,15 @@ module.exports = {
                 post: "inspectLicenses"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/license/trial/move",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "trialMoveToTeacher"
+            }
+        },
         // old api methods, not in use
         {
             requireAuth: true,

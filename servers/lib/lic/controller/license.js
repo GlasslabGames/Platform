@@ -3179,10 +3179,9 @@ function trialMoveToTeacher(req, res){
     }
     var userId =req.user.id;
     var email = req.user.email;
-    var licenseId =req.user.licenseId;
+    var licenseId = req.user.licenseId;
     var inviteLicense = req.user.inviteLicense;
     var inviteLicenseId = inviteLicense.licenseId;
-    var license;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
             if(typeof status === "string"){
@@ -3190,28 +3189,14 @@ function trialMoveToTeacher(req, res){
             }
             return _endLicense.call(this, userId, licenseId, false);
         }.bind(this))
-        .then(function(){
+        .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
-            return this.myds.getLicenseById(inviteLicenseId);
-        }.bind(this))
-        .then(function(results){
-            license = results;
-            //var licenseOwnerId = license.user_id;
-            //var promiseList = [];
-            //promiseList.push(this.myds.getUserById(userId));
             var updateFields = [];
-            var status = "status = 'active'";
-            updateFields.push(status);
+            var statusString = "status = 'active'";
+            updateFields.push(statusString);
             return this.myds.updateLicenseMapByLicenseInstructor(inviteLicenseId,[userId], updateFields);
-            //return when.all(promiseList);
-        }.bind(this))
-        .then(function(){
-            var seatType = license.package_type;
-            lConst = lConst || this.serviceManager.get("lic").lib.Const;
-            var seats = lConst.plan[seatType].educatorSeats;
-            return this.updateEducatorSeatsRemaining(licenseId, seats);
         }.bind(this))
         .then(function(status){
             if(typeof status === "string"){
@@ -3222,6 +3207,7 @@ function trialMoveToTeacher(req, res){
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, { key: "lic.general"});
+            console.error("Trial Move To Teacher Error -",err);
         }.bind(this));
 }
 
