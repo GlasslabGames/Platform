@@ -35,6 +35,7 @@ module.exports = {
     migrateToTrialLegacy: migrateToTrialLegacy,
     cancelLicense: cancelLicense,
     cancelLicenseInternal: cancelLicenseInternal,
+    subscribeToLicenseInternal: subscribeToLicenseInternal,
     inspectLicenses: inspectLicenses,
     trialMoveToTeacher: trialMoveToTeacher,
     // vestigial apis
@@ -1449,113 +1450,6 @@ function subscribeToLicensePurchaseOrder(req, res){
         }.bind(this));
 }
 
-function subscribeToLicensePurchaseOrderInternal(req, res){
-    if(!(req.user && req.user.role === "admin")){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
-        return;
-    }
-    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo && req.body.schoolInfo && req.body.user)){
-        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
-        return;
-    }
-    var userId = req.body.user.id;
-    var ownerEmail = req.body.user.email;
-    var purchaseOrderInfo = req.body.purchaseOrderInfo;
-    if( purchaseOrderInfo.firstName === null ||
-        purchaseOrderInfo.lastName === null ||
-        purchaseOrderInfo.phone === null ||
-        purchaseOrderInfo.email === null){
-        this.requestUtil.errorResponse(res, { key: "lic.form.invalid"});
-        return;
-    }
-    var planInfo = req.body.planInfo;
-    var schoolInfo = req.body.schoolInfo;
-    var action;
-    this.myds.getLicenseMapByUser(userId)
-        .then(function(maps){
-            var licenseMaps = [];
-            var licenseCount = 0;
-            var rejectStatus;
-            var licenseId;
-            maps.forEach(function(map){
-                if(map.status !== null){
-                    licenseCount++;
-                    licenseId = map.license_id;
-                    if(map.status === "active" || map.status === "invite-pending" ||
-                        map.status === "po-rejected" || map.status === "pending"){
-                        licenseMaps.push(map);
-                    } else{
-                        rejectStatus = map.status
-                    }
-                }
-            }.bind(this));
-            if(licenseCount > 2){
-                return "too many licenses";
-            }
-            // po-pending, po-received, po-invoiced
-            if(rejectStatus === "po-pending"){
-                return "po-pending";
-            } else if(rejectStatus){
-                return "already on license";
-            }
-            var promiseList = [{},{}];
-            licenseMaps.forEach(function(map){
-                if(map.status === "active"){
-                    promiseList[0] = this.myds.getLicenseById(licenseId);
-                } else{
-                    var statusString = "status = NULL";
-                    var updateFields = [statusString];
-                    promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
-                }
-            }.bind(this));
-            return when.all(promiseList);
-        }.bind(this))
-        .then(function(license){
-            if(typeof license === "string"){
-                return license;
-            }
-            if(license.package_type === "trial"){
-                action = "trial upgrade";
-            } else{
-                action = "subscribe";
-            }
-            return _purchaseOrderSubscribe.call(this, userId, schoolInfo, planInfo, purchaseOrderInfo, action);
-        }.bind(this))
-        .then(function(status){
-            if(status === "po-pending"){
-                this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
-                return;
-            }
-            if(status === "already on license"){
-                this.requestUtil.errorResponse(res, { key: "lic.create.denied" });
-                return;
-            }
-            var emails = [];
-            if(this.options.env === "prod"){
-                emails.push("purchase_order@glasslabgames.org");
-            } else{
-                emails.push("ben@glasslabgames.org");
-                emails.push("michael.mulligan@glasslabgames.org");
-            }
-            var data = {};
-            _.merge(data, purchaseOrderInfo, planInfo);
-            if(action === "trial upgrade"){
-                data.subject = "Upgrade Trial Purchase Order";
-            } else{
-                data.subject = "Subscribe Purchase Order";
-            }
-            var template = "accounting-order";
-            _(emails).forEach(function(email){
-                _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
-            }.bind(this));
-            this.requestUtil.jsonResponse(res, { status: "ok"});
-        }.bind(this))
-        .then(null, function(err){
-            console.error("Subscribe to License Purchase Order Internal Error -",err);
-            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
-        }.bind(this));
-}
-
 // if user is not on stripe, set up a customer account on stripe.
 // if already on stripe, do nothing
 function _createStripeCustomer(userId, params){
@@ -1625,6 +1519,8 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                 data.expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
                 data.subscriptionId = null;
                 data.purchaseOrder = true;
+                // if purchase order number present, then user's purchase order status skips straight to received
+                data.received = purchaseOrderInfo.number ? true : false;
                 return _createLicenseSQL.call(this, userId, schoolInfo, planInfo, data);
             }.bind(this))
             .then(function(id){
@@ -1633,6 +1529,7 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                 }
                 licenseId = id;
                 //create entry in purchaseOrder table
+                // if purchase order number present, then user's purchase order status skips straight to received
                 var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, action);
                 //need to formalize table schema
                 return this.myds.insertToPurchaseOrderTable(values);
@@ -1668,9 +1565,16 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     var values = [];
     values.push(userId);
     values.push(licenseId);
-    var status = "'pending'";
+    var status;
+    var purchaseOrderNumber;
+    if(purchaseOrderInfo.number){
+        status = "'received'";
+        purchaseOrderNumber = "'" + purchaseOrderInfo.number + "'";
+    } else{
+        status = "'pending'";
+        purchaseOrderNumber = "NULL";
+    }
     values.push(status);
-    var purchaseOrderNumber = "NULL";
     values.push(purchaseOrderNumber);
     // license id added to guarantee uniqueness.  table also requires a unique value
     var purchaseOrderKey = Util.CreateUUID() + licenseId;
@@ -2915,6 +2819,129 @@ function cancelLicenseInternal(req, res){
         }.bind(this));
 }
 
+// method to be used to create a license for a user without that user needing to be logged in
+// used primarily for resellers, but we could use it for whatever reason we want to grant a premium license
+// at end of method, that used will have full access to premium license with a po-received map status
+function subscribeToLicenseInternal(req, res){
+    if(!(req.user && req.user.role === "admin")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo && req.body.schoolInfo && req.body.user)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.body.user.id;
+    var ownerEmail = req.body.user.email;
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    if( purchaseOrderInfo.firstName === null ||
+        purchaseOrderInfo.lastName === null ||
+        purchaseOrderInfo.phone === null ||
+        purchaseOrderInfo.email === null ||
+        purchaseOrderInfo.number === null){
+        this.requestUtil.errorResponse(res, { key: "lic.form.invalid"});
+        return;
+    }
+    var planInfo = req.body.planInfo;
+    var schoolInfo = req.body.schoolInfo;
+    var action;
+    this.myds.getLicenseMapByUser(userId)
+        .then(function(maps){
+            var licenseMaps = [];
+            var licenseCount = 0;
+            var rejectStatus;
+            var licenseId;
+            maps.forEach(function(map){
+                if(map.status !== null){
+                    licenseCount++;
+                    licenseId = map.license_id;
+                    if(map.status === "active" || map.status === "invite-pending" ||
+                        map.status === "po-rejected" || map.status === "pending"){
+                        licenseMaps.push(map);
+                    } else{
+                        rejectStatus = map.status
+                    }
+                }
+            }.bind(this));
+            if(licenseCount > 2){
+                return "too many licenses";
+            }
+            // po-pending, po-received, po-invoiced
+            if(rejectStatus === "po-pending"){
+                return "po-pending";
+            } else if(rejectStatus){
+                return "already on license";
+            }
+            var promiseList = [{},{}];
+            licenseMaps.forEach(function(map){
+                if(map.status === "active"){
+                    promiseList[0] = this.myds.getLicenseById(licenseId);
+                } else{
+                    var statusString = "status = NULL";
+                    var updateFields = [statusString];
+                    promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
+                }
+            }.bind(this));
+            return when.all(promiseList);
+        }.bind(this))
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
+            }
+            var license = results[0][0] || results[1][0];
+            if(!license){
+                action = "subscribe";
+            } else if(license.package_type === "trial"){
+                action = "trial upgrade";
+                return _endLicense.call(this, userId, license.id, false);
+            } else{
+                return "already on license";
+            }
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return _purchaseOrderSubscribe.call(this, userId, schoolInfo, planInfo, purchaseOrderInfo, action);
+        }.bind(this))
+        .then(function(status){
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
+                return;
+            }
+            if(status === "already on license"){
+                this.requestUtil.errorResponse(res, { key: "lic.create.denied" });
+                return;
+            }
+            var emails = [];
+            if(this.options.env === "prod"){
+                emails.push("purchase_order@glasslabgames.org");
+                emails.push("meghan@glasslabgames.org");
+                emails.push(purchaseOrderInfo.email);
+            } else{
+                emails.push("ben@glasslabgames.org");
+                emails.push("michael.mulligan@glasslabgames.org");
+                emails.push(purchaseOrderInfo.email);
+            }
+            var data = {};
+            _.merge(data, purchaseOrderInfo, planInfo);
+            if(action === "trial upgrade"){
+                data.subject = "Reseller Upgrade Trial";
+            } else{
+                data.subject = "Reseller Subscribe";
+            }
+            var template = "accounting-reseller";
+            _(emails).forEach(function(email){
+                _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            }.bind(this));
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Subscribe to License Purchase Order Internal Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+        }.bind(this));
+}
+
 function inspectLicenses(req, res){
     if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
@@ -3491,14 +3518,15 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                 } else{
                     subscriptionId = "'" + data.subscriptionId + "'";
                 }
-                var active;
+                var active = 1;
                 var autoRenew = 0;
                 var paymentType;
                 if(data.purchaseOrder){
-                    active = 0;
                     paymentType = "'purchase-order'";
+                    if(!data.received){
+                        active = 0;
+                    }
                 } else{
-                    active = 1;
                     paymentType = "'credit-card'";
                 }
                 var dateCreated = "NOW()";
@@ -3528,7 +3556,11 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                 values.push(userId);
                 values.push(licenseId);
                 if(data.purchaseOrder){
-                    values.push("'po-pending'");
+                    if(data.received){
+                        values.push("'po-received'");
+                    } else{
+                        values.push("'po-pending'");
+                    }
                 } else{
                     values.push("'active'");
                 }

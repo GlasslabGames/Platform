@@ -743,6 +743,16 @@ module.exports = {
         {
             requireAuth: true,
             requireHttps: true,
+            api: "/api/v2/license/subscribe/internal",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "subscribeToLicenseInternal"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/inspect",
             service: "lic",
             controller: "license",
