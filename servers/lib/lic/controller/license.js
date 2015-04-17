@@ -1993,15 +1993,34 @@ function setLicenseMapStatusToNull(req, res){
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
         .then(function(status){
+            if(typeof status === "string" && status !== "inconsistent"){
+                return status;
+            }
+            return this.myds.getLicenseById(licenseId);
+        }.bind(this))
+        .then(function(license){
+            if(typeof license === "string"){
+                return license;
+            }
+            license = license[0];
+            lConst = lConst || this.serviceManager.get("lic").lib.Const;
+            var packageSize = license["package_size_tier"];
+            var educatorSeats = lConst.seats[packageSize].educatorSeats;
+            return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
+        }.bind(this))
+        .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
-            if(!req.user.purchaseOrderLicenseId || req.user.purchaseOrderLicenseId === req.user.licenseId){
+            else if(!(req.user.purchaseOrderLicenseId || req.user.inviteLicense) ||
+                req.user.purchaseOrderLicenseId === req.user.licenseId ||
+                req.user.inviteLicense.licenseId === req.user.licenseId){
                 delete req.user.licenseStatus;
                 delete req.user.licenseId;
                 delete req.user.licenseOwnerId;
                 delete req.user.paymentType;
             }
+            delete req.user.inviteLicense;
             delete req.user.purchaseOrderLicenseId;
             delete req.user.purchaseOrderLicenseStatus;
             return Util.updateSession(req);
@@ -3198,6 +3217,17 @@ function trialMoveToTeacher(req, res){
             updateFields.push(statusString);
             return this.myds.updateLicenseMapByLicenseInstructor(inviteLicenseId,[userId], updateFields);
         }.bind(this))
+        .then(function(){
+            if(typeof status === "string"){
+                return status;
+            }
+            delete req.user.inviteLicense;
+            req.user.licenseId = inviteLicenseId;
+            req.user.licenseStatus = 'active';
+            req.user.paymentType = inviteLicense.paymentType;
+            req.user.licenseOwnerId = inviteLicense.owner.id;
+            return Util.updateSession(req);
+        })
         .then(function(status){
             if(typeof status === "string"){
                 _errorLicensingAccess.call(this, res, status);

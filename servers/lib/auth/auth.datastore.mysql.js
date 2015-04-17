@@ -365,6 +365,7 @@ function _addLicenseInfoToUser(user, results){
             inviteLicense.licenseId = futureLicense.id;
             inviteLicense.packageType = futureLicense.package_type;
             inviteLicense.dateInvited = futureLicense.date_created;
+            inviteLicense.paymentType = futureLicense.payment_type;
             inviteLicense.owner = {};
             inviteLicense.owner.id = futureLicense.user_id;
         }
@@ -378,6 +379,7 @@ function _addLicenseInfoToUser(user, results){
                 inviteLicense.licenseId = futureLicense.id;
                 inviteLicense.packageType = futureLicense.package_type;
                 inviteLicense.dateInvited = futureLicense.date_created;
+                inviteLicense.paymentType = futureLicense.payment_type;
                 inviteLicense.owner = {};
                 inviteLicense.owner.id = futureLicense.user_id;
             }
