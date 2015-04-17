@@ -1502,7 +1502,10 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                 }
                 var params = {
                     metadata: {
-                        purchaseOrder: true
+                        purchaseOrder: true,
+                        plan: planInfo.type,
+                        seats: planInfo.seats,
+                        userId: userId
                     },
                     email: purchaseOrderInfo.email
                 };
@@ -2831,21 +2834,27 @@ function subscribeToLicenseInternal(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    var userId = req.body.user.id;
-    var ownerEmail = req.body.user.email;
+    var userEmail = req.body.user.email;
+    var user;
     var purchaseOrderInfo = req.body.purchaseOrderInfo;
     if( purchaseOrderInfo.firstName === null ||
         purchaseOrderInfo.lastName === null ||
         purchaseOrderInfo.phone === null ||
         purchaseOrderInfo.email === null ||
-        purchaseOrderInfo.number === null){
+        purchaseOrderInfo.payment === null){
         this.requestUtil.errorResponse(res, { key: "lic.form.invalid"});
         return;
     }
+    purchaseOrderInfo.number = Util.CreateUUID();
     var planInfo = req.body.planInfo;
     var schoolInfo = req.body.schoolInfo;
     var action;
-    this.myds.getLicenseMapByUser(userId)
+
+    this.myds.getUserByEmail(userEmail)
+        .then(function(results){
+            user = results;
+            return this.myds.getLicenseMapByUser(user.id)
+        }.bind(this))
         .then(function(maps){
             var licenseMaps = [];
             var licenseCount = 0;
@@ -2879,7 +2888,7 @@ function subscribeToLicenseInternal(req, res){
                 } else{
                     var statusString = "status = NULL";
                     var updateFields = [statusString];
-                    promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
+                    promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [user.id], updateFields);
                 }
             }.bind(this));
             return when.all(promiseList);
@@ -2916,12 +2925,9 @@ function subscribeToLicenseInternal(req, res){
             var emails = [];
             if(this.options.env === "prod"){
                 emails.push("purchase_order@glasslabgames.org");
-                emails.push("meghan@glasslabgames.org");
-                emails.push(purchaseOrderInfo.email);
             } else{
                 emails.push("ben@glasslabgames.org");
                 emails.push("michael.mulligan@glasslabgames.org");
-                emails.push(purchaseOrderInfo.email);
             }
             var data = {};
             _.merge(data, purchaseOrderInfo, planInfo);
@@ -2930,15 +2936,31 @@ function subscribeToLicenseInternal(req, res){
             } else{
                 data.subject = "Reseller Subscribe";
             }
-            var template = "accounting-reseller";
+            var template = "accounting-subscribe-internal";
             _(emails).forEach(function(email){
                 _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             }.bind(this));
+
+            var resellerEmail = purchaseOrderInfo.email;
+            data = {};
+            data.subject =  "Successful Subscription!";
+            data.firstName = purchaseOrderInfo.firstName;
+            data.lastName = purchaseOrderInfo.lastName;
+            template = "reseller-subscribe-internal";
+            _sendEmailResponse.call(this, resellerEmail, data, req.protocol, req.headers.host, template);
+
+            data = {};
+            data.subject = "Successful Subscription!";
+            data.firstName = user.FIRST_NAME;
+            data.lastName = user.LAST_NAME;
+            template = "owner-subscribe-internal";
+            _sendEmailResponse.call(this, resellerEmail, data, req.protocol, req.headers.host, template);
+
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Subscribe to License Purchase Order Internal Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+            console.error("Subscribe to License Purchase Order Internal Error -",err);
         }.bind(this));
 }
 

@@ -543,6 +543,21 @@ Lic_MySQL.prototype.getUserById = function(userId){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getUserByEmail = function(email){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_USER WHERE EMAIL = '" + email + "';";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]);
+            })
+            .then(null, function(err){
+                console.error("Get User By Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+
 Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, userIds, updateFields){
   return when.promise(function(resolve, reject){
       var updateFieldsString = updateFields.join(", ");
