@@ -1586,7 +1586,7 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     values.push(purchaseOrderKey);
     var phone = "'" + purchaseOrderInfo.phone + "'";
     values.push(phone);
-    var email = "'" + purchaseOrderInfo.email + "'";
+    var email = "'" + purchaseOrderInfo.email.toLowerCase() + "'";
     values.push(email);
     var name;
     if(purchaseOrderInfo.lastName){

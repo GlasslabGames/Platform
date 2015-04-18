@@ -465,6 +465,7 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
 };
 
 function _insertTempUserValueWithEmail(email){
+    email = email.toLowerCase();
     var value = "('" + email + "','" + email + "',0,NOW(),1,'temp','temp',NOW()," +
     "'pass','instructor',0,'glasslabv2','invited')";
     return value;
