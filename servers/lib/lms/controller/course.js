@@ -739,6 +739,7 @@ function _updateCourseInfo(courseData, oldCourseData, userData){
                         return "no game to enable";
                     })
                     .then(null, function(err){
+                        console.error("Enable Course Error -",err);
                         return reject(err);
                     });
             } else{
@@ -823,8 +824,7 @@ exampleIn.updateGamesInCourse = [
     { "id": "AA-1", "assigned": true, "settings": {} },
     { "id": "PRIMA", "assigned": false, "settings": {} }
 ];
-function updateGamesInCourse(req, res, next, serviceManager)
-{
+function updateGamesInCourse(req, res, next, serviceManager){
     if( req.body &&
         _.isArray(req.body) ) {
         var userData = req.session.passport.user;

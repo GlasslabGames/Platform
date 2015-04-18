@@ -158,7 +158,7 @@ return when.promise(function(resolve, reject) {
             c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
         WHERE m.user_id="+ this.ds.escape(userId)+
-        " ORDER BY c.date_created";
+        " ORDER BY c.date_created;";
 
     this.ds.query(Q)
         .then(function(results) {

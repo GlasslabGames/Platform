@@ -159,10 +159,10 @@ function getAvailableGamesObj(req, res){
     promise
         .then(function(results){
             var availableGames = {};
-            var  licConst = require("../../lic/lic.const.js");
+            var lConst = this.serviceManager.get("lic").lib.Const;
             if(licenseId){
                 var license = results[0];
-                var plan = licConst.plan[license["package_type"]];
+                var plan = lConst.plan[license["package_type"]];
                 var browserGames = plan.browserGames;
                 browserGames.forEach(function(gameId){
                     availableGames[gameId] = true;
@@ -216,7 +216,7 @@ function _getPlanGamesBasicInfo(type){
             promise = this.getListOfAllFreeGameIds();
         }
         else{
-            var lConst = require('../../lic/lic.const.js');
+            var lConst = this.serviceManager.get("lic").lib.Const;
             var plan = lConst.plan[type];
             var browserGames = plan.browserGames;
             var iPadGames = plan.iPadGames;
