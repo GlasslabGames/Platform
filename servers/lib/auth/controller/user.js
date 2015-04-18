@@ -1252,28 +1252,27 @@ function resetPasswordSend(req, res, next) {
             .then(null, function(err) {
                 if( err.error &&
                     err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.user.emailNotExist"}, 400);
-                    //var userData = {};
-                    //userData.email = req.body.email;
-                    //var emailData = {
-                    //    subject: "Your GlassLabGames.org Password",
-                    //    to:   userData.email,
-                    //    user: userData,
-                    //    host: req.protocol+"://"+req.headers.host
-                    //};
-                    //var email = new Util.Email(
-                    //    this.options.auth.email,
-                    //    path.join(__dirname, "../email-templates"),
-                    //    this.stats);
-                    //email.send('password-reset-nonuser', emailData)
-                    //    .then(function(){
-                    //        // all ok
-                    //        this.requestUtil.jsonResponse(res, {});
-                    //    }.bind(this))
-                    //    // error
-                    //    .then(null, function(err){
-                    //        this.requestUtil.errorResponse(res, err, 500);
-                    //    }.bind(this));
+                    var userData = {};
+                    userData.email = req.body.email;
+                    var emailData = {
+                        subject: "Your GlassLabGames.org Password",
+                        to:   userData.email,
+                        user: userData,
+                        host: req.protocol+"://"+req.headers.host
+                    };
+                    var email = new Util.Email(
+                        this.options.auth.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    email.send('password-reset-nonuser', emailData)
+                        .then(function(){
+                            // all ok
+                            this.requestUtil.jsonResponse(res, {});
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            this.requestUtil.errorResponse(res, err, 500);
+                        }.bind(this));
                 } else {
                     console.error("AuthService: resetPasswordSend Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
@@ -1582,16 +1581,22 @@ function deleteUser(req, res){
     this.authStore.findUser("id", deleteUserId)
         .then(function(deleteUser){
             if(deleteUser.role === "student"){
-                promise = _deleteStudentAccount.call(this, deleteUserId);
-            } else if (user.role === "instructor"){
+                //largely ready and approved, but still good to have one last review before it is live
+                //promise = _deleteStudentAccount.call(this, deleteUserId);
+            } else if (deleteUser.role === "instructor"){
+                //delete instructor method workable, but still needs design attention
+                // for example, are we deleting all the info we need to be
+                // how are we going to store the hashed emails, should we keep hashed passwords, etc
+                // email response also needed
                 //promise = _deleteInstructorAccount.call(this, deleteUserId);
             }
             return promise;
         }.bind(this))
         .then(function(status){
-            if(typeof status === "object"){
+            if(status && typeof status === "object"){
                 req.body.licenseId = status.licenseId;
-                this.serviceManager.internalRoute("/api/v2/license/end/internal", [req, res]);
+                req.body.userDelete = status.userDelete;
+                this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: "ok"});
@@ -1610,14 +1615,14 @@ function _deleteStudentAccount(studentId){
     return when.promise(function(resolve, reject){
         var lmsService = this.serviceManager.get("lms").service;
         var licService = this.serviceManager.get("lic").service;
-        var lConst = require("../../lic/lic.const.js");
+        var lConst = this.serviceManager.get("lic").lib.Const;
         var courses;
         var licenses;
         lmsService.myds.getCoursesByStudentId(studentId)
             .then(function(results){
                 courses = results;
                 var promiseList = [];
-                courses.forEach(function(course){
+                _(courses).forEach(function(course){
                     promiseList.push(licService.myds.getLicenseFromPremiumCourse(course.id));
                 });
                 return when.all(promiseList);
@@ -1670,7 +1675,7 @@ function _deleteStudentAccount(studentId){
             .then(null, function(err){
                 console.error("Delete Student Account Error");
                 reject(err);
-            }.bind(this))
+            }.bind(this));
     }.bind(this));
 }
 
@@ -1681,22 +1686,28 @@ function _deleteInstructorAccount(userId){
     //get license
     // if license active, throw error and encourage
     //archive all courses (also disabling premium games in that process
-    //set license map status to null, if in license
-    //
+    //set license map status to null, if in license and if not license owner
+    //set subscription id of all licenses instructor was owner of in the past to null
+    // in deleteUser method, call internal route for the internal cancel license method
 
     return when.promise(function(resolve, reject){
         var courses;
-        var licenseMap;
         var license;
+        var userEmail;
         var lmsService = this.serviceManager.get("lms").service;
         var licService = this.serviceManager.get("lic").service;
         var promiseList = [];
         promiseList.push(lmsService.myds.getEnrolledCourses(userId));
-        promiseList.push(licService.getLicenseMapByInstructors(userId));
+        promiseList.push(this.authStore.getUserEmail(userId));
+        promiseList.push(licService.myds.getLicenseMapByInstructors([userId]));
         when.all(promiseList)
             .then(function(results){
                 courses = results[0];
-                licenseMap = results[1] || null;
+                var licenseMap = null;
+                user = results[1];
+                if(results[2]){
+                    licenseMap = results[2][0];
+                }
                 if(licenseMap){
                     var licenseId = licenseMap.license_id;
                     return licService.myds.getLicenseById(licenseId);
@@ -1716,14 +1727,11 @@ function _deleteInstructorAccount(userId){
                 var promiseList = [];
                 // archive and disable courses before teacher is removed
                 _(courses).forEach(function(course){
-                    var req = {};
-                    var courseData = {};
+                    var courseData = _.cloneDeep(course);
                     // needed to archive course if not archived
                     courseData.archived = true;
                     // needed to disable course if not disabled
                     courseData.premiumGamesAssigned = false;
-                    var params = req.params = {};
-                    params.courseId = course.id;
                     var userData = {};
                     userData.id = userId;
                     if(course.premiumGamesAssigned){
@@ -1740,18 +1748,20 @@ function _deleteInstructorAccount(userId){
             }.bind(this))
             .then(function(status){
                 if(license && license.active === 1){
-                    if(license.user_id === userId){
+                    var licenseId = license.id;
+                    var promiseList = [];
+                    var licenseUpdateFields = [];
+                    var subscriptionId = "subscription_id = NULL";
+                    licenseUpdateFields.push(subscriptionId);
+                    // finds all licenses an instructor was an owner of in the past, and removes the subscription id
+                    promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
+                    if(license.user_id !== userId){
                         var updateFields = [];
                         var status = "status = NULL";
                         updateFields.push(status);
-                        var licenseId = license.id;
-                        return licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
-                    } else{
-                        var licenseUpdateFields = [];
-                        var subscriptionId = "subscription_id = NULL";
-                        licenseUpdateFields.push(subscriptionId);
-                        return licService.myds.updateLicenseById(licenseId, licenseUpdateFields);
+                        promiseList.push(licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields));
                     }
+                    return when.all(promiseList);
                 }
             })
             .then(function(status){
@@ -1762,6 +1772,8 @@ function _deleteInstructorAccount(userId){
                     var body = {};
                     body.userId = userId;
                     body.licenseId = license.id;
+                    body.userEmail = userEmail;
+                    body.userDelete = true;
                     resolve(body);
                 }
                 resolve();

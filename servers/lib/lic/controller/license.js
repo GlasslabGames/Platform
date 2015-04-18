@@ -3,7 +3,7 @@ var _      = require('lodash');
 var when   = require('when');
 var moment = require('moment');
 var Util   = require('../../core/util.js');
-var lConst = require('../lic.const.js');
+var lConst;
 
 module.exports = {
     getSubscriptionPackages: getSubscriptionPackages,
@@ -36,6 +36,7 @@ module.exports = {
     cancelLicense: cancelLicense,
     cancelLicenseInternal: cancelLicenseInternal,
     inspectLicenses: inspectLicenses,
+    trialMoveToTeacher: trialMoveToTeacher,
     // vestigial apis
     verifyLicense:   verifyLicense,
     registerLicense: registerLicense,
@@ -45,6 +46,7 @@ module.exports = {
 // provides license package information for the subscription/packages page
 function getSubscriptionPackages(req, res){
     try{
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var plans = [];
         var plan;
         _(lConst.plan).forEach(function(value, key){
@@ -77,6 +79,7 @@ function getCurrentPlan(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
@@ -566,7 +569,7 @@ function upgradeLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var planInfo = req.body.planInfo;
@@ -720,6 +723,7 @@ function upgradeTrialLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var stripeInfo = req.body.stripeInfo;
@@ -811,6 +815,7 @@ function validatePromoCode(req, res) {
         return;
     }
 
+    var acceptInvalid = req.query.acceptInvalid || false;
     // Verify a promo code was passed in
     var code;
     if( req.params &&
@@ -829,10 +834,12 @@ function validatePromoCode(req, res) {
             // sanitize the coupon and ensure it's valid
             // then only return the amount off and percent off
             var promoCodeInfo = {};
-            if( coupon.valid == true ) {
+            if( coupon.valid === true || acceptInvalid ) {
                 promoCodeInfo.id = coupon.id;
                 promoCodeInfo.percent_off = coupon.percent_off;
                 promoCodeInfo.amount_off = coupon.amount_off;
+                promoCodeInfo.duration = coupon.duration;
+                promoCodeInfo.valid = coupon.valid;
             }
             else {
                 this.requestUtil.errorResponse(res, {key: "lic.promoCode.noMoreRedemptions"});
@@ -889,6 +896,7 @@ function cancelLicenseAutoRenew(req, res){
 // if enabled, a user will be charged the new subscription price for the next year on the day their prior year ends
 // autorenew is only relevant to stripe/credit cards
 function enableLicenseAutoRenew(req, res){
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
@@ -959,6 +967,7 @@ function addTeachersToLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
@@ -972,6 +981,8 @@ function addTeachersToLicense(req, res){
     var existingTeachers;
     var licenseSeats;
     var approvedTeachers;
+    var invitedTeachers;
+    var invitedTeacherCheck;
     var users;
     var rejectedTeachers = {};
     var plan;
@@ -1010,7 +1021,7 @@ function addTeachersToLicense(req, res){
                 newInstructors[email] = true;
             });
             existingTeachers = [];
-            teachers.forEach(function(teacher){
+            _(teachers).forEach(function(teacher){
                 if(teacher["SYSTEM_ROLE"] !== 'instructor' && teacher["SYSTEM_ROLE"] !== "manager"){
                     delete newInstructors[teacher["EMAIL"]];
                     rejectedTeachers[teacher.id] = "user role not instructor";
@@ -1051,31 +1062,59 @@ function addTeachersToLicense(req, res){
                 hasLicenseObject[id] = false;
             }
             approvedTeachers = [];
+            invitedTeacherCheck = [];
+            var promiseList = [];
+            var otherLicenseId;
+            var invitedUserId;
             _(hasLicenseObject).forEach(function(value, key){
                 if(value === false){
                     approvedTeachers.push(key);
+                } else if(typeof value === "number"){
+                    otherLicenseId = value;
+                    invitedUserId = parseInt(key);
+                    invitedTeacherCheck.push([invitedUserId, otherLicenseId]);
+                    promiseList.push(this.myds.getLicenseById(otherLicenseId));
                 } else{
                     rejectedTeachers[key] = "user already on another license";
                 }
+            }.bind(this));
+            return when.all(promiseList);
+        }.bind(this))
+        .then(function(otherLicenses){
+            var invitedUserId;
+            invitedTeachers = [];
+            _(otherLicenses).forEach(function(license, index){
+                license = license[0];
+                invitedUserId = invitedTeacherCheck[index][0];
+                if(license.user_id === invitedUserId){
+                    if(license.package_type === "trial"){
+                        invitedTeachers.push(invitedUserId);
+                    } else{
+                        rejectedTeachers[invitedUserId] = "user already on another license";
+                    }
+                } else{
+                    rejectedTeachers[invitedUserId] = "user already on another license";
+                }
             });
             var approvedExistingTeachers = [];
-            existingTeachers.forEach(function(id){
+            _(existingTeachers).forEach(function(id){
                 if(!rejectedTeachers[id]){
                     approvedExistingTeachers.push(id);
                 }
             });
             existingTeachers = approvedExistingTeachers;
             // once have all teachers I want to insert, do a multi insert in GL_LICENSE_MAP table
-            if(approvedTeachers.length > 0){
-                return this.myds.multiGetLicenseMap(licenseId, approvedTeachers);
+            if(approvedTeachers.length > 0 || invitedTeachers.length > 0){
+                return this.myds.multiGetLicenseMap(licenseId, approvedTeachers.concat(invitedTeachers));
             }
             return "reject all";
         }.bind(this))
-        .then(function(licenseMap){
-            if(typeof licenseMap === "string"){
-                return licenseMap;
+        .then(function(results){
+            if(typeof results === "string"){
+                return results;
             }
             var map = {};
+            var licenseMap = results;
             licenseMap.forEach(function(teacher){
                 map[teacher.user_id] = true;
             });
@@ -1088,12 +1127,28 @@ function addTeachersToLicense(req, res){
                     teachersToInsert.push(teacherId);
                 }
             });
-            var promiseList = [{},{}];
+            var teachersToInsertInvite = [];
+            var teachersToUpdateInvite = [];
+            invitedTeachers.forEach(function(teacherId){
+                if(map[teacherId]){
+                    teachersToUpdateInvite.push(teacherId);
+                } else{
+                    teachersToInsertInvite.push(teacherId);
+                }
+            });
+            var promiseList = [{},{},{},{}];
             if(teachersToInsert.length > 0){
                 promiseList[0] = this.myds.multiInsertLicenseMap(licenseId, teachersToInsert);
             }
             if(teachersToUpdate.length > 0){
                 promiseList[1] = this.myds.multiUpdateLicenseMapStatus(licenseId, teachersToUpdate, "pending");
+            }
+            if(teachersToInsertInvite.length > 0){
+                var shouldInvite = true;
+                promiseList[2] = this.myds.multiInsertLicenseMap(licenseId, teachersToInsertInvite, shouldInvite);
+            }
+            if(teachersToUpdateInvite.length > 0){
+                promiseList[3] = this.myds.multiUpdateLicenseMapStatus(licenseId, teachersToUpdateInvite, "invite-pending");
             }
             return when.all(promiseList);
         }.bind(this))
@@ -1103,7 +1158,7 @@ function addTeachersToLicense(req, res){
             }
             var promiseList = [];
             var rejectedIds = Object.keys(rejectedTeachers);
-            promiseList.push(_grabInstructorsByType.call(this, existingTeachers, rejectedIds, createTeachers));
+            promiseList.push(_grabInstructorsByType.call(this, existingTeachers, rejectedIds, createTeachers, invitedTeachers));
             promiseList.push(this.updateEducatorSeatsRemaining(licenseId, licenseSeats));
             return when.all(promiseList);
         }.bind(this))
@@ -1126,12 +1181,16 @@ function addTeachersToLicense(req, res){
             var approvedUsers = users[0];
             var approvedNonUsers = users[1];
             var rejectedEmails = users[2];
+            var invitedUsers = users[3];
 
             var approvedTeachersOutput = [];
             approvedUsers.forEach(function(user){
                 approvedTeachersOutput.push(user["EMAIL"]);
             });
             approvedNonUsers.forEach(function(user){
+                approvedTeachersOutput.push(user["EMAIL"]);
+            });
+            invitedUsers.forEach(function(user){
                 approvedTeachersOutput.push(user["EMAIL"]);
             });
             var rejectedTeachersOutput = [];
@@ -1145,7 +1204,7 @@ function addTeachersToLicense(req, res){
             var ownerName = req.user.firstName + " " + req.user.lastName;
             var ownerFirstName = req.user.firstName;
             var ownerLastName = req.user.lastName;
-            _addTeachersEmailResponse.call(this, ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, plan, seatsTier, req.protocol, req.headers.host);
+            _addTeachersEmailResponse.call(this, ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, invitedUsers, plan, seatsTier, req.protocol, req.headers.host);
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
@@ -1386,6 +1445,113 @@ function subscribeToLicensePurchaseOrder(req, res){
         }.bind(this))
         .then(null, function(err){
             console.error("Subscribe to License Purchase Order Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+        }.bind(this));
+}
+
+function subscribeToLicensePurchaseOrderInternal(req, res){
+    if(!(req.user && req.user.role === "admin")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo && req.body.schoolInfo && req.body.user)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    var userId = req.body.user.id;
+    var ownerEmail = req.body.user.email;
+    var purchaseOrderInfo = req.body.purchaseOrderInfo;
+    if( purchaseOrderInfo.firstName === null ||
+        purchaseOrderInfo.lastName === null ||
+        purchaseOrderInfo.phone === null ||
+        purchaseOrderInfo.email === null){
+        this.requestUtil.errorResponse(res, { key: "lic.form.invalid"});
+        return;
+    }
+    var planInfo = req.body.planInfo;
+    var schoolInfo = req.body.schoolInfo;
+    var action;
+    this.myds.getLicenseMapByUser(userId)
+        .then(function(maps){
+            var licenseMaps = [];
+            var licenseCount = 0;
+            var rejectStatus;
+            var licenseId;
+            maps.forEach(function(map){
+                if(map.status !== null){
+                    licenseCount++;
+                    licenseId = map.license_id;
+                    if(map.status === "active" || map.status === "invite-pending" ||
+                        map.status === "po-rejected" || map.status === "pending"){
+                        licenseMaps.push(map);
+                    } else{
+                        rejectStatus = map.status
+                    }
+                }
+            }.bind(this));
+            if(licenseCount > 2){
+                return "too many licenses";
+            }
+            // po-pending, po-received, po-invoiced
+            if(rejectStatus === "po-pending"){
+                return "po-pending";
+            } else if(rejectStatus){
+                return "already on license";
+            }
+            var promiseList = [{},{}];
+            licenseMaps.forEach(function(map){
+                if(map.status === "active"){
+                    promiseList[0] = this.myds.getLicenseById(licenseId);
+                } else{
+                    var statusString = "status = NULL";
+                    var updateFields = [statusString];
+                    promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
+                }
+            }.bind(this));
+            return when.all(promiseList);
+        }.bind(this))
+        .then(function(license){
+            if(typeof license === "string"){
+                return license;
+            }
+            if(license.package_type === "trial"){
+                action = "trial upgrade";
+            } else{
+                action = "subscribe";
+            }
+            return _purchaseOrderSubscribe.call(this, userId, schoolInfo, planInfo, purchaseOrderInfo, action);
+        }.bind(this))
+        .then(function(status){
+            if(status === "po-pending"){
+                this.requestUtil.errorResponse(res, { key: "lic.order.pending" });
+                return;
+            }
+            if(status === "already on license"){
+                this.requestUtil.errorResponse(res, { key: "lic.create.denied" });
+                return;
+            }
+            var emails = [];
+            if(this.options.env === "prod"){
+                emails.push("purchase_order@glasslabgames.org");
+            } else{
+                emails.push("ben@glasslabgames.org");
+                emails.push("michael.mulligan@glasslabgames.org");
+            }
+            var data = {};
+            _.merge(data, purchaseOrderInfo, planInfo);
+            if(action === "trial upgrade"){
+                data.subject = "Upgrade Trial Purchase Order";
+            } else{
+                data.subject = "Subscribe Purchase Order";
+            }
+            var template = "accounting-order";
+            _(emails).forEach(function(email){
+                _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
+            }.bind(this));
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Subscribe to License Purchase Order Internal Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1800,7 +1966,8 @@ function cancelActivePurchaseOrder(req, res){
 
 // called by front end modal. temp state used to inform users that their license access has been closed off
 function setLicenseMapStatusToNull(req, res){
-    if(!(req.user && req.user.licenseId && req.user.purchaseOrderLicenseStatus && req.user.purchaseOrderLicenseStatus === "po-rejected")){
+    if(!(req.user && req.user.licenseId && ((req.user.inviteLicense) ||
+        (req.user.purchaseOrderLicenseStatus && req.user.purchaseOrderLicenseStatus === "po-rejected")))){
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
@@ -1808,6 +1975,8 @@ function setLicenseMapStatusToNull(req, res){
     var licenseId;
     if(req.user.purchaseOrderLicenseStatus){
         licenseId = req.user.purchaseOrderLicenseId;
+    } else if(req.user.inviteLicense){
+        licenseId = req.user.inviteLicense.licenseId;
     } else{
         licenseId = req.user.licenseId;
     }
@@ -1824,15 +1993,34 @@ function setLicenseMapStatusToNull(req, res){
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
         .then(function(status){
+            if(typeof status === "string" && status !== "inconsistent"){
+                return status;
+            }
+            return this.myds.getLicenseById(licenseId);
+        }.bind(this))
+        .then(function(license){
+            if(typeof license === "string"){
+                return license;
+            }
+            license = license[0];
+            lConst = lConst || this.serviceManager.get("lic").lib.Const;
+            var packageSize = license["package_size_tier"];
+            var educatorSeats = lConst.seats[packageSize].educatorSeats;
+            return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
+        }.bind(this))
+        .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
-            if(!req.user.purchaseOrderLicenseId || req.user.purchaseOrderLicenseId === req.user.licenseId){
+            else if(!(req.user.purchaseOrderLicenseId || req.user.inviteLicense) ||
+                req.user.purchaseOrderLicenseId === req.user.licenseId ||
+                req.user.inviteLicense.licenseId === req.user.licenseId){
                 delete req.user.licenseStatus;
                 delete req.user.licenseId;
                 delete req.user.licenseOwnerId;
                 delete req.user.paymentType;
             }
+            delete req.user.inviteLicense;
             delete req.user.purchaseOrderLicenseId;
             delete req.user.purchaseOrderLicenseStatus;
             return Util.updateSession(req);
@@ -1855,6 +2043,7 @@ function setLicenseMapStatusToNull(req, res){
 // admin needs both the glasslab key for that purchase order as well as the purchase order number (if defined in our db) to reject
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -1961,6 +2150,7 @@ function rejectPurchaseOrder(req, res){
 // if a user was on a trial before being marked as received, that trial is terminated
 function receivePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -2092,6 +2282,7 @@ function receivePurchaseOrder(req, res){
 
 function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expirationDate){
     return when.promise(function(resolve, reject) {
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var updateFields = [];
         var active = "active = 1";
         updateFields.push(active);
@@ -2162,6 +2353,7 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
 // upgrade email seems fairly different.  how do?
 function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrderId){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var plan = planInfo.type;
         var status;
         _unassignCoursesWhenUpgrading.call(this, licenseId, plan)
@@ -2215,6 +2407,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
 // purchase order marked invoiced after it has been received, and before a purchase order is marked as approved
 function invoicePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -2279,6 +2472,7 @@ function invoicePurchaseOrder(req, res){
 // can only approve an purchase order after it has been marked received and invoiced
 function approvePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -2479,6 +2673,7 @@ function _switchToCreditCard(licenseId){
 // user cannot update this trial or go premium, until the trial is about to expire at year end
 function migrateToTrialLegacy(req, res){
     // Only admins should be allowed to perform this operation
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     if( req.user.role !== lConst.role.admin ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
@@ -2647,7 +2842,8 @@ function cancelLicense(req, res){
 
 function cancelLicenseInternal(req, res){
     if(!(req.user.role === "admin" && req.body && req.body.userId && req.body.licenseId)){
-
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
     }
     var userId = req.body.userId;
     var licenseId = req.body.licenseId;
@@ -2658,6 +2854,11 @@ function cancelLicenseInternal(req, res){
                 return users;
             }
             instructors = users;
+            instructors.forEach(function(user){
+                if(user.id === userId && user.email === "" && req.body.userDelete){
+                    user.email = userId;
+                }
+            });
             return _endLicense.call(this, userId, licenseId, false);
         }.bind(this))
         .then(function(status) {
@@ -2683,8 +2884,11 @@ function cancelLicenseInternal(req, res){
             var teacherTemplate = "educator-license-cancel";
             var template;
             var data;
-            instructors.forEach(function (user) {
+            _(instructors).forEach(function (user) {
                 email = user.email;
+                if(typeof user.email === "number"){
+                    return;
+                }
                 data = {};
                 if (user.id !== userId) {
                     template = teacherTemplate;
@@ -2979,6 +3183,64 @@ function _expiringSoonEmails(userId, licenseId, daysToGo, isTrial, protocol, hos
     }.bind(this));
 }
 
+function trialMoveToTeacher(req, res){
+    // new from trial added to license api
+    // pass in new license id to switch from trial to license api
+    // cancel trial license
+    // get license you want to join
+    // check if there are enough teacher seats open
+    // grab license map for that teacher and that license —update license map entry
+    // update educator seats remaining
+    if(!(req.user.id && req.user.licenseId && req.user.licenseOwnerId &&
+        req.user.licenseOwnerId === req.user.id && req.user.inviteLicense)){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"} );
+        return;
+    }
+    var userId =req.user.id;
+    var email = req.user.email;
+    var licenseId = req.user.licenseId;
+    var inviteLicense = req.user.inviteLicense;
+    var inviteLicenseId = inviteLicense.licenseId;
+    _validateLicenseInstructorAccess.call(this, userId, licenseId)
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            return _endLicense.call(this, userId, licenseId, false);
+        }.bind(this))
+        .then(function(status){
+            if(typeof status === "string"){
+                return status;
+            }
+            var updateFields = [];
+            var statusString = "status = 'active'";
+            updateFields.push(statusString);
+            return this.myds.updateLicenseMapByLicenseInstructor(inviteLicenseId,[userId], updateFields);
+        }.bind(this))
+        .then(function(){
+            if(typeof status === "string"){
+                return status;
+            }
+            delete req.user.inviteLicense;
+            req.user.licenseId = inviteLicenseId;
+            req.user.licenseStatus = 'active';
+            req.user.paymentType = inviteLicense.paymentType;
+            req.user.licenseOwnerId = inviteLicense.owner.id;
+            return Util.updateSession(req);
+        })
+        .then(function(status){
+            if(typeof status === "string"){
+                _errorLicensingAccess.call(this, res, status);
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+            console.error("Trial Move To Teacher Error -",err);
+        }.bind(this));
+}
+
 function _storeSchoolInformation(schoolInfo){
     return when.promise(function(resolve, reject){
         var title = "'" + schoolInfo.name + "'";
@@ -3169,6 +3431,7 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     var card = stripeInfo.id;
     var plan = planInfo.type;
     var seats = planInfo.seats;
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var stripePlan = lConst.plan[plan]["stripe_planId"];
     var baseStripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
     var discountRate = lConst.seats[seats].discount;
@@ -3193,6 +3456,7 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
 
 function _createLicenseSQL(userId, schoolInfo, planInfo, data){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var licenseId;
         var values;
         var promise;
@@ -3312,6 +3576,7 @@ function _updateStripeSubscription(customerId, subscriptionId, params, autoRenew
 
 function _unassignCoursesWhenUpgrading(licenseId, plan){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var status;
         var availableGames = {};
         var courseIds;
@@ -3462,7 +3727,11 @@ function _endLicense(userId, licenseId, autoRenew){
                     return users;
                 }
                 var promiseList = [];
+                var email;
                 users.forEach(function(educator){
+                    if(educator["email"] === ""){
+                        educator["email"] = userId;
+                    }
                     promiseList.push(_removeInstructorFromLicense.call(this, licenseId, [educator["email"]], userId, {}, users));
                 }.bind(this));
 
@@ -3508,11 +3777,32 @@ function _multiHasLicense(userIds){
         this.myds.getLicenseMapByInstructors(userIds)
             .then(function(licenseMaps){
                 var output = {};
-                userIds.forEach(function(id){
+                _(userIds).forEach(function(id){
                     output[id] = false;
                 });
-                licenseMaps.forEach(function(map){
-                    output[map["user_id"]] = true;
+                var userId;
+                var userMapStatus = {};
+                _(licenseMaps).forEach(function(map){
+                    userId = map["user_id"];
+                    if(!userMapStatus[userId]){
+                        userMapStatus[userId] = [];
+                    }
+                    userMapStatus[userId].push(map);
+                });
+                _(userMapStatus).forEach(function(maps, userId){
+                    if(maps.length === 0){
+                        output[userId] = true;
+                    } else if(maps.length > 1){
+                        output[userId] = false
+                    } else{
+                        var map = maps[0];
+                        if(map.status === "active") {
+                            // possible invite sent, need to check if eligible first
+                            output[userId] = map.license_id;
+                        } else{
+                            output[userId] = false;
+                        }
+                    }
                 });
                 resolve(output);
             })
@@ -3522,9 +3812,9 @@ function _multiHasLicense(userIds){
     }.bind(this));
 }
 
-function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUserEmails){
+function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUserEmails, invitedUserIds){
     return when.promise(function(resolve, reject){
-        var promiseList = [[],[], []];
+        var promiseList = [[],[], [], []];
         if(approvedUserIds.length > 0){
             promiseList[0] = this.myds.getUsersByIds(approvedUserIds);
         }
@@ -3533,6 +3823,9 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
         }
         if(rejectedUserIds.length > 0){
             promiseList[2] = this.myds.getUsersByIds(rejectedUserIds);
+        }
+        if(invitedUserIds.length > 0){
+            promiseList[3] = this.myds.getUsersByIds(invitedUserIds);
         }
         return when.all(promiseList)
             .then(function(results){
@@ -3548,6 +3841,8 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
                     emails[user.id] = user["EMAIL"];
                 });
                 output.push(emails);
+                var invitedUsers = results[3];
+                output.push(invitedUsers);
 
                 resolve(output);
             })
@@ -3560,23 +3855,35 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
 
 function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, emailData, instructors){
     return when.promise(function(resolve, reject){
+        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var promiseList = [];
         // poPendingStatus variable used to check for edge case where we are ending a pending purchase order license, but a trial is still active
         // in that case, we do not want to disable premium classes, because the educator's premium classes would belong to the trial
         var poPendingStatus = false;
+        var license;
+        promiseList.push(this.myds.getLicenseById(licenseId));
+        var teacherId;
+        if(typeof teacherEmail[0] === "number"){
+            teacherId = teacherEmail[0];
+            promiseList.push(teacherId);
+        } else{
+            promiseList.push(this.myds.getUsersByEmail(teacherEmail));
+        }
         // if licenseMap not already computed, find it. else, use existing value
         if(!instructors){
             promiseList.push(this.myds.getInstructorsByLicense(licenseId));
         } else{
             promiseList.push(instructors);
         }
-        promiseList.push(this.myds.getUsersByEmail(teacherEmail));
-        promiseList.push(this.myds.getLicenseById(licenseId));
-        var teacherId;
-        var license;
+        // if user account deleted, pass in an id instead of an email
         when.all(promiseList)
             .then(function(results){
-                var licenseMap = results[0];
+                license = results[0][0];
+                // user account deleted, skip this part
+                if(typeof results[1] === "number"){
+                    return;
+                }
+                var licenseMap = results[2];
                 var state = false;
                 licenseMap.some(function(instructor){
                     if(instructor.email === teacherEmail[0]){
@@ -3592,7 +3899,6 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 }
                 var teacher = results[1][0];
                 teacherId = teacher.id;
-                license = results[2][0];
                 emailData.plan = license["package_type"];
                 return this.myds.getCoursesByInstructor(teacherId);
                 //find out which premium courses that instructor is a part of
@@ -3672,9 +3978,10 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 if (results.length === 0) {
                     state = "access absent";
                 } else if (results.length > 1 &&
-                    !(results.length === 2 && (results[1].status === "po-pending" || results[1].status === "po-rejected"))) {
+                    !(results.length === 2 && (results[1].status === "po-pending" || results[1].status === "po-rejected" ||
+                    (results[0].status === "invite-pending" || results[1].status === "invite-pending")))) {
                     state = "invalid records";
-                } else if (results[0]['license_id'] !== licenseId && results[0].status !== "po-received") {
+                } else if ((results[0]['license_id'] !== licenseId && results[1]['license_id'] !== licenseId) && results[0].status !== "po-received") {
                     state = "inconsistent";
                 } else if(results[0]['license_id'] !== licenseId && results[0].status === "po-received"){
                     state = results[0]['license_id'];
@@ -3736,6 +4043,7 @@ function _errorLicensingAccess(res, status){
 }
 
 function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, protocol, host){
+    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var ownerTemplate = "owner-upgrade";
     var educatorTemplate = "educator-upgrade";
     var emailData;
@@ -3776,7 +4084,7 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
     }.bind(this));
 }
 
-function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, plan, seatsTier, protocol, host){
+function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, approvedUsers, approvedNonUsers, invitedUsers, plan, seatsTier, protocol, host){
     var data;
     var email;
     var usersTemplate = "educator-user-invited";
@@ -3800,7 +4108,6 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
         _sendEmailResponse.call(this, email, data, protocol, host, usersTemplate);
     }.bind(this));
 
-    var data;
     var nonUsersTemplate = "educator-nonuser-invited";
     approvedNonUsers.forEach(function(user){
         email = user["EMAIL"];
@@ -3814,6 +4121,24 @@ function _addTeachersEmailResponse(ownerName, ownerFirstName, ownerLastName, app
         data.plan = plan;
         data.seats = seatsTier;
         _sendEmailResponse.call(this, email, data, protocol, host, nonUsersTemplate);
+    }.bind(this));
+    // make new email for invited users
+    // just has messaging from educator-user-invited template for now
+    var invitedUserTemplate = "educator-invited-optional";
+    invitedUsers.forEach(function(user){
+        email = user["EMAIL"];
+        data = {};
+        data.subject = "You’ve Been Invited!";
+        data.ownerName = ownerName;
+        data.ownerFirstName = ownerFirstName;
+        data.ownerLastName = ownerLastName;
+        data.teacherName = user["FIRST_NAME"] + " " + user["LAST_NAME"];
+        data.teacherFirstName = user["FIRST_NAME"];
+        data.teacherLastName = user["LAST_NAME"];
+        data.plan = plan;
+        data.seats = seatsTier;
+
+        _sendEmailResponse.call(this, email, data, protocol, host, usersTemplate);
     }.bind(this));
 }
 
@@ -3947,6 +4272,7 @@ function getLicenses(req, res, next) {
                         outItem.purchasedFrom = licenseCodeType.shift();
 
                         licenseCodeType = licenseCodeType.join('-');
+                        lConst = lConst || this.serviceManager.get("lic").lib.Const;
                         if(lConst.licenseCodeTypes.hasOwnProperty(licenseCodeType)) {
                             outItem.type = lConst.licenseCodeTypes[licenseCodeType];
                         }
