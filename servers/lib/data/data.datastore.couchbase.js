@@ -226,6 +226,20 @@ var gdv_getStartedSessionsByDeviceId = function (doc, meta)
     }
 };
 
+var gdv_getEndedSessionsByDeviceId = function (doc, meta)
+{
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'gs') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('deviceId') &&
+        doc.hasOwnProperty('state') &&
+        doc['state'] == 'ended' )
+    {
+        emit( doc['deviceId'] );
+    }
+};
+
 // used to process all sessions, migration
 var gdv_getAllGameSessionsByGameId = function (doc, meta)
 {
@@ -323,6 +337,14 @@ var gdv_getAllCourseGameProfiles = function(doc, meta){
         emit(meta.id);
     }
 };
+
+var gdv_getAllGameSaves = function(doc, meta){
+    var values = meta.id.split(':');
+    if((values[0] === "gd") &&
+       (values[1] === "save")){
+        emit(meta.id);
+    }
+};
 // ------------------------------------
 
     this.telemDDoc = {
@@ -338,6 +360,9 @@ var gdv_getAllCourseGameProfiles = function(doc, meta){
             },
             getStartedSessionsByDeviceId : {
                 map: gdv_getStartedSessionsByDeviceId
+            },
+            getEndedSessionsByDeviceId : {
+                map: gdv_getEndedSessionsByDeviceId
             },
             getAllGameSessionsByGameId : {
                 map: gdv_getAllGameSessionsByGameId
@@ -368,6 +393,9 @@ var gdv_getAllCourseGameProfiles = function(doc, meta){
             },
             getAllCourseGameProfiles: {
                 map: gdv_getAllCourseGameProfiles
+            },
+            getAllGameSaves: {
+                map: gdv_getAllGameSaves
             }
         }
     };
@@ -1590,9 +1618,9 @@ TelemDS_Couchbase.prototype.cleanUpOldGameSessionsV2 = function(deviceId){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // use view to find started session for a deviceId
-    // tConst.game.session.started
-    this.client.view("telemetry", 'getStartedSessionsByDeviceId').query(
+    // use view to find ended session for a deviceId
+    // tConst.game.session.ended
+    this.client.view("telemetry", 'getEndedSessionsByDeviceId').query(
         {
             key: deviceId
         },
@@ -2742,21 +2770,17 @@ TelemDS_Couchbase.prototype._getAllGameInformation = function(type){
         } else if (type === "Both"){
             map = "getAllGameInformationAndGameAchievements"
         }
-        console.log( "about to access game information" );
         this.client.view("telemetry", map).query(
             {
             },
             function(err, results) {
-                console.log( "before error" );
                 if(err) {
                     console.error("Couchbase TelemetryStore: Get Game " + type + " Error -", err);
                     reject(err);
                     return;
                 }
-                console.log( "after error: " + results );
                 var keys = _.pluck(results, 'id');
                 this._chunk_getMulti(keys, {}, function(err, results){
-                    console.log( "in chunk get multi" );
                     if(err) {
                         if(err.code == 401) {
                             var errors = [];
@@ -2774,7 +2798,6 @@ TelemDS_Couchbase.prototype._getAllGameInformation = function(type){
                             return;
                         }
                     }
-                    console.log( "end of chunk get multi" );
                     var information = {};
                     _.forEach(results, function(game, gameId){
                         information[gameId] = game.value;
@@ -2878,6 +2901,34 @@ TelemDS_Couchbase.prototype.createMatch = function(gameId, matchData) {
     }.bind(this));
 };
 
+TelemDS_Couchbase.prototype.getMatch = function(gameId, matchId){
+    return when.promise(function(resolve, reject){
+        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+        this.client.get(key, function(err, results){
+            if(err){
+                console.error("CouchBase DataStore: Get Match Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        });
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.updateMatch = function(gameId, matchId, data){
+    return when.promise(function(resolve, reject){
+        var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("CouchBase DataStore: Update Match Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(results.value);
+        });
+    }.bind(this));
+};
+
 TelemDS_Couchbase.prototype.multiGetMatches = function(gameId, matchIds){
     return when.promise(function(resolve, reject){
         var keys = [];
@@ -2888,6 +2939,19 @@ TelemDS_Couchbase.prototype.multiGetMatches = function(gameId, matchIds){
         });
         this._chunk_getMulti(keys, {}, function(err, results){
             if(err){
+                var message = "The key does not exist on the server";
+                var keyExistError = true;
+                keys.forEach(function(key){
+                    if(results[key].error.message === message){
+                        results[key] = "The key does not exist on the server";
+                    } else if(results[key].error && results[key].error.message !== message){
+                        keyExistError = false;
+                    }
+                });
+                if(keyExistError){
+                    resolve(results);
+                    return;
+                }
                 console.error("CouchBase DataStore: Get Matches Error -", err);
                 reject(err);
                 return;
@@ -2947,9 +3011,10 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
     return when.promise(function(resolve, reject){
 
         var map = "getAllMatches";
+        var key = "gd:m:" + gameId;
         this.client.view("telemetry", map).query(
             {
-
+                startkey: key
             },
             function(err, results){
                 if(err){
@@ -2958,15 +3023,8 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
                     return;
                 }
 
-                var keys = [];
-                var id;
-                results.forEach(function(result){
-                    id = result.id;
-                    var components = id.split(":");
-                    if(gameId === components[2]){
-                        keys.push(id);
-                    }
-                });
+                var keys = _.pluck(results, "id");
+
                 this._chunk_getMulti(keys, {}, function(err, results){
                     if(err){
                         console.error("CouchBase TelemetryStore: Get Game Matches Error -", err);
@@ -2984,7 +3042,7 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
                             value = JSON.parse(value);
                         }
                         players = value.data.players;
-                        if(_(players).contains(userId)){
+                        if(players[userId]){
                             components = key.split(":");
                             matchId = components[3];
                             output[matchId] = value;
@@ -3026,6 +3084,32 @@ TelemDS_Couchbase.prototype.getAllCourseGameProfiles = function(){
     }.bind(this));
 };
 
+TelemDS_Couchbase.prototype.getGamesCourseMap = function(gameIds){
+    return when.promise(function(resolve, reject){
+
+        this.getAllCourseGameProfiles()
+            .then(function(courses){
+                var gameCourseMap = {};
+                _(gameIds).forEach(function(gameId){
+                    gameCourseMap[gameId] = {};
+                });
+                _(courses).forEach(function(course, key){
+                    var courseId = key.split(":")[2];
+                    _(gameIds).forEach(function(gameId){
+                        if(course[gameId]){
+                            gameCourseMap[gameId][courseId] = true;
+                        }
+                    });
+                });
+                resolve(gameCourseMap);
+            })
+            .then(null, function(err){
+                console.error("Get Games Course Map Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 TelemDS_Couchbase.prototype.multiSetCourseGameProfiles = function(courses){
     return when.promise(function(resolve, reject){
         this._chunk_setMulti(courses, {}, function(err, results){
@@ -3054,6 +3138,32 @@ TelemDS_Couchbase.prototype.multiGetCourseGameProfiles = function(courseIds){
                 return;
             }
             //var outputs = _.pluck(results, 'value');
+            resolve(results);
+        }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.deleteGameSavesByGameId = function(gameId){
+    return when.promise(function(resolve, reject){
+        var map = "getAllGameSaves";
+        var key = "gd:save:" + gameId.toUpperCase();
+        this.client.view("telemetry", map).query({
+            startkey: key
+        }, function(err, results){
+            if(err){
+                console.error("CouchBase TelemetryStore: Delete Game Saves By Game Id Error -", err);
+                reject(err);
+                return;
+            }
+            var keys = _.pluck(results, "key");
+            this._removeKeys(keys)
+                .then(function(){
+                    resolve()
+                })
+                .then(null, function(err){
+                    console.error("Delete Game Saves By Game Id -", gameId, " Error -", err);
+                    reject(err);
+                });
             resolve(results);
         }.bind(this));
     }.bind(this));

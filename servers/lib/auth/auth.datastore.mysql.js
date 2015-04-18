@@ -312,40 +312,106 @@ return when.promise(function(resolve, reject) {
         .then(function(results){
             if(typeof results === "string"){
                 reject({"error": "user not found"});
+                return;
             }
-            if(results.length > 0){
-                var license = results[0];
-                user.licenseId = license["id"];
-                user.licenseOwnerId = license["user_id"];
-                user.licenseStatus = license["status"];
-                user.paymentType = license["payment_type"];
-                var packageType = license["package_type"];
-                if (packageType === "trial" || packageType === "trialLegacy") {
-                    user.isTrial = true;
-                } else {
-                    user.isTrial = false;
-                }
-                if(license["status"] === "po-pending" || license["status"] === "po-received" || license["status"] === "po-rejected"){
-                    user.purchaseOrderLicenseStatus = license["status"];
-                    user.purchaseOrderLicenseId = license.id;
-                }
-                if(results.length === 2 && (results[1]["status"] === "po-pending" || results[1]["status"] === "po-rejected")){
-                    user.purchaseOrderLicenseStatus = results[1]["status"];
-                    user.purchaseOrderLicenseId = results[1].id;
-                }
-                if( user.licenseStatus === "active" ||
-                    user.licenseStatus === "pending" ||
-                    user.licenseStatus === "po-received" ||
-                    user.licenseStatus === "po-rejected") {
-                    user.expirationDate = license["expiration_date"];
-                }
+            // if gained results, add all relevant license information
+            if(results.length > 0) {
+                return _addLicenseInfoToUser.call(this, user, results);
             }
+        }.bind(this))
+        .then(function(){
             resolve(user);
-        });
+        })
+        .then(null, function(err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this));
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
+
+function _addLicenseInfoToUser(user, results){
+    return when.promise(function(resolve, reject){
+        var license;
+        var futureLicense;
+        if(results.length === 1){
+            license = results[0];
+        } else if(results.length === 2){
+            if(results[0].status === "active" || results[0].status === "po-received"){
+                license = results[0];
+                futureLicense = results[1];
+            } else{
+                license = results[1];
+                futureLicense = results[0];
+            }
+        }
+        var inviteLicense;
+        user.licenseId = license["id"];
+        user.licenseOwnerId = license["user_id"];
+        user.licenseStatus = license["status"];
+        user.paymentType = license["payment_type"];
+        var packageType = license["package_type"];
+        if (packageType === "trial" || packageType === "trialLegacy") {
+            user.isTrial = true;
+        } else {
+            user.isTrial = false;
+        }
+        if(license["status"] === "po-pending" || license["status"] === "po-received" || license["status"] === "po-rejected"){
+            user.purchaseOrderLicenseStatus = license["status"];
+            user.purchaseOrderLicenseId = license.id;
+        }
+        if(license["status"] === "invite-pending"){
+            inviteLicense = user.inviteLicense = {};
+            inviteLicense.licenseId = futureLicense.id;
+            inviteLicense.packageType = futureLicense.package_type;
+            inviteLicense.dateInvited = futureLicense.date_created;
+            inviteLicense.paymentType = futureLicense.payment_type;
+            inviteLicense.owner = {};
+            inviteLicense.owner.id = futureLicense.user_id;
+        }
+        if(results.length === 2){
+            if(futureLicense["status"] === "po-pending" || futureLicense["status"] === "po-rejected"){
+                user.purchaseOrderLicenseStatus = futureLicense["status"];
+                user.purchaseOrderLicenseId = futureLicense.id;
+            }
+            if(futureLicense["status"] === "invite-pending") {
+                inviteLicense = user.inviteLicense = {};
+                inviteLicense.licenseId = futureLicense.id;
+                inviteLicense.packageType = futureLicense.package_type;
+                inviteLicense.dateInvited = futureLicense.date_created;
+                inviteLicense.paymentType = futureLicense.payment_type;
+                inviteLicense.owner = {};
+                inviteLicense.owner.id = futureLicense.user_id;
+            }
+        }
+        if( user.licenseStatus === "active" ||
+            user.licenseStatus === "pending" ||
+            user.licenseStatus === "po-received" ||
+            user.licenseStatus === "po-rejected") {
+            user.expirationDate = license["expiration_date"];
+        }
+        if(!inviteLicense){
+            resolve();
+            return;
+        }
+        // if an instructor is invited to another license and the instructor is already on a license
+        // then we need to display information about the license owner who invited the teacher
+        this.getUserById(inviteLicense.owner.id)
+            .then(function(results){
+                if(results){
+                    var inviteLicenseOwner = user.inviteLicense.owner;
+                    inviteLicenseOwner.email = results.EMAIL;
+                    inviteLicenseOwner.firstName = results.FIRST_NAME;
+                    inviteLicenseOwner.lastName = results.LAST_NAME;
+                }
+                resolve();
+            }.bind(this))
+            .then(null,function(err){
+                console.error("Add License Info to User Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+}
 
 Auth_MySQL.prototype.updateUserPassword = function(id, password, loginType) {
 // add promise wrapper
@@ -537,7 +603,7 @@ return when.promise(function(resolve, reject) {
         last_updated:   "NOW()"
     };
 
-    if(userData.password) {
+    if(userData.password !== undefined) {
         data.password = this.ds.escape(userData.password);
     }
     if(userData.resetCode) {
@@ -561,7 +627,6 @@ return when.promise(function(resolve, reject) {
             data.reset_code_status = this.ds.escape(userData.resetCodeStatus);
         }
     }
-
     if(userData.verifyCode) {
         if(userData.verifyCode == "NULL") {
             data.verify_code = "NULL";
@@ -595,6 +660,27 @@ return when.promise(function(resolve, reject) {
             data.standards_view = "NULL";
         } else {
             data.standards_view = this.ds.escape(userData.standards);
+        }
+    }
+    if(userData.enabled !== undefined){
+        if(userData.enabled === 1){
+            data.enabled = 1;
+        } else if(userData.enabled === 0){
+            data.enabled = 0;
+        }
+    }
+    if(userData.institutionId){
+        if(userData.institutionId === "NULL"){
+            data.institution_id = "NULL";
+        } else{
+            data.institution_id = this.ds.escape(userData.institutionId);
+        }
+    }
+    if(userData.customerId){
+        if(userData.customerId === "NULL"){
+            data.customer_id = "NULL";
+        } else{
+            data.customer_id = this.ds.escape(userData.customerId);
         }
     }
 
@@ -633,11 +719,25 @@ Auth_MySQL.prototype.getUserEmail = function(userId){
     }.bind(this));
 };
 
+Auth_MySQL.prototype.getUserById = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_USER WHERE id = " + userId;
+
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.payment_type,lm.status FROM GL_LICENSE as lic JOIN\n" +
-            "(SELECT license_id,status FROM GL_LICENSE_MAP\n" +
-            "WHERE status in ('active','pending','po-received','po-rejected', 'po-pending') and user_id = " + userId+ ") as lm\n" +
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
+            "WHERE status in ('active','pending','po-received','po-rejected', 'po-pending', 'invite-pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
         var licenseInfo;
         this.ds.query(Q)

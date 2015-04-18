@@ -241,9 +241,23 @@ Lic_MySQL.prototype.setCustomerIdByUserId = function(userId, customerId){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.removeSubscriptionIdsByUserId = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "UPDATE GL_LICENSE SET subscription_id = NULL where user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(){
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Remove Subscription Ids By User Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 Lic_MySQL.prototype.countEducatorSeatsByLicense = function(licenseId, seats){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP WHERE status in ('active','pending') and license_id = " + licenseId + ";";
+        var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP WHERE status in ('active','pending','invite-pending','po-received') and license_id = " + licenseId + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]["COUNT(*)"]);
@@ -288,7 +302,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
 Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     return when.promise(function(resolve, reject){
         var userIdsString = userIds.join(",");
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending', 'po-pending', 'po-received','po-rejected') and user_id in (" + userIdsString + ");";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending','po-pending','po-received','po-rejected','invite-pending') and user_id in (" + userIdsString + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -334,7 +348,7 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
         var Q = "SELECT u.id,u.first_name as firstName,u.last_name as lastName,u.email,lm.status FROM GL_USER as u\n" +
             "JOIN GL_LICENSE_MAP as lm\n" +
             "ON lm.user_id = u.id\n" +
-            "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending','po-received','po-pending');";
+            "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending','po-received','po-pending','invite-pending');";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -456,10 +470,15 @@ function _insertTempUserValueWithEmail(email){
     return value;
 }
 
-Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds){
+Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds, invite){
     return when.promise(function(resolve, reject){
         var inputs = [];
-        var startValues = "('pending',NOW()," + licenseId + ",";
+        var startValues;
+        if(invite){
+            startValues = "('invite-pending',NOW()," + licenseId + ",";
+        } else{
+            startValues = "('pending',NOW()," + licenseId + ",";
+        }
         userIds.forEach(function(id){
             inputs.push(startValues + id + ")")
         });
@@ -498,7 +517,7 @@ Lic_MySQL.prototype.multiUpdateLicenseMapStatus = function(licenseId, userIds, s
             status = "'" + status + "'";
         }
         var userIdsString = userIds.join(',');
-        var Q = "UPDATE GL_LICENSE_MAP SET status = " + status + " WHERE user_id in(" + userIdsString + ");";
+        var Q = "UPDATE GL_LICENSE_MAP SET status = " + status + " WHERE user_id in(" + userIdsString + ") and license_id = " + licenseId + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -575,7 +594,7 @@ Lic_MySQL.prototype.getLicenseFromPremiumCourse = function(courseId){
         var Q = "SELECT * FROM GL_LICENSE AS l JOIN\n" +
             "(SELECT license_id FROM GL_LICENSE_MAP AS lm JOIN\n" +
                 "(SELECT user_id FROM GL_MEMBERSHIP WHERE ROLE = 'instructor' and course_id = " + courseId + ") AS m\n" +
-            "ON m.user_id = lm.user_id WHERE status IN('active','pending')) AS lm\n" +
+            "ON m.user_id = lm.user_id WHERE status IN('active','pending','po-received')) AS lm\n" +
             "ON lm.license_id = l.id;";
         this.ds.query(Q)
             .then(function(results){
@@ -744,6 +763,37 @@ Lic_MySQL.prototype.insertToInstitutionTable = function(values){
                 console.error("Insert To Institution Table Error -",err);
                 reject(err);
             })
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getLicensesForInspection = function(){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lm.status, l.* FROM GL_LICENSE as l\n" +
+        "JOIN (SELECT * FROM GL_LICENSE_MAP WHERE status in ('renew', 'active', 'po-received')) as lm\n" +
+        "ON l.id = lm.license_id AND l.user_id = lm.user_id\n" +
+        "WHERE (l.active = 1) OR (l.active = 0 AND lm.status = 'renew');";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get Licenses For Expire Renew Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Lic_MySQL.prototype.getLicenseMapByLicenseId = function(licenseId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Get License Map By License Error -",err);
+                reject(err);
+            });
     }.bind(this));
 };
 

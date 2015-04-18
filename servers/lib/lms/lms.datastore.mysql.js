@@ -158,7 +158,7 @@ return when.promise(function(resolve, reject) {
             c.lmsType \
         FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
         WHERE m.user_id="+ this.ds.escape(userId)+
-        " ORDER BY c.date_created";
+        " ORDER BY c.date_created;";
 
     this.ds.query(Q)
         .then(function(results) {
@@ -315,6 +315,20 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+LMS_MySQL.prototype.removeStudentFromAllCourses = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "DELETE FROM GL_MEMBERSHIP WHERE ROLE = 'student' AND user_id = " + userId + ";";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(null, function(err){
+                console.error("Remove Student From All Courses Error -", err);
+                reject(err);
+            });
+    }.bind(this));
 };
 
 

@@ -159,6 +159,24 @@ module.exports = {
                 get: "pollMatches"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/:gameId/complete",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "completeMatch"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/data/game/saves/delete",
+            service: "data",
+            controller: "game",
+            method: {
+                post: "deleteGameSaves"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
@@ -442,6 +460,14 @@ module.exports = {
                 post: "blockPremiumGamesBasicCourses"
             }
         },
+        {
+            api: "/api/v2/lms/course/games/map",
+            service: "lms",
+            controller: "course",
+            method: {
+                post: "getGamesCourseMap"
+            }
+        },
 
         // ---------------------------------------------------
         {
@@ -614,15 +640,6 @@ module.exports = {
                 post: "upgradeTrialLicensePurchaseOrder"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/license/upgrade/po",
-        //    service: "lic",
-        //    controller: "license",
-        //    method: {
-        //        post: "upgradeLicensePurchaseOrder"
-        //    }
-        //},
         {
             requireAuth: true,
             requireHttps: true,
@@ -645,6 +662,7 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/nullify",
             service: "lic",
             controller: "license",
@@ -710,6 +728,36 @@ module.exports = {
             controller: "license",
             method: {
                 post: "cancelLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/end/internal",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "cancelLicenseInternal"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/inspect",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "inspectLicenses"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/trial/move",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "trialMoveToTeacher"
             }
         },
         // old api methods, not in use
@@ -884,15 +932,15 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
-        //{
-        //    requireAuth: true,
-        //    api: "/api/v2/auth/user/:userId/delete",
-        //    service: "auth",
-        //    controller: "user",
-        //    method: {
-        //        post: "deleteUser"
-        //    }
-        //},
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/delete/user",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "deleteUser"
+            }
+        },
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------

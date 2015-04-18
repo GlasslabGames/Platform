@@ -959,7 +959,9 @@ function sendVerifyEmail(regData, protocol, host) {
         regData.email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
-
+    if(this.options.env === "prod" || this.options.env === "stage"){
+        protocol = "https";
+    }
     var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
@@ -1018,7 +1020,9 @@ function sendDeveloperVerifyEmail(regData, protocol, host) {
         regData.email.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
     }
-
+    if(this.options.env === "prod" || this.options.env === "stage"){
+        protocol = "https";
+    }
     var verifyCode = Util.CreateUUID();
     var expirationTime = Util.GetTimeStamp() + aConst.verifyCode.expirationInterval;
 
@@ -1248,7 +1252,27 @@ function resetPasswordSend(req, res, next) {
             .then(null, function(err) {
                 if( err.error &&
                     err.error == "user not found") {
-                    this.requestUtil.errorResponse(res, {key:"user.passwordReset.user.emailNotExist"}, 400);
+                    var userData = {};
+                    userData.email = req.body.email;
+                    var emailData = {
+                        subject: "Your GlassLabGames.org Password",
+                        to:   userData.email,
+                        user: userData,
+                        host: req.protocol+"://"+req.headers.host
+                    };
+                    var email = new Util.Email(
+                        this.options.auth.email,
+                        path.join(__dirname, "../email-templates"),
+                        this.stats);
+                    email.send('password-reset-nonuser', emailData)
+                        .then(function(){
+                            // all ok
+                            this.requestUtil.jsonResponse(res, {});
+                        }.bind(this))
+                        // error
+                        .then(null, function(err){
+                            this.requestUtil.errorResponse(res, err, 500);
+                        }.bind(this));
                 } else {
                     console.error("AuthService: resetPasswordSend Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
@@ -1543,25 +1567,38 @@ function _getDeveloperByCode(code, gameId){
 }
 
 function deleteUser(req, res){
-    if(!(req.user.role === "instructor" || req.user.role === "manager")){
+    if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
         return;
     }
-    if(!(req.params && req.params.userId)){
+    if(!(req.body && req.body.userId)){
         this.requestUtil.errorResponse(res, { key: "user.delete.information"});
         return;
     }
-    var userId = req.user.id;
-    var role = req.user.role;
-    var deleteUserId = req.params.userId;
+    var deleteUserId = req.body.userId;
     var promise;
-    if(userId !== deleteUserId){
-        promise = _deleteStudentAccount(deleteUserId, userId)
-    } else{
-        promise = _deleteInstructorAccount();
-    }
-    promise
-        .then(function(){
+
+    this.authStore.findUser("id", deleteUserId)
+        .then(function(deleteUser){
+            if(deleteUser.role === "student"){
+                //largely ready and approved, but still good to have one last review before it is live
+                //promise = _deleteStudentAccount.call(this, deleteUserId);
+            } else if (deleteUser.role === "instructor"){
+                //delete instructor method workable, but still needs design attention
+                // for example, are we deleting all the info we need to be
+                // how are we going to store the hashed emails, should we keep hashed passwords, etc
+                // email response also needed
+                //promise = _deleteInstructorAccount.call(this, deleteUserId);
+            }
+            return promise;
+        }.bind(this))
+        .then(function(status){
+            if(status && typeof status === "object"){
+                req.body.licenseId = status.licenseId;
+                req.body.userDelete = status.userDelete;
+                this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
+                return;
+            }
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
@@ -1574,32 +1611,34 @@ function deleteUser(req, res){
         }.bind(this));
 }
 
-function _deleteStudentAccount(studentId, instructorId){
+function _deleteStudentAccount(studentId){
     return when.promise(function(resolve, reject){
         var lmsService = this.serviceManager.get("lms").service;
         var licService = this.serviceManager.get("lic").service;
+        var lConst = this.serviceManager.get("lic").lib.Const;
         var courses;
         var licenses;
-        // method will reject if student is not in this instructor's class
-        lmsService.isEnrolledInInstructorCourse(studentId, instructorId)
-            .then(function(){
-                return lmsService.myds.getCoursesByStudentId(studentId);
-            })
+        lmsService.myds.getCoursesByStudentId(studentId)
             .then(function(results){
                 courses = results;
                 var promiseList = [];
-                courses.forEach(function(course){
-                    promiseList.push(licService.getLicenseFromPremiumCourse(course.id));
+                _(courses).forEach(function(course){
+                    promiseList.push(licService.myds.getLicenseFromPremiumCourse(course.id));
                 });
                 return when.all(promiseList);
             })
             .then(function(results){
-                licenses = results;
+                var licenseObj = {};
+                licenses = [];
+                _(results).forEach(function(license){
+                    if(license && !licenseObj[license.id]){
+                        licenseObj[license.id] = license;
+                        licenses.push(license);
+                    }
+                });
                 var promiseList = [];
                 _(licenses).forEach(function(license){
-                    if(license){
-                        promiseList.push(licService.cbds.getStudentsByLicense(license.id));
-                    }
+                    promiseList.push(licService.cbds.getStudentsByLicense(license.id));
                 });
                 return when.all(promiseList);
             })
@@ -1607,27 +1646,162 @@ function _deleteStudentAccount(studentId, instructorId){
                 var promiseList = [];
                 _(studentMaps).forEach(function(map, index){
                     delete map[studentId];
-                    //_(student).forEach(function(course, key){
-                    //    student[key] = false;
-                    //});
-                    var licenseId = licenses[index].id;
                     var data = { students: map };
+                    var licenseId = licenses[index].id;
                     promiseList.push(licService.cbds.updateStudentsByLicense(licenseId, data));
                 });
                 return when.all(promiseList);
             })
             .then(function(){
-
+                var promiseList = [];
+                _(licenses).forEach(function(license){
+                    var licenseId = license.id;
+                    var seats = license["package_size_tier"];
+                    var studentSeats = lConst.seats[seats].studentSeats;
+                    promiseList.push(licService.updateStudentSeatsRemaining(licenseId, studentSeats));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(){
+                return lmsService.myds.removeStudentFromAllCourses(studentId);
+            })
+            .then(function(){
+                var userData = _deleteUserTableInfo(studentId);
+                return this.authStore.updateUserDBData(userData);
+            }.bind(this))
+            .then(function(){
+                resolve();
             })
             .then(null, function(err){
                 console.error("Delete Student Account Error");
                 reject(err);
-            }.bind(this))
+            }.bind(this));
     }.bind(this));
 }
 
 function _deleteInstructorAccount(userId){
-    return when.promise(function(resolve, reject){
+    //delete instructor plan
+    //get courses,
+    //getLicenseMap
+    //get license
+    // if license active, throw error and encourage
+    //archive all courses (also disabling premium games in that process
+    //set license map status to null, if in license and if not license owner
+    //set subscription id of all licenses instructor was owner of in the past to null
+    // in deleteUser method, call internal route for the internal cancel license method
 
+    return when.promise(function(resolve, reject){
+        var courses;
+        var license;
+        var userEmail;
+        var lmsService = this.serviceManager.get("lms").service;
+        var licService = this.serviceManager.get("lic").service;
+        var promiseList = [];
+        promiseList.push(lmsService.myds.getEnrolledCourses(userId));
+        promiseList.push(this.authStore.getUserEmail(userId));
+        promiseList.push(licService.myds.getLicenseMapByInstructors([userId]));
+        when.all(promiseList)
+            .then(function(results){
+                courses = results[0];
+                var licenseMap = null;
+                user = results[1];
+                if(results[2]){
+                    licenseMap = results[2][0];
+                }
+                if(licenseMap){
+                    var licenseId = licenseMap.license_id;
+                    return licService.myds.getLicenseById(licenseId);
+                }
+            })
+            .then(function(results){
+                if(results){
+                    license = results[0] || null;
+                    // an account can only be deleted after a license is cancelled. run cancel license api first
+                } else{
+                    license = null;
+                }
+                var courseController = require("../../lms/controller/course.js");
+                // non api form of the updateCourseInfo api method
+                // need to mimic the fields required by the api
+                var updateCourseInfo = courseController._updateCourseInfo.bind(lmsService);
+                var promiseList = [];
+                // archive and disable courses before teacher is removed
+                _(courses).forEach(function(course){
+                    var courseData = _.cloneDeep(course);
+                    // needed to archive course if not archived
+                    courseData.archived = true;
+                    // needed to disable course if not disabled
+                    courseData.premiumGamesAssigned = false;
+                    var userData = {};
+                    userData.id = userId;
+                    if(course.premiumGamesAssigned){
+                        userData.licenseId = license.id;
+                    }
+                    userData.role = "instructor";
+                    promiseList.push(updateCourseInfo(courseData, course, userData));
+                });
+                return when.all(promiseList);
+            })
+            .then(function(){
+                var userData = _deleteUserTableInfo(userId);
+                return this.authStore.updateUserDBData(userData);
+            }.bind(this))
+            .then(function(status){
+                if(license && license.active === 1){
+                    var licenseId = license.id;
+                    var promiseList = [];
+                    var licenseUpdateFields = [];
+                    var subscriptionId = "subscription_id = NULL";
+                    licenseUpdateFields.push(subscriptionId);
+                    // finds all licenses an instructor was an owner of in the past, and removes the subscription id
+                    promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
+                    if(license.user_id !== userId){
+                        var updateFields = [];
+                        var status = "status = NULL";
+                        updateFields.push(status);
+                        promiseList.push(licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields));
+                    }
+                    return when.all(promiseList);
+                }
+            })
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                }
+                if(license && license.active === 1 && license.user_id === userId){
+                    var body = {};
+                    body.userId = userId;
+                    body.licenseId = license.id;
+                    body.userEmail = userEmail;
+                    body.userDelete = true;
+                    resolve(body);
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Delete Instructor Account Error -",err);
+                reject(err);
+            });
     }.bind(this));
+}
+
+function _deleteUserTableInfo(userId){
+    var userData = {};
+    userData.username = "";
+    userData.firstName = "";
+    userData.lastName = "";
+    userData.email = "";
+    userData.ssoUserName = "";
+    userData.ssoData = "";
+    userData.password = "";
+    userData.enabled = 0;
+    userData.resetCode = "NULL";
+    userData.resetCodeExpiration = "NULL";
+    userData.resetCodeStatus = "NULL";
+    userData.verifyCode = "NULL";
+    userData.verifyCodeExpiration = "NULL";
+    userData.verifyCodeStatus = "NULL";
+    userData.customerId = "NULL";
+    userData.id = userId;
+    return userData;
 }

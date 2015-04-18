@@ -18,7 +18,9 @@ module.exports = {
     releases: releases,
     createMatch: createMatch,
     updateMatches: updateMatches,
-    pollMatches: pollMatches
+    pollMatches: pollMatches,
+    completeMatch: completeMatch,
+    deleteGameSaves: deleteGameSaves
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -432,8 +434,15 @@ function createMatch(req, res){
                     return "cannot create matches";
                 }
             }
+            var players = {};
+            var player;
+            userIds.forEach(function(userId){
+                player = {};
+                player.playerStatus = "active";
+                players[userId] = player;
+            });
             var data = {
-                players: userIds,
+                players: players,
                 status: "active",
                 history: [],
                 meta: {
@@ -490,6 +499,7 @@ function updateMatches(req, res){
         return;
     }
 
+    var matchStatus;
     var matchesToUpdate;
     this.cbds.getGameInformation(gameId, true)
         .then(function(info){
@@ -501,8 +511,10 @@ function updateMatches(req, res){
             matchesToUpdate = {};
             var matchId;
             var matchIds = [];
-            matchUpdates.forEach(function(item){
+            matchStatus = {};
+            _(matchUpdates).forEach(function(item){
                 matchId = item.matchId;
+                matchStatus[matchId] = "not a valid matchId";
                 if(!matchesToUpdate[matchId]){
                     matchesToUpdate[matchId] = {};
                     matchesToUpdate[matchId].turns = [];
@@ -519,16 +531,38 @@ function updateMatches(req, res){
                 return matches;
             }
             var data;
+            var match;
+            var player;
+            matchStatus;
             _(matches).forEach(function(item, key){
                 delete item.cas;
                 delete item.flags;
 
-                // Only continue if the playerTurn matches the userId
-                if( item.value.data.meta.playerTurn === userId ) {
-                    match = item.value;
-                    data = match.data;
-                    data.history = data.history.concat(matchesToUpdate[match.id].turns);
-                    data.meta.playerTurn = matchesToUpdate[match.id].nextPlayer;
+                if(typeof item === "string"){
+                    delete matches[key];
+                    return;
+                }
+                match = item.value;
+                //finish this
+                var player = match.data.players[userId];
+                // check if player is in match
+                if(player){
+                    // check if match is active for player
+                    if(player.playerStatus === "active"){
+                        // check if it is the player's turn
+                        if(match.data.meta.playerTurn === userId ) {
+                            data = match.data;
+                            data.history = data.history.concat(matchesToUpdate[match.id].turns);
+                            data.meta.playerTurn = matchesToUpdate[match.id].nextPlayer;
+                            matchStatus[match.id] = "updated";
+                        } else{
+                            matchStatus[match.id] = "not your turn";
+                        }
+                    } else{
+                        matchStatus[match.id] = "match complete";
+                    }
+                } else{
+                    matchStatus[match.id] = "not your match";
                 }
             });
             return this.cbds.multiSetMatches(matches);
@@ -542,7 +576,7 @@ function updateMatches(req, res){
                 this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
                 return;
             }
-            this.requestUtil.jsonResponse(res, { status: "ok" });
+            this.requestUtil.jsonResponse(res, { status: "ok", data: matchStatus });
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
@@ -558,8 +592,14 @@ function pollMatches(req, res){
         this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
         return;
     }
+    if(!(req.query && req.query.status)){
+        this.requestUtil.errorResponse(res, {key: "data.match.status.missing"});
+        return
+    }
+
     var gameId = req.params.gameId;
     var userId = req.user.id;
+    var status = req.query.status;
 
     this.cbds.getGameInformation(gameId, true)
         .then(function(info){
@@ -580,8 +620,12 @@ function pollMatches(req, res){
                 return;
             }
             var activeMatches = {};
+            var player;
             _(matches).forEach(function(match, matchId){
-                if(match.data.status === "active"){
+                player = match.data.players[userId];
+                if( (status === "all") ||
+                    (status === "active" && player.playerStatus === "active") ||
+                    (status === "complete" && player.playerStatus === "complete") ){
                     activeMatches[matchId] = match.data;
                 }
             });
@@ -589,5 +633,80 @@ function pollMatches(req, res){
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function completeMatch(req, res){
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.body && req.body.matchId)){
+        this.requestUtil.errorResponse(res, {key: "data.matchId.missing"});
+        return;
+    }
+    if(!(req.user && req.user.id)){
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+    var matchId = req.body.matchId;
+    var userId = req.user.id;
+
+    this.cbds.getMatch(gameId, matchId)
+        .then(function(match){
+            var players = match.data.players;
+            var found = false;
+            var complete = true;
+            _(players).forEach(function(player, playerId){
+                if(userId === parseInt(playerId)){
+                    found = true;
+                    player.playerStatus = "complete";
+                } else if(player.playerStatus === "active"){
+                    complete = false;
+                }
+            });
+            if(!found){
+                return "not in match";
+            }
+            if(complete){
+                match.data.status = "complete";
+            }
+            return this.cbds.updateMatch(gameId, matchId, match);
+        }.bind(this))
+        .then(function(status){
+            if(status === "not in match"){
+                this.requestUtil.errorResponse(res, { key: "data.match.access"});
+                return;
+            }
+            if(status === "no object"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.invalid"});
+                return;
+            }
+            if(status === "cannot create matches"){
+                this.requestUtil.errorResponse(res, {key: "data.gameId.match"});
+                return;
+            }
+            this.requestUtil.jsonResponse(res, { status: "ok" });
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Complet Match Error -",err);
+            this.requestUtil.errorResponse(res, { key: "data.gameId.general"});
+        }.bind(this));
+}
+
+function deleteGameSaves(req, res){
+    if(!(req.user.role === "admin" && req.query.gameId)){
+        this.requestUtil.errorResponse(res, { key: "data.access.invalid"});
+        return;
+    }
+    var gameId = req.query.gameId;
+    this.cbds.deleteGameSavesByGameId(gameId)
+        .then(function(){
+            this.requestUtil.jsonResponse(res, { status: "ok"});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Delete Game Saves Error -", err);
+            this.requestUtil.errorReponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }

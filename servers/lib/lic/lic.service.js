@@ -7,6 +7,7 @@ var http       = require('http');
 // Third-party libs
 var _          = require('lodash');
 var when       = require('when');
+var CronJob    = require('cron').CronJob;
 // load at runtime
 var Util, lConst;
 

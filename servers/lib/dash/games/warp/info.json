@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "WARP",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Warp Driver",
         "longName": "Warp Driver",
@@ -16,7 +16,7 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "TBD",
+        "price": "Free",
         "packages": "PC/Mac Games",
         "release": "dev",
         "releaseDate": "TBD",
@@ -26,8 +26,8 @@
             "id": "GD",
             "name": "GameDesk",
             "logo": {
-                "small": "assets/gamedesk-logo.png",
-                "large": "assets/gamedesk-logo-2x.png"
+                "small": "assets/dev-logo-placeholder.jpg",
+                "large": "assets/dev-logo-placeholder@2x.jpg"
             },
             "description": ""
         },
@@ -47,8 +47,8 @@
             "large": "assets/thumb-game-PLACEHOLDER@2x.png"
         },
         "card": {
-            "small": "assets/game-card-WARP.png",
-            "large": "assets/game-card-WARP@2x.png"
+            "small": "assets/game-card-PLACEHOLDER.jpg",
+            "large": "assets/game-card-PLACEHOLDER@2x.jpg"
         },
         "banners": {
             "product": "assets/game-banner-WARP.png",

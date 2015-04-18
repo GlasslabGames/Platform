@@ -15,7 +15,9 @@ module.exports = {
     blockPremiumGamesBasicCourses: blockPremiumGamesBasicCourses,
     verifyCode:             verifyCode,
     verifyGameInCourse:     verifyGameInCourse,
-    verifyAccessToGameInCourse: verifyAccessToGameInCourse
+    verifyAccessToGameInCourse: verifyAccessToGameInCourse,
+    _updateCourseInfo:      _updateCourseInfo,
+    getGamesCourseMap:      getGamesCourseMap
 };
 
 var exampleOut = {}, exampleIn = {};
@@ -480,7 +482,7 @@ function _checkForGameAccess(licenseId, games, newGameIds){
                 }
                 var isAvailable;
                 _(gamesInfo).some(function (game) {
-                    if (game.price === "Premium" || game.price === "TBD" || game.price === "Coming Soon") {
+                    if (game.price === "Premium" || game.price === "Coming Soon") {
                         premiumGamesAssigned = true;
                         // if user on a license, but the game is not in the user's plan
                         // or if the user is not on a license, throw an error
@@ -638,6 +640,8 @@ function updateCourseInfo(req, res, next, serviceManager)
                 }
                 var licenseId = req.user.licenseId;
                 var userId = req.user.id;
+                //return _updateCourseInfo.call(this, courseData, oldCourseData, userId, licenseId);
+                // delete between comments if above commented out helper method works well
                 var licService = this.serviceManager.get("lic").service;
                 if(courseData.premiumGamesAssigned && !oldCourseData.premiumGamesAssigned){
                     if(licenseId){
@@ -675,6 +679,7 @@ function updateCourseInfo(req, res, next, serviceManager)
                 }
                 return this.updateCourse(userData, courseData);
             }.bind(this))
+            // delete above these comments if helper method works well
             .then(function(status){
                 if(status === "course.general"){
                     this.requestUtil.errorResponse(res, { key: "course.general"});
@@ -704,6 +709,68 @@ function updateCourseInfo(req, res, next, serviceManager)
         //this.requestUtil.errorResponse(res, "missing arguments or invalid");
         this.requestUtil.errorResponse(res, {key:"course.general"});
     }
+}
+
+// not tested yet. needed tool for deleting instructor accounts (plan to archive deleted instructor classes)
+function _updateCourseInfo(courseData, oldCourseData, userData){
+    return when.promise(function(resolve, reject){
+        var promise;
+        var userId = userData.id;
+        var licenseId = userData.licenseId;
+        var courseId = oldCourseData.id;
+        var licService = this.serviceManager.get("lic").service;
+        if(courseData.premiumGamesAssigned && !oldCourseData.premiumGamesAssigned){
+            if(licenseId){
+                promise = licService.myds.multiGetLicenseMap(licenseId, [userId])
+                    .then(function(results){
+                        var licenseMap = results[0];
+                        if(licenseMap.status === null){
+                            return "not in license";
+                        }
+                        return _canClassEnable.call(this, licenseId, courseData.games);
+                    }.bind(this))
+                    .then(function(state){
+                        if(state === "not in license"){
+                            return "not in license";
+                        }
+                        if(state){
+                            return licService.assignPremiumCourse(courseId, licenseId);
+                        }
+                        return "no game to enable";
+                    })
+                    .then(null, function(err){
+                        console.error("Enable Course Error -",err);
+                        return reject(err);
+                    });
+            } else{
+                resolve("not in license");
+                return;
+            }
+        }
+        if(!courseData.premiumGamesAssigned && oldCourseData.premiumGamesAssigned) {
+            promise = licService.unassignPremiumCourses(courseId, licenseId);
+        } else{
+            promise = Util.PromiseContinue();
+        }
+        promise
+            .then(function(status){
+                if(typeof status === "string"){
+                    return status;
+                }
+                return this.updateCourse(userData, courseData);
+            }.bind(this))
+            .then(function(status){
+                if(typeof status === "string"){
+                    resolve(status);
+                    return;
+                }
+                resolve();
+            })
+            .then(null, function(err){
+                console.error("Update Course Info Error -",err);
+                reject(err);
+            });
+    }.bind(this));
 }
 
 function _canClassEnable(licenseId, games){
@@ -757,8 +824,7 @@ exampleIn.updateGamesInCourse = [
     { "id": "AA-1", "assigned": true, "settings": {} },
     { "id": "PRIMA", "assigned": false, "settings": {} }
 ];
-function updateGamesInCourse(req, res, next, serviceManager)
-{
+function updateGamesInCourse(req, res, next, serviceManager){
     if( req.body &&
         _.isArray(req.body) ) {
         var userData = req.session.passport.user;
@@ -1119,5 +1185,22 @@ function verifyAccessToGameInCourse(req, res, next) {
         .then(null, function(err){
             console.error("Verify Access to Game In Course Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
+        }.bind(this));
+}
+
+function getGamesCourseMap(req, res){
+    if(!(req.user && req.user.role === "admin" && req.body && req.body.gameIds)){
+        this.requestUtil.errorResponse(res, { key: "lms.access.invalid"});
+        return;
+    }
+    var gameIds = req.body.gameIds;
+
+    this.telmStore.getGamesCourseMap(gameIds)
+        .then(function(gameCourseMap){
+            this.requestUtil.jsonResponse(res, { status: "ok", data: gameCourseMap});
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Game Course Map Error", err);
+            this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }

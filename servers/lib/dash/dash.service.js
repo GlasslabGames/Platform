@@ -86,13 +86,96 @@ return when.promise(function(resolve, reject) {
                 console.trace("DashService: Dash DS Error -", err);
                 this.stats.increment("error", "DashDataStore.Connect");
             }.bind(this))
-
+        .then(function(){
+            _buildLicPackages.call(this);
+        }.bind(this))
         .then(resolve, reject);
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
 
+function _buildLicPackages(){
+    return when.promise(function(resolve, reject){
+        var games = this._games;
+        var premiumGames = {
+            browserGames: [],
+            iPadGames: [],
+            downloadableGames: []
+        };
+        var freeGames = {
+            browserGames: [],
+            iPadGames: [],
+            downloadableGames: []
+        };
+        var gameInfo;
+        _(games).forEach(function(game){
+            gameInfo = game.info.basic;
+            if(!gameInfo.packages){
+                return;
+            }
+            var packages = gameInfo.packages.split(", ");
+            var price = gameInfo.price;
+            var release = gameInfo.release;
+            packages.forEach(function(package){
+                if(release === "live" || (release === "dev" && this.options.env !== "prod")){
+                    if(price === "Premium"){
+                        if(package === "Chromebook/Web Games"){
+                            premiumGames.browserGames.push(gameInfo.gameId);
+                        } else if(package === "iPad Games"){
+                            premiumGames.iPadGames.push(gameInfo.gameId);
+                        } else if(package === "PC/Mac Games") {
+                            premiumGames.downloadableGames.push(gameInfo.gameId);
+                        }
+                    } else if(price === "Free"){
+                        if(package === "Chromebook/Web Games"){
+                            freeGames.browserGames.push(gameInfo.gameId);
+                        } else if(package === "iPad Games"){
+                            freeGames.iPadGames.push(gameInfo.gameId);
+                        } else if(package === "PC/Mac Games") {
+                            freeGames.downloadableGames.push(gameInfo.gameId);
+                        }
+                    }
+                }
+            }.bind(this));
+        }.bind(this));
+        var lConst = this.serviceManager.get("lic").lib.Const;
+        //chromebook package
+        lConst.plan.chromebook.browserGames = freeGames.browserGames.concat(premiumGames.browserGames);
+        lConst.plan.chromebook.iPadGames = freeGames.iPadGames;
+        lConst.plan.chromebook.downloadableGames = freeGames.downloadableGames;
+        //ipad package
+        lConst.plan.ipad.browserGames = freeGames.browserGames;
+        lConst.plan.ipad.iPadGames = freeGames.iPadGames.concat(premiumGames.iPadGames);
+        lConst.plan.ipad.downloadableGames = freeGames.downloadableGames;
+        // pcMac package
+        lConst.plan.pcMac.browserGames = freeGames.browserGames.concat(premiumGames.browserGames);
+        lConst.plan.pcMac.iPadGames = freeGames.iPadGames;
+        lConst.plan.pcMac.downloadableGames = freeGames.downloadableGames.concat(premiumGames.downloadableGames);
+        //allGames package
+        lConst.plan.allGames.browserGames = freeGames.browserGames.concat(premiumGames.browserGames);
+        lConst.plan.allGames.iPadGames = freeGames.iPadGames.concat(premiumGames.iPadGames);
+        lConst.plan.allGames.downloadableGames = freeGames.downloadableGames.concat(premiumGames.downloadableGames);
+        //trial package
+        lConst.plan.trial.browserGames = freeGames.browserGames.concat(premiumGames.browserGames);
+        lConst.plan.trial.iPadGames = freeGames.iPadGames.concat(premiumGames.iPadGames);
+        lConst.plan.trial.downloadableGames = freeGames.downloadableGames.concat(premiumGames.downloadableGames);
+        //trialLegacy package
+        lConst.plan.trialLegacy.browserGames = freeGames.browserGames.concat(premiumGames.browserGames);
+        lConst.plan.trialLegacy.iPadGames = freeGames.iPadGames.concat(premiumGames.iPadGames);
+        lConst.plan.trialLegacy.downloadableGames = freeGames.downloadableGames.concat(premiumGames.downloadableGames);
+
+        //var file = "module.exports = " + JSON.stringify(lConst, null, 4) + ";\n";
+        //var directory = __dirname + "/../lic/lic.const.js";
+        //fs.writeFile(directory, file, function(err){
+        //    if(err){
+        //        console.log("Build Lic Packages Error -",err);
+        //        reject(err);
+        //    }
+        //    resolve();
+        //}.bind(this));
+    }.bind(this));
+}
 
 // TODO: replace this with DB lookup, return promise
 // promise transition complete.
@@ -183,7 +266,7 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
             if( this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
-                this._games[g].info.basic.price === "Free") {
+                this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD") {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
@@ -435,10 +518,8 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
 // couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
 DashService.prototype._loadGameFiles = function(){
     return when.promise(function(resolve, reject){
-        console.log( "loadgamefiles" );
         this.telmStore.getAllGameInformationAndGameAchievements()
             .then(function(results){
-                console.log( "success with load game files: " + results );
                 var ids;
                 var type;
                 var gameId;
@@ -474,13 +555,11 @@ DashService.prototype._loadGameFiles = function(){
 DashService.prototype._buildGamesObject = function(gameInformation, gameAchievements){
     return when.promise(function(resolve, reject){
         try {
-            console.log( "build games object" );
             var gameId;
             var index = 0;
             var achievements = [];
             var gameIds = [];
             _.forEach(gameInformation, function (data, gameId) {
-                console.log( "in a game"  + gameId);
                 gameIds.push(gameId);
                 this._games[gameId] = {};
                 if(gameAchievements[gameId] !== undefined){

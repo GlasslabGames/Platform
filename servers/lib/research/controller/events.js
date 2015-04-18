@@ -22,7 +22,7 @@ module.exports = {
 
  http://stage.argubotacademy.org:8090/research/events/get?gameId=AA-1&startDate=2014-05-01
 
- http://localhost:8090/research/events/get?gameId=AA-1&startDate=2014-05-01&endDate=2014-05-14&timeFormat="MM/DD/YYYY HH:mm:ss"
+ http://localhost:8090/research/events/get?gameId=AA-1&startDate=2014-05-01&endDate=2014-05-14&timeFormat="MM/DD/YYYY HH:mm:ss:SSS"
 
 
  required:
@@ -543,7 +543,7 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                         }
                         // check if runningArchive state is true.  If true, keep archiving, else stop archiving
                         if(!runningArchive){
-                            var stopTime = startDateTime.format("MM/DD/YYYY HH:mm:ss");
+                            var stopTime = startDateTime.format("MM/DD/YYYY HH:mm:ss:SSS");
                             var error = {'stop.archive': 'Call made to stop archive'};
                             error.stopTime = stopTime;
                             reject(error);
@@ -698,7 +698,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
     return when.promise(function(resolve, reject) {
         try {
             console.log( "Archiving: in _archiveEventsByLimit with sdt: " + startDateTime + ", edt: " + endDateTime );
-            var timeFormat = "MM/DD/YYYY HH:mm:ss";
+            var timeFormat = "MM/DD/YYYY HH:mm:ss:SSS";
             // moment object which will become parent scope's startDateTime when _archiveEventsByLimit resolves
             var updatedDateTime = startDateTime;
             var eventCount;
@@ -957,7 +957,7 @@ function getEventsByDate(req, res, next){
         endDate = endDate.utc();
 
 
-        var timeFormat = "MM/DD/YYYY HH:mm:ss";
+        var timeFormat = "MM/DD/YYYY HH:mm:ss:SSS";
         if(req.query.timeFormat) {
             timeFormat = req.query.timeFormat;
         }
@@ -1169,7 +1169,7 @@ return when.promise(function(resolve, reject) {
                                 row[r] = JSON.stringify(event);
                             } else {
                                 row[r] = parseItems(event, row[r], '{', '}');
-                                row[r] = parseItems(event.eventData, row[r], '[', ']');
+                                row[r] = parseItems(event.eventData, row[r], '\\', '\\');
                             }
                         }
 
