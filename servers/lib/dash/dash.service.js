@@ -266,7 +266,7 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
             if( this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
-                this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD") {
+                ( this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD" ) ) {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
