@@ -517,9 +517,11 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
 // now builds up _games from couchbase gi and ga documents, instead of from json files
 // couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
 DashService.prototype._loadGameFiles = function(){
+    console.log( "_loadGameFiles" );
     return when.promise(function(resolve, reject){
         this.telmStore.getAllGameInformationAndGameAchievements()
             .then(function(results){
+                console.log( "_loadGameFiles results: " + results );
                 var ids;
                 var type;
                 var gameId;
@@ -555,11 +557,13 @@ DashService.prototype._loadGameFiles = function(){
 DashService.prototype._buildGamesObject = function(gameInformation, gameAchievements){
     return when.promise(function(resolve, reject){
         try {
+            console.log( "_buildGamesObject" );
             var gameId;
             var index = 0;
             var achievements = [];
             var gameIds = [];
             _.forEach(gameInformation, function (data, gameId) {
+                console.log( "_buildGamesObject for game: " + gameId );
                 gameIds.push(gameId);
                 this._games[gameId] = {};
                 if(gameAchievements[gameId] !== undefined){
