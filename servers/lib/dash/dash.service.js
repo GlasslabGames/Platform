@@ -59,10 +59,10 @@ DashService.prototype.start = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     this.telmStore.connect()
-        .then(function(){
+        /*.then(function(){
                 // test connection to telemetry store
             return this._migrateGameFiles(true);
-        }.bind(this))
+        }.bind(this))*/
         .then(function(){
             return this._loadGameFiles();
         }.bind(this))
