@@ -59,7 +59,7 @@ function getSubscriptionPackages(req, res){
         });
         var seats = [];
         _(lConst.seats).forEach(function(value, key){
-            if(key !== "trial"){
+            if(key === "group" || key === "class" || key === "multiClass" || key === "school"){
                 seats.push(value);
             }
         });
@@ -408,6 +408,11 @@ function subscribeToLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    if(!(req.body.planInfo.seats === "group" || req.body.planInfo.seats === "class" ||
+        req.body.planInfo.seats === "multiClass" || req.body.planInfo.seats === "school")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
     if(req.user.licenseId){
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
@@ -570,6 +575,11 @@ function upgradeLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    if(!(req.body.planInfo.seats === "group" || req.body.planInfo.seats === "class" ||
+        req.body.planInfo.seats === "multiClass" || req.body.planInfo.seats === "school")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
@@ -721,6 +731,11 @@ function upgradeTrialLicense(req, res){
         return;
     }
     if(!(req.user.licenseStatus === "active" && req.user.licenseOwnerId === req.user.id && req.body.planInfo && req.body.schoolInfo)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.body.planInfo.seats === "group" || req.body.planInfo.seats === "class" ||
+        req.body.planInfo.seats === "multiClass" || req.body.planInfo.seats === "school")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -1385,6 +1400,11 @@ function subscribeToLicensePurchaseOrder(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
+    if(!(req.body.planInfo.seats === "group" || req.body.planInfo.seats === "class" ||
+        req.body.planInfo.seats === "multiClass" || req.body.planInfo.seats === "school")){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
     if(req.user.licenseId){
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
@@ -1622,6 +1642,11 @@ function upgradeTrialLicensePurchaseOrder(req, res){
         return;
     }
     if(!(req.body && req.body.purchaseOrderInfo && req.body.planInfo && req.body.schoolInfo)){
+        this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.body.planInfo.seats === "group" || req.body.planInfo.seats === "class" ||
+        req.body.planInfo.seats === "multiClass" || req.body.planInfo.seats === "school")){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -2911,7 +2936,7 @@ function subscribeToLicenseInternal(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            return _purchaseOrderSubscribe.call(this, userId, schoolInfo, planInfo, purchaseOrderInfo, action);
+            return _purchaseOrderSubscribe.call(this, user.id, schoolInfo, planInfo, purchaseOrderInfo, action);
         }.bind(this))
         .then(function(status){
             if(status === "po-pending"){
@@ -2954,7 +2979,7 @@ function subscribeToLicenseInternal(req, res){
             data.firstName = user.FIRST_NAME;
             data.lastName = user.LAST_NAME;
             template = "owner-subscribe-internal";
-            _sendEmailResponse.call(this, resellerEmail, data, req.protocol, req.headers.host, template);
+            _sendEmailResponse.call(this, userEmail, data, req.protocol, req.headers.host, template);
 
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
@@ -3428,7 +3453,7 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
         this.myds.getCustomerIdByUserId(userId)
             .then(function(id){
                 customerId = id;
-                var params = _buildStripeParams(planInfo, customerId, stripeInfo, email, name);
+                var params = _buildStripeParams.call(this, planInfo, customerId, stripeInfo, email, name);
                 var condition = !stripeInfo.id;
                 if(condition){
                     delete params.card;
