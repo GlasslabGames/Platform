@@ -307,7 +307,7 @@ function getBillingInfo(req, res){
             var license = results[1][0];
             var billingInfo = {};
             if(cardData){
-                billingInfo = _buildBillingInfo(cardData);
+                billingInfo = _buildBillingInfo.call(this, cardData);
             }
             // Get the account balance
             billingInfo.accountBalance = customer.account_balance;
@@ -371,7 +371,7 @@ function updateBillingInfo(req, res){
             var cardData = customer.cards.data[0];
             var billingInfo = {};
             if(cardData){
-                billingInfo = _buildBillingInfo(cardData);
+                billingInfo = _buildBillingInfo.call(this, cardData);
             }
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
@@ -632,7 +632,7 @@ function upgradeLicense(req, res){
             }
             var subscriptionId = license["subscription_id"];
             var autoRenew = license["auto_renew"] > 0;
-            var params = _buildStripeParams(planInfo, customerId, stripeInfo);
+            var params = _buildStripeParams.call(this, planInfo, customerId, stripeInfo);
             var promiseList = [];
             if(!params.card){
                 delete params.card;
@@ -1553,7 +1553,7 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                 licenseId = id;
                 //create entry in purchaseOrder table
                 // if purchase order number present, then user's purchase order status skips straight to received
-                var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, action);
+                var values = _preparePurchaseOrderInsert.call(this, userId, licenseId, purchaseOrderInfo, action);
                 //need to formalize table schema
                 return this.myds.insertToPurchaseOrderTable(values);
 
@@ -1753,7 +1753,7 @@ function upgradeLicensePurchaseOrder(req, res){
                 return results;
             }
             // create purchase order row in sql
-            var values = _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, action);
+            var values = _preparePurchaseOrderInsert.call(this, userId, licenseId, purchaseOrderInfo, action);
             return this.myds.insertToPurchaseOrderTable(values);
         }.bind(this))
         .then(function(purchaseOrderId){
@@ -2510,12 +2510,12 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
                 var ownerEmail = user["EMAIL"];
                 var license = results[1][0];
                 var expirationDate = license["expiration_date"];
-                var ownerData = _buildPurchaseOrderEmailData(subject, ownerName, ownerFirstName, ownerLastName, expirationDate, planInfo, purchaseOrderInfo);
-                var billerData = _buildPurchaseOrderEmailData(subject, billingName, billingName, false, expirationDate, planInfo, purchaseOrderInfo);
+                var ownerData = _buildPurchaseOrderEmailData.call(this, subject, ownerName, ownerFirstName, ownerLastName, expirationDate, planInfo, purchaseOrderInfo);
+                var billerData = _buildPurchaseOrderEmailData.call(this, subject, billingName, billingName, false, expirationDate, planInfo, purchaseOrderInfo);
                 ownerData.email = ownerEmail;
                 billerData.email = billingEmail;
                 resolve([ownerData, billerData]);
-            })
+            }.bind(this))
             .then(null, function(err){
                 console.error("Gather Purchase Order Email Data Error -",err);
                 reject(err);
