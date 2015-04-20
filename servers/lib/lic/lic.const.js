@@ -21,12 +21,16 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
-                "AA-1"
+                "AA-1",
+                "PVZ"
             ],
             "downloadableGames": [
+                "WARP"
             ],
             "planId": "chromebook"
         },
@@ -36,13 +40,17 @@ module.exports = {
             "description": "Games in this package are optimized to work on iPads.",
             "pricePerSeat": 3,
             "browserGames": [
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
+                "WARP"
             ],
             "planId": "ipad"
         },
@@ -54,13 +62,17 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
-                "AA-1"
+                "AA-1",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "pcMac"
         },
@@ -72,15 +84,19 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "allGames"
         },
@@ -92,15 +108,19 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "trial"
         },
@@ -112,15 +132,19 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "trialLegacy"
         }
