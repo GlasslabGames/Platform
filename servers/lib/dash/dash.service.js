@@ -59,10 +59,10 @@ DashService.prototype.start = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     this.telmStore.connect()
-        .then(function(){
+        /*.then(function(){
                 // test connection to telemetry store
             return this._migrateGameFiles(true);
-        }.bind(this))
+        }.bind(this))*/
         .then(function(){
             return this._loadGameFiles();
         }.bind(this))
@@ -266,7 +266,7 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
             if( this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
-                this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD") {
+                ( this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD" ) ) {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
@@ -517,9 +517,11 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
 // now builds up _games from couchbase gi and ga documents, instead of from json files
 // couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
 DashService.prototype._loadGameFiles = function(){
+    console.log( "_loadGameFiles" );
     return when.promise(function(resolve, reject){
         this.telmStore.getAllGameInformationAndGameAchievements()
             .then(function(results){
+                console.log( "_loadGameFiles results: " + results );
                 var ids;
                 var type;
                 var gameId;
@@ -555,11 +557,13 @@ DashService.prototype._loadGameFiles = function(){
 DashService.prototype._buildGamesObject = function(gameInformation, gameAchievements){
     return when.promise(function(resolve, reject){
         try {
+            console.log( "_buildGamesObject" );
             var gameId;
             var index = 0;
             var achievements = [];
             var gameIds = [];
             _.forEach(gameInformation, function (data, gameId) {
+                console.log( "_buildGamesObject for game: " + gameId );
                 gameIds.push(gameId);
                 this._games[gameId] = {};
                 if(gameAchievements[gameId] !== undefined){
