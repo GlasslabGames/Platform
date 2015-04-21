@@ -498,7 +498,7 @@ return when.promise(function(resolve, reject) {
         version:        0,
         date_created:   "NOW()",
         enabled:        1,
-        email:          this.ds.escape(userData.email),
+        email:          this.ds.escape(userData.email.toLowerCase()),
         first_name:     this.ds.escape(userData.firstName),
         last_name:      this.ds.escape(userData.lastName),
         institution_id: userData.institutionId ? this.ds.escape(userData.institutionId) : "NULL",
@@ -509,7 +509,7 @@ return when.promise(function(resolve, reject) {
         reset_code_status:      "NULL",
         system_role:    this.ds.escape(userData.role),
         user_type:      "NULL",
-        username:       this.ds.escape(userData.username),
+        username:       this.ds.escape(userData.username.toLowerCase()),
         collect_telemetry:      0,
         login_type:     this.ds.escape(userData.loginType),
         ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
@@ -595,7 +595,7 @@ return when.promise(function(resolve, reject) {
 
     var data = {
         username:       this.ds.escape(userData.username),
-        email:          this.ds.escape(userData.email),
+        email:          this.ds.escape(userData.email.toLowerCase()),
         first_name:     this.ds.escape(userData.firstName),
         last_name:      this.ds.escape(userData.lastName),
         ssoUsername:    this.ds.escape(userData.ssoUsername || ""),

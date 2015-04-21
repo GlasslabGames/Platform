@@ -465,6 +465,7 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
 };
 
 function _insertTempUserValueWithEmail(email){
+    email = email.toLowerCase();
     var value = "('" + email + "','" + email + "',0,NOW(),1,'temp','temp',NOW()," +
     "'pass','instructor',0,'glasslabv2','invited')";
     return value;
@@ -542,6 +543,21 @@ Lic_MySQL.prototype.getUserById = function(userId){
             });
     }.bind(this));
 };
+
+Lic_MySQL.prototype.getUserByEmail = function(email){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT * FROM GL_USER WHERE EMAIL = '" + email + "';";
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]);
+            })
+            .then(null, function(err){
+                console.error("Get User By Id Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
 
 Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, userIds, updateFields){
   return when.promise(function(resolve, reject){
