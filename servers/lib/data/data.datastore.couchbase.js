@@ -3018,7 +3018,17 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
             },
             function(err, results){
                 if(err){
-                    console.error("CouchBase TelemetryStore: Get Game Matches Error - ", err);
+                    if(err.code === 4101){
+                        var errors = [];
+                        for(var r in results) {
+                            if(results[r].error) {
+                                errors.push( results[r].error );
+                            }
+                        }
+                        console.error("CouchBase TelemetryStore: Get Game Matches: View Errors -", errors);
+                    } else{
+                        console.error("CouchBase TelemetryStore: Get Game Matches: View Error -", err);
+                    }
                     reject(err);
                     return;
                 }
@@ -3027,7 +3037,17 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
 
                 this._chunk_getMulti(keys, {}, function(err, results){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Get Game Matches Error -", err);
+                        if(err.code === 4101){
+                            var errors = [];
+                            for(var r in results) {
+                                if(results[r].error) {
+                                    errors.push( results[r].error );
+                                }
+                            }
+                            console.error("CouchBase TelemetryStore: Get Game Matches: Multi Get Errors -", errors);
+                        } else{
+                            console.error("CouchBase TelemetryStore: Get Game Matches: Multi Get Error -", err);
+                        }
                         reject(err);
                         return;
                     }
