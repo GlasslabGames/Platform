@@ -326,7 +326,10 @@ var gdv_getAllMatches = function(doc, meta){
     var values = meta.id.split(':');
     if((values[0] === 'gd') &&
         (values[1] === 'm')){
-        emit( meta.id );
+        var players = doc.data.players;
+        for(var userId in players){
+            emit( userId );
+        }
     }
 };
 
@@ -3011,10 +3014,10 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
     return when.promise(function(resolve, reject){
 
         var map = "getAllMatches";
-        var key = "gd:m:" + gameId;
+        var userKey = "" + userId;
         this.client.view("telemetry", map).query(
             {
-                startkey: key
+                key: userKey
             },
             function(err, results){
                 if(err){
@@ -3053,20 +3056,11 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId)
                     }
                     var output = {};
                     var value;
-                    var players;
                     var matchId;
-                    var components;
                     _.forEach(results, function(match, key){
                         value = match.value;
-                        if(typeof value === "string"){
-                            value = JSON.parse(value);
-                        }
-                        players = value.data.players;
-                        if(players[userId]){
-                            components = key.split(":");
-                            matchId = components[3];
-                            output[matchId] = value;
-                        }
+                        matchId = value.id;
+                        output[matchId] = value;
                     });
                     resolve(output);
                 }.bind(this));
