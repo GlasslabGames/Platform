@@ -64,7 +64,7 @@
             "trigger": "endSession"
         },
         {
-            "enabled": false,
+            "enabled": true,
             "id": "sowo",
             "dataProcessScope": "gameSession",
             "engine": "javascript",

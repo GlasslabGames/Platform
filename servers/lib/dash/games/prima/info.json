@@ -69,7 +69,7 @@
     },
     "assessment": [
         {
-            "enabled": false,
+            "enabled": true,
             "id": "sowo",
             "dataProcessScope": "gameSession",
             "engine": "javascript",
