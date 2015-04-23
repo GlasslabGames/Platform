@@ -26,7 +26,7 @@ Directory Structure
 Controllers
 ========
 
-Below is listed each controller in the data service, followed by a listing of all included api methods.
+Below is listed each controller in the data service, followed by a listing of all api methods.
 APIs from controllers prefixed with _ are accessed through the routes.internal.map.js file.
 All other controller api methods are contained in the routes.external.map.js file.
 Use the below link to access more details about data apis.

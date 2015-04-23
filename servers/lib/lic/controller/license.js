@@ -16,8 +16,8 @@ module.exports = {
     upgradeLicense: upgradeLicense,
     upgradeTrialLicense: upgradeTrialLicense,
     validatePromoCode: validatePromoCode,
-    cancelLicenseAutoRenew: cancelLicenseAutoRenew,
-    enableLicenseAutoRenew: enableLicenseAutoRenew,
+    //cancelLicenseAutoRenew: cancelLicenseAutoRenew,
+    //enableLicenseAutoRenew: enableLicenseAutoRenew,
     addTeachersToLicense: addTeachersToLicense,
     setLicenseMapStatusToActive: setLicenseMapStatusToActive,
     setLicenseMapStatusToNull: setLicenseMapStatusToNull,
@@ -39,9 +39,9 @@ module.exports = {
     inspectLicenses: inspectLicenses,
     trialMoveToTeacher: trialMoveToTeacher,
     // vestigial apis
-    verifyLicense:   verifyLicense,
-    registerLicense: registerLicense,
-    getLicenses:     getLicenses
+    //verifyLicense:   verifyLicense,
+    //registerLicense: registerLicense,
+    //getLicenses:     getLicenses
 };
 
 // provides license package information for the subscription/packages page
