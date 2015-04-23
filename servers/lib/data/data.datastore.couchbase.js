@@ -326,7 +326,12 @@ var gdv_getAllMatches = function(doc, meta){
     var values = meta.id.split(':');
     if((values[0] === 'gd') &&
         (values[1] === 'm')){
-        emit( meta.id );
+        var players = doc.data.players;
+        var status;
+        for(var userId in players){
+            status = players[userId].playerStatus;
+            emit( userId, status );
+        }
     }
 };
 
@@ -3007,46 +3012,62 @@ TelemDS_Couchbase.prototype._chunk_setMulti = function(kv, options, callback){
         });
 };
 
-TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId){
+TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId, status){
     return when.promise(function(resolve, reject){
 
         var map = "getAllMatches";
-        var key = "gd:m:" + gameId;
+        var userKey = "" + userId;
         this.client.view("telemetry", map).query(
             {
-                startkey: key
+                key: userKey
             },
             function(err, results){
                 if(err){
-                    console.error("CouchBase TelemetryStore: Get Game Matches Error - ", err);
+                    if(err.code === 4101){
+                        var errors = [];
+                        for(var r in results) {
+                            if(results[r].error) {
+                                errors.push( results[r].error );
+                            }
+                        }
+                        console.error("CouchBase TelemetryStore: Get Game Matches: View Errors -", errors);
+                    } else{
+                        console.error("CouchBase TelemetryStore: Get Game Matches: View Error -", err);
+                    }
                     reject(err);
                     return;
                 }
 
-                var keys = _.pluck(results, "id");
+                var keys = [];
+                _(results).forEach(function(result){
+                    if(status === "all" || result.value === status){
+                        keys.push(result.id);
+                    }
+                });
 
                 this._chunk_getMulti(keys, {}, function(err, results){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Get Game Matches Error -", err);
+                        if(err.code === 4101){
+                            var errors = [];
+                            for(var r in results) {
+                                if(results[r].error) {
+                                    errors.push( results[r].error );
+                                }
+                            }
+                            console.error("CouchBase TelemetryStore: Get Game Matches: Multi Get Errors -", errors);
+                        } else{
+                            console.error("CouchBase TelemetryStore: Get Game Matches: Multi Get Error -", err);
+                        }
                         reject(err);
                         return;
                     }
                     var output = {};
                     var value;
-                    var players;
                     var matchId;
-                    var components;
                     _.forEach(results, function(match, key){
                         value = match.value;
-                        if(typeof value === "string"){
-                            value = JSON.parse(value);
-                        }
-                        players = value.data.players;
-                        if(players[userId]){
-                            components = key.split(":");
-                            matchId = components[3];
-                            output[matchId] = value;
-                        }
+                        matchId = value.id;
+                        output[matchId] = value;
                     });
                     resolve(output);
                 }.bind(this));

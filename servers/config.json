@@ -177,5 +177,8 @@
         "connect": "$host", "//": "$host is default, returns req.headers.host",
         "protocol": "http", "//": "https or http, :// will be appended automatically",
         "simcity": "https", "//": "for simcity testing only, remove me when done..."
+    },
+    "stripe": {
+        "env": "test"
     }
 }

@@ -608,7 +608,7 @@ function pollMatches(req, res){
             } else if(!info.basic.settings.canCreateMatches){
                 return "cannot create matches";
             }
-            return this.cbds.getAllGameMatchesByUserId(gameId, userId);
+            return this.cbds.getAllGameMatchesByUserId(gameId, userId, status);
         }.bind(this))
         .then(function(matches){
             if(matches === "no object"){
