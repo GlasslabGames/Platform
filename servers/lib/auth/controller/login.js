@@ -102,6 +102,10 @@ function glassLabLogin_LogIn(req, user) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
+    console.log("define user session");
+    if(req.session === undefined){
+        console.log("session object undefined");
+    }
     user.sessionId = req.session.id;
 
     // login
