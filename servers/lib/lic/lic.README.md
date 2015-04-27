@@ -21,7 +21,7 @@ Directory Structure
 Controllers
 ========
 
-All api methods are accessible through the routes.external.map.js file.
+All api methods are accessible through the external server, and can be seen in the routes.external.map.js file.
 
 ## license.js
 

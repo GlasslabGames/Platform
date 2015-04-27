@@ -16,7 +16,7 @@ Directory Structure
 Controllers
 ========
 
-Apis in config.js can be seen in the routes.internal.map.js.
+Apis in config.js can be accessed via the internal server and can be seen in the routes.internal.map.js.
 
 ## config.js
 

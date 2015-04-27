@@ -34,7 +34,8 @@ Directory Structure
 Controllers
 ========
 
-The _user controler uses the routes.internal.map.js file to reference their apis.  All other controllers use the routes.external.map.js file.
+The _user controler's api is accessed through the internal server, and can be seen in the routes.internal.map.js file to reference their apis.
+All other controller apis are accessed via the external server and can be found in the routes.external.map.js file.
 
 ## _user.js
 
