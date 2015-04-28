@@ -16,8 +16,8 @@ module.exports = {
     upgradeLicense: upgradeLicense,
     upgradeTrialLicense: upgradeTrialLicense,
     validatePromoCode: validatePromoCode,
-    cancelLicenseAutoRenew: cancelLicenseAutoRenew,
-    enableLicenseAutoRenew: enableLicenseAutoRenew,
+    //cancelLicenseAutoRenew: cancelLicenseAutoRenew,
+    //enableLicenseAutoRenew: enableLicenseAutoRenew,
     addTeachersToLicense: addTeachersToLicense,
     setLicenseMapStatusToActive: setLicenseMapStatusToActive,
     setLicenseMapStatusToNull: setLicenseMapStatusToNull,
@@ -37,11 +37,11 @@ module.exports = {
     cancelLicenseInternal: cancelLicenseInternal,
     subscribeToLicenseInternal: subscribeToLicenseInternal,
     inspectLicenses: inspectLicenses,
-    trialMoveToTeacher: trialMoveToTeacher,
+    trialMoveToTeacher: trialMoveToTeacher
     // vestigial apis
-    verifyLicense:   verifyLicense,
-    registerLicense: registerLicense,
-    getLicenses:     getLicenses
+    //verifyLicense:   verifyLicense,
+    //registerLicense: registerLicense,
+    //getLicenses:     getLicenses
 };
 
 // provides license package information for the subscription/packages page
@@ -2969,9 +2969,11 @@ function subscribeToLicenseInternal(req, res){
 
             var resellerEmail = purchaseOrderInfo.email;
             data = {};
-            data.subject =  "Successful Subscription!";
+            data.subject =  "You've Successfully Added a License Owner!";
             data.firstName = purchaseOrderInfo.firstName;
             data.lastName = purchaseOrderInfo.lastName;
+            data.ownerFirstName = user.FIRST_NAME;
+            data.ownerLastName = user.LAST_NAME;
             template = "reseller-subscribe-internal";
             _sendEmailResponse.call(this, resellerEmail, data, req.protocol, req.headers.host, template);
 

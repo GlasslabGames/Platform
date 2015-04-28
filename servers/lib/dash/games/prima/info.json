@@ -68,6 +68,79 @@
         }
     },
     "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "wo1": {
+                    "name": "Trouble with Gameplay Knowledge",
+                    "description": "The player may not understand how the game works - they needed four or more attempts to finish one or more of the introductory challenges."
+                },
+                "wo2": {
+                    "name": "Trouble with Shipping Activities",
+                    "description": "The player has experienced multiple failures when shipping creatures."
+                },
+                "wo3": {
+                    "name": "Trouble Feeding Creatures",
+                    "description": "The player has experienced multiple failures when feeding creatures."
+                },
+                "wo4": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: ND types."
+                },
+                "wo5": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: MD types."
+                },
+                "wo6": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: MS types."
+                },
+                "wo7": {
+                    "name": "Trouble with Complex Skills",
+                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: NS types."
+                },
+                "wo8": {
+                    "name": "Trouble with Advanced Skills",
+                    "description": "Difficulty with \"advanced\" skills: player has been unsuccessful working with advanced problem types: MT types."
+                },
+                "so1": {
+                    "name": "Good Gameplay Knowledge",
+                    "description": "The player knows how to play the game and use it's features."
+                },
+                "so2": {
+                    "name": "Successful Feeding!",
+                    "description": "The player successfully fed their first pen of creatures."
+                },
+                "so3": {
+                    "name": "Successful Shipment!",
+                    "description": "This player has successfully made their first shipment of creatures."
+                },
+                "so4": {
+                    "name": "Success with Early Skills",
+                    "description": "Player successfully completed the first two challenge types on their first attempt."
+                },
+                "so5": {
+                    "name": "Success with Complex Skills",
+                    "description": "Player successfully completed the second two challenge types on their first attempt."
+                },
+                "so6": {
+                    "name": "Success with Advanced Skills",
+                    "description": "Player successfully completed the first advanced challenge type on their first attempt."
+                },
+                "so7": {
+                    "name": "Early Mastery!",
+                    "description": "Master performance! The player has completed Part I and Part II of the game without any mistakes!"
+                },
+                "so8": {
+                    "name": "Completed Advanced Challenges!",
+                    "description": "Super performance! This player successfully completed one or more advanced level challenges."
+                }
+            }
+        }
     ],
     "reports": {
         "list": [

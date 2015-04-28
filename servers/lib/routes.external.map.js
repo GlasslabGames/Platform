@@ -560,26 +560,26 @@ module.exports = {
                 get: "validatePromoCode"
             }
         },
-        {
-            requireAuth: true,
-            requireHttps: true,
-            api: "/api/v2/license/cancel",
-            service: "lic",
-            controller: "license",
-            method: {
-                post: "cancelLicenseAutoRenew"
-            }
-        },
-        {
-            requireAuth: true,
-            requireHttps: true,
-            api: "/api/v2/license/renew",
-            service: "lic",
-            controller: "license",
-            method: {
-                post: "enableLicenseAutoRenew"
-            }
-        },
+        //{
+        //    requireAuth: true,
+        //    requireHttps: true,
+        //    api: "/api/v2/license/cancel",
+        //    service: "lic",
+        //    controller: "license",
+        //    method: {
+        //        post: "cancelLicenseAutoRenew"
+        //    }
+        //},
+        //{
+        //    requireAuth: true,
+        //    requireHttps: true,
+        //    api: "/api/v2/license/renew",
+        //    service: "lic",
+        //    controller: "license",
+        //    method: {
+        //        post: "enableLicenseAutoRenew"
+        //    }
+        //},
         {
             requireAuth: true,
             requireHttps: true,
@@ -771,33 +771,33 @@ module.exports = {
             }
         },
         // old api methods, not in use
-        {
-            requireAuth: true,
-            api: "/api/v2/license/:licenseKey/verify",
-            service: "lic",
-            controller: "license",
-            method: {
-                get: "verifyLicense"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/license/current",
-            service: "lic",
-            controller: "license",
-            method: {
-                get: "getLicenses"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/license/register",
-            service: "lic",
-            controller: "license",
-            method: {
-                post: "registerLicense"
-            }
-        },
+        //{
+        //    requireAuth: true,
+        //    api: "/api/v2/license/:licenseKey/verify",
+        //    service: "lic",
+        //    controller: "license",
+        //    method: {
+        //        get: "verifyLicense"
+        //    }
+        //},
+        //{
+        //    requireAuth: true,
+        //    api: "/api/v2/license/current",
+        //    service: "lic",
+        //    controller: "license",
+        //    method: {
+        //        get: "getLicenses"
+        //    }
+        //},
+        //{
+        //    requireAuth: true,
+        //    api: "/api/v2/license/register",
+        //    service: "lic",
+        //    controller: "license",
+        //    method: {
+        //        post: "registerLicense"
+        //    }
+        //},
         // ---------------------------------------------------
         {
             api: "/api/v2/auth/user/register",
