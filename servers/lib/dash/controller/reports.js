@@ -630,9 +630,16 @@ function _getStandards(req, res, reportId, gameId, courseId) {
     var assessmentId = reportId;
     var currentAssessmentData;
     var outAssessmentData;
-
-    var lmsService = this.serviceManager.get("lms").service;
-    lmsService.getStudentsOfCourse(courseId)
+    var assessment;
+    this.getGameAssessmentInfo(gameId)
+        .then(function(results){
+            if(!results){
+                return;
+            }
+            assessment = results;
+            var lmsService = this.serviceManager.get("lms").service;
+            return lmsService.getStudentsOfCourse(courseId);
+        }.bind(this))
         .then(function(users){
             if(!users){
                 return;
@@ -654,13 +661,6 @@ function _getStandards(req, res, reportId, gameId, courseId) {
 
                         currentAssessmentData = assessmentData;
 
-                        return this.getGameAssessmentInfo(gameId);
-
-                    }.bind(this))
-                    .then(function(assessment) {
-                        if(!assessment){
-                            return;
-                        }
                         for(var i = 0; i < assessment.length; i++){
                             if(assessment[i].id === assessmentId){
 
