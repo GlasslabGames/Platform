@@ -79,7 +79,14 @@
                     "description": "Outstanding performance at identifying weaknesses of claim-data pairs."
                 }
             }
-        }
+        },
+      {
+        "enabled": false,
+        "id": "standards",
+        "dataProcessScope": "gameSession",
+        "engine": "standards",
+        "trigger": "activity"
+      }
     ],
     "reports": {
         "list": [
