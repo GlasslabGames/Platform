@@ -62,6 +62,99 @@
             "dataProcessScope": "gameSession",
             "engine": "netica",
             "trigger": "endSession"
+        },
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "wo1": {
+                    "name": "Sunflowers in front of lane",
+                    "description": "Student places sunflowers near the front of the lane where they are more vulnerable."
+                },
+                "wo2": {
+                    "name": "Walnuts in back of lane",
+                    "description": "Student places walnuts near the back of the lane where they can't protect other plants."
+                },
+                "wo3": {
+                    "name": "Potato mines diffused",
+                    "description": "Student places potato mines such that they are diffused before arming."
+                },
+                "wo4": {
+                    "name": "Not enough sunflowers",
+                    "description": "Student places less than 4 sunflowers before the second wave of zombies."
+                },
+                "wo5": {
+                    "name": "Not collecting sun",
+                    "description": "Student collects less than (RATIO * 100) % of sun produced."
+                },
+                "wo6": {
+                    "name": "Inefficient plant food use",
+                    "description": "Student uses plant food in situations that don't require it."
+                },
+                "wo7": {
+                    "name": "Losing to difficult zombies",
+                    "description": "Student is defeated when fast, tough, or many zombies are in a lane."
+                },
+                "wo8": {
+                    "name": "Not improving plant layout",
+                    "description": "Student is not trying a more effective plant layout when retrying a level."
+                },
+                "wo9": {
+                    "name": "Ineffective use of shovel",
+                    "description": "Student is not using the shovel to strengthen their lanes."
+                },
+                "wo10": {
+                    "name": "Not replacing eaten plants",
+                    "description": "Student is not replacing plants quickly after they are eaten."
+                },
+                "so1": {
+                    "name": "Sunflowers protected",
+                    "description": "Student places sunflowers near the back of the lane where they are less vulnerable."
+                },
+                "so2": {
+                    "name": "Walnuts protecting",
+                    "description": "Student places walnuts near the front of the lane where they can protect other plants."
+                },
+                "so3": {
+                    "name": "Potato mines working",
+                    "description": "Student places potato mines such that they arm before zombies reach them."
+                },
+                "so4": {
+                    "name": "Plenty of sun",
+                    "description": "Student places more than 3 sunflowers before the second wave of zombies."
+                },
+                "so5": {
+                    "name": "Sun collector",
+                    "description": "Student collects more than (RATIO * 100) % of sun produced."
+                },
+                "so6": {
+                    "name": "Efficient plant food use",
+                    "description": "Student uses plant food in situations that require it."
+                },
+                "so7": {
+                    "name": "Overcoming difficult zombies",
+                    "description": "Student successfully stops fast, tough, or many zombies are in a lane."
+                },
+                "so8": {
+                    "name": "Improving plant layout",
+                    "description": "Student is trying a more effective plant layout when retrying a level."
+                },
+                "so9": {
+                    "name": "Efficient use of shovel",
+                    "description": "Student is using the shovel to strengthen their lanes."
+                },
+                "so10": {
+                    "name": "Effectively replacing eaten plants",
+                    "description": "Student is replacing plants quickly after they are eaten."
+                },
+                "so11": {
+                    "name": "Defeated Gargantuar!",
+                    "description": "Student has successfully defeated the Gargantuar zombie without using a lawnmower."
+                }
+            }
         }
     ],
     "reports": {
@@ -135,6 +228,261 @@
                         }
                     ]
                 }
+            },
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-PVZ.png",
+                    "skinny": "assets/skinny-banner-PVZ.png",
+                    "large": "assets/skinny-banner-PVZ@2x.png"
+                },
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "title": "Sunflowers protected",
+                                    "description": "Student places sunflowers near the back of the lane where they are less vulnerable."
+                                },
+                                {
+                                    "id": "so2",
+                                    "title": "Walnuts protecting",
+                                    "description": "Student places walnuts near the front of the lane where they can protect other plants."
+                                },
+                                {
+                                    "id": "so3",
+                                    "title": "Potato mines working",
+                                    "description": "Student places potato mines such that they arm before zombies reach them."
+                                },
+                                {
+                                    "id": "so4",
+                                    "title": "Plenty of sun",
+                                    "description": "Student places more than 3 sunflowers before the second wave of zombies."
+                                },
+                                {
+                                    "id": "so5",
+                                    "title": "Sun collector",
+                                    "description": "Student collects more than (RATIO * 100) % of sun produced."
+                                },
+                                {
+                                    "id": "so6",
+                                    "title": "Efficient plant food use",
+                                    "description": "Student uses plant food in situations that require it."
+                                },
+                                {
+                                    "id": "so7",
+                                    "title": "Overcoming difficult zombies",
+                                    "description": "Student successfully stops fast, tough, or many zombies are in a lane."
+                                },
+                                {
+                                    "id": "so8",
+                                    "title": "Improving plant layout",
+                                    "description": "Student is trying a more effective plant layout when retrying a level."
+                                },
+                                {
+                                    "id": "so9",
+                                    "title": "Efficient use of shovel",
+                                    "description": "Student is using the shovel to strengthen their lanes."
+                                },
+                                {
+                                    "id": "so10",
+                                    "title": "Effectively replacing eaten plants",
+                                    "description": "Student is replacing plants quickly after they are eaten."
+                                },
+                                {
+                                    "id": "so11",
+                                    "title": "Defeated Gargantuar!",
+                                    "description": "Student has successfully defeated the Gargantuar zombie without using a lawnmower."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "title": "Sunflowers in front of lane",
+                                    "description": "Student places sunflowers near the front of the lane where they are more vulnerable.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student why they are placing sunflowers near the front to get a sense of their thinking. Help the student to understand the givens by asking:",
+                                        "actionPoints":
+                                            [
+                                                "What do sunflowers do?",
+                                                "Can they attack the zombies?",
+                                                "What happens if the zombies attack the sunflowers?",
+                                                "Where does it make the most sense to plant the sunflowers? Why?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo2",
+                                    "title": "Walnuts in back of lane",
+                                    "description": "Student places walnuts near the back of the lane where they can't protect other plants.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student why they are placing the walnut near the back to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
+                                        "actionPoints":
+                                            [
+                                                "What do walnuts do?",
+                                                "Can they attack the zombies?",
+                                                "What happens if the zombies attack the walnuts?",
+                                                "Where does it make the most sense to plant the walnuts? Why?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo3",
+                                    "title": "Potato mines diffused",
+                                    "description": "Student places potato mines such that they are diffused before arming.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student how they are using potato mines to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
+                                        "actionPoints":
+                                            [
+                                                "What do potato mines do?",
+                                                "Can zombies eat the mines?",
+                                                "How can you tell if a mine will defeat a zombie or be eaten?",
+                                                "Where does it make the most sense to plant the potato mines? Why?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "Not enough sunflowers",
+                                    "description": "Student places less than 4 sunflowers before the second wave of zombies.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student what the purpose of sunflowers is to get a sense of their thinking. Help the student to feel confident in exploring more options by asking:",
+                                        "actionPoints":
+                                            [
+                                                "What happens if you don't plant any sunflowers?",
+                                                "What happens if you only plant sunflowers?",
+                                                "What is the best number of sunflowers to plant? Why?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo5",
+                                    "title": "Not collecting sun",
+                                    "description": "Student collects less than (RATIO * 100) % of sun produced.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student what the purpose of the suns are to get a sense of their thinking. Help the student to understand the givens by asking:",
+                                        "actionPoints":
+                                            [
+                                                "Why do you need to collect suns?",
+                                                "What happens if you don't collect it?",
+                                                "How long do you have before it disappears?",
+                                                "What is the ideal strategy when it comes to picking up suns? Why?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo6",
+                                    "title": "Inefficient plant food use",
+                                    "description": "Student uses plant food in situations that don't require it.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student what plant food is for to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
+                                        "actionPoints":
+                                            [
+                                                "When do you tend to use it?",
+                                                "How many times can you use it on a level?",
+                                                "Does it work differently depending on the type of plant?",
+                                                "When does it make sense to use it on one plant versus another?",
+                                                "What situations make the most sense for using plant food?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo7",
+                                    "title": "Losing to difficult zombies",
+                                    "description": "Student is defeated when fast, tough, or many zombies are in a lane.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student what has been defeating them and how they have tried to defend against it to get a sense of their tihnking. Help the student to plan effectively by asking:",
+                                        "actionPoints":
+                                            [
+                                                "What is your defense for large groups of zombies in one lane?",
+                                                "What is your defense for tough zombies?",
+                                                "What is your defense for fast zombies?",
+                                                "What else can you try to use to stop them?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo8",
+                                    "title": "Not improving plant layout",
+                                    "description": "Student is not trying a more effective plant layout when retrying a level.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student how they like to arrange their plants to get a sense of their thinking. Help the student to plan effectively by asking:",
+                                        "actionPoints":
+                                            [
+                                                "What types of plants do you use?",
+                                                "Where do you like to plant them?",
+                                                "What would happen if you placed that plant more toward the front or the back?",
+                                                "Is there a better way to arrange the plants?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo9",
+                                    "title": "Ineffective use of shovel",
+                                    "description": "Student is not using the shovel to strengthen their lanes.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student how they use the shovel to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
+                                        "actionPoints":
+                                            [
+                                                "Why would you want to remove a plant?",
+                                                "Is there a time when a plant isn't being effective? Why?",
+                                                "Is there a time when you want to replace a plant with a different one? Why?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                },
+                                {
+                                    "id": "wo10",
+                                    "title": "Not replacing eaten plants",
+                                    "description": "Student is not replacing plants quickly after they are eaten.",
+                                    "whatNow":
+                                    {
+                                        "intro": "Ask the student what they do when a plant gets eaten to get a sense of their thinking. Help the student to evaluate their progress by asking:",
+                                        "actionPoints":
+                                            [
+                                                "What happens when a zombie eats one of your plants?",
+                                                "What does it mean for your overall progress?",
+                                                "How can you maintain the safety of that lane?",
+                                                "How does it impact your sun?",
+                                                "What is the best way to deal with a plant being eaten?"
+                                            ],
+                                        "summary": ""
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             }
         ]
     },
