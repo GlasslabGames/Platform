@@ -58,7 +58,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/14/index.html?sdkURL=http://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/14/index.html?sdkURL=http://localhost:8001",
                 "format": "html",
                 "size": {
                     "width": 800,
@@ -140,6 +140,13 @@
                     "description": "Super performance! This player successfully completed one or more advanced level challenges."
                 }
             }
+        },
+        {
+            "enabled": false,
+            "id": "standards",
+            "dataProcessScope": "gameSession",
+            "engine": "standards",
+            "trigger": "activity"
         }
     ],
     "reports": {
