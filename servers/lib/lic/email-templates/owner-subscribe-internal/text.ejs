@@ -2,9 +2,14 @@ Hello {{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }},
 
 Great news!
 
-You are now enrolled as a premium license owner on GlassLab Games - a growing library of the best in high-impact learning and formative assessment games. Each game comes with real-time reports and instructional resources that help make learning visible.
+You have been enrolled as a premium license owner on GlassLab Games - a growing library of the best in high-impact learning and formative assessment games. Each game comes with real-time reports and instructional resources that help make learning visible.
 
-Feel free to use your [Subscription Manager (link)] to check and/or edit your account info at any time.
+{{ } if(user.subscribe){ }}
+<b>To complete creating your GlassLab Games account</b>, please click on the link below to confirm your email address:
+   {{= user.host }}/verify-email/{{= user.code }}
+{{ } }}
+
+Feel free to use your premium manager to check and/or edit your account info at any time.
 
 If you need any help getting started, please check out the FAQ or Getting Started Guides located on each game page. You can also contact our support team directly!
 

@@ -3,9 +3,15 @@ Hello <span>{{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }}</
 Great news!
 <br />
 <br />
-You are now enrolled as a premium license owner on GlassLab Games - a growing library of the best in high-impact learning and formative assessment games. Each game comes with real-time reports and instructional resources that help make learning visible.
+You have been enrolled as a premium license owner on GlassLab Games - a growing library of the best in high-impact learning and formative assessment games. Each game comes with real-time reports and instructional resources that help make learning visible.
 <br />
 <br />
+{{ } if(user.subscribe){ }}
+    <b>To complete creating your GlassLab Games account</b>, please click on the link below to confirm your email address:
+    <a href="{{= user.host }}/verify-email/{{= user.code }}">{{= user.host }}/verify-email/{{= user.code }}</a>
+    <br />
+    <br />
+{{ } }}
 Feel free to use your premium manager to check and/or edit your account info at any time.
 <br />
 <br />
