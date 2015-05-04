@@ -1,1 +1,28 @@
-Yay.  Welcome.  You go license.
+Hello <span>{{= data.firstName }}{{= data.lastName ? ' '+ data.lastName : '' }}</span>,<br />
+<br />
+Great news!
+<br />
+<br />
+You have been enrolled as a premium license owner on GlassLab Games - a growing library of the best in high-impact learning and formative assessment games. Each game comes with real-time reports and instructional resources that help make learning visible.
+<br />
+<br />
+{{ if(data.code){ }}
+    <b>To complete creating your GlassLab Games account</b>, please click on the link below to confirm your email address:
+    <br />
+    <br />
+    <a href="{{= data.host }}/verify-email/{{= data.code }}">{{= data.host }}/verify-email/{{= data.code }}</a>
+    <br />
+    <br />
+{{ } }}
+Feel free to use your premium manager to check and/or edit your account info at any time.
+<br />
+<br />
+If you need any help getting started, please check out the <a href="glasslab.zendesk.com">FAQ</a> or <a href="mailto:support@glasslabgames.org">contact our support team</a> directly!
+<br />
+<br />
+Thanks again for bringing the best in high-impact learning games to your students!
+<br />
+<br />
+
+Sincerely,<br />
+Your Best Friends at GlassLab

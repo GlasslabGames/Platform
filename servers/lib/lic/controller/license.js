@@ -2928,7 +2928,7 @@ function subscribeToLicenseInternal(req, res){
                 action = "subscribe";
             } else if(license.package_type === "trial"){
                 action = "trial upgrade";
-                return _endLicense.call(this, userId, license.id, false);
+                return _endLicense.call(this, user.id, license.id, false);
             } else{
                 return "already on license";
             }
@@ -2978,9 +2978,13 @@ function subscribeToLicenseInternal(req, res){
             _sendEmailResponse.call(this, resellerEmail, data, req.protocol, req.headers.host, template);
 
             data = {};
-            data.subject = "Successful Subscription!";
             data.firstName = user.FIRST_NAME;
             data.lastName = user.LAST_NAME;
+            data.subject = "You Have Premium Access!";
+            if(user["VERIFY_CODE_STATUS"] !== "verified"){
+                data.code = user["VERIFY_CODE"];
+                data.host = req.protocol+"://"+req.headers.host;
+            }
             template = "owner-subscribe-internal";
             _sendEmailResponse.call(this, userEmail, data, req.protocol, req.headers.host, template);
 
