@@ -1,4 +1,4 @@
-Hello <span>{{= user.firstName }}{{= user.lastName ? ' '+user.lastName : '' }}</span>,<br />
+Hello <span>{{= data.firstName }}{{= data.lastName ? ' '+ data.lastName : '' }}</span>,<br />
 <br />
 Great news!
 <br />
@@ -6,9 +6,11 @@ Great news!
 You have been enrolled as a premium license owner on GlassLab Games - a growing library of the best in high-impact learning and formative assessment games. Each game comes with real-time reports and instructional resources that help make learning visible.
 <br />
 <br />
-{{ } if(user.subscribe){ }}
+{{ if(data.code){ }}
     <b>To complete creating your GlassLab Games account</b>, please click on the link below to confirm your email address:
-    <a href="{{= user.host }}/verify-email/{{= user.code }}">{{= user.host }}/verify-email/{{= user.code }}</a>
+    <br />
+    <br />
+    <a href="{{= data.host }}/verify-email/{{= data.code }}">{{= data.host }}/verify-email/{{= data.code }}</a>
     <br />
     <br />
 {{ } }}

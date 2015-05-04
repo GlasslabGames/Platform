@@ -2928,7 +2928,7 @@ function subscribeToLicenseInternal(req, res){
                 action = "subscribe";
             } else if(license.package_type === "trial"){
                 action = "trial upgrade";
-                return _endLicense.call(this, userId, license.id, false);
+                return _endLicense.call(this, user.id, license.id, false);
             } else{
                 return "already on license";
             }
