@@ -135,17 +135,21 @@ Running the app
   ```
   * To stop services run the following command:
   ```sh
-  $ ./service.sh stop
+  $ sudo ./service.sh stop
   ```
   * To restart services run the following command:
   ```sh
-  $ ./service.sh restart
+  $ sudo ./service.sh restart
   ```
   * Possible problems:
       * Permission denied error (```Error: EACCES, permission denied '/var/log/hydra/app-external.log```). This happened because hydra was under root instead of the user. To fix (insert your username instead of user):
       ```sh
       $ sudo chown -R user hydra
       ```
+      * grunt missing error ('''./service.sh: line 9: grunt: command not found''').  Install grunt
+      '''sh
+      $ sudo npm install -g grunt-cli
+      '''
 2. In a browser go to [http://localhost:8001](http://localhost:8001)
 
 
