@@ -59,7 +59,9 @@ function getSubscriptionPackages(req, res){
         });
         var seats = [];
         _(lConst.seats).forEach(function(value, key){
-            if(key === "group" || key === "class" || key === "multiClass" || key === "school"){
+            if(req.query.salesRep && key !== "trial"){
+                seats.push(value);
+            } else if(key === "group" || key === "class" || key === "multiClass" || key === "school"){
                 seats.push(value);
             }
         });
