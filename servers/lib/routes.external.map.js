@@ -415,15 +415,15 @@ module.exports = {
                 post: "enrollInCourse"
             }
         },
-        {
-            requireAuth: true,
-            api: "/api/v2/lms/course/unenroll",
-            service: "lms",
-            controller: "course",
-            method: {
-                post: "unenrollFromCourse"
-            }
-        },
+        //{
+        //    requireAuth: true,
+        //    api: "/api/v2/lms/course/unenroll",
+        //    service: "lms",
+        //    controller: "course",
+        //    method: {
+        //        post: "unenrollFromCourse"
+        //    }
+        //},
         {
             requireAuth: true,
             api: "/api/v2/lms/course/unenroll-user",
