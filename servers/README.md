@@ -27,10 +27,20 @@ OSX Installation
     $ chmod +x /usr/local/bin/brew-services.rb
     ```
 2. Install **Node.js**
-   * Use Brew to install node
-   ```sh
-   $ brew install node
-   ```
+   1. We're using the latest v0.10 version of node.js; later versions introduce breaking changes.  Install nvm to manage which node.js version to use.
+	   '''sh
+	   $ curl https://raw.githubusercontent.com/creationix/nvm/v0.25.1/install.sh | bash
+	   '''
+   2. You'll need close your terminal window, then open it back up again for nvm to be active.  Then use it to setup node.js.
+	   '''sh
+	   $ . ~/.nvm/nvm.sh
+	   $ nvm install 0.10
+	   $ nvm use 0.10
+	   $ nvm alias default 0.10
+	   '''
+	3. You'll need to activate nvm by sourcing it from your shell window for each new terminal instance.  Add
+		. ~/.nvm/nvm.sh
+	to your .bash_profile to do that automatically, or type that command in every time you create a new terminal instance.
 3. Install **Forever** node process manager
   * Use NPM to install forever process manager globally
   ```sh
