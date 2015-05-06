@@ -116,6 +116,12 @@ OSX Installation
                3. Access Control: Standard port password "glasslab"
                4. Replicas: uncheck "Enable"
                5. Click Create button at bottom of modal.
+           3. Click "Create New Data Bucket" again
+               1. Name: "glasslab_dashdata"
+               2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
+               3. Access Control: Standard port password "glasslab"
+               4. Replicas: uncheck "Enable"
+               5. Click Create button at bottom of modal.
      8.  Open the Node to Client ports (Refer to http://docs.couchbase.com/couchbase-manual-2.2/#network-ports)
 
            1. 8091    Web Administration Port
