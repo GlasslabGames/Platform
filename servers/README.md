@@ -27,10 +27,20 @@ OSX Installation
     $ chmod +x /usr/local/bin/brew-services.rb
     ```
 2. Install **Node.js**
-   * Use Brew to install node
-   ```sh
-   $ brew install node
-   ```
+   1. We're using the latest v0.10 version of node.js; later versions introduce breaking changes.  Install nvm to manage which node.js version to use.
+	   '''sh
+	   $ curl https://raw.githubusercontent.com/creationix/nvm/v0.25.1/install.sh | bash
+	   '''
+   2. You'll need close your terminal window, then open it back up again for nvm to be active.  Then use it to setup node.js.
+	   '''sh
+	   $ . ~/.nvm/nvm.sh
+	   $ nvm install 0.10
+	   $ nvm use 0.10
+	   $ nvm alias default 0.10
+	   '''
+	3. You'll need to activate nvm by sourcing it from your shell window for each new terminal instance.  Add
+		. ~/.nvm/nvm.sh
+	to your .bash_profile to do that automatically, or type that command in every time you create a new terminal instance.
 3. Install **Forever** node process manager
   * Use NPM to install forever process manager globally
   ```sh
@@ -103,7 +113,7 @@ OSX Installation
      * You can delete this bucket later it's not used
    7. Add the required buckets
      * Select "Data Buckets" from the admin console
-        * Create two data buckets
+        * Create three data buckets
            1. Click "Create New Data Bucket"
                1. Name: "glasslab_gamedata"
                2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
@@ -112,6 +122,12 @@ OSX Installation
                5. Click Create button at bottom of modal.
            2. Click "Create New Data Bucket" again
                1. Name: "glasslab_webapp"
+               2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
+               3. Access Control: Standard port password "glasslab"
+               4. Replicas: uncheck "Enable"
+               5. Click Create button at bottom of modal.
+           3. Click "Create New Data Bucket" again
+               1. Name: "glasslab_dashdata"
                2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
                3. Access Control: Standard port password "glasslab"
                4. Replicas: uncheck "Enable"
@@ -135,18 +151,25 @@ Running the app
   ```
   * To stop services run the following command:
   ```sh
-  $ ./service.sh stop
+  $ sudo ./service.sh stop
   ```
   * To restart services run the following command:
   ```sh
-  $ ./service.sh restart
+  $ sudo ./service.sh restart
   ```
   * Possible problems:
       * Permission denied error (```Error: EACCES, permission denied '/var/log/hydra/app-external.log```). This happened because hydra was under root instead of the user. To fix (insert your username instead of user):
       ```sh
       $ sudo chown -R user hydra
       ```
-2. In a browser go to [http://localhost:8001](http://localhost:8001)
+      * grunt missing error ('''./service.sh: line 9: grunt: command not found''').  Install grunt
+      '''sh
+      $ sudo npm install -g grunt-cli
+      '''
+2. In a browser go to:
+      [localhost:8001/api/v2/dash/migrate/KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R](localhost:8001/api/v2/dash/migrate/KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R)
+      This should load in the current games.  This can be run more than once.
+3. In a browser go to [http://localhost:8001](http://localhost:8001)
 
 
 Configs
