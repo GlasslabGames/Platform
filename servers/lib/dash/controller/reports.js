@@ -69,6 +69,9 @@ function getReport(req, res, next) {
                 else if(reportId == 'competency') {
                     _getCompetency.call(this, req, res, reportId, gameId, courseId);
                 }
+                else if(reportId === "standards") {
+                    _getStandards.call(this, req, res, reportId, gameId, courseId);
+                }
                 else {
                     this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
                 }
@@ -103,7 +106,7 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
 
             var outList = [];
             var userMap = {};
-            var promistList = [];
+            var promiseList = [];
             //console.log("users:", users);
 
             // get SOWO data per game per user
@@ -178,11 +181,11 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                         console.error("Get SOWO Error - Key is not defined in database");
                     }.bind(this));
 
-                promistList.push(p);
+                promiseList.push(p);
             }.bind(this) );
 
 
-            when.all(promistList)
+            when.all(promiseList)
                 .then(function(){
                     // all done
                     this.requestUtil.jsonResponse(res, outList);
@@ -565,7 +568,7 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
 
             var outList = [];
             var userMap = {};
-            var promistList = [];
+            var promiseList = [];
 
             //console.log("users:", users);
 
@@ -608,11 +611,11 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                         p = 'reject';
                     });
                 if(p !== 'reject'){
-                    promistList.push(p);
+                    promiseList.push(p);
                 }
             }.bind(this) );
 
-            when.reduce(promistList, function(list, item){
+            when.reduce(promiseList, function(list, item){
                     list.push(item);
                     return list;
                 }.bind(this), [])
@@ -621,4 +624,85 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                     this.requestUtil.jsonResponse(res, outList);
                 }.bind(this) );
         }.bind(this) );
+}
+
+function _getStandards(req, res, reportId, gameId, courseId) {
+    var assessmentId = reportId;
+    var currentAssessmentData;
+    var outAssessmentData;
+    var assessment;
+    this.getGameAssessmentInfo(gameId)
+        .then(function(results){
+            if(!results){
+                return;
+            }
+            assessment = results;
+            var lmsService = this.serviceManager.get("lms").service;
+            return lmsService.getStudentsOfCourse(courseId);
+        }.bind(this))
+        .then(function(users){
+            if(!users){
+                return;
+            }
+
+            var outList = [];
+            var userMap = {};
+            var promiseList = [];
+
+            //get Standards data per game per user
+            users.forEach(function(user){
+                var userId = user.id;
+
+                var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                    .then(function(assessmentData){
+                        if(!assessmentData || !assessmentData.results){
+                            return;
+                        }
+
+                        currentAssessmentData = assessmentData;
+
+                        for(var i = 0; i < assessment.length; i++){
+                            if(assessment[i].id === assessmentId){
+
+                                var results = currentAssessmentData.results;
+
+                                outAssessmentData = {};
+                                outAssessmentData.gameId = gameId;
+                                outAssessmentData.userId = userId;
+                                outAssessmentData.assessmentId = assessmentId;
+                                outAssessmentData.timestamp = results.timestamp;
+                                var outResults = outAssessmentData.results = {};
+
+                                _(results).forEach(function(report, standard){
+                                    outResults[standard] = report.status;
+                                });
+
+                                break;
+                            }
+                        }
+
+                        outList.push(outAssessmentData);
+
+                    }.bind(this))
+                    .then(null, function(err){
+                        console.error("Get Standards Error 1 -", err);
+                    }.bind(this));
+
+                promiseList.push(p);
+            }.bind(this));
+
+            when.all(promiseList)
+                .then(function(){
+                    this.requestUtil.jsonResponse(res, outList);
+                }.bind(this))
+                .then(null, function(err){
+                    // give some error code
+                    console.error("Get Standards Error 2 -", err);
+                    this.requestUtil.errorResponse(res, { key: "dash.general"});
+                }.bind(this));
+        }.bind(this))
+        .then(null, function(err){
+            console.error("Get Standards Error 3 -", err);
+            this.requestUtil.errorResponse(res, { key: "dash.general"});
+        }.bind(this));
 }

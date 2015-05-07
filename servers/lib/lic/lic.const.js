@@ -21,12 +21,16 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
-                "AA-1"
+                "AA-1",
+                "PVZ"
             ],
             "downloadableGames": [
+                "WARP"
             ],
             "planId": "chromebook"
         },
@@ -36,13 +40,17 @@ module.exports = {
             "description": "Games in this package are optimized to work on iPads.",
             "pricePerSeat": 3,
             "browserGames": [
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
+                "WARP"
             ],
             "planId": "ipad"
         },
@@ -54,13 +62,17 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
-                "AA-1"
+                "AA-1",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "pcMac"
         },
@@ -72,15 +84,19 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "allGames"
         },
@@ -92,15 +108,19 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "trial"
         },
@@ -112,15 +132,19 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
-                "SC"
+                "SC",
+                "WARP"
             ],
             "planId": "trialLegacy"
         }
@@ -160,6 +184,153 @@ module.exports = {
             "educatorSeats": 0,
             "discount": 0,
             "seatId": "trial"
+        },
+        "5": {
+            "size": "Custom",
+            "studentSeats": 5,
+            "educatorSeats": 1,
+            "discount": 0,
+            "seatId": "5"
+        },
+        "15": {
+            "size": "Custom",
+            "studentSeats": 15,
+            "educatorSeats": 1,
+            "discount": 0,
+            "seatId": "15"
+        },
+        "20": {
+            "size": "Custom",
+            "studentSeats": 20,
+            "educatorSeats": 2,
+            "discount": 0,
+            "seatId": "20"
+        },
+        "25": {
+            "size": "Custom",
+            "studentSeats": 25,
+            "educatorSeats": 2,
+            "discount": 0,
+            "seatId": "25"
+        },
+        "35": {
+            "size": "Custom",
+            "studentSeats": 35,
+            "educatorSeats": 2,
+            "discount": 0,
+            "seatId": "35"
+        },
+        "40": {
+            "size": "Custom",
+            "studentSeats": 40,
+            "educatorSeats": 3,
+            "discount": 0,
+            "seatId": "40"
+        },
+        "45": {
+            "size": "Custom",
+            "studentSeats": 45,
+            "educatorSeats": 3,
+            "discount": 0,
+            "seatId": "45"
+        },
+        "50": {
+            "size": "Custom",
+            "studentSeats": 50,
+            "educatorSeats": 3,
+            "discount": 0,
+            "seatId": "50"
+        },
+        "55": {
+            "size": "Custom",
+            "studentSeats": 55,
+            "educatorSeats": 3,
+            "discount": 0,
+            "seatId": "55"
+        },
+        "60": {
+            "size": "Custom",
+            "studentSeats": 60,
+            "educatorSeats": 4,
+            "discount": 0,
+            "seatId": "60"
+        },
+        "65": {
+            "size": "Custom",
+            "studentSeats": 65,
+            "educatorSeats": 4,
+            "discount": 0,
+            "seatId": "65"
+        },
+        "70": {
+            "size": "Custom",
+            "studentSeats": 70,
+            "educatorSeats": 4,
+            "discount": 0,
+            "seatId": "70"
+        },
+        "75": {
+            "size": "Custom",
+            "studentSeats": 75,
+            "educatorSeats": 4,
+            "discount": 0,
+            "seatId": "75"
+        },
+        "80": {
+            "size": "Custom",
+            "studentSeats": 80,
+            "educatorSeats": 5,
+            "discount": 0,
+            "seatId": "80"
+        },
+        "85": {
+            "size": "Custom",
+            "studentSeats": 85,
+            "educatorSeats": 5,
+            "discount": 0,
+            "seatId": "85"
+        },
+        "90": {
+            "size": "Custom",
+            "studentSeats": 90,
+            "educatorSeats": 5,
+            "discount": 0,
+            "seatId": "90"
+        },
+        "95": {
+            "size": "Custom",
+            "studentSeats": 95,
+            "educatorSeats": 5,
+            "discount": 0,
+            "seatId": "95"
+        },
+        "100": {
+            "size": "Custom",
+            "studentSeats": 100,
+            "educatorSeats": 6,
+            "discount": 0,
+            "seatId": "100"
+        },
+        "105": {
+            "size": "Custom",
+            "studentSeats": 105,
+            "educatorSeats": 6,
+            "discount": 0,
+            "seatId": "105"
+        },
+        "110": {
+            "size": "Custom",
+            "studentSeats": 110,
+            "educatorSeats": 6,
+            "discount": 0,
+            "seatId": "110"
+        },
+        "115": {
+            "size": "Custom",
+            "studentSeats": 115,
+            "educatorSeats": 6,
+            "discount": 0,
+            "seatId": "115"
         }
     },
     "stripeTestCard": {

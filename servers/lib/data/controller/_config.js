@@ -25,7 +25,7 @@ function updateGameConfigs(req, res, next, serviceManager)
                 return reject({key: "data.gameId.invalid", statusCode: 401});
             }
 
-            return this.cbds.updateCongs(gameId, config);
+            return this.cbds.updateConfigs(gameId, config);
         }.bind(this) )
         .then(function(){
             this.requestUtil.jsonResponse(res, { status: "ok" });

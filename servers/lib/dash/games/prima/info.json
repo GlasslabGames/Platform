@@ -1,11 +1,11 @@
 {
     "basic": {
         "gameId": "PRIMA",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
-        "shortName": "Prima",
-        "longName": "Prima",
+        "shortName": "Ratio Rancher",
+        "longName": "Ratio Rancher",
         "grades": "TBD",
         "subject": "TBD",
         "type": "Browser",
@@ -58,7 +58,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/14/index.html?sdkURL=http://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/14/index.html?sdkURL=http://localhost:8001",
                 "format": "html",
                 "size": {
                     "width": 800,
@@ -68,6 +68,86 @@
         }
     },
     "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "wo1": {
+                    "name": "Trouble with Gameplay Knowledge",
+                    "description": "The player may not understand how the game works - they needed four or more attempts to finish one or more of the introductory challenges."
+                },
+                "wo2": {
+                    "name": "Trouble with Shipping Activities",
+                    "description": "The player has experienced multiple failures when shipping creatures."
+                },
+                "wo3": {
+                    "name": "Trouble Feeding Creatures",
+                    "description": "The player has experienced multiple failures when feeding creatures."
+                },
+                "wo4": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: ND types."
+                },
+                "wo5": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: MD types."
+                },
+                "wo6": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: MS types."
+                },
+                "wo7": {
+                    "name": "Trouble with Complex Skills",
+                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: NS types."
+                },
+                "wo8": {
+                    "name": "Trouble with Advanced Skills",
+                    "description": "Difficulty with \"advanced\" skills: player has been unsuccessful working with advanced problem types: MT types."
+                },
+                "so1": {
+                    "name": "Good Gameplay Knowledge",
+                    "description": "The player knows how to play the game and use it's features."
+                },
+                "so2": {
+                    "name": "Successful Feeding!",
+                    "description": "The player successfully fed their first pen of creatures."
+                },
+                "so3": {
+                    "name": "Successful Shipment!",
+                    "description": "This player has successfully made their first shipment of creatures."
+                },
+                "so4": {
+                    "name": "Success with Early Skills",
+                    "description": "Player successfully completed the first two challenge types on their first attempt."
+                },
+                "so5": {
+                    "name": "Success with Complex Skills",
+                    "description": "Player successfully completed the second two challenge types on their first attempt."
+                },
+                "so6": {
+                    "name": "Success with Advanced Skills",
+                    "description": "Player successfully completed the first advanced challenge type on their first attempt."
+                },
+                "so7": {
+                    "name": "Early Mastery!",
+                    "description": "Master performance! The player has completed Part I and Part II of the game without any mistakes!"
+                },
+                "so8": {
+                    "name": "Completed Advanced Challenges!",
+                    "description": "Super performance! This player successfully completed one or more advanced level challenges."
+                }
+            }
+        },
+        {
+            "enabled": true,
+            "id": "standards",
+            "dataProcessScope": "gameSession",
+            "engine": "standards",
+            "trigger": "activity"
+        }
     ],
     "reports": {
         "list": [
@@ -180,7 +260,128 @@
                     ]
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
-            }
+            },
+            {
+                "enabled": true,
+                "id": "standards",
+                "assessmentId": "standards",
+                "name": "Standards Report",
+                "header": {
+                    "text": "Standards Report",
+                    "image": "assets/game-banner-AA-1.png",
+                    "skinny": "assets/skinny-banner-AA-1.jpg",
+                    "large": "assets/skinny-banner-AA-1@2x.jpg"
+                },
+                "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
+                "table": {
+                    "groups": [
+                        {
+                            "name": "Common Core",
+                            "subjects": [
+                                {
+                                    "name": "CCSS.MATH.CONTENT",
+                                    "standards": [
+                                        {
+                                            "id": "6.RP.A.1",
+                                            "title": "6.RP.A.1",
+                                            "description": "Understand & apply concept ratio when given the base rate.",
+                                            "alignment": "For baseline argumentation skill-building, students complete training in argument scheme (finding evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to apply ratios in simple and complex challenges.",
+                                              "PartialA": "The student is approaching an understanding of how to apply ratios in simple challenges",
+                                              "PartialB": "The student is approaching an understanding of how to apply ratios in complex challenges",
+                                              "PartialC": "The student is approaching an understanding of how to apply ratios in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how to apply ratios in advanced challenges",
+                                              "Full": "The student understands the application of ratios in simple and complex challenges.",
+                                              "FullA": "The student understands and applies the idea of ratios in simple challenges",
+                                              "FullB": "The student understands and applies the idea of ratios in complex challenges",
+                                              "FullC": "The student understands and applies the idea of ratios in more complex challenges",
+                                              "FullD": "The student understands and applies the idea of ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to understand the application of ratios in simple and complex challenges.",
+                                              "WatchoutA": "The student is beginning to understand ratios and how to apply them in simple challenges.",
+                                              "WatchoutB": "The student is beginning to understand ratios and how to apply them in complex challenges.",
+                                              "WatchoutC": "The student is beginning to understand ratios and how to apply them in more complex challenges.",
+                                              "WatchoutD": "The student is beginning to understand ratios and how to apply them in advanced challenges."
+                                            }
+                                        },
+                                        {
+                                            "id": "6.RP.A.2",
+                                            "title": "6.RP.A.2",
+                                            "description": "Apply base rate by multiplying AND dividing to create equivalent ratios.",
+                                            "alignment": "For intermediate argumentation skill-building, students perform more difficult argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching an understanding of how to multiply and divide with the base rate in complex challenges.",
+                                              "PartialC": "The student is approaching an understanding of how to multiply and divide with the base rate in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how to multiply and divide with the base rate in advanced challenges.",
+                                              "Full": "The student can multiply and divide with the base rate to create equivalent ratios.",
+                                              "FullA": "The student multiplies and divides with the base rate to create equivalent ratios in simple challenges.",
+                                              "FullB": "The student multiplies and divides with the base rate to create equivalent ratios in complex challenges.",
+                                              "FullC": "The student multiplies and divides with the base rate to create equivalent ratios in more complex challenges.",
+                                              "FullD": "The student multiplies and divides with the base rate to create equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to multiply and divide with the base rate to create equivalent ratios.",
+                                              "WatchoutA": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
+                                              "WatchoutB": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in complex challenges.",
+                                              "WatchoutC": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in more complex challenges.",
+                                              "WatchoutD": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in advanced challenges."                                            }
+                                          },
+                                        {
+                                            "id": "6.RP.A.3",
+                                            "title": "6.RP.A.3",
+                                            "description": "Reason about ratios and rates to create equivalent ratios.",
+                                            "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of using multiple base rates to create equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of coordinating information about multiple base rates to create equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching  understanding in using multiple base rates to create equivalent ratios in complex challenges.",
+                                              "PartialD": "The student is approaching understanding of using multiple base rates to create equivalent ratios in advanced challenges.",
+                                              "Full": "The student can use multiple base rates to create equivalent ratios..",
+                                              "FullB": "The student coordinates multiple base rates to create equivalent ratios in complex challenges.",
+                                              "FullD": "The student coordinates multiple base rates to create equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to multiply and divide with the base rate to create equivalent ratios.",
+                                              "Watchout": "The student has beginning understanding in using multiple base rates to create equivalent ratios.",
+                                              "WatchoutB": "The student has beginning understanding in using multiple base rates to create equivalent ratios in complex challenges",
+                                              "WatchoutD": "The student has beginning understanding of using multiple base rates to create equivalent ratios in advanced challenges."                                            }
+                                        },
+                                        {
+                                            "id": "6.RP.A.3.A",
+                                            "title": "6.RP.A.3.A",
+                                            "description": "Create tables of equivalent ratios.",
+                                            "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to create tables of equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of how to create tables of equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching an understanding of how create tables of equivalent ratios in more challenges.",
+                                              "PartialC": "Approaching an understanding of how create tables of equivalent ratios in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how create tables of equivalent ratios in advanced challenges.",
+                                              "Full": "The student can create tables of equivalent ratios.",
+                                              "FullA": "The student creates tables of equivalent ratios in simple challenges",
+                                              "FullB": "The student creates tables of equivalent ratios in complex challenges.",
+                                              "FullC": "The student creates tables of equivalent ratios in more complex challenges.",
+                                              "FullD": "The student creates tables of equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning understand how to create tables of equivalent ratios.",
+                                              "WatchoutA": "The student is beginning understand how to create tables of equivalent ratios in simple challenges.",
+                                              "WatchoutB": "The student is beginning understand how to create tables of equivalent ratios in complex challenges.",
+                                              "WatchoutC": "The student is beginning understand how to create tables of equivalent ratios in more complex challenges.",
+                                              "WatchoutD": "The student is beginning understand how to create tables of equivalent ratios in advanced challenges."
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+          }
         ]
     },
     "details": {

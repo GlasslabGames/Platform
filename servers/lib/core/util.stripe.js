@@ -13,15 +13,14 @@ function StripeUtil(options){
     this.options = options;
 
     // Set the Stripe config
-    if( !this.options.stripe ) {
+    if( !this.options.stripe || !this.options.stripe.test || !this.options.stripe.live ) {
         console.error( "Stripe Utility Error - you do not have Stripe configured!" );
         return;
     }
 
     // Set the Stripe object to "test" or "live", depending on the setting
     var stripeEnv = "test";
-    if( this.options.stripe &&
-        this.options.stripe.env ) {
+    if( this.options.stripe.env ) {
         stripeEnv = this.options.stripe.env;
     }
     this.stripe = new stripe( this.options.stripe[ stripeEnv ].secretKey );

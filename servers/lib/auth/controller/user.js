@@ -1593,10 +1593,7 @@ function deleteUser(req, res){
             return promise;
         }.bind(this))
         .then(function(status){
-            if(status && typeof status === "object"){
-                req.body.licenseId = status.licenseId;
-                req.body.userDelete = status.userDelete;
-                this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
+            if(status === "license owner"){
                 return;
             }
             this.requestUtil.jsonResponse(res, { status: "ok"});
@@ -1679,7 +1676,7 @@ function _deleteStudentAccount(studentId){
     }.bind(this));
 }
 
-function _deleteInstructorAccount(userId){
+function _deleteInstructorAccount(userId, req){
     //delete instructor plan
     //get courses,
     //getLicenseMap
@@ -1743,7 +1740,11 @@ function _deleteInstructorAccount(userId){
                 return when.all(promiseList);
             })
             .then(function(){
-                var userData = _deleteUserTableInfo(userId);
+                return _hashEmail(email);
+            }.bind(this))
+            .then(function(hashedEmail){
+                var userData = _deleteUserTableInfo(userId, hashedEmail);
+                //var email = userEmail;
                 return this.authStore.updateUserDBData(userData);
             }.bind(this))
             .then(function(status){
@@ -1774,10 +1775,14 @@ function _deleteInstructorAccount(userId){
                     body.licenseId = license.id;
                     body.userEmail = userEmail;
                     body.userDelete = true;
-                    resolve(body);
+                    req.body.licenseId = status.license.id;
+                    req.body.userDelete = true;
+                    this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
+                    resolve('license owner');
+                    return;
                 }
                 resolve();
-            })
+            }.bind(this))
             .then(null, function(err){
                 console.error("Delete Instructor Account Error -",err);
                 reject(err);
@@ -1785,15 +1790,19 @@ function _deleteInstructorAccount(userId){
     }.bind(this));
 }
 
-function _deleteUserTableInfo(userId){
+function _deleteUserTableInfo(userId, hashedEmail){
+    // if we want to save a hased email pass it in.
+    // for students though, no email information is present
     var userData = {};
     userData.username = "";
     userData.firstName = "";
     userData.lastName = "";
-    userData.email = "";
+    userData.email = hashedEmail || "";
     userData.ssoUserName = "";
     userData.ssoData = "";
-    userData.password = "";
+    if(!hashedEmail){
+        userData.password = "";
+    }
     userData.enabled = 0;
     userData.resetCode = "NULL";
     userData.resetCodeExpiration = "NULL";
@@ -1805,3 +1814,17 @@ function _deleteUserTableInfo(userId){
     userData.id = userId;
     return userData;
 }
+
+function _hashEmail(email){
+    // hashing email so we could potentially reopen an account if a user came back
+    return when.promise(function(resolve, reject){
+        this.glassLabStrategy.encryptPassword(email)
+            .then(function(hashedEmail){
+                resolve(hashedEmail);
+            })
+            .then(null, function(err){
+                console.error("Hash Email Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
