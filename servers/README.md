@@ -70,7 +70,8 @@ OSX Installation
          ```sh
          $ mysqladmin -u root password glasslab
          ```
-   4. Optional [Install MySQL Workbench](http://dev.mysql.com/downloads/workbench)
+   4. [Install MySQL Workbench](http://dev.mysql.com/downloads/workbench)
+   5. There's an AdditionalSQLCommands.txt file in local with numerous sql commands.  Use MySQL workbench to run these commands one by one to update your db to the latest schema.  TODO: Put the latest schema in glasslab_dev.sql.
 
 5. Install **Redis**
    1. Use Brew to install redis
@@ -178,4 +179,4 @@ Configs
 ---------------
 * A default config is stored in **"config.json"**
 * If you place **"hydra.config.json"** in the home directory of the user running the platform server process. 
-The server will load and override some or all configs in the default config file.
+The server will load and override some or all configs in the default config file.  This is necessary as the default configuration has entries with the passwords removed.  To get a copy of a starter hydra.config.json file, click on this link and request access: [https://docs.google.com/a/warmandfuzzylogic.com/document/d/1fRUZfri6YkMIx3Vnfe3MsapKDyUUAcZ3ktcgR5AcWRs/edit?usp=sharing](https://docs.google.com/a/warmandfuzzylogic.com/document/d/1fRUZfri6YkMIx3Vnfe3MsapKDyUUAcZ3ktcgR5AcWRs/edit?usp=sharing)
