@@ -168,7 +168,9 @@ Running the app
       '''
 2. In a browser go to:
       [localhost:8001/api/v2/dash/migrate/KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R](localhost:8001/api/v2/dash/migrate/KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R)
-      This should load in the current games.  This can be run more than once.
+      You should see this message in the browser:
+      {"migration": "complete"}
+      This command can be run more than once safely.
 3. In a browser go to [http://localhost:8001](http://localhost:8001)
 
 
