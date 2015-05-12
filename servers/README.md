@@ -27,10 +27,20 @@ OSX Installation
     $ chmod +x /usr/local/bin/brew-services.rb
     ```
 2. Install **Node.js**
-   * Use Brew to install node
-   ```sh
-   $ brew install node
-   ```
+   1. We're using the latest v0.10 version of node.js; later versions introduce breaking changes.  Install nvm to manage which node.js version to use.
+	   '''sh
+	   $ curl https://raw.githubusercontent.com/creationix/nvm/v0.25.1/install.sh | bash
+	   '''
+   2. You'll need close your terminal window, then open it back up again for nvm to be active.  Then use it to setup node.js.
+	   '''sh
+	   $ . ~/.nvm/nvm.sh
+	   $ nvm install 0.10
+	   $ nvm use 0.10
+	   $ nvm alias default 0.10
+	   '''
+	3. You'll need to activate nvm by sourcing it from your shell window for each new terminal instance.  Add
+		. ~/.nvm/nvm.sh
+	to your .bash_profile to do that automatically, or type that command in every time you create a new terminal instance.
 3. Install **Forever** node process manager
   * Use NPM to install forever process manager globally
   ```sh
@@ -60,7 +70,8 @@ OSX Installation
          ```sh
          $ mysqladmin -u root password glasslab
          ```
-   4. Optional [Install MySQL Workbench](http://dev.mysql.com/downloads/workbench)
+   4. [Install MySQL Workbench](http://dev.mysql.com/downloads/workbench)
+   5. There's an AdditionalSQLCommands.txt file in local with numerous sql commands.  Use MySQL workbench to run these commands one by one to update your db to the latest schema.  TODO: Put the latest schema in glasslab_dev.sql.
 
 5. Install **Redis**
    1. Use Brew to install redis
@@ -103,7 +114,7 @@ OSX Installation
      * You can delete this bucket later it's not used
    7. Add the required buckets
      * Select "Data Buckets" from the admin console
-        * Create two data buckets
+        * Create three data buckets
            1. Click "Create New Data Bucket"
                1. Name: "glasslab_gamedata"
                2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
@@ -112,6 +123,12 @@ OSX Installation
                5. Click Create button at bottom of modal.
            2. Click "Create New Data Bucket" again
                1. Name: "glasslab_webapp"
+               2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
+               3. Access Control: Standard port password "glasslab"
+               4. Replicas: uncheck "Enable"
+               5. Click Create button at bottom of modal.
+           3. Click "Create New Data Bucket" again
+               1. Name: "glasslab_dashdata"
                2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
                3. Access Control: Standard port password "glasslab"
                4. Replicas: uncheck "Enable"
@@ -135,22 +152,31 @@ Running the app
   ```
   * To stop services run the following command:
   ```sh
-  $ ./service.sh stop
+  $ sudo ./service.sh stop
   ```
   * To restart services run the following command:
   ```sh
-  $ ./service.sh restart
+  $ sudo ./service.sh restart
   ```
   * Possible problems:
       * Permission denied error (```Error: EACCES, permission denied '/var/log/hydra/app-external.log```). This happened because hydra was under root instead of the user. To fix (insert your username instead of user):
       ```sh
       $ sudo chown -R user hydra
       ```
-2. In a browser go to [http://localhost:8001](http://localhost:8001)
+      * grunt missing error ('''./service.sh: line 9: grunt: command not found''').  Install grunt
+      '''sh
+      $ sudo npm install -g grunt-cli
+      '''
+2. In a browser go to:
+      [localhost:8001/api/v2/dash/migrate/KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R](localhost:8001/api/v2/dash/migrate/KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R)
+      You should see this message in the browser:
+      {"migration": "complete"}
+      This command can be run more than once safely.
+3. In a browser go to [http://localhost:8001](http://localhost:8001)
 
 
 Configs
 ---------------
 * A default config is stored in **"config.json"**
 * If you place **"hydra.config.json"** in the home directory of the user running the platform server process. 
-The server will load and override some or all configs in the default config file.
+The server will load and override some or all configs in the default config file.  This is necessary as the default configuration has entries with the passwords removed.  To get a copy of a starter hydra.config.json file, click on this link and request access: [https://docs.google.com/a/warmandfuzzylogic.com/document/d/1fRUZfri6YkMIx3Vnfe3MsapKDyUUAcZ3ktcgR5AcWRs/edit?usp=sharing](https://docs.google.com/a/warmandfuzzylogic.com/document/d/1fRUZfri6YkMIx3Vnfe3MsapKDyUUAcZ3ktcgR5AcWRs/edit?usp=sharing)
