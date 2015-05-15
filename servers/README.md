@@ -19,13 +19,15 @@ Dependencies
 
 OSX Installation
 ------------
-1. Install **Brew**
+1. Install **Homebrew** and **Homebrew Services**
    * http://brew.sh/
     ```sh
     $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    $ curl -o /usr/local/bin/brew-services.rb https://gist.githubusercontent.com/lwe/766293/raw/75a7907004bbff0eb3b072d1d951be2cfe7e5020/brew-services.rb
-    $ chmod +x /usr/local/bin/brew-services.rb
     ```
+   * https://github.com/Homebrew/homebrew-services
+    ```sh
+    $ brew tap homebrew/services
+    ```  
 2. Install **Node.js**
    1. We're using the latest v0.10 version of node.js; later versions introduce breaking changes.  Install nvm to manage which node.js version to use.
 	   '''sh
