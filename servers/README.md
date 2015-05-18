@@ -30,16 +30,16 @@ OSX Installation
     ```  
 2. Install **Node.js**
    1. We're using the latest v0.10 version of node.js; later versions introduce breaking changes.  Install nvm to manage which node.js version to use.
-	   '''sh
+	   ```sh
 	   $ curl https://raw.githubusercontent.com/creationix/nvm/v0.25.1/install.sh | bash
-	   '''
+	   ```
    2. You'll need close your terminal window, then open it back up again for nvm to be active.  Then use it to setup node.js.
-	   '''sh
+	   ```sh
 	   $ . ~/.nvm/nvm.sh
 	   $ nvm install 0.10
 	   $ nvm use 0.10
 	   $ nvm alias default 0.10
-	   '''
+	   ```
 	3. You'll need to activate nvm by sourcing it from your shell window for each new terminal instance.  Add
 		. ~/.nvm/nvm.sh
 	to your .bash_profile to do that automatically, or type that command in every time you create a new terminal instance.
@@ -164,10 +164,10 @@ Running the app
       ```sh
       $ sudo chown -R user hydra
       ```
-      * grunt missing error ('''./service.sh: line 9: grunt: command not found''').  Install grunt
-      '''sh
+      * grunt missing error (`./service.sh: line 9: grunt: command not found`).  Install grunt
+      ```sh
       $ sudo npm install -g grunt-cli
-      '''
+      ```
 2. In a browser go to [http://localhost:8001](http://localhost:8001)
 
 
