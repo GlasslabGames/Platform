@@ -1169,7 +1169,7 @@ return when.promise(function(resolve, reject) {
                                 row[r] = JSON.stringify(event);
                             } else {
                                 row[r] = parseItems(event, row[r], '{', '}');
-                                row[r] = parseItems(event.eventData, row[r], '\\', '\\');
+                                row[r] = parseItems(event.eventData, row[r], '<', '>');
                             }
                         }
 
