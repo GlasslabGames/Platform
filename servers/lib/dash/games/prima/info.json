@@ -6,8 +6,8 @@
         "maintenance": null,
         "shortName": "Ratio Rancher",
         "longName": "Ratio Rancher",
-        "grades": "TBD",
-        "subject": "TBD",
+        "grades": "6-12",
+        "subject": "Mathematics",
         "type": "Browser",
         "platform": {
             "type": "Browser",
@@ -20,8 +20,8 @@
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
         "releaseDate": "TBD",
-        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
-        "description": "TBD",
+        "shortDescription": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
+        "description": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "developer": {
             "id": "GL",
             "name": "GlassLab, Inc.",
@@ -268,9 +268,9 @@
                 "name": "Standards Report",
                 "header": {
                     "text": "Standards Report",
-                    "image": "assets/game-banner-AA-1.png",
-                    "skinny": "assets/skinny-banner-AA-1.jpg",
-                    "large": "assets/skinny-banner-AA-1@2x.jpg"
+                    "image": "assets/game-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.png",
+                    "large": "assets/skinny-banner-PRIMA@2x.jpg"
                 },
                 "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
                 "table": {
@@ -399,6 +399,83 @@
             }
         ],
         "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "<p>Ratio Rancher is a nurturing strategy/puzzle game designed for students in grades 6 and beyond. Aligned to CCSS and 21st century skills, the high-impact title addresses the need for an engaging game that promotes understanding of ratios and proportionality - critical core concepts 42% of math 6-12 standards are dependent upon but difficult to master.</p><p>Become a Mixian Expert! Ratio Rancher places players in charge of their very own lush, green world full of silly, exotic creatures! Everything on the fantasy world of Mixia is connected. In order to keep their wacky and delightful creatures happy, players will need to keep track of what they learn in their very own naturalist journal, and make careful decisions based upon how many creatures they have, and what kind of food they can eat!</p>",
+                "video": "vi",
+                "brochure": "",
+                "curriculum": [
+                    "Helps build a conceptual and intuitive understanding of ratios and proportions while also addressing the critical skill of scaling and representing scale with numbers",
+                    "Brings highly engaging, commercial quality gameplay into the math classroom with standards aligned reporting and resources that enhance the instructional experience"
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "assets/PRIMA-carousel_1.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/PRIMA-carousel_2.png"
+                    }
+                ]
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards Alignment",
+                "CCSS": [
+                    {
+                        "category": "Common Core Math Standards",
+                        "groups": [
+                            {
+                                "name": "Ratios and Proportional Relationships",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.1",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
+                                        "description": "Understand the concept of a ratio and use ratio language to describe a ratio relationship between two quantities."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.2",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.2",
+                                        "description": "Understand the concept of a unit rate a/b associated with a ratio a:b with b ≠ 0, and use rate language in the context of a ratio relationship."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.3",
+                                        "description": "Use ratio and rate reasoning to solve real-world and mathematical problems, e.g., by reasoning about tables of equivalent ratios, tape diagrams, double number line diagrams, or equations."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.3.a",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.3.a",
+                                        "description": "Make tables of equivalent ratios relating quantities with whole-number measurements, find missing values in the tables, and plot the pairs of values on the coordinate plane. Use tables to compare ratios."
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Framework for 21st Century Learning",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "Critical Thinking and Problem Solving",
+                                        "link": "http://www.p21.org/about-us/p21-framework/260",
+                                        "description": "Build new mathematical knowledge through problem solving; and monitor and reflect on the process of mathematical problem solving and solve different kinds of non-familiar problems in both conventional and innovative ways."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
