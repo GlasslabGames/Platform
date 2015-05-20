@@ -475,6 +475,46 @@
                         ]
                     }
                 ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "id": "lessonPlans",
+                "authRequired": true,
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "id": "research",
+                "authRequired": true,
+                "title": "Research",
+                "list": [
+                  {
+                        "category": "Research",
+                        "list": [
+                            {
+                                "name": "Ratio Rancher Research Brief",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Research%20Brief_final.pdf"
+                            },
+                            {
+                                "name": "Field Study Results: Ratio Rancher",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Field%20Study%20Results.pdf"
+                            }
+                        ]
+                    }
+                ]
             }
         },
         "social": {
