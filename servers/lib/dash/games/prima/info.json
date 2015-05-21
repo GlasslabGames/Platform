@@ -6,7 +6,7 @@
         "maintenance": null,
         "shortName": "Ratio Rancher",
         "longName": "Ratio Rancher",
-        "grades": "6-12",
+        "grades": "6 - 12",
         "subject": "Mathematics",
         "type": "Browser",
         "platform": {
@@ -270,7 +270,7 @@
                     "text": "Standards Report",
                     "image": "assets/game-banner-PRIMA.png",
                     "skinny": "assets/skinny-banner-PRIMA.png",
-                    "large": "assets/skinny-banner-PRIMA@2x.jpg"
+                    "large": "assets/skinny-banner-PRIMA@2x.png"
                 },
                 "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
                 "table": {
@@ -471,6 +471,46 @@
                                         "description": "Build new mathematical knowledge through problem solving; and monitor and reflect on the process of mathematical problem solving and solve different kinds of non-familiar problems in both conventional and innovative ways."
                                     }
                                 ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "id": "lessonPlans",
+                "authRequired": true,
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "id": "research",
+                "authRequired": true,
+                "title": "Research",
+                "list": [
+                  {
+                        "category": "Research",
+                        "list": [
+                            {
+                                "name": "Ratio Rancher Research Brief",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Research%20Brief_final.pdf"
+                            },
+                            {
+                                "name": "Field Study Results: Ratio Rancher",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Field%20Study%20Results.pdf"
                             }
                         ]
                     }
