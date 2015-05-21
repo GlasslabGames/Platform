@@ -58,7 +58,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/17/index.html?sdkURL=https://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/17/index.html?sdkURL=http://stage.playfully.org",
                 "format": "html",
                 "size": {
                     "width": 800,
@@ -471,6 +471,46 @@
                                         "description": "Build new mathematical knowledge through problem solving; and monitor and reflect on the process of mathematical problem solving and solve different kinds of non-familiar problems in both conventional and innovative ways."
                                     }
                                 ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "id": "lessonPlans",
+                "authRequired": true,
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "id": "research",
+                "authRequired": true,
+                "title": "Research",
+                "list": [
+                  {
+                        "category": "Research",
+                        "list": [
+                            {
+                                "name": "Ratio Rancher Research Brief",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Research%20Brief_final.pdf"
+                            },
+                            {
+                                "name": "Field Study Results: Ratio Rancher",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Field%20Study%20Results.pdf"
                             }
                         ]
                     }
