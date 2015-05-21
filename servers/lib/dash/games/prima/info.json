@@ -6,7 +6,7 @@
         "maintenance": null,
         "shortName": "Ratio Rancher",
         "longName": "Ratio Rancher",
-        "grades": "6-12",
+        "grades": "6 - 12",
         "subject": "Mathematics",
         "type": "Browser",
         "platform": {
@@ -58,7 +58,7 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/17/index.html?sdkURL=https://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/17/index.html?sdkURL=http://stage.playfully.org",
                 "format": "html",
                 "size": {
                     "width": 800,
