@@ -21,10 +21,13 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
-                "AA-1"
+                "AA-1",
+                "PVZ"
             ],
             "downloadableGames": [
             ],
@@ -36,11 +39,14 @@ module.exports = {
             "description": "Games in this package are optimized to work on iPads.",
             "pricePerSeat": 3,
             "browserGames": [
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
             ],
@@ -54,10 +60,13 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
-                "AA-1"
+                "AA-1",
+                "PVZ"
             ],
             "downloadableGames": [
                 "SC"
@@ -72,12 +81,15 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
                 "SC"
@@ -92,12 +104,15 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
                 "SC"
@@ -112,12 +127,15 @@ module.exports = {
             "browserGames": [
                 "AW-1",
                 "GOG",
-                "SLFR"
+                "SLFR",
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
                 "SC"

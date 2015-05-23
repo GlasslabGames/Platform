@@ -81,7 +81,7 @@
             }
         },
       {
-        "enabled": false,
+        "enabled": true,
         "id": "standards",
         "dataProcessScope": "gameSession",
         "engine": "standards",
@@ -190,7 +190,7 @@
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
-                "enabled": false,
+                "enabled": true,
                 "id": "standards",
                 "assessmentId": "standards",
                 "name": "Standards Report",
