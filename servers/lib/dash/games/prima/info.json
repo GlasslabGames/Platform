@@ -4,10 +4,10 @@
         "enabled": true,
         "visible": true,
         "maintenance": null,
-        "shortName": "Prima",
-        "longName": "Prima",
-        "grades": "TBD",
-        "subject": "TBD",
+        "shortName": "Ratio Rancher",
+        "longName": "Ratio Rancher",
+        "grades": "6 - 12",
+        "subject": "Mathematics",
         "type": "Browser",
         "platform": {
             "type": "Browser",
@@ -20,8 +20,8 @@
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
         "releaseDate": "TBD",
-        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
-        "description": "TBD",
+        "shortDescription": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
+        "description": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "developer": {
             "id": "GL",
             "name": "GlassLab, Inc.",
@@ -58,7 +58,8 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/14/index.html?sdkURL=http://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=http://stage.playfully.org",
+                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=https://stage.playfully.org",
                 "format": "html",
                 "size": {
                     "width": 800,
@@ -68,6 +69,86 @@
         }
     },
     "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "wo1": {
+                    "name": "Trouble with Gameplay Knowledge",
+                    "description": "The player may not understand how the game works - they needed four or more attempts to finish one or more of the introductory challenges."
+                },
+                "wo2": {
+                    "name": "Trouble with Shipping Activities",
+                    "description": "The player has experienced multiple failures when shipping creatures."
+                },
+                "wo3": {
+                    "name": "Trouble Feeding Creatures",
+                    "description": "The player has experienced multiple failures when feeding creatures."
+                },
+                "wo4": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: ND types."
+                },
+                "wo5": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: MD types."
+                },
+                "wo6": {
+                    "name": "Trouble with Early Skills",
+                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: MS types."
+                },
+                "wo7": {
+                    "name": "Trouble with Complex Skills",
+                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: NS types."
+                },
+                "wo8": {
+                    "name": "Trouble with Advanced Skills",
+                    "description": "Difficulty with \"advanced\" skills: player has been unsuccessful working with advanced problem types: MT types."
+                },
+                "so1": {
+                    "name": "Good Gameplay Knowledge",
+                    "description": "The player knows how to play the game and use it's features."
+                },
+                "so2": {
+                    "name": "Successful Feeding!",
+                    "description": "The player successfully fed their first pen of creatures."
+                },
+                "so3": {
+                    "name": "Successful Shipment!",
+                    "description": "This player has successfully made their first shipment of creatures."
+                },
+                "so4": {
+                    "name": "Success with Early Skills",
+                    "description": "Player successfully completed the first two challenge types on their first attempt."
+                },
+                "so5": {
+                    "name": "Success with Complex Skills",
+                    "description": "Player successfully completed the second two challenge types on their first attempt."
+                },
+                "so6": {
+                    "name": "Success with Advanced Skills",
+                    "description": "Player successfully completed the first advanced challenge type on their first attempt."
+                },
+                "so7": {
+                    "name": "Early Mastery!",
+                    "description": "Master performance! The player has completed Part I and Part II of the game without any mistakes!"
+                },
+                "so8": {
+                    "name": "Completed Advanced Challenges!",
+                    "description": "Super performance! This player successfully completed one or more advanced level challenges."
+                }
+            }
+        },
+        {
+            "enabled": true,
+            "id": "standards",
+            "dataProcessScope": "gameSession",
+            "engine": "standards",
+            "trigger": "activity"
+        }
     ],
     "reports": {
         "list": [
@@ -180,7 +261,128 @@
                     ]
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
-            }
+            },
+            {
+                "enabled": true,
+                "id": "standards",
+                "assessmentId": "standards",
+                "name": "Standards Report",
+                "header": {
+                    "text": "Standards Report",
+                    "image": "assets/game-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.png",
+                    "large": "assets/skinny-banner-PRIMA@2x.png"
+                },
+                "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
+                "table": {
+                    "groups": [
+                        {
+                            "name": "Common Core",
+                            "subjects": [
+                                {
+                                    "name": "CCSS.MATH.CONTENT",
+                                    "standards": [
+                                        {
+                                            "id": "6.RP.A.1",
+                                            "title": "6.RP.A.1",
+                                            "description": "Understand & apply concept ratio when given the base rate.",
+                                            "alignment": "For baseline argumentation skill-building, students complete training in argument scheme (finding evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to apply ratios in simple and complex challenges.",
+                                              "PartialA": "The student is approaching an understanding of how to apply ratios in simple challenges",
+                                              "PartialB": "The student is approaching an understanding of how to apply ratios in complex challenges",
+                                              "PartialC": "The student is approaching an understanding of how to apply ratios in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how to apply ratios in advanced challenges",
+                                              "Full": "The student understands the application of ratios in simple and complex challenges.",
+                                              "FullA": "The student understands and applies the idea of ratios in simple challenges",
+                                              "FullB": "The student understands and applies the idea of ratios in complex challenges",
+                                              "FullC": "The student understands and applies the idea of ratios in more complex challenges",
+                                              "FullD": "The student understands and applies the idea of ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to understand the application of ratios in simple and complex challenges.",
+                                              "WatchoutA": "The student is beginning to understand ratios and how to apply them in simple challenges.",
+                                              "WatchoutB": "The student is beginning to understand ratios and how to apply them in complex challenges.",
+                                              "WatchoutC": "The student is beginning to understand ratios and how to apply them in more complex challenges.",
+                                              "WatchoutD": "The student is beginning to understand ratios and how to apply them in advanced challenges."
+                                            }
+                                        },
+                                        {
+                                            "id": "6.RP.A.2",
+                                            "title": "6.RP.A.2",
+                                            "description": "Apply base rate by multiplying AND dividing to create equivalent ratios.",
+                                            "alignment": "For intermediate argumentation skill-building, students perform more difficult argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching an understanding of how to multiply and divide with the base rate in complex challenges.",
+                                              "PartialC": "The student is approaching an understanding of how to multiply and divide with the base rate in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how to multiply and divide with the base rate in advanced challenges.",
+                                              "Full": "The student can multiply and divide with the base rate to create equivalent ratios.",
+                                              "FullA": "The student multiplies and divides with the base rate to create equivalent ratios in simple challenges.",
+                                              "FullB": "The student multiplies and divides with the base rate to create equivalent ratios in complex challenges.",
+                                              "FullC": "The student multiplies and divides with the base rate to create equivalent ratios in more complex challenges.",
+                                              "FullD": "The student multiplies and divides with the base rate to create equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to multiply and divide with the base rate to create equivalent ratios.",
+                                              "WatchoutA": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
+                                              "WatchoutB": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in complex challenges.",
+                                              "WatchoutC": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in more complex challenges.",
+                                              "WatchoutD": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in advanced challenges."                                            }
+                                          },
+                                        {
+                                            "id": "6.RP.A.3",
+                                            "title": "6.RP.A.3",
+                                            "description": "Reason about ratios and rates to create equivalent ratios.",
+                                            "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of using multiple base rates to create equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of coordinating information about multiple base rates to create equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching  understanding in using multiple base rates to create equivalent ratios in complex challenges.",
+                                              "PartialD": "The student is approaching understanding of using multiple base rates to create equivalent ratios in advanced challenges.",
+                                              "Full": "The student can use multiple base rates to create equivalent ratios..",
+                                              "FullB": "The student coordinates multiple base rates to create equivalent ratios in complex challenges.",
+                                              "FullD": "The student coordinates multiple base rates to create equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to multiply and divide with the base rate to create equivalent ratios.",
+                                              "Watchout": "The student has beginning understanding in using multiple base rates to create equivalent ratios.",
+                                              "WatchoutB": "The student has beginning understanding in using multiple base rates to create equivalent ratios in complex challenges",
+                                              "WatchoutD": "The student has beginning understanding of using multiple base rates to create equivalent ratios in advanced challenges."                                            }
+                                        },
+                                        {
+                                            "id": "6.RP.A.3.A",
+                                            "title": "6.RP.A.3.A",
+                                            "description": "Create tables of equivalent ratios.",
+                                            "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                                            "progress": {
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to create tables of equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of how to create tables of equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching an understanding of how create tables of equivalent ratios in more challenges.",
+                                              "PartialC": "Approaching an understanding of how create tables of equivalent ratios in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how create tables of equivalent ratios in advanced challenges.",
+                                              "Full": "The student can create tables of equivalent ratios.",
+                                              "FullA": "The student creates tables of equivalent ratios in simple challenges",
+                                              "FullB": "The student creates tables of equivalent ratios in complex challenges.",
+                                              "FullC": "The student creates tables of equivalent ratios in more complex challenges.",
+                                              "FullD": "The student creates tables of equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning understand how to create tables of equivalent ratios.",
+                                              "WatchoutA": "The student is beginning understand how to create tables of equivalent ratios in simple challenges.",
+                                              "WatchoutB": "The student is beginning understand how to create tables of equivalent ratios in complex challenges.",
+                                              "WatchoutC": "The student is beginning understand how to create tables of equivalent ratios in more complex challenges.",
+                                              "WatchoutD": "The student is beginning understand how to create tables of equivalent ratios in advanced challenges."
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+          }
         ]
     },
     "details": {
@@ -198,6 +400,123 @@
             }
         ],
         "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "<p>Ratio Rancher is a nurturing strategy/puzzle game designed for students in grades 6 and beyond. Aligned to CCSS and 21st century skills, the high-impact title addresses the need for an engaging game that promotes understanding of ratios and proportionality - critical core concepts 42% of math 6-12 standards are dependent upon but difficult to master.</p><p>Become a Mixian Expert! Ratio Rancher places players in charge of their very own lush, green world full of silly, exotic creatures! Everything on the fantasy world of Mixia is connected. In order to keep their wacky and delightful creatures happy, players will need to keep track of what they learn in their very own naturalist journal, and make careful decisions based upon how many creatures they have, and what kind of food they can eat!</p>",
+                "video": "https://www.youtube.com/watch/YmB7HZzaGWs",
+                "brochure": "",
+                "curriculum": [
+                    "Helps build a conceptual and intuitive understanding of ratios and proportions while also addressing the critical skill of scaling and representing scale with numbers",
+                    "Brings highly engaging, commercial quality gameplay into the math classroom with standards aligned reporting and resources that enhance the instructional experience"
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "assets/PRIMA-carousel_1.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/PRIMA-carousel_2.png"
+                    }
+                ]
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards Alignment",
+                "CCSS": [
+                    {
+                        "category": "Common Core Math Standards",
+                        "groups": [
+                            {
+                                "name": "Ratios and Proportional Relationships",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.1",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
+                                        "description": "Understand the concept of a ratio and use ratio language to describe a ratio relationship between two quantities."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.2",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.2",
+                                        "description": "Understand the concept of a unit rate a/b associated with a ratio a:b with b ≠ 0, and use rate language in the context of a ratio relationship."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.3",
+                                        "description": "Use ratio and rate reasoning to solve real-world and mathematical problems, e.g., by reasoning about tables of equivalent ratios, tape diagrams, double number line diagrams, or equations."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.3.a",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.3.a",
+                                        "description": "Make tables of equivalent ratios relating quantities with whole-number measurements, find missing values in the tables, and plot the pairs of values on the coordinate plane. Use tables to compare ratios."
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Framework for 21st Century Learning",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "Critical Thinking and Problem Solving",
+                                        "link": "http://www.p21.org/about-us/p21-framework/260",
+                                        "description": "Build new mathematical knowledge through problem solving; and monitor and reflect on the process of mathematical problem solving and solve different kinds of non-familiar problems in both conventional and innovative ways."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "id": "lessonPlans",
+                "authRequired": true,
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "Ratio Rancher Gameplay",
+                                "link": "https://www.youtube.com/watch/YmB7HZzaGWs"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "id": "research",
+                "authRequired": true,
+                "title": "Research",
+                "list": [
+                  {
+                        "category": "Research",
+                        "list": [
+                            {
+                                "name": "Ratio Rancher Research Brief",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Research%20Brief_final.pdf"
+                            },
+                            {
+                                "name": "Field Study Results: Ratio Rancher",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Field%20Study%20Results.pdf"
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",

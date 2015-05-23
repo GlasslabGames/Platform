@@ -291,7 +291,7 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-
+// old licensing system.  these tables do not exist in the same way anymore.
 exampleOut.getLicensedGameIdsFromUserId = {
     "SC": true
 };

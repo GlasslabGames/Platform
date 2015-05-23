@@ -19,16 +19,30 @@ Dependencies
 
 OSX Installation
 ------------
-1. Install **Brew**
+1. Install **Homebrew** and **Homebrew Services**
    * http://brew.sh/
     ```sh
-    $ ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
+    $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     ```
+   * https://github.com/Homebrew/homebrew-services
+    ```sh
+    $ brew tap homebrew/services
+    ```  
 2. Install **Node.js**
-   * Use Brew to install node
-   ```sh
-   $ brew install node
-   ```
+   1. We're using the latest v0.10 version of node.js; later versions introduce breaking changes.  Install nvm to manage which node.js version to use.
+	   ```sh
+	   $ curl https://raw.githubusercontent.com/creationix/nvm/v0.25.1/install.sh | bash
+	   ```
+   2. You'll need close your terminal window, then open it back up again for nvm to be active.  Then use it to setup node.js.
+	   ```sh
+	   $ . ~/.nvm/nvm.sh
+	   $ nvm install 0.10
+	   $ nvm use 0.10
+	   $ nvm alias default 0.10
+	   ```
+	3. You'll need to activate nvm by sourcing it from your shell window for each new terminal instance.  Add
+		. ~/.nvm/nvm.sh
+	to your .bash_profile to do that automatically, or type that command in every time you create a new terminal instance.
 3. Install **Forever** node process manager
   * Use NPM to install forever process manager globally
   ```sh
@@ -91,9 +105,12 @@ OSX Installation
    1. Download: http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.zip
    2. Extract and Install App
    3. Login into admin console [http://localhost:8091](http://localhost:8091)
+   	 * Note If the login does not work (brings up a file not found), make sure that all of its services are allowed incoming connections, then quit couchbase (I used the Activity Monitor to close it) and start it again.  If it doesn't immediately get permission for incoming connections it can get confused.
+   	 * Note Make sure to use the default paths for data.  If you change the path, it may not function, you'll have to uninstall and start over.
    4. Create user (remember the username/password this is your admin account) 
    5. Create Server (use default settings with a minimum of 512MB for the servers memory)
      * Note you can NOT edit the mem usage later, so it's recommended to leave it at default or all memory. The memory is a cap for all the buckets caps, it will not pre-allocat this memory so it's safe to put a high cap here.
+     * Note I did not create a new server, but used an already created one at 127.0.0.1
    6. For the default bucket choose the 100MB (minimal size) for ram
      * You can delete this bucket later it's not used
    7. Add the required buckets
@@ -111,8 +128,13 @@ OSX Installation
                3. Access Control: Standard port password "glasslab"
                4. Replicas: uncheck "Enable"
                5. Click Create button at bottom of modal.
-               6. 
-    8.  Open the Node to Client ports (Refer to http://docs.couchbase.com/couchbase-manual-2.2/#network-ports)
+           3. Click "Create New Data Bucket" again
+               1. Name: "glasslab_dashdata"
+               2. RAM Quota: 100MB to 512MB this depends on how much ram you have free on your system. The higher the number the faster the data can be accessed.
+               3. Access Control: Standard port password "glasslab"
+               4. Replicas: uncheck "Enable"
+               5. Click Create button at bottom of modal.
+     8.  Open the Node to Client ports (Refer to http://docs.couchbase.com/couchbase-manual-2.2/#network-ports)
 
            1. 8091    Web Administration Port
            2. 8092    Couchbase API Port
@@ -127,20 +149,24 @@ Running the app
 1. Start/Stop/Restart servies
   * To start services run the following command:
   ```sh
-  $ ./service.sh start
+  $ sudo ./service.sh start
   ```
   * To stop services run the following command:
   ```sh
-  $ ./service.sh stop
+  $ sudo ./service.sh stop
   ```
   * To restart services run the following command:
   ```sh
-  $ ./service.sh restart
+  $ sudo ./service.sh restart
   ```
   * Possible problems:
       * Permission denied error (```Error: EACCES, permission denied '/var/log/hydra/app-external.log```). This happened because hydra was under root instead of the user. To fix (insert your username instead of user):
       ```sh
       $ sudo chown -R user hydra
+      ```
+      * grunt missing error (`./service.sh: line 9: grunt: command not found`).  Install grunt
+      ```sh
+      $ sudo npm install -g grunt-cli
       ```
 2. In a browser go to [http://localhost:8001](http://localhost:8001)
 
