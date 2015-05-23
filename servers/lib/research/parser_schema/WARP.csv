@@ -1,2 +1,0 @@
-Header/EventName,clientTimeStamp,serverTimeStamp,clientVersion,totalTimePlayed,userId,deviceId,activityId,sessionId,attempt,sessionOrder,gameLevel,actionName,actionData
-*,{clientTimeStamp},{serverTimeStamp},{clientVersion},{totalTimePlayed},{userId},{deviceId},[activityId],{gameSessionId},[attempt],{gameSessionEventOrder},{gameLevel},{eventName},{eventData}
