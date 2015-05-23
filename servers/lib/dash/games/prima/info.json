@@ -406,7 +406,7 @@
                 "title": "Product Description",
                 "header": "About the Game",
                 "about": "<p>Ratio Rancher is a nurturing strategy/puzzle game designed for students in grades 6 and beyond. Aligned to CCSS and 21st century skills, the high-impact title addresses the need for an engaging game that promotes understanding of ratios and proportionality - critical core concepts 42% of math 6-12 standards are dependent upon but difficult to master.</p><p>Become a Mixian Expert! Ratio Rancher places players in charge of their very own lush, green world full of silly, exotic creatures! Everything on the fantasy world of Mixia is connected. In order to keep their wacky and delightful creatures happy, players will need to keep track of what they learn in their very own naturalist journal, and make careful decisions based upon how many creatures they have, and what kind of food they can eat!</p>",
-                "video": "vi",
+                "video": "https://www.youtube.com/watch/YmB7HZzaGWs",
                 "brochure": "",
                 "curriculum": [
                     "Helps build a conceptual and intuitive understanding of ratios and proportions while also addressing the critical skill of scaling and representing scale with numbers",
@@ -487,8 +487,8 @@
                         "category": "Videos",
                         "list": [
                             {
-                                "name": "",
-                                "link": ""
+                                "name": "Ratio Rancher Gameplay",
+                                "link": "https://www.youtube.com/watch/YmB7HZzaGWs"
                             }
                         ]
                     }

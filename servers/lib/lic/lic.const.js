@@ -30,7 +30,6 @@ module.exports = {
                 "PVZ"
             ],
             "downloadableGames": [
-                "WARP"
             ],
             "planId": "chromebook"
         },
@@ -50,7 +49,6 @@ module.exports = {
                 "PVZ"
             ],
             "downloadableGames": [
-                "WARP"
             ],
             "planId": "ipad"
         },
@@ -71,8 +69,7 @@ module.exports = {
                 "PVZ"
             ],
             "downloadableGames": [
-                "SC",
-                "WARP"
+                "SC"
             ],
             "planId": "pcMac"
         },
@@ -95,8 +92,7 @@ module.exports = {
                 "PVZ"
             ],
             "downloadableGames": [
-                "SC",
-                "WARP"
+                "SC"
             ],
             "planId": "allGames"
         },
@@ -119,8 +115,7 @@ module.exports = {
                 "PVZ"
             ],
             "downloadableGames": [
-                "SC",
-                "WARP"
+                "SC"
             ],
             "planId": "trial"
         },
@@ -143,8 +138,7 @@ module.exports = {
                 "PVZ"
             ],
             "downloadableGames": [
-                "SC",
-                "WARP"
+                "SC"
             ],
             "planId": "trialLegacy"
         }
