@@ -190,7 +190,7 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.urlencoded());
                 this.app.use(express.json());
                 this.app.use(express.methodOverride());
-                var whitelist = [ "http://new.wwf.local", "https://new.wwf.local", "http://www.wordswithfriendsedu.com", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com" ];
+                var whitelist = [ "http://new.wwf.local", "https://new.wwf.local", "http://www.wordswithfriendsedu.com", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com", "https://s3-us-west-1.amazonaws.com" ];
                 var corsOptions = {
                     origin: function( origin, callback ) {
                         var originIsWhitelisted = whitelist.indexOf( origin ) !== -1;

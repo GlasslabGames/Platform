@@ -6,7 +6,7 @@ var lConst = require('../lms.const.js');
 module.exports = {
     getEnrolledCourses:     getEnrolledCourses,
     enrollInCourse:         enrollInCourse,
-    unenrollFromCourse:     unenrollFromCourse,
+    //unenrollFromCourse:     unenrollFromCourse,
     unenrollUserFromCourse: unenrollUserFromCourse,
     createCourse:           createCourse,
     getCourse:              getCourse,
