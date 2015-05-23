@@ -10,7 +10,7 @@
         "subject": "Mathematics",
         "type": "Browser",
         "platform": {
-            "type": "Browser",
+            "type": "Browser (Optimized for Chrome)",
             "icon": {
                 "small": "assets/platform-browser.png",
                 "large": "assets/platform-browser@2x.png"
@@ -19,7 +19,7 @@
         "price": "Free",
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
-        "releaseDate": "TBD",
+        "releaseDate": "May 22, 2015",
         "shortDescription": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "description": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "developer": {
@@ -43,16 +43,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-PRIMA.png",
-            "large": "assets/thumb-game-PRIMA@2x.png"
+            "small": "assets/ratiorancher_game_image.png",
+            "large": "assets/ratiorancher_game_image@2x.png"
         },
         "card": {
-            "small": "assets/game-card-PRIMA.png",
-            "large": "assets/game-card-PRIMA@2x.png"
+            "small": "assets/ratiorancher_game_image@2x.png",
+            "large": "assets/ratiorancher_game_image@4x.png"
         },
         "banners": {
-            "product": "assets/game-banner-PRIMA.png",
-            "reports": "assets/game-banner-PRIMA.png"
+            "product": "assets/ratiorancher_game_banner.png",
+            "reports": "assets/ratiorancher_report_banner.png"
         },
         "play": {
             "type": "page",
@@ -158,9 +158,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-PRIMA.png",
-                    "skinny": "assets/skinny-banner-PRIMA.png",
-                    "large": "assets/skinny-banner-PRIMA@2x.png"
+                    "image": "assets/ratiorancher_report_banner.png",
+                    "skinny": "assets/ratiorancher_report_banner.png",
+                    "large": "assets/ratiorancher_dash_banner.png"
                 },
                 "table": {
                     "labels": [],
@@ -187,27 +187,32 @@
                                 {
                                     "id": "so4",
                                     "title": "Success with Early Skills",
-                                    "description": "Player successfully completed the first two challenge types on their first attempt."
+                                    "description": "Player successfully competed two ways of solving simple proportions on their first attempt with easier ratio challenges (juvenile rammus and juvenile unifox)."
                                 },
                                 {
                                     "id": "so5",
                                     "title": "Success with Complex Skills",
-                                    "description": "Player successfully completed the second two challenge types on their first attempt."
+                                    "description": "Player successfully competed two ways of solving simple proportions on their first attempt with intermediate ratio challenges (adult rammus and adult unifox). "
                                 },
                                 {
                                     "id": "so6",
                                     "title": "Success with Advanced Skills",
-                                    "description": "Player successfully completed the first advanced challenge type on their first attempt."
+                                    "description": "Player successfully competed three ways of solving simple proportions on their first attempt with advanced ratio challenges (juvenile and adult flockin)."
                                 },
                                 {
                                     "id": "so7",
+                                    "title": "Success with Total Food Challenges",
+                                    "description": "Player successfully completed two total food challenge types on their first attempt."
+                                },
+                                {
+                                    "id": "so8",
                                     "title": "Early Mastery!",
                                     "description": "Master performance! The player has completed Part I and Part II of the game without any mistakes!"
                                 },
                                 {
-                                    "id": "so8",
+                                    "id": "so9",
                                     "title": "Completed Advanced Challenges!",
-                                    "description": "Super performance! This player successfully completed one or more advanced level challenges."
+                                    "description": "Super performance! This player successfully completed the early level challenges."
                                 }
                             ]
                         },
@@ -233,27 +238,42 @@
                                 {
                                     "id": "wo4",
                                     "title": "Trouble with Early Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: ND types."
+                                    "description": "Player has been unsuccessful two or more times when working with easier ratio challenges (juvenile rammus and juvenile unifox): How much food for given number of creatures?"
                                 },
                                 {
                                     "id": "wo5",
                                     "title": "Trouble with Early Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: MD types."
+                                    "description": "Player has been unsuccessful two or more times when working with easier ratio challenges (juvenile rammus and juvenile unifox): How many creatures for given amount of food?"
                                 },
                                 {
                                     "id": "wo6",
-                                    "title": "Trouble with Early Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: MS types."
+                                    "title": "Trouble with Complex Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with intermediate ratio challenges (adult rammus and adult unifox): How much food for a given number of creatures?"
                                 },
                                 {
                                     "id": "wo7",
                                     "title": "Trouble with Complex Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: NS types."
+                                    "description": "Player has been unsuccessful two or more times when working with intermediate ratio challenges (adult rammus and adult unifox): How many creatures and food type 1 for given amount of food type 2?"
                                 },
                                 {
                                     "id": "wo8",
+                                    "title": "Trouble with Complex Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with intermediate ratio challenges (adult rammus and adult unifox): How many creatures for given amount of total food?"
+                                },
+                                {
+                                    "id": "wo9",
                                     "title": "Trouble with Advanced Skills",
-                                    "description": "Difficulty with \"advanced\" skills: player has been unsuccessful working with advanced problem types: MT types."
+                                    "description": "Player has been unsuccessful two or more times when working with advanced ratio challenges (juvenile flockin and adult flockin): How much food for a given number of creatures?"
+                                },
+                                {
+                                    "id": "wo10",
+                                    "title": "Trouble with Advanced Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with advanced ratio challenges (juvenile flockin and adult flockin): How many creatures given amount of food?"
+                                },
+                                {
+                                    "id": "wo11",
+                                    "title": "Trouble with Advanced Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with advanced ratio challenges (adult flockin): How many creatures for given amount of total food?"
                                 }
                             ]
                         }
@@ -268,9 +288,9 @@
                 "name": "Standards Report",
                 "header": {
                     "text": "Standards Report",
-                    "image": "assets/game-banner-PRIMA.png",
-                    "skinny": "assets/skinny-banner-PRIMA.png",
-                    "large": "assets/skinny-banner-PRIMA@2x.png"
+                    "image": "assets/ratiorancher_report_banner.png",
+                    "skinny": "assets/ratiorancher_report_banner.png",
+                    "large": "assets/ratiorancher_dash_banner.png"
                 },
                 "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
                 "table": {
@@ -405,7 +425,7 @@
                 "id": "product",
                 "title": "Product Description",
                 "header": "About the Game",
-                "about": "<p>Ratio Rancher is a nurturing strategy/puzzle game designed for students in grades 6 and beyond. Aligned to CCSS and 21st century skills, the high-impact title addresses the need for an engaging game that promotes understanding of ratios and proportionality - critical core concepts 42% of math 6-12 standards are dependent upon but difficult to master.</p><p>Become a Mixian Expert! Ratio Rancher places players in charge of their very own lush, green world full of silly, exotic creatures! Everything on the fantasy world of Mixia is connected. In order to keep their wacky and delightful creatures happy, players will need to keep track of what they learn in their very own naturalist journal, and make careful decisions based upon how many creatures they have, and what kind of food they can eat!</p>",
+                "about": "<p><img align='left' class='media media-image' src='/assets/ratiorancher_bestOnChrome.png'><p>(For the best gameplay experience, play on Chrome!)<br/><br/>Ratio Rancher is a nurturing strategy/puzzle game designed for students in grades 6 and beyond. Aligned to CCSS and 21st century skills, the high-impact title addresses the need for an engaging game that promotes understanding of ratios and proportionality - critical core concepts 42% of math 6-12 standards are dependent upon but difficult to master.</p><p>Become a Mixian Expert! Ratio Rancher places players in charge of their very own lush, green world full of silly, exotic creatures! Everything on the fantasy world of Mixia is connected. In order to keep their wacky and delightful creatures happy, players will need to keep track of what they learn in their very own naturalist journal, and make careful decisions based upon how many creatures they have, and what kind of food they can eat!</p>",
                 "video": "https://www.youtube.com/watch/YmB7HZzaGWs",
                 "brochure": "",
                 "curriculum": [
