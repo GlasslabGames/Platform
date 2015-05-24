@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "PVZ",
-        "enabled": true,
-        "visible": true,
+        "enabled": false,
+        "visible": false,
         "maintenance": null,
         "shortName": "Use Your Brainz EDU",
         "longName": "Use Your Brainz EDU",

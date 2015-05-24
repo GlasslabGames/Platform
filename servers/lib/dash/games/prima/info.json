@@ -18,8 +18,8 @@
         },
         "price": "Free",
         "packages": "PC/Mac, Chromebook/Web Games",
-        "release": "dev",
-        "releaseDate": "TBD",
+        "release": "live",
+        "releaseDate": "May 22, 2015",
         "shortDescription": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "description": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "developer": {
@@ -58,8 +58,8 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=http://stage.playfully.org",
-                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=https://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/22/index.html?sdkURL=http://www.glasslabgames.org",
+                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/22/index.html?sdkURL=https://www.glasslabgames.org",
                 "format": "html",
                 "size": {
                     "width": 800,
