@@ -58,8 +58,8 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=http://stage.playfully.org",
-                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=https://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=http://www.glasslabgames.org",
+                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/20/index.html?sdkURL=https://www.glasslabgames.org",
                 "format": "html",
                 "size": {
                     "width": 800,
