@@ -18,11 +18,7 @@
         },
         "price": "Free",
         "packages": "PC/Mac, Chromebook/Web Games",
-<<<<<<< HEAD
-        "release": "dev",
-=======
         "release": "live",
->>>>>>> d8aa96f956b472b0d800449437e7b981575b312b
         "releaseDate": "May 22, 2015",
         "shortDescription": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "description": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
@@ -440,11 +436,19 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/PRIMA-carousel_1.png"
+                        "url": "assets/PRIMA-carousel_2.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/PRIMA-carousel_2.png"
+                        "url": "assets/prima_carousel3"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/prima_carousel4"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/prima_carousel5"
                     }
                 ]
             },
