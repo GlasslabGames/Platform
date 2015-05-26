@@ -8,9 +8,9 @@
         "longName": "Use Your Brainz EDU",
         "grades": "2 - 7",
         "subject": "Math",
-        "type": "Browser",
+        "type": "App",
         "platform": {
-            "type": "Browser/Flash",
+            "type": "iPad",
             "icon": {
                 "small": "assets/platform-browser.png",
                 "large": "assets/platform-browser@2x.png"
