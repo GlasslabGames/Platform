@@ -143,6 +143,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/data/game/:gameId/match/:matchId",
+            service: "data",
+            controller: "game",
+            method: {
+                get: "getMatch"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/data/game/:gameId/submit",
             service: "data",
             controller: "game",
