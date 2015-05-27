@@ -499,6 +499,11 @@ function subscribeToTrialLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
+    var emailDomain = req.user.email.split('@')[1].indexOf('glasslabgames.org');
+    if(this.options.env === "prod" && req.user.email.indexOf("+") !== -1 && emailDomain !== -1){
+        this.requestUtil.errorResponse(res, {key: "lic.email.invalid"});
+        return;
+    }
     var userId = req.user.id;
     var stripeInfo = {};
     var planInfo = {
