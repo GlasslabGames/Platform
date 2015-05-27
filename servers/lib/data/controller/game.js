@@ -17,6 +17,7 @@ module.exports = {
     postGameAchievement: postGameAchievement,
     releases: releases,
     createMatch: createMatch,
+    getMatch: getMatch,
     updateMatches: updateMatches,
     pollMatches: pollMatches,
     completeMatch: completeMatch,
@@ -469,6 +470,34 @@ function createMatch(req, res){
         .then(null, function(err){
             console.error(err);
             this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function getMatch(req, res) {
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.user && req.user.id)) {
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    if(!req.params.matchId) {
+        this.requestUtil.errorResponse(res, {key: "data.matchId.missing"});
+        return
+    }
+
+    var gameId = req.params.gameId;
+    var userId = req.user.id;
+    var matchId = req.params.matchId;
+
+    this.cbds.getMatch(gameId, matchId)
+        .then(function(match) {
+            this.requestUtil.jsonResponse(res, match);
+        }.bind(this))
+        .then(null, function(err) {
+            console.error("Get Match Error -",err);
+            this.requestUtil.errorResponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }
 
