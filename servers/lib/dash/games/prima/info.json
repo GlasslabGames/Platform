@@ -161,7 +161,7 @@
                     "text": "Shout Out and Watch Out Report",
                     "image": "assets/ratiorancher_report_banner.png",
                     "skinny": "assets/ratiorancher_report_banner.png",
-                    "large": "assets/ratiorancher_dash_banner.png"
+                    "large": "assets/ratiorancher_dashboard_banner.png"
                 },
                 "table": {
                     "labels": [],
@@ -291,7 +291,7 @@
                     "text": "Standards Report",
                     "image": "assets/ratiorancher_report_banner.png",
                     "skinny": "assets/ratiorancher_report_banner.png",
-                    "large": "assets/ratiorancher_dash_banner.png"
+                    "large": "assets/ratiorancher_dashboard_banner.png"
                 },
                 "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
                 "table": {
