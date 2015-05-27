@@ -43,16 +43,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/ratiorancher_game_image.png",
-            "large": "assets/ratiorancher_game_image@2x.png"
+            "small": "assets/thumb-game-PRIMA.png",
+            "large": "assets/thumb-game-PRIMA@2x.png"
         },
         "card": {
-            "small": "assets/ratiorancher_game_image@2x.png",
-            "large": "assets/ratiorancher_game_image@4x.png"
+            "small": "assets/game-card-PRIMA.png",
+            "large": "assets/game-card-PRIMA@2x.png"
         },
         "banners": {
-            "product": "assets/ratiorancher_game_banner.png",
-            "reports": "assets/ratiorancher_report_banner.png"
+            "product": "assets/game-banner-PRIMA.png",
+            "reports": "assets/game-banner-PRIMA.png"
         },
         "play": {
             "type": "page",
@@ -159,8 +159,8 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/ratiorancher_report_banner.png",
-                    "skinny": "assets/ratiorancher_report_banner.png",
+                    "image": "assets/skinny-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.png",
                     "large": "assets/ratiorancher_dashboard_banner.png"
                 },
                 "table": {
@@ -289,8 +289,8 @@
                 "name": "Standards Report",
                 "header": {
                     "text": "Standards Report",
-                    "image": "assets/ratiorancher_report_banner.png",
-                    "skinny": "assets/ratiorancher_report_banner.png",
+                    "image": "assets/skinny-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.png",
                     "large": "assets/ratiorancher_dashboard_banner.png"
                 },
                 "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
