@@ -6,11 +6,11 @@
         "maintenance": null,
         "shortName": "Ratio Rancher",
         "longName": "Ratio Rancher",
-        "grades": "TBD",
-        "subject": "TBD",
+        "grades": "6 - 12",
+        "subject": "Mathematics",
         "type": "Browser",
         "platform": {
-            "type": "Browser",
+            "type": "Browser (Optimized for Chrome)",
             "icon": {
                 "small": "assets/platform-browser.png",
                 "large": "assets/platform-browser@2x.png"
@@ -18,10 +18,10 @@
         },
         "price": "Free",
         "packages": "PC/Mac, Chromebook/Web Games",
-        "release": "dev",
-        "releaseDate": "TBD",
-        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
-        "description": "TBD",
+        "release": "live",
+        "releaseDate": "May 22, 2015",
+        "shortDescription": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
+        "description": "Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
         "developer": {
             "id": "GL",
             "name": "GlassLab, Inc.",
@@ -58,7 +58,8 @@
             "type": "page",
             "page": {
                 "title": "Prima",
-                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/15/index.html?sdkURL=http://stage.playfully.org",
+                "embed": "http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/22/index.html?sdkURL=http://www.glasslabgames.org",
+                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/22/index.html?sdkURL=https://www.glasslabgames.org",
                 "format": "html",
                 "size": {
                     "width": 800,
@@ -158,9 +159,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-PRIMA.png",
+                    "image": "assets/skinny-banner-PRIMA.png",
                     "skinny": "assets/skinny-banner-PRIMA.png",
-                    "large": "assets/skinny-banner-PRIMA@2x.png"
+                    "large": "assets/ratiorancher_dashboard_banner.png"
                 },
                 "table": {
                     "labels": [],
@@ -172,7 +173,7 @@
                                 {
                                     "id": "so1",
                                     "title": "Good Gameplay Knowledge",
-                                    "description": "The player knows how to play the game and use it's features."
+                                    "description": "The player knows how to play the game and use its features."
                                 },
                                 {
                                     "id": "so2",
@@ -187,27 +188,32 @@
                                 {
                                     "id": "so4",
                                     "title": "Success with Early Skills",
-                                    "description": "Player successfully completed the first two challenge types on their first attempt."
+                                    "description": "Player successfully completed two ways of solving simple proportions on their first attempt with easier ratio challenges (juvenile rammus and juvenile unifox)."
                                 },
                                 {
                                     "id": "so5",
                                     "title": "Success with Complex Skills",
-                                    "description": "Player successfully completed the second two challenge types on their first attempt."
+                                    "description": "Player successfully completed two ways of solving simple proportions on their first attempt with intermediate ratio challenges (adult rammus and adult unifox). "
                                 },
                                 {
                                     "id": "so6",
                                     "title": "Success with Advanced Skills",
-                                    "description": "Player successfully completed the first advanced challenge type on their first attempt."
+                                    "description": "Player successfully completed three ways of solving simple proportions on their first attempt with advanced ratio challenges (juvenile and adult flockin)."
                                 },
                                 {
                                     "id": "so7",
+                                    "title": "Success with Total Food Challenges",
+                                    "description": "Player successfully completed two total food challenge types on their first attempt."
+                                },
+                                {
+                                    "id": "so8",
                                     "title": "Early Mastery!",
                                     "description": "Master performance! The player has completed Part I and Part II of the game without any mistakes!"
                                 },
                                 {
-                                    "id": "so8",
+                                    "id": "so9",
                                     "title": "Completed Advanced Challenges!",
-                                    "description": "Super performance! This player successfully completed one or more advanced level challenges."
+                                    "description": "Super performance! This player successfully completed the early level challenges."
                                 }
                             ]
                         },
@@ -233,27 +239,42 @@
                                 {
                                     "id": "wo4",
                                     "title": "Trouble with Early Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: ND types."
+                                    "description": "Player has been unsuccessful two or more times when working with easier ratio challenges (juvenile rammus and juvenile unifox): How much food for given number of creatures?"
                                 },
                                 {
                                     "id": "wo5",
                                     "title": "Trouble with Early Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with easier ratio-challenge types: MD types."
+                                    "description": "Player has been unsuccessful two or more times when working with easier ratio challenges (juvenile rammus and juvenile unifox): How many creatures for given amount of food?"
                                 },
                                 {
                                     "id": "wo6",
-                                    "title": "Trouble with Early Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: MS types."
+                                    "title": "Trouble with Complex Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with intermediate ratio challenges (adult rammus and adult unifox): How much food for a given number of creatures?"
                                 },
                                 {
                                     "id": "wo7",
                                     "title": "Trouble with Complex Skills",
-                                    "description": "Player has been unsuccessful two or more times when working with complex ratio-challenge types: NS types."
+                                    "description": "Player has been unsuccessful two or more times when working with intermediate ratio challenges (adult rammus and adult unifox): How many creatures and food type 1 for given amount of food type 2?"
                                 },
                                 {
                                     "id": "wo8",
+                                    "title": "Trouble with Complex Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with intermediate ratio challenges (adult rammus and adult unifox): How many creatures for given amount of total food?"
+                                },
+                                {
+                                    "id": "wo9",
                                     "title": "Trouble with Advanced Skills",
-                                    "description": "Difficulty with \"advanced\" skills: player has been unsuccessful working with advanced problem types: MT types."
+                                    "description": "Player has been unsuccessful two or more times when working with advanced ratio challenges (juvenile flockin and adult flockin): How much food for a given number of creatures?"
+                                },
+                                {
+                                    "id": "wo10",
+                                    "title": "Trouble with Advanced Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with advanced ratio challenges (juvenile flockin and adult flockin): How many creatures given amount of food?"
+                                },
+                                {
+                                    "id": "wo11",
+                                    "title": "Trouble with Advanced Skills",
+                                    "description": "Player has been unsuccessful two or more times when working with advanced ratio challenges (adult flockin): How many creatures for given amount of total food?"
                                 }
                             ]
                         }
@@ -268,9 +289,9 @@
                 "name": "Standards Report",
                 "header": {
                     "text": "Standards Report",
-                    "image": "assets/game-banner-AA-1.png",
-                    "skinny": "assets/skinny-banner-AA-1.jpg",
-                    "large": "assets/skinny-banner-AA-1@2x.jpg"
+                    "image": "assets/skinny-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.png",
+                    "large": "assets/ratiorancher_dashboard_banner.png"
                 },
                 "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
                 "table": {
@@ -399,6 +420,156 @@
             }
         ],
         "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "<p><img align='left' class='media media-image' src='/assets/ratiorancher_bestOnChrome.png'><p>(For the best gameplay experience, play on Chrome!)<br/><br/>Ratio Rancher is a nurturing strategy/puzzle game designed for students in grades 6 and beyond. Aligned to CCSS and 21st century skills, the high-impact title addresses the need for an engaging game that promotes understanding of ratios and proportionality - critical core concepts 42% of math 6-12 standards are dependent upon but difficult to master.</p><p>Become a Mixian Expert! Ratio Rancher places players in charge of their very own lush, green world full of silly, exotic creatures! Everything on the fantasy world of Mixia is connected. In order to keep their wacky and delightful creatures happy, players will need to keep track of what they learn in their very own naturalist journal, and make careful decisions based upon how many creatures they have, and what kind of food they can eat!</p>",
+                "video": "https://www.youtube.com/watch/YmB7HZzaGWs",
+                "brochure": "",
+                "curriculum": [
+                    "Helps build a conceptual and intuitive understanding of ratios and proportions while also addressing the critical skill of scaling and representing scale with numbers",
+                    "Brings highly engaging, commercial quality gameplay into the math classroom with standards aligned reporting and resources that enhance the instructional experience"
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "assets/PRIMA-carousel_2.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/prima_carousel3.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/prima_carousel4.png"
+                    },
+                    {
+                        "type": "image",
+                        "url": "assets/prima_carousel5.png"
+                    }
+                ]
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards Alignment",
+                "CCSS": [
+                    {
+                        "category": "Common Core Math Standards",
+                        "groups": [
+                            {
+                                "name": "Ratios and Proportional Relationships",
+                                "list": [
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.1",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
+                                        "description": "Understand the concept of a ratio and use ratio language to describe a ratio relationship between two quantities."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.2",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.2",
+                                        "description": "Understand the concept of a unit rate a/b associated with a ratio a:b with b ≠ 0, and use rate language in the context of a ratio relationship."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.3",
+                                        "description": "Use ratio and rate reasoning to solve real-world and mathematical problems, e.g., by reasoning about tables of equivalent ratios, tape diagrams, double number line diagrams, or equations."
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.6.RP.A.3.a",
+                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.3.a",
+                                        "description": "Make tables of equivalent ratios relating quantities with whole-number measurements, find missing values in the tables, and plot the pairs of values on the coordinate plane. Use tables to compare ratios."
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Framework for 21st Century Learning",
+                        "groups": [
+                            {
+                                "list": [
+                                    {
+                                        "name": "Critical Thinking and Problem Solving",
+                                        "link": "http://www.p21.org/about-us/p21-framework/260",
+                                        "description": "Build new mathematical knowledge through problem solving; and monitor and reflect on the process of mathematical problem solving and solve different kinds of non-familiar problems in both conventional and innovative ways."
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": true,
+                "id": "lessonPlans",
+                "authRequired": true,
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Lesson Plans",
+                        "list": [
+                            {
+                                "name": "Instructional Guide",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Instructional%20Guide.pdf",
+                                "description": ""
+                            },
+                            {
+                                "name": "Handout - Multiple Representations for Feeding Ratios",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Handout%20-%20Multiple%20Representations%20for%20Feeding%20Ratios.pdf",
+                                "description": ""
+                            },
+                            {
+                                "name": "Lesson 1 Bundle",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Lesson%201.zip",
+                                "description": ""
+                            },
+                            {
+                                "name": "Lesson 2 Bundle",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Lesson%202.zip",
+                                "description": ""
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "Ratio Rancher Gameplay",
+                                "link": "https://www.youtube.com/watch/YmB7HZzaGWs"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": true,
+                "id": "research",
+                "authRequired": true,
+                "title": "Research",
+                "list": [
+                  {
+                        "category": "Research",
+                        "list": [
+                            {
+                                "name": "Ratio Rancher Research Brief",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Research%20Brief_final.pdf"
+                            },
+                            {
+                                "name": "Field Study Results: Ratio Rancher",
+                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/research/Ratio%20Rancher%20Field%20Study%20Results.pdf"
+                            }
+                        ]
+                    }
+                ]
+            }
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",

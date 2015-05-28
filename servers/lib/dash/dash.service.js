@@ -60,7 +60,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     this.telmStore.connect()
         .then(function(){
-                // test connection to telemetry store
+            // test connection to telemetry store
             return this._migrateGameFiles(true);
         }.bind(this))
         .then(function(){
