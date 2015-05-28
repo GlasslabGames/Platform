@@ -82,8 +82,6 @@ function teacherLogin(username, password, cb){
     post_options.path = "/api/user/login";
     post_options.headers['Content-Length'] = post_data.length;
 
-//  var post_validate = https.request(post_options, function(res) {     // GLAS-77  VVVVVV
-
     var post_validate = http.request(post_options, function(res) {
         // get first cookie, split and grab first
         cookies = res.headers['set-cookie'];
@@ -185,8 +183,6 @@ function validateCode(code, cb)
     post_options.path = "/api/code/valid";
     post_options.headers['Content-Length'] = post_data.length;
 
-//  var post_validate = https.request(post_options, function(res) {      // GLAS-77  VVVVVV
-
     var post_validate = http.request(post_options, function(res) {
         res.setEncoding('utf8');
         var data = "";
@@ -219,8 +215,6 @@ function createUsers(associatedId, username, startId, numOfUsers) {
         post_options.method = "POST";
         post_options.headers['Content-Length'] = post_data.length;
         post_options.path = "/api/user/register";
-
-//      var post_reg = https.request(post_options, function(res) {       // GLAS-77  VVVVVV
 
         var post_reg = http.request(post_options, function(res) {
             res.setEncoding('utf8');

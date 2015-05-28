@@ -1,5 +1,12 @@
 #!/bin/bash
 
+
+# e.g.
+#
+# ./service_start.sh app-external "app-external.js"
+# ./service_start.sh app-internal "app-internal.js"
+
+LOG_DIR=~
 NAME=$1
 
 if [ -n "$2" ]; then

@@ -13,8 +13,7 @@
  *
  *
  */
-var http       = require('http');
-var https      = require('https');      // GLAS-77  VVVVVV
+
 var path       = require('path');
 // Third-party libs
 var _          = require('lodash');
