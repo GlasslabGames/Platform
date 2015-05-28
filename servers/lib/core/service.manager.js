@@ -8,8 +8,10 @@
  *  multiparty - https://github.com/superjoe30/node-multiparty
  *
  */
+
 var fs         = require('fs');
 var http       = require('http');
+var https      = require('https');
 var path       = require('path');
 var url        = require('url');
 // Third-party libs
@@ -18,6 +20,16 @@ var when       = require('when');
 var express    = require('express');
 var couchbase  = require('couchbase');
 var cors       = require('cors');
+
+var TlsOptions = {
+
+    ca: fs.readFileSync('ssl-key/server/priv-root-ca.crt.pem'),
+    key: fs.readFileSync('ssl-key/server/server.key.pem'),
+    cert: fs.readFileSync('ssl-key/server/server.crt.pem')
+
+    //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
+    //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
+}
 
 // load at runtime
 var Util;
@@ -33,6 +45,9 @@ function ServiceManager(configFiles){
     var ConfigManager = require('../core/config.manager.js');
 
     console.log('---------------------------------------------');
+    console.log('');
+    console.log('  hydra/Platform/servers/lib/core/service.manager.js  ');
+    console.log('');
     console.log('Loading Configuration...');
     var config        = new ConfigManager();
     // load config files from first to last until successful
@@ -201,7 +216,7 @@ return when.promise(function(resolve, reject) {
                 this.app.use( cors(corsOptions) );
 
                 this.app.use(express.session({
-                    secret: this.options.services.session.secret || "keyboard kitty",
+                  secret: this.options.services.session.secret || "keyboard kitty",
                     cookie: _.merge({
                         path: '/'
                         , httpOnly : false
@@ -531,9 +546,13 @@ ServiceManager.prototype.start = function(port) {
                     console.log('Starting Server on port', serverPort, "...");
 
                     // start server
-                    http.createServer(this.app).listen(serverPort, function createServer(){
+                    //  http.createServer(this.app).listen(serverPort, function createServer(){
+                    https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
+
                         console.log('Server listening on port ' + serverPort);
                         console.log('---------------------------------------------');
+                        console.log('');
+
                         this.stats.increment("info", "ServerStarted");
                     }.bind(this));
                 }.bind(this))
