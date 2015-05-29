@@ -1,7 +1,0 @@
-GLAS-77 Require use of SSL on registration and login
-
-Work in progress -
-	Replace temp CA, cert and key when they become available.
-
-( hydra/Platform/servers/lib/core/service.manager.js )
-The temporary .pem files are in servers/ssl-key/server/server.key.pem etc.
