@@ -306,7 +306,35 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         }
         else {*/
             var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
-            res.sendfile( fullPath );
+        //  res.sendfile( fullPath );
+
+
+
+
+    console.log('');
+    console.log(' ++++++++++++++++                ++++++++++++++++ ');
+    console.log('');
+    console.log(' printf --- req.method == '+ req.method);
+    console.log(' printf --- req.headers.host = ', req.headers.host);
+    console.log(' printf --- fullPath is ', fullPath);
+    console.log('');
+
+            if(req.connection.encrypted){
+
+    console.log(' https ok ... no need to redirect ...');
+    console.log(' ');
+
+                res.sendfile( fullPath );
+            }else{
+
+     //            console.log(' redirecting ....');
+
+     //            //  res.send('this should redirect', 404);
+     //            res.redirect('https://127.0.0.1:9999');
+     //            res.end();
+
+            }
+
         //}
     }.bind(this));
 }
@@ -539,22 +567,58 @@ ServiceManager.prototype.start = function(port) {
                     // setup routes
                     this.setupRoutes();
                     console.log('----------------------------');
-                    console.log('Routes Setup')
+                    console.log('Routes Setup done')
 
                     var serverPort = port || this.app.get('port');
 
+                    // start https server
                     console.log('Starting Server on port', serverPort, "...");
-
-                    // start server
-                    //  http.createServer(this.app).listen(serverPort, function createServer(){
                     https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
-
-                        console.log('Server listening on port ' + serverPort);
-                        console.log('---------------------------------------------');
+                        console.log('Server listening on port ' + serverPort);      // testing on port 9999
                         console.log('');
-
                         this.stats.increment("info", "ServerStarted");
                     }.bind(this));
+
+
+
+/*
+                    // fyi - this.app = express()
+
+                    var httpServerPort = 8080;
+                    http.createServer(this.app).listen(httpServerPort, function createServer(){
+                //  http.createServer(this.app).listen(8080, function createServer(){
+
+
+    //         // set up a route to redirect http to https
+    //
+    //     //  http.all('*', function(req, res){
+    //     //  http.post('*', function(req, res){
+    //         http.get('*', function(req, res){
+    //
+    //          //  res.redirect('https://mydomain.com'+req.url)
+    //          //  res.redirect('https://127.0.0.1:9999');
+    //          //  res.end();
+    //
+    //          res.redirect('https://127.0.0.1:' + serverPort + req.url);
+    //      //  res.redirect('https://' + glasslabdomain + serverPort + req.url);
+    //
+    //          })
+
+
+//                     this.stats.increment("info", "ServerStarted");
+
+                        console.log('second dummy Server listening on port ' + 8080);
+                        console.log('  (This redirects to https port). ');
+                        console.log('');
+
+                    }.bind(this));
+*/
+
+
+
+                    console.log('---------------------------------------------');
+                    console.log('');
+
                 }.bind(this))
 
                 .then(null, function(err){
