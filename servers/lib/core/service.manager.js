@@ -308,31 +308,10 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
             var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
         //  res.sendfile( fullPath );
 
-
-
-
-    console.log('');
-    console.log(' ++++++++++++++++                ++++++++++++++++ ');
-    console.log('');
-    console.log(' printf --- req.method == '+ req.method);
-    console.log(' printf --- req.headers.host = ', req.headers.host);
-    console.log(' printf --- fullPath is ', fullPath);
-    console.log('');
-
             if(req.connection.encrypted){
-
-    console.log(' https ok ... no need to redirect ...');
-    console.log(' ');
-
                 res.sendfile( fullPath );
             }else{
-
-     //            console.log(' redirecting ....');
-
-     //            //  res.send('this should redirect', 404);
-     //            res.redirect('https://127.0.0.1:9999');
-     //            res.end();
-
+                        //  console.log(' redirecting ....');
             }
 
         //}
