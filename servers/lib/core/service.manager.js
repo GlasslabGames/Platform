@@ -289,6 +289,9 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         this.stats.increment("info", "Route.Static.Root");
 
         var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
+
+console.log(" *** *** ********************************************************************* setupDefaultRoutes() ... fullPath = " + fullPath);
+
         res.sendfile( fullPath );
     }.bind(this));
 
@@ -305,14 +308,27 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
             res.send( "File not found!", 404 );
         }
         else {*/
+
+
+
+
             var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
+
+
+
+
+            
         //  res.sendfile( fullPath );
+
+
 
 
 
 
     console.log('');
     console.log(' ++++++++++++++++                ++++++++++++++++ ');
+    console.log('');
+    console.log(' printf --- req.originalUrl == '+ req.originalUrl);
     console.log('');
     console.log(' printf --- req.method == '+ req.method);
     console.log(' printf --- req.headers.host = ', req.headers.host);
@@ -327,13 +343,25 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
                 res.sendfile( fullPath );
             }else{
 
-     //            console.log(' redirecting ....');
-
-     //            //  res.send('this should redirect', 404);
-     //            res.redirect('https://127.0.0.1:9999');
+                   console.log(' ');
+                   console.log(' * * * * * * * * * * * * * * * * ');
+                   console.log(' ');
+                   console.log(' contacetd via http - redirecting ....');
+                   console.log(' ');
+                   console.log(' * * * * * * * * * * * * * * * * ');
+                   console.log(' ');
+// .get(
+                // res.redirect(302, 'https://127.0.0.1:9999');     // for pre-http/1/1 user agents
+                   res.redirect(303, 'https://127.0.0.1:9999');
      //            res.end();
 
             }
+
+
+
+
+
+
 
         //}
     }.bind(this));
@@ -570,7 +598,6 @@ ServiceManager.prototype.start = function(port) {
                     console.log('Routes Setup done')
 
                     var serverPort = port || this.app.get('port');
-
                     // start https server
                     console.log('Starting Server on port', serverPort, "...");
                     https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
@@ -581,38 +608,34 @@ ServiceManager.prototype.start = function(port) {
 
 
 
-/*
-                    // fyi - this.app = express()
 
                     var httpServerPort = 8080;
+                    // fyi - this.app = express()
                     http.createServer(this.app).listen(httpServerPort, function createServer(){
-                //  http.createServer(this.app).listen(8080, function createServer(){
 
-
-    //         // set up a route to redirect http to https
-    //
-    //     //  http.all('*', function(req, res){
-    //     //  http.post('*', function(req, res){
-    //         http.get('*', function(req, res){
-    //
-    //          //  res.redirect('https://mydomain.com'+req.url)
-    //          //  res.redirect('https://127.0.0.1:9999');
-    //          //  res.end();
-    //
-    //          res.redirect('https://127.0.0.1:' + serverPort + req.url);
-    //      //  res.redirect('https://' + glasslabdomain + serverPort + req.url);
-    //
-    //          })
-
-
-//                     this.stats.increment("info", "ServerStarted");
+                                //         // set up a route to redirect http to https
+                                //
+                                //     //  http.all('*', function(req, res){
+                                //     //  http.post('*', function(req, res){
+                                //         http.get('*', function(req, res){
+                                //
+                                //          //  res.redirect('https://mydomain.com'+req.url)
+                                //          //  res.redirect('https://127.0.0.1:9999');
+                                //          //  res.end();
+                                //
+                                //          res.redirect('https://127.0.0.1:' + serverPort + req.url);
+                                //      //  res.redirect('https://' + glasslabdomain + serverPort + req.url);
+                                //
+                                //          })
 
                         console.log('second dummy Server listening on port ' + 8080);
                         console.log('  (This redirects to https port). ');
                         console.log('');
 
+                        this.stats.increment("info", "http ServerStarted");
+
                     }.bind(this));
-*/
+
 
 
 
