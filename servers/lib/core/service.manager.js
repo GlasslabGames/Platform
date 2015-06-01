@@ -335,6 +335,8 @@ console.log(" *** *** **********************************************************
     console.log(' printf --- fullPath is ', fullPath);
     console.log('');
 
+
+
             if(req.connection.encrypted){
 
     console.log(' https ok ... no need to redirect ...');
@@ -592,6 +594,37 @@ ServiceManager.prototype.start = function(port) {
                     console.log("Setting Up Routes...");
                     console.log('----------------------------');
 
+//first route
+
+
+
+//  this.app.all("/", function(req, res, next) {
+//  this.app.post("/", function(req, res, next) {
+    this.app.get("/", function(req, res, next) {
+
+        console.log("**************XXXXXXXXX    first route    XXXXXXX************************");
+
+        if(req.connection.encrypted){
+
+            console.log(' req.connection.encrypted - check next route ... ');
+            next();
+        }else{
+            console.log(' not encrypted *****************');
+            res.redirect(303, 'https://127.0.0.1:8001');
+        //  res.redirect(302, 'https://127.0.0.1:9999');     // for pre-http/1/1 user agents
+
+        //  res.redirect(303, 'https://' + glasslabdomain + serverPort + req.url);
+        //  res.end();
+
+
+        }
+
+    }.bind(this));
+
+
+
+
+
                     // setup routes
                     this.setupRoutes();
                     console.log('----------------------------');
@@ -609,39 +642,27 @@ ServiceManager.prototype.start = function(port) {
 
 
 
-                    var httpServerPort = 8080;
-                    // fyi - this.app = express()
-                    http.createServer(this.app).listen(httpServerPort, function createServer(){
+                    // is this the internal server
+                    if( serverPort && 8002 == serverPort)
+                    {
+//                      console.log("internal server AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                    }else{
 
-                                //         // set up a route to redirect http to https
-                                //
-                                //     //  http.all('*', function(req, res){
-                                //     //  http.post('*', function(req, res){
-                                //         http.get('*', function(req, res){
-                                //
-                                //          //  res.redirect('https://mydomain.com'+req.url)
-                                //          //  res.redirect('https://127.0.0.1:9999');
-                                //          //  res.end();
-                                //
-                                //          res.redirect('https://127.0.0.1:' + serverPort + req.url);
-                                //      //  res.redirect('https://' + glasslabdomain + serverPort + req.url);
-                                //
-                                //          })
+                        var httpServerPort = 8080;
+                        // fyi - this.app = express()
+                        http.createServer(this.app).listen(httpServerPort, function createServer(){
 
+                            // external server node will also listen on port 8080 for http: GETs
 
-//////
+                            console.log('  also listiening on port ' + 8080);
+                            console.log('  (This redirects to https port). ');
+                            console.log('');
 
+                            this.stats.increment("info", "http ServerStarted");
 
-                        console.log('second dummy Server listening on port ' + 8080);
-                        console.log('  (This redirects to https port). ');
-                        console.log('');
+                        }.bind(this));
 
-                        this.stats.increment("info", "http ServerStarted");
-
-                    }.bind(this));
-
-
-
+                    }
 
                     console.log('---------------------------------------------');
                     console.log('');
