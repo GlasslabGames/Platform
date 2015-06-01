@@ -289,9 +289,6 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         this.stats.increment("info", "Route.Static.Root");
 
         var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
-
-console.log(" *** *** ********************************************************************* setupDefaultRoutes() ... fullPath = " + fullPath);
-
         res.sendfile( fullPath );
     }.bind(this));
 
@@ -306,66 +303,28 @@ console.log(" *** *** **********************************************************
         // If the route ends with .png or .jpg, default to 404
         /*if( req.originalUrl.indexOf( ".png" ) != -1 || req.originalUrl.indexOf( ".jpg" ) != -1 ) {
             res.send( "File not found!", 404 );
-        }
-        else {*/
-
-
-
+        }*/
+        //  else {
 
             var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
 
-
-
-
-            
-        //  res.sendfile( fullPath );
-
-
-
-
-
-
-    console.log('');
-    console.log(' ++++++++++++++++                ++++++++++++++++ ');
-    console.log('');
-    console.log(' printf --- req.originalUrl == '+ req.originalUrl);
-    console.log('');
-    console.log(' printf --- req.method == '+ req.method);
-    console.log(' printf --- req.headers.host = ', req.headers.host);
-    console.log(' printf --- fullPath is ', fullPath);
-    console.log('');
-
-
-
             if(req.connection.encrypted){
 
-    console.log(' https ok ... no need to redirect ...');
-    console.log(' ');
+                //  console.log(' https ok ... no need to redirect ...');
+                //  console.log(' ');
 
                 res.sendfile( fullPath );
             }else{
-
                    console.log(' ');
                    console.log(' * * * * * * * * * * * * * * * * ');
                    console.log(' ');
-                   console.log(' contacetd via http - redirecting ....');
+                   console.log(' contacetd via http - ERROR ....');
                    console.log(' ');
                    console.log(' * * * * * * * * * * * * * * * * ');
                    console.log(' ');
-// .get(
-                // res.redirect(302, 'https://127.0.0.1:9999');     // for pre-http/1/1 user agents
-  ////xxxxxx                 res.redirect(303, 'https://127.0.0.1:9999');
-     //            res.end();
-
             }
 
-
-
-
-
-
-
-        //}
+        //  }
     }.bind(this));
 }
 
@@ -594,36 +553,50 @@ ServiceManager.prototype.start = function(port) {
                     console.log("Setting Up Routes...");
                     console.log('----------------------------');
 
-//first route
+
+                    if( serverPort && 8002 == serverPort)
+                    {
+                        // internal server
+                        // TODO - better test for is-internal-server
+                    }else{
+                        // external server
+
+                        // first route - check for SSL
+                        console.log(' The first route checks for SSL and redirects. ');
 
 
+                        this.app.get("/", function(req, res, next) {
+                    //  this.app.post("/", function(req, res, next) {
+                    //  this.app.all("/", function(req, res, next) {
 
-//  this.app.all("/", function(req, res, next) {
-//  this.app.post("/", function(req, res, next) {
-    this.app.get("/", function(req, res, next) {
+console.log("**************XXXXXXXXX    first route    XXXXXXX************************");
 
-        console.log("**************XXXXXXXXX    first route    XXXXXXX************************");
+                            if(req.connection.encrypted){
+                                console.log(' req.connection.encrypted - check next route ... ');
+                                next();
+                            }else{
+console.log('');
+console.log(' ++++++++++++++++        (run time)        ++++++++++++++++ ');
+console.log('');
+console.log(' printf --- req.originalUrl == '+ req.originalUrl);
+console.log('');
+console.log(' printf --- req.method == '+ req.method);
 
-        if(req.connection.encrypted){
+var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
 
-            console.log(' req.connection.encrypted - check next route ... ');
-            next();
-        }else{
-            console.log(' not encrypted *****************');
-            res.redirect(303, 'https://127.0.0.1:8001');
-        //  res.redirect(302, 'https://127.0.0.1:9999');     // for pre-http/1/1 user agents
+console.log(' printf --- req.headers.host = ', req.headers.host);
+console.log(' printf --- fullPath is ', fullPath);
+console.log('');
 
-        //  res.redirect(303, 'https://' + glasslabdomain + serverPort + req.url);
-        //  res.end();
+                                console.log(' req.connection is not encrypted -- redirect  **************** ');
+                                res.redirect(303, 'https://127.0.0.1:8001');
+                            //  res.redirect(302, 'https://127.0.0.1:9999');     // for pre-http/1/1 user agents
 
-
-        }
-
-    }.bind(this));
-
-
-
-
+                            //  res.redirect(303, 'https://' + glasslabdomain + serverPort + req.url);
+                            //  res.end();
+                            }
+                        }.bind(this));
+                    }
 
                     // setup routes
                     this.setupRoutes();
@@ -631,39 +604,30 @@ ServiceManager.prototype.start = function(port) {
                     console.log('Routes Setup done')
 
                     var serverPort = port || this.app.get('port');
+
                     // start https server
                     console.log('Starting Server on port', serverPort, "...");
                     https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
                         console.log('Server listening on port ' + serverPort);      // testing on port 9999
-                        console.log('');
                         this.stats.increment("info", "ServerStarted");
                     }.bind(this));
 
-
-
-
-                    // is this the internal server
                     if( serverPort && 8002 == serverPort)
                     {
-//                      console.log("internal server AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+                        // internal server
                     }else{
 
                         var httpServerPort = 8080;
-                        // fyi - this.app = express()
+
                         http.createServer(this.app).listen(httpServerPort, function createServer(){
 
                             // external server node will also listen on port 8080 for http: GETs
-
-                            console.log('  also listiening on port ' + 8080);
-                            console.log('  (This redirects to https port). ');
-                            console.log('');
-
+                            console.log(' also listiening on port ' + 8080 + '  ( redirects to https:// ). ');
                             this.stats.increment("info", "http ServerStarted");
-
                         }.bind(this));
-
                     }
 
+                    console.log('');
                     console.log('---------------------------------------------');
                     console.log('');
 
