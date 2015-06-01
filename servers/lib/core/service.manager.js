@@ -352,7 +352,7 @@ console.log(" *** *** **********************************************************
                    console.log(' ');
 // .get(
                 // res.redirect(302, 'https://127.0.0.1:9999');     // for pre-http/1/1 user agents
-                   res.redirect(303, 'https://127.0.0.1:9999');
+  ////xxxxxx                 res.redirect(303, 'https://127.0.0.1:9999');
      //            res.end();
 
             }
@@ -627,6 +627,10 @@ ServiceManager.prototype.start = function(port) {
                                 //      //  res.redirect('https://' + glasslabdomain + serverPort + req.url);
                                 //
                                 //          })
+
+
+//////
+
 
                         console.log('second dummy Server listening on port ' + 8080);
                         console.log('  (This redirects to https port). ');
