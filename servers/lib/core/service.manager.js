@@ -22,13 +22,11 @@ var couchbase  = require('couchbase');
 var cors       = require('cors');
 
 var TlsOptions = {
-
+    //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
+    //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
     ca: fs.readFileSync('ssl-key/server/priv-root-ca.crt.pem'),
     key: fs.readFileSync('ssl-key/server/server.key.pem'),
     cert: fs.readFileSync('ssl-key/server/server.crt.pem')
-
-    //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
-    //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
 }
 
 // load at runtime
@@ -45,9 +43,6 @@ function ServiceManager(configFiles){
     var ConfigManager = require('../core/config.manager.js');
 
     console.log('---------------------------------------------');
-    console.log('');
-    console.log('  hydra/Platform/servers/lib/core/service.manager.js  ');
-    console.log('');
     console.log('Loading Configuration...');
     var config        = new ConfigManager();
     // load config files from first to last until successful
@@ -309,19 +304,13 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
             var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
 
             if(req.connection.encrypted){
-
                 //  console.log(' https ok ... no need to redirect ...');
-                //  console.log(' ');
-
                 res.sendfile( fullPath );
             }else{
                    console.log(' ');
-                   console.log(' * * * * * * * * * * * * * * * * ');
-                   console.log(' ');
-                   console.log(' contacetd via http - ERROR ....');
-                   console.log(' ');
-                   console.log(' * * * * * * * * * * * * * * * * ');
-                   console.log(' ');
+                   console.log(' * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ');
+                   console.log('    ERROR -    HTTP request was not redirected. ');
+                   console.log(' * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ');
             }
 
         //  }
@@ -553,7 +542,6 @@ ServiceManager.prototype.start = function(port) {
                     console.log("Setting Up Routes...");
                     console.log('----------------------------');
 
-
                     if( serverPort && 8002 == serverPort)
                     {
                         // internal server
@@ -562,30 +550,24 @@ ServiceManager.prototype.start = function(port) {
                         // external server
 
                         // first route - check for SSL
-                        console.log(' The first route checks for SSL and redirects. ');
+                        console.log(' The first route checks for non-SSL requests. ');
+                        console.log(' ');
 
-
-                        this.app.get("/", function(req, res, next) {
-                    //  this.app.post("/", function(req, res, next) {
+                        this.app.all("*", function(req, res, next) {
                     //  this.app.all("/", function(req, res, next) {
-
-console.log("**************XXXXXXXXX    first route    XXXXXXX************************");
+                    //  this.app.get("/", function(req, res, next) {
+                    //  this.app.post("/", function(req, res, next) {
 
                             if(req.connection.encrypted){
-                                console.log(' req.connection.encrypted - check next route ... ');
+                                //  console.log(' req.connection.encrypted - check next route ... ');
                                 next();
                             }else{
-console.log('');
-console.log(' ++++++++++++++++        (run time)        ++++++++++++++++ ');
-console.log('');
+
+console.log(' ++++++++++++++++    ++++++++++++++++        (run time) ');
 console.log(' printf --- req.originalUrl == '+ req.originalUrl);
 console.log('');
 console.log(' printf --- req.method == '+ req.method);
-
-var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
-
 console.log(' printf --- req.headers.host = ', req.headers.host);
-console.log(' printf --- fullPath is ', fullPath);
 console.log('');
 
                                 console.log(' req.connection is not encrypted -- redirect  **************** ');
@@ -614,20 +596,22 @@ console.log('');
 
                     if( serverPort && 8002 == serverPort)
                     {
-                        // internal server
+                        // internal server node
                     }else{
+                        // external server node -- will also listen on ports 80 and 8080 for http: requests.
 
-                        var httpServerPort = 8080;
+                        var httpServerPort = 80;
+                //      http.createServer(this.app).listen(httpServerPort, function createServer(){
+                //          console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
+                //      }.bind(this));
 
+                        httpServerPort = 8080;
                         http.createServer(this.app).listen(httpServerPort, function createServer(){
-
-                            // external server node will also listen on port 8080 for http: GETs
-                            console.log(' also listiening on port ' + 8080 + '  ( redirects to https:// ). ');
                             this.stats.increment("info", "http ServerStarted");
+                            console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
                         }.bind(this));
                     }
 
-                    console.log('');
                     console.log('---------------------------------------------');
                     console.log('');
 
