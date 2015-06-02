@@ -568,13 +568,19 @@ console.log(' printf --- req.originalUrl == '+ req.originalUrl);
 console.log('');
 console.log(' printf --- req.method == '+ req.method);
 console.log(' printf --- req.headers.host = ', req.headers.host);
+console.log(' printf --- req.socket._peername.address = ', req.socket._peername.address);
 console.log('');
 
                                 console.log(' req.connection is not encrypted -- redirect  **************** ');
-                                res.redirect(303, 'https://127.0.0.1:8001');
-                            //  res.redirect(302, 'https://127.0.0.1:9999');     // for pre-http/1/1 user agents
+                                var glasslabdomain = 'www.glasslabgames.org';
 
-                            //  res.redirect(303, 'https://' + glasslabdomain + serverPort + req.url);
+                                if(this.options.env && 'dev' == this.options.env){
+                                    res.redirect(303, 'https://127.0.0.1:' + serverPort);
+                                }else{
+                                    res.redirect(303, 'https://' + glasslabdomain + ':' + serverPort);
+                            //      res.redirect(302, 'https://' + glasslabdomain + ':' + serverPort);     // for pre-http/1/1 user agents
+                                }
+
                             //  res.end();
                             }
                         }.bind(this));
