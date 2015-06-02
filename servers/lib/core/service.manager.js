@@ -554,10 +554,6 @@ ServiceManager.prototype.start = function(port) {
                         console.log(' ');
 
                         this.app.all("*", function(req, res, next) {
-                    //  this.app.all("/", function(req, res, next) {
-                    //  this.app.get("/", function(req, res, next) {
-                    //  this.app.post("/", function(req, res, next) {
-
                             if(req.connection.encrypted){
                                 //  console.log(' req.connection.encrypted - check next route ... ');
                                 next();
