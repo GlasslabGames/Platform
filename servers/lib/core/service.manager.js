@@ -562,18 +562,10 @@ ServiceManager.prototype.start = function(port) {
                                 //  console.log(' req.connection.encrypted - check next route ... ');
                                 next();
                             }else{
-
-console.log(' ++++++++++++++++    ++++++++++++++++        (run time) ');
-console.log(' printf --- req.originalUrl == '+ req.originalUrl);
-console.log('');
-console.log(' printf --- req.method == '+ req.method);
-console.log(' printf --- req.headers.host = ', req.headers.host);
-console.log(' printf --- req.socket._peername.address = ', req.socket._peername.address);
-console.log('');
-
                                 console.log(' req.connection is not encrypted -- redirect  **************** ');
                                 var glasslabdomain = 'www.glasslabgames.org';
 
+                            //  if(req.headers.host.index('127.0.0.1') != -1 ){
                                 if(this.options.env && 'dev' == this.options.env){
                                     res.redirect(303, 'https://127.0.0.1:' + serverPort);
                                 }else{
