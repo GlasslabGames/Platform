@@ -838,7 +838,7 @@ function getEventsByDate(req, res, next){
 
     try {
         // set timeout so request doesn't close connection
-        req.connection.setTimeout(this.options.request.httpTimeout);
+        req.connection.setTimeout(moment.duration(this.options.research.csvTimeout).asMilliseconds());
 
         if( req.session &&
         req.session.passport) {
