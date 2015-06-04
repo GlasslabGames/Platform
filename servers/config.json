@@ -149,6 +149,7 @@
         "port": 8003
     },
     "research": {
+        "csvTimeout": {"minutes": 10},
         "dataChunkSize": 2000,
         "datastore": {
             "couchbase": {
