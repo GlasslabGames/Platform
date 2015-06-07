@@ -1,7 +1,7 @@
 {
     "basic": {
         "gameId": "PVZ",
-        "enabled": false,
+        "enabled": true,
         "visible": false,
         "maintenance": null,
         "shortName": "Use Your Brainz EDU",
@@ -16,7 +16,7 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Free",
+        "price": "Coming Soon",
         "packages": "iPad Games",
         "release": "dev",
         "releaseDate": "TBD",
