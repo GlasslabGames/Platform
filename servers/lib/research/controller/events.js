@@ -218,10 +218,12 @@ function archiveEvents(req, res, next) {
         gameIds.push( req.query.gameId );
     } else {
         // archive for all games
-        // 'all games' hard coded.  maybe change
+        // TODO: 'all games' hard coded, replace with couchbase doc that already exists for
+        //   getArchiveInfo
         gameIds.push( "SC" );
         gameIds.push( "AA-1" );
         gameIds.push( "AW-1" );
+        gameIds.push( "WWF" );
     }
 
 
