@@ -10,7 +10,8 @@ module.exports = {
         "GL-SC-250": "SimCityEDU Site Unlimited"
     },
     "datastore": {
-        "licenseKey": "lic"
+        "licenseKey": "lic",
+        "licenseKeyEmail": "lic:email"
     },
     "plan": {
         "chromebook": {
