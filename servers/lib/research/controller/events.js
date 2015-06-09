@@ -1105,19 +1105,15 @@ function parseItems(event, row, left, right){
 
 function processSpecialRowItem (item, data) {
     var results = "";
-    with(data){
-        try {
-            results = eval(item);
-        }
-        catch(err) {
-            // this is ok
-        }
+    try {
+        results = eval(data[item]) || '';
     }
-
+    catch(err) {
+        results = data[item] || '';
+    }
     if(_.isObject(results)) {
         results = JSON.stringify(results);
     }
-
     return results;
 }
 
