@@ -542,6 +542,7 @@ ServiceManager.prototype.start = function(port) {
                     console.log("Setting Up Routes...");
                     console.log('----------------------------');
 
+                    // serverPort = undefined
                     if( serverPort && 8002 == serverPort)
                     {
                         // internal server
@@ -558,19 +559,22 @@ ServiceManager.prototype.start = function(port) {
                                 //  console.log(' req.connection.encrypted - check next route ... ');
                                 next();
                             }else{
-                                console.log(' req.connection is not encrypted -- redirect  **************** ');
-                                var glasslabdomain = 'www.glasslabgames.org';
+                                var baseAddress = req.get("host") || "www.glasslabgames.org";
+                                var tPortMarker = baseAddress.indexOf(":");
 
-                            //  if(req.headers.host.index('127.0.0.1') != -1 ){
-                                if(this.options.env && 'dev' == this.options.env){
-                                    res.redirect(303, 'https://127.0.0.1:' + serverPort);
-                                }else{
-                                    res.redirect(303, 'https://' + glasslabdomain + ':' + serverPort);
-                            //      res.redirect(302, 'https://' + glasslabdomain + ':' + serverPort);     // for pre-http/1/1 user agents
+                                if(-1 < tPortMarker){
+                                    baseAddress = baseAddress.substr(0, tPortMarker);
                                 }
 
-                            //  res.end();
+                                var newUrl = "https://" + baseAddress + ":" + serverPort;
+                                console.log("  ******  req.connection is not encrypted  ******  ");
+                                console.log("  ******  rediriecting to " + newUrl + "  ******  ");
+
+                                res.redirect(303, newUrl);
+                        //      res.redirect(302, newUrl);     // for pre-http/1/1 user agents
                             }
+                            //  res.end();
+
                         }.bind(this));
                     }
 
