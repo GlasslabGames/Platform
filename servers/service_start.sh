@@ -5,6 +5,9 @@
 #
 # ./service_start.sh app-external "app-external.js"
 # ./service_start.sh app-internal "app-internal.js"
+# or
+# ./service_start.sh external
+# ./service_start.sh internal
 
 LOG_DIR=~
 NAME=$1
