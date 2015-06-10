@@ -9,7 +9,6 @@
 # ./service_start.sh external
 # ./service_start.sh internal
 
-LOG_DIR=~
 NAME=$1
 
 if [ -n "$2" ]; then
