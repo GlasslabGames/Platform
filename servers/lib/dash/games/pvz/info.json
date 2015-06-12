@@ -2,7 +2,7 @@
     "basic": {
         "gameId": "PVZ",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Use Your Brainz EDU",
         "longName": "Use Your Brainz EDU",
@@ -16,10 +16,10 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Coming Soon",
+        "price": "Premium",
         "packages": "iPad Games",
-        "release": "dev",
-        "releaseDate": "TBD",
+        "release": "live",
+        "releaseDate": "June 22, 2015",
         "shortDescription": "Use Your Brainz EDU unlocks and assesses the critical competency of problem solving. Players can learn to strategically grow powerful plant obstacles to thwart hungry zombies. By thinking faster, they’ll keep their brains protected from harm!",
         "description": "Use Your Brainz EDU unlocks and assesses the critical competency of problem solving. Players can learn to strategically grow powerful plant obstacles to thwart hungry zombies. By thinking faster, they’ll keep their brains protected from harm!",
         "developer": {

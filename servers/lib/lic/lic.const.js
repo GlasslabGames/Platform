@@ -42,7 +42,8 @@ module.exports = {
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
             ],
@@ -81,7 +82,8 @@ module.exports = {
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
                 "SC"
@@ -102,7 +104,8 @@ module.exports = {
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
                 "SC"
@@ -123,7 +126,8 @@ module.exports = {
             "iPadGames": [
                 "AA-1",
                 "WPLUS",
-                "WT"
+                "WT",
+                "PVZ"
             ],
             "downloadableGames": [
                 "SC"
