@@ -1,0 +1,58 @@
+{
+    "basic": {
+        "gameId": "GEM",
+        "enabled": true,
+        "visible": false,
+        "maintenance": null,
+        "shortName": "Gemini",
+        "longName": "Gemini game",
+        "release": "dev",
+        "releaseDate": "TBD",
+        "shortDescription": "Gemini game",
+        "description": "For developers without a game ID.",
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab, Inc.",
+            "logo": {
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
+            }
+        },
+        "settings": {
+            "canCreateMatches": true
+        },
+        "license": {
+            "type": "loginType",
+            "loginType": "glasslabv2",
+            "valid": false,
+            "message": {
+                "invalid": "In Development"
+            }
+        },
+        "thumbnail": {
+            "small": "assets/thumb-game-PVZ.png",
+            "large": "assets/thumb-game-PVZ.png"
+        },
+        "banners": {
+            "product": "assets/game-banner-AA-1.jpg",
+            "reports": "assets/game-banner-AA-1.jpg"
+        }
+    },
+    "assessment": [
+    ],
+    "reports": {
+        "list": [
+        ]
+    },
+    "details": {
+        "buttons": [
+        ],
+        "pages": {
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "https://plus.google.com/117864084582459836584/posts"
+        }
+    }
+}
