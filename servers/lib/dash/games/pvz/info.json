@@ -16,10 +16,10 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Free",
+        "price": "Premium",
         "packages": "iPad Games",
-        "release": "dev",
-        "releaseDate": "TBD",
+        "release": "live",
+        "releaseDate": "June 17, 2015",
         "shortDescription": "Use Your Brainz EDU unlocks and assesses the critical competency of problem solving. Players can learn to strategically grow powerful plant obstacles to thwart hungry zombies. By thinking faster, they’ll keep their brains protected from harm!",
         "description": "Use Your Brainz EDU unlocks and assesses the critical competency of problem solving. Players can learn to strategically grow powerful plant obstacles to thwart hungry zombies. By thinking faster, they’ll keep their brains protected from harm!",
         "developer": {
@@ -488,6 +488,19 @@
     },
     "details": {
         "buttons": [
+            {
+                "name": "Download",
+                "type": "download",
+                "authRequired": false,
+                "links": [
+                    {
+                        "target": "_blank",
+                        "name": "iPad",
+                        "link": "https://itunes.apple.com/us/app/use-your-brainz-edu/id950482467?mt=8",
+                        "type": "ios-appstore"
+                    }
+                ]
+            }
         ],
         "pages": {
             "product": {

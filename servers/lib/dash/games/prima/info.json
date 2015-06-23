@@ -517,22 +517,32 @@
                         "list": [
                             {
                                 "name": "Instructional Guide",
-                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Instructional%20Guide.pdf",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/lesson+plans/Jun+5+2015/Instructional_Guide.pdf",
                                 "description": ""
                             },
                             {
                                 "name": "Handout - Multiple Representations for Feeding Ratios",
-                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Handout%20-%20Multiple%20Representations%20for%20Feeding%20Ratios.pdf",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/lesson+plans/Jun+5+2015/Handout+-+Multiple+Representations+for+Feeding+Ratios.pdf",
                                 "description": ""
                             },
                             {
                                 "name": "Lesson 1 Bundle",
-                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Lesson%201.zip",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/lesson+plans/Jun+5+2015/lesson_1.zip",
                                 "description": ""
                             },
                             {
                                 "name": "Lesson 2 Bundle",
-                                "link": "https://playfully-games.s3.amazonaws.com/PRIMA/lesson%20plans/Lesson%202.zip",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/lesson+plans/Jun+5+2015/lesson_2.zip",
+                                "description": ""
+                            },
+                            {
+                                "name": "Lesson 3 Bundle",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/lesson+plans/Jun+5+2015/lesson_3.zip",
+                                "description": ""
+                            },
+                            {
+                                "name": "Lesson 4 Bundle",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/lesson+plans/Jun+5+2015/lesson_4.zip",
                                 "description": ""
                             }
                         ]
