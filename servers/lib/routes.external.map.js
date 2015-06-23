@@ -134,6 +134,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/data/game/:gameId/user/:userId",
+            service: "data",
+            controller: "game",
+            method: {
+                get: "getGameDataForUser"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/data/game/:gameId/create",
             service: "data",
             controller: "game",
