@@ -363,7 +363,7 @@
                 "enabled": true,
                 "authRequired": true,
                 "id": "lessonPlans",
-                "title": "Lesson Plans and Guides",
+                "title": "Lesson Plans and Videos",
                 "list": [
                     {
                         "category": "Lesson Plans and Guides",
@@ -375,6 +375,35 @@
                             {
                                 "name": "Lesson Plans",
                                 "link": "https://s3-us-west-1.amazonaws.com/playfully-games/WT/guides/WT_Formative_Assessment_Lesson_Plan_edits.pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "Math is different today",
+                                "link": "https://vimeo.com/131575536"
+                            },
+                            {
+                                "name": "How BrainQuake is different",
+                                "link": "https://vimeo.com/131575539"
+                            },
+                            {
+                                "name": "What is the Symbol Barrier?",
+                                "link": "https://vimeo.com/131575543"
+                            },
+                            {
+                                "name": "Why is there no Symbol Barrier in music?",
+                                "link": "https://vimeo.com/131575546"
+                            },
+                            {
+                                "name": "Does BrainQuake’s approach work?",
+                                "link": "https://vimeo.com/131575548"
+                            },
+                            {
+                                "name": "Who can play Wuzzit Trouble?",
+                                "link": "https://vimeo.com/131576857"
                             }
                         ]
                     }
