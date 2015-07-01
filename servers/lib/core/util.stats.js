@@ -31,6 +31,12 @@ function Stats(options, root){
         return console.error("StatsD: Error connecting to server. ", err);
     });*/
 
+    statsdInst = new StatsD(this.options.statsd);
+    statsdInst.socket.on('error', function(err) {
+        this.statsd = null;
+        return console.error("StatsD: Error connecting to server. ", err);
+    });
+
     this.sRoot = root;
     this.root  = root;
     this.env   = process.env.HYDRA_ENV || 'dev';

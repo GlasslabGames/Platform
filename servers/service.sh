@@ -8,13 +8,13 @@ start() {
     npm install
     grunt #create version file
 
-    #./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
+    ./service_start.sh statsd "node_modules/statsd/stats.js config.statsd.json"
     ./service_start.sh app-external "app-external.js"
     ./service_start.sh app-internal "app-internal.js"
 }
 
 stop() {
-    #forever stop node_modules/statsd/stats.js
+    forever stop node_modules/statsd/stats.js
     forever stop app-external.js
     forever stop app-internal.js
 }
