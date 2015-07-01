@@ -170,40 +170,37 @@
                     "skinny": "assets/skinny-banner-PVZ.png",
                     "large": "assets/skinny-banner-PVZ@2x.png"
                 },
-                "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving.",
                 "icons": {
                     "small": "assets/icon-plus-green.png",
                     "large": "assets/icon-plus-green@2x.png"
                 },
+                "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving.",
                 "table": {
-                    "headers": {
-                        "facets": [
-                            {
-                                "id": "facet_analyze_constraints",
-                                "title": "Analyze givens/constraints",
-                                "description": ""
-                            },
-                            {
-                                "id": "facet_plan_solution_pathway",
-                                "title": "Plan a solution pathway",
-                                "description": ""
-                            },
-                            {
-                                "id": "facet_effective_tool_use",
-                                "title": "Effective/efficient tools/resources use",
-                                "description": ""
-                            },
-                            {
-                                "id": "facet_monitor_progress",
-                                "title": "Monitor/evaluate progress",
-                                "description": ""
-                            }
-                        ],
-                        "competency": {
-                            "id": "competency_problem_solving",
-                            "title": "Problem Solving Ability Overall",
+                    "facetHeaders": [
+                        {
+                            "id": "facet_analyze_constraints",
+                            "title": "Analyze givens/constraints",
+                            "description": ""
+                        },
+                        {
+                            "id": "facet_plan_solution_pathway",
+                            "title": "Plan a solution pathway",
+                            "description": ""
+                        },
+                        {
+                            "id": "facet_effective_tool_use",
+                            "title": "Effective/efficient tools/resources use",
+                            "description": ""
+                        },
+                        {
+                            "id": "facet_monitor_progress",
+                            "title": "Monitor/evaluate progress",
                             "description": ""
                         }
+                    ],
+                    "competencyHeader": {
+                        "id": "competency_problem_solving",
+                        "title": "Problem Solving Ability Overall"
                     },
                     "labels": [
                         {
@@ -240,6 +237,7 @@
                     "skinny": "assets/skinny-banner-PVZ.png",
                     "large": "assets/skinny-banner-PVZ@2x.png"
                 },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -312,16 +310,14 @@
                                     "id": "wo1",
                                     "title": "Sunflowers in front of lane",
                                     "description": "Student places sunflowers near the front of the lane where they are more vulnerable.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student why they are placing sunflowers near the front to get a sense of their thinking. Help the student to understand the givens by asking:",
-                                        "actionPoints":
-                                            [
-                                                "What do sunflowers do?",
-                                                "Can they attack the zombies?",
-                                                "What happens if the zombies attack the sunflowers?",
-                                                "Where does it make the most sense to plant the sunflowers? Why?"
-                                            ],
+                                        "actionPoints": [
+                                            "What do sunflowers do?",
+                                            "Can they attack the zombies?",
+                                            "What happens if the zombies attack the sunflowers?",
+                                            "Where does it make the most sense to plant the sunflowers? Why?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -329,16 +325,14 @@
                                     "id": "wo2",
                                     "title": "Walnuts in back of lane",
                                     "description": "Student places walnuts near the back of the lane where they can't protect other plants.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student why they are placing the walnut near the back to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
-                                        "actionPoints":
-                                            [
-                                                "What do walnuts do?",
-                                                "Can they attack the zombies?",
-                                                "What happens if the zombies attack the walnuts?",
-                                                "Where does it make the most sense to plant the walnuts? Why?"
-                                            ],
+                                        "actionPoints": [
+                                            "What do walnuts do?",
+                                            "Can they attack the zombies?",
+                                            "What happens if the zombies attack the walnuts?",
+                                            "Where does it make the most sense to plant the walnuts? Why?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -346,16 +340,14 @@
                                     "id": "wo3",
                                     "title": "Potato mines diffused",
                                     "description": "Student places potato mines such that they are diffused before arming.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student how they are using potato mines to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
-                                        "actionPoints":
-                                            [
-                                                "What do potato mines do?",
-                                                "Can zombies eat the mines?",
-                                                "How can you tell if a mine will defeat a zombie or be eaten?",
-                                                "Where does it make the most sense to plant the potato mines? Why?"
-                                            ],
+                                        "actionPoints": [
+                                            "What do potato mines do?",
+                                            "Can zombies eat the mines?",
+                                            "How can you tell if a mine will defeat a zombie or be eaten?",
+                                            "Where does it make the most sense to plant the potato mines? Why?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -363,15 +355,13 @@
                                     "id": "wo4",
                                     "title": "Not enough sunflowers",
                                     "description": "Student places less than 4 sunflowers before the second wave of zombies.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student what the purpose of sunflowers is to get a sense of their thinking. Help the student to feel confident in exploring more options by asking:",
-                                        "actionPoints":
-                                            [
-                                                "What happens if you don't plant any sunflowers?",
-                                                "What happens if you only plant sunflowers?",
-                                                "What is the best number of sunflowers to plant? Why?"
-                                            ],
+                                        "actionPoints": [
+                                            "What happens if you don't plant any sunflowers?",
+                                            "What happens if you only plant sunflowers?",
+                                            "What is the best number of sunflowers to plant? Why?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -379,16 +369,14 @@
                                     "id": "wo5",
                                     "title": "Not collecting sun",
                                     "description": "Student collects less than (RATIO * 100) % of sun produced.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student what the purpose of the suns are to get a sense of their thinking. Help the student to understand the givens by asking:",
-                                        "actionPoints":
-                                            [
-                                                "Why do you need to collect suns?",
-                                                "What happens if you don't collect it?",
-                                                "How long do you have before it disappears?",
-                                                "What is the ideal strategy when it comes to picking up suns? Why?"
-                                            ],
+                                        "actionPoints": [
+                                            "Why do you need to collect suns?",
+                                            "What happens if you don't collect it?",
+                                            "How long do you have before it disappears?",
+                                            "What is the ideal strategy when it comes to picking up suns? Why?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -396,17 +384,15 @@
                                     "id": "wo6",
                                     "title": "Inefficient plant food use",
                                     "description": "Student uses plant food in situations that don't require it.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student what plant food is for to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
-                                        "actionPoints":
-                                            [
-                                                "When do you tend to use it?",
-                                                "How many times can you use it on a level?",
-                                                "Does it work differently depending on the type of plant?",
-                                                "When does it make sense to use it on one plant versus another?",
-                                                "What situations make the most sense for using plant food?"
-                                            ],
+                                        "actionPoints": [
+                                            "When do you tend to use it?",
+                                            "How many times can you use it on a level?",
+                                            "Does it work differently depending on the type of plant?",
+                                            "When does it make sense to use it on one plant versus another?",
+                                            "What situations make the most sense for using plant food?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -414,16 +400,14 @@
                                     "id": "wo7",
                                     "title": "Losing to difficult zombies",
                                     "description": "Student is defeated when fast, tough, or many zombies are in a lane.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student what has been defeating them and how they have tried to defend against it to get a sense of their tihnking. Help the student to plan effectively by asking:",
-                                        "actionPoints":
-                                            [
-                                                "What is your defense for large groups of zombies in one lane?",
-                                                "What is your defense for tough zombies?",
-                                                "What is your defense for fast zombies?",
-                                                "What else can you try to use to stop them?"
-                                            ],
+                                        "actionPoints": [
+                                            "What is your defense for large groups of zombies in one lane?",
+                                            "What is your defense for tough zombies?",
+                                            "What is your defense for fast zombies?",
+                                            "What else can you try to use to stop them?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -431,16 +415,14 @@
                                     "id": "wo8",
                                     "title": "Not improving plant layout",
                                     "description": "Student is not trying a more effective plant layout when retrying a level.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student how they like to arrange their plants to get a sense of their thinking. Help the student to plan effectively by asking:",
-                                        "actionPoints":
-                                            [
-                                                "What types of plants do you use?",
-                                                "Where do you like to plant them?",
-                                                "What would happen if you placed that plant more toward the front or the back?",
-                                                "Is there a better way to arrange the plants?"
-                                            ],
+                                        "actionPoints": [
+                                            "What types of plants do you use?",
+                                            "Where do you like to plant them?",
+                                            "What would happen if you placed that plant more toward the front or the back?",
+                                            "Is there a better way to arrange the plants?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -448,15 +430,13 @@
                                     "id": "wo9",
                                     "title": "Ineffective use of shovel",
                                     "description": "Student is not using the shovel to strengthen their lanes.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student how they use the shovel to get a sense of their thinking. Help the student to use the tool more effectively by asking:",
-                                        "actionPoints":
-                                            [
-                                                "Why would you want to remove a plant?",
-                                                "Is there a time when a plant isn't being effective? Why?",
-                                                "Is there a time when you want to replace a plant with a different one? Why?"
-                                            ],
+                                        "actionPoints": [
+                                            "Why would you want to remove a plant?",
+                                            "Is there a time when a plant isn't being effective? Why?",
+                                            "Is there a time when you want to replace a plant with a different one? Why?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -464,25 +444,22 @@
                                     "id": "wo10",
                                     "title": "Not replacing eaten plants",
                                     "description": "Student is not replacing plants quickly after they are eaten.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student what they do when a plant gets eaten to get a sense of their thinking. Help the student to evaluate their progress by asking:",
-                                        "actionPoints":
-                                            [
-                                                "What happens when a zombie eats one of your plants?",
-                                                "What does it mean for your overall progress?",
-                                                "How can you maintain the safety of that lane?",
-                                                "How does it impact your sun?",
-                                                "What is the best way to deal with a plant being eaten?"
-                                            ],
+                                        "actionPoints": [
+                                            "What happens when a zombie eats one of your plants?",
+                                            "What does it mean for your overall progress?",
+                                            "How can you maintain the safety of that lane?",
+                                            "How does it impact your sun?",
+                                            "What is the best way to deal with a plant being eaten?"
+                                        ],
                                         "summary": ""
                                     }
                                 }
                             ]
                         }
                     ]
-                },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+                }
             }
         ]
     },

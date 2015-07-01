@@ -3,15 +3,12 @@
         "gameId": "FILL_ME_IN",
         "enabled": false,
         "visible": false,
+        "maintenance": null,
         "shortName": "Placeholder Short Name",
         "longName": "Placeholder Long Name",
         "grades": "TBD",
         "subject": "TBD",
         "type": "TBD",
-        "price": "Free",
-        "packages": "TBD",
-        "release": "dev",
-        "releaseDate": "TBD",
         "platform": {
             "type": "iPad",
             "icon": {
@@ -19,6 +16,10 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
+        "price": "Free",
+        "packages": "TBD",
+        "release": "dev",
+        "releaseDate": "TBD",
         "shortDescription": "Placeholder Short Description",
         "description": "Placeholder Description",
         "developer": {
@@ -54,15 +55,12 @@
             "reports": "assets/game-banner-AA-1.png"
         }
     },
-    "assessment": [
-    ],
+    "assessment": [],
     "reports": {
-        "list": [
-        ]
+        "list": []
     },
     "details": {
-        "buttons": [
-        ],
+        "buttons": [],
         "pages": {
             "product": {
                 "order": 1,

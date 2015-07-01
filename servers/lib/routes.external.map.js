@@ -364,6 +364,24 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/dash/developer/info/schema",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getDeveloperGamesInfoSchema"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/info/game/:gameId",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getDeveloperGameInfo"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/dash/developer/info/game/:gameId",
             service: "dash",
             controller: "games",

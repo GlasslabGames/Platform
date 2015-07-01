@@ -9,8 +9,6 @@
         "grades": "2 - 7",
         "subject": "Math",
         "type": "App",
-        "release": "live",
-        "releaseDate": "March 13, 2015",
         "platform": {
             "type": "iPad",
             "icon": {
@@ -20,6 +18,8 @@
         },
         "price": "Premium",
         "packages": "iPad Games",
+        "release": "live",
+        "releaseDate": "March 13, 2015",
         "shortDescription": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
         "description": "You’ll stretch your numerical, algebraic and algorithmic problem solving skills as you try to rescue the lovable Wuzzits from the cages by rotating the cogs in the gears mechanism.  One reviewer described this engaging game as Angry Birds meets Lumosity.",
         "developer": {
@@ -137,6 +137,7 @@
                     "skinny": "assets/skinny-banner-WT.png",
                     "large": "assets/skinny-banner-WT@2x.png"
                 },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -208,8 +209,7 @@
                             ]
                         }
                     ]
-                },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+                }
             }
         ]
     },
