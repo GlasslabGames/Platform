@@ -2,14 +2,14 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "id": "http://developer.playfully.org/api/v2/dash/developer/info/schema",
     "$ref": "#/definitions/root",
+    "title": " ",
+    "options": {
+        "disable_collapse": true,
+        "disable_edit_json": true
+    },
     "definitions": {
         "root": {
             "type": "object",
-            "title": "Editor",
-            "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true
-            },
             "properties": {
                 "basic": {
                     "$ref": "#/definitions/basic",
