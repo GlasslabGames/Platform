@@ -603,7 +603,7 @@ ServiceManager.prototype.start = function(port) {
                 //          console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
                 //      }.bind(this));
 
-                        httpServerPort = 8080;
+                        httpServerPort = this.options.services.portNonSSL;
                         http.createServer(this.app).listen(httpServerPort, function createServer(){
                             this.stats.increment("info", "http ServerStarted");
                             console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');

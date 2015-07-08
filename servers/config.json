@@ -5,6 +5,7 @@
     },
     "services": {
         "port": 8001,
+        "portNonSSL": 8080,
         "session": {
             "secret": "keyboard kitty",
             "cookie": {
