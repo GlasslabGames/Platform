@@ -24,13 +24,6 @@ function Stats(options, root){
         options
     );
 
-    // disabled for now
-    /*statsdInst = new StatsD(this.options.statsd);
-    statsdInst.socket.on('error', function(err) {
-        this.statsd = null;
-        return console.error("StatsD: Error connecting to server. ", err);
-    });*/
-
     statsdInst = new StatsD(this.options.statsd);
     statsdInst.socket.on('error', function(err) {
         this.statsd = null;
