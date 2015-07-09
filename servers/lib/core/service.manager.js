@@ -555,25 +555,23 @@ ServiceManager.prototype.start = function(port) {
                         console.log(' ');
 
                         this.app.all("*", function(req, res, next) {
+                            var host = req.get("host");
+                            if (!host) {
+                                console.log("  ****** req.host missing, sending 403 error  ******  ");
+                                res.send(403);
+                                return;
+                            }
+
                             if(req.connection.encrypted){
                                 //  console.log(' req.connection.encrypted - check next route ... ');
                                 next();
                             }else{
-                                var baseAddress = req.get("host") || "www.glasslabgames.org";
-                                var tPortMarker = baseAddress.indexOf(":");
-
-                                if(-1 < tPortMarker){
-                                    baseAddress = baseAddress.substr(0, tPortMarker);
-                                }
-
-                                var newUrl = "https://" + baseAddress + ":" + serverPort;
-                                console.log("  ******  req.connection is not encrypted  ******  ");
-                                console.log("  ******  rediriecting to " + newUrl + "  ******  ");
+                                var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
+                                console.log("  ****** req.connection is not encrypted, rediriecting to " + newUrl + "  ******  ");
 
                                 res.redirect(303, newUrl);
-                        //      res.redirect(302, newUrl);     // for pre-http/1/1 user agents
+                                //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
                             }
-                            //  res.end();
 
                         }.bind(this));
                     }
@@ -598,12 +596,7 @@ ServiceManager.prototype.start = function(port) {
                     }else{
                         // external server node -- will also listen on ports 80 and 8080 for http: requests.
 
-                        var httpServerPort = 80;
-                //      http.createServer(this.app).listen(httpServerPort, function createServer(){
-                //          console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
-                //      }.bind(this));
-
-                        httpServerPort = this.options.services.portNonSSL;
+                        var httpServerPort = this.options.services.portNonSSL || 80;
                         http.createServer(this.app).listen(httpServerPort, function createServer(){
                             this.stats.increment("info", "http ServerStarted");
                             console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
