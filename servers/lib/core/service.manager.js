@@ -603,6 +603,7 @@ ServiceManager.prototype.start = function(port) {
                         }.bind(this));
                     }
 
+                    stats.increment("info","serverRestart");
                     console.log('---------------------------------------------');
                     console.log('');
 
