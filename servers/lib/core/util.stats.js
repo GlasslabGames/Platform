@@ -54,15 +54,24 @@ Stats.prototype.increment = function(level, key, count) {
     if(statsdInst) {
         level = level.toLowerCase();
 
-        // dev.App.error.Loaded
-        statsdInst.increment(this.env+"."+this.root+"."+level+"."+key, count);
+        // // dev.App.error.Loaded
+        // statsdInst.increment(this.env+"."+this.root+"."+level+"."+key, count);
 
         // dev.error.App.Loaded
         statsdInst.increment(this.env+"."+level+"."+this.root+"."+key, count);
-        // dev.error.App._total
-        statsdInst.increment(this.env+"."+level+"."+this.root+"._total", count);
-        // dev.error._total
-        statsdInst.increment(this.env+"."+level+"._total", count);
+
+        if(-1 < level.indexOf("err")){
+            statsdInst.increment(this.env+"."+level+"."+this.root+"._total", count);    // dev.error.App._total
+            statsdInst.increment(this.env+"."+level+"._total", count);                  // dev.error._total
+        }
+    }
+};
+
+Stats.prototype.set = function(level, key, value) {
+
+    if(statsdInst) {
+        level = level.toLowerCase();
+        statsdInst.set(this.env+"."+level+"."+this.root+"."+key, value);
     }
 };
 
