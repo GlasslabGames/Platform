@@ -2,10 +2,10 @@
     "basic": {
         "gameId": "THRV",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
-        "shortName": "Placeholder Short Name",
-        "longName": "Placeholder Long Name",
+        "shortName": "Thrive 'n' Shine",
+        "longName": "Thrive 'n' Shine",
         "grades": "TBD",
         "subject": "TBD",
         "type": "App",
