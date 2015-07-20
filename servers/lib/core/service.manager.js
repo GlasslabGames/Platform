@@ -654,6 +654,13 @@ var updateUserCount = function(stats){
 
     this.ds = new MySQL(this.options);
 
+if(MySQL){
+    console.log("got MySQL ...");
+    if(this.ds){
+        console.log("got this.ds");
+    }
+}
+
     console.log(Util.DateString()+" PST ? ****  updateUserCount() called ... --- debug ---");
 
     when.promise(function(resolve, reject){
