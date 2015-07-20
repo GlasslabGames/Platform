@@ -661,7 +661,7 @@ if(MySQL){
     }
 }
 
-    console.log(Util.DateString()+" PST ? ****  updateUserCount() called ... --- debug ---");
+    console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
 
     when.promise(function(resolve, reject){
         var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
@@ -680,6 +680,7 @@ if(MySQL){
             })
             .catch(function(err){
 //          .then(function(err){
+                console.log("error ---- dbg ");
                 reject(err);
             });
     }.bind(this));
