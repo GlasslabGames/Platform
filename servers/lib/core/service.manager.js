@@ -598,7 +598,7 @@ ServiceManager.prototype.start = function(port) {
 //    var serverPort = port || this.app.get('port');
 
                     // start https server
-                    console.log('Starting Server on port', serverPort, "...");
+                    console.log(Util.DateGMTString()+' Starting Server on port', serverPort, "...");
                     https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
                         console.log('Server listening on port ' + serverPort);      // testing on port 9999
                         this.stats.increment("info", "server_started_port_"+serverPort);    // app-int and app-ext
