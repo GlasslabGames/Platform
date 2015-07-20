@@ -544,8 +544,8 @@ ServiceManager.prototype.start = function(port) {
                     // undefined == serverPort
                     var serverPort = port || this.app.get('port');
 
-//  console.log(" ");
-//  console.log(Util.DateGMTString()+" test point **************** ");
+    console.log(" ");
+    console.log(Util.DateGMTString()+" test point **************** ");
 
                     // app-internal or app-external ?
                     if( serverPort && 8002 == serverPort){  // internal server
