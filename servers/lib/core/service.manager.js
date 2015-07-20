@@ -539,8 +539,22 @@ ServiceManager.prototype.start = function(port) {
                 .then(function(){
                     console.log('----------------------------');
                     console.log('Services Started');
+
+                    // undefined == port
+                    // undefined == serverPort
+                    var serverPort = port || this.app.get('port');
+
+//  console.log(" ");
+//  console.log(Util.DateGMTString()+" test point **************** ");
+
+                    // app-internal or app-external ?
+                    if( serverPort && 8002 == serverPort){  // internal server
+                        updateUserCount(this.stats);        // update user count stats telemetry
+                        setInterval( updateUserCount, 4*60*1000, this.stats);
+                    }
+
+                    console.log(" ");
                     console.log("Setting Up Routes...");
-                    console.log('----------------------------');
 
                     // serverPort = undefined
                     if( serverPort && 8002 == serverPort)
@@ -581,7 +595,7 @@ ServiceManager.prototype.start = function(port) {
                     console.log('----------------------------');
                     console.log('Routes Setup done')
 
-                    var serverPort = port || this.app.get('port');
+//    var serverPort = port || this.app.get('port');
 
                     // start https server
                     console.log('Starting Server on port', serverPort, "...");
@@ -619,6 +633,48 @@ ServiceManager.prototype.start = function(port) {
             console.error("ServiceManager: Start Error -", err);
         }.bind(this));
 };
+
+var updateUserCount = function(stats){
+    var userId = 1;
+    var userCount;
+
+    var MySQL = require('../core/datastore.mysql.js');
+
+    var options = {
+        xtest: "xtest"
+    };
+
+    this.options = _.merge(
+        {
+            host    : "localhost",
+            user    : "glasslab",
+            password: "glasslab",
+            database: "glasslab_dev"
+        },
+        options
+    );
+
+    this.ds = new MySQL(this.options);
+
+    stats.increment("info", "user_lookup");
+
+    when.promise(function(resolve, reject){
+        var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
+        this.ds.query(Q)
+            .then(function(results){
+                userCount = parseFloat(results[0].num);
+                stats.gauge("info", "user_count", userCount);
+                console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+
+                    " students and instructors in the DB.");
+
+                resolve(results[0]);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
 
 ServiceManager.prototype.updateUserDataInSession = function(session){
 // add promise wrapper
