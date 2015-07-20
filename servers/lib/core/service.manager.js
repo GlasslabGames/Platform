@@ -656,12 +656,15 @@ var updateUserCount = function(stats){
 
     console.log(Util.DateString()+" PST ? ****  updateUserCount() called ... --- debug ---");
 
-    stats.increment("info", "user_lookup");
+    //  stats.increment("info", "user_lookup");
 
     when.promise(function(resolve, reject){
         var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
         this.ds.query(Q)
             .then(function(results){
+
+                console.log(results);
+
                 userCount = parseFloat(results[0].num);
                 stats.gauge("info", "user_count", userCount);
                 console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+
