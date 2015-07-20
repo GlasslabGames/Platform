@@ -595,8 +595,6 @@ ServiceManager.prototype.start = function(port) {
                     console.log('----------------------------');
                     console.log('Routes Setup done')
 
-//    var serverPort = port || this.app.get('port');
-
                     // start https server
                     console.log(Util.DateGMTString()+' Starting Server on port', serverPort, "...");
                     https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
@@ -655,6 +653,8 @@ var updateUserCount = function(stats){
     );
 
     this.ds = new MySQL(this.options);
+
+    console.log(Util.DateString()+" PST ? ****  updateUserCount() called ... --- debug ---");
 
     stats.increment("info", "user_lookup");
 
