@@ -664,7 +664,7 @@ if(MySQL){
     console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
 
     when.promise(function(resolve, reject){
-        var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
+        var Q = "SELECT COUNT(id) as num FROM GL_USER xxWHERE system_Role = 'instructor' OR system_Role = 'student'";
 
         this.ds.query(Q)
             .then(function(results){
@@ -678,12 +678,18 @@ if(MySQL){
                         " students and instructors in the DB."+err);
 
                 resolve(results[0]);
-            })
-            .then(null, function(err){
+            }, function(err){
                     console.log("error ---- dbg "+err+" <<");
-                reject(err);
-            });
+                reject(err);})
     }.bind(this));
+
+
+
+//            .then(null, function(err){
+//                console.log("error ---- dbg "+err+" <<");
+//                reject(err);
+//            });
+//    }.bind(this));
 };
 
 
