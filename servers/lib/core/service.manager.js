@@ -663,6 +663,7 @@ var updateUserCount = function(stats){
         this.ds.query(Q)
             .then(function(results){
 
+                console.log(Util.DateGMTString()+" list SQL results ...    --- debug --- ");
                 console.log(results);
 
                 userCount = parseFloat(results[0].num);
