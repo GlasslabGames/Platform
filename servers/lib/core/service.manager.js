@@ -680,7 +680,7 @@ if(MySQL){
                 resolve(results[0]);
             })
                 .then(function(err){
-                console.log("error ---- dbg ");
+                    console.log("error ---- dbg "+err+" <<");
                 reject(err);
             });
         }
