@@ -665,6 +665,7 @@ if(MySQL){
 
     when.promise(function(resolve, reject){
         var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
+        try{
         this.ds.query(Q)
             .then(function(results){
 
@@ -674,15 +675,39 @@ if(MySQL){
                 userCount = parseFloat(results[0].num);
                 stats.gauge("info", "user_count", userCount);
                 console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+
-                    " students and instructors in the DB.");
+                        " students and instructors in the DB."+err);
 
                 resolve(results[0]);
             })
-            .catch(function(err){
-//          .then(function(err){
+                .then(function(err){
                 console.log("error ---- dbg ");
                 reject(err);
             });
+        }
+        catch (e){
+            console.log("ds.query threw ... "+e+" <<--");
+        }
+        finally{
+            console.log("back from try - catch");
+        }
+
+        // this.ds.query(Q)
+        //     .then(function(results){
+
+        //         console.log(Util.DateGMTString()+" list SQL results ...    --- debug --- ");
+        //         console.log(results);
+
+        //         userCount = parseFloat(results[0].num);
+        //         stats.gauge("info", "user_count", userCount);
+        //         console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+
+        //             " students and instructors in the DB.");
+
+        //         resolve(results[0]);
+        //     })
+        //     .then(function(err){
+        //         console.log("error ---- dbg ");
+        //         reject(err);
+        //     });
     }.bind(this));
 };
 
