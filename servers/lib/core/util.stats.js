@@ -86,3 +86,11 @@ Stats.prototype.gauge = function(level, key, value) {
     //  statsdInst.gauge(level+"."+this.root+"."+key, value);                   // info.App.Loaded
     }
 };
+
+Stats.prototype.gaugeNoRoot = function(level, key, value) {
+
+    if(statsdInst) {
+        level = level.toLowerCase();
+        statsdInst.gauge(this.env+"."+level+"."+key, value);      // prod.info.Loaded
+    }
+};
