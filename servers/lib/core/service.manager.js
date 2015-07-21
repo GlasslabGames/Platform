@@ -712,7 +712,6 @@ var updateUserCount = function(stats){
     }.bind(this));
 };
 
-
 ServiceManager.prototype.updateUserDataInSession = function(session){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
