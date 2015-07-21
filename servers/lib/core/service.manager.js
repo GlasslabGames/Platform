@@ -39,11 +39,15 @@ process.on('uncaughtException', function(err) {
 });
 
 function ServiceManager(configFiles){
+    // called as:   new ServiceManager("~/hydra.config.json");
+    // this == {}
+
     Util              = require('../core/util.js');
     var ConfigManager = require('../core/config.manager.js');
 
     console.log('---------------------------------------------');
-    console.log('Loading Configuration...');
+    console.log(Util.DateGMTString()+' **** Loading Configuration...');
+
     var config        = new ConfigManager();
     // load config files from first to last until successful
     // if not set, then make array
@@ -57,7 +61,7 @@ function ServiceManager(configFiles){
     }
 
     // always add the root config first
-    configFiles.unshift("./config.json");
+    configFiles.unshift("./config.json");   // [ './config.json', '~/hydra.config.json' ]
     this.options = config.loadSync(configFiles);
 
     if(!this.options.services) {
@@ -69,6 +73,7 @@ function ServiceManager(configFiles){
 
     global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
+    
     this.stats            = new Util.Stats(this.options, "ServiceManager");
     this.awss3            = new Util.S3Util(this.options);
     this.stripe           = new Util.StripeUtil(this.options);
@@ -538,22 +543,67 @@ ServiceManager.prototype.start = function(port) {
             when.all(promiseList)
                 .then(function(){
                     console.log('----------------------------');
-                    console.log('Services Started');
+                    console.log(Util.DateGMTString()+' **** Services Started');
 
-                    // undefined == port
-                    // undefined == serverPort
                     var serverPort = port || this.app.get('port');
-
-    console.log(" ");
-    console.log(Util.DateGMTString()+" test point **************** ");
 
                     // app-internal or app-external ?
                     if( serverPort && 8002 == serverPort){  // internal server
-                //      updateUserCount(this.stats);        // update user count stats telemetry
-                //      setInterval( updateUserCount, 3*60*1000, this.stats);
+
+
+
+
+//     console.log("    ****    ****    ****    ****    ");
+// //  console.log(this.options.services);
+//     console.log(this.options.auth.datastore.mysql);
+//     console.log("    ****    ****    ****    ****    ");
+
+//     var test_merge = _.merge(
+//         {
+//             host    : "localhost",
+//             user    : "glasslab",
+//             password: "glasslab",
+//             database: "glasslab_dev",
+//             // test1: { t1: "1111", t2: "2222" }
+//         },
+
+//         this.options.auth.datastore.mysql
+
+//         // ,{
+//         //     test1: { t1: "updates old values, does not delete missing sub values" },
+//         //     database: "why is this not in config.json ? "
+//         // }
+//     );
+
+//     // console.log(test_merge);
+
+
+
+
+                        // update user count stats telemetry
+
+                        var mysql_options = _.merge(
+                            {
+                                host    : "localhost",
+                                user    : "glasslab",
+                                password: "glasslab",
+                                database: "glasslab_dev",
+                            },
+
+                            this.options.auth.datastore.mysql
+                        );
+
+                        var MySQL = require('../core/datastore.mysql.js');
+                        var ds = new MySQL(mysql_options);
+
+                        this.options.services.ds_mysql = ds;
+
+                        var boundUpUserCount = updateUserCount.bind(this, this.stats);      // with context
+                        boundUpUserCount(this.stats);
+                        setInterval( boundUpUserCount, 3*60*1000, this.stats);
                     }
 
-                    console.log(" ");
+                    //  console.log(" ");
                     console.log("Setting Up Routes...");
 
                     // serverPort = undefined
@@ -633,36 +683,12 @@ ServiceManager.prototype.start = function(port) {
 };
 
 var updateUserCount = function(stats){
-    var userId = 1;
-    var userCount;
-
-    var MySQL = require('../core/datastore.mysql.js');
-
-    var options = {
-        xtest: "xtest"
-    };
-
-    if(this.options){
-    this.options = _.merge(
-        {
-            host    : "localhost",
-            user    : "glasslab",
-                password: "glasslab",
-        },
-        options
-    );
-    }else{
-        this.options = {
-                host    : "localhost",
-                user    : "glasslab",
-                password: "glasslab",
-                database: "glasslab_dev"
-        };
-    }
-
-    this.ds = new MySQL(this.options);
 
     console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
+
+    var userCount;
+
+    this.ds = this.options.services.ds_mysql;
 
     when.promise(function(resolve, reject){
         var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
