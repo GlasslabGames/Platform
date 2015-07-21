@@ -654,7 +654,7 @@ ServiceManager.prototype.start = function(port) {
 
 var updateUserCount = function(stats){
 
-    console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
+    // console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
 
     var userCount;
 
@@ -666,13 +666,13 @@ var updateUserCount = function(stats){
         this.ds.query(Q)
             .then(function(results){
 
-                console.log(Util.DateGMTString()+" list SQL results ...    --- debug --- ");
-                console.log(results);
+                // console.log(Util.DateGMTString()+" list SQL results ...    --- debug --- ");
+                // console.log(results);
 
                 userCount = parseFloat(results[0].num);
                 stats.gauge("info", "user_count", userCount);
                 console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+
-                        " students and instructors in the DB."+err);
+                        " students and instructors in the DB.");
 
                 resolve(results[0]);
             }, function(err){
