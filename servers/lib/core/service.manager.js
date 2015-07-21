@@ -656,12 +656,13 @@ var updateUserCount = function(stats){
 
     // console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
 
+    var Q;
     var userCount;
 
     this.ds = this.options.services.ds_mysql;
 
     when.promise(function(resolve, reject){
-        var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'student'";
 
         this.ds.query(Q)
             .then(function(results){
@@ -670,9 +671,46 @@ var updateUserCount = function(stats){
                 // console.log(results);
 
                 userCount = parseFloat(results[0].num);
+                stats.gauge("info", "student_count", userCount);
+                stats.gaugeNoRoot("info", "student_count", userCount);
+                console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+" students in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor'";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gauge("info", "teacher_count", userCount);
+                stats.gaugeNoRoot("info", "teacher_count", userCount);
+                console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+" teachers in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
                 stats.gauge("info", "user_count", userCount);
+                stats.gaugeNoRoot("info", "user_count", userCount);
                 console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+
-                        " students and instructors in the DB.");
+                        " students and teachers in the DB.");
 
                 resolve(results[0]);
             }, function(err){
