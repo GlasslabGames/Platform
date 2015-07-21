@@ -550,36 +550,6 @@ ServiceManager.prototype.start = function(port) {
                     // app-internal or app-external ?
                     if( serverPort && 8002 == serverPort){  // internal server
 
-
-
-
-//     console.log("    ****    ****    ****    ****    ");
-// //  console.log(this.options.services);
-//     console.log(this.options.auth.datastore.mysql);
-//     console.log("    ****    ****    ****    ****    ");
-
-//     var test_merge = _.merge(
-//         {
-//             host    : "localhost",
-//             user    : "glasslab",
-//             password: "glasslab",
-//             database: "glasslab_dev",
-//             // test1: { t1: "1111", t2: "2222" }
-//         },
-
-//         this.options.auth.datastore.mysql
-
-//         // ,{
-//         //     test1: { t1: "updates old values, does not delete missing sub values" },
-//         //     database: "why is this not in config.json ? "
-//         // }
-//     );
-
-//     // console.log(test_merge);
-
-
-
-
                         // update user count stats telemetry
 
                         var mysql_options = _.merge(
