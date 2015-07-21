@@ -549,8 +549,8 @@ ServiceManager.prototype.start = function(port) {
 
                     // app-internal or app-external ?
                     if( serverPort && 8002 == serverPort){  // internal server
-                        updateUserCount(this.stats);        // update user count stats telemetry
-                        setInterval( updateUserCount, 3*60*1000, this.stats);
+                //      updateUserCount(this.stats);        // update user count stats telemetry
+                //      setInterval( updateUserCount, 3*60*1000, this.stats);
                     }
 
                     console.log(" ");
