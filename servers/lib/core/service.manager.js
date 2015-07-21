@@ -642,32 +642,30 @@ var updateUserCount = function(stats){
         xtest: "xtest"
     };
 
-    if(!this.options.database){
-        this.options.database = "glasslab_dev";
-    }
-
+    if(this.options){
     this.options = _.merge(
         {
             host    : "localhost",
             user    : "glasslab",
-            password: "glasslab"
+                password: "glasslab",
         },
         options
     );
+    }else{
+        this.options = {
+                host    : "localhost",
+                user    : "glasslab",
+                password: "glasslab",
+                database: "glasslab_dev"
+        };
+    }
 
     this.ds = new MySQL(this.options);
-
-    // if(MySQL){
-    //     console.log("got MySQL ...");
-    //     if(this.ds){
-    //         console.log("got this.ds");
-    //     }
-    // }
 
     console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
 
     when.promise(function(resolve, reject){
-        var Q = "SELECT COUNT(id) as num FROM GL_USER xxWHERE system_Role = 'instructor' OR system_Role = 'student'";
+        var Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
 
         this.ds.query(Q)
             .then(function(results){
