@@ -646,8 +646,7 @@ var updateUserCount = function(stats){
         {
             host    : "localhost",
             user    : "glasslab",
-            password: "glasslab",
-            database: "glasslab_dev"
+            password: "glasslab"
         },
         options
     );
@@ -680,16 +679,9 @@ if(MySQL){
                 resolve(results[0]);
             }, function(err){
                     console.log("error ---- dbg "+err+" <<");
-                reject(err);})
+                reject(err);
+            })
     }.bind(this));
-
-
-
-//            .then(null, function(err){
-//                console.log("error ---- dbg "+err+" <<");
-//                reject(err);
-//            });
-//    }.bind(this));
 };
 
 
