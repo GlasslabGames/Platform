@@ -642,24 +642,27 @@ var updateUserCount = function(stats){
         xtest: "xtest"
     };
 
+    if(!this.options.database){
+        this.options.database = "glasslab_dev";
+    }
+
     this.options = _.merge(
         {
             host    : "localhost",
             user    : "glasslab",
-            password: "glasslab",
-            database: "glasslab_dev"
+            password: "glasslab"
         },
         options
     );
 
     this.ds = new MySQL(this.options);
 
-if(MySQL){
-    console.log("got MySQL ...");
-    if(this.ds){
-        console.log("got this.ds");
-    }
-}
+    // if(MySQL){
+    //     console.log("got MySQL ...");
+    //     if(this.ds){
+    //         console.log("got this.ds");
+    //     }
+    // }
 
     console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
 
@@ -680,16 +683,9 @@ if(MySQL){
                 resolve(results[0]);
             }, function(err){
                     console.log("error ---- dbg "+err+" <<");
-                reject(err);})
+                reject(err);
+            })
     }.bind(this));
-
-
-
-//            .then(null, function(err){
-//                console.log("error ---- dbg "+err+" <<");
-//                reject(err);
-//            });
-//    }.bind(this));
 };
 
 
