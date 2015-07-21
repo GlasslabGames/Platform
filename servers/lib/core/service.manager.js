@@ -642,6 +642,10 @@ var updateUserCount = function(stats){
         xtest: "xtest"
     };
 
+    if(!this.options.database){
+        this.options.database = "glasslab_dev";
+    }
+
     this.options = _.merge(
         {
             host    : "localhost",
@@ -653,12 +657,12 @@ var updateUserCount = function(stats){
 
     this.ds = new MySQL(this.options);
 
-if(MySQL){
-    console.log("got MySQL ...");
-    if(this.ds){
-        console.log("got this.ds");
-    }
-}
+    // if(MySQL){
+    //     console.log("got MySQL ...");
+    //     if(this.ds){
+    //         console.log("got this.ds");
+    //     }
+    // }
 
     console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
 
