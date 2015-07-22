@@ -551,26 +551,7 @@ ServiceManager.prototype.start = function(port) {
                     if( serverPort && 8002 == serverPort){  // internal server
 
                         // update user count stats telemetry
-
-                        var mysql_options = _.merge(
-                            {
-                                host    : "localhost",
-                                user    : "glasslab",
-                                password: "glasslab",
-                                database: "glasslab_dev",
-                            },
-
-                            this.options.auth.datastore.mysql
-                        );
-
-                        var MySQL = require('../core/datastore.mysql.js');
-                        var ds = new MySQL(mysql_options);
-
-                        this.options.services.ds_mysql = ds;
-
-                        var boundUpUserCount = updateUserCount.bind(this, this.stats);      // with context
-                        boundUpUserCount(this.stats);
-                        setInterval( boundUpUserCount, 3*60*1000, this.stats);
+                        updateTelemetryStats.call(this, this.stats);
                     }
 
                     //  console.log(" ");
@@ -652,9 +633,40 @@ ServiceManager.prototype.start = function(port) {
         }.bind(this));
 };
 
-var updateUserCount = function(stats){
+var updateTelemetryStats = function(stats){
 
-    // console.log(Util.DateGMTString()+" ****  updateUserCount() called ... --- debug ---");
+    console.log("updateTelemetryStats() called ...")
+
+    var mysql_options = _.merge(
+        {
+            host    : "localhost",
+            user    : "glasslab",
+            password: "glasslab",
+            database: "glasslab_dev",
+        },
+
+        this.options.auth.datastore.mysql
+    );
+
+    var MySQL = require('../core/datastore.mysql.js');
+    var ds = new MySQL(mysql_options);
+
+    this.options.services.ds_mysql = ds;
+
+    var bindCountStudents = countStudents.bind(this, this.stats);   // with context
+    bindCountStudents(this.stats);                                  // now
+    setInterval( bindCountStudents, 2*60*1000, this.stats);         // every 2 minutes
+
+    var bindCountTeachers = countTeachers.bind(this, this.stats);
+    bindCountTeachers(this.stats);
+    setInterval( bindCountTeachers, 2*60*1000, this.stats);
+
+    var boundUpUserCount = updateUserCount.bind(this, this.stats);
+    boundUpUserCount(this.stats);
+    setInterval( boundUpUserCount, 2*60*1000, this.stats);
+};
+
+var countStudents = function(stats){
 
     var Q;
     var userCount;
@@ -667,13 +679,9 @@ var updateUserCount = function(stats){
         this.ds.query(Q)
             .then(function(results){
 
-                // console.log(Util.DateGMTString()+" list SQL results ...    --- debug --- ");
-                // console.log(results);
-
                 userCount = parseFloat(results[0].num);
-                stats.gauge("info", "student_count", userCount);
                 stats.gaugeNoRoot("info", "student_count", userCount);
-                console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+" students in the DB.");
+                console.log(Util.DateGMTString()+" countStudents() -- found, "+userCount+" students in the DB.");
 
                 resolve(results[0]);
             }, function(err){
@@ -681,6 +689,14 @@ var updateUserCount = function(stats){
                 reject(err);
             })
     }.bind(this));
+};
+
+var countTeachers = function(stats){
+
+    var Q;
+    var userCount;
+
+    this.ds = this.options.services.ds_mysql;
 
     when.promise(function(resolve, reject){
         Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor'";
@@ -689,9 +705,8 @@ var updateUserCount = function(stats){
             .then(function(results){
 
                 userCount = parseFloat(results[0].num);
-                stats.gauge("info", "teacher_count", userCount);
                 stats.gaugeNoRoot("info", "teacher_count", userCount);
-                console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+" teachers in the DB.");
+                console.log(Util.DateGMTString()+" countTeachers() -- found, "+userCount+" teachers in the DB.");
 
                 resolve(results[0]);
             }, function(err){
@@ -699,6 +714,14 @@ var updateUserCount = function(stats){
                 reject(err);
             })
     }.bind(this));
+};
+
+var updateUserCount = function(stats){
+
+    var Q;
+    var userCount;
+
+    this.ds = this.options.services.ds_mysql;
 
     when.promise(function(resolve, reject){
         Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
