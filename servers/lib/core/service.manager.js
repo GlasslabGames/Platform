@@ -674,7 +674,7 @@ var countStudents = function(stats){
     this.ds = this.options.services.ds_mysql;
 
     when.promise(function(resolve, reject){
-        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'student'";
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE ENABLED = 1 AND system_Role = 'student'";
 
         this.ds.query(Q)
             .then(function(results){
@@ -699,7 +699,7 @@ var countTeachers = function(stats){
     this.ds = this.options.services.ds_mysql;
 
     when.promise(function(resolve, reject){
-        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor'";
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE ENABLED = 1 AND system_Role = 'instructor'";
 
         this.ds.query(Q)
             .then(function(results){
@@ -724,7 +724,7 @@ var updateUserCount = function(stats){
     this.ds = this.options.services.ds_mysql;
 
     when.promise(function(resolve, reject){
-        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE system_Role = 'instructor' OR system_Role = 'student'";
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE ENABLED = 1 AND (system_Role = 'instructor' OR system_Role = 'student')";
 
         this.ds.query(Q)
             .then(function(results){
