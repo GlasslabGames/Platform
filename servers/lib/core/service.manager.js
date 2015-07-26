@@ -45,7 +45,8 @@ function ServiceManager(configFiles){
     Util              = require('../core/util.js');
     var ConfigManager = require('../core/config.manager.js');
 
-    console.log('---------------------------------------------');
+    console.log(" **************************************** ");
+    console.log(" **************************************** ");
     console.log(Util.DateGMTString()+' **** Loading Configuration...');
 
     var config        = new ConfigManager();
