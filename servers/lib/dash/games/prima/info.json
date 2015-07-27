@@ -163,7 +163,6 @@
                     "skinny": "assets/skinny-banner-PRIMA.png",
                     "large": "assets/ratiorancher_dashboard_banner.png"
                 },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -280,12 +279,13 @@
                             ]
                         }
                     ]
-                }
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
+                "enabled": true,
                 "id": "standards",
                 "assessmentId": "standards",
-                "enabled": true,
                 "name": "Standards Report",
                 "header": {
                     "text": "Standards Report",
@@ -308,23 +308,23 @@
                                             "description": "Understand & apply concept ratio when given the base rate.",
                                             "alignment": "For baseline argumentation skill-building, students complete training in argument scheme (finding evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "Partial": "The student is approaching an understanding of how to apply ratios in simple and complex challenges.",
-                                                "PartialA": "The student is approaching an understanding of how to apply ratios in simple challenges",
-                                                "PartialB": "The student is approaching an understanding of how to apply ratios in complex challenges",
-                                                "PartialC": "The student is approaching an understanding of how to apply ratios in more complex challenges.",
-                                                "PartialD": "The student is approaching an understanding of how to apply ratios in advanced challenges",
-                                                "Full": "The student understands the application of ratios in simple and complex challenges.",
-                                                "FullA": "The student understands and applies the idea of ratios in simple challenges",
-                                                "FullB": "The student understands and applies the idea of ratios in complex challenges",
-                                                "FullC": "The student understands and applies the idea of ratios in more complex challenges",
-                                                "FullD": "The student understands and applies the idea of ratios in advanced challenges.",
-                                                "Watchout": "The student is just beginning to understand the application of ratios in simple and complex challenges.",
-                                                "WatchoutA": "The student is beginning to understand ratios and how to apply them in simple challenges.",
-                                                "WatchoutB": "The student is beginning to understand ratios and how to apply them in complex challenges.",
-                                                "WatchoutC": "The student is beginning to understand ratios and how to apply them in more complex challenges.",
-                                                "WatchoutD": "The student is beginning to understand ratios and how to apply them in advanced challenges."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to apply ratios in simple and complex challenges.",
+                                              "PartialA": "The student is approaching an understanding of how to apply ratios in simple challenges",
+                                              "PartialB": "The student is approaching an understanding of how to apply ratios in complex challenges",
+                                              "PartialC": "The student is approaching an understanding of how to apply ratios in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how to apply ratios in advanced challenges",
+                                              "Full": "The student understands the application of ratios in simple and complex challenges.",
+                                              "FullA": "The student understands and applies the idea of ratios in simple challenges",
+                                              "FullB": "The student understands and applies the idea of ratios in complex challenges",
+                                              "FullC": "The student understands and applies the idea of ratios in more complex challenges",
+                                              "FullD": "The student understands and applies the idea of ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to understand the application of ratios in simple and complex challenges.",
+                                              "WatchoutA": "The student is beginning to understand ratios and how to apply them in simple challenges.",
+                                              "WatchoutB": "The student is beginning to understand ratios and how to apply them in complex challenges.",
+                                              "WatchoutC": "The student is beginning to understand ratios and how to apply them in more complex challenges.",
+                                              "WatchoutD": "The student is beginning to understand ratios and how to apply them in advanced challenges."
                                             }
                                         },
                                         {
@@ -333,44 +333,43 @@
                                             "description": "Apply base rate by multiplying AND dividing to create equivalent ratios.",
                                             "alignment": "For intermediate argumentation skill-building, students perform more difficult argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "Partial": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios.",
-                                                "PartialA": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
-                                                "PartialB": "The student is approaching an understanding of how to multiply and divide with the base rate in complex challenges.",
-                                                "PartialC": "The student is approaching an understanding of how to multiply and divide with the base rate in more complex challenges.",
-                                                "PartialD": "The student is approaching an understanding of how to multiply and divide with the base rate in advanced challenges.",
-                                                "Full": "The student can multiply and divide with the base rate to create equivalent ratios.",
-                                                "FullA": "The student multiplies and divides with the base rate to create equivalent ratios in simple challenges.",
-                                                "FullB": "The student multiplies and divides with the base rate to create equivalent ratios in complex challenges.",
-                                                "FullC": "The student multiplies and divides with the base rate to create equivalent ratios in more complex challenges.",
-                                                "FullD": "The student multiplies and divides with the base rate to create equivalent ratios in advanced challenges.",
-                                                "Watchout": "The student is just beginning to multiply and divide with the base rate to create equivalent ratios.",
-                                                "WatchoutA": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
-                                                "WatchoutB": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in complex challenges.",
-                                                "WatchoutC": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in more complex challenges.",
-                                                "WatchoutD": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in advanced challenges."
-                                            }
-                                        },
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of how to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching an understanding of how to multiply and divide with the base rate in complex challenges.",
+                                              "PartialC": "The student is approaching an understanding of how to multiply and divide with the base rate in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how to multiply and divide with the base rate in advanced challenges.",
+                                              "Full": "The student can multiply and divide with the base rate to create equivalent ratios.",
+                                              "FullA": "The student multiplies and divides with the base rate to create equivalent ratios in simple challenges.",
+                                              "FullB": "The student multiplies and divides with the base rate to create equivalent ratios in complex challenges.",
+                                              "FullC": "The student multiplies and divides with the base rate to create equivalent ratios in more complex challenges.",
+                                              "FullD": "The student multiplies and divides with the base rate to create equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to multiply and divide with the base rate to create equivalent ratios.",
+                                              "WatchoutA": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in simple challenges.",
+                                              "WatchoutB": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in complex challenges.",
+                                              "WatchoutC": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in more complex challenges.",
+                                              "WatchoutD": "The student is beginning to multiply and divide with the base rate to create equivalent ratios in advanced challenges."                                            }
+                                          },
                                         {
                                             "id": "6.RP.A.3",
                                             "title": "6.RP.A.3",
                                             "description": "Reason about ratios and rates to create equivalent ratios.",
                                             "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "Partial": "The student is approaching an understanding of using multiple base rates to create equivalent ratios.",
-                                                "PartialA": "The student is approaching an understanding of coordinating information about multiple base rates to create equivalent ratios in simple challenges.",
-                                                "PartialB": "The student is approaching  understanding in using multiple base rates to create equivalent ratios in complex challenges.",
-                                                "PartialD": "The student is approaching understanding of using multiple base rates to create equivalent ratios in advanced challenges.",
-                                                "Full": "The student can use multiple base rates to create equivalent ratios..",
-                                                "FullB": "The student coordinates multiple base rates to create equivalent ratios in complex challenges.",
-                                                "FullD": "The student coordinates multiple base rates to create equivalent ratios in advanced challenges.",
-                                                "Watchout": "The student has beginning understanding in using multiple base rates to create equivalent ratios.",
-                                                "WatchoutB": "The student has beginning understanding in using multiple base rates to create equivalent ratios in complex challenges",
-                                                "WatchoutD": "The student has beginning understanding of using multiple base rates to create equivalent ratios in advanced challenges."
-                                            }
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of using multiple base rates to create equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of coordinating information about multiple base rates to create equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching  understanding in using multiple base rates to create equivalent ratios in complex challenges.",
+                                              "PartialD": "The student is approaching understanding of using multiple base rates to create equivalent ratios in advanced challenges.",
+                                              "Full": "The student can use multiple base rates to create equivalent ratios..",
+                                              "FullB": "The student coordinates multiple base rates to create equivalent ratios in complex challenges.",
+                                              "FullD": "The student coordinates multiple base rates to create equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning to multiply and divide with the base rate to create equivalent ratios.",
+                                              "Watchout": "The student has beginning understanding in using multiple base rates to create equivalent ratios.",
+                                              "WatchoutB": "The student has beginning understanding in using multiple base rates to create equivalent ratios in complex challenges",
+                                              "WatchoutD": "The student has beginning understanding of using multiple base rates to create equivalent ratios in advanced challenges."                                            }
                                         },
                                         {
                                             "id": "6.RP.A.3.A",
@@ -378,23 +377,23 @@
                                             "description": "Create tables of equivalent ratios.",
                                             "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "Partial": "The student is approaching an understanding of how to create tables of equivalent ratios.",
-                                                "PartialA": "The student is approaching an understanding of how to create tables of equivalent ratios in simple challenges.",
-                                                "PartialB": "The student is approaching an understanding of how create tables of equivalent ratios in more challenges.",
-                                                "PartialC": "Approaching an understanding of how create tables of equivalent ratios in more complex challenges.",
-                                                "PartialD": "The student is approaching an understanding of how create tables of equivalent ratios in advanced challenges.",
-                                                "Full": "The student can create tables of equivalent ratios.",
-                                                "FullA": "The student creates tables of equivalent ratios in simple challenges",
-                                                "FullB": "The student creates tables of equivalent ratios in complex challenges.",
-                                                "FullC": "The student creates tables of equivalent ratios in more complex challenges.",
-                                                "FullD": "The student creates tables of equivalent ratios in advanced challenges.",
-                                                "Watchout": "The student is just beginning understand how to create tables of equivalent ratios.",
-                                                "WatchoutA": "The student is beginning understand how to create tables of equivalent ratios in simple challenges.",
-                                                "WatchoutB": "The student is beginning understand how to create tables of equivalent ratios in complex challenges.",
-                                                "WatchoutC": "The student is beginning understand how to create tables of equivalent ratios in more complex challenges.",
-                                                "WatchoutD": "The student is beginning understand how to create tables of equivalent ratios in advanced challenges."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "Partial": "The student is approaching an understanding of how to create tables of equivalent ratios.",
+                                              "PartialA": "The student is approaching an understanding of how to create tables of equivalent ratios in simple challenges.",
+                                              "PartialB": "The student is approaching an understanding of how create tables of equivalent ratios in more challenges.",
+                                              "PartialC": "Approaching an understanding of how create tables of equivalent ratios in more complex challenges.",
+                                              "PartialD": "The student is approaching an understanding of how create tables of equivalent ratios in advanced challenges.",
+                                              "Full": "The student can create tables of equivalent ratios.",
+                                              "FullA": "The student creates tables of equivalent ratios in simple challenges",
+                                              "FullB": "The student creates tables of equivalent ratios in complex challenges.",
+                                              "FullC": "The student creates tables of equivalent ratios in more complex challenges.",
+                                              "FullD": "The student creates tables of equivalent ratios in advanced challenges.",
+                                              "Watchout": "The student is just beginning understand how to create tables of equivalent ratios.",
+                                              "WatchoutA": "The student is beginning understand how to create tables of equivalent ratios in simple challenges.",
+                                              "WatchoutB": "The student is beginning understand how to create tables of equivalent ratios in complex challenges.",
+                                              "WatchoutC": "The student is beginning understand how to create tables of equivalent ratios in more complex challenges.",
+                                              "WatchoutD": "The student is beginning understand how to create tables of equivalent ratios in advanced challenges."
                                             }
                                         }
                                     ]
@@ -403,7 +402,7 @@
                         }
                     ]
                 }
-            }
+          }
         ]
     },
     "details": {
@@ -509,8 +508,8 @@
             "lessonPlans": {
                 "order": 3,
                 "enabled": true,
-                "authRequired": true,
                 "id": "lessonPlans",
+                "authRequired": true,
                 "title": "Lesson Plans & Videos",
                 "list": [
                     {
@@ -562,11 +561,11 @@
             "research": {
                 "order": 4,
                 "enabled": true,
-                "authRequired": true,
                 "id": "research",
+                "authRequired": true,
                 "title": "Research",
                 "list": [
-                    {
+                  {
                         "category": "Research",
                         "list": [
                             {

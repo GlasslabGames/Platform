@@ -134,29 +134,11 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/data/game/:gameId/user/:userId",
-            service: "data",
-            controller: "game",
-            method: {
-                get: "getGameDataForUser"
-            }
-        },
-        {
-            requireAuth: true,
             api: "/api/v2/data/game/:gameId/create",
             service: "data",
             controller: "game",
             method: {
                 post: "createMatch"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/data/game/:gameId/match/:matchId",
-            service: "data",
-            controller: "game",
-            method: {
-                get: "getMatch"
             }
         },
         {
@@ -369,24 +351,6 @@ module.exports = {
             controller: "games",
             method: {
                 get: "getDeveloperGamesInfo"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/dash/developer/info/schema",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "getDeveloperGamesInfoSchema"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/dash/developer/info/game/:gameId",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "getDeveloperGameInfo"
             }
         },
         {

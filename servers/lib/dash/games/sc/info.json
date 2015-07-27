@@ -6,8 +6,10 @@
         "maintenance": null,
         "shortName": "SimCityEDU",
         "longName": "SimCityEDU: Pollution Challenge!",
-        "grades": "6 - 8",
-        "subject": "21st Century Skills, Science, ELA",
+        "price": "Premium",
+        "packages": "PC/Mac Games",
+        "release": "live",
+        "releaseDate": "Nov 2, 2013",
         "type": "Client Download",
         "platform": {
             "type": "PC & Mac",
@@ -16,10 +18,8 @@
                 "large": "assets/platform-client@2x.png"
             }
         },
-        "price": "Premium",
-        "packages": "PC/Mac Games",
-        "release": "live",
-        "releaseDate": "Nov 2, 2013",
+        "subject": "21st Century Skills, Science, ELA",
+        "grades": "6 - 8",
         "shortDescription": "In SimCityEDU students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.",
         "description": "In SimCityEDU students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.",
         "developer": {
@@ -43,20 +43,20 @@
                 "invalid": "Coming Soon!"
             }
         },
-        "thumbnail": {
-            "small": "assets/thumb-game-SC.png",
-            "large": "assets/thumb-game-SC.png"
-        },
         "card": {
             "small": "assets/game-card-SC.jpg",
             "large": "assets/game-card-SC@2x.jpg"
         },
-        "banners": {
-            "product": "assets/game-banner-SC.jpg",
-            "reports": "assets/game-banner-SC.jpg"
+        "thumbnail": {
+            "small": "assets/thumb-game-SC.png",
+            "large": "assets/thumb-game-SC.png"
         },
         "play": {
             "type": "missions"
+        },
+        "banners": {
+            "product": "assets/game-banner-SC.jpg",
+            "reports": "assets/game-banner-SC.jpg"
         }
     },
     "assessment": [
@@ -75,6 +75,7 @@
                     "name": "Parktown - Housing Mogul",
                     "description": "Zone residential areas to increase #students"
                 },
+
                 "alex_wo1": {
                     "name": "Alexandria - NoZoner",
                     "description": "Less than 15 zones (Commercial/Industrial) within a certain amount of time."
@@ -83,6 +84,7 @@
                     "name": "Alexandria - Industrial Champion",
                     "description": "More commercial zones plopped than industrial"
                 },
+
                 "sierra_wo1": {
                     "name": "Sierra - Brown Out",
                     "description": "More than two attempts AND no power outage/failure"
@@ -91,6 +93,7 @@
                     "name": "Sierra - Smog Destroyer",
                     "description": "Bulldoze the first coal plant AND no power outage/failure"
                 },
+
                 "jack_wo1": {
                     "name": "Jackson City - Home Builder",
                     "description": "Misunderstanding: zone residential to bring in more people for increased jobs"
@@ -160,7 +163,6 @@
                     "skinny": "assets/skinny-banner-SC.jpg",
                     "large": "assets/skinny-banner-SC@2x.jpg"
                 },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -198,9 +200,11 @@
                                     "id": "park_wo1",
                                     "title": "Crazy Plopper",
                                     "description": "Parktown - Places too many bus stops",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Ask this student to think aloud and observe her/his gameplay to reveal the cause of their decision to place too many bus stops. Make sure the student understands the goals of this mission and how to check their progress toward those goals. ",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "What is the current number of enrolled students?",
                                             "How can we enroll more students in school?"
@@ -212,9 +216,11 @@
                                     "id": "alex_wo1",
                                     "title": "No Zoner",
                                     "description": "Alexandria - Less than 15 zones (Commercial/Industrial) within a certain amount of time",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision not to place enough job producing zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "What is the current number of jobs?",
                                             "What is the rate of job growth?",
@@ -227,9 +233,11 @@
                                     "id": "sierra_wo1",
                                     "title": "Brown Out",
                                     "description": "Sierra - The student has made multiple attempts but continues to run low on power for the city",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to remove too many power producing structures. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "How much pollution do you currently generate?",
                                             "Where is the pollution coming from?",
@@ -245,9 +253,11 @@
                                     "id": "jack_wo1",
                                     "title": "Home Builder",
                                     "description": "Jackson City - Misunderstanding: zone residential to bring in more people for increased jobs",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to place residential zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "What are the goals of this mission?",
                                             "What is the current number of jobs?",
                                             "How can we create more jobs?",
@@ -266,19 +276,22 @@
                             ]
                         }
                     ]
-                }
+                },
+
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
                 "id": "mission-progress",
                 "assessmentId": "mission-progress",
                 "enabled": true,
                 "name": "Game Progress Report",
-                "header": {
+                 "header": {
                     "text": "Game Progress Report",
                     "image": "assets/game-banner-SC.jpg",
                     "skinny": "assets/skinny-banner-SC.jpg",
-                    "large": "assets/skinny-banner-SC@2x.jpg"
+                     "large": "assets/skinny-banner-SC@2x.jpg"
                 },
+                "description": "This report shows students' progress through the game, medals earned, and total time played.",
                 "icons": {
                     "complete": {
                         "small": "assets/add-blue.png",
@@ -289,28 +302,27 @@
                         "large": "assets/add-grey-square@2x.png"
                     }
                 },
-                "description": "This report shows students' progress through the game, medals earned, and total time played.",
                 "table": {
                     "headers": [
                         {
                             "id": "MedusaA1School01",
                             "title": "School Is In",
-                            "description": "false"
+                            "description": false
                         },
                         {
                             "id": "MedusaA1Jobs01",
                             "title": "We Need Jobs!",
-                            "description": "false"
+                            "description": false
                         },
                         {
                             "id": "MedusaA1Power01",
                             "title": "Pollution Problems",
-                            "description": "false"
+                            "description": false
                         },
                         {
                             "id": "MedusaA1Pollution01",
                             "title": "It's Complicated",
-                            "description": "false"
+                            "description": false
                         }
                     ],
                     "labels": []
@@ -327,11 +339,11 @@
                     "skinny": "assets/skinny-banner-SC.jpg",
                     "large": "assets/skinny-banner-SC@2x.jpg"
                 },
+                "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from each mission assessed.",
                 "icons": {
                     "small": "assets/icon-plus-green.png",
                     "large": "assets/icon-plus-green@2x.png"
                 },
-                "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from each mission assessed.",
                 "table": {
                     "headers": [
                         {
@@ -411,8 +423,8 @@
         "buttons": [
             {
                 "name": "Getting Started Guide",
-                "type": "link",
                 "authRequired": false,
+                "type": "link",
                 "links": [
                     {
                         "target": "_blank",
@@ -426,16 +438,16 @@
                 "authRequired": true,
                 "links": [
                     {
-                        "target": "_blank",
                         "name": "PC (1.0GB)",
                         "OS": "Windows",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.msi"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.msi",
+                        "target": "_blank"
                     },
                     {
-                        "target": "_blank",
                         "name": "Mac (1.0GB)",
                         "OS": "Mac",
-                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.dmg"
+                        "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/downloads/2.1.1129/SimCityEDU_setup.dmg",
+                        "target": "_blank"
                     }
                 ]
             },
@@ -460,7 +472,7 @@
                 "header": "Let Your Students Go to Town!",
                 "about": "With SimCityEDU, educators have more than a just digital game. They have the tools and content they need to make learning come alive for their students. In the game, students play the role of mayor, doing the challenging work of addressing environmental impact while balancing the employment needs and the happiness of the city’s residents.<br> <br>Designed in partnership with the assessment experts from ETS and Pearson, SimCityEDU: Pollution Challenge! not only teaches students about the factors affecting the environment in a modern city, but the game also provides formative assessment information about students’ ability to problem solve and explain the relationships in complex systems.<br><br>Lesson plans, teacher and student dashboards—along with student data reporting—complete the SimCityEDU experience, delivering personalized learning to every student.",
                 "video": "https://vimeo.com/102270816",
-                "brochure": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/brochures/SIMCITYbrochure_v3small.pdf",
+                "brochure":"https://s3-us-west-1.amazonaws.com/playfully-games/SC/brochures/SIMCITYbrochure_v3small.pdf",
                 "curriculum": [
                     "SimCityEDU: Pollution Challenge! is made of four different missions all centered on the theme of environmental impact. In each mission, students are tasked with solving increasingly complex problems. The game aligns to Next Generation Science Standards, Common Core Standards, 21st Century Skills, and Economics Standards."
                 ],
@@ -587,8 +599,8 @@
                             {
                                 "list": [
                                     {
-                                        "name": "Influence of Science, Engineering, and Technology on Society and Nature",
-                                        "link": "http://www.nap.edu/openbook.php?record_id=13165&page=201",
+                                        "name":"Influence of Science, Engineering, and Technology on Society and Nature",
+                                        "link":"http://www.nap.edu/openbook.php?record_id=13165&page=201",
                                         "description": "Core interdisciplinary connections"
                                     }
                                 ]
@@ -599,26 +611,26 @@
                         "category": "Common Core Math Standards (CCSS)",
                         "groups": [
                             {
-                                "list": [
+                                "list":[
                                     {
-                                        "name": "CCSS.MATH.6.EE.B.6",
-                                        "link": "http://www.corestandards.org/Math/Content/6/EE/#CCSS.Math.Content.6.EE.B.6",
-                                        "description": "Understanding/identifying variables"
+                                        "name":"CCSS.MATH.6.EE.B.6",
+                                        "link":"http://www.corestandards.org/Math/Content/6/EE/#CCSS.Math.Content.6.EE.B.6",
+                                        "description":"Understanding/identifying variables"
                                     },
                                     {
-                                        "name": "CCSS.MATH.7.EE.B.4",
-                                        "link": "http://www.corestandards.org/Math/Content/7/EE/#CCSS.Math.Content.7.EE.B.4",
-                                        "description": "Understanding/identifying variables"
+                                        "name":"CCSS.MATH.7.EE.B.4",
+                                        "link":"http://www.corestandards.org/Math/Content/7/EE/#CCSS.Math.Content.7.EE.B.4",
+                                        "description":"Understanding/identifying variables"
                                     },
                                     {
-                                        "name": "CCSS.MATH.6.RP.A.1",
-                                        "link": "http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
-                                        "description": "Understanding/identifying ratios"
+                                        "name":"CCSS.MATH.6.RP.A.1",
+                                        "link":"http://www.corestandards.org/Math/Content/6/RP/#CCSS.Math.Content.6.RP.A.1",
+                                        "description":"Understanding/identifying ratios"
                                     },
                                     {
-                                        "name": "CCSS.MATH.7.RP.A.2",
-                                        "link": "http://www.corestandards.org/Math/Content/7/RP/#CCSS.Math.Content.7.RP.A.2",
-                                        "description": "Understanding/identifying ratios"
+                                      "name":"CCSS.MATH.7.RP.A.2",
+                                       "link":"http://www.corestandards.org/Math/Content/7/RP/#CCSS.Math.Content.7.RP.A.2",
+                                       "description":"Understanding/identifying ratios"
                                     }
                                 ]
                             }
@@ -628,31 +640,33 @@
                         "category": "Council for Economic Education (CEE)",
                         "groups": [
                             {
-                                "list": [
+                                "list":[
+
+
                                     {
-                                        "name": "Standard 1 (Scarcity: Productive Resources)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Productive Resources"
+                                        "name":"Standard 1 (Scarcity: Productive Resources)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Productive Resources"
                                     },
                                     {
-                                        "name": "Standard 1 (Scarcity: Human Capital)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Human Capital"
+                                        "name":"Standard 1 (Scarcity: Human Capital)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Human Capital"
                                     },
                                     {
-                                        "name": "Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Cost/Benefit Analysis"
+                                        "name":"Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Cost/Benefit Analysis"
                                     },
                                     {
-                                        "name": "Standard 6 (Specialization and Trade: Division of Labor)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Division of Labor"
+                                        "name":"Standard 6 (Specialization and Trade: Division of Labor)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Division of Labor"
                                     },
                                     {
-                                        "name": "Standard 6 (Specialization and Trade: Employment/Unemployment)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Employment/Unemployment"
+                                        "name":"Standard 6 (Specialization and Trade: Employment/Unemployment)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Employment/Unemployment"
                                     }
                                 ]
                             }
@@ -753,8 +767,8 @@
                             {
                                 "list": [
                                     {
-                                        "name": "Influence of Science, Engineering, and Technology on Society and Nature",
-                                        "link": "http://www.nap.edu/openbook.php?record_id=13165&page=201",
+                                        "name":"Influence of Science, Engineering, and Technology on Society and Nature",
+                                        "link":"http://www.nap.edu/openbook.php?record_id=13165&page=201",
                                         "description": "Core interdisciplinary connections"
                                     }
                                 ]
@@ -765,7 +779,7 @@
                         "category": "Texas Essential Knowledge and Skills",
                         "groups": [
                             {
-                                "list": [
+                                "list":[
                                     {
                                         "name": "Middle School Social Studies: Social Studies Skills (Grade 6, Grade 7)",
                                         "link": "http://ritter.tea.state.tx.us/rules/tac/chapter113/ch113b.html",
@@ -814,31 +828,33 @@
                         "category": "Council for Economic Education (CEE)",
                         "groups": [
                             {
-                                "list": [
+                                "list":[
+
+
                                     {
-                                        "name": "Standard 1 (Scarcity: Productive Resources)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Productive Resources"
+                                        "name":"Standard 1 (Scarcity: Productive Resources)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Productive Resources"
                                     },
                                     {
-                                        "name": "Standard 1 (Scarcity: Human Capital)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Human Capital"
+                                        "name":"Standard 1 (Scarcity: Human Capital)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Human Capital"
                                     },
                                     {
-                                        "name": "Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Cost/Benefit Analysis"
+                                        "name":"Standard 2 (Marginal Cost/Benefit: Cost/Benefit Analysis)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Cost/Benefit Analysis"
                                     },
                                     {
-                                        "name": "Standard 6 (Specialization and Trade: Division of Labor)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Division of Labor"
+                                        "name":"Standard 6 (Specialization and Trade: Division of Labor)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Division of Labor"
                                     },
                                     {
-                                        "name": "Standard 6 (Specialization and Trade: Employment/Unemployment)",
-                                        "link": "http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
-                                        "description": "Employment/Unemployment"
+                                        "name":"Standard 6 (Specialization and Trade: Employment/Unemployment)",
+                                        "link":"http://www.econlib.org/library/Topics/HighSchool/NationalStandards.html#basics",
+                                        "description":"Employment/Unemployment"
                                     }
                                 ]
                             }
@@ -853,61 +869,69 @@
                 "id": "lessonPlans",
                 "title": "Lesson Plans & Videos",
                 "list": [
-                    {
-                        "category": "Lesson Plans",
-                        "list": [
-                            {
-                                "name": "Mission 1 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1.pdf",
-                                "standard": "CCSS"
-                            },
-                            {
-                                "name": "Mission 2 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2.pdf",
-                                "standard": "CCSS"
-                            },
-                            {
-                                "name": "Mission 3 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3.pdf",
-                                "standard": "CCSS"
-                            },
-                            {
-                                "name": "Mission 4 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4.pdf",
-                                "standard": "CCSS"
-                            },
-                            {
-                                "name": "Mission 1 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1_TEKS.pdf",
-                                "standard": "TEKS"
-                            },
-                            {
-                                "name": "Mission 2 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2_TEKS.pdf",
-                                "standard": "TEKS"
-                            },
-                            {
-                                "name": "Mission 3 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3_TEKS.pdf",
-                                "standard": "TEKS"
-                            },
-                            {
-                                "name": "Mission 4 Lesson Plan",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4_TEKS.pdf",
-                                "standard": "TEKS"
-                            }
-                        ]
-                    },
-                    {
-                        "category": "Videos",
-                        "list": [
-                            {
-                                "name": "Walkthrough",
-                                "link": "http://vimeo.com/102270816"
-                            }
-                        ]
-                    },
-                    {}
+                  {
+                    "category": "Lesson Plans",
+                    "list": [
+                        {
+                            "name": "Mission 1 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1.pdf",
+                            "standard": "CCSS"
+                        },
+                        {
+                            "name": "Mission 2 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2.pdf",
+                            "standard": "CCSS"
+                        },
+                        {
+                            "name": "Mission 3 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3.pdf",
+                            "standard": "CCSS"
+                        },
+                        {
+                            "name": "Mission 4 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4.pdf",
+                            "standard": "CCSS"
+                        },
+                        {
+                            "name": "Mission 1 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+1_Mission+1_TEKS.pdf",
+                            "standard": "TEKS"
+                        },
+                        {
+                            "name": "Mission 2 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+2_Mission+2_TEKS.pdf",
+                            "standard": "TEKS"
+                        },
+                        {
+                            "name": "Mission 3 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+3_Mission+3_TEKS.pdf",
+                            "standard": "TEKS"
+                        },
+                        {
+                            "name": "Mission 4 Lesson Plan",
+                            "link": "https://s3-us-west-1.amazonaws.com/playfully-games/SC/lessonplans/SCE+Lesson+4_Mission+4_TEKS.pdf",
+                            "standard": "TEKS"
+                        }
+                    ]
+                  },
+                  {
+                    "category": "Videos",
+                    "list": [
+                        {
+                            "name": "Walkthrough",
+                            "link": "http://vimeo.com/102270816"
+                        }
+                    ]
+                   },
+                  {
+                    "_category": "Info Pack",
+                    "_list": [
+                        {
+                            "name": "One Page Game Description",
+                            "link": "http://www.simcityedu.org/wp-content/uploads/2013/11/SCE_PC_Brochure_sml-1.pdf"
+                        }
+                    ]
+                   }
                 ]
             },
             "research": {
@@ -917,19 +941,19 @@
                 "id": "research",
                 "title": "Research",
                 "list": [
-                    {
-                        "category": "SRI 2014",
-                        "list": [
-                            {
-                                "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
-                                "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
-                            },
-                            {
-                                "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
-                                "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
-                            }
-                        ]
-                    }
+                  {
+                      "category": "SRI 2014",
+                      "list": [
+                          {
+                              "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Brief)",
+                              "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-brief"
+                          },
+                          {
+                              "name": "Digital Games for Learning: A Systematic Review and Meta-Analysis (Executive Summary)",
+                              "link": "http://www.sri.com/work/publications/digital-games-design-and-learning-systematic-review-and-meta-analysis-executive-su"
+                          }
+                      ]
+                  }
                 ]
             },
             "reviews": {
@@ -938,18 +962,18 @@
                 "id": "reviews",
                 "title": "Reviews",
                 "list": [
-                    {
-                        "reviewer": "Denise Cruz</br>Teacher, Robinswood Middle School</br>Orlando, Florida",
-                        "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission,      automatic grading."
-                    },
-                    {
-                        "reviewer": "Frank Lopes</br>Teacher, East Windsor Middle School</br>East Windsor, CT",
-                        "review": " I also wanted to take the time out to say how impressed I’ve been with the challenges. But most of all, the lessons. These lessons really to do a great job of compelling students to engage in textual analysis in effective ways. SimCityEdu has really outdone themselves. Bravo!"
-                    },
-                    {
-                        "reviewer": "Joanna Doyle</br>Teacher, Edison Regional Gifted Center</br>Chicago, IL",
-                        "review": "  I launched today and it was fantastic! All the students were engaged and the classroom chatter was on topic. I had 7 students come up to me at the end of class and ask if they could continue to work on SimCityEDU at home. YES!"
-                    }
+                  {
+                    "reviewer": "Denise Cruz<\/br>Teacher, Robinswood Middle School<\/br>Orlando, Florida",
+                    "review": "GlassLab Team, you’ve outdone yourselves with this release; as if I had any doubt. Teacher dashboard likes: diagramming tutorial in the mission, lesson plans in the mission,      automatic grading."
+                  },
+                {
+                    "reviewer": "Frank Lopes<\/br>Teacher, East Windsor Middle School<\/br>East Windsor, CT",
+                    "review": " I also wanted to take the time out to say how impressed I’ve been with the challenges. But most of all, the lessons. These lessons really to do a great job of compelling students to engage in textual analysis in effective ways. SimCityEdu has really outdone themselves. Bravo!"
+                },
+                {
+                    "reviewer": "Joanna Doyle<\/br>Teacher, Edison Regional Gifted Center<\/br>Chicago, IL",
+                    "review": "  I launched today and it was fantastic! All the students were engaged and the classroom chatter was on topic. I had 7 students come up to me at the end of class and ask if they could continue to work on SimCityEDU at home. YES!"
+                }
                 ]
             },
             "check": {
@@ -1395,5 +1419,6 @@
             }
         ]
     },
-    "releases": {}
+    "releases": {
+    }
 }

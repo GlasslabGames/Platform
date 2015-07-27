@@ -10,8 +10,7 @@ module.exports = {
         "GL-SC-250": "SimCityEDU Site Unlimited"
     },
     "datastore": {
-        "licenseKey": "lic",
-        "licenseKeyEmail": "lic:email"
+        "licenseKey": "lic"
     },
     "plan": {
         "chromebook": {
@@ -23,12 +22,10 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
-                "AA-1",
-                "PVZ"
+                "AA-1"
             ],
             "downloadableGames": [
             ],
@@ -40,8 +37,7 @@ module.exports = {
             "description": "Games in this package are optimized to work on iPads.",
             "pricePerSeat": 3,
             "browserGames": [
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
                 "AA-1",
@@ -62,12 +58,10 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
-                "AA-1",
-                "PVZ"
+                "AA-1"
             ],
             "downloadableGames": [
                 "SC"
@@ -83,8 +77,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
                 "AA-1",
@@ -106,8 +99,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
                 "AA-1",
@@ -129,8 +121,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
                 "AA-1",

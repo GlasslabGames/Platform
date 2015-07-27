@@ -3008,7 +3008,7 @@ function inspectLicenses(req, res){
     //job should run at midnight evey day.  eventually handles all time running out emails and does expire/renew operations
     this.myds.getLicensesForInspection()
         .then(function(licenses){
-            var now = new Date();
+            var today = new Date();
             var protocol = req.protocol;
             var host = req.headers.host;
             var promiseList = [];
@@ -3022,23 +3022,23 @@ function inspectLicenses(req, res){
             var license;
             var renewLicense;
             var corruptData;
+            var sevenDays = 604800000;
             _(inspecter).forEach(function(user, userId){
                 if(user.length === 1 && user[0].active === 1){
                     license = user[0];
-                    var expDate = moment(license.expiration_date);
-                    var daysToGo = expDate.diff(now, 'days');
-                    if(expDate < now){
-                        promiseList.push(_expireLicense.call(this, license, protocol, host));
+                    var expDate = new Date(license.expiration_date);
+                    if(today - expDate >= 0){
+                        promiseList.push(_expireLicense.call(this, license, today, protocol, host));
                     } else if (license.packageType === 'trial'){
                         // add all relevant dates to these checks.  Emails customized to those dates
-                        if(daysToGo <= this.options.lic.emailDaysBeforeExpiration){
+                        if(expDate - today <= sevenDays){
                             // send out the proper email. make helper for this
-                            promiseList.push(_expiringSoonEmails.call(this, userId, license.id, daysToGo, expDate, true, protocol, host));
+                            //promiseList.push(_expiringSoonEmails.call(this, userId, license.id, 7, true, protocol, host));
                         }
                     } else{
-                        if(daysToGo <= this.options.lic.emailDaysBeforeExpiration){
+                        if(expDate - today <= sevenDays){
                             // send out the proper email. make helper for this
-                            promiseList.push(_expiringSoonEmails.call(this, userId, license.id, daysToGo, expDate, false, protocol, host));
+                            //promiseList.push(_expiringSoonEmails.call(this, userId, license.id, 7, false, protocol, host));
                         }
                     }
                     // add more else if conditions to know when to send expiring soon emails
@@ -3089,13 +3089,19 @@ function inspectLicenses(req, res){
         }.bind(this));
 }
 
-function _expireLicense(license, protocol, host){
+function _expireLicense(license, today, protocol, host){
     return when.promise(function(resolve, reject) {
         var userId = license.user_id;
         var licenseId = license.id;
         var isTrial = false;
         if(license.package_type === "trial"){
             isTrial = true;
+        }
+        var expDate = new Date(license.expiration_date);
+        // today is a date object as well
+        if(today - expDate < 0){
+            resolve("no expire");
+            return;
         }
         var instructors;
         var promise;
@@ -3228,46 +3234,31 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
     }.bind(this));
 }
 
-function _expiringSoonEmails(userId, licenseId, daysToGo, expDate, isTrial, protocol, host){
+function _expiringSoonEmails(userId, licenseId, daysToGo, isTrial, protocol, host){
     return when.promise(function(resolve, reject){
-        var now = moment();
-        var template;
-        var data = {};
-        if (isTrial) {
-            data.subject = "You’re Almost Done with Your Trial!";
-            template = "owner-trial-expires-soon";
-        } else {
-            data.subject = "It’s Almost Time to Renew!";
-            template = "owner-subscription-expires-soon";
-        }
-        this.cbds.getEmailLastSentTimestamp(licenseId, template)
-            .then(function(timestamp){
-                var daysSinceLastSent = now.diff(timestamp, 'days');
-                if (daysSinceLastSent <= this.options.lic.emailDaysBeforeExpiration) {
-                    resolve();
-                    return;
+        this.myds.getUserById(userId)
+            .then(function(user){
+                var email = user["EMAIL"];
+                var data = {};
+                data.firstName = user["FIRST_NAME"];
+                data.lastName = user["LAST_NAME"];
+                data.daysToGo = daysToGo;
+                var template;
+                if(isTrial){
+                    data.subject = "You’re Almost Done with Your Trial!";
+                    template = "owner-trial-expires-soon";
+                } else{
+                    data.subject = "It’s Almost Time to Renew!";
+                    template = "owner-subscription-expires-soon";
                 }
-                this.myds.getUserById(userId)
-                    .then(function(user) {
-                        var email = user["EMAIL"];
-                        data.firstName = user["FIRST_NAME"];
-                        data.lastName = user["LAST_NAME"];
-                        data.daysToGo = daysToGo;
-                        data.expirationDate = expDate;
-                        return _sendEmailResponse.call(this, email, data, protocol, host, template);
-                    }.bind(this))
-                    .then(function(){
-                        var ttl = moment.duration(this.options.lic.emailDaysBeforeExpiration, "days").asSeconds();
-                        return this.cbds.updateEmailLastSentTimestamp(licenseId, template, now, ttl);
-                    }.bind(this))
-                    .then(function(){
-                        resolve();
-                    })
-                    .then(null, function(err){
-                        console.error("Expiring Soon Emails Error -", err);
-                        reject(err);
-                    }.bind(this));
+                return _sendEmailResponse.call(this, email, data, protocol, host, template);
             }.bind(this))
+            .then(function(){
+                // modify license to notify it has sent out relevant email, new column
+            }.bind(this))
+            .then(function(){
+                resolve();
+            })
             .then(null, function(err){
                 console.error("Expiring Soon Emails Error -", err);
                 reject(err);
@@ -4252,8 +4243,7 @@ function _sendEmailResponse(email, data, protocol, host, template){
             subject: data.subject,
             to: email,
             data: data,
-            host: protocol + "://" + host,
-            staticDir: path.resolve(this.options.webapp.staticContentPath)
+            host: protocol + "://" + host
         };
         var pathway = path.join(__dirname,"../email-templates");
         var options = this.options.auth.email;

@@ -3,12 +3,15 @@
         "gameId": "AA-1",
         "enabled": true,
         "visible": true,
-        "maintenance": null,
         "shortName": "Argubot Academy EDU",
         "longName": "Mars Generation One: Argubot Academy EDU",
         "grades": "6 - 8",
         "subject": "ELA",
         "type": "App",
+        "price": "Free",
+        "packages": "iPad Games",
+        "release": "live",
+        "releaseDate": "Sep 2, 2014",
         "platform": {
             "type": "iPad",
             "icon": {
@@ -16,10 +19,6 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "price": "Free",
-        "packages": "iPad Games",
-        "release": "live",
-        "releaseDate": "Sep 2, 2014",
         "shortDescription": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "description": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for iOS tablets.",
         "developer": {
@@ -81,13 +80,13 @@
                 }
             }
         },
-        {
-            "enabled": true,
-            "id": "standards",
-            "dataProcessScope": "gameSession",
-            "engine": "standards",
-            "trigger": "activity"
-        }
+      {
+        "enabled": true,
+        "id": "standards",
+        "dataProcessScope": "gameSession",
+        "engine": "standards",
+        "trigger": "activity"
+      }
     ],
     "reports": {
         "list": [
@@ -116,7 +115,6 @@
                     "skinny": "assets/skinny-banner-AA-1.jpg",
                     "large": "assets/skinny-banner-AA-1@2x.jpg"
                 },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -139,9 +137,11 @@
                                     "id": "wo1",
                                     "title": "Contradictory Mechanic",
                                     "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more contradictory pairs.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "In continued play by the student, support her/him in thinking aloud about choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "talk through what contradictory evidence means",
                                             "identify pieces of contradictory evidence in the current game level, or",
                                             "use the contradictory evidence to equip a robot or fight a battle."
@@ -153,9 +153,11 @@
                                     "id": "wo2",
                                     "title": "Irrelevant Mechanic",
                                     "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more pairs with irrelevant evidence.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "talk through what irrelevant evidence means",
                                             "identify pieces of irrelevant evidence in the current game level, or",
                                             "use the irrelevant evidence to equip a robot or fight a battle"
@@ -167,9 +169,11 @@
                                     "id": "wo3",
                                     "title": "Straggler",
                                     "description": "Student is having difficulty distinguishing between evidence that is 'not supporting' and 'not relevant' in opponent arguments.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "As the student continues play, engage her/him in chat about game progression. To help understand what the student knows, encourage discussion about kinds of evidence she/he is seeing anywhere in the current game level. Help the student:",
-                                        "actionPoints": [
+                                        "actionPoints":
+                                        [
                                             "Identify evidence that comes up, and support a think-aloud about what evidence is and what it means in the game scene.",
                                             "Next, specifically talk through supporting and relevant evidence that comes up (e.g. during next gathering of evidence or claim core construction). ",
                                             "If a game battle happens, discuss with the student what active arguments she/he is making (if possible, making reference to the idea of supporting and relevant evidence).",
@@ -182,12 +186,13 @@
                             ]
                         }
                     ]
-                }
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
+                "enabled": true,
                 "id": "standards",
                 "assessmentId": "standards",
-                "enabled": true,
                 "name": "Standards Report",
                 "header": {
                     "text": "Standards Report",
@@ -195,7 +200,7 @@
                     "skinny": "assets/skinny-banner-AA-1.jpg",
                     "large": "assets/skinny-banner-AA-1@2x.jpg"
                 },
-                "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
+              "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
                 "table": {
                     "groups": [
                         {
@@ -210,13 +215,13 @@
                                             "description": "Trace and evaluate argument and claims in text; distinguish those supported (and not supported) by reasons and evidence.",
                                             "alignment": "For baseline argumentation skill-building, students complete training in argument scheme (finding evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "WatchoutA": "Student is having trouble identifying evidence relevant to argument schemes.",
-                                                "Partial": "Student has successfully completed initial training in argument schemes and evidence selection.",
-                                                "WatchoutB": "In the training level, student is having trouble successfully critiquing opponents in battle.",
-                                                "Full": "Student has successfully completed training in selection of scheme-relevant evidence, evidence-claim pairing, and evaluation of argument (via critique) in battle.",
-                                                "Watchout": "At a beginning level, the student is having trouble identifying evidence and successfully critiquing opponents in battle."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "WatchoutA": "Student is having trouble identifying evidence relevant to argument schemes.",
+                                              "Partial": "Student has successfully completed initial training in argument schemes and evidence selection.",
+                                              "WatchoutB": "In the training level, student is having trouble successfully critiquing opponents in battle.",
+                                              "Full": "Student has successfully completed training in selection of scheme-relevant evidence, evidence-claim pairing, and evaluation of argument (via critique) in battle.",
+                                              "Watchout": "At a beginning level, the student is having trouble identifying evidence and successfully critiquing opponents in battle."
                                             }
                                         },
                                         {
@@ -225,28 +230,28 @@
                                             "description": "Trace and evaluate argument and claims in text; distinguish those supported (and not supported) by reasons and evidence.",
                                             "alignment": "For intermediate argumentation skill-building, students perform more difficult argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "WatchoutA": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle.",
-                                                "Partial": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in intermediate battle.",
-                                                "WatchoutB": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle.",
-                                                "Full": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in multiple intermediate battles.",
-                                                "Watchout": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "WatchoutA": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle.",
+                                              "Partial": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in intermediate battle.",
+                                              "WatchoutB": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle.",
+                                              "Full": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in multiple intermediate battles.",
+                                              "Watchout": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle."
                                             }
-                                        },
+                                          },
                                         {
                                             "id": "RI 8.8",
                                             "title": "RI 8.8",
                                             "description": "Trace and evaluate argument and claims in text; assess sound reasoning and relevant/sufficient evidence; recognize when irrelevant evidence is introduced.",
                                             "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "WatchoutA": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle.",
-                                                "Partial": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in advanced battle.",
-                                                "WatchoutB": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle.",
-                                                "Full": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in multiple advanced battles.",
-                                                "Watchout": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "WatchoutA": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle.",
+                                              "Partial": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in advanced battle.",
+                                              "WatchoutB": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle.",
+                                              "Full": "Student has successfully matched strong claim-evidence pairs, and evaluated opponents’ argument through critique in multiple advanced battles.",
+                                              "Watchout": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle."
                                             }
                                         }
                                     ]
@@ -260,13 +265,13 @@
                                             "description": "Make logical inferences from close reading of text; support conclusions drawn with specific evidence.",
                                             "alignment": "For logical inference around sound claims and evidence, students’ success in building strong evidence-claim pairs (through fusion of argubot evidence-claim cores) is measured throughout play.",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
-                                                "WatchoutA": "Student is having trouble successfully matching evidence and claims to create a strong core argument.",
-                                                "Partial": "Throughout beginning and intermediate levels of play, student has consistently fused strong claim-evidence pairs.",
-                                                "WatchoutB": "Student is having trouble successfully matching evidence and claims to create a strong core argument.",
-                                                "Full": "Throughout beginning, intermediate, and advanced levels of play, student has consistently fused strong claim-evidence pairs.",
-                                                "Watchout": "Student is having trouble successfully matching evidence and claims to create a strong core argument."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
+                                              "WatchoutA": "Student is having trouble successfully matching evidence and claims to create a strong core argument.",
+                                              "Partial": "Throughout beginning and intermediate levels of play, student has consistently fused strong claim-evidence pairs.",
+                                              "WatchoutB": "Student is having trouble successfully matching evidence and claims to create a strong core argument.",
+                                              "Full": "Throughout beginning, intermediate, and advanced levels of play, student has consistently fused strong claim-evidence pairs.",
+                                              "Watchout": "Student is having trouble successfully matching evidence and claims to create a strong core argument."
                                             }
                                         },
                                         {
@@ -275,13 +280,13 @@
                                             "description": "Delineate and evaluate the argument and claims in text; assess the validity of the reasoning, and existence of relevant and sufficient evidence.",
                                             "alignment": "For advanced evidence-based evaluation of claims, students train in special argument critique and rebuttal tactics for use in battle.",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
-                                                "WatchoutA": "Student is having trouble with advanced critique training, based in the use of critical questions to attack opponent argument in battle.",
-                                                "Partial": "Student has completed advanced critique training, based on the evaluation and attack of opponents’ arguments via critical questions.",
-                                                "WatchoutB": "Student is having trouble with defensive argumentation tactics (evidence-based rebuttal of opponent attacks).",
-                                                "Full": "Student has completed advanced training in defensive argumentation tactics, around evidence-based rebuttal of opponents’ attacks in battle.",
-                                                "Watchout": "Student is having trouble with critiquing and defensive argumentation tactics in advanced battle."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                              "WatchoutA": "Student is having trouble with advanced critique training, based in the use of critical questions to attack opponent argument in battle.",
+                                              "Partial": "Student has completed advanced critique training, based on the evaluation and attack of opponents’ arguments via critical questions.",
+                                              "WatchoutB": "Student is having trouble with defensive argumentation tactics (evidence-based rebuttal of opponent attacks).",
+                                              "Full": "Student has completed advanced training in defensive argumentation tactics, around evidence-based rebuttal of opponents’ attacks in battle.",
+                                              "Watchout": "Student is having trouble with critiquing and defensive argumentation tactics in advanced battle."
                                             }
                                         }
                                     ]
@@ -300,13 +305,13 @@
                                             "description": "Use various types of reasoning as appropriate to the situation.",
                                             "alignment": "For dynamic application of reasoning, students’ ongoing response (via successful critique and rebuttal) during varied and changing battle scenarios is measured.",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
-                                                "WatchoutA": "Student is having trouble consistently evaluating the logic of opponents’ arguments, and successfully launching claim critique in battle.",
-                                                "Partial": "Throughout beginning and intermediate levels of play, student has consistently launched successful evaluation and critique of opponent arguments.",
-                                                "WatchoutB": "Student is having trouble consistently evaluating the logic of opponents’ arguments, and successfully launching claim critique in battle.",
-                                                "Full": "From beginning through advanced levels of play, student has consistently launched successful evaluation and critique of opponent arguments.",
-                                                "Watchout": "Student is having trouble consistently evaluating the logic of opponents’ arguments, and successfully launching claim critique in battle."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
+                                              "WatchoutA": "Student is having trouble consistently evaluating the logic of opponents’ arguments, and successfully launching claim critique in battle.",
+                                              "Partial": "Throughout beginning and intermediate levels of play, student has consistently launched successful evaluation and critique of opponent arguments.",
+                                              "WatchoutB": "Student is having trouble consistently evaluating the logic of opponents’ arguments, and successfully launching claim critique in battle.",
+                                              "Full": "From beginning through advanced levels of play, student has consistently launched successful evaluation and critique of opponent arguments.",
+                                              "Watchout": "Student is having trouble consistently evaluating the logic of opponents’ arguments, and successfully launching claim critique in battle."
                                             }
                                         },
                                         {
@@ -315,13 +320,13 @@
                                             "description": "Effectively analyze evidence, arguments, and claims; evaluate alternative points of view; synthesize information and arguments and draw evidence-based conclusions.",
                                             "alignment": "For full synthesis of argument evaluation skills, students perform advanced fusion of evidence identification, argument scheme, strong evidence-claim matching, and critique and rebuttal tactics in boss-level battle scenarios.",
                                             "progress": {
-                                                "Not-Started": "Standard progress not yet started.",
-                                                "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
-                                                "WatchoutA": "Student is having trouble identifying advanced evidence relevant to argument schemes.",
-                                                "Partial": "Student has successfully completed advanced levels of argument schemes and evidence selection.",
-                                                "WatchoutB": "At an advanced level, student is having trouble successfully critiquing opponents in battle.",
-                                                "Full": "Student has successfully completed advanced levels of evidence-claim pairing, and evaluation of argument (via advanced critique & rebuttal tactics) in battle.",
-                                                "Watchout": "Student is having trouble identifying advanced evidence and critiquing in battle."
+                                              "Not-Started": "Standard progress not yet started.",
+                                              "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
+                                              "WatchoutA": "Student is having trouble identifying advanced evidence relevant to argument schemes.",
+                                              "Partial": "Student has successfully completed advanced levels of argument schemes and evidence selection.",
+                                              "WatchoutB": "At an advanced level, student is having trouble successfully critiquing opponents in battle.",
+                                              "Full": "Student has successfully completed advanced levels of evidence-claim pairing, and evaluation of argument (via advanced critique & rebuttal tactics) in battle.",
+                                              "Watchout": "Student is having trouble identifying advanced evidence and critiquing in battle."
                                             }
                                         }
                                     ]
@@ -330,16 +335,17 @@
                         }
                     ]
                 }
-            }
+          }
         ]
     },
+
     "details": {
         "applink": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8",
         "buttons": [
             {
                 "name": "Getting Started Guide",
-                "type": "link",
                 "authRequired": false,
+                "type": "link",
                 "links": [
                     {
                         "target": "_blank",
@@ -370,12 +376,13 @@
                 "header": "Put your powers of persuasion to the ultimate test, on a whole new planet!",
                 "about": "Mars Generation One: Argubot Academy EDU is an engaging futuristic adventure game for iOS tablets. Aligned to the Common Core State Standards, the game brings STEM content into the English Language Arts classroom, and helps middle schoolers develop persuasion and reasoning skills. In Argubot Academy EDU, players take on the persona of a new student at Argubot Academy, the city’s middle school. There, each player will have to make very adult decisions about the building and governance of the city, for example: What type of food should the citizens cultivate? Players have to build sound arguments for every choice they make – but in this city on Mars, people settle their differences by equipping their robot assistants, called argubots, with claims and evidence, culminating in a robot battle of wits!",
                 "video": "https://vimeo.com/105931525",
-                "brochure": "https://s3-us-west-1.amazonaws.com/playfully-games/AA-1/brochures/AAEDU+brochure.pdf",
+                "brochure":"https://s3-us-west-1.amazonaws.com/playfully-games/AA-1/brochures/AAEDU+brochure.pdf",
                 "curriculum": [
                     "Addresses critical Common Core standards in persuasion and reasoned thinking – a cornerstone of the standards for English Language Arts",
                     "Promotes interest in STEM content while developing the literacy and leadership skills that are essential for any 21st century career",
                     "With input from experts in literacy at the National Writing Project, works well to introduce norms for classroom discussions, persuasive writing, and expository writing",
                     "Brings games into the ELA classroom to support Common Core Reading and Writing so that educators can make the most of their tablet hardware"
+
                 ],
                 "slideshow": [
                     {

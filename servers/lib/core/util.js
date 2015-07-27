@@ -89,17 +89,6 @@ function checkTimeStamp(time) {
     return (time < 10000000000) ? time * 1000 : time;
 }
 
-function dateString(){      // ISO 8601, local time
-    var dGMT = new Date();
-    var tzo = dGMT.getTimezoneOffset()*1000*60;
-    var dLoc = new Date(dGMT.getTime()-tzo);
-    return dLoc.toISOString().substring(0,19).replace(/T/," ");
-}
-
-function dateGmtString(){      // ISO 8601, GMT
-    return new Date().toISOString().substring(0,19).replace(/T/," ").concat(" GMT");
-}
-
 function getExpressLogger(options, express, stats){
     express.logger.token('remote-addy', function(req, res){
         if( req.headers.hasOwnProperty('x-forwarded-for') ){
@@ -209,8 +198,6 @@ module.exports = {
     GetExpressLogger:   getExpressLogger,
     GetTimeStamp:       getTimeStamp,
     CheckTimeStamp:     checkTimeStamp,
-    DateString:         dateString,
-    DateGMTString:      dateGmtString,
     BuildURI:           buildUri,
     CreateUUID:         createUUID,
     String: {

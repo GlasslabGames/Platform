@@ -6,8 +6,10 @@
         "maintenance": null,
         "shortName": "Argument Wars",
         "longName": "Argument Wars",
-        "grades": "6 - 10",
-        "subject": "Social Studies",
+        "price": "Premium",
+        "packages": "PC/Mac, Chromebook/Web Games",
+        "release": "live",
+        "releaseDate": "Aug 1, 2010",
         "type": "Browser",
         "platform": {
             "type": "Flash/Browser",
@@ -16,10 +18,8 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "price": "Premium",
-        "packages": "PC/Mac, Chromebook/Web Games",
-        "release": "live",
-        "releaseDate": "Aug 1, 2010",
+        "subject": "Social Studies",
+        "grades": "6 - 10",
         "shortDescription": "Use your reasoning powers to argue landmark Supreme Court cases!",
         "description": "Try out your persuasive abilities by arguing a real Supreme Court case. The other lawyer is your competition. Whoever uses the strongest arguments wins!",
         "developer": {
@@ -43,17 +43,13 @@
                 "invalid": "Coming Soon!"
             }
         },
-        "thumbnail": {
-            "small": "assets/thumb-game-AW-1.png",
-            "large": "assets/thumb-game-AW-1.jpg"
-        },
         "card": {
             "small": "assets/game-card-AW-1.jpg",
             "large": "assets/game-card-AW-1@2x.jpg"
         },
-        "banners": {
-            "product": "assets/game-banner-AW-1.jpg",
-            "reports": "assets/game-banner-AW-1.jpg"
+        "thumbnail": {
+            "small": "assets/thumb-game-AW-1.png",
+            "large": "assets/thumb-game-AW-1.jpg"
         },
         "play": {
             "type": "page",
@@ -66,6 +62,10 @@
                     "height": 640
                 }
             }
+        },
+        "banners": {
+            "product": "assets/game-banner-AW-1.jpg",
+            "reports": "assets/game-banner-AW-1.jpg"
         }
     },
     "assessment": [
@@ -131,7 +131,6 @@
                     "skinny": "assets/skinny-banner-AW-1.jpg",
                     "large": "assets/skinny-banner-AW-1@2x.jpg"
                 },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -198,7 +197,8 @@
                             ]
                         }
                     ]
-                }
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             },
             {
                 "id": "achievements",
@@ -211,7 +211,8 @@
                     "large": "assets/skinny-banner-AW-1@2x.jpg"
                 },
                 "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
-                "groups": []
+                "groups": [
+                ]
             }
         ]
     },
@@ -219,8 +220,8 @@
         "buttons": [
             {
                 "name": "Getting Started Guide",
-                "type": "link",
                 "authRequired": false,
+                "type": "link",
                 "links": [
                     {
                         "target": "_blank",
@@ -248,8 +249,8 @@
                 "title": "Product Description",
                 "header": "Use your reasoning powers to argue landmark Supreme Court cases!",
                 "about": "Argument Wars is an online game that lets players argue landmark Supreme Court cases. By finding and using the strongest support, students recreate historic legal cases while evaluating arguments and distinguishing between valid and invalid reasoning. Argument Wars brings gaming to the social studies classroom and lets students have fun while they learn about landmark cases and hone fundamental skills that are critical to success in meeting Common Core standards. ",
-                "video": "https://www.youtube.com/watch?v=kZF_s1jNBrM",
-                "brochure": "https://cdn.icivics.org/sites/default/files/uploads/ArgumentWars_Guide.pdf",
+                "video":"https://www.youtube.com/watch?v=kZF_s1jNBrM",
+                "brochure":"https://cdn.icivics.org/sites/default/files/uploads/ArgumentWars_Guide.pdf",
                 "curriculum": [
                     " Addresses Common Core standards related to evaluating arguments and assessing whether reasoning is valid",
                     " Offers an engaging way for students to interact with commonly-taught Supreme Court landmark cases",
@@ -370,8 +371,8 @@
             "lessonPlans": {
                 "order": 3,
                 "enabled": true,
-                "authRequired": true,
                 "id": "lessonPlans",
+                "authRequired": true,
                 "title": "Lesson Plans & Videos",
                 "list": [
                     {
@@ -413,11 +414,11 @@
             "research": {
                 "order": 4,
                 "enabled": true,
-                "authRequired": true,
                 "id": "research",
+                "authRequired": true,
                 "title": "Research",
                 "list": [
-                    {
+                  {
                         "category": "   ",
                         "list": [
                             {

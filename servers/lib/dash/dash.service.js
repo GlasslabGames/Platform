@@ -2,16 +2,15 @@
  * Dashboard Service Module
  *
  * Module dependencies:
- *  lodash           - https://github.com/lodash/lodash
- *  when             - https://github.com/cujojs/when
- *  is-my-json-valid - https://github.com/mafintosh/is-my-json-valid
+ *  lodash     - https://github.com/lodash/lodash
+ *  when       - https://github.com/cujojs/when
+ *
  */
 var fs      = require('fs');
 var path    = require('path');
 // Third-party libs
 var _       = require('lodash');
 var when    = require('when');
-var imjv    = require('is-my-json-valid');
 
 // load at runtime
 var Util;
@@ -47,8 +46,6 @@ function DashService(options, serviceManager){
         this.serviceManager = serviceManager;
 
         this._games = {};
-        this._schema = {};
-        this._validate = undefined;
 
 
     } catch(err){
@@ -62,13 +59,10 @@ DashService.prototype.start = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     this.telmStore.connect()
-        .then(function(){
-            // test connection to telemetry store
+        /*.then(function(){
+                // test connection to telemetry store
             return this._migrateGameFiles(true);
-        }.bind(this))
-        .then(function(){
-            return this._loadGameInfoSchema();
-        }.bind(this))
+        }.bind(this))*/
         .then(function(){
             return this._loadGameFiles();
         }.bind(this))
@@ -218,10 +212,6 @@ DashService.prototype._isValidGameId = function(gameId){
             }
             reject();
     }.bind(this) );
-};
-
-DashService.prototype.validateGameInfo = function(data) {
-    return this._validate(data);
 };
 
 // TODO: replace this with DB lookup, return promise
@@ -524,17 +514,6 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
     }.bind(this));
 };
 
-DashService.prototype._loadGameInfoSchema = function(){
-    console.log("_loadGameInfoSchema");
-    return when.promise(function(resolve, reject){
-        var schemaPath = path.join(__dirname, "_schema", "info.json");
-
-        this._schema = require(schemaPath);
-        this._validate = imjv(this._schema);
-        resolve();
-    }.bind(this));
-};
-
 // now builds up _games from couchbase gi and ga documents, instead of from json files
 // couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
 DashService.prototype._loadGameFiles = function(){
@@ -638,7 +617,6 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
 };
 
 DashService.prototype.buildGameForGamesObject = function(data, gameId){
-    this._games[gameId].raw = JSON.stringify(data, null, 4);
     this._games[gameId].info = data;
 
     //remove all enabled=false objects

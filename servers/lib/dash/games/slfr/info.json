@@ -16,9 +16,9 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
+        "release": "live",
         "price": "Premium",
         "packages": "PC/Mac, Chromebook/Web Games",
-        "release": "live",
         "releaseDate": "Feb 6, 2014",
         "shortDescription": "Slice through ice and lava to clear the mammoth’s path! We’ve teamed up with university education experts to craft an incredibly fun way to explore important fractions concepts. Discover the school version of this popular award-winning game!",
         "description": "Slice through ice and lava to clear the mammoth’s path! We’ve teamed up with university education experts to craft an incredibly fun way to explore important fractions concepts. Discover the school version of this popular award-winning game!",
@@ -225,7 +225,6 @@
                     "skinny": "assets/skinny-banner-SLFR.png",
                     "large": "assets/skinny-banner-SLFR@2x.png"
                 },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -318,13 +317,15 @@
                                     "id": "wo1",
                                     "title": "How to Play concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that establishes the basic game rules.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them about the role of different game elements. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "Bubble can hold objects and will pop when the player clicks on them.",
-                                            "Lava cancels out an equivalent amount of ice.",
-                                            "Chains are unbreakable."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "Bubble can hold objects and will pop when the player clicks on them.",
+                                                "Lava cancels out an equivalent amount of ice.",
+                                                "Chains are unbreakable."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -332,12 +333,14 @@
                                     "id": "wo2",
                                     "title": "Split Groups concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that establishes how to divide a group of blocks into equal parts.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them about the role of ice columns. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "The number of ice columns dictates in how many groups you have to divide lava into.",
-                                            "An ice column that is lowered under the ground level indicates it received too much lava."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "The number of ice columns dictates in how many groups you have to divide lava into.",
+                                                "An ice column that is lowered under the ground level indicates it received too much lava."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -345,13 +348,15 @@
                                     "id": "wo3",
                                     "title": "Slice Shapes concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that establishes how to divide various shapes into equal parts.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them what slicing strategies seem to work. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "The number of ice columns dictates in how many groups you have to divide lava into.",
-                                            "An ice column that is lowered under the ground level indicates it received too much lava.",
-                                            "Lava blocks don't need to have the same shape represent equal quantities of lava."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "The number of ice columns dictates in how many groups you have to divide lava into.",
+                                                "An ice column that is lowered under the ground level indicates it received too much lava.",
+                                                "Lava blocks don't need to have the same shape represent equal quantities of lava."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -359,13 +364,15 @@
                                     "id": "wo4",
                                     "title": "Shape Comparison concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that establishes how to compare parts to their whole.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them about the role of the white lines in the background. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "White lines represent the whole.",
-                                            "Smoke always hides lava behind it.",
-                                            "The symbol over smoke represents the lava part of the whole."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "White lines represent the whole.",
+                                                "Smoke always hides lava behind it.",
+                                                "The symbol over smoke represents the lava part of the whole."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -373,12 +380,14 @@
                                     "id": "wo5",
                                     "title": "Symbolic Numerator concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions through symbols.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them about how the symbols over the smoke changed. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "The number of red blocks over the black line represent the number of lava parts behind the smoke.",
-                                            "The shapes drawn in white under the black line represent the whole these parts are compared to. They indicate how that whole is divided."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "The number of red blocks over the black line represent the number of lava parts behind the smoke.",
+                                                "The shapes drawn in white under the black line represent the whole these parts are compared to. They indicate how that whole is divided."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -386,12 +395,14 @@
                                     "id": "wo6",
                                     "title": "Fractions Reading concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions by comparing it to a symbolic representation.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them about the numbers that appeared on ice blocks. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "The number over the black line represents the number of parts of a divided whole.",
-                                            "The number under the black line represents in how many parts the whole was divided."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "The number over the black line represents the number of parts of a divided whole.",
+                                                "The number under the black line represents in how many parts the whole was divided."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -399,9 +410,12 @@
                                     "id": "wo7",
                                     "title": "Denominator concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that explores different ways to divide a whole into equal parts.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them why some ways of dividing blocks don't seem to work.",
-                                        "actionPoints": [],
+                                        "actionPoints":
+                                            [
+                                            ],
                                         "summary": "See if they can figure out by themselves that a whole needs to be split in equal parts to nullify shapes with fractions on them."
                                     }
                                 },
@@ -409,12 +423,14 @@
                                     "id": "wo8",
                                     "title": "Numerator concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that explores the impact different numerators have on the quantity of ice or lava.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them how changing the numerator changes the quantity of ice or lava. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "A fraction 1/B is the quantity formed by 1 part when a whole is partitioned into B equal parts.",
-                                            "A fraction A/B is the quantity formed by a parts of size 1/B."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "A fraction 1/B is the quantity formed by 1 part when a whole is partitioned into B equal parts.",
+                                                "A fraction A/B is the quantity formed by a parts of size 1/B."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -422,9 +438,12 @@
                                     "id": "wo9",
                                     "title": "Pie Charts concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that explores ways to divide a shape that resembles a pie chart.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices.",
-                                        "actionPoints": [],
+                                        "actionPoints":
+                                            [
+                                            ],
                                         "summary": "Ask them about the different quantities they can make out of a circle."
                                     }
                                 },
@@ -432,12 +451,14 @@
                                     "id": "wo10",
                                     "title": "Size Comparison concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that explores how to compare fractions to each other to determine which represents the largest quantity and in what proportion.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them how they can determine the value of blocks that have a question mark on them. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "Doubling the numerator doubles the quantity (2/6 is two times bigger than 1/6).",
-                                            "Doubling the denominator divides the quantity in half (2/6 is half of 2/3)."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "Doubling the numerator doubles the quantity (2/6 is two times bigger than 1/6).",
+                                                "Doubling the denominator divides the quantity in half (2/6 is half of 2/3)."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -445,9 +466,12 @@
                                     "id": "wo11",
                                     "title": "Equivalent Fractions (A) concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that have students manipulate fractions with different denominators to find out which ones are equivalent.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them why blocks that have different numbers on them can be of the same quantity.",
-                                        "actionPoints": [],
+                                        "actionPoints":
+                                            [
+                                            ],
                                         "summary": "See if they can figure out by themselves that 1/3 is the same as 2/6, because splitting a shape in 3 and taking one piece is the same as splitting it in 6 and taking 2 pieces."
                                     }
                                 },
@@ -455,9 +479,12 @@
                                     "id": "wo12",
                                     "title": "Equivalent Fractions (B) concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that offers different contexts in which to use equivalent fractions.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them why blocks that have different numbers on them can be of the same quantity.",
-                                        "actionPoints": [],
+                                        "actionPoints":
+                                            [
+                                            ],
                                         "summary": "See if they can figure out by themselves that 1/3 is the same as 2/6, because splitting a shape in 3 and taking one piece is the same as splitting it in 6 and taking 2 pieces."
                                     }
                                 },
@@ -465,12 +492,14 @@
                                     "id": "wo13",
                                     "title": "Fractions Ordering concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that asks players to place fractions in ascending order.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them what determines where an ice block should be. See if they can figure out by themselves that:",
-                                        "actionPoints": [
-                                            "Fractions with the same denominator should be ordered by using the numerator in ascending order.",
-                                            "Fractions with the same numerator should be ordered by using the denominator in descending order."
-                                        ],
+                                        "actionPoints":
+                                            [
+                                                "Fractions with the same denominator should be ordered by using the numerator in ascending order.",
+                                                "Fractions with the same numerator should be ordered by using the denominator in descending order."
+                                            ],
                                         "summary": ""
                                     }
                                 },
@@ -478,9 +507,12 @@
                                     "id": "wo14",
                                     "title": "Question Marks concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that makes students deduct the value of the parts of a whole based on the information that is available to them.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them how they can deduct the quantity hidden behind question marks.",
-                                        "actionPoints": [],
+                                        "actionPoints":
+                                            [
+                                            ],
                                         "summary": "See if they can figure out by themselves that the total quantity of a whole shape is 1, therefore all parts in it need to add up to that total."
                                     }
                                 },
@@ -488,16 +520,20 @@
                                     "id": "wo15",
                                     "title": "Subtraction concept - retrying a level often",
                                     "description": "A student repeated a particular level often in a series that explores the notion of subtracting quantities from 1.",
-                                    "whatNow": {
+                                    "whatNow":
+                                    {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them how they can predict the quantity of ice or lava they will need to arrive at the desired fraction.",
-                                        "actionPoints": [],
+                                        "actionPoints":
+                                            [
+                                            ],
                                         "summary": "See if they can figure out by themselves by how much they should reduce ice or lava blocks before using them to nullify the blocks on the ground."
                                     }
                                 }
                             ]
                         }
                     ]
-                }
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
             }
         ]
     },
@@ -586,7 +622,7 @@
                         ]
                     },
                     {
-                        "category": "Common Core Math: Fractions",
+                      "category": "Common Core Math: Fractions",
                         "groups": [
                             {
                                 "name": "Denominator",

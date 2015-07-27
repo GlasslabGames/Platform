@@ -5,7 +5,6 @@
     },
     "services": {
         "port": 8001,
-        "portNonSSL": 8080,
         "session": {
             "secret": "keyboard kitty",
             "cookie": {
@@ -150,7 +149,6 @@
         "port": 8003
     },
     "research": {
-        "csvTimeout": {"minutes": 10},
         "dataChunkSize": 2000,
         "datastore": {
             "couchbase": {
@@ -158,10 +156,6 @@
                 "bucket":   "glasslab_gamedata",
                 "password": "glasslab"
             }
-        },
-        "cron": {
-            "time": "0 0 1 * * *", "//": "everyday at 1 am",
-            "enabled": false
         }
     },
     "lic":{
@@ -177,13 +171,7 @@
           "bucket":   "glasslab_dashdata",
           "password": "glasslab"
         }
-      },
-      "cron": {
-        "time": "0 */5 * * * *", "//": "every 5 min",
-        "protocol": "http",
-        "host": "localhost:8001"
-      },
-      "emailDaysBeforeExpiration": 7
+      }
     },
     "sdk": {
         "connect": "$host", "//": "$host is default, returns req.headers.host",

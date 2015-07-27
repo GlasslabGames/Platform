@@ -76,8 +76,7 @@ function getGameDetails(req, res){
     this.isValidGameId(gameId)
         .then(function(state){
             if(!state){
-                this.requestUtil.errorResponse(res, {key:"report.gameId.invalid"});
-                return;
+                return reject({key:"report.gameId.invalid"});
             }
             return this.getGameDetails(gameId);
         }.bind(this) )

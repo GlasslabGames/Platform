@@ -1,14 +1,5 @@
 #!/bin/bash
 
-
-# e.g.
-#
-# ./service_start.sh app-external "app-external.js"
-# ./service_start.sh app-internal "app-internal.js"
-# or
-# ./service_start.sh external
-# ./service_start.sh internal
-
 NAME=$1
 
 if [ -n "$2" ]; then
