@@ -1,5 +1,5 @@
 /**
- * LMS Service Module
+ * License Service Module
  *
  */
 
@@ -33,7 +33,8 @@ function LicService(options, serviceManager) {
         this.requestUtil = new Util.Request(this.options, Errors);
         this.myds        = new LicStore(this.options.lic.datastore.mysql);
         this.cbds        = new LicDataStore(this.options.lic.datastore.couchbase);
-        this.stats       = new Util.Stats(this.options, "LMS");
+        this.stats       = new Util.Stats(this.options, "Lic");
+        this.cron        = new CronJob(this.options.lic.cron.time, _cronTask.bind(this));
         this.serviceManager = serviceManager;
 
     } catch(err){
@@ -60,7 +61,7 @@ return when.promise(function(resolve, reject) {
         .then(function(){
             return this.cbds.connect();
         }.bind(this))
-            .then(function(){
+        .then(function(){
                 console.log("LicService: Couchbase DS Connected");
                 this.stats.increment("info", "Couchbase.Connect");
             }.bind(this),
@@ -68,10 +69,26 @@ return when.promise(function(resolve, reject) {
                 console.trace("LicService: Couchbase Error -", err);
                 this.stats.increment("error", "Couchbase.Connect");
             }.bind(this))
+        .then(function () {
+            this.cron.start();
+        }.bind(this))
         .then(resolve, reject);
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+function _cronTask() {
+    console.log('Lic cronTask start');
+    var mockReq = {
+        "user": {"role": "admin"},
+        "protocol": this.options.lic.cron.protocol || "http",
+        "headers": {"host": this.options.lic.cron.host || "localhost:8001"}
+    }, mockRes = {
+        writeHead: function(){ /* console.log('Lic cronTask mock res.writeHead()', arguments) */ },
+        end: function(){console.log('Lic cronTask response:', arguments)},
+    };
+    this.serviceManager.internalRoute('/api/v2/license/inspect', 'post', [mockReq, mockRes]);
 };
 
 LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){

@@ -16,8 +16,8 @@
                 "large": "assets/platform-ipad@2x.png"
             }
         },
-        "packages": "iPad Games",
         "price": "Premium",
+        "packages": "iPad Games",
         "release": "live",
         "releaseDate": "March 23, 2015",
         "shortDescription": "Water Bears EDU",
@@ -137,6 +137,7 @@
                     "skinny": "assets/skinny-banner-WPLUS.png",
                     "large": "assets/skinny-banner-WPLUS@2x.png"
                 },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -184,16 +185,14 @@
                                     "id": "wo1",
                                     "title": "Stuck on Pack 1",
                                     "description": "Student has spent an irregular amount of time on a pack 1 level. Consider looking into it.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
-                                        "actionPoints":
-                                            [
-                                                "Color and number of Water Bears",
-                                                "How can they create those colors with the given water flows?",
-                                                "Where are the Water Bears?",
-                                                "How can they reach the Water Bears with the given pieces?"
-                                            ],
+                                        "actionPoints": [
+                                            "Color and number of Water Bears",
+                                            "How can they create those colors with the given water flows?",
+                                            "Where are the Water Bears?",
+                                            "How can they reach the Water Bears with the given pieces?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -201,16 +200,14 @@
                                     "id": "wo2",
                                     "title": "Stuck on Pack 2",
                                     "description": "Student has spent an irregular amount of time on a pack 2 level. Consider looking into it.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
-                                        "actionPoints":
-                                            [
-                                                "Color and number of Water Bears",
-                                                "How can they create those colors with the given water flows?",
-                                                "Where are the Water Bears?",
-                                                "How can they reach the Water Bears with the given pieces?"
-                                            ],
+                                        "actionPoints": [
+                                            "Color and number of Water Bears",
+                                            "How can they create those colors with the given water flows?",
+                                            "Where are the Water Bears?",
+                                            "How can they reach the Water Bears with the given pieces?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -218,16 +215,14 @@
                                     "id": "wo3",
                                     "title": "Stuck on Pack 3",
                                     "description": "Student has spent an irregular amount of time on a pack 3 level. Consider looking into it.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
-                                        "actionPoints":
-                                            [
-                                                "Color and number of Water Bears",
-                                                "How can they create those colors with the given water flows?",
-                                                "Where are the Water Bears?",
-                                                "How can they reach the Water Bears with the given pieces?"
-                                            ],
+                                        "actionPoints": [
+                                            "Color and number of Water Bears",
+                                            "How can they create those colors with the given water flows?",
+                                            "Where are the Water Bears?",
+                                            "How can they reach the Water Bears with the given pieces?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -235,16 +230,14 @@
                                     "id": "wo4",
                                     "title": "Stuck on Pack 4",
                                     "description": "Student has spent an irregular amount of time on a pack 4 level. Consider looking into it.",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Find out if the student is currently stuck in a level. If so, investigate what it is about that level that the student finds challenging. Help the student find their way through the level by guiding them through the thought process that leads to the solution. The student should consider:",
-                                        "actionPoints":
-                                            [
-                                                "Color and number of Water Bears",
-                                                "How can they create those colors with the given water flows?",
-                                                "Where are the Water Bears?",
-                                                "How can they reach the Water Bears with the given pieces?"
-                                            ],
+                                        "actionPoints": [
+                                            "Color and number of Water Bears",
+                                            "How can they create those colors with the given water flows?",
+                                            "Where are the Water Bears?",
+                                            "How can they reach the Water Bears with the given pieces?"
+                                        ],
                                         "summary": ""
                                     }
                                 },
@@ -252,22 +245,19 @@
                                     "id": "wo5",
                                     "title": "Avoiding Challenges",
                                     "description": "Student is doing great on the base levels, but they haven't completed any challenges yet. Encourage them to try one!",
-                                    "whatNow":
-                                    {
+                                    "whatNow": {
                                         "intro": "Ask the student why they haven't tried any challenge levels yet. It's possible that they have tried one but were unable to finish it.",
-                                        "actionPoints":
-                                            [
-                                                "Encourage them to try the first challenge level of Pack 1, and help them analyze the level if necessary",
-                                                "Remind them that they can jump around challenge levels, so they can try different ones until they find one  they like"
-                                            ],
+                                        "actionPoints": [
+                                            "Encourage them to try the first challenge level of Pack 1, and help them analyze the level if necessary",
+                                            "Remind them that they can jump around challenge levels, so they can try different ones until they find one  they like"
+                                        ],
                                         "summary": ""
                                     }
                                 }
                             ]
                         }
                     ]
-                },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+                }
             }
         ]
     },

@@ -1,6 +1,16 @@
+// if http: ...
 var http = require('http');
 var hostname = "stage.glgames.org";
 port = 80;
+
+// GLAS-77  VVVVVV
+/*
+// if https: ...
+var http = require('https');
+var hostname = "stage.glgames.org";
+port = 443;
+*/
+
 
 //hostname = "localhost";
 //port = 8000;
@@ -172,6 +182,7 @@ function validateCode(code, cb)
     post_options.method = "POST";
     post_options.path = "/api/code/valid";
     post_options.headers['Content-Length'] = post_data.length;
+
     var post_validate = http.request(post_options, function(res) {
         res.setEncoding('utf8');
         var data = "";
@@ -204,6 +215,7 @@ function createUsers(associatedId, username, startId, numOfUsers) {
         post_options.method = "POST";
         post_options.headers['Content-Length'] = post_data.length;
         post_options.path = "/api/user/register";
+
         var post_reg = http.request(post_options, function(res) {
             res.setEncoding('utf8');
             var data = "";

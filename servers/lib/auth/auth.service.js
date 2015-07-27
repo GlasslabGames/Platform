@@ -13,7 +13,7 @@
  *
  *
  */
-var http       = require('http');
+
 var path       = require('path');
 // Third-party libs
 var _          = require('lodash');
