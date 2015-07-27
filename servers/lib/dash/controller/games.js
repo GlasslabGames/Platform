@@ -18,6 +18,8 @@ module.exports = {
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
     getDeveloperGamesInfo:           getDeveloperGamesInfo,
+    getDeveloperGamesInfoSchema:     getDeveloperGamesInfoSchema,
+    getDeveloperGameInfo:            getDeveloperGameInfo,
     updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
 
@@ -568,6 +570,19 @@ function getDeveloperGamesInfo(req, res){
         }.bind(this));
 }
 
+function getDeveloperGamesInfoSchema(req, res){
+    this.requestUtil.jsonResponse(res, this._schema);
+}
+
+function getDeveloperGameInfo(req, res) {
+    var gameId = req.params.gameId;
+    if(this._games[gameId] && this._games[gameId].raw) {
+        this.requestUtil.jsonResponse(res, this._games[gameId].raw);
+    } else {
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"});
+    }
+}
+
 function updateDeveloperGameInfo(req, res){
     var userId = req.user.id;
     var gameId = req.params.gameId;
@@ -575,49 +590,33 @@ function updateDeveloperGameInfo(req, res){
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
-    var data = req.body.data;
+    try {
+        var data = JSON.parse(req.body.jsonStr);
+    } catch(err) {
 
-    if(!data.basic){
-        this.requestUtil.errorResponse(res, {key:"dash.info.missing"},401);
+    }
+
+    if (!this.validateGameInfo(data)) {
+        this.requestUtil.errorResponse(res, {key:"dash.data.invalid"},500);
         return;
     }
-    var infoData;
+
     getDeveloperGameIds.call(this,userId)
         .then(function(gameIds){
             if(gameIds[gameId]){
-                return this.telmStore.getGameInformation(gameId, true);
+                return _writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
             }
             return "no access"
         }.bind(this))
-        .then(function(results){
-            if(typeof results === "string"){
-                return results;
-            }
-            var basic = results.basic;
-            var details = results.details;
-            if(!(basic && details)){
-                return "malformed object";
-            }
-            _(basic).forEach(function(value, property){
-                basic[property] = data[property];
-            });
-            _(details).forEach(function(value, property){
-                details[property] = data[property];
-            });
-            results.basic = basic;
-            results.details = details;
-            infoData = results;
-            return _writeToInfoJSONFiles(gameId, JSON.stringify(infoData, null, 4));
-        })
         .then(function(status){
             if(typeof status === "string"){
                 return status;
             }
-            return this.telmStore.updateGameInformation(gameId, infoData);
+            return this.telmStore.updateGameInformation(gameId, data);
         }.bind(this))
         .then(function(status){
             if(status !== "no object" && status !== "no access" && status !== "malformed object"){
-                this.buildGameForGamesObject(infoData, gameId);
+                this.buildGameForGamesObject(data, gameId);
                 res.end('{"update":"complete"}');
             } else if(status === "malformed object"){
                 this.requestUtil.errorResponse(res, {key:"dash.info.malformed"});
