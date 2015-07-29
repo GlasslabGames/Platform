@@ -583,7 +583,7 @@ ServiceManager.prototype.start = function(port) {
                                 next();
                             }else{
                                 var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
-                                console.log("  ****** req.connection is not encrypted, rediriecting to " + newUrl + "  ******  ");
+                                console.log("  ****** req.connection is not encrypted, redirecting to " + newUrl + "  ******  ");
 
                                 res.redirect(303, newUrl);
                                 //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
