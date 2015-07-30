@@ -11,7 +11,9 @@ var Admin          = require('./lib/admin/admin.js');
 var Research       = require('./lib/research/research.js');
 
 var manager = new ServiceManager("~/hydra.config.json");
+
 manager.setRouteMap('../routes.external.map.js');
+//manager.setPort(8001);
 
 // add all services
 manager.add( Auth );
@@ -23,3 +25,4 @@ manager.add( Admin );
 manager.add( Research );
 
 manager.start();
+//manager.start(8001);
