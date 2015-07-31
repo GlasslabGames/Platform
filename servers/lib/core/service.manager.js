@@ -653,6 +653,7 @@ ServiceManager.prototype.start = function(port) {
                             // this.stats.increment('info', 'server_started_any');
                         }.bind(this));
 
+                        httpServerPort = 8001;
                     }
 
 
@@ -681,10 +682,10 @@ ServiceManager.prototype.start = function(port) {
                     // 8002  app_internal
                     // 8003  Assessment
 
-                    if(8002 != serverPort && 8003 != serverPort){
-                        httpServerPort = 8001;
-                        // todo - use getNodeName()
-                    }
+// if(8002 != serverPort && 8003 != serverPort){
+//     httpServerPort = 8001;
+//     // todo - use getNodeName()
+// }
 
                     http.createServer(this.app).listen(httpServerPort, function createServer(){
                         this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
