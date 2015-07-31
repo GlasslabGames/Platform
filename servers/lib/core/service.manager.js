@@ -554,7 +554,7 @@ ServiceManager.prototype.start = function(port) {
                     //
                     // 8001  app_external
                     // 8002  app_internal
-                    // 8003  ?
+                    // 8003  Assessment
 
                     // app-internal or app-external ?
                     if( serverPort && 8002 == serverPort){  // internal server
@@ -577,9 +577,7 @@ ServiceManager.prototype.start = function(port) {
 
                         // external server
 
-                        // first route - check for SSL
-                        console.log(' The first route checks for non-SSL requests. ');
-                        console.log(' ');
+                        console.log('SSL Redirect Gate - The first route checks for non-SSL requests. ');
 
                         this.app.all("*", function(req, res, next) {
                             var host = req.get("host");
@@ -587,6 +585,11 @@ ServiceManager.prototype.start = function(port) {
                                 console.log("  ****** req.host missing, sending 403 error  ******  ");
                                 res.send(403);
                                 return;
+                            }
+
+                            var forwProto = req.get('X-Forwarded-Proto');
+                            if(forwProto){
+                                console.log('  --  req protocol = '+forwProto);
                             }
 
                             if(req.connection.encrypted){
@@ -615,70 +618,75 @@ ServiceManager.prototype.start = function(port) {
                     var sslServerPort = 8043;
                     var httpServerPort = serverPort;
 
-                    // start https server
-                    console.log(Util.DateGMTString()+' Starting Server on port', sslServerPort, "...");
+                    console.log(Util.DateGMTString()+' Starting Server ... ');
 
-                    console.log(" ");
-                    console.log("        ----------------------------------------------------- ");
-                    console.log("        (decoded and forwarded by ELB) ");
-                    console.log(" ");
-                    console.log("        8001 http  <- ELB <- 443  https     // secure web site - not enforced");
-                    console.log("        -----------------------------------------------------   ");
-                    console.log("        pass through ... (forwarded but NOT decrpyted by ELB)   ");
-                    console.log("                                                                ");
-                    console.log("        8001 http  <- ELB <- 80   http      // insecure web site ");
-                    console.log("        8001 http  <- ELB <- 8080 http      //                   ");
-                    console.log("                                                                ");
-                    console.log("        8001 http  <- ELB <- 8001 http          // these can be blocked ");
-                    console.log("        8002 http  <- ELB <- 8002 http          // at the ELB if external access ");
-                    console.log("        8003 http  <- ELB <- 8003 http          // is not allowed. ");
-                    console.log(" ");
-                    console.log("        8043 https <- ELB <- 8043 https         // for new dev "); 
-                    console.log("        ----------------------------------------------------- ");
-                    console.log(" " );
+                    console.log('        ----------------------------------------------------- ');
+                    console.log('        (decoded and forwarded by ELB) ');
+                    console.log(' ');
+                    console.log('        8001 http  <- ELB <- 443  https     // secure web site - not enforced');
+                    console.log('        -----------------------------------------------------    ');
+                    console.log('        pass through ... (forwarded but NOT decrpyted by ELB)    ');
+                    console.log('                                                                 ');
+                    console.log('        8001 http  <- ELB <- 80   http      // insecure web site ');
+                    console.log('        8001 http  <- ELB <- 8080 http      //                   ');
+                    console.log('                                                                 ');
+                    console.log('        8001 http  <- ELB <- 8001 http          // these can be blocked ');
+                    console.log('        8002 http  <- ELB <- 8002 http          // at the ELB if external access ');
+                    console.log('        8003 http  <- ELB <- 8003 http          // is not allowed. ');
+                    console.log(' ');
+                    console.log('        8043 https <- ELB <- 8043 https         // for new dev '); 
+                    console.log('        ----------------------------------------------------- ');
 
+                    if(serverPort && 8001 == serverPort){
 
-                if(serverPort && 8001 == serverPort){
+                        // don't expect much traffic here yet
 
-                    // don't expect much traffic here yet
+                        // start https server
+                        console.log(Util.DateGMTString()+' attempting to attach port '+sslServerPort+' (https) ... ');
 
-                    // https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
-                    https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
-                        console.log('Server listening on port ' + sslServerPort+"  (https) ");
-                        this.stats.increment("info", "server_started_port_"+sslServerPort);
-                        // this.stats.increment("info", "server_started_any");
-                    }.bind(this));
+                        // https.createServer(TlsOptions, this.app).listen(serverPort, function createServer(){
+                        https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
+                            console.log('                        listening on port '+sslServerPort+' (https). ');
+                            this.stats.increment('info', 'server_started_port_'+sslServerPort);
+                            // this.stats.increment('info', 'server_started_any');
+                        }.bind(this));
 
-                }
-
+                    }
 
 
                     // if( serverPort && 8002 == serverPort)
                     // {
                     //     // internal server node
                     // }else{
-                        // external server node -- will also listen on ports 80 and 8080 for http: requests.
-
-                        // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
-
-
-
-                        // 8001  app_external
-                        // 8002  app_internal
-                        // 8003  ?
-
-                        http.createServer(this.app).listen(httpServerPort, function createServer(){
-                            this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-    //                      console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
-    //
-    console.log('       listening on port ' + httpServerPort + '  ( for now http:// will not be redirected ). ');
-    //
-
-                        }.bind(this));
+                    //
+                    //     // external server node -- will also listen on ports 80 and 8080 for http: requests.
+                    //
+                    //     var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
+                    //
+                    //     http.createServer(this.app).listen(httpServerPort, function createServer(){
+                    //         this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                    //         console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
+                    //
+                    //     }.bind(this));
                     // }
 
-                    console.log('---------------------------------------------');
-                    console.log('');
+
+                    // external server node -- will also listen on ports 80 and 8080 for http: requests.
+
+                    // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
+
+                    // 8001  app_external
+                    // 8002  app_internal
+                    // 8003  Assessment
+
+                    http.createServer(this.app).listen(httpServerPort, function createServer(){
+                        this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                    //  console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
+                    //
+                        console.log('                        listening on port '+httpServerPort+'  -- for now http will not be redirected. ');
+                        console.log('---------------------------------------------------------------------------------------');
+
+                    }.bind(this));
 
                 }.bind(this))
 
