@@ -6,3 +6,4 @@ servers/loadtest/locustfile.pyc
 servers/loadtest/reports/*
 servers/supertest/results/*.json
 servers/supertest/results/*.zip
+npm-debug.log
