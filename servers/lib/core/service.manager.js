@@ -681,7 +681,7 @@ ServiceManager.prototype.start = function(port) {
                     // 8002  app_internal
                     // 8003  Assessment
 
-                    if(8002 != httpServerPort && 8003 != httpServerPort){
+                    if(8002 != serverPort && 8003 != serverPort){
                         httpServerPort = 8001;
                         // todo - use getNodeName()
                     }
