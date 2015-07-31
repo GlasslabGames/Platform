@@ -637,7 +637,9 @@ ServiceManager.prototype.start = function(port) {
                     console.log('        8043 https <- ELB <- 8043 https         // for new dev '); 
                     console.log('        ----------------------------------------------------- ');
 
-                    if(serverPort && 8001 == serverPort){
+
+                    // if(serverPort && 8001 == serverPort){
+                    if(serverPort && 8002 != serverPort && 8003 != serverPort){
 
                         // don't expect much traffic here yet
 
@@ -679,10 +681,14 @@ ServiceManager.prototype.start = function(port) {
                     // 8002  app_internal
                     // 8003  Assessment
 
+                    if(8002 != httpServerPort && 8003 != httpServerPort){
+                        httpServerPort = 8001;
+                        // todo - use getNodeName()
+                    }
+
                     http.createServer(this.app).listen(httpServerPort, function createServer(){
                         this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-                    //  console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
-                    //
+
                         console.log('                        listening on port '+httpServerPort+'  -- for now http will not be redirected. ');
                         console.log('---------------------------------------------------------------------------------------');
 
