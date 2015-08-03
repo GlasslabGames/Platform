@@ -704,6 +704,14 @@
                         "category": "Research Articles",
                         "list": [
                             {
+                                "name": "Use Your Brainz Research Brief",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/research/Brainz+Research+Brief+v3.pdf"
+                            },
+                            {
+                                "name": "Use Your Brainz Validation Study Results",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/research/Use+Your+Brainz+Validation+Study+Results+v2.pdf"
+                            },
+                            {
                                 "name": "Best Practices and Lessons Learned of Stealth Assessment",
                                 "link": "http://myweb.fsu.edu/vshute/pdf/IJGCMS.pdf"
                             },
