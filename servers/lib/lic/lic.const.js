@@ -317,6 +317,41 @@ module.exports = {
             "educatorSeats": 6,
             "discount": 0,
             "seatId": "115"
+        },
+        "150": {
+            "size": "Custom",
+            "studentSeats": 150,
+            "educatorSeats": 15,
+            "discount": 0,
+            "seatId": "150"
+        },
+        "200": {
+            "size": "Custom",
+            "studentSeats": 200,
+            "educatorSeats": 15,
+            "discount": 0,
+            "seatId": "200"
+        },
+        "250": {
+            "size": "Custom",
+            "studentSeats": 250,
+            "educatorSeats": 15,
+            "discount": 0,
+            "seatId": "250"
+        },
+        "300": {
+            "size": "Custom",
+            "studentSeats": 300,
+            "educatorSeats": 15,
+            "discount": 0,
+            "seatId": "300"
+        },
+        "400": {
+            "size": "Custom",
+            "studentSeats": 400,
+            "educatorSeats": 15,
+            "discount": 0,
+            "seatId": "400"
         }
     },
     "stripeTestCard": {
