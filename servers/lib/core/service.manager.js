@@ -529,6 +529,7 @@ ServiceManager.prototype.start = function(port) {
         .then(null,function(err) {
             console.error("ServiceManager: Failed to Load Version File -", err);
         });
+
     // start express (session store,...), then start services
     this.initExpress()
         .then(function(){
@@ -581,7 +582,12 @@ ServiceManager.prototype.start = function(port) {
 
                         // external server
 
-                        console.log('SSL Redirect Gate - The first route checks for non-SSL requests. ');
+                        // console.log('SSL Redirect Gate - The first route checks request encryption status. ');
+                        // console.log('                    It rejects [403] any request with no "host" in the header ');
+                        // console.log('                    and may redirect [303] unencrypted requests. ');
+
+                        console.log('SSL Redirect Gate - The first route checks request encryption status. ');
+                        console.log('                    It rejects [403] any request with no "host" in the header. ');
 
                         this.app.all("*", function(req, res, next) {
                             var host = req.get("host");
@@ -602,10 +608,14 @@ ServiceManager.prototype.start = function(port) {
                             }else{
                                 var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
 
-    console.log("  ****** WARNING - req.connection is not encrypted but will be allowed for now... ******  ");
+                                // console.log("  ****** WARNING - req.connection is not encrypted ... ******  ");
+                                // console.log("  ****** WARNING -     but will be allowed for now ... ******  ");
+
+                                console.log("Connection status - The http request is not encrypted. ");
     next();
 
-                            //  console.log("  ****** req.connection is not encrypted, rediriecting to " + newUrl + "  ******  ");
+                                //  console.log("  ****** req.connection is not encrypted,  ******  ");
+                                //  console.log("  ******   rediriecting to " + newUrl + "  ******  ");
                             //
                             //  res.redirect(303, newUrl);
                                 //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
