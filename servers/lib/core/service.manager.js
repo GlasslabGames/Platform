@@ -559,7 +559,7 @@ ServiceManager.prototype.start = function(port) {
                     //
                     // 8001  app_external
                     // 8002  app_internal
-                    // 8003  Assessment
+                    // 8003  app_assessment     (different source)
 
                     // app-internal or app-external ?
                     if( serverPort && 8002 == serverPort){  // internal server
@@ -652,8 +652,7 @@ ServiceManager.prototype.start = function(port) {
                     console.log('        ----------------------------------------------------- ');
 
 
-                    // if(serverPort && 8001 == serverPort){
-                    if(serverPort && 8002 != serverPort && 8003 != serverPort){
+                    if(this.options.services.name && 'app-external' == this.options.services.name){
 
                         // don't expect much traffic here yet
 
@@ -694,7 +693,7 @@ ServiceManager.prototype.start = function(port) {
 
                     // 8001  app_external
                     // 8002  app_internal
-                    // 8003  Assessment
+                    // 8003  app_assessment     (different source)
 
 // if(8002 != serverPort && 8003 != serverPort){
 //     httpServerPort = 8001;
@@ -704,7 +703,7 @@ ServiceManager.prototype.start = function(port) {
                     http.createServer(this.app).listen(httpServerPort, function createServer(){
                         this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
 
-                        console.log('                        listening on port '+httpServerPort+'  -- for now http will not be redirected. ');
+                        console.log('                        listening on port '+httpServerPort+' http ');
                         console.log('---------------------------------------------------------------------------------------');
 
                     }.bind(this));
