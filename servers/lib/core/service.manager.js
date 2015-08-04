@@ -703,7 +703,7 @@ ServiceManager.prototype.start = function(port) {
                     http.createServer(this.app).listen(httpServerPort, function createServer(){
                         this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
 
-                        console.log('                        listening on port '+httpServerPort+' http ');
+                        console.log('                        listening on port '+httpServerPort+' (http). ');
                         console.log('---------------------------------------------------------------------------------------');
 
                     }.bind(this));
