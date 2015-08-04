@@ -168,6 +168,10 @@ ServiceManager.prototype.setRouteMap = function(str) {
     this.routesMap = require(str);
 };
 
+ServiceManager.prototype.setName = function(name) {
+    this.options.services.name = name;
+};
+
 ServiceManager.prototype.setPort = function(port) {
     this.options.services.port = port;
 };
