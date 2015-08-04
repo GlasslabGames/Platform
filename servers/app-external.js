@@ -13,6 +13,7 @@ var Research       = require('./lib/research/research.js');
 var manager = new ServiceManager("~/hydra.config.json");
 
 manager.setRouteMap('../routes.external.map.js');
+manager.setName('app-external');
 //manager.setPort(8001);
 
 // add all services
