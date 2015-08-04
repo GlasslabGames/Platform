@@ -597,10 +597,7 @@ ServiceManager.prototype.start = function(port) {
                                 return;
                             }
 
-                            var forwProto = req.get('X-Forwarded-Proto');
-                            if(forwProto){
-                                console.log('  --  req protocol = '+forwProto);
-                            }
+                            // var forwProto = req.get('X-Forwarded-Proto');
 
                             if(req.connection.encrypted){
                                 //  console.log(' req.connection.encrypted - check next route ... ');
