@@ -294,7 +294,48 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         this.stats.increment("info", "Route.Static.Root");
 
         var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
-        res.sendfile( fullPath );
+
+        if(req.secure){
+            res.sendfile( fullPath );
+
+            // console.log('****** https request for "/" was encrypted.  ( from setupDefaultRoutes ) ****** ');
+
+        }else{
+
+            // console.log('######## insecure http request for "/" ...  ( from setupDefaultRoutes() ) ');
+
+            var host = req.get("host");
+
+            if (!host) {
+                console.log('                      ');
+                console.log('  *   *  *****  ***** ');
+                console.log('  *   *  *   *      * ');
+                console.log('  *****  *   *  ***** ');
+                console.log('      *  *   *      * ');
+                console.log('      *  *****  ***** ');
+                console.log('                      ');
+
+                console.log('****** Request arrived with no "host" in header -- sending 403 error. ****** ');
+                res.send(403);
+                return;
+            }
+
+            var sslServerPort = this.sslServerPort || 443;
+            var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+
+
+            // Test - Turn off this redirect to test catching static requests and file gets.
+            //
+            // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
+            // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
+            // res.sendfile( fullPath );
+
+
+            // Redirecting this request also causes all the file gest for this page to redirect.
+            console.log('****** rediriecting "/" http request to ' + newUrl + ' ****** ');
+            res.redirect(303, newUrl);
+
+        }
     }.bind(this));
 
     // all others -> DEFAULT
@@ -313,17 +354,42 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
 
             var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
 
-            if(req.connection.encrypted){
-                //  console.log(' https ok ... no need to redirect ...');
+            if(req.secure){
+                // console.log('****** default route -- connection is encryped -- ');
                 res.sendfile( fullPath );
             }else{
-                // console.log(' ');
-                // console.log(' * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ');
-                // console.log('    ERROR -    HTTP request was not redirected. ');
-                // console.log(' * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ');
 
-    // allow non secure web traffic to pass for now
-    res.sendfile( fullPath );
+                // console.log('****** default route -- connection is NOT encryped -- ');
+
+                var host = req.get("host");
+
+                if (!host) {
+                    console.log("  ****** req.host missing, sending 403 error  ******  ");
+                    res.send(403);
+                    return;
+                }
+
+                // var serverPort = port || this.app.get('port');
+                //
+                // 8001  app_external
+                // 8002  app_internal
+                // 8003  app_assessment     (different source)
+
+                var sslServerPort = this.sslServerPort || 443;
+
+                var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+
+    // console.log("  ****** fake rediriecting http request to " + newUrl + "  ******  ");
+    // res.sendfile( fullPath );
+
+                // can't tell from the logs that this even works --
+                // says it's encrypted but logs an http://sssss:8001 path
+                //
+                console.log("  ****** req.connection is not encrypted,  ******  ");
+                console.log("  ******    rediriecting http request to " + newUrl + "  ******  ");
+                //
+                res.redirect(303, newUrl);
+                //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
 
             }
 
@@ -338,6 +404,7 @@ ServiceManager.prototype.setupStaticRoutes = function() {
 
         _.forEach(s.routes, function(route) {
             var file = "";
+
             if(s.file == 'index') {
                 file = this.routesMap.index;
             } else {
@@ -353,6 +420,9 @@ ServiceManager.prototype.setupStaticRoutes = function() {
 
                     // auth
                     if( req.isAuthenticated() ) {
+
+    // console.log("SSSSSSSSSSSSSSSS  AAAAAAAA  Static Route - Auth required ");
+
                         this.stats.increment("info", "Route.Auth.Ok");
                         res.sendfile( fullPath );
                     } else {
@@ -369,7 +439,14 @@ ServiceManager.prototype.setupStaticRoutes = function() {
 
             } else {
                 console.log("Static Route -", route, "->", file);
+
                 this.app.get(route, function(req, res) {
+
+    // // wont ever happen - no un-auth static routes in table
+    // console.log("SSSSSSSSSSSSSSSS  NA-NA-NA-NA  Static Route - no auth ");
+    // console.log('fullpath = '+fullpath);
+
+
                     res.sendfile( fullPath );
                 }.bind(this));
             }
@@ -599,21 +676,21 @@ ServiceManager.prototype.start = function(port) {
 
                             // var forwProto = req.get('X-Forwarded-Proto');
 
-                            if(req.connection.encrypted){
-                                //  console.log(' req.connection.encrypted - check next route ... ');
+                            if(req.secure){
+                                // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
                                 next();
                             }else{
+
+                                // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
+
                                 var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
+                             // var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
 
-                                // console.log("  ****** WARNING - req.connection is not encrypted ... ******  ");
-                                // console.log("  ****** WARNING -     but will be allowed for now ... ******  ");
-
-                                console.log("Connection status - The http request is not encrypted. ");
-    next();
+                                next();
 
                                 //  console.log("  ****** req.connection is not encrypted,  ******  ");
                                 //  console.log("  ******   rediriecting to " + newUrl + "  ******  ");
-                            //
+                                //
                             //  res.redirect(303, newUrl);
                                 //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
                             }
@@ -661,30 +738,11 @@ ServiceManager.prototype.start = function(port) {
                             console.log('                        listening on port '+sslServerPort+' (https). ');
                             this.stats.increment('info', 'server_started_port_'+sslServerPort);
                             // this.stats.increment('info', 'server_started_any');
+                            this.sslServerPort = sslServerPort;
                         }.bind(this));
 
                         httpServerPort = 8001;
                     }
-
-
-                    // if( serverPort && 8002 == serverPort)
-                    // {
-                    //     // internal server node
-                    // }else{
-                    //
-                    //     // external server node -- will also listen on ports 80 and 8080 for http: requests.
-                    //
-                    //     var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
-                    //
-                    //     http.createServer(this.app).listen(httpServerPort, function createServer(){
-                    //         this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-                    //         console.log('       listening on port ' + httpServerPort + '  ( redirect any http:// request to https:// ). ');
-                    //
-                    //     }.bind(this));
-                    // }
-
-
-                    // external server node -- will also listen on ports 80 and 8080 for http: requests.
 
                     // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
 
@@ -692,17 +750,11 @@ ServiceManager.prototype.start = function(port) {
                     // 8002  app_internal
                     // 8003  app_assessment     (different source)
 
-// if(8002 != serverPort && 8003 != serverPort){
-//     httpServerPort = 8001;
-//     // todo - use getNodeName()
-// }
-
                     http.createServer(this.app).listen(httpServerPort, function createServer(){
+                        this.httpServerPort = httpServerPort;
                         this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-
                         console.log('                        listening on port '+httpServerPort+' (http). ');
                         console.log('---------------------------------------------------------------------------------------');
-
                     }.bind(this));
 
                 }.bind(this))
