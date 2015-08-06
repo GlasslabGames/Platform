@@ -61,9 +61,17 @@ function ServiceManager(configFiles){
         configFiles = [configFiles];
     }
 
-    // always add the root config first
-    configFiles.unshift("./config.json");   // [ './config.json', '~/hydra.config.json' ]
+    // Add the base config (./config.json from Platform/servers/) at the front of the list.
+    // Values in ./config.json will be replaced by newer values in eg. ~/hydra.config.json.
+    // [ './config.json', '~/hydra.config.json' ]
+    configFiles.unshift("./config.json");
     this.options = config.loadSync(configFiles);
+
+    console.log('Configs loaded');
+    console.log('    env: ' + this.options.env);
+    console.log('    services.port: ' + this.options.services.port);
+    console.log('    services.portNonSSL: ' + this.options.services.portNonSSL);
+
 
     if(!this.options.services) {
         this.options.services = {};
