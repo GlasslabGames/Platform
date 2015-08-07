@@ -344,8 +344,8 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
             var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
 
 
-            // safe migration for release-candidate to develop branch
-            res.sendfile( fullPath );
+    // safe migration for release-candidate to develop branch
+    res.sendfile( fullPath );
 
             // Test - Turn off this redirect to test catching static requests and file gets.
             //
@@ -756,11 +756,11 @@ ServiceManager.prototype.start = function(port) {
 
                     // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
 
-                    var sslServerPort = 8043;
-                    var sslServerPort_02 = 1943;
-
                     var httpServerPort = serverPort;    // 8001 or 8002
                     var httpServerPort_02 = 8080;
+
+                    var sslServerPort = 8043;
+                    var sslServerPort_02 = 1943;
 
                     console.log(Util.DateGMTString()+' attaching ports ... ');
 
@@ -792,14 +792,14 @@ ServiceManager.prototype.start = function(port) {
                             // insecure website requests will redirect to this port
                             console.log('                        attempting to attach port '+sslServerPort+' ... ');
 
-                        https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
+                            https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
                                 this.sslServerPort = sslServerPort;
-                            console.log('                        listening on port '+sslServerPort+' (https). ');
-                            this.stats.increment('info', 'server_started_port_'+sslServerPort);
-                            // this.stats.increment('info', 'server_started_any');
-                        }.bind(this));
+                                console.log('                        listening on port '+sslServerPort+' (https). ');
+                                this.stats.increment('info', 'server_started_port_'+sslServerPort);
+                                // this.stats.increment('info', 'server_started_any');
+                            }.bind(this));
 
-                    }
+                        }
 
                         // second SSL port
                         // never decoded by proxy
@@ -815,11 +815,11 @@ ServiceManager.prototype.start = function(port) {
                         // app-internal
                         // 8002 primary http port - insecure
                         console.log('                        attempting to attach port '+httpServerPort+' ... ');
-                    http.createServer(this.app).listen(httpServerPort, function createServer(){
-                        this.httpServerPort = httpServerPort;
-                        this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-                        console.log('                        listening on port '+httpServerPort+' (http). ');
-                    }.bind(this));
+                        http.createServer(this.app).listen(httpServerPort, function createServer(){
+                            this.httpServerPort = httpServerPort;
+                            this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                            console.log('                        listening on port '+httpServerPort+' (http). ');
+                        }.bind(this));
 
                     }
 
