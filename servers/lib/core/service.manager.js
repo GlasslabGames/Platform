@@ -402,17 +402,21 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
 
                 var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
 
+
+    res.sendfile( fullPath );   // safe migration for release-candidate to develop branch
+
+
     // console.log("  ****** fake rediriecting http request to " + newUrl + "  ******  ");
     // res.sendfile( fullPath );
 
-                // can't tell from the logs that this even works --
-                // says it's encrypted but logs an http://sssss:8001 path
-                //
-                console.log("  ****** req.connection is not encrypted,  ******  ");
-                console.log("  ******    rediriecting http request to " + newUrl + "  ******  ");
-                //
-                res.redirect(303, newUrl);
-                //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
+                // // can't tell from the logs that this even works --
+                // // says it's encrypted but logs an http://sssss:8001 path
+                // //
+                // console.log("  ****** req.connection is not encrypted,  ******  ");
+                // console.log("  ******    rediriecting http request to " + newUrl + "  ******  ");
+                // //
+                // res.redirect(303, newUrl);
+                // //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
 
             }
 
