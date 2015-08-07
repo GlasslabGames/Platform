@@ -47,6 +47,18 @@ function ServiceManager(configFiles){
 
     console.log(" **************************************** ");
     console.log(" **************************************** ");
+
+    console.log("ServiceManager()");
+    console.log('    process.pid:         ' + process.pid);
+    console.log('    process.platform:    ' + process.platform);
+    console.log('    process.version:     ' + process.version);
+
+    console.log('    process.env.SHLVL:   ' + process.env.SHLVL);
+    console.log('    process.env.LOGNAME: ' + process.env.LOGNAME);
+    console.log('    process.env.HOME:    ' + process.env.HOME);
+    console.log('    process.env.PWD:     ' + process.env.PWD);
+    console.log('    process.env._:       ' + process.env._);
+
     console.log(Util.DateGMTString()+' **** Loading Configuration...');
 
     var config        = new ConfigManager();
@@ -607,6 +619,8 @@ return when.promise(function(resolve, reject) {
 };
 
 ServiceManager.prototype.start = function(port) {
+    console.log(Util.DateGMTString()+' ServiceManager start('+port+')');
+
     this.loadVersionFile()
         .then(function() {
             console.log('Loading Version File...');
