@@ -316,7 +316,7 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
 
         if(req.secure){
-            res.sendfile( fullPath );
+            res.sendfile( fullPath );   // eg. /index.html
 
             // console.log('****** https request for "/" was encrypted.  ( from setupDefaultRoutes ) ****** ');
 
