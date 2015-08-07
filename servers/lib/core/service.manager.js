@@ -344,6 +344,9 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
             var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
 
 
+            // safe migration for release-candidate to develop branch
+            res.sendfile( fullPath );
+
             // Test - Turn off this redirect to test catching static requests and file gets.
             //
             // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
@@ -351,9 +354,9 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
             // res.sendfile( fullPath );
 
 
-            // Redirecting this request also causes all the file gest for this page to redirect.
-            console.log('****** rediriecting "/" http request to ' + newUrl + ' ****** ');
-            res.redirect(303, newUrl);
+            // // Redirecting this request also causes all the file gest for this page to redirect.
+            // console.log('****** rediriecting "/" http request to ' + newUrl + ' ****** ');
+            // res.redirect(303, newUrl);
 
         }
     }.bind(this));
