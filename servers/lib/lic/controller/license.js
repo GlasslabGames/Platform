@@ -3247,7 +3247,11 @@ function _expiringSoonEmails(userId, licenseId, daysToGo, expDate, isTrial, prot
                     resolve();
                     return;
                 }
-                this.myds.getUserById(userId)
+                var ttl = moment.duration(this.options.lic.emailDaysBeforeExpiration, "days").asSeconds();
+                this.cbds.updateEmailLastSentTimestamp(licenseId, template, now, ttl)
+                    .then(function(){
+                        return this.myds.getUserById(userId);
+                    }.bind(this))
                     .then(function(user) {
                         var email = user["EMAIL"];
                         data.firstName = user["FIRST_NAME"];
@@ -3255,10 +3259,6 @@ function _expiringSoonEmails(userId, licenseId, daysToGo, expDate, isTrial, prot
                         data.daysToGo = daysToGo;
                         data.expirationDate = expDate;
                         return _sendEmailResponse.call(this, email, data, protocol, host, template);
-                    }.bind(this))
-                    .then(function(){
-                        var ttl = moment.duration(this.options.lic.emailDaysBeforeExpiration, "days").asSeconds();
-                        return this.cbds.updateEmailLastSentTimestamp(licenseId, template, now, ttl);
                     }.bind(this))
                     .then(function(){
                         resolve();

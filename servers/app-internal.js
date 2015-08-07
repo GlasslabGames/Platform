@@ -13,6 +13,7 @@ var Admin          = require('./lib/admin/admin.js');
 var manager = new ServiceManager("~/hydra.config.json");
 
 manager.setRouteMap('../routes.internal.map.js');
+manager.setName('app-internal');
 manager.setPort(8002);
 
 // add all services

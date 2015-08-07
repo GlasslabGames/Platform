@@ -598,27 +598,96 @@
             },
             "lessonPlans": {
                 "order": 3,
-                "enabled": false,
+                "enabled": true,
                 "authRequired": true,
                 "id": "lessonPlans",
-                "title": "Lesson Plans & Videos",
+                "title": "Lesson Plans",
                 "list": [
                     {
-                        "category": "Lesson Plans",
+                        "category": "Lesson 1",
                         "list": [
                             {
-                                "name": "",
-                                "link": "",
-                                "description": ""
+                                "name": "Lesson 1 - Problem Solving Cycle",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/1/Lesson+1+-+Problem+Solving+Cycle.pdf"
+                            },
+                            {
+                                "name": "Lesson 1 Slides",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/1/Lesson+1+slides.pptx"
+                            },
+                            {
+                                "name": "Student Worksheet - Mathematization of Problems",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/1/Student+Worksheet+Mathematizationof+Problems.pdf"
+                            },
+                            {
+                                "name": "Student Worksheet - Problem of the Day 1",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/1/Student+Worksheet+Problem+of+The+Day1.pdf"
+                            },
+                            {
+                                "name": "Teacher Resource - Problem Solving Cycle",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/1/Teacher+Resource+-+Problem+Solving+Cycle.pptx"
                             }
                         ]
                     },
                     {
-                        "category": "Videos",
+                        "category": "Lesson 2",
                         "list": [
                             {
-                                "name": "",
-                                "link": ""
+                                "name": "Lesson 2 - Working Backwards",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/2/Lesson+2+-+Working+Backwards.pdf"
+                            },
+                            {
+                                "name": "Lesson 2 Sides",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/2/Lesson+2+slides.pptx"
+                            },
+                            {
+                                "name": "Student Worksheet - Problem of the Day",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/2/Student+Worksheet+Problem+of+The+Day+2.pdf"
+                            },
+                            {
+                                "name": "Student Worksheet - Subproblems and Subgoals",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/2/Student+Worksheet+Subproblems+and+Subgoals.pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Lesson 3",
+                        "list": [
+                            {
+                                "name": "Lesson 3 - Draw to Represent Data",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/3/Lesson+3+-+Draw+to+Represent+Data.pdf"
+                            },
+                            {
+                                "name": "Lesson 3 Slides",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/3/Lesson+3+slides.pptx"
+                            },
+                            {
+                                "name": "Student Worksheet - Plant Layout",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/3/Student+Worksheet+Plant+Layout.pdf"
+                            },
+                            {
+                                "name": "Student Worksheet - Problem of the Day 3",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/3/Student+Worksheet+Problem+of+The+Day+3.pdf"
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Lesson 4",
+                        "list": [
+                            {
+                                "name": "Lesson 4 - List to Represent Data",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/4/Lesson+4+-+List+to+Represent+Data.pdf"
+                            },
+                            {
+                                "name": "Lesson 4 Slides",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/4/Lesson+4+slides.pptx"
+                            },
+                            {
+                                "name": "Student Worksheet - Build Order",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/4/Student+Worksheet+Build+Order.pdf"
+                            },
+                            {
+                                "name": "Student Worksheet - Problem of the Day 4",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/lesson-plans/4/Student+Worksheet+Problem+of+The+Day+4.pdf"
                             }
                         ]
                     }
@@ -634,6 +703,14 @@
                     {
                         "category": "Research Articles",
                         "list": [
+                            {
+                                "name": "Use Your Brainz Research Brief",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/research/Brainz+Research+Brief+v3.pdf"
+                            },
+                            {
+                                "name": "Use Your Brainz Validation Study Results",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/PVZ/research/Use+Your+Brainz+Validation+Study+Results+v2.pdf"
+                            },
                             {
                                 "name": "Best Practices and Lessons Learned of Stealth Assessment",
                                 "link": "http://myweb.fsu.edu/vshute/pdf/IJGCMS.pdf"
