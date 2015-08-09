@@ -176,8 +176,8 @@ return when.promise(function(resolve, reject) {
         if (err) {
             reject(err);
         } else{
-            this.version = data.toString();
-            resolve(this.version);
+            this.version = data;
+            resolve(JSON.parse(data));
         }
     }.bind(this));
 }.bind(this));
@@ -621,11 +621,11 @@ return when.promise(function(resolve, reject) {
 ServiceManager.prototype.start = function(port) {
     console.log(Util.DateGMTString()+' ServiceManager start('+port+')');
 
-    this.loadVersionFile()
-        .then(function() {
             console.log('Loading Version File...');
-        })
-        .then(null,function(err) {
+    this.loadVersionFile()
+        .then(function(data) { // resolve(data)
+            console.log('    --> date from Version File = '+data.date);
+        }, function(err) { // reject(err)
             console.error("ServiceManager: Failed to Load Version File -", err);
         });
 
@@ -700,6 +700,7 @@ ServiceManager.prototype.start = function(port) {
 
                             if(req.secure){
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
+                                console.log(Util.DateGMTString()+' Request - ');
                                 next();
                             }else{
 
