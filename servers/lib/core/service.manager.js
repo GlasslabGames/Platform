@@ -624,7 +624,7 @@ return when.promise(function(resolve, reject) {
 ServiceManager.prototype.start = function(port) {
     console.log(Util.DateGMTString()+' ServiceManager start('+port+')');
 
-            console.log('Loading Version File...');
+    console.log('Loading Version File...');
     this.loadVersionFile()
         .then(function(str) { // resolve(str)
             console.log('    --> date string from Version File = "'+str.split('"')[19]+'"');
@@ -746,7 +746,7 @@ ServiceManager.prototype.start = function(port) {
                     console.log('        8003 http  <- ELB <- 8003 http          // is not allowed. ');
                     console.log(' ');
                     console.log('        8043 https  ( NOT decoded by ELB ) '); 
-                    console.log('        1943 https  ( NOT decoded by ELB ) '); 
+                    // console.log('        1943 https  ( NOT decoded by ELB ) '); 
                     console.log('        ----------------------------------------------------- ');
 
                     // 8001  app_external
@@ -756,7 +756,7 @@ ServiceManager.prototype.start = function(port) {
                     // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
 
                     var sslServerPort = 8043;
-                    var sslServerPort_02 = 1943;
+                    // var sslServerPort_02 = 1943;
 
                     var httpServerPort = serverPort;    // 8001 or 8002
                     var httpServerPort_02 = 8080;
@@ -791,35 +791,35 @@ ServiceManager.prototype.start = function(port) {
                             // insecure website requests will redirect to this port
                             console.log('                        attempting to attach port '+sslServerPort+' ... ');
 
-                        https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
-                                this.sslServerPort = sslServerPort;
-                            console.log('                        listening on port '+sslServerPort+' (https). ');
-                            this.stats.increment('info', 'server_started_port_'+sslServerPort);
-                            // this.stats.increment('info', 'server_started_any');
-                        }.bind(this));
+                            https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
+                                    this.sslServerPort = sslServerPort;
+                                console.log('                        listening on port '+sslServerPort+' (https). ');
+                                this.stats.increment('info', 'server_started_port_'+sslServerPort);
+                                // this.stats.increment('info', 'server_started_any');
+                            }.bind(this));
 
-                    }
+                        }
 
-                        // second SSL port
-                        // never decoded by proxy
-                        console.log('                        attempting to attach port '+sslServerPort_02+' ... ');
-                        https.createServer(TlsOptions, this.app).listen(sslServerPort_02, function createServer(){
-                            this.sslServerPort_02 = sslServerPort_02;
-                            console.log('                        listening on port '+sslServerPort_02+' (https). ');
-                        }.bind(this));
+                        // // second SSL port
+                        // // never decoded by proxy
+                        // console.log('                        attempting to attach port '+sslServerPort_02+' ... ');
+                        // https.createServer(TlsOptions, this.app).listen(sslServerPort_02, function createServer(){
+                        //     this.sslServerPort_02 = sslServerPort_02;
+                        //     console.log('                        listening on port '+sslServerPort_02+' (https). ');
+                        // }.bind(this));
 
 
                     }else{
-
-                        // app-internal
-                        // 8002 primary http port - insecure
-                        console.log('                        attempting to attach port '+httpServerPort+' ... ');
-                    http.createServer(this.app).listen(httpServerPort, function createServer(){
-                        this.httpServerPort = httpServerPort;
-                        this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-                        console.log('                        listening on port '+httpServerPort+' (http). ');
-                    }.bind(this));
-
+                        if(this.options.services.name && 'app-internal' == this.options.services.name){
+                            // app-internal
+                            // 8002 primary http port - insecure
+                            console.log('                        attempting to attach port '+httpServerPort+' ... ');
+                            http.createServer(this.app).listen(httpServerPort, function createServer(){
+                                this.httpServerPort = httpServerPort;
+                                this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                                console.log('                        listening on port '+httpServerPort+' (http). ');
+                            }.bind(this));
+                        }
                     }
 
                     console.log('---------------------------------------------------------------------------------------');
