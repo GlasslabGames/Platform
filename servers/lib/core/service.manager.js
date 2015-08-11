@@ -49,9 +49,11 @@ function ServiceManager(configFiles){
     console.log(" **************************************** ");
 
     console.log("ServiceManager()");
+
     console.log('    process.pid:         ' + process.pid);
     console.log('    process.platform:    ' + process.platform);
     console.log('    process.version:     ' + process.version);
+    console.log('    process.execPath:   ' + process.execPath);
 
     console.log('    process.env.SHLVL:   ' + process.env.SHLVL);
     console.log('    process.env.LOGNAME: ' + process.env.LOGNAME);
@@ -177,7 +179,8 @@ return when.promise(function(resolve, reject) {
             reject(err);
         } else{
             this.version = data;
-            resolve(JSON.parse(data));
+            resolve(data);
+            // resolve(JSON.parse(data));
         }
     }.bind(this));
 }.bind(this));
@@ -623,8 +626,10 @@ ServiceManager.prototype.start = function(port) {
 
             console.log('Loading Version File...');
     this.loadVersionFile()
-        .then(function(data) { // resolve(data)
-            console.log('    --> date from Version File = '+data.date);
+        .then(function(str) { // resolve(str)
+            console.log('    --> date string from Version File = "'+str.split('"')[19]+'"');
+            // var data = JSON.parse(str);
+            // console.log('    --> date from Version File = '+data.date);
         }, function(err) { // reject(err)
             console.error("ServiceManager: Failed to Load Version File -", err);
         });
