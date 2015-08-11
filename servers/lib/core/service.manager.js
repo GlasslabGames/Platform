@@ -49,9 +49,11 @@ function ServiceManager(configFiles){
     console.log(" **************************************** ");
 
     console.log("ServiceManager()");
+
     console.log('    process.pid:         ' + process.pid);
     console.log('    process.platform:    ' + process.platform);
     console.log('    process.version:     ' + process.version);
+    console.log('    process.execPath:   ' + process.execPath);
 
     console.log('    process.env.SHLVL:   ' + process.env.SHLVL);
     console.log('    process.env.LOGNAME: ' + process.env.LOGNAME);
@@ -176,8 +178,9 @@ return when.promise(function(resolve, reject) {
         if (err) {
             reject(err);
         } else{
-            this.version = data.toString();
-            resolve(this.version);
+            this.version = data;
+            resolve(data);
+            // resolve(JSON.parse(data));
         }
     }.bind(this));
 }.bind(this));
@@ -316,7 +319,7 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
 
         if(req.secure){
-            res.sendfile( fullPath );
+            res.sendfile( fullPath );   // eg. /index.html
 
             // console.log('****** https request for "/" was encrypted.  ( from setupDefaultRoutes ) ****** ');
 
@@ -628,11 +631,13 @@ return when.promise(function(resolve, reject) {
 ServiceManager.prototype.start = function(port) {
     console.log(Util.DateGMTString()+' ServiceManager start('+port+')');
 
+    console.log('Loading Version File...');
     this.loadVersionFile()
-        .then(function() {
-            console.log('Loading Version File...');
-        })
-        .then(null,function(err) {
+        .then(function(str) { // resolve(str)
+            console.log('    --> date string from Version File = "'+str.split('"')[19]+'"');
+            // var data = JSON.parse(str);
+            // console.log('    --> date from Version File = '+data.date);
+        }, function(err) { // reject(err)
             console.error("ServiceManager: Failed to Load Version File -", err);
         });
 
@@ -707,6 +712,7 @@ ServiceManager.prototype.start = function(port) {
 
                             if(req.secure){
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
+                                console.log(Util.DateGMTString()+' Request - ');
                                 next();
                             }else{
 
@@ -747,7 +753,7 @@ ServiceManager.prototype.start = function(port) {
                     console.log('        8003 http  <- ELB <- 8003 http          // is not allowed. ');
                     console.log(' ');
                     console.log('        8043 https  ( NOT decoded by ELB ) '); 
-                    console.log('        1943 https  ( NOT decoded by ELB ) '); 
+                    // console.log('        1943 https  ( NOT decoded by ELB ) '); 
                     console.log('        ----------------------------------------------------- ');
 
                     // 8001  app_external
@@ -755,6 +761,9 @@ ServiceManager.prototype.start = function(port) {
                     // 8003  app_assessment     (different source)
 
                     // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
+
+                    var sslServerPort = 8043;
+                    // var sslServerPort_02 = 1943;
 
                     var httpServerPort = serverPort;    // 8001 or 8002
                     var httpServerPort_02 = 8080;
@@ -801,25 +810,27 @@ ServiceManager.prototype.start = function(port) {
 
                         }
 
-                        // second SSL port
-                        // never decoded by proxy
-                        console.log('                        attempting to attach port '+sslServerPort_02+' ... ');
-                        https.createServer(TlsOptions, this.app).listen(sslServerPort_02, function createServer(){
-                            this.sslServerPort_02 = sslServerPort_02;
-                            console.log('                        listening on port '+sslServerPort_02+' (https). ');
-                        }.bind(this));
+                        // // second SSL port
+                        // // never decoded by proxy
+                        // console.log('                        attempting to attach port '+sslServerPort_02+' ... ');
+                        // https.createServer(TlsOptions, this.app).listen(sslServerPort_02, function createServer(){
+                        //     this.sslServerPort_02 = sslServerPort_02;
+                        //     console.log('                        listening on port '+sslServerPort_02+' (https). ');
+                        // }.bind(this));
 
 
                     }else{
 
-                        // app-internal
-                        // 8002 primary http port - insecure
-                        console.log('                        attempting to attach port '+httpServerPort+' ... ');
-                        http.createServer(this.app).listen(httpServerPort, function createServer(){
-                            this.httpServerPort = httpServerPort;
-                            this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-                            console.log('                        listening on port '+httpServerPort+' (http). ');
-                        }.bind(this));
+                        if(this.options.services.name && 'app-internal' == this.options.services.name){
+                            // app-internal
+                            // 8002 primary http port - insecure
+                            console.log('                        attempting to attach port '+httpServerPort+' ... ');
+                            http.createServer(this.app).listen(httpServerPort, function createServer(){
+                                this.httpServerPort = httpServerPort;
+                                this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                                console.log('                        listening on port '+httpServerPort+' (http). ');
+                            }.bind(this));
+                        }
 
                     }
 

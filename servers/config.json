@@ -4,8 +4,9 @@
         "httpTimeout": 60000, "//": "1 min in milliseconds"
     },
     "services": {
-        "port": 8001,
-        "portNonSSL": 8080,
+        "port": 443,
+        "portSSL": 443,
+        "portNonSSL": 80,
         "appExternalPort":   8001,
         "appInternalPort":   8002,
         "appAssessmentPort": 8003,
