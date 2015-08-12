@@ -1,16 +1,6 @@
-// if http: ...
 var http = require('http');
 var hostname = "stage.glgames.org";
 port = 80;
-
-// GLAS-77  VVVVVV
-/*
-// if https: ...
-var http = require('https');
-var hostname = "stage.glgames.org";
-port = 443;
-*/
-
 
 //hostname = "localhost";
 //port = 8000;
