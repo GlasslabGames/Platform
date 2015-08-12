@@ -13,6 +13,7 @@ var _         = require('lodash');
 var when      = require('when');
 var csv       = require('csv');
 var CronJob   = require('cron').CronJob;
+var rConst    = require('./research.const.js');
 
 // load at runtime
 var Util;
@@ -38,6 +39,7 @@ function ResearchService(options, serviceManager){
         this.requestUtil = new Util.Request(this.options);
         this.store       = new Research.Datastore.Couchbase(this.options.research.datastore.couchbase);
         this.stats       = new Util.Stats(this.options, "Research");
+        this.cron        = new CronJob(this.options.research.cron.time, _cronTask.bind(this), this.options.research.cron.enabled);
         this.serviceManager = serviceManager;
         
     } catch(err) {
@@ -96,4 +98,14 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+function _cronTask() {
+    console.log('Research cronTask start');
+    var mockReq = {};
+    var mockRes = {
+        writeHead: function(){/*console.log('Research cronTask mockRes.writeHead()', arguments)*/},
+        end: function(){console.log('Research cronTask response:', arguments)},
+    };
+    this.serviceManager.internalRoute('/api/v2/research/code/'+rConst.code+'/archive', 'post', [mockReq, mockRes]);
 };

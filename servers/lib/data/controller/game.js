@@ -11,12 +11,14 @@ module.exports = {
     saveGameData: saveGameData,
     getGameData:  getGameData,
     deleteGameData: deleteGameData,
+    getGameDataForUser:  getGameDataForUser,
     updateDevice: updateDevice,
     getGamePlayInfo: getGamePlayInfo,
     postTotalTimePlayed: postTotalTimePlayed,
     postGameAchievement: postGameAchievement,
     releases: releases,
     createMatch: createMatch,
+    getMatch: getMatch,
     updateMatches: updateMatches,
     pollMatches: pollMatches,
     completeMatch: completeMatch,
@@ -87,6 +89,38 @@ function getGameData(req, res, next)
     var gameId = req.params.gameId;
 
     // TODO: check if gameId in DB
+
+
+    this.cbds.getUserGameData(userId, gameId)
+        .then(function(data){
+            this.requestUtil.jsonResponse(res, data);
+        }.bind(this))
+        .then(null, function(err) {
+            // missing
+            if(err.code == 13) {
+                this.requestUtil.errorResponse(res, { error: "no game data", key: "no.data", statusCode: 404});
+            } else {
+                this.requestUtil.errorResponse(res, err);
+            }
+        }.bind(this));
+}
+
+// http://localhost:8001/api/v2/data/game/AA-1/user/27
+function getGameDataForUser(req, res, next)
+{
+    if( !( req.params &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId"});
+        return;
+    }
+    var gameId = req.params.gameId;
+
+    if( !( req.params &&
+        req.params.hasOwnProperty("userId") ) ) {
+        this.requestUtil.errorResponse(res, { error: "missing user Id", key: "data.userId.missing"});
+        return;
+    }
+    var userId = req.params.userId;
 
 
     this.cbds.getUserGameData(userId, gameId)
@@ -469,6 +503,34 @@ function createMatch(req, res){
         .then(null, function(err){
             console.error(err);
             this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function getMatch(req, res) {
+    if(!(req.params && req.params.gameId)) {
+        this.requestUtil.errorResponse(res, {key: "data.gameId.missing"});
+        return;
+    }
+    if(!(req.user && req.user.id)) {
+        this.requestUtil.errorResponse(res, {key: "data.userId.missing"});
+        return;
+    }
+    if(!req.params.matchId) {
+        this.requestUtil.errorResponse(res, {key: "data.matchId.missing"});
+        return
+    }
+
+    var gameId = req.params.gameId;
+    var userId = req.user.id;
+    var matchId = req.params.matchId;
+
+    this.cbds.getMatch(gameId, matchId)
+        .then(function(match) {
+            this.requestUtil.jsonResponse(res, match);
+        }.bind(this))
+        .then(null, function(err) {
+            console.error("Get Match Error -",err);
+            this.requestUtil.errorResponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }
 

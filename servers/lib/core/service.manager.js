@@ -8,8 +8,10 @@
  *  multiparty - https://github.com/superjoe30/node-multiparty
  *
  */
+
 var fs         = require('fs');
 var http       = require('http');
+var https      = require('https');
 var path       = require('path');
 var url        = require('url');
 // Third-party libs
@@ -18,6 +20,14 @@ var when       = require('when');
 var express    = require('express');
 var couchbase  = require('couchbase');
 var cors       = require('cors');
+
+var TlsOptions = {
+    //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
+    //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
+    ca: fs.readFileSync('ssl-key/server/priv-root-ca.crt.pem'),
+    key: fs.readFileSync('ssl-key/server/server.key.pem'),
+    cert: fs.readFileSync('ssl-key/server/server.crt.pem')
+}
 
 // load at runtime
 var Util;
@@ -29,11 +39,30 @@ process.on('uncaughtException', function(err) {
 });
 
 function ServiceManager(configFiles){
+    // called as:   new ServiceManager("~/hydra.config.json");
+    // this == {}
+
     Util              = require('../core/util.js');
     var ConfigManager = require('../core/config.manager.js');
 
-    console.log('---------------------------------------------');
-    console.log('Loading Configuration...');
+    console.log(" **************************************** ");
+    console.log(" **************************************** ");
+
+    console.log("ServiceManager()");
+
+    console.log('    process.pid:         ' + process.pid);
+    console.log('    process.platform:    ' + process.platform);
+    console.log('    process.version:     ' + process.version);
+    console.log('    process.execPath:   ' + process.execPath);
+
+    console.log('    process.env.SHLVL:   ' + process.env.SHLVL);
+    console.log('    process.env.LOGNAME: ' + process.env.LOGNAME);
+    console.log('    process.env.HOME:    ' + process.env.HOME);
+    console.log('    process.env.PWD:     ' + process.env.PWD);
+    console.log('    process.env._:       ' + process.env._);
+
+    console.log(Util.DateGMTString()+' **** Loading Configuration...');
+
     var config        = new ConfigManager();
     // load config files from first to last until successful
     // if not set, then make array
@@ -46,9 +75,17 @@ function ServiceManager(configFiles){
         configFiles = [configFiles];
     }
 
-    // always add the root config first
+    // Add the base config (./config.json from Platform/servers/) at the front of the list.
+    // Values in ./config.json will be replaced by newer values in eg. ~/hydra.config.json.
+    // [ './config.json', '~/hydra.config.json' ]
     configFiles.unshift("./config.json");
     this.options = config.loadSync(configFiles);
+
+    console.log('Configs loaded');
+    console.log('    env: ' + this.options.env);
+    console.log('    services.port: ' + this.options.services.port);
+    console.log('    services.portNonSSL: ' + this.options.services.portNonSSL);
+
 
     if(!this.options.services) {
         this.options.services = {};
@@ -59,6 +96,7 @@ function ServiceManager(configFiles){
 
     global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
+    
     this.stats            = new Util.Stats(this.options, "ServiceManager");
     this.awss3            = new Util.S3Util(this.options);
     this.stripe           = new Util.StripeUtil(this.options);
@@ -140,8 +178,9 @@ return when.promise(function(resolve, reject) {
         if (err) {
             reject(err);
         } else{
-            this.version = data.toString();
-            resolve(this.version);
+            this.version = data;
+            resolve(data);
+            // resolve(JSON.parse(data));
         }
     }.bind(this));
 }.bind(this));
@@ -150,6 +189,10 @@ return when.promise(function(resolve, reject) {
 
 ServiceManager.prototype.setRouteMap = function(str) {
     this.routesMap = require(str);
+};
+
+ServiceManager.prototype.setName = function(name) {
+    this.options.services.name = name;
 };
 
 ServiceManager.prototype.setPort = function(port) {
@@ -201,7 +244,7 @@ return when.promise(function(resolve, reject) {
                 this.app.use( cors(corsOptions) );
 
                 this.app.use(express.session({
-                    secret: this.options.services.session.secret || "keyboard kitty",
+                  secret: this.options.services.session.secret || "keyboard kitty",
                     cookie: _.merge({
                         path: '/'
                         , httpOnly : false
@@ -274,7 +317,51 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         this.stats.increment("info", "Route.Static.Root");
 
         var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
-        res.sendfile( fullPath );
+
+        if(req.secure){
+            res.sendfile( fullPath );   // eg. /index.html
+
+            // console.log('****** https request for "/" was encrypted.  ( from setupDefaultRoutes ) ****** ');
+
+        }else{
+
+            // console.log('######## insecure http request for "/" ...  ( from setupDefaultRoutes() ) ');
+
+            var host = req.get("host");
+
+            if (!host) {
+                console.log('                      ');
+                console.log('  *   *  *****  ***** ');
+                console.log('  *   *  *   *      * ');
+                console.log('  *****  *   *  ***** ');
+                console.log('      *  *   *      * ');
+                console.log('      *  *****  ***** ');
+                console.log('                      ');
+
+                console.log('****** Request arrived with no "host" in header -- sending 403 error. ****** ');
+                res.send(403);
+                return;
+            }
+
+            var sslServerPort = this.sslServerPort || 443;
+            var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+
+
+    // safe migration for release-candidate to develop branch
+    res.sendfile( fullPath );
+
+    // Test - Turn off this redirect to test catching static requests and file gets.
+    //
+    // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
+    // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
+    // res.sendfile( fullPath );
+
+
+            // // Redirecting this request also causes all the file gest for this page to redirect.
+            // console.log('****** rediriecting "/" http request to ' + newUrl + ' ****** ');
+            // res.redirect(303, newUrl);
+
+        }
     }.bind(this));
 
     // all others -> DEFAULT
@@ -288,11 +375,56 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
         // If the route ends with .png or .jpg, default to 404
         /*if( req.originalUrl.indexOf( ".png" ) != -1 || req.originalUrl.indexOf( ".jpg" ) != -1 ) {
             res.send( "File not found!", 404 );
-        }
-        else {*/
+        }*/
+        //  else {
+
             var fullPath = path.resolve(this.options.webapp.staticContentPath + "/" + this.routesMap.index);
-            res.sendfile( fullPath );
-        //}
+
+            if(req.secure){
+                // console.log('****** default route -- connection is encryped -- ');
+                res.sendfile( fullPath );
+            }else{
+
+                // console.log('****** default route -- connection is NOT encryped -- ');
+
+                var host = req.get("host");
+
+                if (!host) {
+                    console.log("  ****** req.host missing, sending 403 error  ******  ");
+                    res.send(403);
+                    return;
+                }
+
+                // var serverPort = port || this.app.get('port');
+                //
+                // 8001  app_external
+                // 8002  app_internal
+                // 8003  app_assessment     (different source)
+
+                var sslServerPort = this.sslServerPort || 443;
+
+                var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+
+
+    res.sendfile( fullPath );   // safe migration for release-candidate to develop branch
+
+
+    // console.log("  ****** fake rediriecting http request to " + newUrl + "  ******  ");
+    // res.sendfile( fullPath );
+
+
+                // // can't tell from the logs that this even works --
+                // // says it's encrypted but logs an http://sssss:8001 path
+                // //
+                // console.log("  ****** req.connection is not encrypted,  ******  ");
+                // console.log("  ******    rediriecting http request to " + newUrl + "  ******  ");
+                // //
+                // res.redirect(303, newUrl);
+                // //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
+
+            }
+
+        //  }
     }.bind(this));
 }
 
@@ -303,6 +435,7 @@ ServiceManager.prototype.setupStaticRoutes = function() {
 
         _.forEach(s.routes, function(route) {
             var file = "";
+
             if(s.file == 'index') {
                 file = this.routesMap.index;
             } else {
@@ -318,6 +451,9 @@ ServiceManager.prototype.setupStaticRoutes = function() {
 
                     // auth
                     if( req.isAuthenticated() ) {
+
+    // console.log("SSSSSSSSSSSSSSSS  AAAAAAAA  Static Route - Auth required ");
+
                         this.stats.increment("info", "Route.Auth.Ok");
                         res.sendfile( fullPath );
                     } else {
@@ -334,7 +470,14 @@ ServiceManager.prototype.setupStaticRoutes = function() {
 
             } else {
                 console.log("Static Route -", route, "->", file);
+
                 this.app.get(route, function(req, res) {
+
+    // // wont ever happen - no un-auth static routes in table
+    // console.log("SSSSSSSSSSSSSSSS  NA-NA-NA-NA  Static Route - no auth ");
+    // console.log('fullpath = '+fullpath);
+
+
                     res.sendfile( fullPath );
                 }.bind(this));
             }
@@ -487,13 +630,18 @@ return when.promise(function(resolve, reject) {
 };
 
 ServiceManager.prototype.start = function(port) {
+    console.log(Util.DateGMTString()+' ServiceManager start('+port+')');
+
+    console.log('Loading Version File...');
     this.loadVersionFile()
-        .then(function() {
-            console.log('Loading Version File...');
-        })
-        .then(null,function(err) {
+        .then(function(str) { // resolve(str)
+            console.log('    --> date string from Version File = "'+str.split('"')[19]+'"');
+            // var data = JSON.parse(str);
+            // console.log('    --> date from Version File = '+data.date);
+        }, function(err) { // reject(err)
             console.error("ServiceManager: Failed to Load Version File -", err);
         });
+
     // start express (session store,...), then start services
     this.initExpress()
         .then(function(){
@@ -517,25 +665,173 @@ ServiceManager.prototype.start = function(port) {
             when.all(promiseList)
                 .then(function(){
                     console.log('----------------------------');
-                    console.log('Services Started');
+                    console.log(Util.DateGMTString()+' **** Services Started');
+
+                    var serverPort = port || this.app.get('port');
+                    //
+                    // 8001  app_external
+                    // 8002  app_internal
+                    // 8003  app_assessment     (different source)
+
+                    // app-internal or app-external ?
+                    if( serverPort && 8002 == serverPort){  // internal server
+
+                        // update user count stats telemetry
+                        updateTelemetryStats.call(this, this.stats);
+                    }
+
+                    //  console.log(" ");
                     console.log("Setting Up Routes...");
-                    console.log('----------------------------');
+
+                    if( serverPort && 8002 == serverPort)
+                    {
+                        // internal server
+                        // TODO - better test for is-internal-server
+                    }else{
+
+                //  }else{
+                //  if(serverPort && 8001 == serverPort){
+
+                        // external server
+
+                        // console.log('SSL Redirect Gate - The first route checks request encryption status. ');
+                        // console.log('                    It rejects [403] any request with no "host" in the header ');
+                        // console.log('                    and may redirect [303] unencrypted requests. ');
+
+                        console.log('SSL Redirect Gate - The first route checks request encryption status. ');
+                        console.log('                    It rejects [403] any request with no "host" in the header. ');
+
+                        this.app.all("*", function(req, res, next) {
+                            var host = req.get("host");
+                            if (!host) {
+                                console.log("  ****** req.host missing, sending 403 error  ******  ");
+                                res.send(403);
+                                return;
+                            }
+
+                            // var forwProto = req.get('X-Forwarded-Proto');
+
+                            if(req.secure){
+                                // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
+                                console.log(Util.DateGMTString()+' Request - ');
+                                next();
+                            }else{
+
+                                // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
+
+                                var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
+                             // var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+
+                                next();
+
+                                //  console.log("  ****** req.connection is not encrypted,  ******  ");
+                                //  console.log("  ******   rediriecting to " + newUrl + "  ******  ");
+                                //
+                            //  res.redirect(303, newUrl);
+                                //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
+                            }
+
+                        }.bind(this));
+                    }
 
                     // setup routes
                     this.setupRoutes();
                     console.log('----------------------------');
-                    console.log('Routes Setup')
+                    console.log('Routes Setup done')
 
-                    var serverPort = port || this.app.get('port');
+                    console.log(Util.DateGMTString()+' Starting Server ... ');
 
-                    console.log('Starting Server on port', serverPort, "...");
+                    console.log('        ----------------------------------------------------- ');
+                    console.log('        (decoded and forwarded by ELB) ');
+                    console.log(' ');
+                    console.log('        8001 http  <- ELB <- 443  https     // secure web site - not enforced');
+                    console.log('        -----------------------------------------------------    ');
+                    console.log('        8001 http  <- ELB <- 80   http      // insecure web site ');
+                    console.log('        8001 http  <- ELB <- 8080 http      //                   ');
+                    console.log('                                                                 ');
+                    console.log('        8001 http  <- ELB <- 8001 http          // these can be blocked ');
+                    console.log('        8002 http  <- ELB <- 8002 http          // if external access ');
+                    console.log('        8003 http  <- ELB <- 8003 http          // is not allowed. ');
+                    console.log(' ');
+                    console.log('        8043 https  ( NOT decoded by ELB ) '); 
+                    // console.log('        1943 https  ( NOT decoded by ELB ) '); 
+                    console.log('        ----------------------------------------------------- ');
 
-                    // start server
-                    http.createServer(this.app).listen(serverPort, function createServer(){
-                        console.log('Server listening on port ' + serverPort);
-                        console.log('---------------------------------------------');
-                        this.stats.increment("info", "ServerStarted");
-                    }.bind(this));
+                    // 8001  app_external
+                    // 8002  app_internal
+                    // 8003  app_assessment     (different source)
+
+                    // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
+
+                    var sslServerPort = 8043;
+                    // var sslServerPort_02 = 1943;
+
+                    var httpServerPort = serverPort;    // 8001 or 8002
+                    var httpServerPort_02 = 8080;
+
+                    console.log(Util.DateGMTString()+' attaching ports ... ');
+
+                    if(this.options.services.name && 'app-external' == this.options.services.name){
+
+                        httpServerPort = this.services.appExternalPort || 8001;     // 8001
+
+                        // app-external
+                        // 8001 primary http port - insecure
+                        console.log('                        attempting to attach port '+httpServerPort+' ... ');
+                        http.createServer(this.app).listen(httpServerPort, function createServer(){
+                            this.httpServerPort = httpServerPort;
+                            this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                            console.log('                        listening on port '+httpServerPort+' (http). ');
+                            // console.log('---------------------------------------------------------------------------------------');
+                        }.bind(this));
+
+                        // second http port
+                        console.log('                        attempting to attach port '+httpServerPort_02+' ... ');
+                        http.createServer(this.app).listen(httpServerPort_02, function createServer(){
+                            this.httpServerPort_02 = httpServerPort_02;
+                            console.log('                        listening on port '+httpServerPort_02+' (http). ');
+                        }.bind(this));
+
+
+                        if(!this.options.services.sslDecodedByProxy){
+
+                            // primary SSL port
+                            // insecure website requests will redirect to this port
+                            console.log('                        attempting to attach port '+sslServerPort+' ... ');
+
+                            https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
+                                    this.sslServerPort = sslServerPort;
+                                console.log('                        listening on port '+sslServerPort+' (https). ');
+                                this.stats.increment('info', 'server_started_port_'+sslServerPort);
+                                // this.stats.increment('info', 'server_started_any');
+                            }.bind(this));
+
+                        }
+
+                        // // second SSL port
+                        // // never decoded by proxy
+                        // console.log('                        attempting to attach port '+sslServerPort_02+' ... ');
+                        // https.createServer(TlsOptions, this.app).listen(sslServerPort_02, function createServer(){
+                        //     this.sslServerPort_02 = sslServerPort_02;
+                        //     console.log('                        listening on port '+sslServerPort_02+' (https). ');
+                        // }.bind(this));
+
+
+                    }else{
+                        if(this.options.services.name && 'app-internal' == this.options.services.name){
+                            // app-internal
+                            // 8002 primary http port - insecure
+                            console.log('                        attempting to attach port '+httpServerPort+' ... ');
+                            http.createServer(this.app).listen(httpServerPort, function createServer(){
+                                this.httpServerPort = httpServerPort;
+                                this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                                console.log('                        listening on port '+httpServerPort+' (http). ');
+                            }.bind(this));
+                        }
+                    }
+
+                    console.log('---------------------------------------------------------------------------------------');
+
                 }.bind(this))
 
                 .then(null, function(err){
@@ -547,6 +843,116 @@ ServiceManager.prototype.start = function(port) {
         .then(null, function(err){
             console.error("ServiceManager: Start Error -", err);
         }.bind(this));
+};
+
+var updateTelemetryStats = function(stats){
+
+    console.log("updateTelemetryStats() called ...")
+
+    var mysql_options = _.merge(
+        {
+            host    : "localhost",
+            user    : "glasslab",
+            password: "glasslab",
+            database: "glasslab_dev",
+        },
+
+        this.options.auth.datastore.mysql
+    );
+
+    var MySQL = require('../core/datastore.mysql.js');
+    var ds = new MySQL(mysql_options);
+
+    this.options.services.ds_mysql = ds;
+
+    var bindCountStudents = countStudents.bind(this, this.stats);   // with context
+    bindCountStudents(this.stats);                                  // now
+    setInterval( bindCountStudents, 2*60*1000, this.stats);         // every 2 minutes
+
+    var bindCountTeachers = countTeachers.bind(this, this.stats);
+    bindCountTeachers(this.stats);
+    setInterval( bindCountTeachers, 2*60*1000, this.stats);
+
+    var boundUpUserCount = updateUserCount.bind(this, this.stats);
+    boundUpUserCount(this.stats);
+    setInterval( boundUpUserCount, 2*60*1000, this.stats);
+};
+
+var countStudents = function(stats){
+
+    var Q;
+    var userCount;
+
+    this.ds = this.options.services.ds_mysql;
+
+    when.promise(function(resolve, reject){
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE ENABLED = 1 AND system_Role = 'student'";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "student_count", userCount);
+                console.log(Util.DateGMTString()+" countStudents() -- found, "+userCount+" students in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+};
+
+var countTeachers = function(stats){
+
+    var Q;
+    var userCount;
+
+    this.ds = this.options.services.ds_mysql;
+
+    when.promise(function(resolve, reject){
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE ENABLED = 1 AND system_Role = 'instructor'";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "teacher_count", userCount);
+                console.log(Util.DateGMTString()+" countTeachers() -- found, "+userCount+" teachers in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+};
+
+var updateUserCount = function(stats){
+
+    var Q;
+    var userCount;
+
+    this.ds = this.options.services.ds_mysql;
+
+    when.promise(function(resolve, reject){
+        Q = "SELECT COUNT(id) as num FROM GL_USER WHERE ENABLED = 1 AND (system_Role = 'instructor' OR system_Role = 'student')";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gauge("info", "user_count", userCount);
+                stats.gaugeNoRoot("info", "user_count", userCount);
+                console.log(Util.DateGMTString()+" updateUserCount() -- found, "+userCount+
+                        " students and teachers in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
 };
 
 ServiceManager.prototype.updateUserDataInSession = function(session){

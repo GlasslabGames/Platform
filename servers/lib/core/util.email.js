@@ -146,7 +146,7 @@ return when.promise(function(resolve, reject) {
     this.build(templateName, emailData)
         .then(function(templateData){
 
-            var transport = nodemailer.createTransport("SMTP", this.options.transport);
+            var transport = nodemailer.createTransport(this.options.transportMethod || "SMTP", this.options.transport);
             var emailSettings = {
                 from:    this.options.from,
                 to:      emailData.to,

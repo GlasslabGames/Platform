@@ -1,0 +1,117 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "/_schema/achievments.json#",
+    "type": "object",
+    "properties": {
+        "groups": {
+            "type": "object",
+            "properties": {
+                "CCSS": {
+                    "$ref": "#/definitions/standard"
+                },
+                "TEKS": {
+                    "$ref": "#/definitions/standard"
+                }
+            }
+        },
+        "achievements": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "info": {
+                        "type": "string"
+                    },
+                    "standards": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "group": {
+                                    "type": "string"
+                                },
+                                "subGroup": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "additionalItems": false
+                    }
+                },
+                "additionalProperties": false
+            },
+            "additionalItems": false
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "groups",
+        "achievements"
+    ],
+    "definitions": {
+        "standard": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "subGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "title": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "info": {
+                                    "type": "string"
+                                },
+                                "icon": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "additionalItems": false
+                    }
+                },
+                "additionalProperties": false,
+                "required": [
+                    "id",
+                    "description",
+                    "title",
+                    "subGroups"
+                ]
+            },
+            "additionalItems": false,
+            "required": ["1"]
+        }
+    }
+}

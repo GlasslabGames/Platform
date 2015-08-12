@@ -1,15 +1,13 @@
 {
     "basic": {
         "gameId": "WWF",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Unannounced Game",
         "longName": "Unannounced Game",
-        "release": "dev",
-        "price": "Free",
-        "packages": "PC/Mac, Chromebook/Web Games",
-        "releaseDate": "TBD",
+        "grades": "6 - 8",
+        "subject": "TBD",
         "type": "TBD",
         "platform": {
             "type": "Browser",
@@ -18,8 +16,10 @@
                 "large": "assets/platform-browser@2x.png"
             }
         },
-        "subject": "TBD",
-        "grades": "6 - 8",
+        "price": "Free",
+        "packages": "PC/Mac, Chromebook/Web Games",
+        "release": "dev",
+        "releaseDate": "TBD",
         "shortDescription": "Unannounced Game",
         "description": "Unannounced Game",
         "developer": {
@@ -55,17 +55,13 @@
             "reports": "assets/game-banner-PRIMA.png"
         }
     },
-    "assessment": [
-    ],
+    "assessment": [],
     "reports": {
-        "list": [
-        ]
+        "list": []
     },
     "details": {
-        "buttons": [
-        ],
-        "pages": {
-        },
+        "buttons": [],
+        "pages": {},
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",

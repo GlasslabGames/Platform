@@ -1,0 +1,163 @@
+{
+    "basic": {
+        "gameId": "FILL_ME_IN",
+        "enabled": false,
+        "visible": false,
+        "maintenance": null,
+        "shortName": "Placeholder Short Name",
+        "longName": "Placeholder Long Name",
+        "grades": "TBD",
+        "subject": "TBD",
+        "type": "TBD",
+        "platform": {
+            "type": "iPad",
+            "icon": {
+                "small": "assets/platform-ipad.png",
+                "large": "assets/platform-ipad@2x.png"
+            }
+        },
+        "price": "Free",
+        "packages": "TBD",
+        "release": "dev",
+        "releaseDate": "TBD",
+        "shortDescription": "Placeholder Short Description",
+        "description": "Placeholder Description",
+        "developer": {
+            "id": "TEMP",
+            "name": "Developer Name",
+            "logo": {
+                "small": "assets/glasslab-logo.png",
+                "large": "assets/glasslab-logo-2x.png"
+            },
+            "description": "Placeholder Developer Description"
+        },
+        "settings": {
+            "canCreateMatches": false
+        },
+        "license": {
+            "type": "loginType",
+            "loginType": "glasslabv2,icivics,edmodo",
+            "valid": false,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
+        },
+        "thumbnail": {
+            "small": "assets/thumb-game-AA-1.png",
+            "large": "assets/thumb-game-AA-1.png"
+        },
+        "card": {
+            "small": "assets/game-card-AA-1.jpg",
+            "large": "assets/game-card-AA-1@2x.jpg"
+        },
+        "banners": {
+            "product": "assets/game-banner-AA-1.png",
+            "reports": "assets/game-banner-AA-1.png"
+        }
+    },
+    "assessment": [],
+    "reports": {
+        "list": []
+    },
+    "details": {
+        "buttons": [],
+        "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Placeholder Product Description",
+                "header": "Placeholder Header",
+                "about": "Placeholder About Section.",
+                "video": "",
+                "brochure": ""
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards",
+                "CCSS": [
+                    {
+                        "category": "Placeholder Standards Category",
+                        "groups": [
+                            {
+                                "name": "Placeholder Group",
+                                "list": [
+                                    {
+                                        "name": "Placeholder Standard",
+                                        "link": "Placeholder Link",
+                                        "description": "Placeholder Description"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": false,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Lesson Plans",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": false,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                    {
+                        "category": "",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": false,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                    {
+                        "reviewer": "",
+                        "review": ""
+                    }
+                ]
+            }
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "https://plus.google.com/117864084582459836584/posts"
+        }
+    }
+}
