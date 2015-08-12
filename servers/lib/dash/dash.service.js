@@ -63,6 +63,8 @@ return when.promise(function(resolve, reject) {
                 // test connection to telemetry store
             return this._migrateGameFiles(true);
         }.bind(this))*/
+        //
+        // "recent" change to master branch
         .then(function(){
             return this._loadGameFiles();
         }.bind(this))
