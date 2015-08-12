@@ -768,9 +768,6 @@ ServiceManager.prototype.start = function(port) {
                     var httpServerPort = serverPort;    // 8001 or 8002
                     var httpServerPort_02 = 8080;
 
-                    var sslServerPort = 8043;
-                    var sslServerPort_02 = 1943;
-
                     console.log(Util.DateGMTString()+' attaching ports ... ');
 
                     if(this.options.services.name && 'app-external' == this.options.services.name){
