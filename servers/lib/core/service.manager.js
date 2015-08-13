@@ -350,11 +350,11 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
     // safe migration for release-candidate to develop branch
     res.sendfile( fullPath );
 
-            // Test - Turn off this redirect to test catching static requests and file gets.
-            //
-            // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
-            // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
-            // res.sendfile( fullPath );
+    // Test - Turn off this redirect to test catching static requests and file gets.
+    //
+    // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
+    // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
+    // res.sendfile( fullPath );
 
 
             // // Redirecting this request also causes all the file gest for this page to redirect.
