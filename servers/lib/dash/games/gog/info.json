@@ -145,6 +145,7 @@
                     "skinny": "assets/skinny-banner-GOG.png",
                     "large": "assets/skinny-banner-GOG@2x.png"
                 },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
                     "labels": [],
                     "groups": [
@@ -211,8 +212,7 @@
                             ]
                         }
                     ]
-                },
-                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+                }
             }
         ]
     },

@@ -149,3 +149,35 @@ Lic_Couchbase.prototype.createLicenseStudentObject = function(licenseId){
         });
     }.bind(this));
 };
+
+Lic_Couchbase.prototype.getEmailLastSentTimestamp = function(licenseId, emailTemplateKey) {
+    return when.promise(function(resolve, reject){
+        // lic:email:templateKey:licenseId
+        var key = _getEmailKey(licenseId, emailTemplateKey);
+        this.client.get(key, function(err, results){
+            resolve(err ? 0 : results.value.ts); // return 0 if key doesn't exist
+        });
+    }.bind(this));
+};
+
+Lic_Couchbase.prototype.updateEmailLastSentTimestamp = function(licenseId, emailTemplateKey, timestamp, ttl){
+    return when.promise(function(resolve, reject){
+        // lic:email:templateKey:licenseId
+        var key = _getEmailKey(licenseId, emailTemplateKey);
+        var data = {ts: timestamp};
+        var metadata = {expiry: ttl || 0};
+        this.client.set(key, data, metadata, function(err, results){
+            if(err){
+                console.error("Couchbase LicStore: Update Email Timestamp Error -",err);
+                reject(err);
+                return;
+            }
+            console.log("Couchbase LicStore: Update Email Timestamp id:", licenseId, "ttl:", ttl);
+            resolve(results.value);
+        });
+    }.bind(this));
+};
+
+function _getEmailKey(licenseId, emailTemplateKey) {
+    return lConst.datastore.licenseKeyEmail + ":" + emailTemplateKey + ":" + licenseId;
+}
