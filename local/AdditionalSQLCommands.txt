@@ -1,11 +1,11 @@
 ALTER TABLE glasslab_dev.GL_INSTITUTION ADD ADDRESS VARCHAR(255);
 ALTER TABLE glasslab_dev.GL_USER ADD customer_id VARCHAR(20);
-ALTER TABLE glasslab_dev.GL_USER ADD standards_view VARCHAR(20) AFTER SCHOOL;
+ALTER TABLE glasslab_dev.GL_USER ADD standards_view VARCHAR(20);
 
 ALTER TABLE glasslab_dev.GL_COURSE ADD premium_games_assigned TINYINT(1);
 
-DROP TABLE glasslab_dev.GL_LICENSE_MAP;
-DROP TABLE glasslab_dev.GL_LICENSE;
+DROP TABLE IF EXISTS glasslab_dev.GL_LICENSE_MAP;
+DROP TABLE IF EXISTS glasslab_dev.GL_LICENSE;
 
 CREATE TABLE glasslab_dev.GL_LICENSE
 (
