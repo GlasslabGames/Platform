@@ -11,9 +11,9 @@
         "appInternalPort":   8002,
         "appAssessmentPort": 8003,
         "TlsFiles": {
-            "caName": "ssl-key/server/priv-root-ca.crt.pem",
-            "keyName": "ssl-key/server/server.key.pem",
-            "certName": "ssl-key/server/server.crt.pem"
+            "caName": "ssl-key/root-ca.crt.pem",
+            "keyName": "ssl-key/server.key.pem",
+            "certName": "ssl-key/server.crt.pem"
         },
         "session": {
             "secret": "keyboard kitty",
