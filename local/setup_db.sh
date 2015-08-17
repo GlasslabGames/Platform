@@ -7,7 +7,7 @@ echo "[Root User]"
 
 cat $DIR/glasslab_dev.sql $DIR/create_users.sql | mysql -u root -p 
 if [[ $? = 1 ]]; then
-    echo "Error occurred importing database!"
+    echo "Error Occurred!"
 else
     echo "Done!"
 fi
