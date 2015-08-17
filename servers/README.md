@@ -143,6 +143,60 @@ OSX Installation
            
 7. Installation Complete
 
+Linux (Ubuntu 12.04) Installation
+------------
+1. Setup windows-line-ending compatible bash script 
+   1. Run the following command as root (or sudo bash'd)
+    ```sh
+    cat > $'/bin/bash\r' << "EOF"
+    #!/usr/bin/env bash
+    echo "Warning: Running CRLF bash script"
+    script=$1
+    shift
+    exec bash <(tr -d '\r' < "$script") "$@"
+    EOF
+    ```
+    * This is important because many of the scripts use the different line endings, and will otherwise a pain to modify en-mass.
+
+2. Install **Node.js**
+   1. Install nodejs and npm from the repository
+    ```sh
+    $ sudo apt-get install nodejs nodejs-legacy npm
+    ```
+
+3. Install **Forever** node process manager
+  * Use NPM to install forever process manager globally
+  ```sh
+  $ sudo npm install forever -g
+  ```
+
+4. Install **MySQL**
+   1. Install the mysql server from the repository 
+    ```sh
+    $ sudo apt-get install mysql-server
+    ```
+    * When prompted for the root password, use 'glasslab' (sans quotes).  Otherwise accept defaults. 
+   2. (optional) Install the mysql client
+    ```sh
+    $ sudo apt-get install mysql-client
+    ```
+   3. Add MySQL user and Import SQL Schema data
+      * See 4.3 for the OSX section and follow the instructions (running setup_db.sh)
+
+5. Install **Redis**
+   1. Use apt-get to install redis
+      ```sh
+      $ sudo apt-get install redis-server redis-tools
+      ```
+6. Install/Setup **Couchbase** Server
+   1. Download: http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.deb
+   2. install with dpkg
+      ```sh
+      $ sudo dpkg -i couchbase-server-community-2.2.0_x86_64.deb
+      ```
+   3. Continue to follow instructions for 6.3 in the OSX Installation instructions
+
+7. Installation Complete
 
 Running the app
 ---------------
