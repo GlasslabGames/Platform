@@ -69,6 +69,8 @@ function ServiceManager(configFiles){
     console.log('    process.env.PWD:     ' + process.env.PWD);
     console.log('    process.env._:       ' + process.env._);
 
+    // TODO - error if ! this.options.services.name
+
     console.log(Util.DateGMTString()+' **** Loading Configuration...');
 
     var config        = new ConfigManager();
@@ -92,11 +94,17 @@ function ServiceManager(configFiles){
     console.log('Configs loaded');
     console.log('    env: ' + this.options.env);
     console.log('    services.port: ' + this.options.services.port);
+    console.log('    services.portSSL: ' + this.options.services.portSSL);
     console.log('    services.portNonSSL: ' + this.options.services.portNonSSL);
+    console.log('    services.appExternalPort: ' + this.options.services.appExternalPort);
+    console.log('    services.appInternalPort: ' + this.options.services.appInternalPort);
+    console.log('    services.appAssessmentPort: ' + this.options.services.appAssessmentPort);
 
+    // TODO - error if ! services.appExternalPort etc.
 
     if(!this.options.services) {
         this.options.services = {};
+        // TODO - error
     }
     if(!this.options.services.session) {
         this.options.services.session = {};
@@ -351,19 +359,20 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
                 return;
             }
 
-            var sslServerPort = this.sslServerPort || 443;
-            var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
-
 
     // safe migration for release-candidate to develop branch
     res.sendfile( fullPath );
 
-    // Test - Turn off this redirect to test catching static requests and file gets.
+
+    // Test - Turn off the redirect to test catching static requests and file gets.
     //
+    // if(this.options.services.name && 'app-external' == this.options.services.name){
+    //     var sslServerPort = this.sslServerPort || 443;
+    //     var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
     // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
     // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
     // res.sendfile( fullPath );
-
+    // }
 
             // // Redirecting this request also causes all the file gest for this page to redirect.
             // console.log('****** rediriecting "/" http request to ' + newUrl + ' ****** ');
@@ -736,8 +745,8 @@ ServiceManager.prototype.start = function(port) {
 
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
 
-                                var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
-                             // var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+                             //    var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
+                             // // var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
 
                                 next();
 
