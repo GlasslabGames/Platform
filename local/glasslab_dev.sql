@@ -16,13 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Create user and add user privileges to DB
---
-  
-CREATE USER 'glasslab'@'localhost' IDENTIFIED BY 'glasslab';
-GRANT ALL PRIVILEGES ON *.* TO 'glasslab'@'localhost' WITH GRANT OPTION;
-    
---
 -- Current Database: `glasslab_dev`
 --
 
