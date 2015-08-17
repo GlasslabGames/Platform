@@ -1,10 +1,14 @@
 #!/bin/bash
 
+DIR=$(cd `dirname $0` && pwd)
+
 echo "Adding 'glasslab' user, 'glasslab_dev' database and importing some data"
 echo "[Root User]"
-mysql -u root -p < ./glasslab_dev.sql
+
+cat $DIR/glasslab_dev.sql $DIR/create_users.sql | mysql -u root -p 
 if [[ $? = 1 ]]; then
-    echo "Error Occurred!"
+    echo "Error occurred importing database!"
 else
     echo "Done!"
 fi
+
