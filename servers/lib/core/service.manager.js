@@ -21,12 +21,20 @@ var express    = require('express');
 var couchbase  = require('couchbase');
 var cors       = require('cors');
 
+// moving TLS key-file names to config.json
+//
 var TlsOptions = {
+    ca: "",
+    key: "",
+    cert: ""
+    /*
     //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
     //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
+
     ca: fs.readFileSync('ssl-key/server/priv-root-ca.crt.pem'),
     key: fs.readFileSync('ssl-key/server/server.key.pem'),
     cert: fs.readFileSync('ssl-key/server/server.crt.pem')
+    */
 }
 
 // load at runtime
@@ -666,6 +674,15 @@ ServiceManager.prototype.start = function(port) {
                 .then(function(){
                     console.log('----------------------------');
                     console.log(Util.DateGMTString()+' **** Services Started');
+
+                    TlsOptions = {
+                        //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
+                        //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
+
+                        ca: fs.readFileSync(this.options.services.TlsFiles.caName),
+                        key: fs.readFileSync(this.options.services.TlsFiles.keyName),
+                        cert: fs.readFileSync(this.options.services.TlsFiles.certName)
+                    }
 
                     var serverPort = port || this.app.get('port');
                     //
