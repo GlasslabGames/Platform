@@ -158,6 +158,7 @@
                 "password": "glasslab"
             }
         },
+        "s3PathPrefix": "",
         "cron": {
             "time": "0 0 1 * * *", "//": "everyday at 1 am",
             "enabled": false

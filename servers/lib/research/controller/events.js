@@ -141,7 +141,7 @@ function getSignedUrlsByDayRange(req, res){
                 dayString = "" + day;
             }
             dayString = fileString + dayString;
-            var pathParams = ['archives', this.options.env, gameId, year, month, dayString];
+            var pathParams = ['archives', (this.options.research.s3PathPrefix || this.options.env), gameId, year, month, dayString];
             this.serviceManager.awss3.getSignedUrls('csv', pathParams, false)
                 .then(function(urls){
                     urls.forEach(function(url){
@@ -542,7 +542,7 @@ function archiveEventsByDate(gameId, count, startProcess, limit){
                 }
 
                 var dates = formattedDate.split( "-" );
-                fileString =  "archives/" + this.options.env + "/" + gameId + "/"
+                fileString =  "archives/" + (this.options.research.s3PathPrefix || this.options.env) + "/" + gameId + "/"
                                 + dates[0] + "/" + dates[1] + "/" + gameId + "_" + formattedDate;
 
                 return this.store.getCsvDataByGameId(gameId);
