@@ -665,9 +665,11 @@ ServiceManager.prototype.start = function(port) {
     var portArg = port;
 
     if(!this.options.services.name){
-        console.log('X X X X    Error -- expect serverices.name set in e.g. app-external.js');
-        console.log('                    ' + this.options.services.startScript + ' should call manager.setName().');
-        // return;
+        console.log('');
+        console.log('****************    Error -- expect serverices.name set in e.g. app-external.js');
+        console.log('****************             call manager.setName() in ' + this.options.services.startScript);
+        console.log('');
+        return;
     }
 
     console.log('Loading Version File...');
@@ -796,14 +798,14 @@ ServiceManager.prototype.start = function(port) {
                     console.log('        -----------------------------------------------------    ');
                     console.log('        8001 http  <- ELB <- 80   http      // insecure web site ');
                     console.log('        8001 http  <- ELB <- 8080 http      //                   ');
+                    // console.log('                                                                        ');
+                    // console.log('        8001 http  <- ELB <- 8001 http          // these can be blocked ');
+                    // console.log('        8002 http  <- ELB <- 8002 http          // if external access   ');
+                    // console.log('        8003 http  <- ELB <- 8003 http          // is not allowed.      ');
                     console.log('                                                                 ');
-                    console.log('        8001 http  <- ELB <- 8001 http          // these can be blocked ');
-                    console.log('        8002 http  <- ELB <- 8002 http          // if external access ');
-                    console.log('        8003 http  <- ELB <- 8003 http          // is not allowed. ');
-                    console.log(' ');
+                    console.log('        8080 https  ( can work without ELB ) '); 
                     console.log('        8043 https  ( NOT decoded by ELB ) '); 
-                    // console.log('        1943 https  ( NOT decoded by ELB ) '); 
-                    console.log('        ----------------------------------------------------- ');
+                    console.log('        ------------------------------------ ');
 
                     // 8001  app_external
                     // 8002  app_internal
