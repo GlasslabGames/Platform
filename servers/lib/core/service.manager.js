@@ -103,13 +103,17 @@ function ServiceManager(configFiles){
     console.log('    services.appAssessmentPort: ' + this.options.services.appAssessmentPort);
 
     if(!this.options.services.appExternalPort){
-        console.log('X X X X    Error -- expect services.appExternalPort in config.json');
-        // return;
+        console.log('');
+        console.log('****************    Error -- expect services.appExternalPort in config.json');
+        console.log('');
+        return;
     }
 
     if(!this.options.services.appInternalPort){
-        console.log('X X X X    Error -- expect services.appInternalPort in config.json');
-        // return;
+        console.log('');
+        console.log('****************    Error -- expect services.appInternalPort in config.json');
+        console.log('');
+        return;
     }
 
     if(!this.options.services) {
