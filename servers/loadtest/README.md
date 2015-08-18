@@ -1,6 +1,19 @@
 System Requirements:
 Linux/Mac OS X
 
+Dependencies
+------------
+Python
+Locust (http://locust.io, load test framework)
+
+Linux (Ubuntu 12.04 and compatible) Installation
+------------
+1. Install python and locust.io
+ ```sh
+ sudo apt-get install -y python-pip python-dev libzmq-dev python-lxml
+ sudo pip install locustio pyzmq pyquery
+ ```
+
 Load Testing
 ------------
 #### Recording user data.
@@ -21,6 +34,3 @@ I installed Locust on a small aws instance and copied all the data and script to
 I enter 10 user at first then 20, 50, 100, 200, 300 and finally 400.
 I watched the Locust Report (average request latency, failure count), RDS (QPS, CPU, FreeStorage, Mem), System (CPU, Mem and thread count)
  
-#### Load Test Framework
-Locust
-http://locust.io
