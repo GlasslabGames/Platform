@@ -53,7 +53,10 @@ function ServiceManager(configFiles){
     Util              = require('../core/util.js');
     var ConfigManager = require('../core/config.manager.js');
 
+    var startScript = process.argv[1].split("servers/")[1];
+
     console.log(" **************************************** ");
+    console.log("        " + startScript);
     console.log(" **************************************** ");
 
     console.log("ServiceManager()");
@@ -61,15 +64,14 @@ function ServiceManager(configFiles){
     console.log('    process.pid:         ' + process.pid);
     console.log('    process.platform:    ' + process.platform);
     console.log('    process.version:     ' + process.version);
-    console.log('    process.execPath:   ' + process.execPath);
+    console.log('    process.execPath:    ' + process.execPath);
+    console.log('    process.argv[1]:     ' + process.argv[1]);
 
     console.log('    process.env.SHLVL:   ' + process.env.SHLVL);
     console.log('    process.env.LOGNAME: ' + process.env.LOGNAME);
     console.log('    process.env.HOME:    ' + process.env.HOME);
     console.log('    process.env.PWD:     ' + process.env.PWD);
     console.log('    process.env._:       ' + process.env._);
-
-    // TODO - error if ! this.options.services.name
 
     console.log(Util.DateGMTString()+' **** Loading Configuration...');
 
@@ -100,15 +102,25 @@ function ServiceManager(configFiles){
     console.log('    services.appInternalPort: ' + this.options.services.appInternalPort);
     console.log('    services.appAssessmentPort: ' + this.options.services.appAssessmentPort);
 
-    // TODO - error if ! services.appExternalPort etc.
+    if(!this.options.services.appExternalPort){
+        console.log('X X X X    Error -- expect services.appExternalPort in config.json');
+        // return;
+    }
+
+    if(!this.options.services.appInternalPort){
+        console.log('X X X X    Error -- expect services.appInternalPort in config.json');
+        // return;
+    }
 
     if(!this.options.services) {
+        // TODO - error - this.options.services.appExternalPort must be set
         this.options.services = {};
-        // TODO - error
     }
     if(!this.options.services.session) {
         this.options.services.session = {};
     }
+
+    this.options.services.startScript = startScript;
 
     global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
@@ -238,6 +250,7 @@ return when.promise(function(resolve, reject) {
 
             this.app = express();
             this.app.set('port', process.env.PORT || this.options.services.port);
+            // process.env.PORT not used here
 
             this.app.configure(function() {
 
@@ -369,9 +382,9 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
     // if(this.options.services.name && 'app-external' == this.options.services.name){
     //     var sslServerPort = this.sslServerPort || 443;
     //     var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
-    // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
-    // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
-    // res.sendfile( fullPath );
+    //     console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
+    //     console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
+    //     res.sendfile( fullPath );
     // }
 
             // // Redirecting this request also causes all the file gest for this page to redirect.
@@ -649,6 +662,14 @@ return when.promise(function(resolve, reject) {
 ServiceManager.prototype.start = function(port) {
     console.log(Util.DateGMTString()+' ServiceManager start('+port+')');
 
+    var portArg = port;
+
+    if(!this.options.services.name){
+        console.log('X X X X    Error -- expect serverices.name set in e.g. app-external.js');
+        console.log('                    ' + this.options.services.startScript + ' should call manager.setName().');
+        // return;
+    }
+
     console.log('Loading Version File...');
     this.loadVersionFile()
         .then(function(str) { // resolve(str)
@@ -693,14 +714,15 @@ ServiceManager.prototype.start = function(port) {
                         cert: fs.readFileSync(this.options.services.TlsFiles.certName)
                     }
 
-                    var serverPort = port || this.app.get('port');
+                    var serverPort = portArg || this.app.get('port');
                     //
                     // 8001  app_external
                     // 8002  app_internal
                     // 8003  app_assessment     (different source)
 
                     // app-internal or app-external ?
-                    if( serverPort && 8002 == serverPort){  // internal server
+                    // if( serverPort && 8002 == serverPort){  // internal server
+                    if(this.options.services.name && 'app-internal' == this.options.services.name){
 
                         // update user count stats telemetry
                         updateTelemetryStats.call(this, this.stats);
@@ -709,14 +731,7 @@ ServiceManager.prototype.start = function(port) {
                     //  console.log(" ");
                     console.log("Setting Up Routes...");
 
-                    if( serverPort && 8002 == serverPort)
-                    {
-                        // internal server
-                        // TODO - better test for is-internal-server
-                    }else{
-
-                //  }else{
-                //  if(serverPort && 8001 == serverPort){
+                    if(this.options.services.name && 'app-external' == this.options.services.name){
 
                         // external server
 
@@ -735,13 +750,20 @@ ServiceManager.prototype.start = function(port) {
                                 return;
                             }
 
-                            // var forwProto = req.get('X-Forwarded-Proto');
+                            // AWS says X-Forwarded-Proto and X-Forwarded-Port will be present if
+                            // the request came to the EC2 server through the ELB.
+
+                            var forwProto = req.get('X-Forwarded-Proto');
+                            var forwPort = req.get('X-Forwarded-Port');
+
+                            var reqPort = req.get('port') || host.split(":")[1];
 
                             if(req.secure){
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
-                                console.log(Util.DateGMTString()+' Request - ');
+                                console.log(Util.DateGMTString()+' Secure Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
                                 next();
                             }else{
+                                console.log(Util.DateGMTString()+' INSECURE Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
 
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
 
