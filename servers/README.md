@@ -103,10 +103,30 @@ OSX Installation
 
 6. Install/Setup **Couchbase** Server
    1. Download: http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.zip
-   2. Extract and Install App
+   2. Extract and Install App (install by dragging Couchbase from Zip into Applications on OS-X)
    3. Login into admin console [http://localhost:8091](http://localhost:8091)
    	 * Note If the login does not work (brings up a file not found), make sure that all of its services are allowed incoming connections, then quit couchbase (I used the Activity Monitor to close it) and start it again.  If it doesn't immediately get permission for incoming connections it can get confused.
    	 * Note Make sure to use the default paths for data.  If you change the path, it may not function, you'll have to uninstall and start over.
+     * Note: If you do uninstall on OS-X, follow these instructions: http://docs.couchbase.com/admin/admin/Install/mac-uninstall.html
+     * Note: You might see a different set of menus than (4) and (5), if so and assuming you see "Configure Server   Step 1 of 5" as your first window when logging into Admin Console after first install, follow (4.alt) and skip (4), (5), and (6):
+   4.alt. 
+      Step 1 of 5:
+          * Leave disk storage paths and Server Hostname as is
+          * Start a new cluster.  Leave the RAM Quota as is, as mentioned in (5) below, it is just a quota.
+      Step 2 of 5:
+          * Samples, do not install
+      Step 3 of 5:
+          * Use Bucket Type Couchbase
+          * Leave quota as is
+          * Relicas, make sure both setings are off (Enable, Index replicas)
+          * Disk R-W, leave as is
+          * Flush, leave disabled
+      Step 4 of 5:
+          * Leave notications as is
+      Step 5 of 5:
+          * As step (4) below, this is your admin account.
+
+      Skip to step 7 (available in menu)
    4. Create user (remember the username/password this is your admin account) 
    5. Create Server (use default settings with a minimum of 512MB for the servers memory)
      * Note you can NOT edit the mem usage later, so it's recommended to leave it at default or all memory. The memory is a cap for all the buckets caps, it will not pre-allocat this memory so it's safe to put a high cap here.
@@ -114,7 +134,7 @@ OSX Installation
    6. For the default bucket choose the 100MB (minimal size) for ram
      * You can delete this bucket later it's not used
    7. Add the required buckets
-     * Select "Data Buckets" from the admin console
+     * Select "Data Buckets" from the admin console.  Note that I HAD to delete the 'default' bucket, since it was using all of the ram (safe, the default isn't used).  You can delete the 'default' by selecting the arrow to the left of 'default', select 'edit', then 'delete'.
         * Create two data buckets
            1. Click "Create New Data Bucket"
                1. Name: "glasslab_gamedata"
@@ -140,8 +160,23 @@ OSX Installation
            2. 8092    Couchbase API Port
            3. 11210   Internal/External Bucket Port
            4. 11211   Client interface (proxy)
-           
-7. Installation Complete
+
+7. Setup mail access
+   Create a 'hydra.config.json' file in your user root: ~/
+   Contents, where <user> is your user acct:
+   {
+    "auth": {
+        "email": {
+             "from": "<accounts@glasslabgames.org>",
+             "transportMethod": "PICKUP",
+             "transport": "/Users/<user>/tmpmail"
+         }
+     }
+   }
+
+8. Ensure that xcode is installed (used for building node_modules, must be up to date with OS-X)
+
+9. Installation Complete
 
 Linux (Ubuntu 12.04) Installation
 ------------
@@ -227,7 +262,12 @@ Running the app
       ```sh
       $ sudo npm install -g grunt-cli
       ```
-2. In a browser go to [http://localhost:8001](http://localhost:8001)
+
+      Couchbase might not have built:
+      It is important to check Platform/servers/node_modules/couchbase/builderror.log and confirm that it has no errors.  The npm scripts will SILENTLY fail if there are any errors building the couchbase interface and you will get errors launching and other issues.
+      One Issue I encountered that kept Couchbase from being built properly was the failure of the gyp scripts to generate a proper config.h (Platform/servers/node_modules/couchbase/deps/lcb/src/config.h).  I think we're missing something here, since the prebuilt dirs (Platform/servers/node_modules/couchbase/prebuilt) are for windows only, which wouldn't make sense if this is configured for the existing platform (in my case OS-X).  One workable fix is to copy Platform/servers/node_modules/couchbase/deps/lcb/gyp_config/mac/x64/config.h to Platform/servers/node_modules/couchbase/deps/lcb/src/config.h, then do a 'sudo npm rebuild'.  Later I will investigate why we are not always getting couchbase setup correctly for build (works with warnings on one OSX system - 10.10.4 with a lot of existing developer tools, this particular error on 10.10.5 with only xcode and tools indicated in these readme's.  I suspect we're missing some tool dependencies.)
+2. Confirm that the services started without errors by reviewing /var/log/hydra/app-external.log and /var/log/hydra/app-internal.log.  This is CRITICAL, as many errors are silent.  (should be fixed)
+3. In a browser go to [http://localhost:8001](http://localhost:8001)
 
 
 Configs
