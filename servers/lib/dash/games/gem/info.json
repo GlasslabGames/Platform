@@ -1,7 +1,7 @@
 {
     "basic": {
         "gameId": "GEM",
-        "enabled": false,
+        "enabled": true,
         "visible": false,
         "maintenance": null,
         "shortName": "Gemini",
