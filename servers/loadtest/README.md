@@ -5,6 +5,7 @@ Dependencies
 ------------
 Python
 Locust (http://locust.io, load test framework)
+http-proxy node module <= 0.10.4
 
 Linux (Ubuntu 12.04 and compatible) Installation
 ------------
@@ -12,6 +13,11 @@ Linux (Ubuntu 12.04 and compatible) Installation
  ```sh
  sudo apt-get install -y python-pip python-dev libzmq-dev python-lxml
  sudo pip install locustio pyzmq pyquery
+ ```
+
+2. Ensure that you have http-proxy 0.10.4 installed
+ ```sh
+ npm install http-proxy@0.10.4
  ```
 
 Load Testing
