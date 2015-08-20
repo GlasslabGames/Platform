@@ -161,10 +161,10 @@ OSX Installation
            3. 11210   Internal/External Bucket Port
            4. 11211   Client interface (proxy)
 
-7. Setup mail access
-   Create a 'hydra.config.json' file in your user root: ~/
-   Contents, where <user> is your user acct:
-   {
+7. Setup your config overrides and email access
+   Copy 'Platform/scripts/sample.hydra.config.json' to '~/hydra.config.json'.
+
+   In the 'hydra.config.json' you placed in your root dir '~/', change <user> to your user account name in auth.email.transport:
     "auth": {
         "email": {
              "from": "<accounts@glasslabgames.org>",
@@ -172,7 +172,6 @@ OSX Installation
              "transport": "/Users/<user>/tmpmail"
          }
      }
-   }
 
 8. Ensure that xcode is installed (used for building node_modules, must be up to date with OS-X)
 
