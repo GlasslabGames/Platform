@@ -112,12 +112,20 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                         user.permits = aConst.permits[user.role];
                     }
                     if(results.role === "instructor"){
-                        return this.getLicenseInfoByInstructor(id);
+                        return this.getLicenseRecordsByInstructor(id);
                     }
                     return [];
                 } else {
                     return "none";
                 }
+            }.bind(this))
+            .then(function(results){
+                if(!((results === "none")||(results.length===0))){
+                    // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
+                    user.hadTrial = true;
+                    console.log("user had trial or previous subscriptions: ", user.username);
+                }
+                return this.getLicenseInfoByInstructor(id);
             }.bind(this))
             .then(function(results){
                 if(results === "none"){
@@ -134,7 +142,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 resolve(user);
             })
             .then(null, function(err) {
-                    reject({"error": "failure", "exception": err}, 500);
+                reject({"error": "failure", "exception": err}, 500);
             }.bind(this));
 
 // ------------------------------------------------
@@ -356,3 +364,27 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
             });
     }.bind(this));
 };
+
+
+WebStore_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
+            "WHERE user_id = " + userId+ ") as lm\n" +
+            "ON lic.id = lm.license_id;";
+        var licenseInfo;
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length === 0){
+                    resolve([]);
+                    return;
+                }
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Get License Record Count By Instructor Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
