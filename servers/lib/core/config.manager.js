@@ -32,6 +32,7 @@ ConfigManager.prototype.loadSync = function(files, fileType) {
 
                     if(fileType == "json") {
                         // merge in next
+                        console.log('merging config file '+file);
                         this.config = _.merge(
                             this.config,
                             JSON.parse(data)
