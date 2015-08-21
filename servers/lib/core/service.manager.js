@@ -749,6 +749,9 @@ ServiceManager.prototype.start = function(port) {
                         console.log('                    It rejects [403] any request with no "host" in the header. ');
 
                         this.app.all("*", function(req, res, next) {
+
+                            this.stats.increment("info", "any.request");
+
                             var host = req.get("host");
                             if (!host) {
                                 console.log("  ****** req.host missing, sending 403 error  ******  ");
