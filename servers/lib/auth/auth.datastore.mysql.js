@@ -310,7 +310,10 @@ return when.promise(function(resolve, reject) {
             }
         }.bind(this))
         .then(function(results){
-            if(!(_.isArray(value) || (results === "none") || (results.length===0))){
+            if (_.isArray(value)) {
+                return [];
+            }
+            if(!((results === "none") || (results.length===0))){
                 // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
                 user.hadTrial = true;
             }
