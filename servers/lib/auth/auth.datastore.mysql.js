@@ -297,11 +297,11 @@ return when.promise(function(resolve, reject) {
 
                 // if input not array then return a single user
                 if(!_.isArray(value)) {
-                    single_user = user[0];
-                    if(single_user["verifyCodeStatus"] === "invited"){
+                    user = user[0];
+                    if(user["verifyCodeStatus"] === "invited"){
                         return "tempUser";
-                    } else if(single_user.role === "instructor"){
-                        return this.getLicenseRecordsByInstructor(single_user.id);
+                    } else if(user.role === "instructor"){
+                         return this.getLicenseRecordsByInstructor(user.id);
                     }
                 }
                 return [];
@@ -310,12 +310,11 @@ return when.promise(function(resolve, reject) {
             }
         }.bind(this))
         .then(function(results){
-            if(!((results === "none")||(results.length===0))){
+            if(!(_.isArray(value) || (results === "none") || (results.length===0))){
                 // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
                 user.hadTrial = true;
-                console.log("user had trial or previous subscriptions: ", single_user.username);
             }
-            return this.getLicenseInfoByInstructor(single_user.id);
+            return this.getLicenseInfoByInstructor(user.id);
         }.bind(this))
         .then(function(results){
             if(typeof results === "string"){
@@ -324,11 +323,11 @@ return when.promise(function(resolve, reject) {
             }
             // if gained results, add all relevant license information
             if(results.length > 0) {
-                return _addLicenseInfoToUser.call(this, single_user, results);
+                return _addLicenseInfoToUser.call(this, user, results);
             }
         }.bind(this))
         .then(function(){
-            resolve(single_user);
+            resolve(user);
         })
         .then(null, function(err) {
             reject({"error": "failure", "exception": err}, 500);
