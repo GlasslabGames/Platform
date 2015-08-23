@@ -53,7 +53,10 @@ function ServiceManager(configFiles){
     Util              = require('../core/util.js');
     var ConfigManager = require('../core/config.manager.js');
 
+    var startScript = process.argv[1].split("servers/")[1];
+
     console.log(" **************************************** ");
+    console.log("        " + startScript);
     console.log(" **************************************** ");
 
     console.log("ServiceManager()");
@@ -61,7 +64,8 @@ function ServiceManager(configFiles){
     console.log('    process.pid:         ' + process.pid);
     console.log('    process.platform:    ' + process.platform);
     console.log('    process.version:     ' + process.version);
-    console.log('    process.execPath:   ' + process.execPath);
+    console.log('    process.execPath:    ' + process.execPath);
+    console.log('    process.argv[1]:     ' + process.argv[1]);
 
     console.log('    process.env.SHLVL:   ' + process.env.SHLVL);
     console.log('    process.env.LOGNAME: ' + process.env.LOGNAME);
@@ -92,15 +96,35 @@ function ServiceManager(configFiles){
     console.log('Configs loaded');
     console.log('    env: ' + this.options.env);
     console.log('    services.port: ' + this.options.services.port);
+    console.log('    services.portSSL: ' + this.options.services.portSSL);
     console.log('    services.portNonSSL: ' + this.options.services.portNonSSL);
+    console.log('    services.appExternalPort: ' + this.options.services.appExternalPort);
+    console.log('    services.appInternalPort: ' + this.options.services.appInternalPort);
+    console.log('    services.appAssessmentPort: ' + this.options.services.appAssessmentPort);
 
+    if(!this.options.services.appExternalPort){
+        console.log('');
+        console.log('****************    Error -- expect services.appExternalPort in config.json');
+        console.log('');
+        return;
+    }
+
+    if(!this.options.services.appInternalPort){
+        console.log('');
+        console.log('****************    Error -- expect services.appInternalPort in config.json');
+        console.log('');
+        return;
+    }
 
     if(!this.options.services) {
+        // TODO - error - this.options.services.appExternalPort must be set
         this.options.services = {};
     }
     if(!this.options.services.session) {
         this.options.services.session = {};
     }
+
+    this.options.services.startScript = startScript;
 
     global.ENV            = this.options.env || 'dev';
     process.env.HYDRA_ENV = process.env.HYDRA_ENV || global.ENV;
@@ -230,6 +254,7 @@ return when.promise(function(resolve, reject) {
 
             this.app = express();
             this.app.set('port', process.env.PORT || this.options.services.port);
+            // process.env.PORT not used here
 
             this.app.configure(function() {
 
@@ -351,19 +376,20 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
                 return;
             }
 
-            var sslServerPort = this.sslServerPort || 443;
-            var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
-
 
     // safe migration for release-candidate to develop branch
     res.sendfile( fullPath );
 
-    // Test - Turn off this redirect to test catching static requests and file gets.
-    //
-    // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
-    // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
-    // res.sendfile( fullPath );
 
+    // Test - Turn off the redirect to test catching static requests and file gets.
+    //
+    // if(this.options.services.name && 'app-external' == this.options.services.name){
+    //     var sslServerPort = this.sslServerPort || 443;
+    //     var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+    //     console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
+    //     console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
+    //     res.sendfile( fullPath );
+    // }
 
             // // Redirecting this request also causes all the file gest for this page to redirect.
             // console.log('****** rediriecting "/" http request to ' + newUrl + ' ****** ');
@@ -640,6 +666,16 @@ return when.promise(function(resolve, reject) {
 ServiceManager.prototype.start = function(port) {
     console.log(Util.DateGMTString()+' ServiceManager start('+port+')');
 
+    var portArg = port;
+
+    if(!this.options.services.name){
+        console.log('');
+        console.log('****************    Error -- expect serverices.name set in e.g. app-external.js');
+        console.log('****************             call manager.setName() in ' + this.options.services.startScript);
+        console.log('');
+        return;
+    }
+
     console.log('Loading Version File...');
     this.loadVersionFile()
         .then(function(str) { // resolve(str)
@@ -684,14 +720,15 @@ ServiceManager.prototype.start = function(port) {
                         cert: fs.readFileSync(this.options.services.TlsFiles.certName)
                     }
 
-                    var serverPort = port || this.app.get('port');
+                    var serverPort = portArg || this.options.services.port || 8001;
                     //
                     // 8001  app_external
                     // 8002  app_internal
                     // 8003  app_assessment     (different source)
 
                     // app-internal or app-external ?
-                    if( serverPort && 8002 == serverPort){  // internal server
+                    // if( serverPort && 8002 == serverPort){  // internal server
+                    if(this.options.services.name && 'app-internal' == this.options.services.name){
 
                         // update user count stats telemetry
                         updateTelemetryStats.call(this, this.stats);
@@ -700,14 +737,7 @@ ServiceManager.prototype.start = function(port) {
                     //  console.log(" ");
                     console.log("Setting Up Routes...");
 
-                    if( serverPort && 8002 == serverPort)
-                    {
-                        // internal server
-                        // TODO - better test for is-internal-server
-                    }else{
-
-                //  }else{
-                //  if(serverPort && 8001 == serverPort){
+                    if(this.options.services.name && 'app-external' == this.options.services.name){
 
                         // external server
 
@@ -719,6 +749,9 @@ ServiceManager.prototype.start = function(port) {
                         console.log('                    It rejects [403] any request with no "host" in the header. ');
 
                         this.app.all("*", function(req, res, next) {
+
+                            this.stats.increment("info", "any.request");
+
                             var host = req.get("host");
                             if (!host) {
                                 console.log("  ****** req.host missing, sending 403 error  ******  ");
@@ -726,18 +759,34 @@ ServiceManager.prototype.start = function(port) {
                                 return;
                             }
 
-                            // var forwProto = req.get('X-Forwarded-Proto');
+                            // AWS says X-Forwarded-Proto and X-Forwarded-Port will be present if
+                            // the request came to the EC2 server through the ELB.
+
+                            var forwProto = req.get('X-Forwarded-Proto');
+                            var forwPort = req.get('X-Forwarded-Port');
+
+                            var reqPort = req.get('port') || host.split(":")[1];
 
                             if(req.secure){
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
-                                console.log(Util.DateGMTString()+' Request - ');
+                                if(forwProto){
+                                console.log(Util.DateGMTString()+' Secure Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
+                                }else{
+                                    console.log(Util.DateGMTString()+' Secure Request -- port = '+reqPort+'  -- host = '+host);
+                                }
                                 next();
                             }else{
 
+                                if(forwProto){
+                                console.log(Util.DateGMTString()+' INSECURE Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
+                                }else{
+                                    console.log(Util.DateGMTString()+' INSECURE Request -- port = '+reqPort+'  -- host = '+host);
+                                }
+
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
 
-                                var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
-                             // var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
+                             //    var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
+                             // // var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
 
                                 next();
 
@@ -765,35 +814,37 @@ ServiceManager.prototype.start = function(port) {
                     console.log('        -----------------------------------------------------    ');
                     console.log('        8001 http  <- ELB <- 80   http      // insecure web site ');
                     console.log('        8001 http  <- ELB <- 8080 http      //                   ');
+                    // console.log('                                                                        ');
+                    // console.log('        8001 http  <- ELB <- 8001 http          // these can be blocked ');
+                    // console.log('        8002 http  <- ELB <- 8002 http          // if external access   ');
+                    // console.log('        8003 http  <- ELB <- 8003 http          // is not allowed.      ');
                     console.log('                                                                 ');
-                    console.log('        8001 http  <- ELB <- 8001 http          // these can be blocked ');
-                    console.log('        8002 http  <- ELB <- 8002 http          // if external access ');
-                    console.log('        8003 http  <- ELB <- 8003 http          // is not allowed. ');
-                    console.log(' ');
+                    console.log('        8080 https  ( can work without ELB ) '); 
                     console.log('        8043 https  ( NOT decoded by ELB ) '); 
-                    // console.log('        1943 https  ( NOT decoded by ELB ) '); 
-                    console.log('        ----------------------------------------------------- ');
+                    console.log('        ------------------------------------ ');
 
                     // 8001  app_external
                     // 8002  app_internal
                     // 8003  app_assessment     (different source)
 
-                    // var httpServerPort = this.options.services.portNonSSL || 8080;      // ELB: 80 -> 8080
+                    var httpServerPort = 8001;      // default app-external port
+                    var httpServerPort_02 = 8080;   // second http port -- can work without ELB
 
-                    var sslServerPort = 8043;
-                    // var sslServerPort_02 = 1943;
-
-                    var httpServerPort = serverPort;    // 8001 or 8002
-                    var httpServerPort_02 = 8080;
+                    // set services.portSSL = 8043 for local dev
+                    // not used if services.sslDecodedByProxy == true
+                    var sslServerPort = this.options.services.portSSL || 443;
 
                     console.log(Util.DateGMTString()+' attaching ports ... ');
 
                     if(this.options.services.name && 'app-external' == this.options.services.name){
-
-                        httpServerPort = this.services.appExternalPort || 8001;     // 8001
-
                         // app-external
                         // 8001 primary http port - insecure
+                        httpServerPort = this.services.portNonSSL || this.services.appExternalPort || 8001;
+
+                        if((443 != serverPort) && (8043 != serverPort)){
+                            httpServerPort = serverPort;
+                        }
+
                         console.log('                        attempting to attach port '+httpServerPort+' ... ');
                         http.createServer(this.app).listen(httpServerPort, function createServer(){
                             this.httpServerPort = httpServerPort;
@@ -802,17 +853,26 @@ ServiceManager.prototype.start = function(port) {
                             // console.log('---------------------------------------------------------------------------------------');
                         }.bind(this));
 
-                        // second http port
-                        console.log('                        attempting to attach port '+httpServerPort_02+' ... ');
-                        http.createServer(this.app).listen(httpServerPort_02, function createServer(){
-                            this.httpServerPort_02 = httpServerPort_02;
-                            console.log('                        listening on port '+httpServerPort_02+' (http). ');
-                        }.bind(this));
+                        if(this.options.portNonSSL && this.options.portNonSSL != httpServerPort){
+                            httpServerPort_02 = this.options.portNonSSL;
+                        }
 
+                        // second http port -- can work without ELB
+                        if(httpServerPort != httpServerPort_02){
+                            console.log('                        attempting to attach port '+httpServerPort_02+' ... ');
+                            http.createServer(this.app).listen(httpServerPort_02, function createServer(){
+                                this.httpServerPort_02 = httpServerPort_02;
+                                console.log('                        listening on port '+httpServerPort_02+' (http). ');
+                            }.bind(this));
+                        }
 
+                        // primary SSL port
                         if(!this.options.services.sslDecodedByProxy){
 
-                            // primary SSL port
+                            if((443 == serverPort) || (8043 == serverPort)){
+                                sslServerPort = serverPort;
+                            }
+
                             // insecure website requests will redirect to this port
                             console.log('                        attempting to attach port '+sslServerPort+' ... ');
 
@@ -825,19 +885,11 @@ ServiceManager.prototype.start = function(port) {
 
                         }
 
-                        // // second SSL port
-                        // // never decoded by proxy
-                        // console.log('                        attempting to attach port '+sslServerPort_02+' ... ');
-                        // https.createServer(TlsOptions, this.app).listen(sslServerPort_02, function createServer(){
-                        //     this.sslServerPort_02 = sslServerPort_02;
-                        //     console.log('                        listening on port '+sslServerPort_02+' (https). ');
-                        // }.bind(this));
-
-
                     }else{
                         if(this.options.services.name && 'app-internal' == this.options.services.name){
                             // app-internal
                             // 8002 primary http port - insecure
+                            httpServerPort = this.options.services.appInternalPort || 8002;
                             console.log('                        attempting to attach port '+httpServerPort+' ... ');
                             http.createServer(this.app).listen(httpServerPort, function createServer(){
                                 this.httpServerPort = httpServerPort;

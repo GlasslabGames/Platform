@@ -27,8 +27,6 @@ module.exports = {
                 "WWF"
             ],
             "iPadGames": [
-                "AA-1",
-                "PVZ"
             ],
             "downloadableGames": [
             ],
@@ -40,8 +38,6 @@ module.exports = {
             "description": "Games in this package are optimized to work on iPads.",
             "pricePerSeat": 3,
             "browserGames": [
-                "PRIMA",
-                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
@@ -66,8 +62,6 @@ module.exports = {
                 "WWF"
             ],
             "iPadGames": [
-                "AA-1",
-                "PVZ"
             ],
             "downloadableGames": [
                 "SC"
