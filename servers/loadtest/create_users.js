@@ -1,10 +1,11 @@
 var http = require('http');
-var hostname = "stage.glgames.org";
-port = 80;
+var hostname = "stage.playfully.org";
+var port = 80;
 
-hostname = "localhost";
+
+//hostname = "localhost";
 //port = 9080;
-port = 8001;
+//port = 8001;
 
 //hostname = "glasslab-dashboard-stage-164657619.us-west-2.elb.amazonaws.com";
 //hostname = "test.glgames.org";
@@ -64,7 +65,7 @@ createCoursesWithUsers(
     "jlt_test1_", 0, 1);
 */
 
-var id = "LT02";
+var id = "LT01";
 // 200 courss, 30 students in each course, 6000 students total
 createCoursesWithUsers(
     "jlt_1@instituteofplay.org", "jlt_1",
@@ -190,8 +191,84 @@ function createCode(cookie, courseName, courseId, cb){
 	    "id":"AA-1"
 		}]
     });
-	
-	var post_options = new Object(templates.post_options);
+
+/*
+    var post_data = JSON.stringify( {
+	"title":courseName + courseId,
+	"grade":"7",
+	"games":[
+	    {"gameId":"PRIMA",
+	     "enabled":true,
+	     "visible":true,
+	     "maintenance":null,
+	     "shortName":"Ratio Rancher",
+	     "longName":"Ratio Rancher",
+	     "grades":"6 - 12",
+	     "subject":"Mathematics",
+	     "type":"Browser",
+	     "platform":{
+		 "type":"Browser (Optimized for Chrome)",
+		 "icon":{
+		     "small":"assets/platform-browser.png",
+		     "large":"assets/platform-browser@2x.png"
+		 }
+	     },
+	     "price":"Free",
+	     "packages":"PC/Mac, Chromebook/Web Games",
+	     "release":"live",
+	     "releaseDate":"May 22, 2015",
+	     "shortDescription":"Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
+	     "description":"Ratio Rancher is a nurturing strategy/puzzle game that promotes understanding of ratios and proportions. Students are in charge of their own lush, green world filled with wacky creatures that have surprising eating habits!",
+	     "developer":{
+		 "id":"GL",
+		 "name":"GlassLab, Inc.",
+		 "logo":{
+		     "small":"assets/glasslab-logo.png",
+		     "large":"assets/glasslab-logo-2x.png"
+		 },
+		 "description":"GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
+	     },
+	     "settings":{
+		 "canCreateMatches":false
+	     },
+	     "license":{
+		 "type":"loginType",
+		 "loginType":["glasslabv2","icivics","edmodo"],
+		 "valid":true,
+		 "message":{
+		     "invalid":"Coming Soon!"
+		 }
+	     },
+	     "thumbnail":{
+		 "small":"assets/thumb-game-PRIMA.png",
+		 "large":"assets/thumb-game-PRIMA@2x.png"
+	     },
+	     "card":{
+		 "small":"assets/game-card-PRIMA.png",
+		 "large":"assets/game-card-PRIMA@2x.png"
+	     },
+	     "banners":{
+		 "product":"assets/game-banner-PRIMA.png",
+		 "reports":"assets/game-banner-PRIMA.png"
+	     },
+	     "play":{
+		 "type":"page",
+		 "page":{
+		     "title":"Prima",
+		     "embed":"http://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/22/index.html?sdkURL=http://www.glasslabgames.org",
+		     "embedSecure":"https://s3-us-west-1.amazonaws.com/playfully-games/PRIMA/game/22/index.html?sdkURL=https://www.glasslabgames.org",
+		     "format":"html",
+		     "size":{
+			 "width":800,
+			 "height":600
+		     }
+		 }
+	     },
+	     "id":"PRIMA"}
+	]
+    });
+*/
+    var post_options = new Object(templates.post_options);
     post_options.method = "POST";
     post_options.path = "/api/v2/lms/course/create";
     post_options.headers['Content-Length'] = post_data.length;
@@ -274,8 +351,7 @@ function createUsersWithCode(code, username, startId, numOfUsers){
 
 function validateCode(code, cb)
 {
-
-	options = {};
+    options = {};
     options.host    = hostname;
     options.port    = port;
     options.method  = "GET";
@@ -297,7 +373,7 @@ function validateCode(code, cb)
 
             jdata = JSON.parse(data);
             cb(code);
-        });hostname
+        });
 
         //console.log('Response headers: ', res.headers);
     });
@@ -307,7 +383,7 @@ function validateCode(code, cb)
 
 function createUsers(code, username, startId, numOfUsers) {
     for(var i = startId; i < startId + numOfUsers; i++){
-        data = new Object(templates.user);
+        var data = new Object(templates.user);
         data.username = username + i;
         data.firstName = username + i;
         data.lastName = "x";
@@ -320,31 +396,31 @@ function createUsers(code, username, startId, numOfUsers) {
         post_options.method = "POST";
         post_options.headers['Content-Length'] = post_data.length;
         post_options.path = "/api/v2/auth/user/register";
-        delete post_options.headers['set-cookie'];
-        delete post_options.headers['cookie'];
-
-        var post_reg = http.request(post_options, function(res) {
-        	validateResponse(res, function(res) {
-        		console.log("Failed to create user", username + i );
-        	});
-        	console.log("creaing user #",i)
-            res.setEncoding('utf8');
-            var data = "";
-            res.on('data', function (chunk) {
-                data += chunk;
+	
+	// Execute anonymous function with capture of i;
+        (function a(id) {
+	    var post_reg = http.request(post_options, function(res) {
+		validateResponse(res, function(res) {
+        	    console.log("Failed to create user", id );
+		});
+       		console.log("creating user ",id);
+		res.setEncoding('utf8');
+		var newdata = "";
+		res.on('data', function (chunk) {
+                    newdata += chunk;
+		});
+		res.on('end', function () {
+                    if(res.statusCode != 200) {
+			console.log('error!!! createUsers Response - username:', username, ', statusCode', res.statusCode, ', data:', newdata);
+                    } else {
+			//console.log('createUsers Response: ', data);
+                    }
+		});
             });
-            res.on('end', function () {
-                
-                if(res.statusCode != 200) {
-                    //console.log('error!!! createUsers Response - username:', username, ', statusCode', res.statusCode, ', data:', data);
-                } else {
-                    //console.log('createUsers Response: ', data);
-                }
-            });
-        });
-        // post the data
-        post_reg.write(post_data);
-        post_reg.end();
+            // post the data
+            post_reg.write(post_data);
+            post_reg.end();
+	})(i);
     }
 }
 
