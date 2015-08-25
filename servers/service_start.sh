@@ -5,9 +5,11 @@
 #
 # ./service_start.sh app-external "app-external.js"
 # ./service_start.sh app-internal "app-internal.js"
+# ./service_start.sh app-archiver "app-archiver.js"
 # or
 # ./service_start.sh external
 # ./service_start.sh internal
+# ./service_start.sh archiver
 
 NAME=$1
 

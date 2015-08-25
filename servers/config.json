@@ -10,6 +10,7 @@
         "appExternalPort":   8001,
         "appInternalPort":   8002,
         "appAssessmentPort": 8003,
+        "appArchiverPort":   8004,
         "TlsFiles": {
             "caName": "ssl-key/root-ca.crt.pem",
             "keyName": "ssl-key/server.key.pem",
@@ -171,7 +172,8 @@
         "s3PathPrefix": "",
         "cron": {
             "time": "0 0 1 * * *", "//": "everyday at 1 am",
-            "enabled": false
+            "enabled": false,
+            "server": "app-archiver"
         }
     },
     "lic":{

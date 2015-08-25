@@ -101,6 +101,7 @@ function ServiceManager(configFiles){
     console.log('    services.appExternalPort: ' + this.options.services.appExternalPort);
     console.log('    services.appInternalPort: ' + this.options.services.appInternalPort);
     console.log('    services.appAssessmentPort: ' + this.options.services.appAssessmentPort);
+    console.log('    services.appArchiverPort: ' + this.options.services.appArchiverPort);
 
     if(!this.options.services.appExternalPort){
         console.log('');
@@ -116,6 +117,13 @@ function ServiceManager(configFiles){
         return;
     }
 
+    if(!this.options.services.appArchiverPort){
+        console.log('');
+        console.log('****************    Error -- expect services.appArchiverPort in config.json');
+        console.log('');
+        return;
+    }
+    
     if(!this.options.services) {
         // TODO - error - this.options.services.appExternalPort must be set
         this.options.services = {};
@@ -434,7 +442,7 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
                 // 8001  app_external
                 // 8002  app_internal
                 // 8003  app_assessment     (different source)
-
+                // 8004  app_archiver
                 var sslServerPort = this.sslServerPort || 443;
 
                 var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
@@ -725,6 +733,7 @@ ServiceManager.prototype.start = function(port) {
                     // 8001  app_external
                     // 8002  app_internal
                     // 8003  app_assessment     (different source)
+                    // 8004  app_archiver
 
                     // app-internal or app-external ?
                     // if( serverPort && 8002 == serverPort){  // internal server
@@ -818,6 +827,7 @@ ServiceManager.prototype.start = function(port) {
                     // console.log('        8001 http  <- ELB <- 8001 http          // these can be blocked ');
                     // console.log('        8002 http  <- ELB <- 8002 http          // if external access   ');
                     // console.log('        8003 http  <- ELB <- 8003 http          // is not allowed.      ');
+                    // console.log('        8004 http  <- ELB <- 8004 http');
                     console.log('                                                                 ');
                     console.log('        8080 https  ( can work without ELB ) '); 
                     console.log('        8043 https  ( NOT decoded by ELB ) '); 
@@ -826,6 +836,7 @@ ServiceManager.prototype.start = function(port) {
                     // 8001  app_external
                     // 8002  app_internal
                     // 8003  app_assessment     (different source)
+                    // 8004  app_archiver
 
                     var httpServerPort = 8001;      // default app-external port
                     var httpServerPort_02 = 8080;   // second http port -- can work without ELB
@@ -885,18 +896,26 @@ ServiceManager.prototype.start = function(port) {
 
                         }
 
-                    }else{
-                        if(this.options.services.name && 'app-internal' == this.options.services.name){
-                            // app-internal
-                            // 8002 primary http port - insecure
-                            httpServerPort = this.options.services.appInternalPort || 8002;
-                            console.log('                        attempting to attach port '+httpServerPort+' ... ');
-                            http.createServer(this.app).listen(httpServerPort, function createServer(){
-                                this.httpServerPort = httpServerPort;
-                                this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-                                console.log('                        listening on port '+httpServerPort+' (http). ');
-                            }.bind(this));
-                        }
+                    } else if(this.options.services.name && 'app-internal' == this.options.services.name){
+                        // app-internal
+                        // 8002 primary http port - insecure
+                        httpServerPort = this.options.services.appInternalPort || 8002;
+                        console.log('                        attempting to attach port '+httpServerPort+' ... ');
+                        http.createServer(this.app).listen(httpServerPort, function createServer(){
+                            this.httpServerPort = httpServerPort;
+                            this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                            console.log('                        listening on port '+httpServerPort+' (http). ');
+                        }.bind(this));
+                    } else if(this.options.services.name && 'app-archiver' == this.options.services.name){
+                        // app-aechiver
+                        // 8004 primary http port - insecure
+                        httpServerPort = this.options.services.appArchiverPort || 8004;
+                        console.log('                        attempting to attach port '+httpServerPort+' ... ');
+                        http.createServer(this.app).listen(httpServerPort, function createServer(){
+                            this.httpServerPort = httpServerPort;
+                            this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                            console.log('                        listening on port '+httpServerPort+' (http). ');
+                        }.bind(this));
                     }
 
                     console.log('---------------------------------------------------------------------------------------');
