@@ -181,7 +181,7 @@ function getCurrentPlan(req, res){
         }.bind(this));
 }
 
-// for instructors, this api shows there students who are taking up seats in the license
+// for instructors, this api shows their students who are taking up seats in the license
 // for the license owner, this api shows all students who are taking up seats in the license
 function getStudentsInLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
@@ -214,14 +214,20 @@ function getStudentsInLicense(req, res){
             studentToTeacher = {};
             var teacher;
             var outputStudents = {};
-            var teacherName;
+            var className;
             _(students).forEach(function(premiumCourses, student){
                 studentToTeacher[student] = {};
                 _(premiumCourses).forEach(function(isEnrolled, courseId){
                     if(isEnrolled){
                         teacher = courseTeacherMap[courseId];
-                        teacherName = teacher.firstName + " " + teacher.lastName;
-                        studentToTeacher[student][teacher.username] = teacherName;
+                        className = teacher.courseTitle;
+                        if(studentToTeacher[student][teacher.username]!=null) {
+                            studentToTeacher[student][teacher.username] = studentToTeacher[student][teacher.username] + ", " + className;
+                        }
+                        else {
+                            studentToTeacher[student][teacher.username] = className;
+                        }
+
                         if(teacher.userId === userId){
                             outputStudents[student] = true;
                         }

@@ -396,14 +396,16 @@ Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
 
 Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT m.course_id,m.user_id,teachers.username,teachers.first_name,teachers.last_name FROM GL_MEMBERSHIP as m\n" +
+        var Q = "SELECT m.course_id,course.title,m.user_id,teachers.username,teachers.first_name,teachers.last_name FROM GL_MEMBERSHIP as m\n" +
             "JOIN\n" +
             "(SELECT id,username,first_name,last_name FROM GL_USER as u\n" +
                 "JOIN\n" +
                     "(SELECT user_id FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm\n" +
                     "ON lm.user_id = u.id\n" +
             ") as teachers\n" +
-            "ON teachers.id = m.user_id;";
+            "ON teachers.id = m.user_id\n" +
+            "JOIN ( SELECT ID,TITLE FROM GL_COURSE ) as course ON course.ID = m.course_id;"
+            ;
 
         this.ds.query(Q)
             .then(function(courses){
@@ -415,6 +417,8 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
                     map["username"] = course["username"];
                     map["firstName"] = course["first_name"];
                     map["lastName"] = course["last_name"];
+                    map["courseId"] = course["course_id"];
+                    map["courseTitle"] = course["title"];
                 });
                 resolve(courseTeacherMap);
             })
