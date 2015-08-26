@@ -117,10 +117,10 @@ Glasslab_Strategy.prototype._verify = function(username, password, done){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     // try username
-    this._service.getAuthStore().findUser("username", username)
+    this._service.getAuthStore().findUser("username", username, true)
         // error, try email
         .then(null, function(err){
-            return this._service.getAuthStore().findUser("email", username);
+            return this._service.getAuthStore().findUser("email", username, true);
         }.bind(this))
         // valid user
         .then(function(user){
@@ -405,7 +405,7 @@ return when.promise(function(resolve, reject) {
     var isSelf = (loginUserSessionData.id == userData.id);
 
     // get/validate user by Id
-    this._service.getAuthStore().findUser('id', userData.id)
+    this._service.getAuthStore().findUser('id', userData.id, true)
         .then(function(data){
             dbUserData = data;
 

@@ -227,7 +227,7 @@ Auth_MySQL.prototype.setInstructorFtue = function(id){
     }.bind(this));
 };
 
-Auth_MySQL.prototype.findUser = function(type, value) {
+Auth_MySQL.prototype.findUser = function(type, value, includePassword) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -239,9 +239,9 @@ return when.promise(function(resolve, reject) {
             username as username,    \
             last_Name as lastName,   \
             first_Name as firstName, \
-            email as email,          \
-            password as password,    \
-            system_Role as role, \
+            email as email," +
+            (includePassword === true ? "password as password," : "") +
+            "system_Role as role, \
             USER_TYPE as type,       \
             login_Type as loginType, \
             ssoUsername, \

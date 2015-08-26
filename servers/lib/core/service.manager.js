@@ -776,6 +776,8 @@ ServiceManager.prototype.start = function(port) {
 
                             var reqPort = req.get('port') || host.split(":")[1];
 
+                            res.set('Strict-Transport-Security', 'max-age=31536000');
+
                             if(req.secure){
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
                                 if(forwProto){
