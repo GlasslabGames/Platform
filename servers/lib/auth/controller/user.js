@@ -1569,25 +1569,6 @@ function _getDeveloperByCode(code, gameId){
     }.bind(this));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function eraseStudentInfo(req, res){
 
     console.log(' ');
@@ -1669,17 +1650,6 @@ function eraseStudentInfo(req, res){
         this.requestUtil.errorResponse(res, { key: "user.delete.general"});
     }.bind(this));
 }
-
-
-
-
-
-
-
-
-
-
-
 
 // for student use eraseStudentInfo()
 //
