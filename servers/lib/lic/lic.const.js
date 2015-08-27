@@ -23,7 +23,8 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA"
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
@@ -39,7 +40,8 @@ module.exports = {
             "description": "Games in this package are optimized to work on iPads.",
             "pricePerSeat": 3,
             "browserGames": [
-                "PRIMA"
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
@@ -60,7 +62,8 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA"
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
@@ -80,7 +83,8 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA"
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
@@ -102,7 +106,8 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA"
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
@@ -124,7 +129,8 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA"
+                "PRIMA",
+                "WWF"
             ],
             "iPadGames": [
                 "AA-1",
