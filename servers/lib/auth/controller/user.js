@@ -21,6 +21,9 @@ module.exports = {
     resetPasswordUpdate: resetPasswordUpdate,
     requestDeveloperGameAccess: requestDeveloperGameAccess,
     approveDeveloperGameAccess: approveDeveloperGameAccess,
+
+    eraseStudentInfo: eraseStudentInfo,
+
     deleteUser: deleteUser
 };
 
@@ -1566,7 +1569,127 @@ function _getDeveloperByCode(code, gameId){
     }.bind(this));
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function eraseStudentInfo(req, res){
+
+    console.log(' ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++    eraseStudentInfo() called ... ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+
+    if(req.user.role !== "admin"){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to erase student records but is not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if(!(req.body && req.body.userId)){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to erase student records but corect information was not supplied.');
+
+        this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+        return;
+    }
+
+    console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+        req.user.username, 'starting to erase student records for',
+        req.body.userId, req.body.username);
+
+    var deleteUserId = req.body.userId;
+    var promise;
+
+    this.authStore.findUser("id", deleteUserId)
+    .then(function(foundUser){
+
+        console.log(' ');
+        console.log('               id =', foundUser.id);
+        console.log('         username =', foundUser.username);
+        console.log('        firstName =', foundUser.firstName);
+        console.log('         lastName =', foundUser.lastName);
+        console.log('            email =', foundUser.email);
+        console.log('             role =', foundUser.role);
+        console.log('             type =', foundUser.type);
+        console.log('    institutionId =', foundUser.institutionId);
+        console.log('          enabled =', foundUser.enabled);
+
+        // console.log('        foundUser =', foundUser);
+
+        if('student' !== foundUser.role){
+            console.log(' * * * * Operation Canceled * * * * ');
+            console.log('This function only removes student records.');
+            console.log('The supplied userId is not for a student.');
+            this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+            return;
+        }
+
+        promise = _deleteStudentAccount.call(this, deleteUserId);
+        return promise;
+
+    }.bind(this))
+    .then(function(status){
+
+        console.log(' status =', status);
+        if(status === "license owner"){
+            return;
+        }
+
+        this.requestUtil.jsonResponse(res, { status: "ok"});
+
+    }.bind(this))
+    .then(null, function(err){
+        console.error(Util.DateGMTString(), 'Delete User Error -',err);
+        if(err.error === "user not found"){
+            this.requestUtil.errorResponse(res, { key: "user.delete.access"});
+            return;
+        }
+        this.requestUtil.errorResponse(res, { key: "user.delete.general"});
+    }.bind(this));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// for student use eraseStudentInfo()
+//
 function deleteUser(req, res){
+
+    this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+    return;
+
+    ////////////////    ////////////////
+
     if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
         return;
@@ -1580,10 +1703,13 @@ function deleteUser(req, res){
 
     this.authStore.findUser("id", deleteUserId)
         .then(function(deleteUser){
-            if(deleteUser.role === "student"){
-                //largely ready and approved, but still good to have one last review before it is live
-                //promise = _deleteStudentAccount.call(this, deleteUserId);
-            } else if (deleteUser.role === "instructor"){
+
+            // if(deleteUser.role === "student"){
+            //     //largely ready and approved, but still good to have one last review before it is live
+            //     //promise = _deleteStudentAccount.call(this, deleteUserId);
+            // } else if (deleteUser.role === "instructor"){
+
+            if (deleteUser.role === "instructor"){
                 //delete instructor method workable, but still needs design attention
                 // for example, are we deleting all the info we need to be
                 // how are we going to store the hashed emails, should we keep hashed passwords, etc
