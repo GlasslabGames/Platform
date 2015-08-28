@@ -34,6 +34,7 @@ function logout(req, res){
     this.stats.increment("info", "Logout");
     req.logout();
     //res.redirect("/");
+    res.clearCookie('connect.sid', { path: '/' });
     this.requestUtil.jsonResponse(res, {} );
 }
 
