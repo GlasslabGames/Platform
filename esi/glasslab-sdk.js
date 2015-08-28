@@ -857,7 +857,7 @@ console.log('params', params);
 
         if(params && params.id){
             // console.log('xxxxxx', params.id);
-            // params2.id = params.id;
+            params2.userId = params.id;
         }else{
             // console.log(' xx fail xx');
             console.log('EraseStudentInfo() requires the userId of the student whos info is to be erased.');
