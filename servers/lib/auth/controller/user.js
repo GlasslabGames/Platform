@@ -218,6 +218,8 @@ function registerUserV1(req, res, next) {
 };
 
 /**
+ * (shouldn't this be removed?)
+ *
  * Registers a user with role of manager
  * 1. validate institution not already taken
  * 2. validate license key
@@ -557,9 +559,8 @@ function registerUserV2(req, res, next, serviceManager) {
                         serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                     }
                 }
-                // if instructor or manager
-                else if( regData.role == lConst.role.instructor ||
-                         regData.role == lConst.role.manager)
+                // if instructor
+                else if( regData.role == lConst.role.instructor )
                 {
                     var promise;
                     if(req.body.newsletter) {
@@ -1155,7 +1156,7 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLabGames.org!",
@@ -1182,7 +1183,7 @@ function sendDeveloperWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLab Games Developer!",

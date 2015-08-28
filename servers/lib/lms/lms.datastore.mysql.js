@@ -272,7 +272,7 @@ LMS_MySQL.prototype.getTeacherOfCourse = function(courseId) {
                 u.first_name as firstName,  \
                 u.last_name as lastName     \
             FROM GL_USER u JOIN  GL_MEMBERSHIP m on u.id = m.user_id    \
-            WHERE (m.role='instructor' OR m.role='manager') AND  \
+            WHERE m.role='instructor' AND  \
             m.course_id="+ this.ds.escape(courseId);
 
         this.ds.query(Q)
@@ -377,7 +377,7 @@ LMS_MySQL.prototype.getCourseInfoFromCourseCode = function(courseCode) {
                 u.last_name as lastName \
             FROM GL_CODE co \
             JOIN GL_COURSE c on co.course_id=c.id \
-            JOIN GL_MEMBERSHIP m on m.course_id=c.id AND (m.role=\"instructor\" OR m.role=\"manager\") \
+            JOIN GL_MEMBERSHIP m on m.course_id=c.id AND (m.role=\"instructor\") \
             JOIN GL_USER u on u.id=m.user_id \
             WHERE co.code="+ this.ds.escape(courseCode);
 
@@ -502,7 +502,7 @@ LMS_MySQL.prototype.isMultiUsersInInstructorCourse = function(userIds, instructo
                     course_id           \
                 FROM GL_MEMBERSHIP      \
                 WHERE                   \
-                    (ROLE='instructor' OR ROLE='manager')   \
+                    ROLE='instructor'   \
                     AND user_id=";
         Q += parseInt(instructorId);
         Q += ") ORDER BY user_id";
@@ -544,11 +544,6 @@ LMS_MySQL.prototype.addUserToCourse = function(userId, courseId, role) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-
-    // if manager, make role in members instructor
-    if( role == lConst.role.manager) {
-        role = lConst.role.instructor;
-    }
 
     var values = [
         "NULL",  // id
@@ -729,7 +724,7 @@ return when.promise(function(resolve, reject) {
             // check if course name already exists for null institution_id's
             Q += "WHERE NOT EXISTS " +
                 "(SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE " +
-                "(m.role='instructor' OR m.role='manager') AND ";
+                "m.role='instructor' AND ";
             Q += "c.title="+courseData.title+" AND m.user_id="+parseInt(userId)+") LIMIT 1";
         } else {
             Q += "VALUES("+values+")";
@@ -780,7 +775,7 @@ return when.promise(function(resolve, reject) {
     courseData.archivedDate = Util.GetTimeStamp(courseData.archivedDate);
 
     // verify userId is instructor of course
-    var Q = "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE (m.role='instructor' OR m.role='manager') AND ";
+    var Q = "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND ";
     Q += "c.id="+courseData.id+" AND m.user_id="+parseInt(userId);
     //console.log("getCourses Q:", Q);
     this.ds.query(Q).then(function(data){
@@ -976,7 +971,7 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
     var Q = "SELECT course_id as courseId FROM GL_MEMBERSHIP \
-             WHERE (role=\"instructor\" OR role=\"manager\") AND \
+             WHERE role=\"instructor\" AND \
                    user_id="+this.ds.escape(userId);
 
     this.ds.query(Q)

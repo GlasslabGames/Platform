@@ -278,9 +278,6 @@ return when.promise(function(resolve, reject) {
                     user[i] = data[i];
                     user[i].collectTelemetry = user[i].collectTelemetry ? true : false;
                     user[i].enabled = true;
-                    if(user[i].role === "manager"){
-                        user[i].role = "instructor";
-                    }
 
                     // if not glasslab login type then set username to lms username
                     if( (user[i].loginType !== aConst.login.type.glassLabV2) &&
@@ -533,7 +530,7 @@ return when.promise(function(resolve, reject) {
         ftue_checklist: "NULL"
     };
 
-    if(userData.role === "instructor" || userData.role === "manager"){
+    if(userData.role === "instructor"){
         data.ftue_checklist = 0;
     }
 
