@@ -112,7 +112,7 @@ Verify link is sent to developers after a Glass Lab admin has approved their req
 
 **registerManager**
 
-API no longer in use.  Manager system role is deprecated.
+API no longer in use and now removed.  Manager system role is deprecated.
 
 **getUserDataById**
 
