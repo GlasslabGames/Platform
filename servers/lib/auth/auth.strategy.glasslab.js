@@ -190,9 +190,8 @@ Glasslab_Strategy.prototype.registerUser = function(userData){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // if instructor or manager check email
+    // if instructor or developer check email
     if( (userData.role == lConst.role.instructor) ||
-        (userData.role == lConst.role.manager) ||
         (userData.role == lConst.role.developer) ) {
         //console.log("Auth registerUserRoute - institution isEmail:", check(userData.email).isEmail());
         // if no email -> error
@@ -440,9 +439,8 @@ return when.promise(function(resolve, reject) {
 
         // check UserName, if changed
         .then(function(){
-            // If Instructors OR managers, then username is the same as there email
+            // If Instructors OR developer, then username is the same as there email
             if( ( (userData.role == lConst.role.instructor) ||
-                  (userData.role == lConst.role.manager) ||
                   (userData.role == lConst.role.developer) ) &&
                   userData.email
               ) {
@@ -581,7 +579,6 @@ return when.promise(function(resolve, reject) {
     }
     // if instructor, then check if student their course
     else if( (loginUserData.role == lConst.role.instructor) ||
-             (loginUserData.role == lConst.role.manager) ||
              (loginUserData.role == lConst.role.developer) ) {
         this._service.getLMSStore().isEnrolledInInstructorCourse(userData.id, loginUserData.id)
             .then(

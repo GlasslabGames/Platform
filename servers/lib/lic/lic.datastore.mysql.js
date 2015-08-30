@@ -362,7 +362,7 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
 
 Lic_MySQL.prototype.getAllInstructorsNonCustomers = function(){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_USER WHERE SYSTEM_ROLE IN('instructor', 'manager') and customer_id IS NULL";
+        var Q = "SELECT * FROM GL_USER WHERE SYSTEM_ROLE ='instructor' and customer_id IS NULL";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);

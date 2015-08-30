@@ -34,6 +34,7 @@ function logout(req, res){
     this.stats.increment("info", "Logout");
     req.logout();
     //res.redirect("/");
+    res.clearCookie('connect.sid', { path: '/' });
     this.requestUtil.jsonResponse(res, {} );
 }
 
@@ -121,7 +122,6 @@ return when.promise(function(resolve, reject) {
         // get courses
         if( (user.role == lConst.role.student) ||
             (user.role == lConst.role.instructor) ||
-            (user.role == lConst.role.manager) ||
             (user.role == lConst.role.admin) ) {
             this.lmsStore.getCoursesByStudentId(user.id)
                 .then(function(courses){

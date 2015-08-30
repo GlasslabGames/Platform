@@ -320,7 +320,7 @@ return when.promise(function(resolve, reject) {
                     IN (SELECT course_id \
                         FROM GL_MEMBERSHIP \
                         WHERE user_id="+this.ds.escape(userId);
-        Q += ") AND (role='"+lConst.role.instructor+"' OR role='"+lConst.role.manager+"'))";
+        Q += ") AND (role='"+lConst.role.instructor+"'))";
 
     //console.log("Q:", Q);
     this.ds.query(Q).then(function(results) {

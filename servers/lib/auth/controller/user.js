@@ -13,7 +13,6 @@ module.exports = {
     verifyEmailCode:     verifyEmailCode,
     verifyBetaCode:      verifyBetaCode,
     verifyDeveloperCode: verifyDeveloperCode,
-    registerManager:     registerManager,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
@@ -21,6 +20,9 @@ module.exports = {
     resetPasswordUpdate: resetPasswordUpdate,
     requestDeveloperGameAccess: requestDeveloperGameAccess,
     approveDeveloperGameAccess: approveDeveloperGameAccess,
+
+    eraseStudentInfo: eraseStudentInfo,
+
     deleteUser: deleteUser
 };
 
@@ -212,87 +214,6 @@ function registerUserV1(req, res, next) {
     }
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(role));
-};
-
-/**
- * Registers a user with role of manager
- * 1. validate institution not already taken
- * 2. validate license key
- * 3. create the new user
- *    1. validate email and unique
- *    2. validate username unique
- * 4. create institution
- * 5. create code with institutionId
- * 6. update license institutionId, redeemed(true), expiration(date -> now + LICENSE_VALID_PERIOD)
- * 7. update user with institutionId
- */
-function registerManager(req, res, next) {
-    // make sure inputs are strings
-    req.body.email     = Util.ConvertToString(req.body.email);
-    req.body.firstName = Util.ConvertToString(req.body.firstName);
-    req.body.lastName  = Util.ConvertToString(req.body.lastName);
-    req.body.password  = Util.ConvertToString(req.body.password);
-    req.body.key       = Util.ConvertToString(req.body.key);
-
-    this.stats.increment("info", "Route.Register.Manager");
-    //console.log("Auth registerManagerRoute - body:", req.body);
-    if( !(
-        req.body.email  &&
-            req.body.firstName &&
-            req.body.lastName &&
-            req.body.password &&
-            req.body.institution &&
-            req.body.key
-        ) )
-    {
-        this.stats.increment("error", "Route.Register.Manager.MissingFields");
-        this.requestUtil.errorResponse(res, "missing some fields", 400);
-    }
-
-    // copy email to username for login
-    req.body.username = req.body.email;
-    var user = req.session.passport.user;
-    var cookie = "";
-    if(user){
-        cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
-    }
-    // TODO: refactor this and create license system
-    /*
-     this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
-     function(err, sres, data){
-     if(err) {
-     this.requestUtil.errorResponse(res, err, 500);
-     }
-
-     if(sres.statusCode == 200) {
-     this.stats.increment("info", "Route.Register.Manager.Created");
-     this.glassLabLogin(req, res, next);
-     } else {
-     this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
-
-     // don't use requestUtil response as it could contain custom headers, thus writing head
-     res.writeHead(sres.statusCode, sres.headers);
-     res.end(data);
-     }
-     }.bind(this));
-
-     // validate email
-
-     // validate license key
-     .then(function(){
-     return this.license.checkLicense(req.body.key)
-     }.bind(this))
-
-     // validate institution not already taken
-     .then(function(){
-     return this.license.checkInstitution(req.body.institution)
-     }.bind(this))
-
-     // catch all errors
-     .then(null, function(err, code){
-
-     }.bind(this));
-     */
 };
 
 exampleIn.updateUserData = {
@@ -554,9 +475,8 @@ function registerUserV2(req, res, next, serviceManager) {
                         serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                     }
                 }
-                // if instructor or manager
-                else if( regData.role == lConst.role.instructor ||
-                         regData.role == lConst.role.manager)
+                // if instructor
+                else if( regData.role == lConst.role.instructor )
                 {
                     var promise;
                     if(req.body.newsletter) {
@@ -1152,7 +1072,7 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLabGames.org!",
@@ -1179,7 +1099,7 @@ function sendDeveloperWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLab Games Developer!",
@@ -1566,7 +1486,97 @@ function _getDeveloperByCode(code, gameId){
     }.bind(this));
 }
 
+function eraseStudentInfo(req, res){
+
+    console.log(' ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++    eraseStudentInfo() called ... ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+
+    if(req.user.role !== "admin"){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to erase student records but is not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if(!(req.body && req.body.userId)){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to erase student records but corect information was not supplied.');
+
+        this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+        return;
+    }
+
+    console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+        req.user.username, 'starting to erase student records for',
+        req.body.userId, req.body.username);
+
+    var deleteUserId = req.body.userId;
+    var promise;
+
+    this.authStore.findUser("id", deleteUserId)
+    .then(function(foundUser){
+
+        console.log(' ');
+        console.log('               id =', foundUser.id);
+        console.log('         username =', foundUser.username);
+        console.log('        firstName =', foundUser.firstName);
+        console.log('         lastName =', foundUser.lastName);
+        console.log('            email =', foundUser.email);
+        console.log('             role =', foundUser.role);
+        console.log('             type =', foundUser.type);
+        console.log('    institutionId =', foundUser.institutionId);
+        console.log('          enabled =', foundUser.enabled);
+
+        // console.log('        foundUser =', foundUser);
+
+        if('student' !== foundUser.role){
+            console.log(' * * * * Operation Canceled * * * * ');
+            console.log('This function only removes student records.');
+            console.log('The supplied userId is not for a student.');
+            this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+            return;
+        }
+
+        promise = _deleteStudentAccount.call(this, deleteUserId);
+        return promise;
+
+    }.bind(this))
+    .then(function(status){
+
+        console.log(' status =', status);
+        if(status === "license owner"){
+            return;
+        }
+
+        this.requestUtil.jsonResponse(res, { status: "ok"});
+
+    }.bind(this))
+    .then(null, function(err){
+        console.error(Util.DateGMTString(), 'Delete User Error -',err);
+        if(err.error === "user not found"){
+            this.requestUtil.errorResponse(res, { key: "user.delete.access"});
+            return;
+        }
+        this.requestUtil.errorResponse(res, { key: "user.delete.general"});
+    }.bind(this));
+}
+
+// for student use eraseStudentInfo()
+//
 function deleteUser(req, res){
+
+    this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+    return;
+
+    ////////////////    ////////////////
+
     if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
         return;
@@ -1580,10 +1590,13 @@ function deleteUser(req, res){
 
     this.authStore.findUser("id", deleteUserId)
         .then(function(deleteUser){
-            if(deleteUser.role === "student"){
-                //largely ready and approved, but still good to have one last review before it is live
-                //promise = _deleteStudentAccount.call(this, deleteUserId);
-            } else if (deleteUser.role === "instructor"){
+
+            // if(deleteUser.role === "student"){
+            //     //largely ready and approved, but still good to have one last review before it is live
+            //     //promise = _deleteStudentAccount.call(this, deleteUserId);
+            // } else if (deleteUser.role === "instructor"){
+
+            if (deleteUser.role === "instructor"){
                 //delete instructor method workable, but still needs design attention
                 // for example, are we deleting all the info we need to be
                 // how are we going to store the hashed emails, should we keep hashed passwords, etc

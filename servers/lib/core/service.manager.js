@@ -781,6 +781,7 @@ ServiceManager.prototype.start = function(port) {
 
                             var reqPort = req.get('port') || host.split(":")[1];
 
+                            // GLAS-88: use HTTP Strict Transport Security
                             res.set('Strict-Transport-Security', 'max-age=31536000');
 
                             if(req.secure){

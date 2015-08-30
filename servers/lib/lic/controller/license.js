@@ -1047,7 +1047,7 @@ function addTeachersToLicense(req, res){
             });
             existingTeachers = [];
             _(teachers).forEach(function(teacher){
-                if(teacher["SYSTEM_ROLE"] !== 'instructor' && teacher["SYSTEM_ROLE"] !== "manager"){
+                if(teacher["SYSTEM_ROLE"] !== 'instructor'){
                     delete newInstructors[teacher["EMAIL"]];
                     rejectedTeachers[teacher.id] = "user role not instructor";
                     return;

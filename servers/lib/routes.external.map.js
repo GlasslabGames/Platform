@@ -978,6 +978,18 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
+
+
+        {
+            api: "/api/v2/zzzz/test0824esi",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "eraseStudentInfo"
+            }
+        },
+
+/*
         {
             requireAuth: true,
             api: "/api/v2/auth/delete/user",
@@ -987,6 +999,8 @@ module.exports = {
                 post: "deleteUser"
             }
         },
+*/
+
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------
