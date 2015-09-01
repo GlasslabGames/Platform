@@ -248,9 +248,8 @@ LMSService.prototype.createCourse = function(userData, _courseData){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // check if instructor, manager or admin
+    // check if instructor or admin
     if( userData.role == lConst.role.instructor ||
-        userData.role == lConst.role.manager ||
         userData.role == lConst.role.admin ) {
 
         var courseData = {
@@ -291,8 +290,7 @@ return when.promise(function(resolve, reject) {
                     .then(function(courseId){
                         courseData.id = courseId;
 
-                        if( userData.role == lConst.role.instructor ||
-                            userData.role == lConst.role.manager) {
+                        if( userData.role == lConst.role.instructor ) {
                             // create games map
                             var games = {};
                             var gameId;
@@ -340,9 +338,8 @@ LMSService.prototype.updateCourse = function(userData, _courseData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    // check if instructor, manager or admin
+    // check if instructor or admin
     if( userData.role == lConst.role.instructor ||
-        userData.role == lConst.role.manager ||
         userData.role == lConst.role.admin ) {
 
         var courseData = {
@@ -399,9 +396,8 @@ LMSService.prototype.updateGamesInCourse = function(userData, courseData){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // check if instructor, manager or admin
+    // check if instructor or admin
     if( userData.role == lConst.role.instructor ||
-        userData.role == lConst.role.manager ||
         userData.role == lConst.role.admin ) {
 
         // validate gameId's

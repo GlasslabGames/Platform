@@ -13,7 +13,6 @@ module.exports = {
     verifyEmailCode:     verifyEmailCode,
     verifyBetaCode:      verifyBetaCode,
     verifyDeveloperCode: verifyDeveloperCode,
-    registerManager:     registerManager,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
@@ -216,87 +215,6 @@ function registerUserV1(req, res, next) {
     }
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(role));
-};
-
-/**
- * Registers a user with role of manager
- * 1. validate institution not already taken
- * 2. validate license key
- * 3. create the new user
- *    1. validate email and unique
- *    2. validate username unique
- * 4. create institution
- * 5. create code with institutionId
- * 6. update license institutionId, redeemed(true), expiration(date -> now + LICENSE_VALID_PERIOD)
- * 7. update user with institutionId
- */
-function registerManager(req, res, next) {
-    // make sure inputs are strings
-    req.body.email     = Util.ConvertToString(req.body.email);
-    req.body.firstName = Util.ConvertToString(req.body.firstName);
-    req.body.lastName  = Util.ConvertToString(req.body.lastName);
-    req.body.password  = Util.ConvertToString(req.body.password);
-    req.body.key       = Util.ConvertToString(req.body.key);
-
-    this.stats.increment("info", "Route.Register.Manager");
-    //console.log("Auth registerManagerRoute - body:", req.body);
-    if( !(
-        req.body.email  &&
-            req.body.firstName &&
-            req.body.lastName &&
-            req.body.password &&
-            req.body.institution &&
-            req.body.key
-        ) )
-    {
-        this.stats.increment("error", "Route.Register.Manager.MissingFields");
-        this.requestUtil.errorResponse(res, "missing some fields", 400);
-    }
-
-    // copy email to username for login
-    req.body.username = req.body.email;
-    var user = req.session.passport.user;
-    var cookie = "";
-    if(user){
-        cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
-    }
-    // TODO: refactor this and create license system
-    /*
-     this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
-     function(err, sres, data){
-     if(err) {
-     this.requestUtil.errorResponse(res, err, 500);
-     }
-
-     if(sres.statusCode == 200) {
-     this.stats.increment("info", "Route.Register.Manager.Created");
-     this.glassLabLogin(req, res, next);
-     } else {
-     this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
-
-     // don't use requestUtil response as it could contain custom headers, thus writing head
-     res.writeHead(sres.statusCode, sres.headers);
-     res.end(data);
-     }
-     }.bind(this));
-
-     // validate email
-
-     // validate license key
-     .then(function(){
-     return this.license.checkLicense(req.body.key)
-     }.bind(this))
-
-     // validate institution not already taken
-     .then(function(){
-     return this.license.checkInstitution(req.body.institution)
-     }.bind(this))
-
-     // catch all errors
-     .then(null, function(err, code){
-
-     }.bind(this));
-     */
 };
 
 exampleIn.updateUserData = {
@@ -558,9 +476,8 @@ function registerUserV2(req, res, next, serviceManager) {
                         serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                     }
                 }
-                // if instructor or manager
-                else if( regData.role == lConst.role.instructor ||
-                         regData.role == lConst.role.manager)
+                // if instructor
+                else if( regData.role == lConst.role.instructor )
                 {
                     var promise;
                     if(req.body.newsletter) {
@@ -1156,7 +1073,7 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLabGames.org!",
@@ -1183,7 +1100,7 @@ function sendDeveloperWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLab Games Developer!",

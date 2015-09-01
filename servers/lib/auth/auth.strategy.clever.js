@@ -116,11 +116,9 @@ Strategy.prototype._getUserProfile = function(url, accessToken, done) {
                 profile._raw      = body;
                 profile._json     = json;
 
-                // 'student', 'teacher' or 'district'
-                if(json.data.type == "teacher") {
+                // 'student', 'teacher' or 'district' (treat as instructor)
+                if((json.data.type == "teacher") || (json.data.type == "district")) {
                     profile.role = lConst.role.instructor;
-                } else if(json.data.type == "district") {
-                    profile.role = lConst.role.manager;
                 } else {
                     profile.role = lConst.role.student;
                 }
