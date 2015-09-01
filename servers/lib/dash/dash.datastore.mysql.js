@@ -210,6 +210,9 @@ function _addLicenseInfoToUser(user, results){
             user.licenseStatus === "po-rejected") {
             user.expirationDate = license["expiration_date"];
         }
+        if (user.licenseStatus === "active") {
+            user.packageType = packageType;
+        }
         if(!inviteLicense){
             resolve();
             return;

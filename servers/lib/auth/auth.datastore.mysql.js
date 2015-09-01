@@ -231,7 +231,7 @@ Auth_MySQL.prototype.findUser = function(type, value, includePassword) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    //console.log("_findUser type:", type, ", value:", value);
+    //console.log("_findUser type:", type, ", value:", value, ", includePassword:", includePassword);
 
     var Q =
         "SELECT \
