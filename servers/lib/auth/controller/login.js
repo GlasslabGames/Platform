@@ -59,6 +59,14 @@ function glassLabLogin(req, res, next) {
         }.bind(this))
         .then(function(user){
             this.requestUtil.jsonResponse(res, user);
+
+            // for DAU -- Daily Active Users stats
+            console.log(' this.stats.increment("info", "user.login"); ');
+            this.stats.increment("info", "user.login");
+            // unique users ?
+            // console.log(' user', user);
+            // this.stats.set('level', 'unique.users', user.id)
+
         }.bind(this))
 
         // catch all errors

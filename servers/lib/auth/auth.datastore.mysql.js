@@ -60,6 +60,7 @@ return when.promise(function(resolve, reject) {
             var hasState = false;
             var hasSchool = false;
             var hasFtueChecklist = false;
+            var hasLastLogin = false;
 
             var promiseList = [];
             var Q = "";
@@ -90,6 +91,10 @@ return when.promise(function(resolve, reject) {
 
                 if (results[i]['Field'] == "ftue_checklist") {
                     hasFtueChecklist = true;
+                }
+
+                if (results[i]['Field'] == "last_login") {
+                    hasLastLogin = true;
                 }
             }
 
@@ -131,6 +136,21 @@ return when.promise(function(resolve, reject) {
                            ADD COLUMN ftue_checklist TINYINT(1) DEFAULT NULL AFTER SCHOOL";
                 promiseList.push(this.ds.query(Q));
             }
+
+            if (!hasLastLogin) {
+                console.log('                ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ');
+                updating = true;
+                Q = "ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ";
+                promiseList.push(this.ds.query(Q));
+            }
+
+            // if (hasLastLogin) {
+            //     console.log('                ALTER TABLE GL_USER DROP COLUMN last_login ');
+            //     updating = true;
+            //     Q = "ALTER TABLE GL_USER DROP COLUMN last_login";
+            //     promiseList.push(this.ds.query(Q));
+            // }
+
             if (promiseList.length) {
                 when.all(promiseList)
                     .then(function(results) {
