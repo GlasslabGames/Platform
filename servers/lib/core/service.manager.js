@@ -962,8 +962,8 @@ var updateTelemetryStats = function(stats){
     this.options.services.ds_mysql = ds;
 
     var bindCountStudents = countStudents.bind(this, this.stats);   // with context
-    bindCountStudents(this.stats);                                  // now
-    setInterval( bindCountStudents, 2*60*1000, this.stats);         // every 2 minutes
+    bindCountStudents(this.stats);                                  // once, now
+    setInterval( bindCountStudents, 2*60*1000, this.stats);         // then every 2 minutes
 
     var bindCountTeachers = countTeachers.bind(this, this.stats);
     bindCountTeachers(this.stats);
