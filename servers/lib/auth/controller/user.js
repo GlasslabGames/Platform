@@ -23,6 +23,7 @@ module.exports = {
     approveDeveloperGameAccess: approveDeveloperGameAccess,
 
     eraseStudentInfo: eraseStudentInfo,
+    eraseInstructorInfo: eraseInstructorInfo,
 
     deleteUser: deleteUser
 };
@@ -1634,9 +1635,6 @@ function eraseStudentInfo(req, res){
     .then(function(status){
 
         console.log(' status =', status);
-        if(status === "license owner"){
-            return;
-        }
 
         this.requestUtil.jsonResponse(res, { status: "ok"});
 
@@ -1651,7 +1649,91 @@ function eraseStudentInfo(req, res){
     }.bind(this));
 }
 
+function eraseInstructorInfo(req, res){
+    
+    console.log(' ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++    eraseInstructorInfo() called ... ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+    
+    if(req.user.role !== "admin"){
+        
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+                    req.user.username, 'attempted to erase instructor records but is not an admin.');
+        
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+    
+    if(!(req.body && req.body.userId)){
+        
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+                    req.user.username, 'attempted to erase instructor records but corect information was not supplied.');
+        
+        this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+        return;
+    }
+    
+    console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+                req.user.username, 'starting to erase instructor records for',
+                req.body.userId, req.body.username);
+    
+    var deleteUserId = req.body.userId;
+    var promise;
+    
+    this.authStore.findUser("id", deleteUserId)
+    .then(function(foundUser){
+          
+          console.log(' ');
+          console.log('               id =', foundUser.id);
+          console.log('         username =', foundUser.username);
+          console.log('        firstName =', foundUser.firstName);
+          console.log('         lastName =', foundUser.lastName);
+          console.log('            email =', foundUser.email);
+          console.log('             role =', foundUser.role);
+          console.log('             type =', foundUser.type);
+          console.log('    institutionId =', foundUser.institutionId);
+          console.log('          enabled =', foundUser.enabled);
+          
+          // console.log('        foundUser =', foundUser);
+          
+          if('instructor' !== foundUser.role){
+              console.log(' * * * * Operation Canceled * * * * ');
+              console.log('This function only removes instructor records.');
+              console.log('The supplied userId is not for an instructor.');
+              this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+              return;
+          }
+          
+          promise = _deleteInstructorAccount.call(this, deleteUserId, req);
+          return promise;
+          
+    }.bind(this))
+    .then(function(status){
+          var responseStatus = "ok";
+          
+          console.log(' status =', status);
+          if(status === "license owner"){
+                responseStatus = status;
+          }
+          
+          this.requestUtil.jsonResponse(res, { status: responseStatus });
+          
+    }.bind(this))
+    .then(null, function(err){
+          console.error(Util.DateGMTString(), 'Delete User Error -',err);
+          if(err.error === "user not found"){
+            this.requestUtil.errorResponse(res, { key: "user.delete.access"});
+            return;
+          }
+          this.requestUtil.errorResponse(res, { key: "user.delete.general"});
+    }.bind(this));
+}
+
 // for student use eraseStudentInfo()
+// for instructor use eraseInstructorInfo()
 //
 function deleteUser(req, res){
 
@@ -1777,11 +1859,11 @@ function _deleteInstructorAccount(userId, req){
     //get courses,
     //getLicenseMap
     //get license
-    // if license active, throw error and encourage
+    //unenroll all studesnt from courses
     //archive all courses (also disabling premium games in that process
     //set license map status to null, if in license and if not license owner
     //set subscription id of all licenses instructor was owner of in the past to null
-    // in deleteUser method, call internal route for the internal cancel license method
+    //call internal route for the internal cancel license method
 
     return when.promise(function(resolve, reject){
         var courses;
@@ -1796,8 +1878,8 @@ function _deleteInstructorAccount(userId, req){
         when.all(promiseList)
             .then(function(results){
                 courses = results[0];
+                userEmail = results[1];
                 var licenseMap = null;
-                user = results[1];
                 if(results[2]){
                     licenseMap = results[2][0];
                 }
@@ -1805,6 +1887,23 @@ function _deleteInstructorAccount(userId, req){
                     var licenseId = licenseMap.license_id;
                     return licService.myds.getLicenseById(licenseId);
                 }
+            })
+            .then(function(results){
+                _(courses).forEach(function(course){
+                    // unenroll all students
+                    var promiseList = [];
+                    promiseList.push(lmsService.getStudentsOfCourse(course.id));
+                    when.all(promiseList)
+                        .then(function(results) {
+                              var students = results[0];
+                              var promiseList = [];
+                              _(students).forEach(function(student) {
+                                  promiseList.push(lmsService.myds.removeUserFromCourse(student.id, course.id));
+                              });
+                              return when.all(promiseList);
+                        });
+                });
+                return results; // pass along previous results
             })
             .then(function(results){
                 if(results){
@@ -1836,20 +1935,16 @@ function _deleteInstructorAccount(userId, req){
                 return when.all(promiseList);
             })
             .then(function(){
-                return _hashEmail(email);
+                return _hashEmail.call(this, userEmail);
             }.bind(this))
             .then(function(hashedEmail){
                 var userData = _deleteUserTableInfo(userId, hashedEmail);
-                //var email = userEmail;
                 return this.authStore.updateUserDBData(userData);
             }.bind(this))
             .then(function(status){
                 if(license && license.active === 1){
                     var licenseId = license.id;
                     var promiseList = [];
-                    var licenseUpdateFields = [];
-                    var subscriptionId = "subscription_id = NULL";
-                    licenseUpdateFields.push(subscriptionId);
                     // finds all licenses an instructor was an owner of in the past, and removes the subscription id
                     promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
                     if(license.user_id !== userId){
@@ -1865,15 +1960,21 @@ function _deleteInstructorAccount(userId, req){
                 if(typeof status === "string"){
                     resolve(status);
                 }
-                if(license && license.active === 1 && license.user_id === userId){
-                    var body = {};
+
+                if(license && license.active === 1 && license.user_id == userId){
+                    var body = { };
                     body.userId = userId;
                     body.licenseId = license.id;
                     body.userEmail = userEmail;
                     body.userDelete = true;
-                    req.body.licenseId = status.license.id;
-                    req.body.userDelete = true;
-                    this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
+                    req.body = body;
+                  
+                    var mockRes = {
+                        writeHead: function(code, data) { },
+                        end: function(json) { }
+                    };
+                  
+                    this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, mockRes]);
                     resolve('license owner');
                     return;
                 }

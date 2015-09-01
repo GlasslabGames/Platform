@@ -860,7 +860,7 @@ console.log('params', params);
             params2.userId = params.id;
         }else{
             // console.log(' xx fail xx');
-            console.log('EraseStudentInfo() requires the userId of the student whos info is to be erased.');
+            console.log('EraseStudentInfo() requires the userId of the student whose info is to be erased.');
             defaultErrorCallback( error, "boo hoo" );
             return;
         }
@@ -885,11 +885,49 @@ console.log('params', params);
         });
     };
 
+    //    {
+    //        api: "/api/v2/zzzz/test0828eti",
+    //        service: "auth",
+    //        controller: "user",
+    //        method: {
+    //            post: "eraseInstructorInfo"
+    //        }
+    //    },
 
+    _GlassLabSDK.prototype.EraseInstructorInfo = function( params, success, error ) {
 
+        var params2 = {
+        }
+                              
+        console.log('params', params);
 
+        if(params && params.id){
+            params2.userId = params.id;
+        } else {
+            console.log('EraseStudentInfo() requires the userId of the instructor whose info is to be erased.');
+            defaultErrorCallback( error, "boo hoo" );
+            return;
+        }
 
-
+        // Add the request to the queue
+        this.request({
+                   
+           method: "POST",
+           apiKey: "eraseInstructorInfo",
+           api: "/api/v2/zzzz/test0828eti",
+           
+           contentType: "application/json",
+           data: params2,
+           
+           success: function( responseData ) {
+               // Call the user's success callback
+               defaultSuccessCallback( success, responseData );
+           },
+           error: function( responseData ) {
+               defaultErrorCallback( error, responseData );
+           }
+        });
+    };
 
 
 

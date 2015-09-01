@@ -28,19 +28,22 @@
 				var input = document.querySelector(".commandButtons");
 				var button = this.innerHTML;
 				
-				if (button == "connect")
+				if (button == "Connect")
 					InitializeSDK();
 				else if (button == "local")
 					LocalInitSDK();
-				else if (button == "login")
+				else if (button == "Login")
 					Login();
 
 
-				else if (button == "erase student info")
-					Erase_button_pushed();
+				else if (button == "Erase student account")
+					Erase_student_button_pushed();
 
+                else if (button == "Erase instructor account")
+					Erase_instructor_button_pushed();
+     
 
-				else if (button == "logout")
+				else if (button == "Logout")
 					Logout();
 
 
@@ -158,7 +161,7 @@
 	}
 
 	/** remove student login data from db */
-	function Erase_button_pushed()
+	function Erase_student_button_pushed()
 	{
 
 		SetStatus('#del-status', 'waiting');
@@ -187,6 +190,36 @@
 			});
     }
 
+ 
+	/** remove student login data from db */
+	function Erase_instructor_button_pushed()
+	{
+        SetStatus('#del-status', 'waiting');
+        SetData('#del-data', 'operation did not complete');
+ 
+        var instructorid = document.getElementById('gl-instructorId').value;
+ 
+        GlassLabSDK.EraseInstructorInfo(
+          {
+                // test_not_id: "abcefg",
+                id: instructorid
+          },
+          function(data)
+          {
+              console.log(" EraseInstructorInfo : Success: " + data );
+              
+              SetStatus('#del-status', 'EraseInstructorInfo', 'success');
+              SetData('#del-data', 'data from call = '+data);
+          },
+          function (data)
+          {
+              console.log(" EraseInstructorInfo : Fail: " + data );
+              
+              SetStatus('#del-status', 'EraseInstructorInfo', 'error');
+              SetData('#del-data', 'data from call = '+data);
+          });
+    }
+ 
 	/** Gets authorization status about the current user. */
 	function GetAuthStatus()
 	{

@@ -989,6 +989,14 @@ module.exports = {
             }
         },
 
+        {
+           api: "/api/v2/zzzz/test0828eti",
+           service: "auth",
+           controller: "user",
+           method: {
+                post: "eraseInstructorInfo"
+           }
+        },
 /*
         {
             requireAuth: true,
