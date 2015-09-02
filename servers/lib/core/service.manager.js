@@ -996,7 +996,27 @@ var countDailyActiveUsers = function(stats){
 
                 userCount = parseFloat(results[0].num);
                 stats.gaugeNoRoot("info", "dau_count", userCount);
-                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+" students in the DB.");
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+" Daily Active Users in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ENABLED = 1 AND last_login IS NOT NULL " +
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= last_login"
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "mau_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+" Monthly Active Users in the DB.");
 
                 resolve(results[0]);
             }, function(err){
