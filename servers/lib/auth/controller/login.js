@@ -49,6 +49,24 @@ Cases:
     - respond with user data
 */
 function glassLabLogin(req, res, next) {
+
+    var mysql_options = _.merge(
+        {
+            host    : "localhost",
+            user    : "glasslab",
+            password: "glasslab",
+            database: "glasslab_dev",
+        },
+        this.options.auth.datastore.mysql
+    );
+
+    var MySQL = require('../../core/datastore.mysql.js');
+    // var ds = new MySQL(mysql_options);
+    var Q;
+
+    this.ds = new MySQL(mysql_options);
+
+
     this.stats.increment("info", "Route.Login");
     //console.log("Auth loginRoute");
     var authenticate = glassLabLogin_Authenticate.bind(this);
@@ -59,6 +77,25 @@ function glassLabLogin(req, res, next) {
         }.bind(this))
         .then(function(user){
             this.requestUtil.jsonResponse(res, user);
+
+            console.log(' this.stats.increment("info", "user.login"); ');
+            this.stats.increment("info", "user.login");
+
+            // for DAU -- Daily Active Users stats
+            // update login timestamp
+
+            Q = "UPDATE GL_USER SET last_login = NOW() WHERE id = " + user.id + ";";
+
+            // ds.query(Q)
+            this.ds.query(Q)
+            .then(function(results){
+                resolve(results[0]);
+            }, function(err){
+
+                console.log('ERROR: failed to set login time.');
+                reject(err);
+            });
+
         }.bind(this))
 
         // catch all errors
@@ -103,7 +140,7 @@ function glassLabLogin_LogIn(req, user) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    console.log("define user session");
+
     if(req.session === undefined){
         console.log("session object undefined");
     }
@@ -123,6 +160,7 @@ return when.promise(function(resolve, reject) {
         if( (user.role == lConst.role.student) ||
             (user.role == lConst.role.instructor) ||
             (user.role == lConst.role.admin) ) {
+
             this.lmsStore.getCoursesByStudentId(user.id)
                 .then(function(courses){
                     // add courses
@@ -157,6 +195,7 @@ return when.promise(function(resolve, reject) {
                 }.bind(this))
         }
         else {
+            console.log("error", "Route.Login.Auth.LogIn.InvalidRole");
             this.stats.increment("error", "Route.Login.Auth.LogIn.InvalidRole");
             reject(new Error("invalid role"));
         }

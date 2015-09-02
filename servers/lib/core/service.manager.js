@@ -972,6 +972,38 @@ var updateTelemetryStats = function(stats){
     var boundUpUserCount = updateUserCount.bind(this, this.stats);
     boundUpUserCount(this.stats);
     setInterval( boundUpUserCount, 2*60*1000, this.stats);
+
+    var bindCountDAU = countDailyActiveUsers.bind(this, this.stats);
+    bindCountDAU(this.stats);
+    setInterval( bindCountDAU, 30*1000, this.stats);                // 30 seconds
+};
+
+var countDailyActiveUsers = function(stats){
+
+    var Q;
+    var userCount;
+
+    this.ds = this.options.services.ds_mysql;
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ENABLED = 1 AND last_login IS NOT NULL " +
+            "AND DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= last_login"
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "dau_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+" students in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
 };
 
 var countStudents = function(stats){
