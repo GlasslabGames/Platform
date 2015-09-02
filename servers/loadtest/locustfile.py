@@ -10,6 +10,7 @@ baseLoadTestDateDir = "./loadtest_apis"
 username = "jlt_testlt01_"
 password = "jlt_testLT01_"
 multiuser = True
+
 # Single user example
 #username = "build+teach@glasslabgames.org"
 #password = "glasslab123"
@@ -18,9 +19,13 @@ multiuser = True
 gameId = "AA-1"
 
 port = 8001
-#hostname = "localhost:" + str(port)
-hostname = "stage.playfully.org"
-
+hostname = "localhost:" + str(port)
+#hostname = "stage.playfully.org"
+#hostname = "54.183.147.99:" + str(port)
+#hostname = "52.8.144.83:" + str(port)
+#hostname = "54.67.98.243:" + str(port)
+#hostname = "52.21.104.125:" + str(port)
+#hostname = "www.playfully.org"
 #maxLoopSeconds = 10
 maxLoopSeconds = 10*60
 displayInfo = False

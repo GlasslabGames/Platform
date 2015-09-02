@@ -1,11 +1,8 @@
 var http = require('http');
-var hostname = "stage.playfully.org";
-var port = 80;
 
-
-//hostname = "localhost";
-//port = 9080;
-//port = 8001;
+hostname = "localhost";
+//port = 80;
+port = 8001;
 
 //hostname = "glasslab-dashboard-stage-164657619.us-west-2.elb.amazonaws.com";
 //hostname = "test.glgames.org";
