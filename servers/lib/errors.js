@@ -61,6 +61,7 @@ module.exports = {
     "user.login.betaPending":               "Your account is currently pending approval by our admin. We will notify you of your beta status via email shortly. If you have any questions, please let us know at: " + aConst.support.email,
     "user.login.approvePending":            "Your account is currently pending approval by our admin. We will notify you of your registration status via email shortly. If you have any questions, please let us know at: " + aConst.support.email,
     "user.login.notLoggedIn":               "You are not logged in",
+    "user.login.waitToTryAgain":            "Too many login attempts have been made, please wait a few seconds before trying again.",
     "user.passwordReset.general":           "We encountered an error. Please try again.",
     "user.passwordReset.code.missing":      "The code is invalid.",
     "user.passwordReset.code.expired":      "Oops, your code has expired. You'll need to go through the password reset process again.",

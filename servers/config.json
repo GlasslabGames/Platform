@@ -153,6 +153,10 @@
                 "callbackURL": "http://127.0.0.1:8001/auth/clever/callback",
                 "scope": "read:user_id"
             }
+        },
+        "bouncer" : {
+            "whitelist" : [  ],
+            "api" : [ "/api/v2/auth/login/glasslab" ]
         }
     },
     "assessment": {
