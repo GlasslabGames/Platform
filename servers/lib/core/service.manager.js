@@ -109,13 +109,13 @@ function ServiceManager(configFiles){
         return;
     }
 
-    if(!this.options.services.appArchiverPort){
-        console.log('');
-        console.log('****************    Error -- expect services.appArchiverPort in config.json');
-        console.log('');
-        return;
-    }
-    
+    // if(!this.options.services.appArchiverPort){
+    //     console.log('');
+    //     console.log('****************    Error -- expect services.appArchiverPort in config.json');
+    //     console.log('');
+    //     return;
+    // }
+
     if(!this.options.services) {
         // TODO - error - this.options.services.appExternalPort must be set
         this.options.services = {};
