@@ -978,6 +978,7 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
+/*
         {
             requireAuth: true,
             api: "/api/v2/auth/delete/user",
@@ -987,6 +988,8 @@ module.exports = {
                 post: "deleteUser"
             }
         },
+*/
+
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------
