@@ -314,9 +314,14 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     }.bind(this));
 };
 
+// Might as well get the whole set for reference
 Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + userId + ";";
+        var Q = "SELECT * FROM GL_LICENSE_MAP as mp" +
+            " INNER JOIN ( SELECT * FROM GL_LICENSE ) as lic" +
+            " ON ( mp.user_id = lic.user_id AND mp.license_id = lic.id)" +
+            " WHERE mp.user_id = " + userId + ";";
+
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
