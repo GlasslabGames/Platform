@@ -1414,7 +1414,8 @@ function subscribeToLicensePurchaseOrder(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(req.user.licenseId){
+    if(req.user.licenseId && (!req.user.isTrial)){
+        console.log("---> Instructor on license, not trial");
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
