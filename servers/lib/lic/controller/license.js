@@ -1521,15 +1521,24 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                         return true;
                     }
                     if(action === "trial upgrade" && license.status !== null && license.status !== "active"){
+                        // Review how this could happen (decision to trial upgrade, but current license is dead)
                         status = "already on license";
                     }
                     if(action === "subscribe" && license.status !== null){
-                        status = "already on license";
-                    }
+                        if (license.package_type === "trial"){
+                                action = "trial upgrade";
+                            }
+                            else {
+                                status = "already on license";
+                                // Correct this to not set status, but action "license upgrade" (with other upgrade changes)
+                            }
+                        }
                 });
+
                 if(status){
                     return status;
                 }
+
                 var params = {
                     metadata: {
                         purchaseOrder: true,
