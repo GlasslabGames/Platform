@@ -1267,6 +1267,10 @@ function resetPasswordUpdate(req, res, next) {
                 if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                 } else if(userData.resetCodeStatus == aConst.passwordReset.status.inProgress) {
+                    if (this.glassLabStrategy.validatePassword(req.body.password) !== true) {
+                        return;
+                    }
+                  
                     return this.glassLabStrategy.encryptPassword(req.body.password)
                         .then(function(password) {
                             // update status

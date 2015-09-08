@@ -155,7 +155,7 @@
             }
         },
         "bouncer" : {
-            "whitelist" : [  ],
+            "whitelist" : [ "127.0.0.1" ],
             "api" : [ "/api/v2/auth/login/glasslab" ]
         }
     },

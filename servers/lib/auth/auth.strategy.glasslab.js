@@ -36,6 +36,9 @@ function Glasslab_Strategy(options, service) {
 
     passport.Strategy.call(this);
     this.name = 'glasslab';
+
+    this.upperCaseRegEx = new RegExp(/[A-Z]+/);
+    this.numberRegEx = new RegExp(/[0-9]+/);
 }
 
 /**
@@ -218,6 +221,10 @@ return when.promise(function(resolve, reject) {
             existingId = id;
             return this._service.getAuthStore().checkUserNameUnique(userData.username);
         }.bind(this))
+        // validate password
+        .then(function(){
+            return this.validatePassword(userData.password);
+        }.bind(this))
         // encrypt password
         .then(function(){
             return this.encryptPassword(userData.password);
@@ -242,6 +249,23 @@ return when.promise(function(resolve, reject) {
             return reject(err, code);
         }.bind(this));
 // ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+// Current password rule enforced by both client and server:
+// At least 6 characters
+// Must have at least one uppercase letter
+// Must have at least one number
+Glasslab_Strategy.prototype.validatePassword = function(password){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+    if (password.length >= 6 && password.match(this.upperCaseRegEx) && password.match(this.numberRegEx)) {
+        resolve(password);
+    } else {
+        reject({"error": "Password too weak", "exception": err}, 500);
+        return;
+    }
 }.bind(this));
 // end promise wrapper
 };
@@ -490,6 +514,10 @@ return when.promise(function(resolve, reject) {
             if(userData.password) {
                 if (!this._isEncrypted(userData.password)) {
                     // passing old password to salt new password to validate
+                    if (this.validatePassword(userData.password) !== true) {
+                        return;
+                    }
+              
                     return this._comparePassword(userData.password, dbUserData.password);
                 } else {
                     return userData.password;
