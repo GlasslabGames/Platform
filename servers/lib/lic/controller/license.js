@@ -78,8 +78,12 @@ function getSubscriptionPackages(req, res){
 
 // gets information necessary for the premium manager page
 function getCurrentPlan(req, res){
-    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+    if(!(req && req.user && req.user.id )){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.jsonResponse(res, "none", 200);
         return;
     }
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
