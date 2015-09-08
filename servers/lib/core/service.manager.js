@@ -292,8 +292,8 @@ return when.promise(function(resolve, reject) {
                 this.app.use(express.session({
                   secret: this.options.services.session.secret || "keyboard kitty",
                     cookie: _.merge({
-                        path: '/'
-                        , httpOnly : false
+                        path: this.options.services.session.cookie.path || '/'
+                        , httpOnly : this.options.services.session.cookie.httpOnly || false
                         //, maxAge: 1000 * 60 * 24 // 24 hours
                     }, this.options.services.session.cookie),
                     store:  this.exsStore
