@@ -10,6 +10,13 @@
         "appExternalPort":   8001,
         "appInternalPort":   8002,
         "appAssessmentPort": 8003,
+        "appArchiverPort":   8004,
+        "first_login":   "2015-09-03 23:59:01",
+        "TlsFiles": {
+            "caName": "ssl-key/root-ca.crt.pem",
+            "keyName": "ssl-key/server.key.pem",
+            "certName": "ssl-key/server.crt.pem"
+        },
         "session": {
             "secret": "keyboard kitty",
             "cookie": {
@@ -197,5 +204,14 @@
     },
     "stripe": {
         "env": "test"
+    },
+    "env_dev": {
+        "first_login":   "2015-09-02 23:59:01"
+    },
+    "env_stage": {
+        "first_login":   "2015-09-03 23:59:01"
+    },
+    "env_prod": {
+        "first_login":   "2015-09-09 23:59:01"
     }
 }

@@ -967,6 +967,18 @@ var countDailyActiveUsers = function(stats){
 
     var Q;
     var userCount;
+    var first_login;
+    // var first_login = this.options.services.first_login || '2015-09-03 23:59:02';
+
+    if("dev" == this.options.env){
+        first_login = this.options.env_dev.first_login;
+    } else if("stage" == this.options.env){
+        first_login = this.options.env_stage.first_login;
+    } else if("prod" == this.options.env){
+        first_login = this.options.env_prod.first_login;
+    }
+
+    first_login = first_login || '2015-09-03 23:59:02';
 
     this.ds = this.options.services.ds_mysql;
 
@@ -1002,6 +1014,58 @@ var countDailyActiveUsers = function(stats){
                 userCount = parseFloat(results[0].num);
                 stats.gaugeNoRoot("info", "mau_count", userCount);
                 console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+" Monthly Active Users in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    // tentative MAU user has no login date in db ...
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE " +
+            "( ENABLED = 1 AND last_login IS NULL " +
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP('" + first_login + "') ) ";
+
+            //  2015-09-03 23:59:01 == first day last_login was available on this platform ?
+            // after 30 days all of the maybe MAU expire
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "maybe_mau_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " (maybe) Monthly Active Users in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE " +
+            "( ENABLED = 1 AND last_login IS NOT NULL " +
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= last_login ) " +
+            "OR " +
+            "( ENABLED = 1 AND last_login IS NULL " +
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP('" + first_login + "') ) ";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "mau_plus_maybe_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " Monthly plus maybe Active Users in the DB.");
 
                 resolve(results[0]);
             }, function(err){
