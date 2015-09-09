@@ -29,6 +29,8 @@ function Glasslab_Strategy(options, service) {
     lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
 
+    this.stats = new Util.Stats(this.options, "AuthStrategyGlasslab");
+
     this._service       = service;
     this._usernameField = 'username';
     this._passwordField = 'password';
@@ -237,6 +239,11 @@ return when.promise(function(resolve, reject) {
                 // need to test this
                 return this._service.getAuthStore().updateTempUser(userData, existingId);
             } else{
+                console.log(' ');
+                console.log(Util.DateGMTString(), 'adding new user ... ', userData.role, userData.username);
+                console.log(' ');
+                this.stats.increment("info", "new.user.created");
+                this.stats.increment("info", "new."+userData.role+'created');
                 return this._service.getAuthStore().addUser(userData);
             }
         }.bind(this))

@@ -251,6 +251,13 @@ return when.promise(function(resolve, reject) {
                 return this.authStore.updateUserDBData(userData);
             } else {
                 userData.newUser = true;
+
+                // single sign-on users
+                console.log(' ');
+                console.log(Util.DateGMTString(), 'adding new user ... ', userData.role, userData.username);
+                console.log(' ');
+                this.stats.increment("info", "new.user.created");
+                this.stats.increment("info", "new."+userData.role+'created');
                 return this.authStore.addUser(userData);
             }
         }.bind(this))
