@@ -1053,7 +1053,7 @@ var countDailyActiveUsers = function(stats){
             })
     }.bind(this));
 
-    // tentative MAU user has no login date in db ...
+    // tentative MAU - user has no login date in db ...
 
     when.promise(function(resolve, reject){
 
@@ -1097,6 +1097,69 @@ var countDailyActiveUsers = function(stats){
                 stats.gaugeNoRoot("info", "mau_plus_maybe_count", userCount);
                 console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
                     " Monthly plus maybe Active Users in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ( ENABLED = 1 AND " +
+            "DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= date_created ) ";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "new_users_today_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " New users Today in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ( ENABLED = 1 AND system_Role = 'student' AND " +
+            "DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= date_created ) ";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "new_students_today_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " New Students Today in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ( ENABLED = 1 AND system_Role = 'instructor' AND " +
+            "DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= date_created ) ";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "new_teachers_today_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " New Teachers Today in the DB.");
 
                 resolve(results[0]);
             }, function(err){

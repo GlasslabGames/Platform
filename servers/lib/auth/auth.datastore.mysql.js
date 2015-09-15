@@ -562,6 +562,7 @@ return when.promise(function(resolve, reject) {
     this.ds.query(Q)
         .then(
         function(data){
+            // console.log(Util.DateGMTString(), 'Auth_MySQL.prototype.addUser() -- success ');
             resolve(data.insertId);
         }.bind(this),
         function(err) {
