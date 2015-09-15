@@ -21,6 +21,14 @@ var express    = require('express');
 var couchbase  = require('couchbase');
 var cors       = require('cors');
 
+var compression = require('compression');
+var errorhandler = require('errorhandler');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var expressSession = require('express-session');
+var basicAuth = require('basic-auth');
+
 // moving TLS key-file names to config.json
 //
 var TlsOptions = {
@@ -246,11 +254,11 @@ return when.promise(function(resolve, reject) {
 
     var connectPromise;
     if(this.options.services.session.store) {
-        var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
+        var CouchbaseStore = require('./sessionstore.couchbase.js')(expressSession);
         this.exsStore      = new CouchbaseStore(this.options.services.session.store);
         connectPromise = this.exsStore.glsConnect();
     } else {
-        var MemoryStore = express.session.MemoryStore;
+        var MemoryStore = expressSession.MemoryStore;
         this.exsStore   = new MemoryStore();
         connectPromise = Util.PromiseContinue();
     }
@@ -264,21 +272,23 @@ return when.promise(function(resolve, reject) {
             this.app.set('port', process.env.PORT || this.options.services.port);
             // process.env.PORT not used here
 
-            this.app.configure(function() {
+            //this.app.configure(function() {
 
-		this.app.use(function (req, res, next) {
-		    res.removeHeader("X-Powered-By");
-		    next();
-		}); 
+                this.app.use(function (req, res, next) {
+                    res.removeHeader("X-Powered-By");
+                    next();
+                }); 
 
-                this.app.use(Util.GetExpressLogger(this.options, express, this.stats));
-                this.app.use(express.compress()); // gzip compress, Need to disable for loadtest
-                this.app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
-
-                this.app.use(express.cookieParser());
-                this.app.use(express.urlencoded());
-                this.app.use(express.json());
-                this.app.use(express.methodOverride());
+                this.app.use(Util.GetMorganLogger(this.options, this.stats));
+                
+                this.app.use(compression());
+              this.app.use(function (req, res, next) { console.log("no-op"); next(); });
+              
+                this.app.use(cookieParser());
+                this.app.use(bodyParser.urlencoded());
+                this.app.use(bodyParser.json());
+                this.app.use(methodOverride());
+                
                 var whitelist = [ "http://new.wwf.local", "https://new.wwf.local", "http://www.wordswithfriendsedu.com", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com", "https://s3-us-west-1.amazonaws.com" ];
                 var corsOptions = {
                     origin: function( origin, callback ) {
@@ -289,7 +299,7 @@ return when.promise(function(resolve, reject) {
                 };
                 this.app.use( cors(corsOptions) );
 
-                this.app.use(express.session({
+                this.app.use(expressSession({
                   secret: this.options.services.session.secret || "keyboard kitty",
                     cookie: _.merge({
                         path: this.options.services.session.cookie.path || '/'
@@ -298,8 +308,9 @@ return when.promise(function(resolve, reject) {
                     }, this.options.services.session.cookie),
                     store:  this.exsStore
                 }));
+
                 resolve();
-            }.bind(this))
+            //}.bind(this))
         }.bind(this))
         // catch all errors
         .then(null, reject);
@@ -571,15 +582,17 @@ ServiceManager.prototype.setupApiRoutes = function() {
                     if(a.basicAuth) {
                         console.log("Basic Auth API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
 
+                      
                         // add wrapper function to check auth
-                        this.app[ m ](a.api, express.basicAuth(
-                                function(user, pass){
-                                    return ( user == a.basicAuth.user &&
-                                             pass == a.basicAuth.pass
-                                    );
-                                }
-                            )
-                        );
+                        this.app[ m ](a.api, function(req, res, next) {
+                            var user = basicAuth(req);
+                            if (!user || user.name != a.basicAuth.user || user.pass != a.basicAuth.pass) {
+                                var realm = (a.basicAuth.realm ? a.basicAuth.realm : 'My Realm');
+                                res.set('WWW-Authenticate', 'Basic realm="' + realm + '"');
+                                return res.status(401).send();
+                            }
+                            return next();
+                        });
                     }
 
                     // if require auth
@@ -821,6 +834,9 @@ ServiceManager.prototype.start = function(port) {
                     this.setupRoutes();
                     console.log('----------------------------');
                     console.log('Routes Setup done')
+
+                    // after routes set-up
+                    this.app.use(errorhandler({showStack: true, dumpExceptions: true}));
 
                     console.log(Util.DateGMTString()+' Starting Server ... ');
 
