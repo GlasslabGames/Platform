@@ -16,7 +16,7 @@ start() {
 }
 
 stop() {
-    forever stop node_modules/statsd/stats.js
+    # forever stop node_modules/statsd/stats.js
     forever stop app-external.js
     forever stop app-internal.js
     forever stop app-archiver.js
