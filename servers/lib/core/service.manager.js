@@ -1017,7 +1017,9 @@ var countDailyActiveUsers = function(stats){
 
         Q = "SELECT COUNT(id) as num FROM GL_USER " +
             "WHERE ENABLED = 1 AND last_login IS NOT NULL " +
-            "AND DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= last_login"
+            "AND DATE_SUB(NOW(), INTERVAL 17 HOUR) <= last_login"        // over last 24 hours
+        //  "AND DATE_SUB(CURDATE(), INTERVAL 17 HOUR) <= last_login"    // reset DAU at 11:59pm PDT
+        //  "AND DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= last_login"      // reset at 5pm PDT
 
         this.ds.query(Q)
             .then(function(results){
