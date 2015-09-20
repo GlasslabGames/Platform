@@ -863,6 +863,15 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
+            api: "/api/v2/auth/userbyemail",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserDataByEmail",
+            }
+        },
+        {
             api: "/api/v2/auth/login/glasslab",
             service: "auth",
             controller: "login",

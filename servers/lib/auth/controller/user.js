@@ -14,6 +14,7 @@ module.exports = {
     verifyBetaCode:      verifyBetaCode,
     verifyDeveloperCode: verifyDeveloperCode,
     getUserDataById:     getUserDataById,
+    getUserDataByEmail:  getUserDataByEmail, 
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
     resetPasswordVerify: resetPasswordVerify,
@@ -100,6 +101,41 @@ function getUserDataById(req, res, next) {
         this.requestUtil.errorResponse(res, "not logged in");
     }
 }
+
+function getUserDataByEmail(req, res, next) {
+    console.log("gUDBE req", req.query);
+
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.query &&
+        req.query.email) {
+            this.getAuthStore().findUser( 'email', req.query.email )
+
+/*
+see if necessary for security
+        var loginUserSessionData = req.session.passport.user;
+
+            .then(function(userData){
+                return this.checkUserPerminsToUserData(userData, loginUserSessionData)
+            }.bind(this))
+*/
+
+            .then(function(userData) {
+                console.log("findUser-email: ", userData);
+                var userId = userData.id;
+                this.requestUtil.jsonResponse(res, userData);
+            }.bind(this))
+            .then(null, function(err){
+                console.log("gUDBE: did not find email: ", req.query.email);
+                var empty = {};
+                this.requestUtil.jsonResponse(res, empty);
+            }.bind(this));
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
 
 /**
  * Registers a user with role of instructor or student
