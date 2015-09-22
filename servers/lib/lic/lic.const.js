@@ -28,6 +28,7 @@ module.exports = {
             ],
             "iPadGames": [
                 "AA-1",
+                "IYC",
                 "PVZ"
             ],
             "downloadableGames": [
@@ -45,6 +46,7 @@ module.exports = {
             ],
             "iPadGames": [
                 "AA-1",
+                "IYC",
                 "WPLUS",
                 "WT",
                 "PVZ"
@@ -67,6 +69,7 @@ module.exports = {
             ],
             "iPadGames": [
                 "AA-1",
+                "IYC",
                 "PVZ"
             ],
             "downloadableGames": [
@@ -88,6 +91,7 @@ module.exports = {
             ],
             "iPadGames": [
                 "AA-1",
+                "IYC",
                 "WPLUS",
                 "WT",
                 "PVZ"
@@ -111,6 +115,7 @@ module.exports = {
             ],
             "iPadGames": [
                 "AA-1",
+                "IYC",
                 "WPLUS",
                 "WT",
                 "PVZ"
@@ -134,6 +139,7 @@ module.exports = {
             ],
             "iPadGames": [
                 "AA-1",
+                "IYC",
                 "WPLUS",
                 "WT",
                 "PVZ"
