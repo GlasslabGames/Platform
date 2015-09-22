@@ -2,7 +2,7 @@
     "basic": {
         "gameId": "IYC",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "shortName": "If You Can",
         "longName": "If You Can",
         "grades": "TBD",
