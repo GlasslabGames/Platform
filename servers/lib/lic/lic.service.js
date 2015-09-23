@@ -91,7 +91,15 @@ function _cronTask() {
     this.serviceManager.internalRoute('/api/v2/license/inspect', 'post', [mockReq, mockRes]);
 };
 
-LicService.prototype.getPOSeats = function( package_size_tier ) {
+
+LicService.prototype.getPOSeats = function(  package_size_tier ){
+    return when.promise(function(resolve, reject){
+        resolve( _getPOSeats( package_size_tier ) );
+    }.bind(this));
+};
+
+
+function _getPOSeats( package_size_tier ) {
     var seats = new {};
     if ( package_size_tier[0] == '_' ) {
         var index = packageSize.lastIndexOf( '_' );
@@ -123,7 +131,7 @@ LicService.prototype.getPOSeats = function( package_size_tier ) {
     }
 
     return seats;
-}
+};
 
 
 LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
@@ -144,7 +152,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
                 });
                 var license = results[0][0];
                 var packageSize = license["package_size_tier"];
-                studentSeats = getPOSeats( packageSize ).studentSeats;
+                studentSeats = _getPOSeats( packageSize ).studentSeats;
                 studentList = results[1];
                 _(studentList).forEach(function(student){
                     _(student).forEach(function(premiumCourse, courseId, courseList){
@@ -288,7 +296,7 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                     return status;
                 }
                 var size = license["package_size_tier"];
-                var studentSeats = getPOSeats( size ).studentSeats;
+                var studentSeats = _getPOSeats( size ).studentSeats;
                 // change the student_count_remaining field in the license table
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
@@ -400,7 +408,7 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                     return;
                 }
                 // if student is no longer a premium student, update the seat count
-                var studentSeats = getPOSeats( seats ).studentSeats;
+                var studentSeats = _getPOSeats( seats ).studentSeats;
                 this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(status){
@@ -454,7 +462,7 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if (typeof status === "string") {
                     return status;
                 }
-                var studentSeats = getPOSeats( seats ).studentSeats;
+                var studentSeats = _getPOSeats( seats ).studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function (status) {
