@@ -91,6 +91,41 @@ function _cronTask() {
     this.serviceManager.internalRoute('/api/v2/license/inspect', 'post', [mockReq, mockRes]);
 };
 
+LicService.prototype.getPOSeats = function( package_size_tier ) {
+    var seats = new {};
+    if ( package_size_tier[0] == '_' ) {
+        var index = packageSize.lastIndexOf( '_' );
+        var studentSeats = parseInt( package_size_tier.slice( 1, index - 1 ) );
+        var educatorSeats = parseInt( package_size_tier.slice( index + 1 ) );
+
+        console.log("Custom PO students ", studentSeats);
+        console.log("Custom PO educators ", educatorSeats);
+
+        seats.size = "Custom";
+        seats.studentSeats = studentSeats;
+        seats.educatorSeats = educatorSeats;
+        seats.seatId = studentSeats;
+
+        // Discounts
+        if ( studentSeats < 11 ) {
+            seats.discount = 0;
+        } else if ( studentSeats < 31 ) {
+            seats.discount = 20;
+        } else if ( studentSeats < 121 ) {
+            seats.discount = 25;
+        } else if ( studentSeats < 501 ) {
+            seats.discount = 30;
+        } else {
+            seats.discount = 35;
+        }
+    } else {
+        seats = lConst.seats[  package_size_tier ];
+    }
+
+    return seats;
+}
+
+
 LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
     return when.promise(function(resolve, reject){
         var studentSeats;
@@ -109,7 +144,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
                 });
                 var license = results[0][0];
                 var packageSize = license["package_size_tier"];
-                studentSeats = lConst.seats[packageSize].studentSeats;
+                studentSeats = getPOSeats( packageSize ).studentSeats;
                 studentList = results[1];
                 _(studentList).forEach(function(student){
                     _(student).forEach(function(premiumCourse, courseId, courseList){
@@ -253,7 +288,7 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                     return status;
                 }
                 var size = license["package_size_tier"];
-                var studentSeats = lConst.seats[size].studentSeats;
+                var studentSeats = getPOSeats( size ).studentSeats;
                 // change the student_count_remaining field in the license table
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
@@ -365,7 +400,7 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                     return;
                 }
                 // if student is no longer a premium student, update the seat count
-                var studentSeats = lConst.seats[seats].studentSeats;
+                var studentSeats = getPOSeats( seats ).studentSeats;
                 this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(status){
@@ -419,7 +454,7 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if (typeof status === "string") {
                     return status;
                 }
-                var studentSeats = lConst.seats[seats].studentSeats;
+                var studentSeats = getPOSeats( seats ).studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function (status) {

@@ -19,8 +19,6 @@ module.exports = {
             "name": "Chromebook/Web",
             "description": "Games in this package are optimized to work on Chromebooks.",
             "pricePerSeat": 2.5,
-            "studentPrice": 1.5,
-            "educatorPrice": 7.5,
             "browserGames": [
                 "AW-1",
                 "GOG",
@@ -39,8 +37,6 @@ module.exports = {
             "name": "iPad",
             "description": "Games in this package are optimized to work on iPads.",
             "pricePerSeat": 3,
-            "studentPrice": 1.8,
-            "educatorPrice": 10.0,
             "browserGames": [
             ],
             "iPadGames": [
@@ -58,8 +54,6 @@ module.exports = {
             "name": "PC/MAC",
             "description": "Games in this package run on PC or Mac computers.",
             "pricePerSeat": 3.5,
-            "studentPrice": 2.0,
-            "educatorPrice": 15.0,
             "browserGames": [
                 "AW-1",
                 "GOG",
@@ -79,8 +73,6 @@ module.exports = {
             "name": "All Games",
             "description": "This package includes all games available on this site.",
             "pricePerSeat": 5,
-            "studentPrice": 2.0,
-            "educatorPrice": 30.0,
             "browserGames": [
                 "AW-1",
                 "GOG",
