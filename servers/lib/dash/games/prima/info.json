@@ -589,54 +589,102 @@
                 "title": "Game Badges",
                 "list": [
                     {
-                        "name": "Privacy Coach",
-                        "img": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeImages/50x5/Mozilla_Badge_PC_400.png",
-                        "description": "To earn this badge, learners become privacy mentors to their peers by sharing their expertise through discussion or creating their own “recipe” documentation on privacy.",
-                        "ageGroup": [
-                            "highSchool"
-                        ],
+                      "id": 10,
+                      "orgId": 3,
+                      "dateCreated": 1443028952914,
+                      "lastUpdated": 1443028952914,
+                      "status": "draft",
+                      "name": "Privacy Coach",
+                      "ageGroup": [
+                        "highSchool"
+                      ],
+                      "category": "Code",
+                      "description": "To earn this badge, learners become privacy mentors to their peers by sharing their expertise through discussion or creating their own “recipe” documentation on privacy.",
+                      "videoLink": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeBannerImages/banner_image_mozilla.jpg",
+                      "criteria": {
                         "todos": [
-                            "Learners must",
-                            "Mentor a peer in privacy related settings or practices.Gain experience in mentorship."
+                          "Learners must",
+                          "Mentor a peer in privacy related settings or practices.Gain experience in mentorship."
                         ],
                         "requirements": [
-                            "Learners must",
-                            "Choose and document selection of an area of privacy to teach others.Draft a plan to teach others a lesson about their selected area of privacy.Gather materials necessary for that plan.Teach others their lesson or publish it online with an appropriate open license.Document mentorship activities."
-                        ]
+                          "Learners must",
+                          "Choose and document selection of an area of privacy to teach others.Draft a plan to teach others a lesson about their selected area of privacy.Gather materials necessary for that plan.Teach others their lesson or publish it online with an appropriate open license.Document mentorship activities."
+                        ],
+                        "approvalType": "other",
+                        "badgeType": "messingAround"
+                      },
+                      "competency": "",
+                      "image": {
+                        "title": "Privacy Coach",
+                        "type": "To earn this badge, learners become privacy mentors to their peers by sharing their expertise through discussion or creating their own “recipe” documentation on privacy.",
+                        "src": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeImages/50x5/Mozilla_Badge_PC_400.png"
+                      }
                     },
                     {
-                        "name": "PYD Write the Web",
-                        "img": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeImages/50x5/placeholder_badge.png",
-                        "description": "In the first activity for this badge, learners use a free and open source tool called Mozilla Lightbeam to see how cookies and third-party trackers monitor their everyday tasks on the web. Then they divide into teams and race to see who can gather the most trackers.  In the second activity, learners generate passphrases, pronounceable and random passwords based on best practices. Then they create a survey to pass along their knowledge to friends and family.",
-                        "ageGroup": [
-                            "highSchool"
-                        ],
+                      "id": 11,
+                      "orgId": 3,
+                      "dateCreated": 1443028952914,
+                      "lastUpdated": 1443028952914,
+                      "status": "draft",
+                      "name": "PYD Write the Web",
+                      "ageGroup": [
+                        "highSchool"
+                      ],
+                      "category": "Code",
+                      "description": "In the first activity for this badge, learners use a free and open source tool called Mozilla Lightbeam to see how cookies and third-party trackers monitor their everyday tasks on the web. Then they divide into teams and race to see who can gather the most trackers.\n\nIn the second activity, learners generate passphrases, pronounceable and random passwords based on best practices. Then they create a survey to pass along their knowledge to friends and family.",
+                      "videoLink": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeBannerImages/banner_image_mozilla.jpg",
+                      "criteria": {
                         "todos": [
-                            "Cookies & Third Party Tracking Activity: Learners must",
-                            "Show that there are third parties who may be tracking what they do online.Install appropriate add-ons to enhance privacy.Explain what cookies are and why they are used.",
-                            "Draw Secure Passwords Activity: Learners must",
-                            "Make more or less secure passwords and explain what makes them secure.Judge a passwords security strength based on key indicators.Collect original research on passwords."
+                          "Cookies & Third Party Tracking Activity: Learners must",
+                          "Show that there are third parties who may be tracking what they do online.Install appropriate add-ons to enhance privacy.Explain what cookies are and why they are used.",
+                          "Draw Secure Passwords Activity: Learners must",
+                          "Make more or less secure passwords and explain what makes them secure.Judge a passwords security strength based on key indicators.Collect original research on passwords."
                         ],
                         "requirements": [
-                            "Cookies & Third Party Tracking Activity: Learners must",
-                            "Use the Lightbeam tool to discover and then document the tracking practices of 5 favorite websites.Use Lightbeam to complete a “tracking race” to see who can get the most trackers online in 5 minutes.Document their results from the tracking race.",
-                            "Draw Secure Passwords Activity: Learners must",
-                            "Create a passphrase.Draw a passphrase.Create a random password.Create a pronounceable password.Create a Basic 8 password.Create a Basic 16 password.Create a survey about password-making habits.Conduct the survey, document its results, and present the results to the group."
-                        ]
+                          "Cookies & Third Party Tracking Activity: Learners must",
+                          "Use the Lightbeam tool to discover and then document the tracking practices of 5 favorite websites.Use Lightbeam to complete a “tracking race” to see who can get the most trackers online in 5 minutes.Document their results from the tracking race.",
+                          "Draw Secure Passwords Activity: Learners must",
+                          "Create a passphrase.Draw a passphrase.Create a random password.Create a pronounceable password.Create a Basic 8 password.Create a Basic 16 password.Create a survey about password-making habits.Conduct the survey, document its results, and present the results to the group."
+                        ],
+                        "approvalType": "other",
+                        "badgeType": "messingAround"
+                      },
+                      "competency": "",
+                      "image": {
+                        "title": "PYD Write the Web",
+                        "type": "In the first activity for this badge, learners use a free and open source tool called Mozilla Lightbeam to see how cookies and third-party trackers monitor their everyday tasks on the web. Then they divide into teams and race to see who can gather the most trackers.\n\nIn the second activity, learners generate passphrases, pronounceable and random passwords based on best practices. Then they create a survey to pass along their knowledge to friends and family.",
+                        "src": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeImages/50x5/placeholder_badge.png"
+                      }
                     },
                     {
-                        "name": "WLB Completer",
-                        "img": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeImages/50x5/Mozilla_Badge_WLBC_400.png",
-                        "description": "To earn this badge, learners must complete the Mozilla Learning Networks Web Literacy Basics playlists: Read, Write, and Participate on the Web. They will demonstrate skills in search strategies, evaluating online credibility, remixing HTML elements of a Web page, correctly structuring a webpage, and remixing online content to teach other and tell stories on the Web.",
-                        "ageGroup": [
-                            "highSchool"
-                        ],
+                      "id": 12,
+                      "orgId": 3,
+                      "dateCreated": 1443028952915,
+                      "lastUpdated": 1443028952915,
+                      "status": "draft",
+                      "name": "WLB Completer",
+                      "ageGroup": [
+                        "highSchool"
+                      ],
+                      "category": "Code",
+                      "description": "To earn this badge, learners must complete the Mozilla Learning Networks Web Literacy Basics playlists: Read, Write, and Participate on the Web. They will demonstrate skills in search strategies, evaluating online credibility, remixing HTML elements of a Web page, correctly structuring a webpage, and remixing online content to teach other and tell stories on the Web.",
+                      "videoLink": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeBannerImages/banner_image_mozilla.jpg",
+                      "criteria": {
                         "todos": [
-                            "Learners must complete the Read, Write, and Participate on the Web playlists for Web Literacy Basics."
+                          "Learners must complete the Read, Write, and Participate on the Web playlists for Web Literacy Basics."
                         ],
                         "requirements": [
-                            "Learners must gather their Web Literacy Basics submissions and present them to their assessors."
-                        ]
+                          "Learners must gather their Web Literacy Basics submissions and present them to their assessors."
+                        ],
+                        "approvalType": "other",
+                        "badgeType": "messingAround"
+                      },
+                      "competency": "",
+                      "image": {
+                        "title": "WLB Completer",
+                        "type": "To earn this badge, learners must complete the Mozilla Learning Networks Web Literacy Basics playlists: Read, Write, and Participate on the Web. They will demonstrate skills in search strategies, evaluating online credibility, remixing HTML elements of a Web page, correctly structuring a webpage, and remixing online content to teach other and tell stories on the Web.",
+                        "src": "https://s3-us-west-1.amazonaws.com/collectiveshift/badgeImages/50x5/Mozilla_Badge_WLBC_400.png"
+                      }
                     }
                 ]
             }
