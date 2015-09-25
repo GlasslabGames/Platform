@@ -106,6 +106,7 @@ module.exports = {
     "dash.gameId.access.denied":            "You do not have access to this game.",
     "dash.messageId.invalid":               "Invalid messageId",
     "dash.messageId.missing":               "Missing messageId",
+    "dash.badgeId.missing":                 "Missing badgeId",
     "dash.icon.missing":                    "Missing icon when posting a new message",
     "dash.subject.missing":                 "Missing subject when posting a new message",
     "dash.message.missing":                 "Missing message when posting a new message",

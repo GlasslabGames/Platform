@@ -354,6 +354,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/badge/:badgeId",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getBadgeJSON"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/dash/developer/profile",
             service: "dash",

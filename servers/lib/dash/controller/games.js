@@ -14,6 +14,7 @@ module.exports = {
     getActiveGamesDetails:           getActiveGamesDetails,
     getMyGames:                      getMyGames,
     reloadGameFiles:                 reloadGameFiles,
+    getBadgeJSON:                    getBadgeJSON,
     migrateInfoFiles:                migrateInfoFiles,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
@@ -646,4 +647,26 @@ function _writeToInfoJSONFiles(gameId, data){
             resolve();
         });
     });
+}
+
+function getBadgeJSON(req, res){
+    if (!req.params.badgeId) {
+        this.requestUtil.errorResponse(res, {key:"dash.badgeId.missing", error: "missing badgeId"});
+        return;
+    }
+
+    var url = "https://api-qa.lrng.org/api/v1/badge/remote-badges?badgeIds=[" + req.params.badgeId + "]";
+
+    this.requestUtil.getRequest(url,
+        {
+            "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9"
+        },
+        function(err, result, data) {
+                if ( data ) {
+                    res.writeHead(200, {
+                        "Content-Type": "application/json"
+                    });
+                    res.end( JSON.stringify( data ) );
+                }
+            });
 }
