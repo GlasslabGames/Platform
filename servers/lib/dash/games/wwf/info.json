@@ -61,7 +61,7 @@
             "id": "sowo",
             "dataProcessScope": "all",
             "engine": "javascript",
-            "trigger": "endSession",
+            "trigger": "activity",
             "rules": {
                 "wo1": {
                     "name": "Player hasn't viewed academic word list in 3 turns",
