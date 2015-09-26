@@ -157,70 +157,15 @@ RequestUtil.prototype.forwardPostRequest = function(url, jdata, resOut, done){
 */
 
 RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
+    var protocolFunc;
+
     if ( options.protocol === 'https:' ) {
-        var sreq = https.request(options, function(sres) {
-                // handle attachments
-                if(  sres.headers['content-disposition'] &&
-                    (sres.headers['content-disposition'].indexOf('attachment') != -1) ) {
-                    sres.setEncoding('binary');
-                }
-
-                //console.log("sendRequest statusCode:", sres.statusCode, ", headers:",  sres.headers);
-                if(resOut) {
-                    // remove set cookie, but send rest
-                    delete sres.headers['set-cookie'];
-                    resOut.writeHead(sres.statusCode, sres.headers);
-                }
-
-                var data = "";
-                sres.on('data', function(chunk){
-                    data += chunk;
-                    if(resOut) resOut.write(chunk);
-                });
-
-                sres.on('end', function(){
-                    if(resOut) resOut.end();
-                    // call done function if exist
-                    if(done) done(null, sres, data);
-                });
-            });
-
-            sreq.on("error", function(err) {
-                console.error("Auth: sendRequest Error -", err.message);
-                if(resOut) {
-                    resOut.writeHead(500);
-                    resOut.end();
-                }
-
-                if(done) done(err);
-            });
-
-            // request timeout
-            sreq.on('socket', function(socket) {
-                socket.setTimeout(this.options.request.httpTimeout);
-                socket.on('timeout', function() {
-                    sreq.abort();
-                    if(resOut) {
-                        resOut.writeHead(500);
-                        resOut.end();
-                    }
-                });
-            }.bind(this));
-
-            if(data) {
-                if(_.isObject(data)) {
-                    // convert data to string
-                    data = JSON.stringify(data);
-                }
-
-                if(data.length > 0) {
-                    sreq.write( data );
-                }
-            }
-
-            sreq.end();
+        protocolFunc = https;
     } else {
-        var sreq = http.request(options, function(sres) {
+        protocolFunc = http;
+    }
+
+    var sreq = protocolFunc.request(options, function(sres) {
             // handle attachments
             if(  sres.headers['content-disposition'] &&
                 (sres.headers['content-disposition'].indexOf('attachment') != -1) ) {
@@ -281,7 +226,6 @@ RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
         }
 
         sreq.end();
-    }
 };
 
 
