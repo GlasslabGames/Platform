@@ -362,7 +362,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/badge/:badgeId/generateCode",
+            api: "/api/v2/dash/badge/:badgeId/generateCode/:userId",
             service: "dash",
             controller: "games",
             method: {
@@ -375,6 +375,14 @@ module.exports = {
             controller: "games",
             method: {
                 post: "awardBadge"
+            }
+        },
+        {
+            api: "/api/v2/dash/badge/:badgeId/codeAwarded/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "badgeCodeAwarded"
             }
         },
         {

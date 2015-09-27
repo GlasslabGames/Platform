@@ -716,3 +716,24 @@ function awardBadge(req, res) {
                 }
             } );
 }
+
+function badgeCodeAwarded(req, res) {
+    // Expect this to not be needed
+    if (!req.params.badgeId) {
+        this.requestUtil.errorResponse(res, {key:"dash.badgeId.missing", error: "missing badgeId"});
+        return;
+    }
+
+    if (!req.params.code) {
+        this.requestUtil.errorResponse(res, {key:"dash.code.missing", error: "missing code"});
+        return;
+    }
+
+    var url = "https://api-qa.lrng.org/code/" + code;
+
+    // Until implemented
+    var data = { "status": "ok", "data": { "redeemed": true } };
+    res.writeHead( 200, { "Content-Type": "application/json" } );
+    res.end( JSON.stringify( data ) );
+}
+
