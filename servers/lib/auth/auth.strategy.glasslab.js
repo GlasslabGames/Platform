@@ -420,6 +420,15 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Glasslab_Strategy.prototype.updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        return this._service.getAuthStore().updateUserBadgeList( userId, badgeList );
+    }.bind(this))
+    .then(null, function(err, code){
+        reject(err, code);
+    }.bind(this));
+};
+
 // loads of permission checks are done before update the DB data
 Glasslab_Strategy.prototype.updateUserData = function(userData, loginUserSessionData){
     console.log( JSON.stringify( userData ) );

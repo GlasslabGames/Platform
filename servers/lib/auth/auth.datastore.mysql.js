@@ -61,6 +61,7 @@ return when.promise(function(resolve, reject) {
             var hasSchool = false;
             var hasFtueChecklist = false;
             var hasLastLogin = false;
+            var hasBadgeList = false;
 
             var promiseList = [];
             var Q = "";
@@ -95,6 +96,10 @@ return when.promise(function(resolve, reject) {
 
                 if (results[i]['Field'] == "last_login") {
                     hasLastLogin = true;
+                }
+
+                if (results[i]['Field'] == "badge_list") {
+                    hasBadgeList = true;
                 }
             }
 
@@ -141,6 +146,13 @@ return when.promise(function(resolve, reject) {
                 console.log('                ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ');
                 updating = true;
                 Q = "ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ";
+                promiseList.push(this.ds.query(Q));
+            }
+
+            if (!hasBadgeList) {
+                console.log('                ALTER TABLE GL_USER ADD COLUMN badge_list TEXT NULL DEFAULT NULL AFTER standards_view ');
+                updating = true;
+                Q = "ALTER TABLE GL_USER ADD COLUMN badge_list TEXT NULL DEFAULT NULL AFTER standards_view ";
                 promiseList.push(this.ds.query(Q));
             }
 
@@ -439,6 +451,19 @@ function _addLicenseInfoToUser(user, results){
             });
     }.bind(this));
 }
+
+Auth_MySQL.prototype.updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        var badgeListStr = JSON.stringify( badgeList );
+
+        var Q = "UPDATE GL_USER " +
+            "SET last_updated=NOW(), " +
+            "badge_list="+this.ds.escape(badgeListStr)+" " +
+            "WHERE id="+this.ds.escape(id);
+
+        this.ds.query(Q).then( resolve, reject );
+    }.bind(this));
+};
 
 Auth_MySQL.prototype.updateUserPassword = function(id, password, loginType) {
 // add promise wrapper

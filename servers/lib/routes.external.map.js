@@ -895,6 +895,16 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
+            api: "/api/v2/auth/user/badgeList",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserBadgeList",
+                post: "updateUserBadgeList"
+            }
+        },
+        {
             api: "/api/v2/auth/login/glasslab",
             service: "auth",
             controller: "login",
