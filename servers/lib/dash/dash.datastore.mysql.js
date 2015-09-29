@@ -77,23 +77,17 @@ WebStore_MySQL.prototype.getUserBadgeListById = function(id) {
             return;
         }
 
-        var Q =
-            "SELECT     \
-                badge_list   \
-            FROM GL_USER  \
-            WHERE id="+ this.ds.escape(id);
+        var Q = "SELECT badge_list FROM GL_USER WHERE id="+ this.ds.escape(id);
 
         this.ds.query(Q)
-            .then(function(results) {
-                if(results.length > 0) {
-                    var listJSONStr = JSON.parse( results[0].badge_list );
-                    var badgeList = JSON.parse( listJSONStr );
-                    return badgeList;
-                } else {
-                    return "none";
-                }
-            }.bind(this));
-        }.bind(this));
+            .then(function(results){
+                var badge_list = JSON.parse( results[0].badge_list );
+                resolve(badge_list);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
 };
 
 WebStore_MySQL.prototype.getUserInfoById = function(id) {

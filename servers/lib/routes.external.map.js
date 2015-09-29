@@ -895,8 +895,7 @@ module.exports = {
             }
         },
         {
-            requireAuth: true,
-            api: "/api/v2/auth/user/badgeList",
+            api: "/api/v2/auth/user/:userId/badgeList",
             service: "auth",
             controller: "user",
             method: {

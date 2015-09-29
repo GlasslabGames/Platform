@@ -171,18 +171,19 @@ function getUserBadgeList(req, res, next) {
         req.session.passport.user &&
         req.params &&
         req.params.hasOwnProperty("userId")) {
-        this.webstore.getUserBadgeListById(req.params.userId)
-            .then(function(userData){
-                this.requestUtil.jsonResponse(res, userData);
+        this.webstore.getUserBadgeListById( req.params.userId )
+	   		// TODO: KMY: Add .then() to handle updating status of any "redeemed": false entries - before returning them
+            .then(function(results){
+				this.requestUtil.jsonResponse( res, results );
             }.bind(this))
             // error
             .then(null, function(err){
                 this.requestUtil.errorResponse(res, err);
-            }.bind(this))
+            }.bind(this));
     } else {
         this.requestUtil.errorResponse(res, "not logged in");
     }
-}
+};
 
 function updateUserBadgeList(req, res, next, serviceManager) {
 	// TODO: KMY: add stat for updating badge_list
@@ -216,7 +217,7 @@ function updateUserBadgeList(req, res, next, serviceManager) {
             console.error("Auth - updateUserBadgeListRoute error:", err);
             this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
 		}.bind(this));
-}
+};
 
 
 /**
