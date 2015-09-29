@@ -338,6 +338,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/admin-thx1138-data/export-report-data",
+            service: "dash",
+            controller: "dash",
+            method: {
+                get: "exportReportData"
+            }
+        },
+        {
             api: "/api/v2/dash/migrate/:code",
             service: "dash",
             controller: "games",
@@ -351,38 +359,6 @@ module.exports = {
             controller: "games",
             method: {
                 get: "reloadGameFiles"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "getBadgeJSON"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId/generateCode/:userId",
-            service: "dash",
-            controller: "games",
-            method: {
-                post: "generateBadgeCode"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId/awardCode/:code",
-            service: "dash",
-            controller: "games",
-            method: {
-                post: "awardBadge"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId/codeAwarded/:code",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "badgeCodeAwarded"
             }
         },
         {
