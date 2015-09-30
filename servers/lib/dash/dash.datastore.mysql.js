@@ -388,7 +388,6 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     }.bind(this));
 };
 
-
 WebStore_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
@@ -411,3 +410,163 @@ WebStore_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
     }.bind(this));
 };
 
+WebStore_MySQL.prototype.getReportDataP1 = function(userId){
+
+    return when.promise(function(resolve, reject){
+
+        var results;
+        var Q = "SELECT * FROM GL_USER WHERE id = " + 263 + ";";
+        this.ds.query(Q).then(function(results){
+
+            // results = [ { id: 263, ...
+
+            var funcOut = [];
+            var vals = [];
+            var keys = Object.keys(results[0]);
+            keys.forEach(function(k) {
+                vals.push(results[0][k]);
+            });
+
+            funcOut.push( vals.join('\n') );
+            if(0 == funcOut.length){ funcOut = []; }
+            resolve(funcOut);
+        })
+        .then(null, function(err){
+            // console.log('XXXXXXXXXXXXXXXX  reject  XXXXXXXXXXXXXXXX');
+            reject(err);
+        });
+
+    }.bind(this));
+};
+
+
+WebStore_MySQL.prototype.getReportDataP2 = function(argRole){
+
+    return when.promise(function(resolve, reject){
+        // do stuff including calling resolve() and reject()
+
+        var Q;
+        var roleSlang = 'users';
+        var results;
+        var dayx = 0;
+        var imax = 60;
+        var outlist = [];
+        var i = 1000;
+        var promiseArray =[];
+        var funcOut = [];
+        funcOut[0] = '';
+        funcOut[1] = '';
+
+        if(argRole == 'student') {
+            roleSlang = 'students';
+        }
+
+        if(argRole == 'instructor') {
+            roleSlang = 'teachers';
+        }
+
+        for(dayx = 0; dayx < imax; dayx++){
+
+            promiseArray.push( when.promise( function(resolve, reject){
+
+                // new users by  date (descending)
+                Q = "SELECT DATE(date_created) as dt, COUNT(id) as num FROM GL_USER " +
+                "WHERE ENABLED = 1 AND date_created IS NOT NULL " +
+                "AND DATE(date_created) = DATE(DATE_SUB(NOW(), INTERVAL " + dayx + " DAY)) " +
+                "AND (system_Role = 'instructor' OR system_Role = 'student') " +
+                 ";";
+
+    if(argRole == 'student') {
+                // new students by  date (descending)
+                Q = "SELECT DATE(date_created) as dt, COUNT(id) as num FROM GL_USER " +
+                "WHERE ENABLED = 1 AND date_created IS NOT NULL " +
+                "AND DATE(date_created) = DATE(DATE_SUB(NOW(), INTERVAL " + dayx + " DAY)) " +
+                "AND system_Role = 'student' " +
+                 ";";
+    }
+
+    if(argRole == 'instructor') {
+                // new teachers by  date (descending)
+                Q = "SELECT DATE(date_created) as dt, COUNT(id) as num FROM GL_USER " +
+                "WHERE ENABLED = 1 AND date_created IS NOT NULL " +
+                "AND DATE(date_created) = DATE(DATE_SUB(NOW(), INTERVAL " + dayx + " DAY)) " +
+                "AND system_Role = 'instructor' " +
+                 ";";
+    }
+
+                this.ds.query(Q).then(function(results){
+                    ++i;
+                    if( results[0].num > 0){
+                        var countStr = ' '+ i + '   ' + results[0].dt + '  ' +
+                            results[0].num + ' ' + roleSlang;
+                        outlist.push( countStr );  // order not guarenteed
+                        resolve( countStr );
+                    }else{
+                        resolve( ' ' + i );
+                    }
+                }.bind(this) )
+                .then(null, function(err){
+                    console.log('XXXXXXXXXXXXXXXX    getReportDataP2() reject ds.query ');
+                    reject(err);
+                }.bind(this));
+            }.bind(this))   );
+        }
+
+        return when.all( promiseArray ).then(function(stuffArray){
+            funcOut[0] = outlist.join('\n');
+            // console.log('>>>>>>>> funcOut[0] \n' + funcOut[0]);
+            // console.log('XXXXXXXXXXXXXXXX    when.all() resolve \n', stuffArray);
+            resolve(funcOut);
+        }.bind(this) ).then(null, function(err){
+            console.log('XXXXXXXXXXXXXXXX    when.all() reject \n', err);
+            reject(err);
+        }.bind(this));
+
+    }.bind(this));
+};
+
+
+WebStore_MySQL.prototype.getReportDataP3 = function(userId){
+
+    return when.promise(function(resolve, reject){
+
+        var results;
+        var Q = "SELECT * FROM GL_USER WHERE id = " + 263 + ";";
+        Q = "SELECT EMAIL FROM GL_USER;"
+        this.ds.query(Q).then(function(results){
+
+            // results = [ { id: 263, ...
+
+            // console.log('XXXXXXXXXXXXXXXX  resolve  XXXX XXXX XXXX XXXX', results);
+
+            var funcOut = [];
+            var vals = [];
+
+            results.forEach(function(el){
+                // console.log('>>>>>>>>'+el[fileld]);
+                console.log('>>>>>>>>'+el.EMAIL);
+                console.log('    fff'+el.key);
+            });
+
+            // var keys = Object.keys(results[0]);
+            // keys.forEach(function(k) {
+            //     vals.push(results[0][k]);
+            // });
+            // funcOut.push( vals.join('\n') );
+
+            // console.log('====++++ ', keys);
+            // console.log('====++++ ', vals);
+
+            funcOut = ["func out man."];
+
+            if(0 == funcOut.length){ funcOut = []; }
+            resolve(funcOut);
+
+        })
+        .then(null, function(err){
+            // console.log('XXXXXXXXXXXXXXXX  reject  XXXXXXXXXXXXXXXX');
+            reject(err);
+        });
+
+    }.bind(this));
+};
