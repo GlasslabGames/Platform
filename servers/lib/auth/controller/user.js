@@ -261,7 +261,7 @@ function addUserBadgeList(req, res, next) {
 	        	var add = true;
 	        	if ( badgeList.length > 0 ) {
 		        	// Ignore if already exists
-					angular.forEach( badgeList, function(badge) {
+		        	badgeList.forEach( function( badge ) {
 						if ( newBadge.id == badge.id ) {
 							add = false;
 						}

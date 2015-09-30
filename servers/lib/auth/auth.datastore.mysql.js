@@ -458,8 +458,8 @@ Auth_MySQL.prototype.updateUserBadgeList = function(userId, badgeList) {
 
         var Q = "UPDATE GL_USER " +
             "SET last_updated=NOW(), " +
-            "badge_list="+this.ds.escape(badgeListStr)+" " +
-            "WHERE id="+this.ds.escape(id);
+            "badge_list='" + badgeListStr + "' " +
+            "WHERE id=" + userId;
 
         this.ds.query(Q).then( resolve, reject );
     }.bind(this));
