@@ -904,6 +904,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/user/:userId/badgeList/add",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "addUserBadgeList"
+            }
+        },
+        {
             api: "/api/v2/auth/login/glasslab",
             service: "auth",
             controller: "login",

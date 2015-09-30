@@ -166,26 +166,35 @@ function updateUserData(req, res, next, serviceManager) {
 
 
 function getUserBadgeList(req, res, next) {
-    if( req.session &&
-        req.session.passport &&
-        req.session.passport.user &&
-        req.params &&
-        req.params.hasOwnProperty("userId")) {
-        this.webstore.getUserBadgeListById( req.params.userId )
-	   		// TODO: KMY: Add .then() to handle updating status of any "redeemed": false entries - before returning them
-            .then(function(results){
-				this.requestUtil.jsonResponse( res, results );
-            }.bind(this))
-            // error
-            .then(null, function(err){
-                this.requestUtil.errorResponse(res, err);
-            }.bind(this));
-    } else {
-        this.requestUtil.errorResponse(res, "not logged in");
+    if( ! ( req.session && req.session.passport && req.session.passport.user )) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
     }
+
+    var userId = req.params.userId;
+    if( ! userId )
+    {
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    this.webstore.getUserBadgeListById( userId )
+   		// TODO: KMY: Add .then() to handle updating status of any "redeemed": false entries - before returning them
+        .then(function(results){
+			this.requestUtil.jsonResponse( res, results );
+        }.bind(this))
+        // error
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
 };
 
-function updateUserBadgeList(req, res, next, serviceManager) {
+function updateUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user && req.params)) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
 	// TODO: KMY: add stat for updating badge_list
 	// (several spots)
     this.stats.increment("info", "Route.Update.User");
@@ -210,7 +219,7 @@ function updateUserBadgeList(req, res, next, serviceManager) {
     this._updateUserBadgeList( req.body.userId, req.body.badgeList )
     	.then(function(data) {
             this.stats.increment("info", "Route.Update.User.Done");
-            this.requestUtil.jsonResponse(res, userData);
+            this.requestUtil.jsonResponse(res, data);
     	}.bind(this))
 		.then(null,function(err) {
             this.stats.increment("error", "Route.Update.User");
@@ -219,6 +228,67 @@ function updateUserBadgeList(req, res, next, serviceManager) {
 		}.bind(this));
 };
 
+function addUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user && req.params) ) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
+    var userId = req.params.userId;
+    if( ! userId )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    var newBadge = req.params.badge;
+    if( ! newBadge )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+	// TODO: KMY: add stat for updating badge_list
+	// (several spots)
+
+    this.webstore.getUserBadgeListById( userId )
+        .then(function(results) {
+        	return results;
+        }.bind(this))
+	        .then(function( badgeList ) {
+	        	var add = true;
+	        	if ( badgeList.length > 0 ) {
+		        	// Ignore if already exists
+					angular.forEach( badgeList, function(badge) {
+						if ( newBadge.id == badge.id ) {
+							add = false;
+						}
+					});
+
+					if ( add ) {
+						badgeList.push( newBadge );
+						return badgeList;
+					} else {
+						return [];
+					}
+	        	}
+	        }.bind(this))
+		        .then( function( badgeList ) {
+				    this._updateUserBadgeList( userId, badgeList )
+		        }.bind(this))
+			    	.then(function( data ) {
+			            this.stats.increment("info", "Route.Update.User.Done");
+						this.requestUtil.jsonResponse(res, data);
+			    	}.bind(this))
+	// catch all errors
+    .then(null, function(err){
+	    this.stats.increment("error", "Route.Update.User");
+	    console.error("Auth - updateUserBadgeListRoute error:", err);
+	    this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+    }.bind(this));
+};
 
 /**
  * Registers a user with role of instructor or student

@@ -652,7 +652,9 @@ function _writeToInfoJSONFiles(gameId, data){
 }
 
 function getBadgeJSON(req, res){
+    console.log("------------> gBJ");
     if (!req.params.badgeId) {
+        console.log("no badgeId");
         this.requestUtil.errorResponse(res, {key:"dash.badgeId.missing", error: "missing badgeId"});
         return;
     }
@@ -661,17 +663,20 @@ function getBadgeJSON(req, res){
 
     this.requestUtil.getRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
         function( err, result, data ) {
-                if ( data ) {
-                    res.writeHead( 200, { "Content-Type": "application/json" } );
-                    res.end( JSON.stringify( data ) );
-                } else if ( err ) {
-                    res.writeHead( 400, { "Content-Type": "application/json" } );
-                    res.end( JSON.stringify( err ) );
-                }
-            } );
+            if ( data ) {
+                this.requestUtil.jsonResponse(res, data);
+            } else if ( err ) {
+                this.requestUtil.errorResponse(res, err, 400);
+            }
+        }.bind(this) );
 }
 
 function generateBadgeCode( req, res ) {
+    if (!req.params.userId) {
+        this.requestUtil.errorResponse(res, {key:"dash.userId.missing", error: "missing userId"});
+        return;
+    }
+
     if (!req.params.badgeId) {
         this.requestUtil.errorResponse(res, {key:"dash.badgeId.missing", error: "missing badgeId"});
         return;
@@ -682,13 +687,14 @@ function generateBadgeCode( req, res ) {
     this.requestUtil.postRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
         function( err, result, data ) {
                 if ( data ) {
-                    res.writeHead( 200, { "Content-Type": "application/json" } );
-                    res.end( JSON.stringify( data ) );
+                    this.requestUtil.jsonResponse(res, data);
                 } else if ( err ) {
-                    res.writeHead( 400, { "Content-Type": "application/json" } );
-                    res.end( JSON.stringify( err ) );
+                    this.requestUtil.errorResponse(res, err, 400);
                 }
             } );
+
+    // api: "/api/v2/auth/user/:userId/badgeList/add"
+
 }
 
 function awardBadge(req, res) {
@@ -708,11 +714,9 @@ function awardBadge(req, res) {
     this.requestUtil.postRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
         function( err, result, data ) {
                 if ( data ) {
-                    res.writeHead( 200, { "Content-Type": "application/json" } );
-                    res.end( JSON.stringify( data ) );
+                    this.requestUtil.jsonResponse(res, data);
                 } else if ( err ) {
-                    res.writeHead( 400, { "Content-Type": "application/json" } );
-                    res.end( JSON.stringify( err ) );
+                    this.requestUtil.errorResponse(res, err, 400);
                 }
             } );
 }
@@ -733,7 +737,6 @@ function badgeCodeAwarded(req, res) {
 
     // Until implemented
     var data = { "status": "ok", "data": { "redeemed": true } };
-    res.writeHead( 200, { "Content-Type": "application/json" } );
-    res.end( JSON.stringify( data ) );
+    this.requestUtil.jsonResponse(res, data);
 }
 
