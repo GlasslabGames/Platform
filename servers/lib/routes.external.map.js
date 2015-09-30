@@ -362,6 +362,38 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/badge/:badgeId",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getBadgeJSON"
+            }
+        },
+        {
+            api: "/api/v2/dash/badge/:badgeId/generateCode/:userId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "generateBadgeCode"
+            }
+        },
+        {
+            api: "/api/v2/dash/badge/:badgeId/awardCode/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "awardBadge"
+            }
+        },
+        {
+            api: "/api/v2/dash/badge/:badgeId/codeAwarded/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "badgeCodeAwarded"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/dash/developer/profile",
             service: "dash",
