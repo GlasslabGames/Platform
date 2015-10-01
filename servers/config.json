@@ -229,5 +229,27 @@
     },
     "env_prod": {
         "first_login":   "2015-09-09 23:59:01"
+    },
+    "configMod": {
+        "sectionA": {
+            "keyA": {
+                "aa": "aa"
+            }
+        },
+        "buildEnv": {
+            "//": "if configKeys.buildEnv: local is in hydra.config.json ...",
+            "local": {
+                "services": {
+                    "portSSL": 443,
+                    "portNonSSL": 80,
+                    "first_login":   "2015-09-03 23:59:01",
+                }
+            },
+            "autoDev": {
+                "services": {
+                    "first_login":   "2015-09-04 23:59:01",
+                }
+            }
+        }
     }
 }
