@@ -874,7 +874,6 @@ ServiceManager.prototype.start = function(port) {
                     if(this.options.services.name && 'app-external' == this.options.services.name){
                         // app-external
                         // 8001 primary http port - insecure
-                        // httpServerPort = this.options.services.portNonSSL || this.options.services.appExternalPort || 8001;
                         httpServerPort = this.options.services.appExternalPort || this.options.services.portNonSSL || 8001;
 
                         if((443 != serverPort) && (8043 != serverPort)){
@@ -891,7 +890,7 @@ ServiceManager.prototype.start = function(port) {
 
                         if(this.options.services.portNonSSL && this.options.services.portNonSSL != httpServerPort){
                             httpServerPort_02 = this.options.services.portNonSSL;
-                            console.log('diag- httpServerPort_02 =', httpServerPort_02);
+                            // console.log('diag- httpServerPort_02 =', httpServerPort_02);
                         }
 
                         // second http port -- can work without ELB
