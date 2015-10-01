@@ -986,6 +986,23 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/alter-developer-status",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "alterDeveloperVerifyCodeStatus"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/developers",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getAllDevelopers"
+            }
+        },
+        {
             api: "/api/v2/auth/logout",
             service: "auth",
             controller: "login",

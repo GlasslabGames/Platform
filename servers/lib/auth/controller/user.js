@@ -13,6 +13,8 @@ module.exports = {
     verifyEmailCode:     verifyEmailCode,
     verifyBetaCode:      verifyBetaCode,
     verifyDeveloperCode: verifyDeveloperCode,
+    getAllDevelopers: 	 getAllDevelopers,
+    alterDeveloperVerifyCodeStatus: alterDeveloperVerifyCodeStatus,
     getUserDataById:     getUserDataById,
     updateUserData:      updateUserData,
     resetPasswordSend:   resetPasswordSend,
@@ -392,7 +394,8 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.firstName   = Util.ConvertToString(req.body.firstName);
         regData.lastName    = Util.ConvertToString(req.body.lastName);
         regData.email       = Util.ConvertToString(req.body.email);
-
+        regData.verifyCode  = Util.CreateUUID();
+        regData.verifyCodeStatus  = 'approve';
 
         if(!regData.username) {
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
@@ -521,6 +524,8 @@ function registerUserV2(req, res, next, serviceManager) {
                 }
                 // if developer
                 else if( regData.role == lConst.role.developer ) {
+                	this.requestUtil.jsonResponse(res, {});
+                /*
                     sendDeveloperConfirmEmail.call( this, regData, req.protocol, req.headers.host )
                         .then(function(){
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
@@ -532,6 +537,7 @@ function registerUserV2(req, res, next, serviceManager) {
                             console.error("Auth: RegisterUserV2 - Error", err);
                             this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
                         }.bind(this))
+                */
                 }
             }.bind(this))
             // catch all errors
@@ -872,6 +878,97 @@ function verifyDeveloperCode(req, res, next) {
             console.log(err);
             this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"});
         });
+}
+
+function alterDeveloperVerifyCodeStatus(req, res, next) {
+    if(req.user.role !== "admin"){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to alter developer verify status but not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if( !(req.body.userId &&
+    	req.body.status &&
+        _.isString(req.body.status) &&
+        req.body.status.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
+    }
+
+    this.getAuthStore().findUser("id", req.body.userId)
+        .then(function(userData) {
+            if( userData.verifyCodeStatus !== req.body.status ) {
+                return when.resolve(userData);
+            }
+            else {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this),
+            function(err) {
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
+                } else {
+                    console.error("AuthService: verifyDeveloperCode Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+            }.bind(this))
+        .then(function(userData) {
+            if(!userData) return; // no data so skip
+
+            // send verification email to registered user
+            if (userData.verifyCodeStatus == aConst.verifyCode.status.approve && req.body.status == aConst.verifyCode.status.sent) {
+	            return sendDeveloperVerifyEmail.call(this, userData, req.protocol, req.headers.host, userData.verifyCode);
+	        } else {
+	        	userData.verifyCodeStatus = req.body.status;
+	        	return this.glassLabStrategy.updateUserData(userData);
+	        }
+        }.bind(this))
+        .then(function(sent) {
+            if(!sent) return; // no data so skip, error already handled above
+
+            this.requestUtil.jsonResponse(res, {"text": "Successfully changed developer status. Verification email sent if needed", "statusCode":200});
+        }.bind(this))
+        .then(null, function(err) {
+            console.log(err);
+            this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"});
+        });
+}
+
+function getAllDevelopers(req, res, next) {
+    if(req.user.role !== "admin"){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to get developers but not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+	
+	var result = { pending: [], approved: [] };
+	
+	this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.approve)
+		.then(function(pending) {
+			if (_.isArray(pending)) {
+				result.pending = pending;
+			}
+			console.log("developer", "got pending");
+			return this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.verified);
+		}.bind(this))
+		// ok, send data
+		.then(function(approved){
+			if (_.isArray(approved)) {
+				result.approved = approved;
+			}
+			console.log("developer", "got approved");
+			this.requestUtil.jsonResponse(res, result);
+		}.bind(this))
+		// error
+		.then(null, function(err){
+			this.requestUtil.errorResponse(res, err);
+		}.bind(this))
 }
 
 function sendVerifyEmail(regData, protocol, host) {

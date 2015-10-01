@@ -541,9 +541,9 @@ return when.promise(function(resolve, reject) {
         login_type:     this.ds.escape(userData.loginType),
         ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
         ssoData:        this.ds.escape(userData.ssoData || ""),
-        verify_code:    "NULL",
+        verify_code:    userData.verifyCode ? this.ds.escape(userData.verifyCode) : "NULL",
         verify_code_expiration: "NULL",
-        verify_code_status: "NULL",
+        verify_code_status: userData.verifyCodeStatus ? this.ds.escape(userData.verifyCodeStatus) : "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
         standards_view: this.ds.escape(userData.standards),
@@ -807,3 +807,22 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
     }.bind(this));
 };
 
+Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT id, FIRST_NAME, LAST_NAME, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
+        return this.ds.query(Q)
+            .then(function(results){
+                var developers = [];
+                results.forEach(function(result){
+                    developers.push({ id: result.id, name: result.FIRST_NAME + ' ' + result.LAST_NAME, date: result.pretty_date, fulldate: result.date_created });
+                }.bind(this));
+                return when.all(developers);
+            }.bind(this))
+            .then(function(results){ 
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
