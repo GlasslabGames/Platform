@@ -589,15 +589,15 @@
                 "title": "Game Badges",
                 "list": [
                     {
-                      "id": 10,
+                      "id": 14,
+                      "orgId": 3
+                    },
+                    {
+                      "id": 15,
                       "orgId": 3
                     },
                     {
                       "id": 31,
-                      "orgId": 3
-                    },
-                    {
-                      "id": 32,
                       "orgId": 3
                     }
                 ]

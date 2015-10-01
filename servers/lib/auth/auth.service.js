@@ -238,6 +238,13 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+AuthService.prototype._updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        this.glassLabStrategy.updateUserBadgeList(userId, badgeList)
+            .then(resolve,reject);
+    }.bind(this));
+};
+
 AuthService.prototype.addOrUpdate_SSO_UserData = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {

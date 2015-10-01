@@ -7,26 +7,26 @@ var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
 
 module.exports = {
-    getUserProfileData:  getUserProfileData,
-    registerUserV1:      registerUserV1,
-    registerUserV2:      registerUserV2,
-    verifyEmailCode:     verifyEmailCode,
-    verifyBetaCode:      verifyBetaCode,
-    verifyDeveloperCode: verifyDeveloperCode,
-    getAllDevelopers: 	 getAllDevelopers,
+    getUserProfileData:			getUserProfileData,
+    registerUserV1:				registerUserV1,
+    registerUserV2:				registerUserV2,
+    verifyEmailCode:			verifyEmailCode,
+    verifyBetaCode:				verifyBetaCode,
+    verifyDeveloperCode:		verifyDeveloperCode,
+    getAllDevelopers: 	 		getAllDevelopers,
     alterDeveloperVerifyCodeStatus: alterDeveloperVerifyCodeStatus,
-    getUserDataById:     getUserDataById,
-    updateUserData:      updateUserData,
-    resetPasswordSend:   resetPasswordSend,
-    resetPasswordVerify: resetPasswordVerify,
-    resetPasswordUpdate: resetPasswordUpdate,
-    requestDeveloperGameAccess: requestDeveloperGameAccess,
-    approveDeveloperGameAccess: approveDeveloperGameAccess,
-
-    eraseStudentInfo: eraseStudentInfo,
-    eraseInstructorInfo: eraseInstructorInfo,
-
-    deleteUser: deleteUser
+    getUserDataById:			getUserDataById,
+    updateUserData:				updateUserData,
+    getUserBadgeList:			getUserBadgeList,
+    updateUserBadgeList:		updateUserBadgeList,
+    resetPasswordSend:			resetPasswordSend,
+    resetPasswordVerify:		resetPasswordVerify,
+    resetPasswordUpdate:		resetPasswordUpdate,
+    requestDeveloperGameAccess:	requestDeveloperGameAccess,
+    approveDeveloperGameAccess:	approveDeveloperGameAccess,
+    eraseStudentInfo:			eraseStudentInfo,
+    eraseInstructorInfo:		eraseInstructorInfo,
+    deleteUser:					deleteUser
 };
 
 var exampleIn = {};
@@ -102,6 +102,195 @@ function getUserDataById(req, res, next) {
         this.requestUtil.errorResponse(res, "not logged in");
     }
 }
+
+exampleIn.updateUserData = {
+    "userId":        25,
+    "username":      "test2",
+    "firstName":     "test",
+    "lastName":      "2",
+    "email":         "test2@email.com",
+    "password":      "test"
+};
+function updateUserData(req, res, next, serviceManager) {
+    this.stats.increment("info", "Route.Update.User");
+    //console.log("Auth updateUserRoute - body:", req.body);
+    if( !(req.body.userId) )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        //this.requestUtil.errorResponse(res, "missing the userId", 400);
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    var loginUserSessionData = req.session.passport.user;
+
+    var userData = {
+        id:            req.body.userId,
+        loginType:     aConst.login.type.glassLabV2
+    };
+    // add body data to userData
+    userData = _.merge(userData, req.body);
+
+    // legacy
+    if(req.body.institutionId || req.body.institution) {
+        userData.institutionId = req.body.institutionId || req.body.institution;
+    }
+
+    // wrap getSession in promise
+    this._updateUserData(userData, loginUserSessionData)
+        // save changed data
+        .then(function(data) {
+            if(data.changed) {
+                // update session user data
+                req.session.passport.user = data.user;
+                this.stats.increment("info", "Route.Update.User.Changed");
+                return serviceManager.updateUserDataInSession(req.session)
+                    .then(function() {
+                        return data.user;
+                    }.bind(this));
+            } else {
+                return data.user;
+            }
+        }.bind(this))
+        // all ok
+        .then(function(userData){
+            this.stats.increment("info", "Route.Update.User.Done");
+            this.requestUtil.jsonResponse(res, userData);
+        }.bind(this))
+        // error
+        .then(null, function(err){
+            this.stats.increment("error", "Route.Update.User");
+            console.error("Auth - updateUserRoute error:", err);
+            //this.requestUtil.errorResponse(res, err, 400);
+            this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        }.bind(this) );
+};
+
+
+function getUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user )) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
+    var userId = req.params.userId;
+    if( ! userId )
+    {
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    this.webstore.getUserBadgeListById( userId )
+   		// TODO: KMY: Add .then() to handle updating status of any "redeemed": false entries - before returning them
+        .then(function(results){
+			this.requestUtil.jsonResponse( res, results );
+        }.bind(this))
+        // error
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+};
+
+function updateUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user && req.params)) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
+	// TODO: KMY: add stat for updating badge_list
+	// (several spots)
+    this.stats.increment("info", "Route.Update.User");
+
+    var userId = req.body.userId;
+    if( ! userId )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    // Can only modify our own list
+    if ( req.session.passport.user.userId != userId ) {
+    	// TODO: KMY: need a new error for this
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    // Direct update
+    this._updateUserBadgeList( req.body.userId, req.body.badgeList )
+    	.then(function(data) {
+            this.stats.increment("info", "Route.Update.User.Done");
+            this.requestUtil.jsonResponse(res, data);
+    	}.bind(this))
+		.then(null,function(err) {
+            this.stats.increment("error", "Route.Update.User");
+            console.error("Auth - updateUserBadgeListRoute error:", err);
+            this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+		}.bind(this));
+};
+
+function addUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user && req.params) ) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
+    var userId = req.params.userId;
+    if( ! userId )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    var newBadge = req.params.badge;
+    if( ! newBadge )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+	// TODO: KMY: add stat for updating badge_list
+	// (several spots)
+
+    this.webstore.getUserBadgeListById( userId )
+        .then(function(results) {
+        	return results;
+        }.bind(this))
+	        .then(function( badgeList ) {
+	        	var add = true;
+	        	if ( badgeList.length > 0 ) {
+		        	// Ignore if already exists
+		        	badgeList.forEach( function( badge ) {
+						if ( newBadge.id == badge.id ) {
+							add = false;
+						}
+					});
+
+					if ( add ) {
+						badgeList.push( newBadge );
+						return badgeList;
+					} else {
+						return [];
+					}
+	        	}
+	        }.bind(this))
+		        .then( function( badgeList ) {
+				    this._updateUserBadgeList( userId, badgeList )
+		        }.bind(this))
+			    	.then(function( data ) {
+			            this.stats.increment("info", "Route.Update.User.Done");
+						this.requestUtil.jsonResponse(res, data);
+			    	}.bind(this))
+	// catch all errors
+    .then(null, function(err){
+	    this.stats.increment("error", "Route.Update.User");
+	    console.error("Auth - updateUserBadgeListRoute error:", err);
+	    this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+    }.bind(this));
+};
 
 /**
  * Registers a user with role of instructor or student
@@ -218,70 +407,6 @@ function registerUserV1(req, res, next) {
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(role));
 };
-
-exampleIn.updateUserData = {
-    "userId":        25,
-    "username":      "test2",
-    "firstName":     "test",
-    "lastName":      "2",
-    "email":         "test2@email.com",
-    "password":      "test"
-};
-function updateUserData(req, res, next, serviceManager) {
-    this.stats.increment("info", "Route.Update.User");
-    //console.log("Auth updateUserRoute - body:", req.body);
-    if( !(req.body.userId) )
-    {
-        this.stats.increment("error", "Route.Update.User.MissingId");
-        //this.requestUtil.errorResponse(res, "missing the userId", 400);
-        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
-        return;
-    }
-
-    var loginUserSessionData = req.session.passport.user;
-
-    var userData = {
-        id:            req.body.userId,
-        loginType:     aConst.login.type.glassLabV2
-    };
-    // add body data to userData
-    userData = _.merge(userData, req.body);
-
-    // legacy
-    if(req.body.institutionId || req.body.institution) {
-        userData.institutionId = req.body.institutionId || req.body.institution;
-    }
-
-    // wrap getSession in promise
-    this._updateUserData(userData, loginUserSessionData)
-        // save changed data
-        .then(function(data) {
-            if(data.changed) {
-                // update session user data
-                req.session.passport.user = data.user;
-                this.stats.increment("info", "Route.Update.User.Changed");
-                return serviceManager.updateUserDataInSession(req.session)
-                    .then(function() {
-                        return data.user;
-                    }.bind(this));
-            } else {
-                return data.user;
-            }
-        }.bind(this))
-        // all ok
-        .then(function(userData){
-            this.stats.increment("info", "Route.Update.User.Done");
-            this.requestUtil.jsonResponse(res, userData);
-        }.bind(this))
-        // error
-        .then(null, function(err){
-            this.stats.increment("error", "Route.Update.User");
-            console.error("Auth - updateUserRoute error:", err);
-            //this.requestUtil.errorResponse(res, err, 400);
-            this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
-        }.bind(this) );
-};
-
 
 /**
  * Registers a user with role of instructor or student

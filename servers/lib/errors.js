@@ -107,6 +107,7 @@ module.exports = {
     "dash.messageId.invalid":               "Invalid messageId",
     "dash.messageId.missing":               "Missing messageId",
     "dash.badgeId.missing":                 "Missing badgeId",
+    "dash.userId.missing":                  "Missing userId",
     "dash.code.missing":                    "Missing badge code",
     "dash.icon.missing":                    "Missing icon when posting a new message",
     "dash.subject.missing":                 "Missing subject when posting a new message",
