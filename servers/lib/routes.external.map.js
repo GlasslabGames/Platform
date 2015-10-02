@@ -378,14 +378,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/badge/:badgeId/awardCode/:code",
-            service: "dash",
-            controller: "games",
-            method: {
-                post: "awardBadge"
-            }
-        },
-        {
             api: "/api/v2/dash/badge/:badgeId/codeAwarded/:code",
             service: "dash",
             controller: "games",

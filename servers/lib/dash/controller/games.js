@@ -16,7 +16,6 @@ module.exports = {
     reloadGameFiles:                 reloadGameFiles,
     getBadgeJSON:                    getBadgeJSON,
     generateBadgeCode:               generateBadgeCode,
-    awardBadge:                      awardBadge,
     migrateInfoFiles:                migrateInfoFiles,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
@@ -742,30 +741,6 @@ function generateBadgeCode( req, res ) {
                 this.requestUtil.errorResponse(res, err, 400);
             }
         }.bind(this));
-}
-
-function awardBadge(req, res) {
-    if (!req.params.badgeId) {
-        this.requestUtil.errorResponse(res, {key:"dash.badgeId.missing", error: "missing badgeId"});
-        return;
-    }
-
-    if (!req.params.code) {
-        this.requestUtil.errorResponse(res, {key:"dash.code.missing", error: "missing code"});
-        return;
-    }
-
-    var url = "https://api-qa.lrng.org/earn-badge/" + badgeId + "/code/" + code;
-
-    // Not sure how this will redirect, since this would occur on the backend...?
-    this.requestUtil.postRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
-        function( err, result, data ) {
-                if ( data ) {
-                    this.requestUtil.jsonResponse(res, data);
-                } else if ( err ) {
-                    this.requestUtil.errorResponse(res, err, 400);
-                }
-            }.bind(this) );
 }
 
 function badgeCodeAwarded(req, res) {
