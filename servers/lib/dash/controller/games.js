@@ -16,7 +16,7 @@ module.exports = {
     reloadGameFiles:                 reloadGameFiles,
     getBadgeJSON:                    getBadgeJSON,
     generateBadgeCode:               generateBadgeCode,
-    awardBadge:                      awardBadge,
+    badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
@@ -691,13 +691,7 @@ function generateBadgeCode( req, res ) {
                 // data {"status":"ok","data":{"code":"35664e6779763b3e784e7d426f5a3e3f4d402632"}}
                 var dataJSON = JSON.parse( data );
                 var newBadge = { id: parseInt( badgeId ), redeemed: false, code: dataJSON.data.code };
-                /*
-                this.requestUtil.postRequest( '/api/v2' + '/auth/user/' + userId + '/badgeList/add', null, badge,
-                    function( err, result, data ) {
-                        this.requestUtil.jsonResponse(res, data);
-                    }.bind(this)
-                );
-                */
+
                 this.webstore.getUserBadgeListById( userId )
                     .then(function(results) {
                         if ( ! results ) {
@@ -724,7 +718,6 @@ function generateBadgeCode( req, res ) {
                         }.bind(this))
                             .then( function( badgeList ) {
                                 this.serviceManager.get("auth").service.getAuthStore().updateUserBadgeList( userId, badgeList );
-                                //this.serviceManager.get("auth").service._updateUserBadgeList( userId, badgeList );
                             }.bind(this))
                                 .then(function( data ) {
                                     this.stats.increment("info", "Route.Update.User.Done");
@@ -744,46 +737,27 @@ function generateBadgeCode( req, res ) {
         }.bind(this));
 }
 
-function awardBadge(req, res) {
-    if (!req.params.badgeId) {
-        this.requestUtil.errorResponse(res, {key:"dash.badgeId.missing", error: "missing badgeId"});
-        return;
-    }
-
-    if (!req.params.code) {
-        this.requestUtil.errorResponse(res, {key:"dash.code.missing", error: "missing code"});
-        return;
-    }
-
-    var url = "https://api-qa.lrng.org/earn-badge/" + badgeId + "/code/" + code;
-
-    // Not sure how this will redirect, since this would occur on the backend...?
-    this.requestUtil.postRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
-        function( err, result, data ) {
-                if ( data ) {
-                    this.requestUtil.jsonResponse(res, data);
-                } else if ( err ) {
-                    this.requestUtil.errorResponse(res, err, 400);
-                }
-            }.bind(this) );
-}
-
 function badgeCodeAwarded(req, res) {
-    // Expect this to not be needed
-    if (!req.params.badgeId) {
+    var badgeId = parseInt( req.params.badgeId );
+    if ( ! badgeId ) {
         this.requestUtil.errorResponse(res, {key:"dash.badgeId.missing", error: "missing badgeId"});
         return;
     }
 
-    if (!req.params.code) {
+    var code = req.params.code;
+    if (!code) {
         this.requestUtil.errorResponse(res, {key:"dash.code.missing", error: "missing code"});
         return;
     }
 
-    var url = "https://api-qa.lrng.org/code/" + code;
+    var url = "https://api-qa.lrng.org/api/v1/badge/" + badgeId + "/earned-code/" + code + "/redeemed";
 
-    // Until implemented
-    var data = { "status": "ok", "data": { "redeemed": true } };
-    this.requestUtil.jsonResponse(res, data);
+    this.requestUtil.getRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
+        function( err, result, data ) {
+            if ( data ) {
+                this.requestUtil.jsonResponse(res, data);
+            } else if ( err ) {
+                this.requestUtil.errorResponse(res, err, 400);
+            }
+        }.bind(this));
 }
-
