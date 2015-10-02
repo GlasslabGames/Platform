@@ -932,8 +932,29 @@
                     }
                 ]
             },
-            "reviews": {
+            "badges": {
                 "order": 5,
+                "enabled": true,
+                "authRequired": true,
+                "id": "badges",
+                "title": "Game Badges",
+                "list": [
+                    {
+                      "id": 14,
+                      "orgId": 3
+                    },
+                    {
+                      "id": 15,
+                      "orgId": 3
+                    },
+                    {
+                      "id": 31,
+                      "orgId": 3
+                    }
+                ]
+            },
+            "reviews": {
+                "order": 6,
                 "enabled": true,
                 "id": "reviews",
                 "title": "Reviews",
@@ -953,7 +974,7 @@
                 ]
             },
             "check": {
-                "order": 6,
+                "order": 7,
                 "enabled": true,
                 "id": "check",
                 "title": "System Requirements"

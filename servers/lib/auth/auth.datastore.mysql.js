@@ -61,6 +61,7 @@ return when.promise(function(resolve, reject) {
             var hasSchool = false;
             var hasFtueChecklist = false;
             var hasLastLogin = false;
+            var hasBadgeList = false;
 
             var promiseList = [];
             var Q = "";
@@ -95,6 +96,10 @@ return when.promise(function(resolve, reject) {
 
                 if (results[i]['Field'] == "last_login") {
                     hasLastLogin = true;
+                }
+
+                if (results[i]['Field'] == "badge_list") {
+                    hasBadgeList = true;
                 }
             }
 
@@ -141,6 +146,13 @@ return when.promise(function(resolve, reject) {
                 console.log('                ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ');
                 updating = true;
                 Q = "ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ";
+                promiseList.push(this.ds.query(Q));
+            }
+
+            if (!hasBadgeList) {
+                console.log('                ALTER TABLE GL_USER ADD COLUMN badge_list TEXT NULL DEFAULT NULL AFTER standards_view ');
+                updating = true;
+                Q = "ALTER TABLE GL_USER ADD COLUMN badge_list TEXT NULL DEFAULT NULL AFTER standards_view ";
                 promiseList.push(this.ds.query(Q));
             }
 
@@ -247,11 +259,11 @@ Auth_MySQL.prototype.setInstructorFtue = function(id){
     }.bind(this));
 };
 
-Auth_MySQL.prototype.findUser = function(type, value) {
+Auth_MySQL.prototype.findUser = function(type, value, includePassword) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    //console.log("_findUser type:", type, ", value:", value);
+    //console.log("_findUser type:", type, ", value:", value, ", includePassword:", includePassword);
 
     var Q =
         "SELECT \
@@ -259,9 +271,9 @@ return when.promise(function(resolve, reject) {
             username as username,    \
             last_Name as lastName,   \
             first_Name as firstName, \
-            email as email,          \
-            password as password,    \
-            system_Role as role, \
+            email as email," +
+            (includePassword === true ? "password as password," : "") +
+            "system_Role as role, \
             USER_TYPE as type,       \
             login_Type as loginType, \
             ssoUsername, \
@@ -298,9 +310,6 @@ return when.promise(function(resolve, reject) {
                     user[i] = data[i];
                     user[i].collectTelemetry = user[i].collectTelemetry ? true : false;
                     user[i].enabled = true;
-                    if(user[i].role === "manager"){
-                        user[i].role = "instructor";
-                    }
 
                     // if not glasslab login type then set username to lms username
                     if( (user[i].loginType !== aConst.login.type.glassLabV2) &&
@@ -321,13 +330,23 @@ return when.promise(function(resolve, reject) {
                     if(user["verifyCodeStatus"] === "invited"){
                         return "tempUser";
                     } else if(user.role === "instructor"){
-                        return this.getLicenseInfoByInstructor(user.id);
+                         return this.getLicenseRecordsByInstructor(user.id);
                     }
                 }
                 return [];
             } else {
                 reject({"error": "user not found"});
             }
+        }.bind(this))
+        .then(function(results){
+            if (_.isArray(value)) {
+                return [];
+            }
+            if(!((results === "none") || (results.length===0))){
+                // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
+                user.hadTrial = true;
+            }
+            return this.getLicenseInfoByInstructor(user.id);
         }.bind(this))
         .then(function(results){
             if(typeof results === "string"){
@@ -433,6 +452,19 @@ function _addLicenseInfoToUser(user, results){
     }.bind(this));
 }
 
+Auth_MySQL.prototype.updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        var badgeListStr = JSON.stringify( badgeList );
+
+        var Q = "UPDATE GL_USER " +
+            "SET last_updated=NOW(), " +
+            "badge_list='" + badgeListStr + "' " +
+            "WHERE id=" + userId;
+
+        this.ds.query(Q).then( resolve, reject );
+    }.bind(this));
+};
+
 Auth_MySQL.prototype.updateUserPassword = function(id, password, loginType) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -534,16 +566,16 @@ return when.promise(function(resolve, reject) {
         login_type:     this.ds.escape(userData.loginType),
         ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
         ssoData:        this.ds.escape(userData.ssoData || ""),
-        verify_code:    "NULL",
+        verify_code:    userData.verifyCode ? this.ds.escape(userData.verifyCode) : "NULL",
         verify_code_expiration: "NULL",
-        verify_code_status: "NULL",
+        verify_code_status: userData.verifyCodeStatus ? this.ds.escape(userData.verifyCodeStatus) : "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
         standards_view: this.ds.escape(userData.standards),
         ftue_checklist: "NULL"
     };
 
-    if(userData.role === "instructor" || userData.role === "manager"){
+    if(userData.role === "instructor"){
         data.ftue_checklist = 0;
     }
 
@@ -555,6 +587,7 @@ return when.promise(function(resolve, reject) {
     this.ds.query(Q)
         .then(
         function(data){
+            // console.log(Util.DateGMTString(), 'Auth_MySQL.prototype.addUser() -- success ');
             resolve(data.insertId);
         }.bind(this),
         function(err) {
@@ -772,6 +805,48 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
             }.bind(this))
             .then(null, function(err){
                 console.error("Get License Info By Instructor Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
+            "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
+            "WHERE user_id = " + userId+ ") as lm\n" +
+            "ON lic.id = lm.license_id;";
+        var licenseInfo;
+        this.ds.query(Q)
+            .then(function(results){
+                if(results.length === 0){
+                    resolve([]);
+                    return;
+                }
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                console.error("Get License Record Count By Instructor Error -",err);
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT id, FIRST_NAME, LAST_NAME, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
+        return this.ds.query(Q)
+            .then(function(results){
+                var developers = [];
+                results.forEach(function(result){
+                    developers.push({ id: result.id, name: result.FIRST_NAME + ' ' + result.LAST_NAME, date: result.pretty_date, fulldate: result.date_created });
+                }.bind(this));
+                return when.all(developers);
+            }.bind(this))
+            .then(function(results){ 
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
                 reject(err);
             });
     }.bind(this));

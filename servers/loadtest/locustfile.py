@@ -3,19 +3,29 @@ from locust import Locust, HttpLocust, TaskSet, task
 from random import randint
 
 
-#baseLoadTestDateDir = "./loadtest_apis.local"
-baseLoadTestDateDir = "./loadtest_apis.mgoaa.stage5"
-#username = "jstudent"
-#username = "jlt_test1_"
-username = "build+teach@glasslabgames.org"
-password = "glasslab123"
+# Users can create a softlink from loadtest_apis to the acutal test directory
+baseLoadTestDateDir = "./loadtest_apis"
+
+# Multi-user example
+username = "jlt_testlt01_"
+password = "jlt_testLT01_"
+multiuser = True
+
+# Single user example
+#username = "build+teach@glasslabgames.org"
+#password = "glasslab123"
+#multiuser = None
 
 gameId = "AA-1"
 
 port = 8001
 hostname = "localhost:" + str(port)
-#hostname = "stage.argubotacademy.org"
-
+#hostname = "stage.playfully.org"
+#hostname = "54.183.147.99:" + str(port)
+#hostname = "52.8.144.83:" + str(port)
+#hostname = "54.67.98.243:" + str(port)
+#hostname = "52.21.104.125:" + str(port)
+#hostname = "www.playfully.org"
 #maxLoopSeconds = 10
 maxLoopSeconds = 10*60
 displayInfo = False
@@ -142,9 +152,11 @@ class MainTaskSet(TaskSet):
         # loop until login
         while True:
             self.client.headers = {"content-type": "application/json"}
-#            r = self.client.post("/api/user/login", '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
-#            loginStr = '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}'
-            loginStr = '{"username":"'+ username + '","password":"'+ password +'"}'
+            if multiuser is True:
+                r = self.client.post("/api/user/login", '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}')
+                loginStr = '{"username":"'+ username+str(self.c_id) +'","password":"'+ password+str(self.c_id) +'"}'
+            else:
+                loginStr = '{"username":"'+ username + '","password":"'+ password +'"}'
             self.deviceId = str(self.c_id)+'-'+''.join(random.choice(string.lowercase) for x in range(5))
             
             if displayInfo:

@@ -22,6 +22,7 @@ var passport   = require('passport');
 var couchbase  = require('couchbase');
 var check      = require('validator').check;
 var mailChimp  = require('mailchimp').MailChimpAPI;
+var bouncer    = require ("express-bouncer")(500, 900000);
 
 // load at runtime
 var Util, aConst, lConst, TelmStore;
@@ -55,6 +56,8 @@ function AuthService(options, serviceManager){
         this.glassLabStrategy = this.accountsManager.get("Glasslab");
         this.serviceManager   = serviceManager;
 
+        this.bouncerOptions   = this.options.auth.bouncer;
+        
         // TODO: find all webstore, lmsStore dependancies and move to using service APIs
         WebStore      = require('../dash/dash.js').Datastore.MySQL;
         lConst        = require('../lms/lms.js').Const;
@@ -86,6 +89,35 @@ AuthService.prototype.appConfig = function(app) {
     app.use(this.passport.session());
 
     this.accountsManager.setupRoutes(app, this.passport);
+
+    // set-up bouncer
+    if (this.bouncerOptions !== undefined ) {
+        if (this.bouncerOptions.whitelist !== undefined) {
+            this.bouncerOptions.whitelist.forEach(function(entry) {
+                bouncer.whitelist.push(entry);
+            });
+        }
+        
+        bouncer.blocked = function (req, res, next, remaining) {
+            var msg = JSON.stringify({ error: Errors["user.login.waitToTryAgain"] });
+            res.send(403, msg);
+         };
+        
+        if (this.bouncerOptions.api !== undefined) {
+            var action = function (req, res, next) {
+                req.bouncer = bouncer;
+                typeof next === "function" && next();
+            };
+            
+            // Route we wish to protect with bouncer middleware
+            this.bouncerOptions.api.forEach(function(entry) {
+                app.post(entry, bouncer.block, action);
+            });
+        }
+        
+        // Clear all logged addresses (Usually never really used)
+        bouncer.addresses = { };
+    }
 };
 
 
@@ -206,6 +238,13 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+AuthService.prototype._updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        this.glassLabStrategy.updateUserBadgeList(userId, badgeList)
+            .then(resolve,reject);
+    }.bind(this));
+};
+
 AuthService.prototype.addOrUpdate_SSO_UserData = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -219,6 +258,13 @@ return when.promise(function(resolve, reject) {
                 return this.authStore.updateUserDBData(userData);
             } else {
                 userData.newUser = true;
+
+                // single sign-on users
+                console.log(' ');
+                console.log(Util.DateGMTString(), 'adding new user ... ', userData.role, userData.username);
+                console.log(' ');
+                this.stats.increment("info", "new.user.created");
+                this.stats.increment("info", "new."+userData.role+'created');
                 return this.authStore.addUser(userData);
             }
         }.bind(this))

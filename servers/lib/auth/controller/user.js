@@ -7,21 +7,26 @@ var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
 
 module.exports = {
-    getUserProfileData:  getUserProfileData,
-    registerUserV1:      registerUserV1,
-    registerUserV2:      registerUserV2,
-    verifyEmailCode:     verifyEmailCode,
-    verifyBetaCode:      verifyBetaCode,
-    verifyDeveloperCode: verifyDeveloperCode,
-    registerManager:     registerManager,
-    getUserDataById:     getUserDataById,
-    updateUserData:      updateUserData,
-    resetPasswordSend:   resetPasswordSend,
-    resetPasswordVerify: resetPasswordVerify,
-    resetPasswordUpdate: resetPasswordUpdate,
-    requestDeveloperGameAccess: requestDeveloperGameAccess,
-    approveDeveloperGameAccess: approveDeveloperGameAccess,
-    deleteUser: deleteUser
+    getUserProfileData:			getUserProfileData,
+    registerUserV1:				registerUserV1,
+    registerUserV2:				registerUserV2,
+    verifyEmailCode:			verifyEmailCode,
+    verifyBetaCode:				verifyBetaCode,
+    verifyDeveloperCode:		verifyDeveloperCode,
+    getAllDevelopers: 	 		getAllDevelopers,
+    alterDeveloperVerifyCodeStatus: alterDeveloperVerifyCodeStatus,
+    getUserDataById:			getUserDataById,
+    updateUserData:				updateUserData,
+    getUserBadgeList:			getUserBadgeList,
+    updateUserBadgeList:		updateUserBadgeList,
+    resetPasswordSend:			resetPasswordSend,
+    resetPasswordVerify:		resetPasswordVerify,
+    resetPasswordUpdate:		resetPasswordUpdate,
+    requestDeveloperGameAccess:	requestDeveloperGameAccess,
+    approveDeveloperGameAccess:	approveDeveloperGameAccess,
+    eraseStudentInfo:			eraseStudentInfo,
+    eraseInstructorInfo:		eraseInstructorInfo,
+    deleteUser:					deleteUser
 };
 
 var exampleIn = {};
@@ -97,6 +102,195 @@ function getUserDataById(req, res, next) {
         this.requestUtil.errorResponse(res, "not logged in");
     }
 }
+
+exampleIn.updateUserData = {
+    "userId":        25,
+    "username":      "test2",
+    "firstName":     "test",
+    "lastName":      "2",
+    "email":         "test2@email.com",
+    "password":      "test"
+};
+function updateUserData(req, res, next, serviceManager) {
+    this.stats.increment("info", "Route.Update.User");
+    //console.log("Auth updateUserRoute - body:", req.body);
+    if( !(req.body.userId) )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        //this.requestUtil.errorResponse(res, "missing the userId", 400);
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    var loginUserSessionData = req.session.passport.user;
+
+    var userData = {
+        id:            req.body.userId,
+        loginType:     aConst.login.type.glassLabV2
+    };
+    // add body data to userData
+    userData = _.merge(userData, req.body);
+
+    // legacy
+    if(req.body.institutionId || req.body.institution) {
+        userData.institutionId = req.body.institutionId || req.body.institution;
+    }
+
+    // wrap getSession in promise
+    this._updateUserData(userData, loginUserSessionData)
+        // save changed data
+        .then(function(data) {
+            if(data.changed) {
+                // update session user data
+                req.session.passport.user = data.user;
+                this.stats.increment("info", "Route.Update.User.Changed");
+                return serviceManager.updateUserDataInSession(req.session)
+                    .then(function() {
+                        return data.user;
+                    }.bind(this));
+            } else {
+                return data.user;
+            }
+        }.bind(this))
+        // all ok
+        .then(function(userData){
+            this.stats.increment("info", "Route.Update.User.Done");
+            this.requestUtil.jsonResponse(res, userData);
+        }.bind(this))
+        // error
+        .then(null, function(err){
+            this.stats.increment("error", "Route.Update.User");
+            console.error("Auth - updateUserRoute error:", err);
+            //this.requestUtil.errorResponse(res, err, 400);
+            this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        }.bind(this) );
+};
+
+
+function getUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user )) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
+    var userId = req.params.userId;
+    if( ! userId )
+    {
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    this.webstore.getUserBadgeListById( userId )
+   		// TODO: KMY: Add .then() to handle updating status of any "redeemed": false entries - before returning them
+        .then(function(results){
+			this.requestUtil.jsonResponse( res, results );
+        }.bind(this))
+        // error
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+};
+
+function updateUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user && req.params)) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
+	// TODO: KMY: add stat for updating badge_list
+	// (several spots)
+    this.stats.increment("info", "Route.Update.User");
+
+    var userId = req.body.userId;
+    if( ! userId )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    // Can only modify our own list
+    if ( req.session.passport.user.userId != userId ) {
+    	// TODO: KMY: need a new error for this
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    // Direct update
+    this._updateUserBadgeList( req.body.userId, req.body.badgeList )
+    	.then(function(data) {
+            this.stats.increment("info", "Route.Update.User.Done");
+            this.requestUtil.jsonResponse(res, data);
+    	}.bind(this))
+		.then(null,function(err) {
+            this.stats.increment("error", "Route.Update.User");
+            console.error("Auth - updateUserBadgeListRoute error:", err);
+            this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+		}.bind(this));
+};
+
+function addUserBadgeList(req, res, next) {
+    if( ! ( req.session && req.session.passport && req.session.passport.user && req.params) ) {
+		this.requestUtil.errorResponse(res, "not logged in");
+    	return;
+    }
+
+    var userId = req.params.userId;
+    if( ! userId )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+    var newBadge = req.params.badge;
+    if( ! newBadge )
+    {
+        this.stats.increment("error", "Route.Update.User.MissingId");
+        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+        return;
+    }
+
+	// TODO: KMY: add stat for updating badge_list
+	// (several spots)
+
+    this.webstore.getUserBadgeListById( userId )
+        .then(function(results) {
+        	return results;
+        }.bind(this))
+	        .then(function( badgeList ) {
+	        	var add = true;
+	        	if ( badgeList.length > 0 ) {
+		        	// Ignore if already exists
+		        	badgeList.forEach( function( badge ) {
+						if ( newBadge.id == badge.id ) {
+							add = false;
+						}
+					});
+
+					if ( add ) {
+						badgeList.push( newBadge );
+						return badgeList;
+					} else {
+						return [];
+					}
+	        	}
+	        }.bind(this))
+		        .then( function( badgeList ) {
+				    this._updateUserBadgeList( userId, badgeList )
+		        }.bind(this))
+			    	.then(function( data ) {
+			            this.stats.increment("info", "Route.Update.User.Done");
+						this.requestUtil.jsonResponse(res, data);
+			    	}.bind(this))
+	// catch all errors
+    .then(null, function(err){
+	    this.stats.increment("error", "Route.Update.User");
+	    console.error("Auth - updateUserBadgeListRoute error:", err);
+	    this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
+    }.bind(this));
+};
 
 /**
  * Registers a user with role of instructor or student
@@ -215,151 +409,6 @@ function registerUserV1(req, res, next) {
 };
 
 /**
- * Registers a user with role of manager
- * 1. validate institution not already taken
- * 2. validate license key
- * 3. create the new user
- *    1. validate email and unique
- *    2. validate username unique
- * 4. create institution
- * 5. create code with institutionId
- * 6. update license institutionId, redeemed(true), expiration(date -> now + LICENSE_VALID_PERIOD)
- * 7. update user with institutionId
- */
-function registerManager(req, res, next) {
-    // make sure inputs are strings
-    req.body.email     = Util.ConvertToString(req.body.email);
-    req.body.firstName = Util.ConvertToString(req.body.firstName);
-    req.body.lastName  = Util.ConvertToString(req.body.lastName);
-    req.body.password  = Util.ConvertToString(req.body.password);
-    req.body.key       = Util.ConvertToString(req.body.key);
-
-    this.stats.increment("info", "Route.Register.Manager");
-    //console.log("Auth registerManagerRoute - body:", req.body);
-    if( !(
-        req.body.email  &&
-            req.body.firstName &&
-            req.body.lastName &&
-            req.body.password &&
-            req.body.institution &&
-            req.body.key
-        ) )
-    {
-        this.stats.increment("error", "Route.Register.Manager.MissingFields");
-        this.requestUtil.errorResponse(res, "missing some fields", 400);
-    }
-
-    // copy email to username for login
-    req.body.username = req.body.email;
-    var user = req.session.passport.user;
-    var cookie = "";
-    if(user){
-        cookie = aConst.sessionCookieName+"="+user[aConst.webappSessionPrefix];
-    }
-    // TODO: refactor this and create license system
-    /*
-     this.requestUtil.forwardRequestToWebApp({ cookie: cookie }, req, null,
-     function(err, sres, data){
-     if(err) {
-     this.requestUtil.errorResponse(res, err, 500);
-     }
-
-     if(sres.statusCode == 200) {
-     this.stats.increment("info", "Route.Register.Manager.Created");
-     this.glassLabLogin(req, res, next);
-     } else {
-     this.stats.increment("error", "Route.Register.Manager.ForwardRequest");
-
-     // don't use requestUtil response as it could contain custom headers, thus writing head
-     res.writeHead(sres.statusCode, sres.headers);
-     res.end(data);
-     }
-     }.bind(this));
-
-     // validate email
-
-     // validate license key
-     .then(function(){
-     return this.license.checkLicense(req.body.key)
-     }.bind(this))
-
-     // validate institution not already taken
-     .then(function(){
-     return this.license.checkInstitution(req.body.institution)
-     }.bind(this))
-
-     // catch all errors
-     .then(null, function(err, code){
-
-     }.bind(this));
-     */
-};
-
-exampleIn.updateUserData = {
-    "userId":        25,
-    "username":      "test2",
-    "firstName":     "test",
-    "lastName":      "2",
-    "email":         "test2@email.com",
-    "password":      "test"
-};
-function updateUserData(req, res, next, serviceManager) {
-    this.stats.increment("info", "Route.Update.User");
-    //console.log("Auth updateUserRoute - body:", req.body);
-    if( !(req.body.userId) )
-    {
-        this.stats.increment("error", "Route.Update.User.MissingId");
-        //this.requestUtil.errorResponse(res, "missing the userId", 400);
-        this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
-        return;
-    }
-
-    var loginUserSessionData = req.session.passport.user;
-
-    var userData = {
-        id:            req.body.userId,
-        loginType:     aConst.login.type.glassLabV2
-    };
-    // add body data to userData
-    userData = _.merge(userData, req.body);
-
-    // legacy
-    if(req.body.institutionId || req.body.institution) {
-        userData.institutionId = req.body.institutionId || req.body.institution;
-    }
-
-    // wrap getSession in promise
-    this._updateUserData(userData, loginUserSessionData)
-        // save changed data
-        .then(function(data) {
-            if(data.changed) {
-                // update session user data
-                req.session.passport.user = data.user;
-                this.stats.increment("info", "Route.Update.User.Changed");
-                return serviceManager.updateUserDataInSession(req.session)
-                    .then(function() {
-                        return data.user;
-                    }.bind(this));
-            } else {
-                return data.user;
-            }
-        }.bind(this))
-        // all ok
-        .then(function(userData){
-            this.stats.increment("info", "Route.Update.User.Done");
-            this.requestUtil.jsonResponse(res, userData);
-        }.bind(this))
-        // error
-        .then(null, function(err){
-            this.stats.increment("error", "Route.Update.User");
-            console.error("Auth - updateUserRoute error:", err);
-            //this.requestUtil.errorResponse(res, err, 400);
-            this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
-        }.bind(this) );
-};
-
-
-/**
  * Registers a user with role of instructor or student
  * 1. get institution
  * 2. create the new user
@@ -470,7 +519,8 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.firstName   = Util.ConvertToString(req.body.firstName);
         regData.lastName    = Util.ConvertToString(req.body.lastName);
         regData.email       = Util.ConvertToString(req.body.email);
-
+        regData.verifyCode  = Util.CreateUUID();
+        regData.verifyCodeStatus  = 'approve';
 
         if(!regData.username) {
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
@@ -554,9 +604,8 @@ function registerUserV2(req, res, next, serviceManager) {
                         serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
                     }
                 }
-                // if instructor or manager
-                else if( regData.role == lConst.role.instructor ||
-                         regData.role == lConst.role.manager)
+                // if instructor
+                else if( regData.role == lConst.role.instructor )
                 {
                     var promise;
                     if(req.body.newsletter) {
@@ -600,6 +649,8 @@ function registerUserV2(req, res, next, serviceManager) {
                 }
                 // if developer
                 else if( regData.role == lConst.role.developer ) {
+                	this.requestUtil.jsonResponse(res, {});
+                /*
                     sendDeveloperConfirmEmail.call( this, regData, req.protocol, req.headers.host )
                         .then(function(){
                             this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
@@ -611,6 +662,7 @@ function registerUserV2(req, res, next, serviceManager) {
                             console.error("Auth: RegisterUserV2 - Error", err);
                             this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
                         }.bind(this))
+                */
                 }
             }.bind(this))
             // catch all errors
@@ -953,6 +1005,97 @@ function verifyDeveloperCode(req, res, next) {
         });
 }
 
+function alterDeveloperVerifyCodeStatus(req, res, next) {
+    if(req.user.role !== "admin"){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to alter developer verify status but not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if( !(req.body.userId &&
+    	req.body.status &&
+        _.isString(req.body.status) &&
+        req.body.status.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
+    }
+
+    this.getAuthStore().findUser("id", req.body.userId)
+        .then(function(userData) {
+            if( userData.verifyCodeStatus !== req.body.status ) {
+                return when.resolve(userData);
+            }
+            else {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this),
+            function(err) {
+                if( err.error &&
+                    err.error == "user not found") {
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
+                } else {
+                    console.error("AuthService: verifyDeveloperCode Error -", err);
+                    this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+                }
+            }.bind(this))
+        .then(function(userData) {
+            if(!userData) return; // no data so skip
+
+            // send verification email to registered user
+            if (userData.verifyCodeStatus == aConst.verifyCode.status.approve && req.body.status == aConst.verifyCode.status.sent) {
+	            return sendDeveloperVerifyEmail.call(this, userData, req.protocol, req.headers.host, userData.verifyCode);
+	        } else {
+	        	userData.verifyCodeStatus = req.body.status;
+	        	return this.glassLabStrategy.updateUserData(userData);
+	        }
+        }.bind(this))
+        .then(function(sent) {
+            if(!sent) return; // no data so skip, error already handled above
+
+            this.requestUtil.jsonResponse(res, {"text": "Successfully changed developer status. Verification email sent if needed", "statusCode":200});
+        }.bind(this))
+        .then(null, function(err) {
+            console.log(err);
+            this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"});
+        });
+}
+
+function getAllDevelopers(req, res, next) {
+    if(req.user.role !== "admin"){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to get developers but not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+	
+	var result = { pending: [], approved: [] };
+	
+	this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.approve)
+		.then(function(pending) {
+			if (_.isArray(pending)) {
+				result.pending = pending;
+			}
+			console.log("developer", "got pending");
+			return this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.verified);
+		}.bind(this))
+		// ok, send data
+		.then(function(approved){
+			if (_.isArray(approved)) {
+				result.approved = approved;
+			}
+			console.log("developer", "got approved");
+			this.requestUtil.jsonResponse(res, result);
+		}.bind(this))
+		// error
+		.then(null, function(err){
+			this.requestUtil.errorResponse(res, err);
+		}.bind(this))
+}
+
 function sendVerifyEmail(regData, protocol, host) {
     if( !(regData.email &&
         _.isString(regData.email) &&
@@ -1152,7 +1295,7 @@ function sendWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLabGames.org!",
@@ -1179,7 +1322,7 @@ function sendDeveloperWelcomeEmail(emailOptions, regData, protocol, host){
      };
      */
     // TODO
-    // instructor, manager or admin (all require email)
+    // instructor or admin (all require email)
     // 2) send email
     var emailData = {
         subject: "Welcome to GlassLab Games Developer!",
@@ -1346,6 +1489,10 @@ function resetPasswordUpdate(req, res, next) {
                 if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                 } else if(userData.resetCodeStatus == aConst.passwordReset.status.inProgress) {
+                    if (this.glassLabStrategy.validatePassword(req.body.password) !== true) {
+                        return;
+                    }
+                  
                     return this.glassLabStrategy.encryptPassword(req.body.password)
                         .then(function(password) {
                             // update status
@@ -1566,7 +1713,178 @@ function _getDeveloperByCode(code, gameId){
     }.bind(this));
 }
 
+function eraseStudentInfo(req, res){
+
+    console.log(' ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++    eraseStudentInfo() called ... ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+
+    if(req.user.role !== "admin"){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to erase student records but is not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if(!(req.body && req.body.userId)){
+
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to erase student records but corect information was not supplied.');
+
+        this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+        return;
+    }
+
+    console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+        req.user.username, 'starting to erase student records for',
+        req.body.userId, req.body.username);
+
+    var deleteUserId = req.body.userId;
+    var promise;
+
+    this.authStore.findUser("id", deleteUserId)
+    .then(function(foundUser){
+
+        console.log(' ');
+        console.log('               id =', foundUser.id);
+        console.log('         username =', foundUser.username);
+        console.log('        firstName =', foundUser.firstName);
+        console.log('         lastName =', foundUser.lastName);
+        console.log('            email =', foundUser.email);
+        console.log('             role =', foundUser.role);
+        console.log('             type =', foundUser.type);
+        console.log('    institutionId =', foundUser.institutionId);
+        console.log('          enabled =', foundUser.enabled);
+
+        // console.log('        foundUser =', foundUser);
+
+        if('student' !== foundUser.role){
+            console.log(' * * * * Operation Canceled * * * * ');
+            console.log('This function only removes student records.');
+            console.log('The supplied userId is not for a student.');
+            this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+            return;
+        }
+
+        promise = _deleteStudentAccount.call(this, deleteUserId);
+        return promise;
+
+    }.bind(this))
+    .then(function(status){
+
+        console.log(' status =', status);
+
+        this.requestUtil.jsonResponse(res, { status: "ok"});
+
+    }.bind(this))
+    .then(null, function(err){
+        console.error(Util.DateGMTString(), 'Delete User Error -',err);
+        if(err.error === "user not found"){
+            this.requestUtil.errorResponse(res, { key: "user.delete.access"});
+            return;
+        }
+        this.requestUtil.errorResponse(res, { key: "user.delete.general"});
+    }.bind(this));
+}
+
+function eraseInstructorInfo(req, res){
+    
+    console.log(' ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++    eraseInstructorInfo() called ... ');
+    console.log(Util.DateGMTString()+' ++++ ');
+    console.log(Util.DateGMTString()+' ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ');
+    
+    if(req.user.role !== "admin"){
+        
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+                    req.user.username, 'attempted to erase instructor records but is not an admin.');
+        
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+    
+    if(!(req.body && req.body.userId)){
+        
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+                    req.user.username, 'attempted to erase instructor records but corect information was not supplied.');
+        
+        this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+        return;
+    }
+    
+    console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+                req.user.username, 'starting to erase instructor records for',
+                req.body.userId, req.body.username);
+    
+    var deleteUserId = req.body.userId;
+    var promise;
+    
+    this.authStore.findUser("id", deleteUserId)
+    .then(function(foundUser){
+          
+          console.log(' ');
+          console.log('               id =', foundUser.id);
+          console.log('         username =', foundUser.username);
+          console.log('        firstName =', foundUser.firstName);
+          console.log('         lastName =', foundUser.lastName);
+          console.log('            email =', foundUser.email);
+          console.log('             role =', foundUser.role);
+          console.log('             type =', foundUser.type);
+          console.log('    institutionId =', foundUser.institutionId);
+          console.log('          enabled =', foundUser.enabled);
+          
+          // console.log('        foundUser =', foundUser);
+          
+          if('instructor' !== foundUser.role){
+              console.log(' * * * * Operation Canceled * * * * ');
+              console.log('This function only removes instructor records.');
+              console.log('The supplied userId is not for an instructor.');
+              this.requestUtil.errorResponse(res, { key: "user.delete.information"});
+              return;
+          }
+          
+          promise = _deleteInstructorAccount.call(this, deleteUserId, req);
+          return promise;
+          
+    }.bind(this))
+    .then(function(status){
+          var responseStatus = "ok";
+          
+          console.log(' status =', status);
+          if(status === "license owner"){
+                responseStatus = status;
+          }
+          
+          this.requestUtil.jsonResponse(res, { status: responseStatus });
+          
+    }.bind(this))
+    .then(null, function(err){
+          console.error(Util.DateGMTString(), 'Delete User Error -',err);
+          if(err.error === "user not found"){
+            this.requestUtil.errorResponse(res, { key: "user.delete.access"});
+            return;
+          }
+          this.requestUtil.errorResponse(res, { key: "user.delete.general"});
+    }.bind(this));
+}
+
+// for student use eraseStudentInfo()
+// for instructor use eraseInstructorInfo()
+//
 function deleteUser(req, res){
+
+    this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+    return;
+
+    ////////////////    ////////////////
+
     if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
         return;
@@ -1580,10 +1898,13 @@ function deleteUser(req, res){
 
     this.authStore.findUser("id", deleteUserId)
         .then(function(deleteUser){
-            if(deleteUser.role === "student"){
-                //largely ready and approved, but still good to have one last review before it is live
-                //promise = _deleteStudentAccount.call(this, deleteUserId);
-            } else if (deleteUser.role === "instructor"){
+
+            // if(deleteUser.role === "student"){
+            //     //largely ready and approved, but still good to have one last review before it is live
+            //     //promise = _deleteStudentAccount.call(this, deleteUserId);
+            // } else if (deleteUser.role === "instructor"){
+
+            if (deleteUser.role === "instructor"){
                 //delete instructor method workable, but still needs design attention
                 // for example, are we deleting all the info we need to be
                 // how are we going to store the hashed emails, should we keep hashed passwords, etc
@@ -1681,11 +2002,11 @@ function _deleteInstructorAccount(userId, req){
     //get courses,
     //getLicenseMap
     //get license
-    // if license active, throw error and encourage
+    //unenroll all studesnt from courses
     //archive all courses (also disabling premium games in that process
     //set license map status to null, if in license and if not license owner
     //set subscription id of all licenses instructor was owner of in the past to null
-    // in deleteUser method, call internal route for the internal cancel license method
+    //call internal route for the internal cancel license method
 
     return when.promise(function(resolve, reject){
         var courses;
@@ -1700,8 +2021,8 @@ function _deleteInstructorAccount(userId, req){
         when.all(promiseList)
             .then(function(results){
                 courses = results[0];
+                userEmail = results[1];
                 var licenseMap = null;
-                user = results[1];
                 if(results[2]){
                     licenseMap = results[2][0];
                 }
@@ -1709,6 +2030,23 @@ function _deleteInstructorAccount(userId, req){
                     var licenseId = licenseMap.license_id;
                     return licService.myds.getLicenseById(licenseId);
                 }
+            })
+            .then(function(results){
+                _(courses).forEach(function(course){
+                    // unenroll all students
+                    var promiseList = [];
+                    promiseList.push(lmsService.getStudentsOfCourse(course.id));
+                    when.all(promiseList)
+                        .then(function(results) {
+                              var students = results[0];
+                              var promiseList = [];
+                              _(students).forEach(function(student) {
+                                  promiseList.push(lmsService.myds.removeUserFromCourse(student.id, course.id));
+                              });
+                              return when.all(promiseList);
+                        });
+                });
+                return results; // pass along previous results
             })
             .then(function(results){
                 if(results){
@@ -1740,20 +2078,16 @@ function _deleteInstructorAccount(userId, req){
                 return when.all(promiseList);
             })
             .then(function(){
-                return _hashEmail(email);
+                return _hashEmail.call(this, userEmail);
             }.bind(this))
             .then(function(hashedEmail){
                 var userData = _deleteUserTableInfo(userId, hashedEmail);
-                //var email = userEmail;
                 return this.authStore.updateUserDBData(userData);
             }.bind(this))
             .then(function(status){
                 if(license && license.active === 1){
                     var licenseId = license.id;
                     var promiseList = [];
-                    var licenseUpdateFields = [];
-                    var subscriptionId = "subscription_id = NULL";
-                    licenseUpdateFields.push(subscriptionId);
                     // finds all licenses an instructor was an owner of in the past, and removes the subscription id
                     promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
                     if(license.user_id !== userId){
@@ -1769,15 +2103,21 @@ function _deleteInstructorAccount(userId, req){
                 if(typeof status === "string"){
                     resolve(status);
                 }
-                if(license && license.active === 1 && license.user_id === userId){
-                    var body = {};
+
+                if(license && license.active === 1 && license.user_id == userId){
+                    var body = { };
                     body.userId = userId;
                     body.licenseId = license.id;
                     body.userEmail = userEmail;
                     body.userDelete = true;
-                    req.body.licenseId = status.license.id;
-                    req.body.userDelete = true;
-                    this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, res]);
+                    req.body = body;
+                  
+                    var mockRes = {
+                        writeHead: function(code, data) { },
+                        end: function(json) { }
+                    };
+                  
+                    this.serviceManager.internalRoute('/api/v2/license/end/internal', 'post', [req, mockRes]);
                     resolve('license owner');
                     return;
                 }

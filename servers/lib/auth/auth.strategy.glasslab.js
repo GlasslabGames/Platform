@@ -29,6 +29,8 @@ function Glasslab_Strategy(options, service) {
     lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
 
+    this.stats = new Util.Stats(this.options, "AuthStrategyGlasslab");
+
     this._service       = service;
     this._usernameField = 'username';
     this._passwordField = 'password';
@@ -36,6 +38,9 @@ function Glasslab_Strategy(options, service) {
 
     passport.Strategy.call(this);
     this.name = 'glasslab';
+
+    this.upperCaseRegEx = new RegExp(/[A-Z]+/);
+    this.numberRegEx = new RegExp(/[0-9]+/);
 }
 
 /**
@@ -117,10 +122,10 @@ Glasslab_Strategy.prototype._verify = function(username, password, done){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     // try username
-    this._service.getAuthStore().findUser("username", username)
+    this._service.getAuthStore().findUser("username", username, true)
         // error, try email
         .then(null, function(err){
-            return this._service.getAuthStore().findUser("email", username);
+            return this._service.getAuthStore().findUser("email", username, true);
         }.bind(this))
         // valid user
         .then(function(user){
@@ -190,9 +195,8 @@ Glasslab_Strategy.prototype.registerUser = function(userData){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    // if instructor or manager check email
+    // if instructor or developer check email
     if( (userData.role == lConst.role.instructor) ||
-        (userData.role == lConst.role.manager) ||
         (userData.role == lConst.role.developer) ) {
         //console.log("Auth registerUserRoute - institution isEmail:", check(userData.email).isEmail());
         // if no email -> error
@@ -219,6 +223,10 @@ return when.promise(function(resolve, reject) {
             existingId = id;
             return this._service.getAuthStore().checkUserNameUnique(userData.username);
         }.bind(this))
+        // validate password
+        .then(function(){
+            return this.validatePassword(userData.password);
+        }.bind(this))
         // encrypt password
         .then(function(){
             return this.encryptPassword(userData.password);
@@ -231,6 +239,11 @@ return when.promise(function(resolve, reject) {
                 // need to test this
                 return this._service.getAuthStore().updateTempUser(userData, existingId);
             } else{
+                console.log(' ');
+                console.log(Util.DateGMTString(), 'adding new user ... ', userData.role, userData.username);
+                console.log(' ');
+                this.stats.increment("info", "new.user.created");
+                this.stats.increment("info", "new."+userData.role+'created');
                 return this._service.getAuthStore().addUser(userData);
             }
         }.bind(this))
@@ -243,6 +256,23 @@ return when.promise(function(resolve, reject) {
             return reject(err, code);
         }.bind(this));
 // ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+// Current password rule enforced by both client and server:
+// At least 6 characters
+// Must have at least one uppercase letter
+// Must have at least one number
+Glasslab_Strategy.prototype.validatePassword = function(password){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+    if (password.length >= 6 && password.match(this.upperCaseRegEx) && password.match(this.numberRegEx)) {
+        resolve(password);
+    } else {
+        reject({"error": "Password too weak", "exception": err}, 500);
+        return;
+    }
 }.bind(this));
 // end promise wrapper
 };
@@ -390,6 +420,15 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Glasslab_Strategy.prototype.updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        return this._service.getAuthStore().updateUserBadgeList( userId, badgeList );
+    }.bind(this))
+    .then(null, function(err, code){
+        reject(err, code);
+    }.bind(this));
+};
+
 // loads of permission checks are done before update the DB data
 Glasslab_Strategy.prototype.updateUserData = function(userData, loginUserSessionData){
     console.log( JSON.stringify( userData ) );
@@ -405,7 +444,7 @@ return when.promise(function(resolve, reject) {
     var isSelf = (loginUserSessionData.id == userData.id);
 
     // get/validate user by Id
-    this._service.getAuthStore().findUser('id', userData.id)
+    this._service.getAuthStore().findUser('id', userData.id, true)
         .then(function(data){
             dbUserData = data;
 
@@ -440,9 +479,8 @@ return when.promise(function(resolve, reject) {
 
         // check UserName, if changed
         .then(function(){
-            // If Instructors OR managers, then username is the same as there email
+            // If Instructors OR developer, then username is the same as there email
             if( ( (userData.role == lConst.role.instructor) ||
-                  (userData.role == lConst.role.manager) ||
                   (userData.role == lConst.role.developer) ) &&
                   userData.email
               ) {
@@ -492,6 +530,10 @@ return when.promise(function(resolve, reject) {
             if(userData.password) {
                 if (!this._isEncrypted(userData.password)) {
                     // passing old password to salt new password to validate
+                    if (this.validatePassword(userData.password) !== true) {
+                        return;
+                    }
+              
                     return this._comparePassword(userData.password, dbUserData.password);
                 } else {
                     return userData.password;
@@ -581,7 +623,6 @@ return when.promise(function(resolve, reject) {
     }
     // if instructor, then check if student their course
     else if( (loginUserData.role == lConst.role.instructor) ||
-             (loginUserData.role == lConst.role.manager) ||
              (loginUserData.role == lConst.role.developer) ) {
         this._service.getLMSStore().isEnrolledInInstructorCourse(userData.id, loginUserData.id)
             .then(

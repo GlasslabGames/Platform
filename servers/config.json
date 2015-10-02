@@ -154,6 +154,10 @@
                 "callbackURL": "http://127.0.0.1:8001/auth/clever/callback",
                 "scope": "read:user_id"
             }
+        },
+        "bouncer" : {
+            "whitelist" : [ "127.0.0.1" ],
+            "api" : [ "/api/v2/auth/login/glasslab" ]
         }
     },
     "assessment": {
@@ -173,7 +177,8 @@
         "s3PathPrefix": "",
         "cron": {
             "time": "0 0 1 * * *", "//": "everyday at 1 am",
-            "enabled": false
+            "enabled": false,
+            "server": "app-archiver"
         }
     },
     "lic":{

@@ -87,14 +87,14 @@ Vestigial user registration method.  No longer in use.
 
 /api/v2/auth/user/register
 
-Registers user for an account.  Can register several different roles of users, student, instructor, developer, and the now out of use manager.
+Registers user for an account.  Can register several different roles of users: student, instructor, developer.
 For instructors and developers, the user registration process ends with clicking a verify link sent by email.
 
 **verifyEmailCode**
 
 /api/v2/auth/register-verify/:code/verify
 
-API called when user clicks the verify link in their email after registering an instructor or manager account.
+API called when user clicks the verify link in their email after registering an instructor account.
 This api looks up the code contained in the params and changes the associated user account to active, if the code is correct.
 
 **verifyBetaCode**
@@ -112,7 +112,7 @@ Verify link is sent to developers after a Glass Lab admin has approved their req
 
 **registerManager**
 
-API no longer in use.  Manager system role is deprecated.
+API no longer in use and now removed.  Manager system role is deprecated.
 
 **getUserDataById**
 

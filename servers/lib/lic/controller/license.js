@@ -78,8 +78,12 @@ function getSubscriptionPackages(req, res){
 
 // gets information necessary for the premium manager page
 function getCurrentPlan(req, res){
-    if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
+    if(!(req && req.user && req.user.id )){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+        return;
+    }
+    if(!(req.user.licenseOwnerId && req.user.licenseId)){
+        this.requestUtil.jsonResponse(res, "none", 200);
         return;
     }
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
@@ -181,7 +185,7 @@ function getCurrentPlan(req, res){
         }.bind(this));
 }
 
-// for instructors, this api shows there students who are taking up seats in the license
+// for instructors, this api shows their students who are taking up seats in the license
 // for the license owner, this api shows all students who are taking up seats in the license
 function getStudentsInLicense(req, res){
     if(!(req && req.user && req.user.id && req.user.licenseOwnerId && req.user.licenseId)){
@@ -214,14 +218,20 @@ function getStudentsInLicense(req, res){
             studentToTeacher = {};
             var teacher;
             var outputStudents = {};
-            var teacherName;
+            var className;
             _(students).forEach(function(premiumCourses, student){
                 studentToTeacher[student] = {};
                 _(premiumCourses).forEach(function(isEnrolled, courseId){
                     if(isEnrolled){
                         teacher = courseTeacherMap[courseId];
-                        teacherName = teacher.firstName + " " + teacher.lastName;
-                        studentToTeacher[student][teacher.username] = teacherName;
+                        className = teacher.courseTitle;
+                        if(studentToTeacher[student][teacher.username]!=null) {
+                            studentToTeacher[student][teacher.username] = studentToTeacher[student][teacher.username] + ", " + className;
+                        }
+                        else {
+                            studentToTeacher[student][teacher.username] = className;
+                        }
+
                         if(teacher.userId === userId){
                             outputStudents[student] = true;
                         }
@@ -1041,7 +1051,7 @@ function addTeachersToLicense(req, res){
             });
             existingTeachers = [];
             _(teachers).forEach(function(teacher){
-                if(teacher["SYSTEM_ROLE"] !== 'instructor' && teacher["SYSTEM_ROLE"] !== "manager"){
+                if(teacher["SYSTEM_ROLE"] !== 'instructor'){
                     delete newInstructors[teacher["EMAIL"]];
                     rejectedTeachers[teacher.id] = "user role not instructor";
                     return;
@@ -1408,7 +1418,8 @@ function subscribeToLicensePurchaseOrder(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    if(req.user.licenseId){
+    if(req.user.licenseId && (!req.user.isTrial)){
+        console.log("---> Instructor on license, not trial");
         this.requestUtil.errorResponse(res, {key: "lic.create.denied"});
         return;
     }
@@ -1514,15 +1525,24 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                         return true;
                     }
                     if(action === "trial upgrade" && license.status !== null && license.status !== "active"){
+                        // Review how this could happen (decision to trial upgrade, but current license is dead)
                         status = "already on license";
                     }
                     if(action === "subscribe" && license.status !== null){
-                        status = "already on license";
-                    }
+                        if (license.package_type === "trial"){
+                                action = "trial upgrade";
+                            }
+                            else {
+                                status = "already on license";
+                                // Correct this to not set status, but action "license upgrade" (with other upgrade changes)
+                            }
+                        }
                 });
+
                 if(status){
                     return status;
                 }
+
                 var params = {
                     metadata: {
                         purchaseOrder: true,

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Erase student info GLS Admin Panel</title>
+		<link rel="stylesheet" type="text/css" href="esi.css">
+
+        <script type="text/javascript" src="esi.js"></script>
+        <script type="text/javascript" src="glasslab-sdk.js"></script>
+
+        <script>
+        	function Init()
+        	{
+                esiAdminPanel.Init("commandButtons");
+        		// glsdkExample.Init("commandButtons");
+        	}
+		</script>
+
+	</head>
+
+	<body onload="Init();" style="background-color:#b24de8">
+
+		<div class="BodyText">
+			<section>
+				<h1 style="text-align:center"> Erase Student or Instrutor Account GLS Admin Panel </h1>
+			</section>
+		</div>
+
+        <div class="output"></div>
+
+		<div id="commandButtons">
+            (the button panel "commandButtons")<br>
+            <br>
+            First connect to the site.
+
+            <div class="buttons">
+                <div>
+                <span>Connect</span>
+                <div id="connect-status" class="output"><br><div style="text-align:center">Connect Status: <b>------</b> <br></div></div>
+                </div>
+                <div id="connect-data" class="output"><br>Output:</div>
+				<br>
+
+                <input id="gl-username" type="text" placeholder="Screen Name"><br>
+                <input id="gl-password" type="password" placeholder="Password"><br>
+                <span>Login</span><br><br>
+                <div id="login-status" class="output"><br><div style="text-align:center">Login Status: <b>------</b> <br></div></div>
+                <div id="login-data" class="output"><br>Output:<br><br><br><br><br></div>
+                <br>
+
+                <table><tr><td>
+				<input id="gl-studentId" type="text" placeholder="student ID"><br>
+                <span>Erase student account</span>
+                </td><td><span style='width:30'> </span></td><td>
+                <input id="gl-instructorId" type="text" placeholder="instructor ID"><br>
+                <span>Erase instructor account</span>
+                </td></tr></table>
+				<div id="del-status" class="output"><br><div style="text-align:center">Login Status: <b>-----</b><br></div></div>
+                <div id="del-data" class="output"><br>Output:<br></div>
+                <br>
+
+                <span>Logout</span><br>
+
+			</div>
+		</div>
+	</body>
+</html>

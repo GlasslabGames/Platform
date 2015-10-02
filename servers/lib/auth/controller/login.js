@@ -34,6 +34,7 @@ function logout(req, res){
     this.stats.increment("info", "Logout");
     req.logout();
     //res.redirect("/");
+    res.clearCookie('connect.sid', { path: '/' });
     this.requestUtil.jsonResponse(res, {} );
 }
 
@@ -158,9 +159,12 @@ return when.promise(function(resolve, reject) {
         // get courses
         if( (user.role == lConst.role.student) ||
             (user.role == lConst.role.instructor) ||
-            (user.role == lConst.role.manager) ||
             (user.role == lConst.role.admin) ) {
 
+            if (req.bouncer !== undefined) {
+              req.bouncer.reset (req);
+            }
+              
             this.lmsStore.getCoursesByStudentId(user.id)
                 .then(function(courses){
                     // add courses
@@ -176,6 +180,11 @@ return when.promise(function(resolve, reject) {
                 }.bind(this));
         }
         else if( user.role == lConst.role.developer ) {
+            
+            if (req.bouncer !== undefined) {
+              req.bouncer.reset (req);
+            }
+
             var dashService = this.serviceManager.get("dash").service;
             dashService.telmStore.getDeveloperProfile(user.id, true)
                 .then(function(result) {

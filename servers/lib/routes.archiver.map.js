@@ -338,14 +338,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/admin-thx1138-data/export-report-data",
-            service: "dash",
-            controller: "dash",
-            method: {
-                get: "exportReportData"
-            }
-        },
-        {
             api: "/api/v2/dash/migrate/:code",
             service: "dash",
             controller: "games",
@@ -359,38 +351,6 @@ module.exports = {
             controller: "games",
             method: {
                 get: "reloadGameFiles"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "getBadgeJSON"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId/generateCode/:userId",
-            service: "dash",
-            controller: "games",
-            method: {
-                post: "generateBadgeCode"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId/awardCode/:code",
-            service: "dash",
-            controller: "games",
-            method: {
-                post: "awardBadge"
-            }
-        },
-        {
-            api: "/api/v2/dash/badge/:badgeId/codeAwarded/:code",
-            service: "dash",
-            controller: "games",
-            method: {
-                get: "badgeCodeAwarded"
             }
         },
         {
@@ -902,23 +862,7 @@ module.exports = {
                 post: "updateUserData"
             }
         },
-        {
-            api: "/api/v2/auth/user/:userId/badgeList",
-            service: "auth",
-            controller: "user",
-            method: {
-                get: "getUserBadgeList",
-                post: "updateUserBadgeList"
-            }
-        },
-        {
-            api: "/api/v2/auth/user/:userId/badgeList/add",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "addUserBadgeList"
-            }
-        },
+           /*
         {
             api: "/api/v2/auth/login/glasslab",
             service: "auth",
@@ -927,25 +871,7 @@ module.exports = {
                 post: "glassLabLogin"
             }
         },
-        /*
-        // ROUTE DEFINED IN auth.account.edmodo
-        {
-            api: "/api/v2/auth/login/edmodo",
-            service: "auth",
-            controller: "login",
-            method: {
-                post: "edmodoLogin"
-            }
-        },
-        {
-            api: "/api/v2/auth/login/icivics",
-            service: "auth",
-            controller: "login",
-            method: {
-                post: "icivicsLogin"
-            }
-        },
-        */
+            */
         {
             api: "/api/v2/auth/login/status",
             service: "auth",
@@ -1011,23 +937,6 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/auth/alter-developer-status",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "alterDeveloperVerifyCodeStatus"
-            }
-        },
-        {
-            requireAuth: true,
-            api: "/api/v2/auth/developers",
-            service: "auth",
-            controller: "user",
-            method: {
-                get: "getAllDevelopers"
-            }
-        },
-        {
             api: "/api/v2/auth/logout",
             service: "auth",
             controller: "login",
@@ -1052,26 +961,6 @@ module.exports = {
                 get: "approveDeveloperGameAccess"
             }
         },
-
-
-        {
-            api: "/api/v2/zzzz/test0824esi",
-            service: "auth",
-            controller: "user",
-            method: {
-                post: "eraseStudentInfo"
-            }
-        },
-
-        {
-           api: "/api/v2/zzzz/test0828eti",
-           service: "auth",
-           controller: "user",
-           method: {
-                post: "eraseInstructorInfo"
-           }
-        },
-/*
         {
             requireAuth: true,
             api: "/api/v2/auth/delete/user",
@@ -1081,8 +970,6 @@ module.exports = {
                 post: "deleteUser"
             }
         },
-*/
-
     // ---------------------------------------------------
     // Research
     // ---------------------------------------------------
@@ -1140,7 +1027,7 @@ module.exports = {
             method: {
                 get: "index"
             }
-        },
+        } /* ,
         // ---------------------------------------------------
         // SDK
         // ---------------------------------------------------
@@ -1151,7 +1038,7 @@ module.exports = {
             method: {
                 get: "connect"
             }
-        }
+        } */
     ]
 
 };

@@ -21,12 +21,28 @@ var express    = require('express');
 var couchbase  = require('couchbase');
 var cors       = require('cors');
 
+var compression = require('compression');
+var errorhandler = require('errorhandler');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var expressSession = require('express-session');
+var basicAuth = require('basic-auth');
+
+// moving TLS key-file names to config.json
+//
 var TlsOptions = {
+    ca: "",
+    key: "",
+    cert: ""
+    /*
     //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
     //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
+
     ca: fs.readFileSync('ssl-key/server/priv-root-ca.crt.pem'),
     key: fs.readFileSync('ssl-key/server/server.key.pem'),
     cert: fs.readFileSync('ssl-key/server/server.crt.pem')
+    */
 }
 
 // load at runtime
@@ -109,13 +125,13 @@ function ServiceManager(configFiles){
         return;
     }
 
-    // if(!this.options.services.appArchiverPort){
-    //     console.log('');
-    //     console.log('****************    Error -- expect services.appArchiverPort in config.json');
-    //     console.log('');
-    //     return;
-    // }
-
+    if(!this.options.services.appArchiverPort){
+        console.log('');
+        console.log('****************    Error -- expect services.appArchiverPort in config.json');
+        console.log('');
+        return;
+    }
+    
     if(!this.options.services) {
         // TODO - error - this.options.services.appExternalPort must be set
         this.options.services = {};
@@ -238,11 +254,11 @@ return when.promise(function(resolve, reject) {
 
     var connectPromise;
     if(this.options.services.session.store) {
-        var CouchbaseStore = require('./sessionstore.couchbase.js')(express);
+        var CouchbaseStore = require('./sessionstore.couchbase.js')(expressSession);
         this.exsStore      = new CouchbaseStore(this.options.services.session.store);
         connectPromise = this.exsStore.glsConnect();
     } else {
-        var MemoryStore = express.session.MemoryStore;
+        var MemoryStore = expressSession.MemoryStore;
         this.exsStore   = new MemoryStore();
         connectPromise = Util.PromiseContinue();
     }
@@ -256,21 +272,23 @@ return when.promise(function(resolve, reject) {
             this.app.set('port', process.env.PORT || this.options.services.port);
             // process.env.PORT not used here
 
-            this.app.configure(function() {
+            //this.app.configure(function() {
 
-		this.app.use(function (req, res, next) {
-		    res.removeHeader("X-Powered-By");
-		    next();
-		}); 
+                this.app.use(function (req, res, next) {
+                    res.removeHeader("X-Powered-By");
+                    next();
+                }); 
 
-                this.app.use(Util.GetExpressLogger(this.options, express, this.stats));
-                this.app.use(express.compress()); // gzip compress, Need to disable for loadtest
-                this.app.use(express.errorHandler({showStack: true, dumpExceptions: true}));
-
-                this.app.use(express.cookieParser());
-                this.app.use(express.urlencoded());
-                this.app.use(express.json());
-                this.app.use(express.methodOverride());
+                this.app.use(Util.GetMorganLogger(this.options, this.stats));
+                
+                this.app.use(compression());
+              this.app.use(function (req, res, next) { console.log("no-op"); next(); });
+              
+                this.app.use(cookieParser());
+                this.app.use(bodyParser.urlencoded());
+                this.app.use(bodyParser.json());
+                this.app.use(methodOverride());
+                
                 var whitelist = [ "http://new.wwf.local", "https://new.wwf.local", "http://www.wordswithfriendsedu.com", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com", "https://s3-us-west-1.amazonaws.com" ];
                 var corsOptions = {
                     origin: function( origin, callback ) {
@@ -281,17 +299,18 @@ return when.promise(function(resolve, reject) {
                 };
                 this.app.use( cors(corsOptions) );
 
-                this.app.use(express.session({
+                this.app.use(expressSession({
                   secret: this.options.services.session.secret || "keyboard kitty",
                     cookie: _.merge({
-                        path: '/'
-                        , httpOnly : false
+                        path: this.options.services.session.cookie.path || '/'
+                        , httpOnly : this.options.services.session.cookie.httpOnly || false
                         //, maxAge: 1000 * 60 * 24 // 24 hours
                     }, this.options.services.session.cookie),
                     store:  this.exsStore
                 }));
+
                 resolve();
-            }.bind(this))
+            //}.bind(this))
         }.bind(this))
         // catch all errors
         .then(null, reject);
@@ -391,9 +410,9 @@ ServiceManager.prototype.setupDefaultRoutes = function() {
     // if(this.options.services.name && 'app-external' == this.options.services.name){
     //     var sslServerPort = this.sslServerPort || 443;
     //     var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
-    // console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
-    // console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
-    // res.sendfile( fullPath );
+    //     console.log('  ****** FAKE REDIRECT "/" http request  ****** ');
+    //     console.log('  ****** (should redirect to ' + newUrl + ' ) ****** ');
+    //     res.sendfile( fullPath );
     // }
 
             // // Redirecting this request also causes all the file gest for this page to redirect.
@@ -563,15 +582,17 @@ ServiceManager.prototype.setupApiRoutes = function() {
                     if(a.basicAuth) {
                         console.log("Basic Auth API Route -", a.api, "-> ctrl:", a.controller, ", method:", m, ", func:", funcName);
 
+                      
                         // add wrapper function to check auth
-                        this.app[ m ](a.api, express.basicAuth(
-                                function(user, pass){
-                                    return ( user == a.basicAuth.user &&
-                                             pass == a.basicAuth.pass
-                                    );
-                                }
-                            )
-                        );
+                        this.app[ m ](a.api, function(req, res, next) {
+                            var user = basicAuth(req);
+                            if (!user || user.name != a.basicAuth.user || user.pass != a.basicAuth.pass) {
+                                var realm = (a.basicAuth.realm ? a.basicAuth.realm : 'My Realm');
+                                res.set('WWW-Authenticate', 'Basic realm="' + realm + '"');
+                                return res.status(401).send();
+                            }
+                            return next();
+                        });
                     }
 
                     // if require auth
@@ -716,7 +737,14 @@ ServiceManager.prototype.start = function(port) {
                     console.log('----------------------------');
                     console.log(Util.DateGMTString()+' **** Services Started');
 
+                    TlsOptions = {
+                        //  key: fs.readFileSync('ssl-key/glas77-key.pem'),
+                        //  cert: fs.readFileSync('ssl-key/glas77-csr.pem')
 
+                        ca: fs.readFileSync(this.options.services.TlsFiles.caName),
+                        key: fs.readFileSync(this.options.services.TlsFiles.keyName),
+                        cert: fs.readFileSync(this.options.services.TlsFiles.certName)
+                    }
 
                     var serverPort = portArg || this.options.services.port || 8001;
                     //
@@ -807,6 +835,9 @@ ServiceManager.prototype.start = function(port) {
                     console.log('----------------------------');
                     console.log('Routes Setup done')
 
+                    // after routes set-up
+                    this.app.use(errorhandler({showStack: true, dumpExceptions: true}));
+
                     console.log(Util.DateGMTString()+' Starting Server ... ');
 
                     console.log('        ----------------------------------------------------- ');
@@ -843,7 +874,7 @@ ServiceManager.prototype.start = function(port) {
                     if(this.options.services.name && 'app-external' == this.options.services.name){
                         // app-external
                         // 8001 primary http port - insecure
-                        httpServerPort = this.services.portNonSSL || this.services.appExternalPort || 8001;
+                        httpServerPort = this.options.services.appExternalPort || this.options.services.portNonSSL || 8001;
 
                         if((443 != serverPort) && (8043 != serverPort)){
                             httpServerPort = serverPort;
@@ -857,17 +888,18 @@ ServiceManager.prototype.start = function(port) {
                             // console.log('---------------------------------------------------------------------------------------');
                         }.bind(this));
 
-                        if(this.options.portNonSSL && this.options.portNonSSL != httpServerPort){
-                            httpServerPort_02 = this.options.portNonSSL;
+                        if(this.options.services.portNonSSL && this.options.services.portNonSSL != httpServerPort){
+                            httpServerPort_02 = this.options.services.portNonSSL;
+                            // console.log('diag- httpServerPort_02 =', httpServerPort_02);
                         }
 
                         // second http port -- can work without ELB
                         if(httpServerPort != httpServerPort_02){
-                        console.log('                        attempting to attach port '+httpServerPort_02+' ... ');
-                        http.createServer(this.app).listen(httpServerPort_02, function createServer(){
-                            this.httpServerPort_02 = httpServerPort_02;
-                            console.log('                        listening on port '+httpServerPort_02+' (http). ');
-                        }.bind(this));
+                            console.log('                        attempting to attach port '+httpServerPort_02+' ... ');
+                            http.createServer(this.app).listen(httpServerPort_02, function createServer(){
+                                this.httpServerPort_02 = httpServerPort_02;
+                                console.log('                        listening on port '+httpServerPort_02+' (http). ');
+                            }.bind(this));
                         }
 
                         // primary SSL port
@@ -881,7 +913,7 @@ ServiceManager.prototype.start = function(port) {
                             console.log('                        attempting to attach port '+sslServerPort+' ... ');
 
                             https.createServer(TlsOptions, this.app).listen(sslServerPort, function createServer(){
-                                this.sslServerPort = sslServerPort;
+                                    this.sslServerPort = sslServerPort;
                                 console.log('                        listening on port '+sslServerPort+' (https). ');
                                 this.stats.increment('info', 'server_started_port_'+sslServerPort);
                                 // this.stats.increment('info', 'server_started_any');
@@ -890,15 +922,15 @@ ServiceManager.prototype.start = function(port) {
                         }
 
                     } else if(this.options.services.name && 'app-internal' == this.options.services.name){
-                            // app-internal
-                            // 8002 primary http port - insecure
+                        // app-internal
+                        // 8002 primary http port - insecure
                         httpServerPort = this.options.services.appInternalPort || 8002;
-                            console.log('                        attempting to attach port '+httpServerPort+' ... ');
-                            http.createServer(this.app).listen(httpServerPort, function createServer(){
-                                this.httpServerPort = httpServerPort;
-                                this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
-                                console.log('                        listening on port '+httpServerPort+' (http). ');
-                            }.bind(this));
+                        console.log('                        attempting to attach port '+httpServerPort+' ... ');
+                        http.createServer(this.app).listen(httpServerPort, function createServer(){
+                            this.httpServerPort = httpServerPort;
+                            this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
+                            console.log('                        listening on port '+httpServerPort+' (http). ');
+                        }.bind(this));
                     } else if(this.options.services.name && 'app-archiver' == this.options.services.name){
                         // app-aechiver
                         // 8004 primary http port - insecure
@@ -909,7 +941,7 @@ ServiceManager.prototype.start = function(port) {
                             this.stats.increment("info", "http_Server_Started_port_"+httpServerPort);
                             console.log('                        listening on port '+httpServerPort+' (http). ');
                         }.bind(this));
-                        }
+                    }
 
                     console.log('---------------------------------------------------------------------------------------');
 
@@ -1024,7 +1056,7 @@ var countDailyActiveUsers = function(stats){
             })
     }.bind(this));
 
-    // tentative MAU user has no login date in db ...
+    // tentative MAU - user has no login date in db ...
 
     when.promise(function(resolve, reject){
 
@@ -1068,6 +1100,69 @@ var countDailyActiveUsers = function(stats){
                 stats.gaugeNoRoot("info", "mau_plus_maybe_count", userCount);
                 console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
                     " Monthly plus maybe Active Users in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ( ENABLED = 1 AND " +
+            "DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= date_created ) ";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "new_users_today_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " New users Today in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ( ENABLED = 1 AND system_Role = 'student' AND " +
+            "DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= date_created ) ";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "new_students_today_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " New Students Today in the DB.");
+
+                resolve(results[0]);
+            }, function(err){
+                    console.log("error ---- dbg "+err+" <<");
+                reject(err);
+            })
+    }.bind(this));
+
+    when.promise(function(resolve, reject){
+
+        Q = "SELECT COUNT(id) as num FROM GL_USER " +
+            "WHERE ( ENABLED = 1 AND system_Role = 'instructor' AND " +
+            "DATE_SUB(CURDATE(), INTERVAL 1 DAY) <= date_created ) ";
+
+        this.ds.query(Q)
+            .then(function(results){
+
+                userCount = parseFloat(results[0].num);
+                stats.gaugeNoRoot("info", "new_teachers_today_count", userCount);
+                console.log(Util.DateGMTString()+" countDailyActiveUsers() -- found, "+userCount+
+                    " New Teachers Today in the DB.");
 
                 resolve(results[0]);
             }, function(err){

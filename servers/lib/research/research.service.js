@@ -39,7 +39,11 @@ function ResearchService(options, serviceManager){
         this.requestUtil = new Util.Request(this.options);
         this.store       = new Research.Datastore.Couchbase(this.options.research.datastore.couchbase);
         this.stats       = new Util.Stats(this.options, "Research");
-        this.cron        = new CronJob(this.options.research.cron.time, _cronTask.bind(this), this.options.research.cron.enabled);
+        
+        var validServer = this.options.services.name && options.research.cron.server == this.options.services.name;
+        this.cron        = new CronJob(this.options.research.cron.time,
+                                       _cronTask.bind(this),
+                                       this.options.research.cron.enabled && validServer);
         this.serviceManager = serviceManager;
         
     } catch(err) {

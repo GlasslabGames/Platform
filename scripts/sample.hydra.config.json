@@ -1,0 +1,131 @@
+{
+    "env": "dev",
+    "auth": {
+        "email": {
+             "from": "<accounts@glasslabgames.org>",
+             "transportMethod": "PICKUP",
+             "transport": "/Users/<user>/tmpmail"
+        }
+     },
+    "request": {
+        "httpTimeout": 60000, "//": "1 min in milliseconds"
+    },
+    "services": {
+        "port": 8001,
+        "session": {
+            "secret": "keyboard kitty",
+            "cookie": {
+                "path": "/",
+                "httpOnly": false
+            },
+            "store": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab",
+                "ttl": 86400, "//": "24 hours in seconds"
+            }
+        }
+    },
+    "webapp": {
+        "staticContentPath": "../../Playfully.org/build",
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_webapp",
+                "password": "glasslab"
+            }
+        }
+    },
+    "lms": {
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_dashdata",
+                "password": "glasslab"
+            }
+        }
+    },
+    "telemetry": {
+        "datastore": {
+            "mysql": {
+                "host"    : "localhost",
+                "user"    : "glasslab",
+                "password": "glasslab",
+                "database": "glasslab_dev"
+            },
+            "couchbase": {
+                "host":     "localhost:8091",
+                "bucket":   "glasslab_gamedata",
+                "password": "glasslab"
+            }
+        }
+    },
+    "assessment": {
+        "host": "localhost",
+        "port": 8003
+    },
+    "research": {
+        "dataChunkSize": 2000,
+        "datastore": {
+            "couchbase": {
+                "host":     "localhost:8091",
+                "//host":     "ec2-54-183-88-20.us-west-1.compute.amazonaws.com:8091",
+                "bucket":   "glasslab_gamedata",
+                "//bucket":   "dev_playfully_gamedata",
+                "password": "glasslab"
+            }
+        }
+    },
+    "lic":{
+      "datastore":{
+        "mysql": {
+          "host"    : "localhost",
+          "user"    : "glasslab",
+          "password": "glasslab",
+          "database": "glasslab_dev"
+        },
+        "couchbase": {
+          "host":     "localhost:8091",
+          "bucket":   "glasslab_dashdata",
+          "password": "glasslab"
+        }
+      },
+      "cron": {
+        "time": "",
+        "protocol": "http",
+        "host": "localhost:8001"
+      }
+    },
+    "sdk": {
+        "connect": "$host", "//": "$host is default, returns req.headers.host",
+        "protocol": "https", "//": "https or http, :// will be appended automatically",
+        "simcity": "https", "//": "for simcity testing only, remove me when done..."
+    },
+    "awsAccess":
+    {
+    	"accessKeyId": "",
+    	"secretAccessKey": ""
+    },
+    "stripe": {
+        "env": "test",
+        "test": {
+            "secretKey": "sk_test_IoXgE6T2GjzRWLeukDD40bO6",
+            "publishableKey": "pk_test_0T7q98EI508iQGcjdv1DVODS"
+        },
+        "live": {
+            
+        }
+    }
+}
