@@ -711,10 +711,9 @@ function generateBadgeCode( req, res ) {
 
                             if ( add ) {
                                 badgeList.push( newBadge );
-                                return badgeList;
-                            } else {
-                                return [];
                             }
+                            
+                            return badgeList;
                         }.bind(this))
                             .then( function( badgeList ) {
                                 this.serviceManager.get("auth").service.getAuthStore().updateUserBadgeList( userId, badgeList );
