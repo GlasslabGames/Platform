@@ -271,7 +271,6 @@ return when.promise(function(resolve, reject) {
         resolve(password);
     } else {
         reject({"error": "Password too weak", "exception": err}, 500);
-        return;
     }
 }.bind(this));
 // end promise wrapper
@@ -515,6 +514,16 @@ return when.promise(function(resolve, reject) {
             }
             return Util.PromiseContinue();
         }.bind(this))
+
+        // validate if password matches rules
+        .then(function(){
+            if(userData.password) {
+                if (!this._isEncrypted(userData.password)) {
+                    return this.validatePassword(userData.password);
+                }
+            }
+        }.bind(this))
+
         // check if ftue is same
         .then(function () {
             if (userData.ftue !== dbUserData.ftue) {
@@ -525,15 +534,12 @@ return when.promise(function(resolve, reject) {
             }
             return this._service.getAuthStore().updateUserDBData(userData);
         }.bind(this))
+
         // verify password if needed
-        .then(function(){
+        .then(function(password){
             if(userData.password) {
                 if (!this._isEncrypted(userData.password)) {
                     // passing old password to salt new password to validate
-                    if (this.validatePassword(userData.password) !== true) {
-                        return;
-                    }
-              
                     return this._comparePassword(userData.password, dbUserData.password);
                 } else {
                     return userData.password;
