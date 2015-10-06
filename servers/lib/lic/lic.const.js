@@ -23,8 +23,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
             ],
@@ -58,8 +57,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
             ],
@@ -77,8 +75,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
                 "AA-1",
@@ -100,8 +97,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
                 "AA-1",
@@ -123,8 +119,7 @@ module.exports = {
                 "AW-1",
                 "GOG",
                 "SLFR",
-                "PRIMA",
-                "WWF"
+                "PRIMA"
             ],
             "iPadGames": [
                 "AA-1",
