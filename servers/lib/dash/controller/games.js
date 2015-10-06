@@ -658,7 +658,7 @@ function getBadgeJSON(req, res){
         return;
     }
 
-    var url = "https://api-qa.lrng.org/api/v1/badge/remote-badges?badgeIds=[" + req.params.badgeId + "]";
+    var url = "https://api-prod.lrng.org/api/v1/badge/remote-badges?badgeIds=[" + req.params.badgeId + "]";
 
     this.requestUtil.getRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
         function( err, result, data ) {
@@ -683,7 +683,7 @@ function generateBadgeCode( req, res ) {
         return;
     }
 
-    var url = "https://api-qa.lrng.org/api/v1/badge/" + badgeId + "/earned-code/generate";
+    var url = "https://api-prod.lrng.org/api/v1/badge/" + badgeId + "/earned-code/generate";
 
     this.requestUtil.postRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" }, null,
         function( err, result, data ) {
@@ -749,7 +749,7 @@ function badgeCodeAwarded(req, res) {
         return;
     }
 
-    var url = "https://api-qa.lrng.org/api/v1/badge/" + badgeId + "/earned-code/" + code + "/redeemed";
+    var url = "https://api-prod.lrng.org/api/v1/badge/" + badgeId + "/earned-code/" + code + "/redeemed";
 
     this.requestUtil.getRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" },
         function( err, result, data ) {
