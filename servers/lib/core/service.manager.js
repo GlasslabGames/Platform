@@ -289,10 +289,11 @@ return when.promise(function(resolve, reject) {
                 this.app.use(bodyParser.json());
                 this.app.use(methodOverride());
                 
-                var whitelist = [ "http://new.wwf.local", "https://new.wwf.local", "http://www.wordswithfriendsedu.com", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com", "https://s3-us-west-1.amazonaws.com" ];
+                var acceptAll = this.options.services.cors.acceptAll || false;
+                var whitelist = this.options.services.cors.whitelist || [];
                 var corsOptions = {
                     origin: function( origin, callback ) {
-                        var originIsWhitelisted = whitelist.indexOf( origin ) !== -1;
+                        var originIsWhitelisted = acceptAll || whitelist.indexOf( origin ) !== -1;
                         callback( null, originIsWhitelisted );
                     },
                     credentials: true

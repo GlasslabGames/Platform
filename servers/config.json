@@ -29,6 +29,17 @@
                 "password": "glasslab",
                 "ttl": 86400, "//": "24 hours in seconds"
             }
+        },
+        "cors": {
+        	"acceptAll" : false,
+        	"whitelist": [
+        		"http://new.wwf.local", 
+        		"https://new.wwf.local", 
+        		"http://www.wordswithfriendsedu.com", 
+        		"http://edu.zwf-staging.zynga.com", 
+        		"http://s3-us-west-1.amazonaws.com",
+        		"https://s3-us-west-1.amazonaws.com"
+        	]
         }
     },
     "webapp": {
