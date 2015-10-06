@@ -54,3 +54,7 @@ GlasslabAccount.prototype.updateUserData = function(userData, loginUserSessionDa
 GlasslabAccount.prototype.encryptPassword = function(password, passwordScheme) {
     return this.strategy.encryptPassword(password, passwordScheme);
 };
+
+GlasslabAccount.prototype.validatePassword = function(password) {
+    return this.strategy.validatePassword(password);
+};

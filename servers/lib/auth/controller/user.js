@@ -1489,29 +1489,32 @@ function resetPasswordUpdate(req, res, next) {
                 if(Util.GetTimeStamp() > userData.resetCodeExpiration) {
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                 } else if(userData.resetCodeStatus == aConst.passwordReset.status.inProgress) {
-                    if (this.glassLabStrategy.validatePassword(req.body.password) !== true) {
-                        return;
-                    }
-                  
-                    return this.glassLabStrategy.encryptPassword(req.body.password)
-                        .then(function(password) {
-                            // update status
-                            userData.password = password;
-                            userData.resetCodeStatus = "NULL";
-                            userData.resetCodeExpiration = "NULL";
-                            userData.resetCode = "NULL";
+                    return this.glassLabStrategy.validatePassword(req.body.password)
+                    .then(function() {
+						return this.glassLabStrategy.encryptPassword(req.body.password)
+							.then(function(password) {
+								// update status
+								userData.password = password;
+								userData.resetCodeStatus = "NULL";
+								userData.resetCodeExpiration = "NULL";
+								userData.resetCode = "NULL";
 
-                            // If this user missed the verify code, we can authorize them here as well
-                            if( userData.verifyCodeStatus === aConst.verifyCode.status.sent ) {
-                                userData.verifyCodeStatus = aConst.verifyCode.status.verified;
-                                userData.verifyCodeExpiration = "NULL";
-                            }
+								// If this user missed the verify code, we can authorize them here as well
+								if( userData.verifyCodeStatus === aConst.verifyCode.status.sent ) {
+									userData.verifyCodeStatus = aConst.verifyCode.status.verified;
+									userData.verifyCodeExpiration = "NULL";
+								}
 
-                            return this.glassLabStrategy.updateUserData(userData);
-                        }.bind(this))
-                        .then(function() {
-                            this.requestUtil.jsonResponse(res, {});
-                        }.bind(this));
+								return this.glassLabStrategy.updateUserData(userData);
+							}.bind(this))
+							.then(function() {
+								this.requestUtil.jsonResponse(res, {});
+							}.bind(this));
+					}.bind(this))
+					.then(null, function() {
+	                	console.error("AuthService: resetPasswordUpdate Error - validate");
+    	            	this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
+            		}.bind(this));
                 }
             }.bind(this))
 
