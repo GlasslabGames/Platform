@@ -242,12 +242,12 @@
                 "services": {
                     "portSSL": 443,
                     "portNonSSL": 80,
-                    "first_login":   "2015-09-03 23:59:01",
+                    "first_login":   "2015-09-03 23:59:01"
                 }
             },
             "autoDev": {
                 "services": {
-                    "first_login":   "2015-09-04 23:59:01",
+                    "first_login":   "2015-09-04 23:59:01"
                 }
             }
         }
