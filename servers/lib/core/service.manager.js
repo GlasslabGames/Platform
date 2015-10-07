@@ -1003,6 +1003,7 @@ var countDailyActiveUsers = function(stats){
     var first_login;
     // var first_login = this.options.services.first_login || '2015-09-03 23:59:02';
 
+    // update to use configMod ...
     if("dev" == this.options.env){
         first_login = this.options.env_dev.first_login;
     } else if("stage" == this.options.env){

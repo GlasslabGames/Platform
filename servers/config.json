@@ -225,24 +225,31 @@
         "first_login":   "2015-09-02 23:59:01"
     },
     "env_stage": {
-        "first_login":   "2015-09-03 23:59:01"
+        "first_login":   "2015-09-06 23:59:01"
     },
     "env_prod": {
-        "first_login":   "2015-09-09 23:59:01"
+        "first_login":   "2015-10-07 23:59:01"
     },
     "configMod": {
-        "sectionA": {
-            "keyA": {
+        "modSectionAbc": {
+            "modNameAbc": {
                 "aa": "aa"
+            }
+        },
+        "test-section": {
+            "This modName does not match any keyName.": {
+                "bbb": "bbb will not be used"
             }
         },
         "buildEnv": {
             "//": "if configKeys.buildEnv: local is in hydra.config.json ...",
             "local": {
+                "bart": "simpson just for testing",
                 "services": {
-                    "portSSL": 443,
-                    "portNonSSL": 80,
-                    "first_login":   "2015-09-03 23:59:01"
+                    "port": 8043,
+                    "portSSL": 8043,
+                    "portNonSSL": 8080,
+                    "first_login": "2015-09-03 23:59:01"
                 }
             },
             "autoDev": {
