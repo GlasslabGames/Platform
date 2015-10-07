@@ -32,7 +32,7 @@ ConfigManager.prototype.loadSync = function(files, fileType) {
 
                     if(fileType == "json") {
                         // merge in next
-                        console.log('merging config file '+file);
+                        console.log('  merging config file '+file);
                         this.config = _.merge(
                             this.config,
                             JSON.parse(data)
@@ -46,7 +46,8 @@ ConfigManager.prototype.loadSync = function(files, fileType) {
             if(_.isElement(this.config)) {
                 return null;
             } else {
-                return this.config;
+                // return this.config;
+                return this.modConfig(this.config);
             }
         } catch(err){
             console.error("ConfigManager: Error loading config files (",files,"):", err);
@@ -67,6 +68,50 @@ ConfigManager.prototype.getUserHomeDir = function() {
            process.env.HOMEPATH ||
            process.env.USERPROFILE ||
            "/root";
+};
+
+ConfigManager.prototype.modConfig = function(oldConfig) {
+
+    var configOut = oldConfig;
+    var subConfig;
+
+    if(oldConfig.configMod && oldConfig.configKeys) {
+
+        var msectionss = Object.keys(oldConfig.configMod);  // mod section names
+        var keyName;                                        // key name
+        var m;
+
+        console.log('  Using "configMod" sections to alter configuration...');
+
+        msectionss.forEach(function(m,i) { // sectionA, buildEnv
+
+            // is there a key section for this mod section ?
+            if(oldConfig.configKeys.hasOwnProperty(m)) {
+                keyName = oldConfig.configKeys[m];
+
+                // if so, is there a matching modName in this section for the keyName?
+                if(oldConfig.configMod[m].hasOwnProperty(keyName)) {
+                    subConfig = oldConfig.configMod[m][keyName];
+                    console.log('    merging configMod.' + m + '.' + keyName + ' into config...');
+                    // console.log('    ---------------- ----------------');
+                    // console.log(subConfig);
+                    // console.log('    ---------------- ----------------');
+                    configOut = _.merge( configOut, subConfig);
+                } else {
+                    console.warn('    There is a key for mod section ' + m + ' but there is ' +
+                        'no modName in the section that matches the keyName.');
+                }
+            // } else {
+            //     console.warn('    no config key found for config mod section', k);
+            }
+        });
+
+        // console.log('    wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww');
+        // console.log(configOut);
+        // console.log('    wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww');
+    }
+
+    return configOut;
 };
 
 module.exports = ConfigManager;
