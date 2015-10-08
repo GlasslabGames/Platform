@@ -43,6 +43,10 @@ GlasslabAccount.prototype.registerUser = function(userData) {
     return this.strategy.registerUser(userData);
 };
 
+GlasslabAccount.prototype.unregisterUser = function(username) {
+    return this.strategy.unregisterUser(username);
+};
+
 GlasslabAccount.prototype.checkUserPerminsToUserData = function(userData, loginUserSessionData) {
     return this.strategy.checkUserPerminsToUserData(userData, loginUserSessionData);
 };

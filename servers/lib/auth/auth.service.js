@@ -193,6 +193,10 @@ AuthService.prototype.registerUser = function(userData){
     return this.glassLabStrategy.registerUser(userData);
 };
 
+AuthService.prototype.unregisterUser = function(userData){
+    return this.glassLabStrategy.unregisterUser(userData);
+};
+
 AuthService.prototype.getAuthStore = function() {
     return this.authStore;
 };

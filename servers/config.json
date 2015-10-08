@@ -42,6 +42,13 @@
         	]
         }
     },
+    "registration" : {
+    	"developer" : {
+    		"protocol" : "https",
+    		"additionalServers" : [],
+    		"secretKey" : ""
+    	}
+    },
     "webapp": {
         "staticContentPath": "../../Playfully.org/build",
         "datastore": {

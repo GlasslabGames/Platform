@@ -876,6 +876,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/user/unregister",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "unregisterUserV2"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/auth/user/profile",
             service: "auth",

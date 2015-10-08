@@ -851,3 +851,17 @@ Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
             });
     }.bind(this));
 };
+
+Auth_MySQL.prototype.deleteShadowUser = function(username) {
+    return when.promise(function(resolve, reject){
+        //var Q = 'DELETE FROM GL_USER WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
+        var Q = "UPDATE GL_USER SET username='failmultireg{" + username + "}', VERIFY_CODE_STATUS=NULL WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
+        return this.ds.query(Q)
+            .then(function(results){ 
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
