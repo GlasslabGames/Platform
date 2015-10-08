@@ -338,6 +338,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/admin-thx1138-data/export-report-data",
+            service: "dash",
+            controller: "dash",
+            method: {
+                get: "exportReportData"
+            }
+        },
+        {
             api: "/api/v2/dash/migrate/:code",
             service: "dash",
             controller: "games",
@@ -351,6 +359,30 @@ module.exports = {
             controller: "games",
             method: {
                 get: "reloadGameFiles"
+            }
+        },
+        {
+            api: "/api/v2/dash/badge/:badgeId",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getBadgeJSON"
+            }
+        },
+        {
+            api: "/api/v2/dash/badge/:badgeId/generateCode/:userId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "generateBadgeCode"
+            }
+        },
+        {
+            api: "/api/v2/dash/badge/:badgeId/codeAwarded/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "badgeCodeAwarded"
             }
         },
         {
@@ -844,6 +876,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/user/unregister",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "unregisterUserV2"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/auth/user/profile",
             service: "auth",
@@ -869,6 +909,22 @@ module.exports = {
             controller: "user",
             method: {
                 get: "getUserDataByEmail",
+            }
+        },
+            api: "/api/v2/auth/user/:userId/badgeList",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserBadgeList",
+                post: "updateUserBadgeList"
+            }
+        },
+        {
+            api: "/api/v2/auth/user/:userId/badgeList/add",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "addUserBadgeList"
             }
         },
         {
@@ -960,6 +1016,23 @@ module.exports = {
             controller: "user",
             method: {
                 get: "verifyDeveloperCode"
+            }
+        },
+        {
+            api: "/api/v2/auth/alter-developer-status",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "alterDeveloperVerifyCodeStatus"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/developers",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getAllDevelopers"
             }
         },
         {

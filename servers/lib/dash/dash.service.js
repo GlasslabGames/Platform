@@ -29,6 +29,7 @@ function DashService(options, serviceManager){
         DashStore     = require('../dash/dash.js').Datastore.MySQL;
         DashDataStore = require('../dash/dash.js').Datastore.Couchbase;
         Errors        = require('../errors.js');
+        WebStore      = require('../dash/dash.js').Datastore.MySQL;
 
         this.options = _.merge(
             {
@@ -43,6 +44,7 @@ function DashService(options, serviceManager){
         this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
         this.dashStore   = new DashStore(this.options.webapp.datastore.mysql);
         this.dashCBStore = new DashDataStore(this.options.lms.datastore.couchbase);
+        this.webstore	 = new WebStore(this.options.webapp.datastore.mysql);
 
         this.serviceManager = serviceManager;
 

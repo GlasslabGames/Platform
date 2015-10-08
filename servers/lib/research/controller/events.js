@@ -1105,14 +1105,19 @@ function parseItems(event, row, left, right){
 
 function processSpecialRowItem (item, data) {
     var results = "";
+    /* This eval fails when data[item] = "data"
+     TypeError: Converting circular structure to JSON */
     try {
         results = eval(data[item]) || '';
+        if(_.isObject(results)) {
+            results = JSON.stringify(results);
+        }
     }
     catch(err) {
         results = data[item] || '';
-    }
-    if(_.isObject(results)) {
-        results = JSON.stringify(results);
+        if(_.isObject(results)) {
+            results = JSON.stringify(results);
+        }
     }
     return results;
 }

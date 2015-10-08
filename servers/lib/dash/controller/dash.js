@@ -5,7 +5,8 @@ var lConst    = require('../dash.const.js');
 
 module.exports = {
     getMessages:  getMessages,
-    postMessage:  postMessage
+    postMessage:  postMessage,
+    exportReportData: exportReportData
 };
 
 var exampleIn = {}, exampleOut = {};
@@ -17,6 +18,7 @@ var exampleIn = {}, exampleOut = {};
 exampleIn.getMessages = {
     messageId: "message"
 };
+
 exampleOut.getMessages = [
     {
         icon: "app-test-icon.png",
@@ -31,6 +33,7 @@ exampleOut.getMessages = [
         timestamp: 122340438900
     }
 ];
+
 function getMessages(req, res, next) {
 
     if( req.session &&
@@ -79,6 +82,7 @@ exampleIn.postMessage = {
     subject: "SimCityEDU has been updated!",
     message: "Check out the new updates for the game on the game page."
 };
+
 function postMessage(req, res, next) {
 
     if( req.session &&
@@ -136,4 +140,51 @@ function postMessage(req, res, next) {
     else {
         this.requestUtil.errorResponse( res, "not logged in" );
     }
+}
+
+// api: "/api/v2/admin-thx1138-data/export-report-data",
+// Platform/servers/lib/dash/controller/dash.js
+//
+function exportReportData(req, res){
+
+    var qOut1, qOut2, qOut3, qOut4;
+    var out = [];
+    out[0] = '---- retry ----';
+    out[1] = '2';
+    out[2] = '3';
+    out[3] = '4';
+
+    this.dashStore.getReportDataP2()
+    .then(function(qOut1) {
+        out[0] = qOut1[0];
+        // console.log('  this.dashStore.getReportDataP2() pass\n', qOut1[0]);
+    }, function(err){
+        console.log('  this.dashStore.getReportDataP2() fail', err);
+        // this.requestUtil.errorResponse(res, err); ?
+    }.bind(this) );
+
+    this.dashStore.getReportDataP2('student')
+    .then(function(qOut2) {
+        out[1] = qOut2[0];
+        // console.log('  this.dashStore.getReportDataP2("student") pass\n', qOut2[0]);
+    }, function(err){
+        console.log('  this.dashStore.getReportDataP2("student") fail', err);
+    }.bind(this) );
+
+    this.dashStore.getReportDataP2('instructor')
+    .then(function(qOut3) {
+        out[2] = qOut3[0];
+        // console.log('  this.dashStore.getReportDataP2("instructor") pass\n', qOut3[0]);
+    }, function(err){
+        console.log('  this.dashStore.getReportDataP2("instructor") fail', err);
+    }.bind(this) );
+
+    this.dashStore.getReportDataP1()
+    .then(function(qOut4) {
+        out[3] = qOut4[0];
+        this.requestUtil.jsonResponse(res, out);
+    }.bind(this));
+
+    // this.requestUtil.jsonResponse(res, out);
+
 }

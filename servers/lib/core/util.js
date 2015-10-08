@@ -11,6 +11,7 @@ var when   = require('when');
 var _      = require('lodash');
 var uuid   = require('node-uuid');
 var fs     = require('fs');
+var morgan = require('morgan');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -100,8 +101,8 @@ function dateGmtString(){      // ISO 8601, GMT
     return new Date().toISOString().substring(0,19).replace(/T/," ").concat(" GMT");
 }
 
-function getExpressLogger(options, express, stats){
-    express.logger.token('remote-addy', function(req, res){
+function getMorganLogger(options, stats){
+    morgan.token('remote-addy', function(req, res){
         if( req.headers.hasOwnProperty('x-forwarded-for') ){
             return req.headers['x-forwarded-for'];
         } else {
@@ -109,7 +110,7 @@ function getExpressLogger(options, express, stats){
         }
     });
 
-    return express.logger(function(t, req, res){
+    return morgan(function(t, req, res){
         var rTime = t['response-time'](req, res);
         var contentLength = t['res'](req, res, 'content-length');
         var status = t['status'](req, res);
@@ -182,7 +183,7 @@ function getExpressLogger(options, express, stats){
 
     /*
      var logFormat = ':remote-addy - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" (:response-time ms)';
-     return express.logger(logFormat);
+     return morgan(logFormat);
      */
 }
 
@@ -206,7 +207,7 @@ module.exports = {
     ConvertToString:    convertToString,
     PromiseContinue:    promiseContinue,
     PromiseError:       promiseError,
-    GetExpressLogger:   getExpressLogger,
+    GetMorganLogger:    getMorganLogger,
     GetTimeStamp:       getTimeStamp,
     CheckTimeStamp:     checkTimeStamp,
     DateString:         dateString,

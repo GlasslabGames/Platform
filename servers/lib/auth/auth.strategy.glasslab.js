@@ -29,6 +29,8 @@ function Glasslab_Strategy(options, service) {
     lConst = require('../lms/lms.js').Const;
     aConst = require('./auth.js').Const;
 
+    this.stats = new Util.Stats(this.options, "AuthStrategyGlasslab");
+
     this._service       = service;
     this._usernameField = 'username';
     this._passwordField = 'password';
@@ -237,6 +239,11 @@ return when.promise(function(resolve, reject) {
                 // need to test this
                 return this._service.getAuthStore().updateTempUser(userData, existingId);
             } else{
+                console.log(' ');
+                console.log(Util.DateGMTString(), 'adding new user ... ', userData.role, userData.username);
+                console.log(' ');
+                this.stats.increment("info", "new.user.created");
+                this.stats.increment("info", "new."+userData.role+'created');
                 return this._service.getAuthStore().addUser(userData);
             }
         }.bind(this))
@@ -264,7 +271,6 @@ return when.promise(function(resolve, reject) {
         resolve(password);
     } else {
         reject({"error": "Password too weak", "exception": err}, 500);
-        return;
     }
 }.bind(this));
 // end promise wrapper
@@ -413,6 +419,15 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Glasslab_Strategy.prototype.updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        return this._service.getAuthStore().updateUserBadgeList( userId, badgeList );
+    }.bind(this))
+    .then(null, function(err, code){
+        reject(err, code);
+    }.bind(this));
+};
+
 // loads of permission checks are done before update the DB data
 Glasslab_Strategy.prototype.updateUserData = function(userData, loginUserSessionData){
     console.log( JSON.stringify( userData ) );
@@ -499,6 +514,16 @@ return when.promise(function(resolve, reject) {
             }
             return Util.PromiseContinue();
         }.bind(this))
+
+        // validate if password matches rules
+        .then(function(){
+            if(userData.password) {
+                if (!this._isEncrypted(userData.password)) {
+                    return this.validatePassword(userData.password);
+                }
+            }
+        }.bind(this))
+
         // check if ftue is same
         .then(function () {
             if (userData.ftue !== dbUserData.ftue) {
@@ -509,15 +534,12 @@ return when.promise(function(resolve, reject) {
             }
             return this._service.getAuthStore().updateUserDBData(userData);
         }.bind(this))
+
         // verify password if needed
-        .then(function(){
+        .then(function(password){
             if(userData.password) {
                 if (!this._isEncrypted(userData.password)) {
                     // passing old password to salt new password to validate
-                    if (this.validatePassword(userData.password) !== true) {
-                        return;
-                    }
-              
                     return this._comparePassword(userData.password, dbUserData.password);
                 } else {
                     return userData.password;
@@ -633,3 +655,19 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+Glasslab_Strategy.prototype.unregisterUser = function(username){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+	this._service.getAuthStore().deleteShadowUser(username)
+	.then(function() { 
+		resolve(username);
+	}.bind(this),
+		function(err, code){
+		reject({"error": "unexpected error"}, 403);
+	});
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}

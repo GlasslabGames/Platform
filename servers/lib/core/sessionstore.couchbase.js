@@ -9,10 +9,10 @@ var when      = require('when');
 //
 var sessionMaxAge = 24*60*60; // one day in seconds
 
-module.exports = function(connect){
+module.exports = function(session){
 
     // Connect Session Store
-    var Store = connect.session.Store;
+    var Store = session.Store;
     var Util;
 
     function CouchBaseStore(options) {

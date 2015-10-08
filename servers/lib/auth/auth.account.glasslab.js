@@ -43,6 +43,10 @@ GlasslabAccount.prototype.registerUser = function(userData) {
     return this.strategy.registerUser(userData);
 };
 
+GlasslabAccount.prototype.unregisterUser = function(username) {
+    return this.strategy.unregisterUser(username);
+};
+
 GlasslabAccount.prototype.checkUserPerminsToUserData = function(userData, loginUserSessionData) {
     return this.strategy.checkUserPerminsToUserData(userData, loginUserSessionData);
 };
@@ -53,4 +57,8 @@ GlasslabAccount.prototype.updateUserData = function(userData, loginUserSessionDa
 
 GlasslabAccount.prototype.encryptPassword = function(password, passwordScheme) {
     return this.strategy.encryptPassword(password, passwordScheme);
+};
+
+GlasslabAccount.prototype.validatePassword = function(password) {
+    return this.strategy.validatePassword(password);
 };

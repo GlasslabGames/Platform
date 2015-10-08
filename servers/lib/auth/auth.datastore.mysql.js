@@ -61,6 +61,7 @@ return when.promise(function(resolve, reject) {
             var hasSchool = false;
             var hasFtueChecklist = false;
             var hasLastLogin = false;
+            var hasBadgeList = false;
 
             var promiseList = [];
             var Q = "";
@@ -95,6 +96,10 @@ return when.promise(function(resolve, reject) {
 
                 if (results[i]['Field'] == "last_login") {
                     hasLastLogin = true;
+                }
+
+                if (results[i]['Field'] == "badge_list") {
+                    hasBadgeList = true;
                 }
             }
 
@@ -141,6 +146,13 @@ return when.promise(function(resolve, reject) {
                 console.log('                ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ');
                 updating = true;
                 Q = "ALTER TABLE GL_USER ADD COLUMN last_login DATETIME NULL DEFAULT NULL AFTER last_updated ";
+                promiseList.push(this.ds.query(Q));
+            }
+
+            if (!hasBadgeList) {
+                console.log('                ALTER TABLE GL_USER ADD COLUMN badge_list TEXT NULL DEFAULT NULL AFTER standards_view ');
+                updating = true;
+                Q = "ALTER TABLE GL_USER ADD COLUMN badge_list TEXT NULL DEFAULT NULL AFTER standards_view ";
                 promiseList.push(this.ds.query(Q));
             }
 
@@ -440,6 +452,19 @@ function _addLicenseInfoToUser(user, results){
     }.bind(this));
 }
 
+Auth_MySQL.prototype.updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        var badgeListStr = JSON.stringify( badgeList );
+
+        var Q = "UPDATE GL_USER " +
+            "SET last_updated=NOW(), " +
+            "badge_list='" + badgeListStr + "' " +
+            "WHERE id=" + userId;
+
+        this.ds.query(Q).then( resolve, reject );
+    }.bind(this));
+};
+
 Auth_MySQL.prototype.updateUserPassword = function(id, password, loginType) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -541,9 +566,9 @@ return when.promise(function(resolve, reject) {
         login_type:     this.ds.escape(userData.loginType),
         ssoUsername:    this.ds.escape(userData.ssoUsername || ""),
         ssoData:        this.ds.escape(userData.ssoData || ""),
-        verify_code:    "NULL",
+        verify_code:    userData.verifyCode ? this.ds.escape(userData.verifyCode) : "NULL",
         verify_code_expiration: "NULL",
-        verify_code_status: "NULL",
+        verify_code_status: userData.verifyCodeStatus ? this.ds.escape(userData.verifyCodeStatus) : "NULL",
         state:          this.ds.escape(userData.state),
         school:         this.ds.escape(userData.school),
         standards_view: this.ds.escape(userData.standards),
@@ -562,6 +587,7 @@ return when.promise(function(resolve, reject) {
     this.ds.query(Q)
         .then(
         function(data){
+            // console.log(Util.DateGMTString(), 'Auth_MySQL.prototype.addUser() -- success ');
             resolve(data.insertId);
         }.bind(this),
         function(err) {
@@ -806,3 +832,36 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
     }.bind(this));
 };
 
+Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
+    return when.promise(function(resolve, reject){
+        var Q = "SELECT id, FIRST_NAME, LAST_NAME, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
+        return this.ds.query(Q)
+            .then(function(results){
+                var developers = [];
+                results.forEach(function(result){
+                    developers.push({ id: result.id, name: result.FIRST_NAME + ' ' + result.LAST_NAME, date: result.pretty_date, fulldate: result.date_created });
+                }.bind(this));
+                return when.all(developers);
+            }.bind(this))
+            .then(function(results){ 
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+};
+
+Auth_MySQL.prototype.deleteShadowUser = function(username) {
+    return when.promise(function(resolve, reject){
+        //var Q = 'DELETE FROM GL_USER WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
+        var Q = "UPDATE GL_USER SET username='failmultireg{" + username + "}', VERIFY_CODE_STATUS=NULL WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
+        return this.ds.query(Q)
+            .then(function(results){ 
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}

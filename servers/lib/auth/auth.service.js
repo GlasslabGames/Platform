@@ -193,6 +193,10 @@ AuthService.prototype.registerUser = function(userData){
     return this.glassLabStrategy.registerUser(userData);
 };
 
+AuthService.prototype.unregisterUser = function(userData){
+    return this.glassLabStrategy.unregisterUser(userData);
+};
+
 AuthService.prototype.getAuthStore = function() {
     return this.authStore;
 };
@@ -238,6 +242,13 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+AuthService.prototype._updateUserBadgeList = function(userId, badgeList) {
+    return when.promise(function(resolve, reject) {
+        this.glassLabStrategy.updateUserBadgeList(userId, badgeList)
+            .then(resolve,reject);
+    }.bind(this));
+};
+
 AuthService.prototype.addOrUpdate_SSO_UserData = function(userData){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
@@ -251,6 +262,13 @@ return when.promise(function(resolve, reject) {
                 return this.authStore.updateUserDBData(userData);
             } else {
                 userData.newUser = true;
+
+                // single sign-on users
+                console.log(' ');
+                console.log(Util.DateGMTString(), 'adding new user ... ', userData.role, userData.username);
+                console.log(' ');
+                this.stats.increment("info", "new.user.created");
+                this.stats.increment("info", "new."+userData.role+'created');
                 return this.authStore.addUser(userData);
             }
         }.bind(this))
