@@ -55,9 +55,203 @@
             "reports": "assets/game-banner-PRIMA.png"
         }
     },
-    "assessment": [],
+    "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "all",
+            "engine": "javascript",
+            "trigger": "activity",
+            "rules": {
+                "wo1": {
+                    "name": "Player hasn't viewed academic word list in 3 turns",
+                    "description": "Player hasn't viewed academic word list in 3 turns"
+                },
+                "wo5": {
+                    "name": "Player hasn’t played an Academic Word in 5 turns",
+                    "description": "Player hasn’t played an Academic Word in 5 turns"
+                },
+                "wo10": {
+                    "name": "On the same turn, the student looked up an Academic Word Bonus Word but still got the Academic Word Bonus wrong",
+                    "description": "On the same turn, the student looked up an Academic Word Bonus Word but still got the Academic Word Bonus wrong"
+                },
+                "wo12": {
+                    "name": "Student has started more than 6 games without finishing any of them.",
+                    "description": "Student has started more than 6 games without finishing any of them."
+                },
+                "wo14": {
+                    "name": "Streak of 5 turns on which student didn't play a word",
+                    "description": "Streak of 5 turns on which student didn't play a word"
+                },
+                "so2": {
+                    "name": "Student has looked up 8 or more academic words in a game",
+                    "description": "Student has looked up 8 or more academic words in a game"
+                },
+                "so5": {
+                    "name": "Played more than 5 Academic Words in a game",
+                    "description": "Played more than 5 Academic Words in a game"
+                },
+                "so6": {
+                    "name": "Streak of 3 Academic Words played in a row during one game",
+                    "description": "Streak of 3 Academic Words played in a row during one game"
+                },
+                "so7": {
+                    "name": "Played two Academic Words during one turn",
+                    "description": "Played two Academic Words during one turn"
+                },
+                "so8": {
+                    "name": "Student played 50 Power Words",
+                    "description": "Student played 50 Power Words"
+                },
+                "so9": {
+                    "name": "Student played 100 of Power Words",
+                    "description": "Student played 100 of Power Words"
+                },
+                "so10": {
+                    "name": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus",
+                    "description": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus"
+                },
+                "so11": {
+                    "name": "Earned 3 or more Academic Word Bonuses in one game",
+                    "description": "Earned 3 or more Academic Word Bonuses in one game"
+                },
+                "so12": {
+                    "name": "Won 4 games (cumulatively, not neccessarily in a row)",
+                    "description": "Won 4 games (cumulatively, not neccessarily in a row)"
+                },
+                "so13": {
+                    "name": "Student completed 10 games",
+                    "description": "Student completed 10 games"
+                },
+                "so14": {
+                    "name": "Student completed 50 games",
+                    "description": "Student completed 50 games"
+                },
+                "so15": {
+                    "name": "Played a word worth more than 50 points",
+                    "description": "Played a word worth more than 50 points"
+                }
+            }
+        }
+    ],
     "reports": {
-        "list": []
+        "list": [
+            {
+                "id": "sowo",
+                "assessmentId": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.png",
+                    "large": "assets/skinny-banner-PRIMA@2x.png"
+                },
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so2",
+                                    "title": "",
+                                    "description": "Student has looked up 8 or more academic words in a game"
+                                },
+                                {
+                                    "id": "so5",
+                                    "title": "",
+                                    "description": "Played more than 5 Academic Words in a game"
+                                },
+                                {
+                                    "id": "so6",
+                                    "title": "",
+                                    "description": "Streak of 3 Academic Words played (in a row during one game)"
+                                },
+                                {
+                                    "id": "so7",
+                                    "title": "",
+                                    "description": "Played two Academic Words during one turn"
+                                },
+                                {
+                                    "id": "so8",
+                                    "title": "",
+                                    "description": "Student played 50 Power Words"
+                                },
+                                {
+                                    "id": "so9",
+                                    "title": "",
+                                    "description": "Student played 100 of Power Words"
+                                },
+                                {
+                                    "id": "so10",
+                                    "title": "",
+                                    "description": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus "
+                                },
+                                {
+                                    "id": "so11",
+                                    "title": "",
+                                    "description": "Earned 3 or more Academic Word Bonuses in one game"
+                                },
+                                {
+                                    "id": "so12",
+                                    "title": "",
+                                    "description": "Won 4 games (cumulatively, not neccessarily in a row)"
+                                },
+                                {
+                                    "id": "so13",
+                                    "title": "",
+                                    "description": "Student completed 10 games"
+                                },
+                                {
+                                    "id": "so14",
+                                    "title": "",
+                                    "description": "Student completed 50 games"
+                                },
+                                {
+                                    "id": "so15",
+                                    "title": "",
+                                    "description": "Played a word worth more than 50 points"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "title": "",
+                                    "description": "Player hasn't viewed academic word list in 3 turns"
+                                },
+                                {
+                                    "id": "wo5",
+                                    "title": "",
+                                    "description": "Player hasn’t played an Academic Word in 5 turns"
+                                },
+                                {
+                                    "id": "wo10",
+                                    "title": "",
+                                    "description": "On the same turn, the student looked up an Academic Word Bonus Word but still got the Academic Word Bonus wrong"
+                                },
+                                {
+                                    "id": "wo12",
+                                    "title": "",
+                                    "description": "Student has started more than 6 games without finishing any of them."
+                                },
+                                {
+                                    "id": "wo14",
+                                    "title": "",
+                                    "description": "Streak of 5 turns on which student didn't play a word (so they either passed or swapped)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+            }
+        ]
     },
     "details": {
         "buttons": [],
