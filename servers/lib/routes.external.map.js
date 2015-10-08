@@ -911,6 +911,7 @@ module.exports = {
                 get: "getUserDataByEmail",
             }
         },
+        {
             api: "/api/v2/auth/user/:userId/badgeList",
             service: "auth",
             controller: "user",
