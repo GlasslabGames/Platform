@@ -132,6 +132,13 @@
                     "description": "Played a word worth more than 50 points"
                 }
             }
+        },
+        {
+            "enabled": true,
+            "id": "standards",
+            "dataProcessScope": "gameSession",
+            "engine": "standards",
+            "trigger": "activity"
         }
     ],
     "reports": {
@@ -250,6 +257,138 @@
                     ]
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+            },
+            {
+                "id": "standards",
+                "assessmentId": "standards",
+                "enabled": true,
+                "name": "Standards Report",
+                "header": {
+                    "text": "Standards Report",
+                    "image": "assets/game-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.jpg",
+                    "large": "assets/skinny-banner-PRIMA@2x.jpg"
+                },
+                "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
+                "table": {
+                    "groups": [
+                        {
+                            "name": "Common Core",
+                            "subjects": [
+                                {
+                                    "name": "English Language Art",
+                                    "standards": [
+                                        {
+                                            "id": "L.6.6",
+                                            "title": "L.6.6",
+                                            "description": "Acquire and use accurately grade-appropriate general academic and domain-specific words and phrases; gather vocabulary knowledge when considering a word or phrase important to comprehension or expression.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.7.6",
+                                            "title": "L.7.6",
+                                            "description": "Acquire and use accurately grade-appropriate general academic and domain-specific words and phrases; gather vocabulary knowledge when considering a word or phrase important to comprehension or expression.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.8.6",
+                                            "title": "L.8.6",
+                                            "description": "Acquire and use accurately grade-appropriate general academic and domain-specific words and phrases; gather vocabulary knowledge when considering a word or phrase important to comprehension or expression.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.4.4.A",
+                                            "title": "L.4.4.A",
+                                            "description": "Use context (e.g., definitions, examples, or restatements in text) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.5.4.C",
+                                            "title": "L.5.4.C",
+                                            "description": "Consult reference materials (e.g., dictionaries, glossaries, thesauruses), both print and digital, to find the pronunciation and determine or clarify the precise meaning of key words and phrases.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.6.4.A",
+                                            "title": "L.6.4.A",
+                                            "description": "Use context (e.g., the overall meaning of a sentence or paragraph; a word's position or function in a sentence) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.7.4.A",
+                                            "title": "L.7.4.A",
+                                            "description": "Use context (e.g., the overall meaning of a sentence or paragraph; a word's position or function in a sentence) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.8.4.A",
+                                            "title": "L.8.4.A",
+                                            "description": "Use context (e.g., the overall meaning of a sentence or paragraph; a word's position or function in a sentence) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+
             }
         ]
     },
