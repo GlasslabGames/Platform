@@ -147,7 +147,8 @@ function getCurrentPlan(req, res){
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
             var plans = lConst.plan[packageType];
-            var seats = this.getPOSeats( packageSize );
+            var seats = {};
+            this._getPOSeats( packageSize, seats );
 
             _(packageDetails).merge(plans,seats);
             output["packageDetails"] = packageDetails;
@@ -642,7 +643,11 @@ function upgradeLicense(req, res){
             if(!license["promo"] && planInfo.promoCode){
                 promoCode = planInfo.promoCode;
             }
-            if ( this.getPOSeats( emailData.oldSeats ).studentSeats > this.getPOSeats( emailData.newSeats ).studentSeats ) {
+            var oldSeats = {};
+            var newSeats = {};
+            this._getPOSeats( emailData.oldSeats, oldSeats );
+            this._getPOSeats( emailData.newSeats, newSeats );
+            if ( oldSeats.studentSeats > newSeats.studentSeats ) {
                 return "downgrade seats";
             }
             var subscriptionId = license["subscription_id"];
@@ -680,7 +685,8 @@ function upgradeLicense(req, res){
                 updateFields.push(promoCodeString);
             }
             promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
-            var seats = this.getPOSeats( planInfo.seats );
+            var seats = {};
+            this._getPOSeats( planInfo.seats, seats );
             var educatorSeats = seats.educatorSeats;
             promiseList[1] = this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
             if(status === "student count"){
@@ -809,7 +815,7 @@ function upgradeTrialLicense(req, res){
             //data.name = req.user.firstName + ' ' + req.user.lastName;
             data.subject = "Welcome to GlassLab Games Premium!";
             data.plan = lConst.plan[planInfo.type].name;
-            data.seats = this.getPOSeats( planInfo.seats ).size;
+            this._getPOSeats( planInfo.seats, data.seats ); // TODO: KMY: Review
             data.expirationDate = expirationDate;
             var template = "owner-upgrade-trial";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -1037,7 +1043,9 @@ function addTeachersToLicense(req, res){
                 return "inactive license";
             }
             seatsTier = license["package_size_tier"];
-            licenseSeats = this.getPOSeats( seatsTier ).educatorSeats;
+            var seats = {};
+            this._getPOSeats( seatsTier, seats );
+            licenseSeats = seats.educatorSeats;
             plan = license["package_type"];
             return this.myds.getUsersByEmail(teacherEmails);
         }.bind(this))
@@ -1990,7 +1998,9 @@ function setLicenseMapStatusToNull(req, res){
             }
             license = license[0];
             var packageSize = license["package_size_tier"];
-            var educatorSeats = this.getPOSeats( packageSize ).educatorSeats;
+            var seats = {};
+            this._getPOSeats( packageSize, seats );
+            var educatorSeats = seats.educatorSeats;
             return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
         }.bind(this))
         .then(function(status){
@@ -2372,7 +2382,8 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
                 updateFields.push(packageType);
                 promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
 
-                var seats = this.getPOSeats( planInfo.seats );
+                var seats = {};
+                this._getPOSeats( planInfo.seats, seats );
                 var educatorSeats = seats.educatorSeats;
                 promiseList[1] = this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
 
@@ -3585,7 +3596,8 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var stripePlan = lConst.plan[plan]["stripe_planId"];
 
-    var seats = this.getPOSeats( planInfo.seats );
+    var seats = {};
+    this._getPOSeats( planInfo.seats, seats );
     var baseStripeQuantity = lConst.plan[plan].pricePerSeat * seats.studentSeats;
     var discountRate = seats.discount;
 
@@ -4083,7 +4095,9 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 }
                 // update educator count
                 var packageSize = license["package_size_tier"];
-                var educatorSeats = this.getPOSeats( packageSize ).educatorSeats;
+                var seats = {};
+                this._getPOSeats( packageSize, seats );
+                var educatorSeats = seats.educatorSeats;
                 return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
             }.bind(this))
             .then(function(state){
@@ -4236,7 +4250,9 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
         //emailData.oldPlan = data.oldPlan;
         //emailData.oldSeats = data.oldSeats;
         emailData.newPlan = lConst.plan[data.newPlan].name;
-        emailData.newSeats = this.getPOSeats( data.newSeats ).size;
+        var seats = {};
+        this._getPOSeats( data.newSeats, seats );
+        emailData.newSeats = seats.size;    // TODO: KMY: Review
         _sendEmailResponse.call(this, email, emailData, protocol, host, template);
     }.bind(this));
 }

@@ -2201,7 +2201,8 @@ function _deleteStudentAccount(studentId){
                 var promiseList = [];
                 _(licenses).forEach(function(license){
                     var licenseId = license.id;
-                    var seats = licService.getPOSeats( license[ "package_size_tier" ] );
+                    var seats = {};
+                    licService._getPOSeats( license[ "package_size_tier" ], seats );
                     promiseList.push(licService.updateStudentSeatsRemaining(licenseId, seats.studentSeats));
                 });
                 return when.all(promiseList);
