@@ -345,6 +345,13 @@ return when.promise(function(resolve, reject) {
             if(!((results === "none") || (results.length===0))){
                 // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
                 user.hadTrial = true;
+                user.hadSubscribe = false;
+				for (i=0;i<results.length;i++) {
+					if (results[i].package_type !== 'trial') {
+						user.hadSubscribe = true;
+						break;
+					}
+				}
             }
             return this.getLicenseInfoByInstructor(user.id);
         }.bind(this))
