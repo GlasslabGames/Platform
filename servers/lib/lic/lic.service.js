@@ -98,7 +98,7 @@ LicService.prototype._getPOSeats = function(  package_size_tier, seats ) {
 
     if ( packageSize[0] == '_' ) {
         var index = packageSize.lastIndexOf( '_' );
-        var studentSeats = parseInt( packageSize.slice( 1, index - 1 ) );
+        var studentSeats = parseInt( packageSize.slice( 1, index ) );
         var educatorSeats = parseInt( packageSize.slice( index + 1 ) );
 
         seats.size = "Custom";
