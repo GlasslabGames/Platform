@@ -45,8 +45,8 @@
     "registration" : {
     	"developer" : {
     		"protocol" : "https",
-    		"additionalServers" : [],
-    		"secretKey" : ""
+    		"additionalServers" : [], "//": "domains of servers to also perform registration",
+    		"secretKey" : "", "//": "key shared by all servers that jointly register"
     	}
     },
     "webapp": {
