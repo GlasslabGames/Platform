@@ -112,7 +112,7 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
             // get SOWO data per game per user
             users.forEach(function(user){
                 var userId = user.id;
-
+////  testing
                 //console.log("getAssessmentResults gameId:", gameId, ", userId:", userId, ", assessmentId:", assessmentId);
                 var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData) {
