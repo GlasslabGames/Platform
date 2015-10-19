@@ -124,7 +124,7 @@ LicService.prototype._getPOSeats = function(  package_size_tier, seats ) {
 };
 
 
-LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
+LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, archived){
     return when.promise(function(resolve, reject){
         var studentSeats;
         var studentList;
@@ -159,7 +159,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
             .then(function(){
                 promiseList = [];
                 courseIds.forEach(function(id){
-                    promiseList.push(_unassignPremiumGames.call(this, id));
+                    promiseList.push(_unassignPremiumGames.call(this, id, archived));
                 }.bind(this));
                 return when.all(promiseList);
             }.bind(this))
@@ -180,7 +180,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
     }.bind(this));
 };
 
-function _unassignPremiumGames(courseId){
+function _unassignPremiumGames(courseId, archived){
     return when.promise(function(resolve, reject){
         var lmsService = this.serviceManager.get("lms").service;
         var games;
@@ -204,6 +204,11 @@ function _unassignPremiumGames(courseId){
                 _(games).forEach(function(game, key){
                     basicInfo = infoObj[key];
                     if(basicInfo.price === "Premium" || basicInfo.price === "TBD" || basicInfo.price === "Coming Soon"){
+                    	if (archived && game.assigned)
+                    		game.wasAssigned = true;
+                    	else if (game.wasAssigned !== undefined)
+                    		delete game.wasAssigned;
+                    		
                         game.assigned = false;
                     }
                 });
@@ -228,6 +233,8 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
         promiseList.push(lmsService.myds.getStudentIdsForCourse(courseId));
         promiseList.push(this.cbds.getStudentsByLicense(licenseId));
         promiseList.push(this.myds.getLicenseById(licenseId));
+		var dataService = this.serviceManager.get("data").service;
+		promiseList.push(dataService.cbds.getGamesForCourse(courseId));
         when.all(promiseList)
             .then(function(results){
                 // get an id list of all students in a course and all students in license
@@ -295,7 +302,7 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(status){
-                if(typeof status === "string"){
+                if(typeof status === "string" && status != "skip"){
                     resolve(status);
                 }
                 resolve();
@@ -345,6 +352,8 @@ function _assignPremiumGames(courseId, plan){
                     if(basicInfo.price === "Premium" || basicInfo.price === "TBD" || basicInfo.price === "Coming Soon"){
                         if(availableGames[game.id]){
                             game.assigned = true;
+                            if (game.wasAssigned !== undefined)
+                    			delete game.wasAssigned;
                         }
                     }
                 });
@@ -458,6 +467,7 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if (typeof status === "string") {
                     return status;
                 }
+
                 var iseats = {};
                 _getPOSeats( seats, iseats );
                 var studentSeats = iseats.studentSeats;

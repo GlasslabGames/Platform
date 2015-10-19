@@ -83,7 +83,11 @@ function getCurrentPlan(req, res){
         return;
     }
     if(!(req.user.licenseOwnerId && req.user.licenseId)){
-        this.requestUtil.jsonResponse(res, "none", 200);
+    	var expiredOutput = {
+    		expired: true,
+    		hadSubscribe: req.user.hadSubscribe
+    	};
+        this.requestUtil.jsonResponse(res, expiredOutput, 200);
         return;
     }
     lConst = lConst || this.serviceManager.get("lic").lib.Const;

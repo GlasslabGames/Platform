@@ -45,8 +45,8 @@
     "registration" : {
     	"developer" : {
     		"protocol" : "https",
-    		"additionalServers" : [],
-    		"secretKey" : ""
+    		"additionalServers" : [], "//": "domains of servers to also perform registration",
+    		"secretKey" : "", "//": "key shared by all servers that jointly register"
     	}
     },
     "webapp": {
@@ -262,6 +262,11 @@
             "autoDev": {
                 "services": {
                     "first_login":   "2015-09-04 23:59:01"
+                }
+            },
+            "prod": {
+                "services": {
+                    "first_login":   "2015-10-07 23:59:01"
                 }
             }
         }
