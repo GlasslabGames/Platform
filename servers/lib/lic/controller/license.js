@@ -2043,7 +2043,7 @@ function setLicenseMapStatusToNull(req, res){
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2150,7 +2150,7 @@ function rejectPurchaseOrder(req, res){
 function receivePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2416,7 +2416,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
 function invoicePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2481,7 +2481,7 @@ function invoicePurchaseOrder(req, res){
 function approvePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2682,7 +2682,7 @@ function _switchToCreditCard(licenseId){
 function migrateToTrialLegacy(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2849,7 +2849,7 @@ function cancelLicense(req, res){
 }
 
 function cancelLicenseInternal(req, res){
-    if(!(req.user.role === "admin" && req.body && req.body.userId && req.body.licenseId)){
+    if ( ! ( ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) && req.body && req.body.userId && req.body.licenseId ) ) {
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
@@ -2927,7 +2927,7 @@ function cancelLicenseInternal(req, res){
 // used primarily for resellers, but we could use it for whatever reason we want to grant a premium license
 // at end of method, that used will have full access to premium license with a po-received map status
 function subscribeToLicenseInternal(req, res){
-    if(!(req.user && req.user.role === "admin")){
+    if ( ! ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) ) {
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -3072,7 +3072,7 @@ function subscribeToLicenseInternal(req, res){
 }
 
 function inspectLicenses(req, res){
-    if(req.user.role !== "admin"){
+    if ( ! ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) ) {
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }

@@ -128,7 +128,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     // TODO: remove this when we have clarity on the multi-standards design
                     results.standards = results.standards ? results.standards : "CCSS";
                     user = results;
-                    if (user.role === "instructor" || user.role === "developer" || user.role === "admin"){
+                    if (user.role === "instructor" || user.role === "developer" || user.role === "admin" || user.role === "reseller"){
                         user.permits = aConst.permits[user.role];
                     }
                     if(results.role === "instructor"){
