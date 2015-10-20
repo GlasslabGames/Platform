@@ -496,7 +496,7 @@ function registerUserV2(req, res, next, serviceManager) {
             return;
         }
     }
-    else if(regData.role == lConst.role.instructor) {
+    else if( (regData.role == lConst.role.instructor) || (regData.role == lConst.role.reseller_candidate) ) {
         // email and username is the same
         req.body.username   = req.body.email;
         regData.username    = Util.ConvertToString(req.body.username);
@@ -672,7 +672,7 @@ function registerUserV2(req, res, next, serviceManager) {
                     }
                 }
                 // if instructor
-                else if( regData.role == lConst.role.instructor )
+			    else if( (regData.role == lConst.role.instructor) || (regData.role == lConst.role.reseller_candidate) )
                 {
                     var promise;
                     if(req.body.newsletter) {
@@ -744,6 +744,7 @@ function registerUserV2(req, res, next, serviceManager) {
     //var developerProfile;
     // instructor
     if( regData.role == lConst.role.instructor ||
+		regData.role == lConst.role.reseller_candidate ||
         regData.role == lConst.role.developer ) {
         register(regData)
             //.then(function(){
