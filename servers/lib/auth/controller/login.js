@@ -208,7 +208,7 @@ return when.promise(function(resolve, reject) {
                     console.log("Developer Couchbase Error - ", err);
                     reject(err);
                 }.bind(this))
-        } if ( user.role == lConst.role.reseller ) {
+        } else if ( user.role == lConst.role.reseller ) {
         	resolve(user);
         } else {
             console.log("error", "Route.Login.Auth.LogIn.InvalidRole");

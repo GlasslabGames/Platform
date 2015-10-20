@@ -2043,7 +2043,7 @@ function setLicenseMapStatusToNull(req, res){
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2150,7 +2150,7 @@ function rejectPurchaseOrder(req, res){
 function receivePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2416,7 +2416,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
 function invoicePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2481,7 +2481,7 @@ function invoicePurchaseOrder(req, res){
 function approvePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2682,7 +2682,7 @@ function _switchToCreditCard(licenseId){
 function migrateToTrialLegacy(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( ! ( ( req.user.role == lConst.role.admin ) || ( req.user.role == lConst.role.reseller ) ) ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
