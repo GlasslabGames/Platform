@@ -18,7 +18,9 @@ module.exports = {
     getAllDevelopers: 	 		getAllDevelopers,
     alterDeveloperVerifyCodeStatus: alterDeveloperVerifyCodeStatus,
     getUserDataById:			getUserDataById,
-    getUserDataByEmail:         getUserDataByEmail, 
+    getResellers:				getResellers,
+    updateUserRole:				updateUserRole,
+    getUserDataByEmail:         getUserDataByEmail,
     updateUserData:				updateUserData,
     getUserBadgeList:			getUserBadgeList,
     updateUserBadgeList:		updateUserBadgeList,
@@ -91,7 +93,7 @@ function getUserDataById(req, res, next) {
         // check perms before returning user info
         this.webstore.getUserInfoById(req.params.userId)
             .then(function(userData){
-                return this.checkUserPerminsToUserData(userData, loginUserSessionData)
+                return this.checkUserPerminsToUserData(userData, loginUserSessionData);
             }.bind(this))
             // ok, send data
             .then(function(userData){
@@ -106,32 +108,71 @@ function getUserDataById(req, res, next) {
     }
 }
 
-function getUserDataByEmail(req, res, next) {
-    console.log("gUDBE req", req.query);
+function getResellers(req, res, next) {
+    if(req.user.role !== "admin"){
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to get resellers but not an admin.');
 
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user ) {
+    	this.webstore.getResellers()
+            .then(function(results){
+                this.requestUtil.jsonResponse(res, results);
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+function updateUserRole(req, res, next) {
+    if(req.user.role !== "admin"){
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to set user role but not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.params &&
+        req.params.hasOwnProperty("userId") &&
+        req.params.hasOwnProperty("role")) {
+    	this.webstore.updateUserRole( req.params.userId, req.params.role )
+            .then(function(results){
+                this.requestUtil.jsonResponse(res, results);
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+function getUserDataByEmail(req, res, next) {
     if( req.session &&
         req.session.passport &&
         req.session.passport.user &&
         req.query &&
         req.query.email) {
             this.getAuthStore().findUser( 'email', req.query.email )
-
-/*
-see if necessary for security
-        var loginUserSessionData = req.session.passport.user;
-
-            .then(function(userData){
-                return this.checkUserPerminsToUserData(userData, loginUserSessionData)
-            }.bind(this))
-*/
-
             .then(function(userData) {
-                console.log("findUser-email: ", userData);
                 var userId = userData.id;
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             .then(null, function(err){
-                console.log("gUDBE: did not find email: ", req.query.email);
                 var empty = {};
                 this.requestUtil.jsonResponse(res, empty);
             }.bind(this));
@@ -148,13 +189,12 @@ exampleIn.updateUserData = {
     "email":         "test2@email.com",
     "password":      "test"
 };
+
 function updateUserData(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Update.User");
-    //console.log("Auth updateUserRoute - body:", req.body);
     if( !(req.body.userId) )
     {
         this.stats.increment("error", "Route.Update.User.MissingId");
-        //this.requestUtil.errorResponse(res, "missing the userId", 400);
         this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
         return;
     }

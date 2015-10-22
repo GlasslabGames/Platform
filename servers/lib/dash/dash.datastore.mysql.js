@@ -90,6 +90,39 @@ WebStore_MySQL.prototype.getUserBadgeListById = function(id) {
     }.bind(this));
 };
 
+WebStore_MySQL.prototype.getResellers = function() {
+    return when.promise(function(resolve, reject) {
+        var Q = "SELECT id, username, first_name as firstName, last_name as lastName, email, system_role as role FROM GL_USER WHERE system_role='" + lConst.role.reseller + "' or system_role='" + lConst.role.reseller_candidate + "'";
+
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
+
+WebStore_MySQL.prototype.updateUserRole = function( id, role ) {
+    if( ! ( id || role ) ) {
+        reject({"error": "failure", "exception": "invalid argument"}, 500);
+        return;
+    }
+
+    return when.promise(function(resolve, reject) {
+        var Q = "UPDATE GL_USER SET system_role='" + role + "' WHERE id=" + id;
+
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
+
 WebStore_MySQL.prototype.getUserInfoById = function(id) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
