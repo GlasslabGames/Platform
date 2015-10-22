@@ -285,8 +285,8 @@ return when.promise(function(resolve, reject) {
               this.app.use(function (req, res, next) { console.log("no-op"); next(); });
               
                 this.app.use(cookieParser());
-                this.app.use(bodyParser.urlencoded());
-                this.app.use(bodyParser.json());
+                this.app.use(bodyParser.urlencoded({limit: "500kb"}));
+                this.app.use(bodyParser.json({limit: "500kb"}));
                 this.app.use(methodOverride());
                 
                 var whitelist = [ "http://new.wwf.local", "https://new.wwf.local", "http://www.wordswithfriendsedu.com", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com", "https://s3-us-west-1.amazonaws.com" ];
