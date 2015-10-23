@@ -624,7 +624,8 @@ return when.promise(function(resolve, reject) {
         resolve(userData);
     }
     // are admin
-    else if(loginUserData.role == lConst.role.admin) {
+    else if( (loginUserData.role == lConst.role.admin) ||
+             (loginUserData.role == lConst.role.reseller) ) {
         resolve(userData);
     }
     // if instructor, then check if student their course

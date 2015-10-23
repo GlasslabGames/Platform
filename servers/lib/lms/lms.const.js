@@ -5,10 +5,12 @@
 
 module.exports = {
     role: {
-        admin:      "admin",
-        instructor: "instructor",
-        student:    "student",
-        developer:  "developer"
+        admin:      		"admin",
+        instructor: 		"instructor",
+        student:    		"student",
+        developer:  		"developer",
+        reseller:			"reseller",
+        reseller_candidate: "res-cand"
     },
     course: {
         type: {

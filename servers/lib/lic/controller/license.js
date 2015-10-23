@@ -151,7 +151,9 @@ function getCurrentPlan(req, res){
             var packageSize = license["package_size_tier"];
             var packageDetails = {};
             var plans = lConst.plan[packageType];
-            var seats = lConst.seats[packageSize];
+            var seats = {};
+            this._getPOSeats( packageSize, seats );
+
             _(packageDetails).merge(plans,seats);
             output["packageDetails"] = packageDetails;
             return this.myds.getInstructorsByLicense(licenseId);
@@ -641,10 +643,15 @@ function upgradeLicense(req, res){
             emailData.oldSeats = license["package_size_tier"];
             emailData.newPlan = planInfo.type;
             emailData.newSeats = planInfo.seats;
+            emailData.yearAdded = planInfo.yearAdded;
             if(!license["promo"] && planInfo.promoCode){
                 promoCode = planInfo.promoCode;
             }
-            if(lConst.seats[emailData.oldSeats].studentSeats > lConst.seats[emailData.newSeats].studentSeats){
+            var oldSeats = {};
+            var newSeats = {};
+            this._getPOSeats( emailData.oldSeats, oldSeats );
+            this._getPOSeats( emailData.newSeats, newSeats );
+            if ( oldSeats.studentSeats > newSeats.studentSeats ) {
                 return "downgrade seats";
             }
             var subscriptionId = license["subscription_id"];
@@ -682,7 +689,8 @@ function upgradeLicense(req, res){
                 updateFields.push(promoCodeString);
             }
             promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
-            var seats = lConst.seats[planInfo.seats];
+            var seats = {};
+            this._getPOSeats( planInfo.seats, seats );
             var educatorSeats = seats.educatorSeats;
             promiseList[1] = this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
             if(status === "student count"){
@@ -811,7 +819,7 @@ function upgradeTrialLicense(req, res){
             //data.name = req.user.firstName + ' ' + req.user.lastName;
             data.subject = "Welcome to GlassLab Games Premium!";
             data.plan = lConst.plan[planInfo.type].name;
-            data.seats = lConst.seats[planInfo.seats].size;
+            this._getPOSeats( planInfo.seats, data.seats ); // TODO: KMY: Review
             data.expirationDate = expirationDate;
             var template = "owner-upgrade-trial";
             _sendEmailResponse.call(this, licenseOwnerEmail, data, req.protocol, req.headers.host, template);
@@ -1000,7 +1008,6 @@ function addTeachersToLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
@@ -1040,7 +1047,9 @@ function addTeachersToLicense(req, res){
                 return "inactive license";
             }
             seatsTier = license["package_size_tier"];
-            licenseSeats = lConst.seats[seatsTier].educatorSeats;
+            var seats = {};
+            this._getPOSeats( seatsTier, seats );
+            licenseSeats = seats.educatorSeats;
             plan = license["package_type"];
             return this.myds.getUsersByEmail(teacherEmails);
         }.bind(this))
@@ -1515,7 +1524,35 @@ function _createStripeCustomer(userId, params){
     }.bind(this));
 }
 
+function _fixupFixedSeats( planInfo ) {
+    // NOTE: KMY: For existing UI interfaces to define a planInfo (limited to fixed class sizes, instead of reseller open format) - add educators/students to match new #'s
+    // I didn't use lic.const.js, because I expect the "seats" section to be removed at some point.  When it is, these special cases can be added in differently.
+    switch ( planInfo.seats ) {
+        case "group":
+            planInfo.students = 10;
+            planInfo.educators = 1;
+            break;
+
+        case "class":
+            planInfo.students = 30;
+            planInfo.educators = 2;
+            break;
+
+        case "multiClass":
+            planInfo.students = 120;
+            planInfo.educators = 8;
+            break;
+
+        case "school":
+            planInfo.students = 500;
+            planInfo.educators = 15;
+            break;
+    }
+}
+
 function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo, action){
+    _fixupFixedSeats( planInfo );
+
     return when.promise(function(resolve, reject){
         var licenseId;
         //create stripe customer id
@@ -1552,6 +1589,8 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                         purchaseOrder: true,
                         plan: planInfo.type,
                         seats: planInfo.seats,
+                        educators: planInfo.educators,
+                        students: planInfo.students,
                         userId: userId
                     },
                     email: purchaseOrderInfo.email
@@ -1962,9 +2001,10 @@ function setLicenseMapStatusToNull(req, res){
                 return license;
             }
             license = license[0];
-            lConst = lConst || this.serviceManager.get("lic").lib.Const;
             var packageSize = license["package_size_tier"];
-            var educatorSeats = lConst.seats[packageSize].educatorSeats;
+            var seats = {};
+            this._getPOSeats( packageSize, seats );
+            var educatorSeats = seats.educatorSeats;
             return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
         }.bind(this))
         .then(function(status){
@@ -2003,7 +2043,7 @@ function setLicenseMapStatusToNull(req, res){
 function rejectPurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2110,7 +2150,7 @@ function rejectPurchaseOrder(req, res){
 function receivePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2240,16 +2280,20 @@ function receivePurchaseOrder(req, res){
 }
 
 function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expirationDate){
+    _fixupFixedSeats( planInfo );
+
     return when.promise(function(resolve, reject) {
-        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var updateFields = [];
         var active = "active = 1";
         updateFields.push(active);
-        var seats = "package_size_tier = '" + planInfo.seats + "'";
+
+        // NOTE: KMY: All new subscriptions will use the new format now
+        var seats = "package_size_tier = '_" + planInfo.students + "_" + planInfo.instructors + "'";
         updateFields.push(seats);
-        var educatorSeatsRemaining = "educator_seats_remaining = " + lConst.seats[planInfo.seats].educatorSeats;
+
+        var educatorSeatsRemaining = "educator_seats_remaining = " + planInfo.instructors;
         updateFields.push(educatorSeatsRemaining);
-        var studentSeatsRemaining = "student_seats_remaining = " + lConst.seats[planInfo.seats].studentSeats;
+        var studentSeatsRemaining = "student_seats_remaining = " + planInfo.students;
         updateFields.push(studentSeatsRemaining);
         var plan = "package_type = '" + planInfo.type + "'";
         updateFields.push(plan);
@@ -2311,8 +2355,9 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
 
 // upgrade email seems fairly different.  how do?
 function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrderId){
+    _fixupFixedSeats( planInfo );
+
     return when.promise(function(resolve, reject){
-        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var plan = planInfo.type;
         var status;
         _unassignCoursesWhenUpgrading.call(this, licenseId, plan)
@@ -2332,13 +2377,17 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
             .then(function(){
                 var promiseList = [{},{},{},{}];
                 var updateFields = [];
-                var packageSize = "package_size_tier = '" + planInfo.seats + "'";
+
+                // NOTE: KMY: All new subscriptions will use the new format now
+                var packageSize = "package_size_tier = '_" + planInfo.students + "_" + planInfo.instructors + "'";
                 updateFields.push(packageSize);
+
                 var packageType = "package_type = '" + plan + "'";
                 updateFields.push(packageType);
                 promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
 
-                var seats = lConst.seats[planInfo.seats];
+                var seats = {};
+                this._getPOSeats( planInfo.seats, seats );
                 var educatorSeats = seats.educatorSeats;
                 promiseList[1] = this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
 
@@ -2367,7 +2416,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
 function invoicePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2432,7 +2481,7 @@ function invoicePurchaseOrder(req, res){
 function approvePurchaseOrder(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2633,7 +2682,7 @@ function _switchToCreditCard(licenseId){
 function migrateToTrialLegacy(req, res){
     // Only admins should be allowed to perform this operation
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    if( req.user.role !== lConst.role.admin ) {
+    if( ! ( ( req.user.role === lConst.role.admin ) || ( req.user.role === lConst.role.reseller ) ) ) {
         this.requestUtil.errorResponse(res, "lic.access.invalid");
         return;
     }
@@ -2800,7 +2849,7 @@ function cancelLicense(req, res){
 }
 
 function cancelLicenseInternal(req, res){
-    if(!(req.user.role === "admin" && req.body && req.body.userId && req.body.licenseId)){
+    if ( ! ( ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) && req.body && req.body.userId && req.body.licenseId ) ) {
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
@@ -2878,7 +2927,7 @@ function cancelLicenseInternal(req, res){
 // used primarily for resellers, but we could use it for whatever reason we want to grant a premium license
 // at end of method, that used will have full access to premium license with a po-received map status
 function subscribeToLicenseInternal(req, res){
-    if(!(req.user && req.user.role === "admin")){
+    if ( ! ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) ) {
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
@@ -3023,7 +3072,7 @@ function subscribeToLicenseInternal(req, res){
 }
 
 function inspectLicenses(req, res){
-    if(req.user.role !== "admin"){
+    if ( ! ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) ) {
         this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
         return;
     }
@@ -3432,6 +3481,8 @@ function _buildBillingInfo(cardData){
 }
 
 function _createSubscription(req, userId, schoolInfo, stripeInfo, planInfo){
+    _fixupFixedSeats( planInfo );
+
     return when.promise(function(resolve, reject){
         var email = req.user.email;
         var name = req.user.firstName + " " + req.user.lastName;
@@ -3546,11 +3597,14 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
 function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
     var card = stripeInfo.id;
     var plan = planInfo.type;
-    var seats = planInfo.seats;
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
     var stripePlan = lConst.plan[plan]["stripe_planId"];
-    var baseStripeQuantity = lConst.plan[plan].pricePerSeat * lConst.seats[seats].studentSeats;
-    var discountRate = lConst.seats[seats].discount;
+
+    var seats = {};
+    this._getPOSeats( planInfo.seats, seats );
+    var baseStripeQuantity = lConst.plan[plan].pricePerSeat * seats.studentSeats;
+    var discountRate = seats.discount;
+
     var stripeQuantity = Math.round(baseStripeQuantity - baseStripeQuantity*discountRate/100);
     var params = {};
     params.card = card;
@@ -3572,7 +3626,6 @@ function _buildStripeParams(planInfo, customerId, stripeInfo, email, name){
 
 function _createLicenseSQL(userId, schoolInfo, planInfo, data){
     return when.promise(function(resolve, reject){
-        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var licenseId;
         var values;
         var promise;
@@ -3598,8 +3651,8 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                     promo = "NULL";
                 }
                 var expirationDate = "'" + data.expirationDate + "'";
-                var educatorSeatsRemaining = lConst.seats[seatsTier].educatorSeats;
-                var studentSeatsRemaining = lConst.seats[seatsTier].studentSeats;
+                var educatorSeatsRemaining = planInfo.educators;
+                var studentSeatsRemaining = planInfo.students;
                 seatsTier = "'" + seatsTier + "'";
                 var subscriptionId;
                 if(!data.subscriptionId){
@@ -3976,7 +4029,6 @@ function _grabInstructorsByType(approvedUserIds, rejectedUserIds, approvedNonUse
 
 function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, emailData, instructors){
     return when.promise(function(resolve, reject){
-        lConst = lConst || this.serviceManager.get("lic").lib.Const;
         var promiseList = [];
         // poPendingStatus variable used to check for edge case where we are ending a pending purchase order license, but a trial is still active
         // in that case, we do not want to disable premium classes, because the educator's premium classes would belong to the trial
@@ -4047,7 +4099,9 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 }
                 // update educator count
                 var packageSize = license["package_size_tier"];
-                var educatorSeats = lConst.seats[packageSize].educatorSeats;
+                var seats = {};
+                this._getPOSeats( packageSize, seats );
+                var educatorSeats = seats.educatorSeats;
                 return this.updateEducatorSeatsRemaining(licenseId, educatorSeats);
             }.bind(this))
             .then(function(state){
@@ -4200,7 +4254,9 @@ function _upgradeLicenseEmailResponse(licenseOwnerEmail, instructors, data, prot
         //emailData.oldPlan = data.oldPlan;
         //emailData.oldSeats = data.oldSeats;
         emailData.newPlan = lConst.plan[data.newPlan].name;
-        emailData.newSeats = lConst.seats[data.newSeats].size;
+        var seats = {};
+        this._getPOSeats( data.newSeats, seats );
+        emailData.newSeats = seats.size;    // TODO: KMY: Review
         _sendEmailResponse.call(this, email, emailData, protocol, host, template);
     }.bind(this));
 }

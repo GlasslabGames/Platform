@@ -903,6 +903,33 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
+            api: "/api/v2/auth/userResellers",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getResellers",
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/user/:userId/updateRole/:role",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "updateUserRole",
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/userbyemail",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserDataByEmail",
+            }
+        },
+        {
             api: "/api/v2/auth/user/:userId/badgeList",
             service: "auth",
             controller: "user",
