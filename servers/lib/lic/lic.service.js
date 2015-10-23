@@ -119,7 +119,7 @@ LicService.prototype._getPOSeats = function(  package_size_tier, seats ) {
             seats.discount = 35;
         }
     } else {
-        seats = lConst.seats[ packageSize ];
+		_(seats).merge(seats,lConst.seats[ packageSize ]);
     }
 };
 
