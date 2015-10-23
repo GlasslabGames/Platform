@@ -819,6 +819,7 @@ function upgradeTrialLicense(req, res){
             //data.name = req.user.firstName + ' ' + req.user.lastName;
             data.subject = "Welcome to GlassLab Games Premium!";
             data.plan = lConst.plan[planInfo.type].name;
+            data.seats = {};
             this._getPOSeats( planInfo.seats, data.seats ); // TODO: KMY: Review
             data.expirationDate = expirationDate;
             var template = "owner-upgrade-trial";

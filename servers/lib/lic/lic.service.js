@@ -119,7 +119,7 @@ LicService.prototype._getPOSeats = function(  package_size_tier, seats ) {
             seats.discount = 35;
         }
     } else {
-        seats = lConst.seats[ packageSize ];
+        _.merge(seats, lConst.seats[ packageSize ]);
     }
 };
 
@@ -143,7 +143,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, arc
                 var license = results[0][0];
                 var packageSize = license["package_size_tier"];
                 var seats = {};
-                _getPOSeats( packageSize, seats );
+                this._getPOSeats( packageSize, seats );
                 studentSeats = seats.studentSeats;
                 studentList = results[1];
                 _(studentList).forEach(function(student){
@@ -296,7 +296,7 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                 }
                 var size = license["package_size_tier"];
                 var seats = {};
-                _getPOSeats( size, seats );
+                this._getPOSeats( size, seats );
                 var studentSeats = seats.studentSeats;
                 // change the student_count_remaining field in the license table
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
@@ -412,7 +412,7 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                 }
                 // if student is no longer a premium student, update the seat count
                 var iseats = {};
-                _getPOSeats( seats, iseats );
+                this._getPOSeats( seats, iseats );
                 var studentSeats = iseats.studentSeats;
                 this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
@@ -469,7 +469,7 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 }
 
                 var iseats = {};
-                _getPOSeats( seats, iseats );
+                this._getPOSeats( seats, iseats );
                 var studentSeats = iseats.studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
