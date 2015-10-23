@@ -420,7 +420,7 @@ function registerUserV1(req, res, next) {
 function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User");
 
-    var didMultiReg = false;
+    var multiRegPromise = null;
         
     var regData = {
         username:      "",
@@ -562,12 +562,7 @@ function registerUserV2(req, res, next, serviceManager) {
 				};
 				var protocol = this.options.registration.developer.protocol || "http";
 
-				if (!multiServerRegistration(multiRegInfo, additionalServers, protocol)) {
-					this.requestUtil.errorResponse(res, {key:"user.create.general"}, 400);
-					return;
-				}
-				
-				didMultiReg = true;
+                multiRegPromise = multiServerRegistration(multiRegInfo, additionalServers, protocol);
 			}
         }
     }
@@ -710,7 +705,16 @@ function registerUserV2(req, res, next, serviceManager) {
     // instructor
     if( regData.role == lConst.role.instructor ||
         regData.role == lConst.role.developer ) {
-        register(regData)
+            // either kick the reg ball off with multi-sever reg or a dummy promise
+            var firstPromise = multiRegPromise ? multiRegPromise : when.promise(function(resolve) { resolve(true) });
+
+            firstPromise
+            .then(function(result) {
+                if (result) return register(regData);
+
+                this.requestUtil.errorResponse(res, {key:"user.create.general"}, 400);
+                reject();
+            }.bind(this))
             //.then(function(){
                 //if(regData.role === lConst.role.developer && gameId){
                 //    var dashService = this.serviceManager.get("dash").service;
@@ -734,7 +738,7 @@ function registerUserV2(req, res, next, serviceManager) {
             .then(null, function(err){
                 console.log("Registration Error -",err);
                 
-				if( regData.role == lConst.role.developer && didMultiReg) {
+				if( regData.role == lConst.role.developer && multiRegPromise) {
 					// 'unregister' user created on other servers
 					var additionalServers = this.options.registration.developer.additionalServers;
 					var params = { cb: new Date().getTime() };
@@ -949,7 +953,7 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
 
 function remoteRegistration(url, regInfo, params) {
 	return when.promise(function(resolve, reject) {
-		console.log("remoteRegistration to server", server);
+		console.log("remoteRegistration to server", url);
 		request({
 			method: 'POST',
 			url: url + '/api/v2/auth/user/register',
@@ -959,8 +963,7 @@ function remoteRegistration(url, regInfo, params) {
 		}, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				console.log("remoteRegistration success!");
-				//resolve({});
-				reject({ errmsg: error, code: response ? response.statusCode : 400 });
+				resolve({});
 			} else {
 				console.log("remoteRegistration failed!");
 				reject({ errmsg: error, code: response ? response.statusCode : 400 });
@@ -970,48 +973,47 @@ function remoteRegistration(url, regInfo, params) {
 }
 
 function multiServerRegistration(regInfo, additionalServers, protocol) {
-	var postData = JSON.stringify(regInfo);
-	var params = { cb: new Date().getTime() };
-	var promiseList = [];
-	var success = false;
-	
-	additionalServers.forEach(function(server) {
-		var url = protocol + "://" + server;
-		promiseList.push(remoteRegistration(url, regInfo, params));
-	});
-	
-	when.all(promiseList)
-	.then(function(results){
-		console.log("calls to remoteRegistration: success!");
-		success = true;
-	})
-	.then(null, function(err) {
-		console.log("calls to remoteRegistration: failed:", err.errMsg, err.code);
-		
-		// clean-up 
-		var multiUnregInfo = {
-			username:	regData.username
-		};
-		additionalServers.forEach(function(server) {
-			// don't care about response
-			request({
-				method: 'POST',
-				url: protocol + '://' + server + '/api/v2/auth/user/unregister',
-				qs: params,
-				json: true,
-				body: multiUnregInfo  			
-			});
-		});
-					
-	}.bind(this));
-	
-	return success;
+    return when.promise(function(resolve, reject) {
+
+        var params = { cb: new Date().getTime() };
+        var promiseList = [];
+        
+        additionalServers.forEach(function(server) {
+            var url = protocol + "://" + server;
+            promiseList.push(remoteRegistration(url, regInfo, params));
+        });
+        
+        when.all(promiseList)
+        .then(function(results){
+            console.log("calls to remoteRegistration: success!");
+            resolve(true);
+        }.bind(this), function(err) {
+            console.log("calls to remoteRegistration: failed", err.errMsg, err.code);
+            
+            // clean-up 
+            var multiUnregInfo = {
+                username:	regInfo.username
+            };
+            additionalServers.forEach(function(server) {
+                // don't care about response
+               request({
+                    method: 'POST',
+                    url: protocol + '://' + server + '/api/v2/auth/user/unregister',
+                    qs: params,
+                    json: true,
+                    body: multiUnregInfo  			
+                });
+            }.bind(this));
+
+            resolve(false)
+        }.bind(this));
+    }.bind(this));
 }
 
 function unregisterUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User.Unregister");
 
-	var username    = Util.ConvertToString(req.body.username);
+	var username = Util.ConvertToString(req.body.username);
 	
 	if(!username) {
 		this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
@@ -1144,7 +1146,7 @@ function verifyDeveloperCode(req, res, next) {
 function alterDeveloperVerifyCodeStatus(req, res, next) {
 	console.log("alterDeveloperVerifyCodeStatus start");
 
-	var reqSecretKey = req.body.secretKey ? req.body.secretKey : "";
+	var reqSecretKey = req.body.secretKey ? Util.ConvertToString(req.body.secretKey) : "";
 	var wantSecretKey = "";
 	
 	if (this.options.registration && 
@@ -1409,11 +1411,12 @@ function verifyEmailCode(req, res, next, serviceManager) {
 		
 								if (additionalServers.length > 0) {
 									var alterInfo = {
-										secretKey:	this.options.registration.developer.secretKey,
+										secretKey: this.options.registration.developer.secretKey,
 										username: userData.username,
 										status: aConst.verifyCode.status.verified
 									};
 									var protocolMulti = this.options.registration.developer.protocol || "http";
+                                    var params = { cb: new Date().getTime() };
 
 									additionalServers.forEach(function(server) {
 										// don't care about response
@@ -1424,7 +1427,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
 											json: true,
 											body: alterInfo  			
 										});
-									});
+									}.bind(this));
 
 								}
 							}                
