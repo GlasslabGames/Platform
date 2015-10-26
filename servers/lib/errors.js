@@ -126,6 +126,7 @@ module.exports = {
     "lms.course.premium.corrupted":         "Course labels itself as a premium course, but it is not associated with a license",
     "lms.access.invalid":                   "Invalid Access",
     "lms.course.not.premium":               "This course is not a associated with a license",
+    "lms.course.is.archived":               "This course is not a associated with an active course",
     // lic
     "lic.access.invalid":                   "Invalid Access",
     "lic.records.invalid":                  "User tied to to more than one license",

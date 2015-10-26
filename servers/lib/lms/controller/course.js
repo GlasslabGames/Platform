@@ -1080,6 +1080,10 @@ function verifyCode(req, res, next) {
         .then(function(info) {
             courseInfo = info;
             if (courseInfo) {
+                var isArchived = courseInfo.archived;
+                if (isArchived) {
+                    return "is archived";
+                }
                 var isPremium = courseInfo.premiumGamesAssigned;
                 if (isPremium) {
                     licService = this.serviceManager.get("lic").service;
@@ -1123,6 +1127,10 @@ function verifyCode(req, res, next) {
             }
             if(status === "lms.course.not.premium"){
                 this.requestUtil.errorResponse(res, { key: "lms.course.not.premium"});
+                return;
+            }
+            if (status === "is archived") {
+                this.requestUtil.errorResponse(res, { key: "lms.course.is.archived"});
                 return;
             }
             if( courseInfo &&
