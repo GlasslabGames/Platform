@@ -1,0 +1,215 @@
+{
+  "groups": {
+    "CCSS": [
+      {
+        "id": "Student_Progress",
+        "description": "Student Progress",
+        "title": "Student Progress",
+        "subGroups": [
+          {
+            "id": "Student completed Earning Money",
+            "title": "Student completed Earning Money",
+            "name": "",
+            "description": "Student completed Earning Money",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Human Capital and Time & Needs",
+            "title": "Student completed Human Capital and Time & Needs",
+            "name": "",
+            "description": "Student completed Human Capital and Time & Needs",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Expenses and Net Worth",
+            "title": "Student completed Expenses and Net Worth",
+            "name": "",
+            "description": "Student completed Expenses and Net Worth",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Saving & Budgeting",
+            "title": "Student completed Saving & Budgeting",
+            "name": "",
+            "description": "Student completed Saving & Budgeting",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Transportation",
+            "title": "Student completed Transportation",
+            "name": "",
+            "description": "Student completed Transportation",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Emergencies",
+            "title": "Student completed Emergencies",
+            "name": "",
+            "description": "Student completed Emergencies",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Savings & Buying a Car",
+            "title": "Student completed Savings & Buying a Car",
+            "name": "",
+            "description": "Student completed Savings & Buying a Car",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Costs of Owning a Car",
+            "title": "Student completed Costs of Owning a Car",
+            "name": "",
+            "description": "Student completed Costs of Owning a Car",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Insurance",
+            "title": "Student completed Insurance",
+            "name": "",
+            "description": "Student completed Insurance",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Higher Education",
+            "title": "Student completed Higher Education",
+            "name": "",
+            "description": "Student completed Higher Education",
+            "info": "",
+            "icon": "achievement-light-blue"
+          }
+        ]
+      }
+    ]
+  },
+  "achievements": [
+    {
+      "id": "Chapter_1",
+      "title": "Chapter 1",
+      "info": "Student completed Earning Money",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Earning Money"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_2",
+      "title": "Chapter 2",
+      "info": "Student completed Human Capital and Time & Needs",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Human Capital and Time & Needs"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_3",
+      "title": "Chapter 3",
+      "info": "Student completed Expenses and Net Worth",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Expenses and Net Worth"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_4",
+      "title": "Chapter 4",
+      "info": "Student completed Saving & Budgeting",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Saving & Budgeting"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_5",
+      "title": "Chapter 5",
+      "info": "Student completed Transportation",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Transportation"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_6",
+      "title": "Chapter 6",
+      "info": "Student completed Emergencies",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Emergencies"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_7",
+      "title": "Chapter 7",
+      "info": "Student completed Savings & Buying a Car",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Savings & Buying a Car"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_8",
+      "title": "Chapter 8",
+      "info": "Student completed Costs of Owning a Car",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Costs of Owning a Car"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_9",
+      "title": "Chapter 9",
+      "info": "Student completed Insurance",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Insurance"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_10",
+      "title": "Chapter 10",
+      "info": "Student completed Higher Education",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Higher Education"
+        }
+      ]
+    }
+  ]
+}
