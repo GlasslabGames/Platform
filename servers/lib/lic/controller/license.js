@@ -1548,6 +1548,11 @@ function _fixupFixedSeats( planInfo ) {
             planInfo.students = 500;
             planInfo.educators = 15;
             break;
+
+        case "trial":
+            planInfo.students = 30;
+            planInfo.educators = 0;
+            break;
     }
 }
 
