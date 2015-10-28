@@ -1865,6 +1865,7 @@ function requestDeveloperGameAccess(req, res){
 function sendDeveloperGameConfirmEmail(userId, devEmail, gameId, developerProfile, protocol, host) {
     return when.promise(function(resolve, reject){
         var verifyCode = Util.CreateUUID();
+        console.log( "dev game code ", verifyCode); 
         developerProfile[gameId].verifyCode = verifyCode;
         developerProfile[gameId].verifyCodeStatus = aConst.verifyCode.status.approve;
         this.authDataStore.setDeveloperProfile(userId, developerProfile)
