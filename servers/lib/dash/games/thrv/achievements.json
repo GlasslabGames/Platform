@@ -39,6 +39,38 @@
             "icon": "achievement-light-blue"
           },
           {
+            "id": "Student regularly achieving positive net growth",
+            "title": "Student regularly achieving positive net growth",
+            "name": "",
+            "description": "Student regularly achieving positive net growth",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student achieves positive growth after needs added",
+            "title": "Student achieves positive growth after needs added",
+            "name": "",
+            "description": "Student achieves positive growth after needs added",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student regularly paying all expenses",
+            "title": "Student regularly paying all expenses",
+            "name": "",
+            "description": "Student regularly paying all expenses",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student depositing money into savings successfully when reminded",
+            "title": "Student depositing money into savings successfully when reminded",
+            "name": "",
+            "description": "Student depositing money into savings successfully when reminded",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
             "id": "Student completed Transportation",
             "title": "Student completed Transportation",
             "name": "",
@@ -136,6 +168,54 @@
           "id": "CCSS",
           "group": "Student_Progress",
           "subGroup": "Student completed Saving & Budgeting"
+        }
+      ]
+    },
+    {
+      "id": "Earns Money",
+      "title": "Earns Money",
+      "info": "Student regularly achieving positive net growth",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student regularly achieving positive net growth"
+        }
+      ]
+    },
+    {
+      "id": "Balances Time and Needs",
+      "title": "Balances Time and Needs",
+      "info": "Student achieves positive growth after needs added",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student achieves positive growth after needs added"
+        }
+      ]
+    },
+    {
+      "id": "Pays All Expenses",
+      "title": "Pays All Expenses",
+      "info": "Student regularly paying all expenses",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student regularly paying all expenses"
+        }
+      ]
+    },
+    {
+      "id": "Effectively Uses Savings",
+      "title": "Effectively Uses Savings",
+      "info": "Student depositing money into savings successfully when reminded",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student depositing money into savings successfully when reminded"
         }
       ]
     },
