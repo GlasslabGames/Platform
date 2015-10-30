@@ -674,7 +674,7 @@ Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
     }.bind(this));
 };
 
-Lic_MySQL.prototype.getInProcessPurchaseOrders = function() {
+Lic_MySQL.prototype.getOpenPurchaseOrders = function() {
 	return when.promise(function(resolve, reject){
 		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received', 'invoiced');";
 		this.ds.query(Q)
@@ -682,7 +682,7 @@ Lic_MySQL.prototype.getInProcessPurchaseOrders = function() {
 			resolve(results);
 		})
 		.then(null, function(err){
-			console.error("Get In Process Purchase Order Error -",err);
+			console.error("Get Open Purchase Orders Error -",err);
 			reject(err);
 		});
 	}.bind(this));

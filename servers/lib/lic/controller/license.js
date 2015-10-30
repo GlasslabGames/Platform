@@ -6,42 +6,43 @@ var Util   = require('../../core/util.js');
 var lConst;
 
 module.exports = {
-    getSubscriptionPackages: getSubscriptionPackages,
-    getCurrentPlan: getCurrentPlan,
-    getStudentsInLicense: getStudentsInLicense,
-    getBillingInfo: getBillingInfo,
-    updateBillingInfo: updateBillingInfo,
-    subscribeToLicense: subscribeToLicense,
-    subscribeToTrialLicense: subscribeToTrialLicense,
-    upgradeLicense: upgradeLicense,
-    upgradeTrialLicense: upgradeTrialLicense,
-    validatePromoCode: validatePromoCode,
-    //cancelLicenseAutoRenew: cancelLicenseAutoRenew,
-    //enableLicenseAutoRenew: enableLicenseAutoRenew,
-    addTeachersToLicense: addTeachersToLicense,
-    setLicenseMapStatusToActive: setLicenseMapStatusToActive,
-    setLicenseMapStatusToNull: setLicenseMapStatusToNull,
-    removeTeacherFromLicense: removeTeacherFromLicense,
-    teacherLeavesLicense: teacherLeavesLicense,
-    subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
-    upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
-    //upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
-    getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
-    cancelActivePurchaseOrder: cancelActivePurchaseOrder,
-    receivePurchaseOrder: receivePurchaseOrder,
-    rejectPurchaseOrder: rejectPurchaseOrder,
-    invoicePurchaseOrder: invoicePurchaseOrder,
-    approvePurchaseOrder: approvePurchaseOrder,
-    migrateToTrialLegacy: migrateToTrialLegacy,
-    cancelLicense: cancelLicense,
-    cancelLicenseInternal: cancelLicenseInternal,
-    subscribeToLicenseInternal: subscribeToLicenseInternal,
-    inspectLicenses: inspectLicenses,
-    trialMoveToTeacher: trialMoveToTeacher
+    getSubscriptionPackages: 			getSubscriptionPackages,
+    getCurrentPlan: 					getCurrentPlan,
+    getStudentsInLicense: 				getStudentsInLicense,
+    getBillingInfo: 					getBillingInfo,
+    updateBillingInfo: 					updateBillingInfo,
+    subscribeToLicense: 				subscribeToLicense,
+    subscribeToTrialLicense: 			subscribeToTrialLicense,
+    upgradeLicense: 					upgradeLicense,
+    upgradeTrialLicense: 				upgradeTrialLicense,
+    validatePromoCode: 					validatePromoCode,
+    //cancelLicenseAutoRenew: 			cancelLicenseAutoRenew,
+    //enableLicenseAutoRenew: 			enableLicenseAutoRenew,
+    addTeachersToLicense: 				addTeachersToLicense,
+    setLicenseMapStatusToActive: 		setLicenseMapStatusToActive,
+    setLicenseMapStatusToNull: 			setLicenseMapStatusToNull,
+    removeTeacherFromLicense: 			removeTeacherFromLicense,
+    teacherLeavesLicense: 				teacherLeavesLicense,
+    subscribeToLicensePurchaseOrder: 	subscribeToLicensePurchaseOrder,
+    upgradeTrialLicensePurchaseOrder: 	upgradeTrialLicensePurchaseOrder,
+    //upgradeLicensePurchaseOrder: 		upgradeLicensePurchaseOrder,
+    getActivePurchaseOrderInfo: 		getActivePurchaseOrderInfo,
+    getOpenPurchaseOrders: 				getOpenPurchaseOrders,
+    cancelActivePurchaseOrder: 			cancelActivePurchaseOrder,
+    receivePurchaseOrder: 				receivePurchaseOrder,
+    rejectPurchaseOrder: 				rejectPurchaseOrder,
+    invoicePurchaseOrder: 				invoicePurchaseOrder,
+    approvePurchaseOrder: 				approvePurchaseOrder,
+    migrateToTrialLegacy: 				migrateToTrialLegacy,
+    cancelLicense: 						cancelLicense,
+    cancelLicenseInternal: 				cancelLicenseInternal,
+    subscribeToLicenseInternal: 		subscribeToLicenseInternal,
+    inspectLicenses: 					inspectLicenses,
+    trialMoveToTeacher: 				trialMoveToTeacher
     // vestigial apis
-    //verifyLicense:   verifyLicense,
-    //registerLicense: registerLicense,
-    //getLicenses:     getLicenses
+    //verifyLicense:   					verifyLicense,
+    //registerLicense: 					registerLicense,
+    //getLicenses:     					getLicenses
 };
 
 // provides license package information for the subscription/packages page
@@ -1908,6 +1909,23 @@ function getActivePurchaseOrderInfo(req, res){
             console.error("Get Active Purchase Order Info Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
+}
+
+// gets any open purchase orders (pending, received, invoiced)
+function getOpenPurchaseOrders(req, res) {
+    if(!(req && req.user && ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) )){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+
+    this.myds.getOpenPurchaseOrders()
+    	.then( function(results) {
+    		this.requestUtil.jsonResponse(res, results);
+    	}.bind(this))
+    	.then(null, function(err) {
+            console.error("Get Open Purchase Orders Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+    	}.bind(this));
 }
 
 // cancels a purchase order application process that has the status of pending
