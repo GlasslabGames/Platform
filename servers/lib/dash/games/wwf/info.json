@@ -64,12 +64,16 @@
             "trigger": "activity",
             "rules": {
                 "wo1": {
-                    "name": "Player hasn't viewed academic word list in 3 turns",
-                    "description": "Player hasn't viewed academic word list in 3 turns"
+                    "name": "Hasn't viewed Power Word List in 3 turns",
+                    "description": "Hasn't viewed Power Word List in 3 turns"
+                },
+                "wo4": {
+                    "name": "Used two Definition Hints in a single turn (\"word freebie\") but didn't play the associated Power Word",
+                    "description": "Used two Definition Hints in a single turn (\"word freebie\") but didn't play the associated Power Word"
                 },
                 "wo5": {
-                    "name": "Player hasn’t played an Academic Word in 5 turns",
-                    "description": "Player hasn’t played an Academic Word in 5 turns"
+                    "name": "Hasn't played a Power Word in 5 turns",
+                    "description": "Hasn't played a Power Word in 5 turns"
                 },
                 "wo10": {
                     "name": "On the same turn, the student looked up an Academic Word Bonus Word but still got the Academic Word Bonus wrong",
@@ -84,48 +88,48 @@
                     "description": "Streak of 5 turns on which student didn't play a word"
                 },
                 "so2": {
-                    "name": "Student has looked up 8 or more academic words in a game",
-                    "description": "Student has looked up 8 or more academic words in a game"
+                    "name": "Looked up 8 or more Power Words in a single game",
+                    "description": "Looked up 8 or more Power Words in a single game"
                 },
                 "so5": {
-                    "name": "Played more than 5 Academic Words in a game",
-                    "description": "Played more than 5 Academic Words in a game"
+                    "name": "Played more than 5 Power Words in a single game",
+                    "description": "Played more than 5 Power Words in a single game"
                 },
                 "so6": {
-                    "name": "Streak of 3 Academic Words played in a row during one game",
-                    "description": "Streak of 3 Academic Words played in a row during one game"
+                    "name": "Played 3 Power Words in a row in a single game",
+                    "description": "Played 3 Power Words in a row in a single game"
                 },
                 "so7": {
-                    "name": "Played two Academic Words during one turn",
-                    "description": "Played two Academic Words during one turn"
+                    "name": "Played 2 Power Words in a single turn",
+                    "description": "Played 2 Power Words in a single turn"
                 },
                 "so8": {
-                    "name": "Student played 50 Power Words",
-                    "description": "Student played 50 Power Words"
+                    "name": "Played 50 Power Words",
+                    "description": "Played 50 Power Words"
                 },
                 "so9": {
-                    "name": "Student played 100 of Power Words",
-                    "description": "Student played 100 of Power Words"
+                    "name": "Played 100 of Power Words",
+                    "description": "Played 100 of Power Words"
                 },
                 "so10": {
-                    "name": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus",
-                    "description": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus"
+                    "name": "Got the Power Word Bonus correct after looking up the Power Word",
+                    "description": "Got the Power Word Bonus correct after looking up the Power Word"
                 },
                 "so11": {
-                    "name": "Earned 3 or more Academic Word Bonuses in one game",
-                    "description": "Earned 3 or more Academic Word Bonuses in one game"
+                    "name": "Earned 3 or more Power Word Bonuses in a single game",
+                    "description": "Earned 3 or more Power Word Bonuses in a single game"
                 },
                 "so12": {
-                    "name": "Won 4 games (cumulatively, not neccessarily in a row)",
-                    "description": "Won 4 games (cumulatively, not neccessarily in a row)"
+                    "name": "Won 4 games",
+                    "description": "Won 4 games"
                 },
                 "so13": {
-                    "name": "Student completed 10 games",
-                    "description": "Student completed 10 games"
+                    "name": "Completed 10 games",
+                    "description": "Completed 10 games"
                 },
                 "so14": {
-                    "name": "Student completed 50 games",
-                    "description": "Student completed 50 games"
+                    "name": "Completed 50 games",
+                    "description": "Completed 50 games"
                 },
                 "so15": {
                     "name": "Played a word worth more than 50 points",
