@@ -168,57 +168,57 @@
                                 {
                                     "id": "so2",
                                     "title": "",
-                                    "description": "Student has looked up 8 or more academic words in a game"
+                                    "description": "Looked up 8 or more Power Words in a single game"
                                 },
                                 {
                                     "id": "so5",
                                     "title": "",
-                                    "description": "Played more than 5 Academic Words in a game"
+                                    "description": "Played more than 5 Power Words in a single game"
                                 },
                                 {
                                     "id": "so6",
                                     "title": "",
-                                    "description": "Streak of 3 Academic Words played (in a row during one game)"
+                                    "description": "Played 3 Power Words in a row in a single game"
                                 },
                                 {
                                     "id": "so7",
                                     "title": "",
-                                    "description": "Played two Academic Words during one turn"
+                                    "description": "Played 2 Power Words in a single turn"
                                 },
                                 {
                                     "id": "so8",
                                     "title": "",
-                                    "description": "Student played 50 Power Words"
+                                    "description": "Played 50 Power Words"
                                 },
                                 {
                                     "id": "so9",
                                     "title": "",
-                                    "description": "Student played 100 of Power Words"
+                                    "description": "Played 100 of Power Words"
                                 },
                                 {
                                     "id": "so10",
                                     "title": "",
-                                    "description": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus "
+                                    "description": "Got the Power Word Bonus correct after looking up the Power Word"
                                 },
                                 {
                                     "id": "so11",
                                     "title": "",
-                                    "description": "Earned 3 or more Academic Word Bonuses in one game"
+                                    "description": "Earned 3 or more Power Word Bonuses in a single game"
                                 },
                                 {
                                     "id": "so12",
                                     "title": "",
-                                    "description": "Won 4 games (cumulatively, not neccessarily in a row)"
+                                    "description": "Won 4 games"
                                 },
                                 {
                                     "id": "so13",
                                     "title": "",
-                                    "description": "Student completed 10 games"
+                                    "description": "Completed 10 games"
                                 },
                                 {
                                     "id": "so14",
                                     "title": "",
-                                    "description": "Student completed 50 games"
+                                    "description": "Completed 50 games"
                                 },
                                 {
                                     "id": "so15",
@@ -234,12 +234,17 @@
                                 {
                                     "id": "wo1",
                                     "title": "",
-                                    "description": "Player hasn't viewed academic word list in 3 turns"
+                                    "description": "Hasn't viewed Power Word List in 3 turns"
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "",
+                                    "description": "Used two Definition Hints in a single turn (\"word freebie\") but didn't play the associated Power Word"
                                 },
                                 {
                                     "id": "wo5",
                                     "title": "",
-                                    "description": "Player hasn’t played an Academic Word in 5 turns"
+                                    "description": "Hasn't played a Power Word in 5 turns"
                                 },
                                 {
                                     "id": "wo10",
