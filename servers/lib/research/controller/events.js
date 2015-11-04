@@ -758,6 +758,131 @@ function getEventsByDate(req, res, next){
             schema = req.query.schema;
         }
 
+        var saveToFile = false;
+        if(req.query.saveToFile) {
+            saveToFile = (req.query.saveToFile === "true" ? true : false);
+        }
+
+        // If queryArchivesOnly flags is true, don't pull data from DB.
+        // Instead fetch file from archives on AWS.
+        if (this.options.research.queryArchivesOnly) {
+            if(req.query.startDate) {
+                startDate = req.query.startDate;
+                // if starts with " then strip "s
+                if(startDate.charAt(0) == '"') {
+                    startDate = startDate.substring(1, startDate.length-1);
+                }
+            }
+            if(!startDate) {
+                this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
+                return;
+            }
+            if(req.query.endDate) {
+                endDate = req.query.endDate;
+                // if starts with " then strip "s
+                if(endDate.charAt(0) == '"') {
+                    endDate = endDate.substring(1, endDate.length-1);
+                }
+            }
+            if(!endDate) {
+                this.requestUtil.errorResponse(res, {key: "research.endDate.missing"}, 401);
+                return;
+            }
+
+            var tempDate = startDate.split('T');
+            if (tempDate.length == 1) {
+                tempDate = startDate.split(' ');
+            }
+            startDate = tempDate[0];
+            var startMoment = moment(startDate);
+            var curMoment = startMoment.clone();
+            tempDate = endDate.split('T');
+            if (tempDate.length == 1) {
+                tempDate = endDate.split(' ');
+            }
+            endDate = tempDate[0];
+            var endMoment = moment(endDate);
+
+            return when.promise(function(resolve, reject) {
+                _checkForGameAccess.call(this, req.user.id, gameId, req.user.role)
+                    .then(function(state){
+                        if(!state) return "invalid";
+
+                        var keyList = [];
+
+                        function getSignedUrlsForParser(){
+                            var year = curMoment.format("YYYY");
+                            var month = curMoment.format("MM");
+                            var dayString = curMoment.format("DD")
+                            var fileString = gameId + '_' + year + "-" + month + '-';
+                            dayString = fileString + dayString;
+                            var pathParams = ['archives', (this.options.research.s3PathPrefix || this.options.env), gameId, year, month, dayString];
+                            this.serviceManager.awss3.getSignedKeys('csv', pathParams, false)
+                            .then(function(keys){
+                                keys.forEach(function(key){
+                                    keyList.push(key);
+                                });
+                                
+                                if(curMoment.isBefore(endMoment)){
+                                    curMoment.add(1, "days");
+                                    getSignedUrlsForParser.call(this);
+                                } else {
+                                    var promiseList = [];
+                                    keyList.forEach(function(key){
+                                        promiseList.push(this.serviceManager.awss3.getS3Object(key));
+                                    }.bind(this));
+                                    when.all(promiseList)
+                                    .then(function(outList) {
+                                        var pruneHdr = false;
+                                        var workList = [];
+                                        var totalEvents = 0;
+                                        outList.forEach(function(data){
+                                            // Internet comments say split is fastest than regex
+                                            // to do this test and we need the result array
+                                            // in most cases anyway.
+                                            var lines = data.split("\n");
+                                            totalEvents += lines.length - 1;
+                                            if (pruneHdr) {
+                                                workList.push(lines.splice(1, lines.length - 1).join("\n"));
+                                            } else {
+                                                workList.push(data);
+                                            }
+                                            pruneHdr = true;
+                                        });
+                                  
+                                        var outData = workList.join("\n");
+                                        if (saveToFile) {
+                                            var file = gameId
+                                                + "_" + startMoment.format("YYYY-DD-MM")
+                                                + "_" + endMoment.format("YYYY-DD-MM")
+                                                + ".csv";
+                                            this.requestUtil.downloadResponse(res, outData, file, 'text/csv');
+                                        } else {
+                                            this.requestUtil.jsonResponse(res, {
+                                                numEvents: totalEvents,
+                                                data: outData
+                                            });
+                                        }
+                                        resolve();
+                                    }.bind(this));
+                                }
+                            }.bind(this))
+                            .then(null, function(err){
+                                reject(err);
+                                this.requestUtil.errorResponse(res, err, 401);
+                            }.bind(this));
+                        }
+                        getSignedUrlsForParser.call(this);
+                    }.bind(this))
+                    // catch all
+                    .then(null, function (err) {
+                        console.trace("Research: Process Events -", err);
+                        this.requestUtil.errorResponse(res, {error: err});
+                        reject(err);
+                    }.bind(this));
+            }.bind(this));
+        }
+
         var startDate = moment({hour: 0});
         // startDate or startEpoc optional
         if(req.query.startEpoc) {
@@ -854,10 +979,6 @@ function getEventsByDate(req, res, next){
             limit = req.query.limit;
         }
 
-        var saveToFile = false;
-        if(req.query.saveToFile) {
-            saveToFile = (req.query.saveToFile === "true" ? true : false);
-        }
         var outList;
         return when.promise(function(resolve, reject) {
             _checkForGameAccess.call(this, req.user.id, gameId, req.user.role)
@@ -917,12 +1038,6 @@ function getEventsByDate(req, res, next){
                                 + "_" + endDate.format("YYYY-DD-MM")
                                 + ".csv";
                             this.requestUtil.downloadResponse(res, outData, file, 'text/csv');
-                            /*
-                             this.requestUtil.jsonResponse(res, {
-                             numEvents: outList.length - 1, // minus header
-                             data: outData
-                             });
-                             */
                         } else {
                             this.requestUtil.jsonResponse(res, {
                                 numEvents: outList.length - 1, // minus header
