@@ -50,6 +50,7 @@ function DashService(options, serviceManager){
 
         this._games = {};
         this._schema = {};
+        this._newGameTemplate = {};
         this._validate = undefined;
 
 
@@ -64,10 +65,10 @@ DashService.prototype.start = function() {
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
     this.telmStore.connect()
-        .then(function(){
-            // test connection to telemetry store
-            return this._migrateGameFiles(true);
-        }.bind(this))
+        //.then(function(){
+        //    // test connection to telemetry store
+        //    return this._migrateGameFiles(true);
+        //}.bind(this))
         .then(function(){
             return this._loadGameInfoSchema();
         }.bind(this))
@@ -97,11 +98,22 @@ return when.promise(function(resolve, reject) {
         .then(function(){
             _buildLicPackages.call(this);
         }.bind(this))
+        .then(function(){
+            setInterval(_refreshGameFiles.bind(this), this.options.webapp.refreshGamesInterval || 30000);
+        }.bind(this))
         .then(resolve, reject);
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
 };
+
+function _refreshGameFiles(){
+    //console.log("_refreshGameFiles");
+    this._loadGameFiles()
+        .then(function() {
+            _buildLicPackages().call(this);
+        }.bind(this));
+}
 
 function _buildLicPackages(){
     return when.promise(function(resolve, reject){
@@ -257,7 +269,8 @@ DashService.prototype.getListOfAllGameIds = function() {
     return when.promise(function(resolve, reject){
         var gameIds = [];
         for(var g in this._games) {
-            if( this._games[g].info &&
+            if( this._games.hasOwnProperty(g) &&
+                this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId) {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
@@ -275,7 +288,8 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
     return when.promise(function(resolve, reject){
         var gameIds = [];
         for(var g in this._games){
-            if( this._games[g].info &&
+            if( this._games.hasOwnProperty(g) &&
+                this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
                 ( this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD" ) ) {
@@ -533,6 +547,9 @@ DashService.prototype._loadGameInfoSchema = function(){
 
         this._schema = require(schemaPath);
         this._validate = imjv(this._schema);
+
+        var newGameTemplatePath = path.join(__dirname, "games/template/info.json");
+        this._newGameTemplate = require(newGameTemplatePath);
         resolve();
     }.bind(this));
 };
@@ -540,11 +557,11 @@ DashService.prototype._loadGameInfoSchema = function(){
 // now builds up _games from couchbase gi and ga documents, instead of from json files
 // couchbase logic contained in this function, building of _games abstracted to _buildGamesObject
 DashService.prototype._loadGameFiles = function(){
-    console.log( "_loadGameFiles" );
+    //console.log( "_loadGameFiles" );
     return when.promise(function(resolve, reject){
         this.telmStore.getAllGameInformationAndGameAchievements()
             .then(function(results){
-                console.log( "_loadGameFiles results: " + results );
+                //console.log( "_loadGameFiles results: ", results );
                 var ids;
                 var type;
                 var gameId;
@@ -580,13 +597,13 @@ DashService.prototype._loadGameFiles = function(){
 DashService.prototype._buildGamesObject = function(gameInformation, gameAchievements){
     return when.promise(function(resolve, reject){
         try {
-            console.log( "_buildGamesObject" );
+            //console.log( "_buildGamesObject" );
             var gameId;
             var index = 0;
             var achievements = [];
             var gameIds = [];
             _.forEach(gameInformation, function (data, gameId) {
-                console.log( "_buildGamesObject for game: " + gameId );
+                //console.log( "_buildGamesObject for game: " + gameId );
                 gameIds.push(gameId);
                 this._games[gameId] = {};
                 if(gameAchievements[gameId] !== undefined){
@@ -640,7 +657,6 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
 };
 
 DashService.prototype.buildGameForGamesObject = function(data, gameId){
-    this._games[gameId].raw = JSON.stringify(data, null, 4);
     this._games[gameId].info = data;
 
     //remove all enabled=false objects

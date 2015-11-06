@@ -50,6 +50,7 @@
     	}
     },
     "webapp": {
+        "refreshGamesInterval": 30000,
         "staticContentPath": "../../Playfully.org/build",
         "datastore": {
             "mysql": {

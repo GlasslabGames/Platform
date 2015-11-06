@@ -430,6 +430,15 @@ module.exports = {
                 post: "updateDeveloperGameInfo"
             }
         },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/new-game/:gameId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "createNewGame"
+            }
+        },
         // ---------------------------------------------------
         {
             requireAuth: true,
