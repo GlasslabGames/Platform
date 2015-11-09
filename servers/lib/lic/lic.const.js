@@ -1,6 +1,7 @@
 module.exports = {
     "role": {
-        "admin": "admin"
+        "admin": "admin",
+        "reseller": "reseller"
     },
     "licenseCodeTypes": {
         "GL-SC-001": "SimCityEDU Single License",
