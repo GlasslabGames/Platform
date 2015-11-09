@@ -12,8 +12,8 @@
         "platform": {
             "type": "PC & Mac",
             "icon": {
-                "small": "assets/platform-client.png",
-                "large": "assets/platform-client@2x.png"
+                "small": "/assets/platform-client.png",
+                "large": "/assets/platform-client@2x.png"
             }
         },
         "price": "Premium",
@@ -26,8 +26,8 @@
             "id": "GL",
             "name": "GlassLab, Inc.",
             "logo": {
-                "small": "assets/glasslab-logo.png",
-                "large": "assets/glasslab-logo2x.png"
+                "small": "/assets/glasslab-logo.png",
+                "large": "/assets/glasslab-logo2x.png"
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
@@ -44,16 +44,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-SC.png",
-            "large": "assets/thumb-game-SC.png"
+            "small": "/assets/thumb-game-SC.png",
+            "large": "/assets/thumb-game-SC.png"
         },
         "card": {
-            "small": "assets/game-card-SC.jpg",
-            "large": "assets/game-card-SC@2x.jpg"
+            "small": "/assets/game-card-SC.jpg",
+            "large": "/assets/game-card-SC@2x.jpg"
         },
         "banners": {
-            "product": "assets/game-banner-SC.jpg",
-            "reports": "assets/game-banner-SC.jpg"
+            "product": "/assets/game-banner-SC.jpg",
+            "reports": "/assets/game-banner-SC.jpg"
         },
         "play": {
             "type": "missions"
@@ -156,9 +156,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-SC.jpg",
-                    "skinny": "assets/skinny-banner-SC.jpg",
-                    "large": "assets/skinny-banner-SC@2x.jpg"
+                    "image": "/assets/game-banner-SC.jpg",
+                    "skinny": "/assets/skinny-banner-SC.jpg",
+                    "large": "/assets/skinny-banner-SC@2x.jpg"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -275,18 +275,18 @@
                 "name": "Game Progress Report",
                 "header": {
                     "text": "Game Progress Report",
-                    "image": "assets/game-banner-SC.jpg",
-                    "skinny": "assets/skinny-banner-SC.jpg",
-                    "large": "assets/skinny-banner-SC@2x.jpg"
+                    "image": "/assets/game-banner-SC.jpg",
+                    "skinny": "/assets/skinny-banner-SC.jpg",
+                    "large": "/assets/skinny-banner-SC@2x.jpg"
                 },
                 "icons": {
                     "complete": {
-                        "small": "assets/add-blue.png",
-                        "large": "assets/add-blue@2x.png"
+                        "small": "/assets/add-blue.png",
+                        "large": "/assets/add-blue@2x.png"
                     },
                     "not-complete": {
-                        "small": "assets/add-grey-square.png",
-                        "large": "assets/add-grey-square@2x.png"
+                        "small": "/assets/add-grey-square.png",
+                        "large": "/assets/add-grey-square@2x.png"
                     }
                 },
                 "description": "This report shows students' progress through the game, medals earned, and total time played.",
@@ -323,13 +323,13 @@
                 "name": "Competency Levels: Complex Problem Solving",
                 "header": {
                     "text": "Competency Levels: Complex Problem Solving",
-                    "image": "assets/game-banner-SC.jpg",
-                    "skinny": "assets/skinny-banner-SC.jpg",
-                    "large": "assets/skinny-banner-SC@2x.jpg"
+                    "image": "/assets/game-banner-SC.jpg",
+                    "skinny": "/assets/skinny-banner-SC.jpg",
+                    "large": "/assets/skinny-banner-SC@2x.jpg"
                 },
                 "icons": {
-                    "small": "assets/icon-plus-green.png",
-                    "large": "assets/icon-plus-green@2x.png"
+                    "small": "/assets/icon-plus-green.png",
+                    "large": "/assets/icon-plus-green@2x.png"
                 },
                 "description": "This report shows the most recent level of competency on the assessed skill of complex problem solving. Click on the tabs to see results from each mission assessed.",
                 "table": {
@@ -467,23 +467,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/SCE_start.jpg"
+                        "url": "/assets/SCE_start.jpg"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SCE_HUD.jpg"
+                        "url": "/assets/SCE_HUD.jpg"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SCE_advisorUI.jpg"
+                        "url": "/assets/SCE_advisorUI.jpg"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SCE_UI.jpg"
+                        "url": "/assets/SCE_UI.jpg"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SCE_results.jpg"
+                        "url": "/assets/SCE_results.jpg"
                     }
                 ]
             },

@@ -141,8 +141,8 @@ function createCode(cookie, courseName, courseId, cb){
 		    "platform":{
 				"type":"iPad",
 				"icon":{
-				    "small":"assets/platform-ipad.png",
-				    "large":"assets/platform-ipad@2x.png"
+				    "small":"/assets/platform-ipad.png",
+				    "large":"/assets/platform-ipad@2x.png"
 				}
 		    },
 		    "price":"Free",
@@ -155,8 +155,8 @@ function createCode(cookie, courseName, courseId, cb){
 				"id":"GL",
 				"name":"GlassLab, Inc.",
 				"logo":{
-				    "small":"assets/glasslab-logo.png",
-				    "large":"assets/glasslab-logo-2x.png"
+				    "small":"/assets/glasslab-logo.png",
+				    "large":"/assets/glasslab-logo-2x.png"
 				},
 				"description":"GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
 		    },
@@ -170,16 +170,16 @@ function createCode(cookie, courseName, courseId, cb){
 				}
 			},
 		    "thumbnail":{
-				"small":"assets/thumb-game-AA-1.png",
-				"large":"assets/thumb-game-AA-1.png"
+				"small":"/assets/thumb-game-AA-1.png",
+				"large":"/assets/thumb-game-AA-1.png"
 		    },
 		    "card":{
-				"small":"assets/game-card-AA-1.jpg",
-				"large":"assets/game-card-AA-1@2x.jpg"
+				"small":"/assets/game-card-AA-1.jpg",
+				"large":"/assets/game-card-AA-1@2x.jpg"
 		    },
 		    "banners":{
-				"product":"assets/game-banner-AA-1.png",
-				"reports":"assets/game-banner-AA-1.png"
+				"product":"/assets/game-banner-AA-1.png",
+				"reports":"/assets/game-banner-AA-1.png"
 		    },
 		    "play":{
 				"type":"download",
@@ -206,8 +206,8 @@ function createCode(cookie, courseName, courseId, cb){
 	     "platform":{
 		 "type":"Browser (Optimized for Chrome)",
 		 "icon":{
-		     "small":"assets/platform-browser.png",
-		     "large":"assets/platform-browser@2x.png"
+		     "small":"/assets/platform-browser.png",
+		     "large":"/assets/platform-browser@2x.png"
 		 }
 	     },
 	     "price":"Free",
@@ -220,8 +220,8 @@ function createCode(cookie, courseName, courseId, cb){
 		 "id":"GL",
 		 "name":"GlassLab, Inc.",
 		 "logo":{
-		     "small":"assets/glasslab-logo.png",
-		     "large":"assets/glasslab-logo-2x.png"
+		     "small":"/assets/glasslab-logo.png",
+		     "large":"/assets/glasslab-logo-2x.png"
 		 },
 		 "description":"GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
 	     },
@@ -237,16 +237,16 @@ function createCode(cookie, courseName, courseId, cb){
 		 }
 	     },
 	     "thumbnail":{
-		 "small":"assets/thumb-game-PRIMA.png",
-		 "large":"assets/thumb-game-PRIMA@2x.png"
+		 "small":"/assets/thumb-game-PRIMA.png",
+		 "large":"/assets/thumb-game-PRIMA@2x.png"
 	     },
 	     "card":{
-		 "small":"assets/game-card-PRIMA.png",
-		 "large":"assets/game-card-PRIMA@2x.png"
+		 "small":"/assets/game-card-PRIMA.png",
+		 "large":"/assets/game-card-PRIMA@2x.png"
 	     },
 	     "banners":{
-		 "product":"assets/game-banner-PRIMA.png",
-		 "reports":"assets/game-banner-PRIMA.png"
+		 "product":"/assets/game-banner-PRIMA.png",
+		 "reports":"/assets/game-banner-PRIMA.png"
 	     },
 	     "play":{
 		 "type":"page",

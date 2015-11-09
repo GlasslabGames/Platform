@@ -375,15 +375,15 @@ exampleOut.getMyGames = [
             valid: false
         },
         thumbnail: {
-            small: "assets/thumb-game-SC.png",
-            large: "assets/thumb-game-SC.png"
+            small: "/assets/thumb-game-SC.png",
+            large: "/assets/thumb-game-SC.png"
         },
         developer: {
             id: "GL",
             name: "GlassLab, Inc.",
             logo: {
-                small: "assets/glasslab-logo.png",
-                large: "assets/glasslab-logo-2x.png"
+                small: "/assets/glasslab-logo.png",
+                large: "/assets/glasslab-logo-2x.png"
             }
         }
     },
@@ -399,15 +399,15 @@ exampleOut.getMyGames = [
             valid: true
         },
         thumbnail: {
-            small: "assets/thumb-game-AA-1.png",
-            large: "assets/thumb-game-AA-1.png"
+            small: "/assets/thumb-game-AA-1.png",
+            large: "/assets/thumb-game-AA-1.png"
         },
         developer: {
             id: "GL",
             name: "GlassLab, Inc.",
             logo: {
-                small: "assets/glasslab-logo.png",
-                large: "assets/glasslab-logo-2x.png"
+                small: "/assets/glasslab-logo.png",
+                large: "/assets/glasslab-logo-2x.png"
             }
         }
     }

@@ -12,8 +12,8 @@
         "platform": {
             "type": "iPad",
             "icon": {
-                "small": "assets/platform-ipad.png",
-                "large": "assets/platform-ipad@2x.png"
+                "small": "/assets/platform-ipad.png",
+                "large": "/assets/platform-ipad@2x.png"
             }
         },
         "price": "Free",
@@ -26,8 +26,8 @@
             "id": "TEMP",
             "name": "Developer Name",
             "logo": {
-                "small": "assets/dev-logo-placeholder.jpg",
-                "large": "assets/dev-logo-placeholder@2x.jpg"
+                "small": "/assets/dev-logo-placeholder.jpg",
+                "large": "/assets/dev-logo-placeholder@2x.jpg"
             },
             "description": "Placeholder Developer Description"
         },
@@ -43,16 +43,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-AA-1.png",
-            "large": "assets/thumb-game-AA-1.png"
+            "small": "/assets/thumb-game-AA-1.png",
+            "large": "/assets/thumb-game-AA-1.png"
         },
         "card": {
-            "small": "assets/game-card-PLACEHOLDER.jpg",
-            "large": "assets/game-card-PLACEHOLDER@2x.jpg"
+            "small": "/assets/game-card-PLACEHOLDER.jpg",
+            "large": "/assets/game-card-PLACEHOLDER@2x.jpg"
         },
         "banners": {
-            "product": "assets/game-banner-AA-1.png",
-            "reports": "assets/game-banner-AA-1.png"
+            "product": "/assets/game-banner-AA-1.png",
+            "reports": "/assets/game-banner-AA-1.png"
         }
     },
     "assessment": [],
