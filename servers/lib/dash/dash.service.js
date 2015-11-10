@@ -218,6 +218,8 @@ DashService.prototype._isValidGameId = function(gameId){
                     return resolve();
                 }
             }
+
+            console.error('    DashService: _isValidGameId() gameId not valid >', gameId);
             reject();
     }.bind(this) );
 };
