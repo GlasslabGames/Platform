@@ -204,6 +204,7 @@ DashService.prototype.isValidGameId = function(gameId) {
             return true;
         })
         .then(null,function(){
+            consle.error('   at least 1 id from this list is not valid:\n        ' + gameId);;
             return false;
         });
 };
@@ -220,6 +221,7 @@ DashService.prototype._isValidGameId = function(gameId){
             }
 
             console.error('    DashService: _isValidGameId() gameId not valid >', gameId);
+            console.error('        gameId not in this list:\n        ' + this._games);
             reject();
     }.bind(this) );
 };
