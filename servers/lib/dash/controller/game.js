@@ -85,6 +85,8 @@ function getGameDetails(req, res){
             this.requestUtil.jsonResponse(res, gameDetails);
         }.bind(this) )
         .then(null,function(err){
+            // Get Game Info Error - [Error: Can't set headers after they are sent.]
+            console.log('getGameDetails() -> isValidGameId(gameId), gameId =', gameId);
             console.trace("Reports: Get Game Info Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "GetGameInfo.Catch");
