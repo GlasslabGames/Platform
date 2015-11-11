@@ -978,7 +978,7 @@ function alterLicense(req, res){
             
             didSetInstitution = true;
             
-            _doSubscribeToLicenseInternal.call(this, userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "callback", callback: upgradeCallback });
+            _doSubscribeToLicenseInternal.call(this, userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "callback", callback: upgradeCallback }, req, res);
             return;
 
         } else if (oldPlanInfo.packageDetails.planId !== planInfo.type || oldPlanInfo.packageDetails.seatId !== planInfo.seats || planInfo.yearAdded) {
@@ -3157,11 +3157,10 @@ function subscribeToLicenseInternal(req, res){
     var planInfo = req.body.planInfo;
     var schoolInfo = req.body.schoolInfo;
 
-    _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "email" });
+    _doSubscribeToLicenseInternal.call(this,userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "email" }, req, res);
 }
 
-function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, schoolInfo, completionInfo) {
-
+function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, schoolInfo, completionInfo,req,res) {
     var user;
     var action;
 
