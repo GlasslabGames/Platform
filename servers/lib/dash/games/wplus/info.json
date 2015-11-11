@@ -12,8 +12,8 @@
         "platform": {
             "type": "iPad",
             "icon": {
-                "small": "assets/platform-ipad.png",
-                "large": "assets/platform-ipad@2x.png"
+                "small": "/assets/platform-ipad.png",
+                "large": "/assets/platform-ipad@2x.png"
             }
         },
         "price": "Premium",
@@ -26,8 +26,8 @@
             "id": "SG",
             "name": "Schell Games",
             "logo": {
-                "small": "assets/dev-logo-schellgames.png",
-                "large": "assets/dev-logo-schellgames@2x.png"
+                "small": "/assets/dev-logo-schellgames.png",
+                "large": "/assets/dev-logo-schellgames@2x.png"
             },
             "description": "Schell Games is a full-service game design and development company, which specializes in creating transformational games and innovative, interactive experiences. Founded in 2002 by world-class game designer and esteemed author Jesse Schell and located in Pittsburgh, we are the largest game studio in Pennsylvania and one of the biggest independent game studios in the country. The company crafts transformational games, or games that change people for the better. Not only do our games educate players and advocate for change, but they are fun! Our team of highly talented artists, programmers, producers and game designers is adept at creating these transformative experiences for some of the world’s most respected companies. Projects in our vast portfolio include mobile, PC, online, console, hand-held, casual and social games; interactive installations and theme park attractions; connected toys and virtual worlds."
         },
@@ -43,16 +43,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-WPLUS.png",
-            "large": "assets/thumb-game-WPLUS@2x.png"
+            "small": "/assets/thumb-game-WPLUS.png",
+            "large": "/assets/thumb-game-WPLUS@2x.png"
         },
         "card": {
-            "small": "assets/game-card-WPLUS.png",
-            "large": "assets/game-card-WPLUS@2x.png"
+            "small": "/assets/game-card-WPLUS.png",
+            "large": "/assets/game-card-WPLUS@2x.png"
         },
         "banners": {
-            "product": "assets/game-banner-WPLUS.png",
-            "reports": "assets/game-banner-WPLUS@2x.png"
+            "product": "/assets/game-banner-WPLUS.png",
+            "reports": "/assets/game-banner-WPLUS@2x.png"
         }
     },
     "assessment": [
@@ -119,9 +119,9 @@
                 "name": "Learning Events & Time Played",
                 "header": {
                     "text": "Learning Events & Time Played",
-                    "image": "assets/game-banner-WPLUS.png",
-                    "skinny": "assets/skinny-banner-WPLUS.png",
-                    "large": "assets/skinny-banner-WPLUS@2x.png"
+                    "image": "/assets/game-banner-WPLUS.png",
+                    "skinny": "/assets/skinny-banner-WPLUS.png",
+                    "large": "/assets/skinny-banner-WPLUS@2x.png"
                 },
                 "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
@@ -133,9 +133,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-WPLUS.png",
-                    "skinny": "assets/skinny-banner-WPLUS.png",
-                    "large": "assets/skinny-banner-WPLUS@2x.png"
+                    "image": "/assets/game-banner-WPLUS.png",
+                    "skinny": "/assets/skinny-banner-WPLUS.png",
+                    "large": "/assets/skinny-banner-WPLUS@2x.png"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -295,23 +295,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_1.png"
+                        "url": "/assets/WPLUS-carousel_1.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_2.png"
+                        "url": "/assets/WPLUS-carousel_2.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_3.png"
+                        "url": "/assets/WPLUS-carousel_3.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_4.png"
+                        "url": "/assets/WPLUS-carousel_4.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/WPLUS-carousel_5.png"
+                        "url": "/assets/WPLUS-carousel_5.png"
                     }
                 ]
             },

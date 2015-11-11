@@ -6,28 +6,28 @@
         "maintenance": null,
         "shortName": "Battleground 538",
         "longName": "Battleground 538",
-        "grades": "TBD",
-        "subject": "TBD",
+        "grades": "8-12",
+        "subject": "Political Science",
         "type": "App",
         "platform": {
             "type": "iPad",
             "icon": {
-                "small": "assets/platform-ipad.png",
-                "large": "assets/platform-ipad@2x.png"
+                "small": "/assets/platform-ipad.png",
+                "large": "/assets/platform-ipad@2x.png"
             }
         },
-        "price": "Free",
-        "packages": "TBD",
+        "price": "Coming Soon",
+        "packages": "iPad Games",
         "release": "dev",
         "releaseDate": "TBD",
-        "shortDescription": "Placeholder Short Description",
-        "description": "Placeholder Description",
+        "shortDescription": "Developed during the first ever White House Game Jam 2014, Battleground 538 is a turn-based strategy game that demonstrates how the electoral college system shapes and drives the way elections are won... and lost.",
+        "description": "Developed during the first ever White House Game Jam 2014, Battleground 538 is a turn-based strategy game that demonstrates how the electoral college system shapes and drives the way elections are won... and lost.",
         "developer": {
             "id": "GL",
             "name": "GlassLab, Inc.",
             "logo": {
-                "small": "assets/glasslab-logo.png",
-                "large": "assets/glasslab-logo-2x.png"
+                "small": "/assets/glasslab-logo.png",
+                "large": "/assets/glasslab-logo-2x.png"
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
@@ -43,16 +43,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-AA-1.png",
-            "large": "assets/thumb-game-AA-1.png"
+            "small": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/150x120BG.jpg",
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/300x240BG.jpg"
         },
         "card": {
-            "small": "assets/game-card-AA-1.jpg",
-            "large": "assets/game-card-AA-1@2x.jpg"
+            "small": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/300x240BG.jpg",
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/600x480BG.jpg"
         },
         "banners": {
-            "product": "assets/game-banner-AA-1.png",
-            "reports": "assets/game-banner-AA-1.png"
+            "product": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/940x300BG.jpg",
+            "reports": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/940x300BG.jpg"
         }
     },
     "assessment": [],
@@ -66,9 +66,9 @@
                 "order": 1,
                 "enabled": true,
                 "id": "product",
-                "title": "Placeholder Product Description",
+                "title": "About Battleground 538",
                 "header": "Placeholder Header",
-                "about": "Placeholder About Section.",
+                "about": "Developed during the first ever White House Game Jam 2014, Battleground 538 is a turn-based strategy game that demonstrates how the electoral college system shapes and drives the way elections are won... and lost.<br> <br>Players are top political strategists, tasked with deciding where to invest a candidate’s precious resources over the final 12 weeks of the presidential campaign. Each in-game week, the player receives cash from their campaign committee; as fundraising increases, players can choose to do a variety of activities, from extra staff training to complete coastal domination.<br><br>The game features 4 historical presidential elections:<br><br><ul><li>Obama vs. Romney (2012)</li><li>Bush vs. Gore (2000)</li><li>Kennedy vs. Dixon (1960)</li><li>Polk vs. Clay (1844)</li></ul>For the more adventurous political strategists, Battleground 538 also includes 3 special game modes where swing states are randomly generated - or completely up for grabs!",
                 "video": "",
                 "brochure": ""
             },

@@ -12,8 +12,8 @@
         "platform": {
             "type": "Browser/Flash",
             "icon": {
-                "small": "assets/platform-browser.png",
-                "large": "assets/platform-browser@2x.png"
+                "small": "/assets/platform-browser.png",
+                "large": "/assets/platform-browser@2x.png"
             }
         },
         "price": "Premium",
@@ -26,8 +26,8 @@
             "id": "UL",
             "name": "Ululab",
             "logo": {
-                "small": "assets/dev-logo-ululab.png",
-                "large": "assets/dev-logo-ululab@2x.png"
+                "small": "/assets/dev-logo-ululab.png",
+                "large": "/assets/dev-logo-ululab@2x.png"
             },
             "description": "Slice Fractions: School Edition is a fun problem solving game that guides students to intuitively and effectively learn fractions through critical concepts. In this puzzling world, players must slice the right amount of ice and lava to clear the mammoth's path. <br /><br />The game is the fruit of multiple years of research and development by Ululab with the help of math learning experts from the University of Quebec in Montreal (UQAM). It has a smooth progression designed for kids who are new to fractions or who have not yet understood its basic concepts. The environment is free of written instructions, which lets students dive into math reasoning without being obstructed by their literacy level."
         },
@@ -43,16 +43,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-SLFR.png",
-            "large": "assets/thumb-game-SLFR@2x.png"
+            "small": "/assets/thumb-game-SLFR.png",
+            "large": "/assets/thumb-game-SLFR@2x.png"
         },
         "card": {
-            "small": "assets/game-card-SLFR.png",
-            "large": "assets/game-card-SLFR@2x.png"
+            "small": "/assets/game-card-SLFR.png",
+            "large": "/assets/game-card-SLFR@2x.png"
         },
         "banners": {
-            "product": "assets/game-banner-SLFR.png",
-            "reports": "assets/game-banner-SLFR.png"
+            "product": "/assets/game-banner-SLFR.png",
+            "reports": "/assets/game-banner-SLFR.png"
         },
         "play": {
             "type": "page",
@@ -207,9 +207,9 @@
                 "name": "Learning Events & Time Played",
                 "header": {
                     "text": "Learning Events & Time Played",
-                    "image": "assets/game-banner-SLFR.png",
-                    "skinny": "assets/skinny-banner-SLFR.png",
-                    "large": "assets/skinny-banner-SLFR@2x.png"
+                    "image": "/assets/game-banner-SLFR.png",
+                    "skinny": "/assets/skinny-banner-SLFR.png",
+                    "large": "/assets/skinny-banner-SLFR@2x.png"
                 },
                 "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
                 "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
@@ -221,9 +221,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "assets/game-banner-SLFR.png",
-                    "skinny": "assets/skinny-banner-SLFR.png",
-                    "large": "assets/skinny-banner-SLFR@2x.png"
+                    "image": "/assets/game-banner-SLFR.png",
+                    "skinny": "/assets/skinny-banner-SLFR.png",
+                    "large": "/assets/skinny-banner-SLFR@2x.png"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -533,23 +533,23 @@
                 "slideshow": [
                     {
                         "type": "image",
-                        "url": "assets/SliceFractions-carousel-1.png"
+                        "url": "/assets/SliceFractions-carousel-1.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SliceFractions-carousel-2.png"
+                        "url": "/assets/SliceFractions-carousel-2.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SliceFractions-carousel-3.png"
+                        "url": "/assets/SliceFractions-carousel-3.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SliceFractions-carousel-4.png"
+                        "url": "/assets/SliceFractions-carousel-4.png"
                     },
                     {
                         "type": "image",
-                        "url": "assets/SliceFractions-carousel-5.png"
+                        "url": "/assets/SliceFractions-carousel-5.png"
                     }
                 ]
             },
