@@ -4369,8 +4369,10 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                         state = results[oldLic]['license_id'];
                     }
                 } else {
-                    if (results[0]['license_id'] != licenseId || results[0].status !== 'active') {
-                        state = "inconsistent";
+					if( results[0].status === "po-received"){
+						state = results[0]['license_id'];
+					} else if (results[0]['license_id'] != licenseId || results[0].status !== 'active') {
+	                    state = "inconsistent";
                     } else {
                         state = results[0]['license_id'];
                     }
