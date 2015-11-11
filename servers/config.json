@@ -50,6 +50,7 @@
     	}
     },
     "webapp": {
+        "refreshGamesInterval": 30000,
         "staticContentPath": "../../Playfully.org/build",
         "datastore": {
             "mysql": {
@@ -185,6 +186,7 @@
     "research": {
         "csvTimeout": {"minutes": 10},
         "dataChunkSize": 2000,
+        "queryArchivesOnly": true,
         "datastore": {
             "couchbase": {
                 "host":     "localhost:8091",

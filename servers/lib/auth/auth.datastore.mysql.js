@@ -795,7 +795,7 @@ Auth_MySQL.prototype.getUserById = function(userId){
 
 Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
             "WHERE status in ('active','pending','po-received','po-rejected', 'po-pending', 'invite-pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";

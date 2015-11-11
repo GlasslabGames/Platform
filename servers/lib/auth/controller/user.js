@@ -21,6 +21,7 @@ module.exports = {
     getResellers:				getResellers,
     updateUserRole:				updateUserRole,
     getUserDataByEmail:         getUserDataByEmail,
+    getUserDataByUserName:      getUserDataByUserName,
     updateUserData:				updateUserData,
     getUserBadgeList:			getUserBadgeList,
     updateUserBadgeList:		updateUserBadgeList,
@@ -170,6 +171,26 @@ function getUserDataByEmail(req, res, next) {
             this.getAuthStore().findUser( 'email', req.query.email )
             .then(function(userData) {
                 var userId = userData.id;
+                this.requestUtil.jsonResponse(res, userData);
+            }.bind(this))
+            .then(null, function(err){
+                var empty = {};
+                this.requestUtil.jsonResponse(res, empty);
+            }.bind(this));
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+function getUserDataByUserName(req, res, next) {
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.user.role === "admin" &&
+        req.query &&
+        req.query.username) {
+            this.getAuthStore().findUser( 'USERNAME', req.query.username )
+            .then(function(userData) {
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             .then(null, function(err){
