@@ -556,7 +556,17 @@ module.exports = {
                 get: "getCurrentPlan"
             }
         },
-        {
+         {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/planforuser",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getPlanForUser"
+            }
+        },
+       {
             requireAuth: true,
             requireHttps: true,
             api: "/api/v2/license/students",
@@ -606,6 +616,16 @@ module.exports = {
             controller: "license",
             method: {
                 post: "upgradeLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/alter",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "alterLicense"
             }
         },
         {
@@ -927,6 +947,15 @@ module.exports = {
             controller: "user",
             method: {
                 get: "getUserDataByEmail",
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/userbyusername",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserDataByUserName",
             }
         },
         {
