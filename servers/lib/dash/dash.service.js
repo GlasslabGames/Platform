@@ -219,10 +219,12 @@ DashService.prototype._isValidGameId = function(gameId){
                     return resolve();
                 }
             }
+//
+        console.error('----  DashService: _isValidGameId() gameId not valid >', gameId);
+        console.error('----  gameId not in this list:');
+        console.error('----  ' + Object.keys(this._games));
+        reject();
 
-            console.error('    DashService: _isValidGameId() gameId not valid >', gameId);
-            console.error('        gameId not in this list:\n        ' + this._games);
-            reject();
     }.bind(this) );
 };
 
