@@ -30,6 +30,7 @@ module.exports = {
     //upgradeLicensePurchaseOrder: 		upgradeLicensePurchaseOrder,
     getActivePurchaseOrderInfo: 		getActivePurchaseOrderInfo,
     getOpenPurchaseOrders: 				getOpenPurchaseOrders,
+    getNotOpenPurchaseOrders:			getNotOpenPurchaseOrders,
     cancelActivePurchaseOrder: 			cancelActivePurchaseOrder,
     receivePurchaseOrder: 				receivePurchaseOrder,
     rejectPurchaseOrder: 				rejectPurchaseOrder,
@@ -2095,6 +2096,23 @@ function getOpenPurchaseOrders(req, res) {
     	}.bind(this))
     	.then(null, function(err) {
             console.error("Get Open Purchase Orders Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+    	}.bind(this));
+}
+
+// gets any not open purchase orders !(pending, received, invoiced)
+function getNotOpenPurchaseOrders(req, res) {
+    if(!(req && req.user && ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) )){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+
+    this.myds.getNotOpenPurchaseOrders()
+    	.then( function(results) {
+    		this.requestUtil.jsonResponse(res, results);
+    	}.bind(this))
+    	.then(null, function(err) {
+            console.error("Get Not Open Purchase Orders Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }
