@@ -176,7 +176,6 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 if(!((results === "none")||(results.length===0))){
                     // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
                     user.hadTrial = true;
-                    console.log("user had trial or previous subscriptions: ", user.username);
 					user.hadSubscribe = false;
 					for (i=0;i<results.length;i++) {
 						if (results[i].package_type !== 'trial') {
