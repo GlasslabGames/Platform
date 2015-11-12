@@ -204,7 +204,7 @@ DashService.prototype.isValidGameId = function(gameId) {
             return true;
         })
         .then(null,function(){
-            consle.error('   at least 1 id from this list is not valid:\n        ' + gameId);;
+            console.error('   at least 1 id from this list is not valid:\n        ' + gameId);;
             return false;
         });
 };
