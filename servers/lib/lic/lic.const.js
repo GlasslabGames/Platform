@@ -43,7 +43,8 @@ module.exports = {
                 "AA-1",
                 "WPLUS",
                 "WT",
-                "PVZ"
+                "PVZ",
+                "B538"
             ],
             "downloadableGames": [
             ],
@@ -84,7 +85,8 @@ module.exports = {
                 "AA-1",
                 "WPLUS",
                 "WT",
-                "PVZ"
+                "PVZ",
+                "B538"
             ],
             "downloadableGames": [
                 "SC"
@@ -107,7 +109,8 @@ module.exports = {
                 "AA-1",
                 "WPLUS",
                 "WT",
-                "PVZ"
+                "PVZ",
+                "B538"
             ],
             "downloadableGames": [
                 "SC"
@@ -130,7 +133,8 @@ module.exports = {
                 "AA-1",
                 "WPLUS",
                 "WT",
-                "PVZ"
+                "PVZ",
+                "B538"
             ],
             "downloadableGames": [
                 "SC"
