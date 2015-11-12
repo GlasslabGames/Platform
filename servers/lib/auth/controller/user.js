@@ -619,6 +619,11 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.firstName   = Util.ConvertToString(req.body.firstName);
         regData.lastName    = Util.ConvertToString(req.body.lastName);
         regData.email       = Util.ConvertToString(req.body.email);
+        regData.organization = Util.ConvertToString(req.body.organization);
+        regData.orgRole = Util.ConvertToString(req.body.orgRole);
+        regData.numGames = Util.ConvertToString(req.body.numGames);
+        regData.subjects = Util.ConvertToString(req.body.subjects);
+        regData.interest = Util.ConvertToString(req.body.interest);
         regData.verifyCode  = Util.CreateUUID();
         regData.verifyCodeStatus  = (Util.ConvertToString(req.body.shadow) ? aConst.verifyCode.status.shadow : aConst.verifyCode.status.approve);
 
@@ -772,7 +777,28 @@ function registerUserV2(req, res, next, serviceManager) {
                 }
                 // if developer
                 else if( regData.role == lConst.role.developer ) {
-                	this.requestUtil.jsonResponse(res, {});
+                    var orgData = {
+                        userId: userID,
+                        username: regData.username,
+                        firstName: regData.firstName,
+                        lastName: regData.lastName,
+                        email: regData.email,
+                        organization: regData.organization,
+                        role: regData.orgRole,
+                        numGames: regData.numGames,
+                        subjects: regData.subjects,
+                        interest: regData.interest
+                    };
+
+                    var dashService = this.serviceManager.get("dash").service;
+                    dashService.telmStore.createDeveloperOrganization(userID, orgData)
+                    .then(function() {
+                        this.requestUtil.jsonResponse(res, {});
+                    }.bind(this))
+                    .then(null, function(err){
+                        this.requestUtil.errorResponse(res, {key:"user.create.general"});
+                    }.bind(this));
+                    
                 /*
                     sendDeveloperConfirmEmail.call( this, regData, req.protocol, req.headers.host )
                         .then(function(){
@@ -1331,13 +1357,49 @@ function getAllDevelopers(req, res, next) {
     }
 	
 	var result = { pending: [], approved: [] };
-	
+    var dashService = this.serviceManager.get("dash").service;
+	var currentDev;
+    
 	this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.approve)
 		.then(function(pending) {
 			if (_.isArray(pending)) {
 				result.pending = pending;
 			}
-			console.log("developer", "got pending");
+
+            var promiseList = [];
+            for (var i=0;i<pending.length;i++) {
+                var dev = pending[i];
+                promiseList.push(dev);
+                promiseList.push(dashService.telmStore.getDeveloperOrganization(dev.id));
+            }
+            return when.all(promiseList);
+        }.bind(this))
+		.then(function(pendingOrg){
+            if (_.isArray(pendingOrg)) {
+                currentDev = null;
+                for (var i=0;i<pendingOrg.length;i++) {
+                    var data = pendingOrg[i];
+                    if (currentDev) {
+                        if (typeof data === 'string') {
+                            currentDev.organization = "";
+                            currentDev.orgRole = "";
+                            currentDev.numGames = "0";
+                            currentDev.subjects = "";
+                            currentDev.interest = "";
+                        } else {
+                            currentDev.organization = data.organization;
+                            currentDev.orgRole = data.role;
+                            currentDev.numGames = data.numGames;
+                            currentDev.subjects = data.subjects;
+                            currentDev.interest = data.interest;
+                        }
+                        currentDev = null;
+                    } else {
+                        currentDev = data;
+                    }
+                }
+            }
+
 			return this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.verified);
 		}.bind(this))
 		// ok, send data
@@ -1345,11 +1407,46 @@ function getAllDevelopers(req, res, next) {
 			if (_.isArray(approved)) {
 				result.approved = approved;
 			}
-			console.log("developer", "got approved");
+
+            var promiseList = [];
+            for (var i=0;i<approved.length;i++) {
+                var dev = approved[i];
+                promiseList.push(dev);
+                promiseList.push(dashService.telmStore.getDeveloperOrganization(dev.id));
+            }
+            return when.all(promiseList);
+        }.bind(this))
+		.then(function(approvedOrg){
+            if (_.isArray(approvedOrg)) {
+                currentDev = null;
+                for (var i=0;i<approvedOrg.length;i++) {
+                    var data = approvedOrg[i];
+                    if (currentDev) {
+                        if (typeof data === 'string') {
+                            currentDev.organization = "";
+                            currentDev.orgRole = "";
+                            currentDev.numGames = "0";
+                            currentDev.subjects = "";
+                            currentDev.interest = "";
+                        } else {
+                            currentDev.organization = data.organization;
+                            currentDev.orgRole = data.role;
+                            currentDev.numGames = data.numGames;
+                            currentDev.subjects = data.subjects;
+                            currentDev.interest = data.interest;
+                        }
+                        currentDev = null;
+                    } else {
+                        currentDev = data;
+                    }
+                }
+            }
+
 			this.requestUtil.jsonResponse(res, result);
 		}.bind(this))
 		// error
 		.then(null, function(err){
+            console.log("getAllDevelopers error:", err);
 			this.requestUtil.errorResponse(res, err);
 		}.bind(this))
 }

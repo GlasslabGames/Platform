@@ -45,6 +45,9 @@ module.exports = {
         gameAchievementKey: 'ga',
         matchKey: 'm'
     },
+    developer: {
+        organizationKey: "o"
+    },
     datastore: {
       keys: {
           user: "u",

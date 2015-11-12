@@ -841,12 +841,12 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
 
 Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT id, FIRST_NAME, LAST_NAME, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
+        var Q = "SELECT id, FIRST_NAME, LAST_NAME, EMAIL, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
         return this.ds.query(Q)
             .then(function(results){
                 var developers = [];
                 results.forEach(function(result){
-                    developers.push({ id: result.id, name: result.FIRST_NAME + ' ' + result.LAST_NAME, date: result.pretty_date, fulldate: result.date_created });
+                    developers.push({ id: result.id, name: result.FIRST_NAME + ' ' + result.LAST_NAME, email: result.EMAIL, date: result.pretty_date, fulldate: result.date_created });
                 }.bind(this));
                 return when.all(developers);
             }.bind(this))

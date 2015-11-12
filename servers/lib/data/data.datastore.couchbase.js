@@ -3189,3 +3189,41 @@ TelemDS_Couchbase.prototype.deleteGameSavesByGameId = function(gameId){
         }.bind(this));
     }.bind(this));
 };
+
+// create method for di:o (developer info/organization).  Returns a promise.  No preexisting key needed.
+TelemDS_Couchbase.prototype.createDeveloperOrganization = function(devId, data){
+    return when.promise(function(resolve, reject){
+        var key = tConst.datastore.keys.developer + ":" + tConst.developer.organizationKey + ":" + devId;
+
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("Couchbase TelemetryStore: Create Developer Organization Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(data);
+        }.bind(this));
+    }.bind(this));
+};
+
+// get method for di:o (developer info/organization).  Returns a promise.
+TelemDS_Couchbase.prototype.getDeveloperOrganization = function(devId){
+    return when.promise(function(resolve, reject){
+        var key = tConst.datastore.keys.developer + ":" + tConst.developer.organizationKey + ":" + devId;
+
+        this.client.get(key, function(err, results) {
+            if(err) {
+                if(err.code != 13) {
+                    console.error("CouchBase TelemetryStore: Get Error -", err);
+                    reject(err);
+                    return;
+                }
+                
+                resolve("no org");
+            } else {
+                resolve(results.value);
+            }
+        }.bind(this));
+    }.bind(this));
+};
+
