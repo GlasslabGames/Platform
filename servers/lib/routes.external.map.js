@@ -750,6 +750,26 @@ module.exports = {
         {
             requireAuth: true,
             requireHttps: true,
+            api: "/api/v2/license/po/open",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getOpenPurchaseOrders"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/notopen",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getNotOpenPurchaseOrders"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/po/cancel",
             service: "lic",
             controller: "license",

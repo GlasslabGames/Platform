@@ -640,7 +640,7 @@ Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
         var valuesString = values.join(",");
         var Q = "INSERT INTO GL_PURCHASE_ORDER " +
             "(user_id,license_id,status,purchase_order_number," +
-            "purchase_order_key,phone,email,name,payment,action,date_created) " +
+            "purchase_order_key,phone,email,name,payment,current_package_type,current_package_size_tier,action,date_created) " +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -672,6 +672,34 @@ Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
                 reject(err);
             });
     }.bind(this));
+};
+
+Lic_MySQL.prototype.getOpenPurchaseOrders = function() {
+	return when.promise(function(resolve, reject){
+		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received', 'invoiced');";
+		this.ds.query(Q)
+		.then(function(results){
+			resolve(results);
+		})
+		.then(null, function(err){
+			console.error("Get Open Purchase Orders Error -",err);
+			reject(err);
+		});
+	}.bind(this));
+};
+
+Lic_MySQL.prototype.getNotOpenPurchaseOrders = function() {
+	return when.promise(function(resolve, reject){
+		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status NOT IN ('pending', 'received', 'invoiced');";
+		this.ds.query(Q)
+		.then(function(results){
+			resolve(results);
+		})
+		.then(null, function(err){
+			console.error("Get Open Purchase Orders Error -",err);
+			reject(err);
+		});
+	}.bind(this));
 };
 
 Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){

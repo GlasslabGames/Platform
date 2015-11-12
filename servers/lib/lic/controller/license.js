@@ -6,44 +6,46 @@ var Util   = require('../../core/util.js');
 var lConst;
 
 module.exports = {
-    getSubscriptionPackages: getSubscriptionPackages,
-    getCurrentPlan: getCurrentPlan,
-    getPlanForUser: getPlanForUser,
-    getStudentsInLicense: getStudentsInLicense,
-    getBillingInfo: getBillingInfo,
-    updateBillingInfo: updateBillingInfo,
-    subscribeToLicense: subscribeToLicense,
-    subscribeToTrialLicense: subscribeToTrialLicense,
-    upgradeLicense: upgradeLicense,
-    upgradeTrialLicense: upgradeTrialLicense,
-    alterLicense: alterLicense,
-    validatePromoCode: validatePromoCode,
-    //cancelLicenseAutoRenew: cancelLicenseAutoRenew,
-    //enableLicenseAutoRenew: enableLicenseAutoRenew,
-    addTeachersToLicense: addTeachersToLicense,
-    setLicenseMapStatusToActive: setLicenseMapStatusToActive,
-    setLicenseMapStatusToNull: setLicenseMapStatusToNull,
-    removeTeacherFromLicense: removeTeacherFromLicense,
-    teacherLeavesLicense: teacherLeavesLicense,
-    subscribeToLicensePurchaseOrder: subscribeToLicensePurchaseOrder,
-    upgradeTrialLicensePurchaseOrder: upgradeTrialLicensePurchaseOrder,
-    //upgradeLicensePurchaseOrder: upgradeLicensePurchaseOrder,
-    getActivePurchaseOrderInfo: getActivePurchaseOrderInfo,
-    cancelActivePurchaseOrder: cancelActivePurchaseOrder,
-    receivePurchaseOrder: receivePurchaseOrder,
-    rejectPurchaseOrder: rejectPurchaseOrder,
-    invoicePurchaseOrder: invoicePurchaseOrder,
-    approvePurchaseOrder: approvePurchaseOrder,
-    migrateToTrialLegacy: migrateToTrialLegacy,
-    cancelLicense: cancelLicense,
-    cancelLicenseInternal: cancelLicenseInternal,
-    subscribeToLicenseInternal: subscribeToLicenseInternal,
-    inspectLicenses: inspectLicenses,
-    trialMoveToTeacher: trialMoveToTeacher
+    getSubscriptionPackages: 			getSubscriptionPackages,
+    getCurrentPlan: 					getCurrentPlan,
+    getPlanForUser: 					getPlanForUser,
+    getStudentsInLicense: 				getStudentsInLicense,
+    getBillingInfo: 					getBillingInfo,
+    updateBillingInfo: 					updateBillingInfo,
+    subscribeToLicense: 				subscribeToLicense,
+    subscribeToTrialLicense: 			subscribeToTrialLicense,
+    upgradeLicense: 					upgradeLicense,
+    upgradeTrialLicense: 				upgradeTrialLicense,
+    alterLicense: 						alterLicense,
+    validatePromoCode: 					validatePromoCode,
+    //cancelLicenseAutoRenew: 			cancelLicenseAutoRenew,
+    //enableLicenseAutoRenew: 			enableLicenseAutoRenew,
+    addTeachersToLicense: 				addTeachersToLicense,
+    setLicenseMapStatusToActive: 		setLicenseMapStatusToActive,
+    setLicenseMapStatusToNull: 			setLicenseMapStatusToNull,
+    removeTeacherFromLicense: 			removeTeacherFromLicense,
+    teacherLeavesLicense: 				teacherLeavesLicense,
+    subscribeToLicensePurchaseOrder: 	subscribeToLicensePurchaseOrder,
+    upgradeTrialLicensePurchaseOrder: 	upgradeTrialLicensePurchaseOrder,
+    //upgradeLicensePurchaseOrder: 		upgradeLicensePurchaseOrder,
+    getActivePurchaseOrderInfo: 		getActivePurchaseOrderInfo,
+    getOpenPurchaseOrders: 				getOpenPurchaseOrders,
+    getNotOpenPurchaseOrders:			getNotOpenPurchaseOrders,
+    cancelActivePurchaseOrder: 			cancelActivePurchaseOrder,
+    receivePurchaseOrder: 				receivePurchaseOrder,
+    rejectPurchaseOrder: 				rejectPurchaseOrder,
+    invoicePurchaseOrder: 				invoicePurchaseOrder,
+    approvePurchaseOrder: 				approvePurchaseOrder,
+    migrateToTrialLegacy: 				migrateToTrialLegacy,
+    cancelLicense: 						cancelLicense,
+    cancelLicenseInternal: 				cancelLicenseInternal,
+    subscribeToLicenseInternal: 		subscribeToLicenseInternal,
+    inspectLicenses: 					inspectLicenses,
+    trialMoveToTeacher: 				trialMoveToTeacher
     // vestigial apis
-    //verifyLicense:   verifyLicense,
-    //registerLicense: registerLicense,
-    //getLicenses:     getLicenses
+    //verifyLicense:   					verifyLicense,
+    //registerLicense: 					registerLicense,
+    //getLicenses:     					getLicenses
 };
 
 // provides license package information for the subscription/packages page
@@ -976,7 +978,7 @@ function alterLicense(req, res){
             
             didSetInstitution = true;
             
-            _doSubscribeToLicenseInternal.call(this, userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "callback", callback: upgradeCallback });
+            _doSubscribeToLicenseInternal.call(this, userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "callback", callback: upgradeCallback }, req, res);
             return;
 
         } else if (oldPlanInfo.packageDetails.planId !== planInfo.type || oldPlanInfo.packageDetails.seatId !== planInfo.seats || planInfo.yearAdded) {
@@ -1777,7 +1779,7 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                 licenseId = id;
                 //create entry in purchaseOrder table
                 // if purchase order number present, then user's purchase order status skips straight to received
-                var values = _preparePurchaseOrderInsert.call(this, userId, licenseId, purchaseOrderInfo, action);
+                var values = _preparePurchaseOrderInsert.call(this, userId, licenseId, purchaseOrderInfo, planInfo, action);
                 //need to formalize table schema
                 return this.myds.insertToPurchaseOrderTable(values);
 
@@ -1812,7 +1814,7 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
     }.bind(this));
 }
 
-function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, action){
+function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, planInfo, action){
     var values = [];
     values.push(userId);
     values.push(licenseId);
@@ -1820,15 +1822,17 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     var purchaseOrderNumber;
     if(purchaseOrderInfo.number){
         status = (purchaseOrderInfo.approve ? "'approved'" : "'received'");
-        purchaseOrderNumber = "'" + purchaseOrderInfo.number + "'";
+        purchaseOrderNumber = purchaseOrderInfo.number;
     } else{
         status = "'pending'";
-        purchaseOrderNumber = "NULL";
+        purchaseOrderNumber = Util.CreateUUID();
     }
     values.push(status);
-    values.push(purchaseOrderNumber);
+
+    var storePONumber = "'" + purchaseOrderNumber + "'";
+    values.push( storePONumber );
     // license id added to guarantee uniqueness.  table also requires a unique value
-    var purchaseOrderKey = Util.CreateUUID() + licenseId;
+    var purchaseOrderKey = purchaseOrderNumber + "-" + licenseId;
     purchaseOrderInfo.key = purchaseOrderKey;
     purchaseOrderKey = "'" + purchaseOrderKey + "'";
     values.push(purchaseOrderKey);
@@ -1852,6 +1856,14 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, actio
     purchaseOrderInfo.payment = payment;
     payment = "'" + payment + "'";
     values.push(payment);
+
+    // Added current_package_type and current_package_size_tier
+    var current_package_type = "'" + planInfo.type + "'";
+    values.push( current_package_type );
+
+    var current_package_size_tier = "'" + planInfo.seats + "'";
+    values.push( current_package_size_tier );
+
     action = "'" + action + "'";
     values.push(action);
     var dateCreated = "NOW()";
@@ -1981,7 +1993,7 @@ function upgradeLicensePurchaseOrder(req, res){
                 return results;
             }
             // create purchase order row in sql
-            var values = _preparePurchaseOrderInsert.call(this, userId, licenseId, purchaseOrderInfo, action);
+            var values = _preparePurchaseOrderInsert.call(this, userId, licenseId, purchaseOrderInfo, planInfo, action);
             return this.myds.insertToPurchaseOrderTable(values);
         }.bind(this))
         .then(function(purchaseOrderId){
@@ -2069,6 +2081,40 @@ function getActivePurchaseOrderInfo(req, res){
             console.error("Get Active Purchase Order Info Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
+}
+
+// gets any open purchase orders (pending, received, invoiced)
+function getOpenPurchaseOrders(req, res) {
+    if(!(req && req.user && ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) )){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+
+    this.myds.getOpenPurchaseOrders()
+    	.then( function(results) {
+    		this.requestUtil.jsonResponse(res, results);
+    	}.bind(this))
+    	.then(null, function(err) {
+            console.error("Get Open Purchase Orders Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+    	}.bind(this));
+}
+
+// gets any not open purchase orders !(pending, received, invoiced)
+function getNotOpenPurchaseOrders(req, res) {
+    if(!(req && req.user && ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) )){
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+
+    this.myds.getNotOpenPurchaseOrders()
+    	.then( function(results) {
+    		this.requestUtil.jsonResponse(res, results);
+    	}.bind(this))
+    	.then(null, function(err) {
+            console.error("Get Not Open Purchase Orders Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+    	}.bind(this));
 }
 
 // cancels a purchase order application process that has the status of pending
@@ -2450,10 +2496,10 @@ function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expiration
         updateFields.push(active);
 
         // NOTE: KMY: All new subscriptions will use the new format now
-        var seats = "package_size_tier = '_" + planInfo.students + "_" + planInfo.instructors + "'";
+        var seats = "package_size_tier = '_" + planInfo.students + "_" + planInfo.educators + "'";
         updateFields.push(seats);
 
-        var educatorSeatsRemaining = "educator_seats_remaining = " + planInfo.instructors;
+        var educatorSeatsRemaining = "educator_seats_remaining = " + planInfo.educators;
         updateFields.push(educatorSeatsRemaining);
         var studentSeatsRemaining = "student_seats_remaining = " + planInfo.students;
         updateFields.push(studentSeatsRemaining);
@@ -3111,11 +3157,10 @@ function subscribeToLicenseInternal(req, res){
     var planInfo = req.body.planInfo;
     var schoolInfo = req.body.schoolInfo;
 
-    _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "email" });
+    _doSubscribeToLicenseInternal.call(this,userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "email" }, req, res);
 }
 
-function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, schoolInfo, completionInfo) {
-
+function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, schoolInfo, completionInfo,req,res) {
     var user;
     var action;
 
@@ -4341,8 +4386,10 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                         state = results[oldLic]['license_id'];
                     }
                 } else {
-                    if (results[0]['license_id'] != licenseId || results[0].status !== 'active') {
-                        state = "inconsistent";
+					if( results[0].status === "po-received"){
+						state = results[0]['license_id'];
+					} else if (results[0]['license_id'] != licenseId || results[0].status !== 'active') {
+	                    state = "inconsistent";
                     } else {
                         state = results[0]['license_id'];
                     }
