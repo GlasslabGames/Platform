@@ -36,7 +36,8 @@ function getAssessmentDefinitions(req, res){
             if(!state){
                 return when.reject({ key: "report.gameId.invalid" } );
             }
-            return this.getGameAssessmentInfo(gameId); ///<<
+            // from this._games[gameId].info.assessment
+            return this.getGameAssessmentInfo(gameId);
         }.bind(this) )
         .then(function(assessmentInfo){
             this.requestUtil.jsonResponse(res, assessmentInfo);
