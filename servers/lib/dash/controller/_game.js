@@ -24,6 +24,9 @@ function getAssessmentDefinitions(req, res){
         return;
     }
     var gameId = req.params.gameId;
+
+    console.log('getAssessmentDefinitions() -- gameId =', gameId);
+
     // gameIds are not case sensitive
     gameId = gameId.toUpperCase();
 
@@ -33,7 +36,7 @@ function getAssessmentDefinitions(req, res){
             if(!state){
                 return when.reject({ key: "report.gameId.invalid" } );
             }
-            return this.getGameAssessmentInfo(gameId);
+            return this.getGameAssessmentInfo(gameId); ///<<
         }.bind(this) )
         .then(function(assessmentInfo){
             this.requestUtil.jsonResponse(res, assessmentInfo);

@@ -55,7 +55,37 @@
             "reports": "assets/game-banner-AA-1.png"
         }
     },
-    "assessment": [],
+    "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "so1": {
+                    "name": "200 In Savings",
+                    "description": "Student deposited over $200 in their savings account."
+                },
+                "so2": {
+                    "name": "500 In Savings",
+                    "description": "Student deposited over $500 in their savings account."
+                },
+                "so3": {
+                    "name": "1000 In Savings",
+                    "description": "Student deposited over $1000 in their savings account."
+                },
+                "so4": {
+                    "name": "5000 In Savings",
+                    "description": "Student deposited over $5000 in their savings account."
+                },
+                "wo8": {
+                    "name": "test data in db",
+                    "description": "Test data has been read into the db from file possibly corrupting good data."
+                }
+            }
+        }
+    ],
     "reports": {
         "list": [
             {

@@ -377,7 +377,7 @@ DashService.prototype.getGameBasicInfo = function(gameId) {
 DashService.prototype.getGameAssessmentInfo = function(gameId) {
     return when.promise(function(resolve, reject){
         resolve(this._games[gameId].info.assessment);
-    }.bind(this) );
+    }.bind(this) );///
 };
 
 

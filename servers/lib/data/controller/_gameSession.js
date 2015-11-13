@@ -23,7 +23,7 @@ function getGameSessionEvents(req, res, next)
         return;
     }
     var gameSessionId = req.params.gameSessionId;
-
+///
     this.cbds.getEvents(gameSessionId)
         .then(function(events){
             this.requestUtil.jsonResponse(res, events);
