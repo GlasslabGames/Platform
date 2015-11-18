@@ -15,8 +15,8 @@
         "platform": {
             "type": "iPad",
             "icon": {
-                "small": "assets/platform-ipad.png",
-                "large": "assets/platform-ipad@2x.png"
+                "small": "/assets/platform-ipad.png",
+                "large": "/assets/platform-ipad@2x.png"
             }
         },
         "shortDescription": "Placeholder Short Description",
@@ -25,8 +25,8 @@
             "id": "TEMP",
             "name": "Developer Name",
             "logo": {
-                "small": "assets/glasslab-logo.png",
-                "large": "assets/glasslab-logo-2x.png"
+                "small": "/assets/glasslab-logo.png",
+                "large": "/assets/glasslab-logo-2x.png"
             },
             "description": "Placeholder Developer Description"
         },
@@ -42,16 +42,16 @@
             }
         },
         "thumbnail": {
-            "small": "assets/thumb-game-AA-1.png",
-            "large": "assets/thumb-game-AA-1.png"
+            "small": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/150x120.jpg",
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/300x240.jpg"
         },
         "card": {
-            "small": "assets/game-card-AA-1.jpg",
-            "large": "assets/game-card-AA-1@2x.jpg"
+            "small": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/300x240.jpg",
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/600x480.jpg"
         },
         "banners": {
-            "product": "assets/game-banner-AA-1.png",
-            "reports": "assets/game-banner-AA-1.png"
+            "product": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/940x300.jpg",
+            "reports": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/940x300.jpg"
         }
     },
     "assessment": [
