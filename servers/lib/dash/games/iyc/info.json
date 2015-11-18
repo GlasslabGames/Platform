@@ -70,33 +70,47 @@
                 "id": "product",
                 "title": "Placeholder Product Description",
                 "header": "Placeholder Header",
-                "about": "Placeholder About Section.",
+                "about": "IF EDU is a chapter-based adventure game for the iPad that enables and empowers students to learn how to make healthy decisions, and how to demonstrate empathy and compassion. The game combines interactive storytelling and commercial quality gameplay to engage, motivate, and inspire. Created for elementary and middle school students, each IF chapter contains one month’s worth of in-class lessons.
+•Originally developed by Trip Hawkin’s If You Can Company
+•Addresses critical SEL skills and character education
+•12 chapters of commercial quality gameplay and character/world design with vivid storytelling
+•Appropriate for students in grades 4 and beyond
+",
                 "video": "https://youtu.be/LvJU4C0bL3g",
-                "brochure": ""
+                "brochure": "",
+                "curriculum": "How it Fits the Curriculum:
+At present, there is no nationally accepted standard for SEL. The most widely adopted definition was developed by Chicago-based Collaborative for Academic, Social, and Emotional Learning (CASEL), which divides SEL into five key ‘competencies’:
+
+•Self-awareness: ability to accurately recognize one’s emotions and thoughts and their influence on behavior
+•Self-management: ability to regulate one’s emotions, thoughts, and behaviors effectively in different situations
+•Social awareness: ability to take the perspective of and empathize with others from diverse backgrounds and cultures
+•Relationship skills: ability to establish healthy and rewarding relationships with diverse individuals and groups
+•Responsible decision-making: ability to make constructive and respectful choices about personal behavior and social interactions based on consideration of ethical standards, safety concerns, social norms, the realistic evaluation of consequences of various actions, and the well-being of self and others
+
+"
             },
             "standards": {
                 "order": 2,
                 "enabled": true,
                 "authRequired": false,
                 "id": "standards",
-                "title": "Standards",
+                "title": "Standards Alignment",
                 "CCSS": [
                     {
-                        "category": "Placeholder Standards Category",
+                        "category": "Goals",
                         "groups": [
                             {
-                                "name": "Placeholder Group",
                                 "list": [
                                     {
-                                        "name": "Placeholder Standard",
-                                        "link": "Placeholder Link",
-                                        "description": "Placeholder Description"
+                                        "name": "ExSEL Goals",
+                                        "link": "http://www.http://ifyoucan.org/exsel-goals",
+                                        "description": "Every “move” your child makes in the game is a choice. “Behind the scenes” we’re assessing each choice against 20 distinct Social & Emotional Learning (SEL) skills."
                                     }
                                 ]
                             }
                         ]
                     }
-                ]
+                ],
             },
             "lessonPlans": {
                 "order": 3,
@@ -109,8 +123,44 @@
                         "category": "Lesson Plans",
                         "list": [
                             {
-                                "name": "",
-                                "link": ""
+                                "name": "Chapter 1",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-overviews/"
+                            },
+                            {
+                                "name": "Chapter 2",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-2-overview/"
+                            },
+                            {
+                                "name": "Chapter 3",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-3-overview/"
+                            },
+                            {
+                                "name": "Chapter 4",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-4-overview/"
+                            },
+                            {
+                                "name": "Chapter 5",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-5-overview/"
+                            },
+                            {
+                                "name": "Chapter 6",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-6-overview/"
+                            },
+                            {
+                                "name": "Chapter 7",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-7-overview/"
+                            },
+                            {
+                                "name": "Chapter 8",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-8-overview/"
+                            },
+                            {
+                                "name": "Chapter 9",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-9-overview/"
+                            },
+                            {
+                                "name": "Chapter 10-12",
+                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapters/"
                             }
                         ]
                     },
