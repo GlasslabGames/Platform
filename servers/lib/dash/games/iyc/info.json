@@ -3,12 +3,12 @@
         "gameId": "IYC",
         "enabled": true,
         "visible": true,
-        "shortName": "If You Can",
-        "longName": "If You Can",
-        "grades": "TBD",
-        "subject": "TBD",
-        "type": "TBD",
-        "price": "Free",
+        "shortName": "IF EDU",
+        "longName": "IF EDU",
+        "grades": "4-8+",
+        "subject": "Social-Emotional Learning",
+        "type": "App",
+        "price": "Coming Soon",
         "packages": "TBD",
         "release": "dev",
         "releaseDate": "TBD",
@@ -19,11 +19,11 @@
                 "large": "/assets/platform-ipad@2x.png"
             }
         },
-        "shortDescription": "Placeholder Short Description",
-        "description": "Placeholder Description",
+        "shortDescription": "IF EDU is a chapter-based adventure game for the iPad that enables and empowers students to learn how to make healthy decisions, and how to demonstrate empathy and compassion.",
+        "description": "IF EDU is a chapter-based adventure game for the iPad that enables and empowers students to learn how to make healthy decisions, and how to demonstrate empathy and compassion.",
         "developer": {
-            "id": "TEMP",
-            "name": "Developer Name",
+            "id": "GL",
+            "name": "GlassLab, Inc.",
             "logo": {
                 "small": "/assets/glasslab-logo.png",
                 "large": "/assets/glasslab-logo-2x.png"
