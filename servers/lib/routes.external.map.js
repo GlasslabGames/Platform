@@ -362,6 +362,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/replace/:gameId/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "replaceGameInfo"
+            }
+        },
+        {
             api: "/api/v2/dash/badge/:badgeId",
             service: "dash",
             controller: "games",

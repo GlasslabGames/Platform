@@ -18,6 +18,7 @@ module.exports = {
     generateBadgeCode:               generateBadgeCode,
     badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
+    replaceGameInfo:                 replaceGameInfo,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
     getDeveloperGamesInfo:           getDeveloperGamesInfo,
@@ -685,6 +686,33 @@ function updateDeveloperGameInfo(req, res){
             console.trace("Dash: Update Developer Game Info Error -", err);
             this.requestUtil.errorResponse(res, error, 401);
             this.stats.increment("error", "UpdateDeveloperGameInfo.Catch");
+        }.bind(this));
+}
+
+function replaceGameInfo(req, res) {
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length &&
+        req.params.code === dConst.code) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    var gameId = req.params.gameId.toUpperCase();
+    var data = req.body;
+    if (!this.validateGameInfo(data)) {
+        this.requestUtil.errorResponse(res, {key:"dash.data.invalid"},500);
+        return;
+    }
+
+    this.telmStore.createGameInformation(gameId, data)
+        .then(function() {
+            this.requestUtil.jsonResponse(res, {update: "complete"});
+        }.bind(this))
+        .catch(function(err){
+            console.trace("Dash: replaceGameInfo Error -", err);
+            this.requestUtil.errorResponse(res, err, 401);
         }.bind(this));
 }
 
