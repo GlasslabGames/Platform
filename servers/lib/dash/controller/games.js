@@ -514,7 +514,7 @@ function reloadGameFiles(req, res){
 
 function getDeveloperProfile(req, res){
     var userId = req.user.id;
-    if(req.user.role !== "developer"){
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
@@ -554,7 +554,7 @@ function getDeveloperGameIds(userId, hidden){
 function createNewGame(req, res){
     var userId = req.user.id;
     var gameId = req.params.gameId.toUpperCase();
-    if(req.user.role !== "developer"){
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
@@ -595,7 +595,7 @@ function createNewGame(req, res){
 
 function getDeveloperGamesInfo(req, res){
     var userId = req.user.id;
-    if(req.user.role !== "developer"){
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
@@ -645,7 +645,7 @@ function getDeveloperGameInfo(req, res) {
 function updateDeveloperGameInfo(req, res){
     var userId = req.user.id;
     var gameId = req.params.gameId;
-    if(req.user.role !== "developer"){
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
