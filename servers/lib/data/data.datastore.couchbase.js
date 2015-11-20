@@ -322,6 +322,13 @@ var gdv_getAllDeveloperProfiles = function(doc, meta)
     }
 };
 
+var gdv_getAllDeveloperGamesAwaitingApproval = function(doc, meta) {
+    var values = meta.id.split(':');
+    if(values[0] === 'dgaa'){
+        emit( meta.id );
+    }
+}
+
 var gdv_getAllMatches = function(doc, meta){
     var values = meta.id.split(':');
     if((values[0] === 'gd') &&
@@ -392,6 +399,9 @@ var gdv_getAllGameSaves = function(doc, meta){
             },
             getAllDeveloperProfiles: {
                 map: gdv_getAllDeveloperProfiles
+            },
+            getAllDeveloperGamesAwaitingApproval: {
+                map: gdv_getAllDeveloperGamesAwaitingApproval
             },
             getAllMatches: {
                 map: gdv_getAllMatches
@@ -3223,6 +3233,60 @@ TelemDS_Couchbase.prototype.getDeveloperOrganization = function(devId){
             } else {
                 resolve(results.value);
             }
+        }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllDeveloperGamesAwaitingApproval = function() {
+    return when.promise(function(resolve, reject){
+        var map = "getAllDeveloperGamesAwaitingApproval";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results) {
+                if (err) {
+                    console.error("Couchbase TelemetryStore: getAllDeveloperGamesAwaitingApproval Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function (err, results) {
+                    if (err) {
+                        console.error("CouchBase TelemetryStore: getAllDeveloperGamesAwaitingApproval Error -", err);
+                        reject(err);
+                        return;
+                    }
+                    var devProfiles = {};
+                    _.forEach(results, function (developer, key) {
+                        var value = developer.value;
+                        if(typeof value === "string"){
+                            value = JSON.parse(value)
+                        }
+                        devProfiles[key] = value;
+                    });
+                    resolve(devProfiles);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, userId){
+    return when.promise(function(resolve, reject){
+        var key = tConst.datastore.keys.developerGameAwaitingApproval + ":" + gameId;
+        var data = {
+            gameId: gameId,
+            userId: userId,
+            ts: Date.now()
+        };
+        this.client.set(key, data, function(err, results){
+            if(err){
+                console.error("Couchbase TelemetryStore: setDeveloperGameAwaitingApproval Error -", err);
+                reject(err);
+                return;
+            }
+            resolve(data);
         }.bind(this));
     }.bind(this));
 };

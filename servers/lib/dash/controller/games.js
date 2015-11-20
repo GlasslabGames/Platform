@@ -25,6 +25,8 @@ module.exports = {
     getDeveloperGamesInfoSchema:     getDeveloperGamesInfoSchema,
     getDeveloperGameInfo:            getDeveloperGameInfo,
     createNewGame:                   createNewGame,
+    submitGameForApproval:           submitGameForApproval,
+    getAllDeveloperGamesAwaitingApproval: getAllDeveloperGamesAwaitingApproval,
     updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
 
@@ -593,6 +595,48 @@ function createNewGame(req, res){
         }.bind(this));
 }
 
+function submitGameForApproval(req, res){
+    var userId = req.user.id;
+    if(req.user.role !== "developer"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    var gameId = req.params.gameId.toUpperCase();
+    getDeveloperGameIds.call(this,userId)
+        .then(function(developerGames) {
+            if(!!developerGames[gameId]) {
+                return this.telmStore.setDeveloperGameAwaitingApproval(gameId, userId);
+            } else {
+                return when.reject(userId + " not a developer for "+gameId);
+            }
+        }.bind(this))
+        .then(function() {
+            this.requestUtil.jsonResponse(res, {status: "ok"});
+        }.bind(this))
+        .catch(function(err) {
+            console.error("Dash: submitGameForApproval Error", err);
+            this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
+        }.bind(this));
+}
+
+function getAllDeveloperGamesAwaitingApproval(req, res){
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    this.telmStore.getAllDeveloperGamesAwaitingApproval()
+        .then(function(results) {
+            this.requestUtil.jsonResponse(res, results);
+        }.bind(this))
+        .catch(function(err) {
+            console.error("Dash: getAllDeveloperGamesAwaitingApproval Error", err);
+            this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
+        }.bind(this));
+}
+
 function getDeveloperGamesInfo(req, res){
     var userId = req.user.id;
     if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
@@ -666,7 +710,7 @@ function updateDeveloperGameInfo(req, res){
             if(!gameIds[gameId]){
                 return "no access";
             }
-            _writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
+            //_writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
             return this.telmStore.updateGameInformation(gameId, data);
         }.bind(this))
         .then(function(status){

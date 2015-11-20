@@ -271,6 +271,24 @@ module.exports = {
         //    }
         //},
         {
+            requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/approve",
+            service: "dash",
+            controller: "game",
+            method: {
+                post: "approveDeveloperGame"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/games/awaiting-approval",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAllDeveloperGamesAwaitingApproval"
+            }
+        },
+        {
             api: "/api/v2/dash/games/active/details",
             service: "dash",
             controller: "games",
@@ -445,6 +463,15 @@ module.exports = {
             controller: "games",
             method: {
                 post: "createNewGame"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/submit/:gameId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "submitGameForApproval"
             }
         },
         // ---------------------------------------------------

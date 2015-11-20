@@ -183,6 +183,11 @@
         "host": "localhost",
         "port": 8003
     },
+    "gameDevelopers": {
+        "submissionAPI": {
+            "destination": "https://auto.playfully.org"
+        }
+    },
     "research": {
         "csvTimeout": {"minutes": 10},
         "dataChunkSize": 2000,

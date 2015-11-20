@@ -4,13 +4,15 @@ var when       = require('when');
 var handlebars = require('handlebars');
 //
 var Util       = require('../../core/util.js');
+var dConst    = require('../dash.const.js');
 
 module.exports = {
     getUserGameAchievements: getUserGameAchievements,
     getGameDetails:         getGameDetails,
     getGameReports:         getGameReports,
     getGameMissions:        getGameMissions,
-    saveAssessmentResults:  saveAssessmentResults
+    saveAssessmentResults:  saveAssessmentResults,
+    approveDeveloperGame:   approveDeveloperGame
 };
 
 var exampleIn = {};
@@ -263,4 +265,42 @@ function saveAssessmentResults(req, res){
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
         }.bind(this) );
+}
+
+
+function approveDeveloperGame(req, res) {
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    if ( !(this.options.gameDevelopers &&
+        this.options.gameDevelopers.submissionAPI &&
+        this.options.gameDevelopers.submissionAPI.destination))
+    {
+        console.error("Dash: approveDeveloperGame Error - destination not configured");
+        this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        return;
+    }
+
+    var gameId = req.params.gameId.toUpperCase();
+    var url = this.options.gameDevelopers.submissionAPI.destination
+        + "/api/v2/dash/replace/"+gameId+"/" + dConst.code;
+
+    this.telmStore.getGameInformation(gameId)
+        .then(function(data) {
+            return this.requestUtil.request(url, data);
+        }.bind(this))
+        .then(function(results) {
+            console.log("Dash: approveDeveloperGame Result - ", results)
+            this.requestUtil.jsonResponse(res, {status: "ok"});
+        }.bind(this))
+        .catch(function(err) {
+            console.error("Dash: approveDeveloperGame Error - ", err);
+            this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        }.bind(this));
+
+
+
 }

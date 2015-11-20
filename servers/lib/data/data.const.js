@@ -51,7 +51,8 @@ module.exports = {
     datastore: {
       keys: {
           user: "u",
-          developer: "di"
+          developer: "di",
+          developerGameAwaitingApproval: "dgaa"
       }
     },
     webapp: {
