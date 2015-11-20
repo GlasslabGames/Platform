@@ -1,27 +1,27 @@
 {
     "basic": {
-        "gameId": "THRV",
+        "gameId": "NSQR",
         "enabled": true,
         "visible": true,
         "maintenance": null,
-        "shortName": "Thrive 'n' Shine",
-        "longName": "Thrive 'n' Shine",
-        "grades": "TBD",
-        "subject": "TBD",
+        "shortName": "Nine Squares",
+        "longName": "Nine Squares",
+        "grades": "1-12",
+        "subject": "Strategy",
         "type": "App",
         "platform": {
-            "type": "iPad",
+            "type": "Flash/Browser",
             "icon": {
-                "small": "/assets/platform-ipad.png",
-                "large": "/assets/platform-ipad@2x.png"
+                "small": "/assets/platform-browser.png",
+                "large": "/assets/platform-browser@2x.png"
             }
         },
         "price": "Free",
         "packages": "TBD",
         "release": "dev",
-        "releaseDate": "TBD",
-        "shortDescription": "Placeholder Short Description",
-        "description": "Placeholder Description",
+        "releaseDate": "not yet",
+        "shortDescription": "Get three-in-a-row.",
+        "description": "Capture any 3 squares in a row, before your opponent, Horizontally, vertically, or diagonally.",
         "developer": {
             "id": "TEMP",
             "name": "Developer Name",
@@ -106,8 +106,6 @@
             }
         }
     ],
-
-    "assessment": [],
     "reports": {
         "list": [
             {
