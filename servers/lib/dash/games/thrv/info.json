@@ -100,8 +100,7 @@
                },
                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                "table": {
-                   "labels": [
-                   ],
+                   "labels": [],
                    "groups": [
                         {
                             "id": "so",
