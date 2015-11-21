@@ -3154,6 +3154,7 @@ function subscribeToLicenseInternal(req, res){
         return;
     }
     purchaseOrderInfo.number = Util.CreateUUID();
+
     var planInfo = req.body.planInfo;
     var schoolInfo = req.body.schoolInfo;
 
@@ -3257,11 +3258,11 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
                     _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
                 }.bind(this));
 
-                var resellerEmail = purchaseOrderInfo.email;
+                var resellerEmail = req.user.email;
                 data = {};
                 data.subject =  "You've Successfully Added a License Owner!";
-                data.firstName = purchaseOrderInfo.firstName;
-                data.lastName = purchaseOrderInfo.lastName;
+                data.firstName = req.user.firstName;
+                data.lastName = req.user.lastName;
                 data.ownerFirstName = user.FIRST_NAME;
                 data.ownerLastName = user.LAST_NAME;
                 template = "reseller-subscribe-internal";
