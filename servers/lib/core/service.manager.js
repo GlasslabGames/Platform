@@ -799,19 +799,19 @@ ServiceManager.prototype.start = function(port) {
 
                             if(req.secure){
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
-                                if(forwProto){
-                                console.log(Util.DateGMTString()+' Secure Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
-                                }else{
-                                    console.log(Util.DateGMTString()+' Secure Request -- port = '+reqPort+'  -- host = '+host);
-                                }
+                                // if(forwProto){
+                                // console.log(Util.DateGMTString()+' Secure Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
+                                // }else{
+                                //     console.log(Util.DateGMTString()+' Secure Request -- port = '+reqPort+'  -- host = '+host);
+                                // }
                                 next();
                             }else{
 
-                                if(forwProto){
-                                console.log(Util.DateGMTString()+' INSECURE Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
-                                }else{
-                                    console.log(Util.DateGMTString()+' INSECURE Request -- port = '+reqPort+'  -- host = '+host);
-                                }
+                                // if(forwProto){
+                                // console.log(Util.DateGMTString()+' INSECURE Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
+                                // }else{
+                                //     console.log(Util.DateGMTString()+' INSECURE Request -- port = '+reqPort+'  -- host = '+host);
+                                // }
 
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
 
