@@ -324,6 +324,10 @@ DashService.prototype.getGameReports = function(gameId) {
 // 1 reference in dash.service
 DashService.prototype.getGameAchievements = function(gameId) {
     return when.promise(function(resolve, reject){
+
+        // crashes if no achievements !?
+        //
+        // console.log('gameId,ach =', gameId, this._games[gameId].achievements);
         if( this._games.hasOwnProperty(gameId) &&
             this._games[gameId].hasOwnProperty('achievements') ) {
             resolve(this._games[gameId].achievements);
@@ -571,7 +575,10 @@ DashService.prototype._loadGameFiles = function(){
                     ids = couchId.split(':');
                     type = ids[0];
                     gameId = ids[1];
-                    console.log('  _loadGameFiles() .. gameId =', gameId);
+
+                    // _loadGameFiles() is failing - crashes if no achievements !?
+                    // console.log('  _loadGameFiles() .. type, gameId =', type, gameId);
+
                     if(type === 'gi'){
                         gameInformation[gameId] = data;
                     } else{
@@ -649,9 +656,11 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
                     resolve();
                 }.bind(this))
                 .then(null, function(err){
+                    err = 'when.all(achievements) failed in _buildGamesObject() ...';
                     reject(err);
                 }.bind(this));
         } catch(err) {
+            console.trace('error in _buildGamesObject() ..', err);
             reject(err)
         }
     }.bind(this));
