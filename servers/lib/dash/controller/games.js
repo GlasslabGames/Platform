@@ -18,15 +18,11 @@ module.exports = {
     generateBadgeCode:               generateBadgeCode,
     badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
-    replaceGameInfo:                 replaceGameInfo,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
     getDeveloperGamesInfo:           getDeveloperGamesInfo,
     getDeveloperGamesInfoSchema:     getDeveloperGamesInfoSchema,
     getDeveloperGameInfo:            getDeveloperGameInfo,
-    createNewGame:                   createNewGame,
-    submitGameForApproval:           submitGameForApproval,
-    getAllDeveloperGamesAwaitingApproval: getAllDeveloperGamesAwaitingApproval,
     updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
 
