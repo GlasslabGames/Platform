@@ -282,7 +282,10 @@ return when.promise(function(resolve, reject) {
                 this.app.use(Util.GetMorganLogger(this.options, this.stats));
                 
                 this.app.use(compression());
-              this.app.use(function (req, res, next) { console.log("no-op"); next(); });
+                this.app.use(function (req, res, next) {
+                    // console.log("no-op");
+                    next();
+                });
               
                 this.app.use(cookieParser());
                 this.app.use(bodyParser.urlencoded({limit: "500kb", extended: false}));
