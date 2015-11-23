@@ -571,6 +571,7 @@ DashService.prototype._loadGameFiles = function(){
                     ids = couchId.split(':');
                     type = ids[0];
                     gameId = ids[1];
+                    console.log('  _loadGameFiles() .. gameId =', gameId);
                     if(type === 'gi'){
                         gameInformation[gameId] = data;
                     } else{
