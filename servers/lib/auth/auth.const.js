@@ -51,7 +51,8 @@ module.exports = {
             verified:   "verified",
             beta:       "beta",
             approve:    "approve",
-            revoked:    "revoked"
+            revoked:    "revoked",
+            shadow:     "shadow"
         }
     },
     datastore: {

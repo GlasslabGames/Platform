@@ -4,13 +4,15 @@ var when       = require('when');
 var handlebars = require('handlebars');
 //
 var Util       = require('../../core/util.js');
+var dConst    = require('../dash.const.js');
 
 module.exports = {
     getUserGameAchievements: getUserGameAchievements,
     getGameDetails:         getGameDetails,
     getGameReports:         getGameReports,
     getGameMissions:        getGameMissions,
-    saveAssessmentResults:  saveAssessmentResults
+    saveAssessmentResults:  saveAssessmentResults,
+    approveDeveloperGame:   approveDeveloperGame
 };
 
 var exampleIn = {};

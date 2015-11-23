@@ -18,11 +18,15 @@ module.exports = {
     generateBadgeCode:               generateBadgeCode,
     badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
+    replaceGameInfo:                 replaceGameInfo,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
     getDeveloperGamesInfo:           getDeveloperGamesInfo,
     getDeveloperGamesInfoSchema:     getDeveloperGamesInfoSchema,
     getDeveloperGameInfo:            getDeveloperGameInfo,
+    createNewGame:                   createNewGame,
+    submitGameForApproval:           submitGameForApproval,
+    getAllDeveloperGamesAwaitingApproval: getAllDeveloperGamesAwaitingApproval,
     updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
 
@@ -512,7 +516,7 @@ function reloadGameFiles(req, res){
 
 function getDeveloperProfile(req, res){
     var userId = req.user.id;
-    if(req.user.role !== "developer"){
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
@@ -589,14 +593,15 @@ function getDeveloperGameInfo(req, res) {
 function updateDeveloperGameInfo(req, res){
     var userId = req.user.id;
     var gameId = req.params.gameId;
-    if(req.user.role !== "developer"){
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
     }
     try {
         var data = JSON.parse(req.body.jsonStr);
     } catch(err) {
-
+        this.requestUtil.errorResponse(res, {key:"dash.info.malformed"});
+        return;
     }
 
     if (!this.validateGameInfo(data)) {
@@ -615,6 +620,7 @@ function updateDeveloperGameInfo(req, res){
             if(typeof status === "string"){
                 return status;
             }
+            //_writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
             return this.telmStore.updateGameInformation(gameId, data);
         }.bind(this))
         .then(function(status){

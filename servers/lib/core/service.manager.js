@@ -282,11 +282,14 @@ return when.promise(function(resolve, reject) {
                 this.app.use(Util.GetMorganLogger(this.options, this.stats));
                 
                 this.app.use(compression());
-              this.app.use(function (req, res, next) { console.log("no-op"); next(); });
-              
+                this.app.use(function (req, res, next) {
+                    // console.log("no-op");
+                    next();
+                });
+
                 this.app.use(cookieParser());
-                this.app.use(bodyParser.urlencoded());
-                this.app.use(bodyParser.json());
+                this.app.use(bodyParser.urlencoded({limit: "500kb", extended: false}));
+                this.app.use(bodyParser.json({limit: "500kb"}));
                 this.app.use(methodOverride());
                 
                 var acceptAll = this.options.services.cors.acceptAll || false;
@@ -1003,6 +1006,7 @@ var countDailyActiveUsers = function(stats){
     var first_login;
     // var first_login = this.options.services.first_login || '2015-09-03 23:59:02';
 
+    // update to use configMod ...
     if("dev" == this.options.env){
         first_login = this.options.env_dev.first_login;
     } else if("stage" == this.options.env){
