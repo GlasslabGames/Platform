@@ -11,8 +11,7 @@ module.exports = {
     getGameDetails:         getGameDetails,
     getGameReports:         getGameReports,
     getGameMissions:        getGameMissions,
-    saveAssessmentResults:  saveAssessmentResults,
-    approveDeveloperGame:   approveDeveloperGame
+    saveAssessmentResults:  saveAssessmentResults
 };
 
 var exampleIn = {};
