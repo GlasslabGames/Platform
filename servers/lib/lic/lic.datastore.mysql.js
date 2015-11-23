@@ -56,6 +56,52 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Lic_MySQL.prototype.updatePOTable = function() {
+	return when.promise(function(resolve, reject) {
+
+    var Q = "DESCRIBE GL_PURCHASE_ORDER";
+    this.ds.query(Q)
+        .then(function(results) {
+            var updating = false;
+
+            var hasResllerLog = false;
+
+            var promiseList = [];
+            var Q = "";
+
+            for (var i = 0; i < results.length; i++) {
+                if (results[i]['Field'] == 'RESELLER_LOG') {
+                    hasResllerLog = true;
+                }
+            }
+
+            if ( ! hasResllerLog ) {
+                updating = true;
+                Q = "ALTER TABLE GL_PURCHASE_ORDER ADD COLUMN RESELLER_LOG TEXT NULL DEFAULT NULL AFTER date_created";
+                console.log( "               ", Q );
+                promiseList.push(this.ds.query(Q));
+            }
+
+            if (promiseList.length) {
+                when.all(promiseList)
+                    .then(function(results) {
+                        resolve(true);
+                    }.bind(this))
+                    .then(null, function(err) {
+                        reject({"error": "failure", "exception": err}, 500);
+                    }.bind(this));
+            }
+            if (!updating) {
+                resolve(false);
+            }
+        }.bind(this),
+        function (err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this));
+
+	}.bind(this));
+};
+
 Lic_MySQL.prototype.createLicensingTables = function(){
     return when.promise(function(resolve, reject){
         var Q = "CREATE TABLE GL_LICENSE\n" +
