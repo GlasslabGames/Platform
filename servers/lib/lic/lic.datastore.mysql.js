@@ -797,6 +797,36 @@ Lic_MySQL.prototype.updatePurchaseOrderById = function(purchaseOrderId, updateFi
     }.bind(this));
 };
 
+Lic_MySQL.prototype.logResellerActionForPO = function(purchaseOrderId, logJSON){
+	this.getPurchaseOrderById( purchaseOrderId )
+		.then( function( purchaseOrder ) {
+            if( !purchaseOrder || purchaseOrder === "no purchase order" ) {
+            	reject( "no purchase order" );
+            	return;
+            }
+
+            var resellerLog = [];
+            var logStr = '';
+            if ( !purchaseOrder[ "RESELLER_LOG" ] ) {
+            	resellerLog.push( logJSON );
+            	logStr = JSON.stringify( resellerLog );
+            } else {
+            	resellerLog = JSON.parse( purchaseOrder[ "RESELLER_LOG" ] );
+            	resellerLog.push( logJSON );
+            	logStr = JSON.stringify( resellerLog );
+            }
+
+			var updateFields = [];
+			var resellerLog = "RESELLER_LOG = '" + logStr + "'";
+			updateFields.push(resellerLog);
+
+			return this.updatePurchaseOrderById( purchaseOrderId, updateFields );
+		}.bind(this))
+		.then( null, function(err ) {
+			reject( err );
+		})
+};
+
 Lic_MySQL.prototype.updateLicenseByPurchaseOrderId = function(purchaseOrderId, updateFields){
     return when.promise(function(resolve, reject){
         var updateFieldsString = updateFields.join(",");

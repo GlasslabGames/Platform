@@ -2273,6 +2273,7 @@ function rejectPurchaseOrder(req, res){
     var billingEmail;
     var billingName;
     var instructors;
+    var purchaseOrderId;
 
     // if legit, update license table, license map, and purchase order table
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
@@ -2286,7 +2287,7 @@ function rejectPurchaseOrder(req, res){
             if((purchaseOrder.status === "received" || purchaseOrder.status === "invoiced") && purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
                 return "key number mismatch";
             }
-            var purchaseOrderId = purchaseOrder.id;
+            purchaseOrderId = purchaseOrder.id;
             licenseId = purchaseOrder["license_id"];
             userId = purchaseOrder["user_id"];
             action = purchaseOrder["action"];
@@ -2343,7 +2344,17 @@ function rejectPurchaseOrder(req, res){
                     _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
                 }
             }.bind(this));
-            this.requestUtil.jsonResponse(res, { status: "ok"});
+
+            var logJSON = {};
+            logJSON.resellerID = req.user.id;
+            logJSON.action = 'rejected';
+            var date = new Date(Date.now());
+            logJSON.date = date.toISOString().slice(0, 19).replace('T', ' ');
+
+			return this.myds.logResellerActionForPO( purchaseOrderId, logJSON );
+        }.bind(this))
+		.then( function( results ) {
+            this.requestUtil.jsonResponse(res, { status: "ok "});
         }.bind(this))
         .then(null, function(err){
             console.error("Reject Purchase Order Error -",err);
@@ -2479,8 +2490,18 @@ function receivePurchaseOrder(req, res){
                 template = "accounting-received";
                 _sendEmailResponse.call(this, email, data, req.protocol, req.headers.host, template);
             }
-            this.requestUtil.jsonResponse(res, { status: "ok "});
+
+            var logJSON = {};
+            logJSON.resellerID = req.user.id;
+            logJSON.action = 'received';
+            var date = new Date(Date.now());
+            logJSON.date = date.toISOString().slice(0, 19).replace('T', ' ');
+
+			return this.myds.logResellerActionForPO( purchaseOrderId, logJSON );
         }.bind(this))
+		.then( function( results ) {
+            this.requestUtil.jsonResponse(res, { status: "ok "});
+		}.bind(this) )
         .then(null, function(err){
             console.error("Received Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, err);
@@ -2643,6 +2664,7 @@ function invoicePurchaseOrder(req, res){
     var userId;
     var billingEmail;
     var billingName;
+    var purchaseOrderId;
 
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
         .then(function(purchaseOrder){
@@ -2655,7 +2677,7 @@ function invoicePurchaseOrder(req, res){
             if(purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
                 return "key number mismatch";
             }
-            var purchaseOrderId = purchaseOrder.id;
+            purchaseOrderId = purchaseOrder.id;
 
             var updateFields = [];
             var status = "status = 'invoiced'";
@@ -2675,6 +2697,16 @@ function invoicePurchaseOrder(req, res){
                 this.requestUtil.errorResponse(res, { key: "lic.order.mismatch"});
                 return;
             }
+
+            var logJSON = {};
+            logJSON.resellerID = req.user.id;
+            logJSON.action = 'invoiced';
+            var date = new Date(Date.now());
+            logJSON.date = date.toISOString().slice(0, 19).replace('T', ' ');
+
+			return this.myds.logResellerActionForPO( purchaseOrderId, logJSON );
+        }.bind(this))
+		.then( function( results ) {
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
@@ -2708,6 +2740,7 @@ function approvePurchaseOrder(req, res){
     var userId;
     var billingEmail;
     var billingName;
+    var purchaseOrderId;
 
     this.myds.getPurchaseOrderByPurchaseOrderKey(purchaseOrderKey)
         .then(function(purchaseOrder){
@@ -2720,7 +2753,7 @@ function approvePurchaseOrder(req, res){
             if(purchaseOrder["purchase_order_number"] !== purchaseOrderNumber){
                 return "key number mismatch";
             }
-            var purchaseOrderId = purchaseOrder.id;
+            purchaseOrderId = purchaseOrder.id;
             billingEmail = purchaseOrder.email;
             billingName = purchaseOrder.name;
             userId = purchaseOrder.user_id;
@@ -2758,6 +2791,16 @@ function approvePurchaseOrder(req, res){
             var template = "owner-purchase-order-approved";
             _sendEmailResponse.call(this, ownerData.email, ownerData, req.protocol, req.headers.host, template);
             _sendEmailResponse.call(this, billerData.email, billerData, req.protocol, req.headers.host, template);
+
+            var logJSON = {};
+            logJSON.resellerID = req.user.id;
+            logJSON.action = 'approved';
+            var date = new Date(Date.now());
+            logJSON.date = date.toISOString().slice(0, 19).replace('T', ' ');
+
+			return this.myds.logResellerActionForPO( purchaseOrderId, logJSON );
+        }.bind(this))
+		.then( function( results ) {
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
