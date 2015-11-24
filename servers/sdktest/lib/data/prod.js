@@ -1,6 +1,6 @@
 module.exports = {
     
-    serverAddress: 'http://www.playfully.org',		// NOTE - for now...
+    serverAddress: 'http://www.glasslabgames.org',		// NOTE - for now...
 
     // gameId for MGO
     testGameId: 'TEST',

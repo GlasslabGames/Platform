@@ -300,7 +300,47 @@ function approveDeveloperGame(req, res) {
             console.error("Dash: approveDeveloperGame Error - ", err);
             this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         }.bind(this));
-
-
-
 }
+
+
+function rejectDeveloperGame(req, res) {
+/*
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    if ( !(this.options.gameDevelopers &&
+        this.options.gameDevelopers.submissionAPI &&
+        this.options.gameDevelopers.submissionAPI.destination))
+    {
+        console.error("Dash: rejectDeveloperGame Error - destination not configured");
+        this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        return;
+    }
+
+    var gameId = req.params.gameId.toUpperCase();
+    var url = this.options.gameDevelopers.submissionAPI.destination
+        + "/api/v2/dash/replace/"+gameId+"/" + dConst.code;
+
+    this.telmStore.getGameInformation(gameId)
+        .then(function(data) {
+            return this.requestUtil.request(url, data);
+        }.bind(this))
+        .then(function(results) {
+            console.log("Dash: rejectDeveloperGame Result - ", results)
+            this.requestUtil.jsonResponse(res, {status: "ok"});
+        }.bind(this))
+        .catch(function(err) {
+            console.error("Dash: rejectDeveloperGame Error - ", err);
+            this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        }.bind(this));
+*/
+}
+
+// maybe this should be in user.js
+function requestInfoDeveloperGame(req, res) {
+}
+
+

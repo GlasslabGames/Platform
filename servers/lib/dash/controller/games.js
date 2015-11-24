@@ -27,6 +27,7 @@ module.exports = {
     createNewGame:                   createNewGame,
     submitGameForApproval:           submitGameForApproval,
     getAllDeveloperGamesAwaitingApproval: getAllDeveloperGamesAwaitingApproval,
+    getApprovedGamesOrgInfo:         getApprovedGamesOrgInfo,
     updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
 
@@ -224,14 +225,12 @@ function _getPlanGamesBasicInfo(type){
     }.bind(this));
 }
 
-// no input
 function getGamesBasicInfo(req, res){
     try {
         var loginType = "guest";
         var promise = null;
         var gameIds;
         var licenseGameIds;
-        //var outGames = [];
         if( req.session &&
             req.session.passport &&
             req.session.passport.user ) {
@@ -244,30 +243,95 @@ function getGamesBasicInfo(req, res){
         }
 
         promise.then(function(ids){
-                // ensure licenseGameIds is object
-                licenseGameIds = ids;
-                if(!licenseGameIds) { licenseGameIds = {}; }
+            // ensure licenseGameIds is object
+            licenseGameIds = ids;
+            if(!licenseGameIds) { licenseGameIds = {}; }
 
-                this.getListOfAllGameIds()
-                    .then(function(ids){
-                        gameIds = ids;
-                        var promiseList = [];
-                        gameIds.forEach(function (gameId) {
-                            promiseList.push(this.getGameBasicInfo(gameId));
-                        }.bind(this) );
-                        return when.all(promiseList);
-                    }.bind(this) )
-                    .then(function(gamesInfo){
-                        var outGames = _infoFormat(gamesInfo, loginType, gameIds, licenseGameIds);
-                        this.requestUtil.jsonResponse(res, outGames);
-
-                    }.bind(this) );
-            }.bind(this) )
-
-            // catch all errors
-            .then(null, function(err) {
-                this.requestUtil.errorResponse(res, err);
+            return this.getListOfAllGameIds();
+        }.bind(this) )
+        .then(function(ids){
+            gameIds = ids;
+            var promiseList = [];
+            gameIds.forEach(function (gameId) {
+                promiseList.push(this.getGameBasicInfo(gameId));
             }.bind(this) );
+            return when.all(promiseList);
+        }.bind(this) )
+        .then(function(gamesInfo){
+            var outGames = _infoFormat(gamesInfo, loginType, gameIds, licenseGameIds);
+            this.requestUtil.jsonResponse(res, outGames);
+        }.bind(this) )
+
+        // catch all errors
+        .then(null, function(err) {
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this) );
+
+    } catch(err) {
+        console.trace("Reports: Get Game Basic Info Error -", err);
+        this.stats.increment("error", "GetGameBasicInfo.Catch");
+    }
+}
+
+function getApprovedGamesOrgInfo(req, res){
+    try {
+        var gameIds;
+        var gamesInfo;
+        
+        this.getListOfVisibleGameIds()
+        .then(function(ids){
+            gameIds = ids;
+            var promiseList = [];
+            gameIds.forEach(function (gameId) {
+                promiseList.push(this.getGameBasicInfo(gameId));
+            }.bind(this) );
+            return when.all(promiseList);
+        }.bind(this) )
+        .then(function(_gamesInfo){
+            gamesInfo = _gamesInfo;
+            return this.telmStore.getAllDeveloperProfiles();
+        }.bind(this) )
+        .then(function(profiles){
+            var owner = { };
+            var keys = Object.keys(profiles);
+            for (var j=0;j<keys.length;j++) {
+                var key = keys[j];
+                var userId = key.split(':')[2];
+                var profile = profiles[key];
+                var pkeys = Object.keys(profile);
+                for (var k=0;k<pkeys.length;k++) {
+                    var pkey = pkeys[k];
+                    if (profile[pkey].verifyCodeStatus == "verified") {
+                        owner[pkey] = userId;
+                    }
+                }
+            }
+          
+            var promiseList = [];
+            for (var i=0;i<gamesInfo.length;i++) {
+                var gameInfo = gamesInfo[i];
+                if (owner.hasOwnProperty(gameInfo.gameId)) {
+                    promiseList.push(this.telmStore.getDeveloperOrganization(owner[gameInfo.gameId]));
+                } else {
+                    promiseList.push({ organization: "-- Legacy game --" });
+                }
+            }
+            return when.all(promiseList);
+        }.bind(this) )
+        .then(function(results){
+            for (var i=0;i<results.length;i++) {
+                var gameInfo = gamesInfo[i];
+                gameInfo["organization"] = results[i];
+            }
+
+            var outGames = _infoFormat(gamesInfo, "loginType", gameIds, {});
+            this.requestUtil.jsonResponse(res, outGames);
+        }.bind(this) )
+
+        // catch all errors
+        .then(null, function(err) {
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this) );
 
     } catch(err) {
         console.trace("Reports: Get Game Basic Info Error -", err);
@@ -629,6 +693,28 @@ function getAllDeveloperGamesAwaitingApproval(req, res){
 
     this.telmStore.getAllDeveloperGamesAwaitingApproval()
         .then(function(results) {
+            if (_.isObject(results)) {
+                var promiseList = [results];
+                for (var did in results) {
+                    var game = results[did];
+                    promiseList.push(game);
+                    promiseList.push(this.telmStore.getDeveloperOrganization(game.userId));
+                    promiseList.push(this.telmStore._getGameInformation(game.gameId, false, false));
+                }
+                return when.all(promiseList);
+            }
+            return [];
+        }.bind(this))
+        .then(function(results) {
+            if (_.isArray(results) && results.length > 0) {
+                var orgData = results;
+                results = results[0];
+                for (var i=1;i<orgData.length;) {
+                    var game = orgData[i++];
+                    game.organization = orgData[i++];
+                    game.basic = orgData[i++].basic;
+                }
+            }
             this.requestUtil.jsonResponse(res, results);
         }.bind(this))
         .catch(function(err) {

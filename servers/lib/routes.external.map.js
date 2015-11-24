@@ -281,6 +281,24 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/reject",
+            service: "dash",
+            controller: "game",
+            method: {
+                post: "rejectDeveloperGame"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/requestInfo",
+            service: "dash",
+            controller: "game",
+            method: {
+                post: "requestInfoDeveloperGame"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/dash/games/awaiting-approval",
             service: "dash",
             controller: "games",
@@ -334,6 +352,14 @@ module.exports = {
             controller: "games",
             method: {
                 get: "getGamesBasicInfo"
+            }
+        },
+        {
+            api: "/api/v2/dash/games/approved",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getApprovedGamesOrgInfo"
             }
         },
         {
