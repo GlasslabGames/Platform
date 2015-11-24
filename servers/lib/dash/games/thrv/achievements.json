@@ -2,173 +2,294 @@
     "groups": {
         "CCSS": [
             {
-                "id": "CCSS.ELA-Literacy.WHST.6-8.1",
-                "description": "Common Core Standards",
-                "title": "Standards",
+        "id": "Student_Progress",
+        "description": "Student Progress",
+        "title": "Student Progress",
                 "subGroups": [
+          {
+            "id": "Student completed Earning Money",
+            "title": "Student completed Earning Money",
+            "name": "",
+            "description": "Student completed Earning Money",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Human Capital and Time & Needs",
+            "title": "Student completed Human Capital and Time & Needs",
+            "name": "",
+            "description": "Student completed Human Capital and Time & Needs",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Expenses and Net Worth",
+            "title": "Student completed Expenses and Net Worth",
+            "name": "",
+            "description": "Student completed Expenses and Net Worth",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Saving & Budgeting",
+            "title": "Student completed Saving & Budgeting",
+            "name": "",
+            "description": "Student completed Saving & Budgeting",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student regularly achieving positive net growth",
+            "title": "Student regularly achieving positive net growth",
+            "name": "",
+            "description": "Student regularly achieving positive net growth",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student achieves positive growth after needs added",
+            "title": "Student achieves positive growth after needs added",
+            "name": "",
+            "description": "Student achieves positive growth after needs added",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student regularly paying all expenses",
+            "title": "Student regularly paying all expenses",
+            "name": "",
+            "description": "Student regularly paying all expenses",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student depositing money into savings successfully when reminded",
+            "title": "Student depositing money into savings successfully when reminded",
+            "name": "",
+            "description": "Student depositing money into savings successfully when reminded",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Transportation",
+            "title": "Student completed Transportation",
+            "name": "",
+            "description": "Student completed Transportation",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Emergencies",
+            "title": "Student completed Emergencies",
+            "name": "",
+            "description": "Student completed Emergencies",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Savings & Buying a Car",
+            "title": "Student completed Savings & Buying a Car",
+            "name": "",
+            "description": "Student completed Savings & Buying a Car",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
                     {
-                        "id": "a",
-                        "title": "CCSS.ELA-Literacy.WHST.6-8.1a",
-                        "name": "Organizing Claims",
-                        "description": "Write arguments focused on discipline-specific content",
-                        "info": "Introduce claim(s) about a topic or issue, acknowledge and distinguish the claim(s) from alternate or opposing claims, and organize the reasons and evidence logically.",
-                        "icon": "achievement-blue"
+            "id": "Student completed Costs of Owning a Car",
+            "title": "Student completed Costs of Owning a Car",
+            "name": "",
+            "description": "Student completed Costs of Owning a Car",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Insurance",
+            "title": "Student completed Insurance",
+            "name": "",
+            "description": "Student completed Insurance",
+            "info": "",
+            "icon": "achievement-light-blue"
+          },
+          {
+            "id": "Student completed Higher Education",
+            "title": "Student completed Higher Education",
+            "name": "",
+            "description": "Student completed Higher Education",
+            "info": "",
+            "icon": "achievement-light-blue"
+          }
+        ]
+      }
+    ]
                     },
+  "achievements": [
+    {
+      "id": "Chapter_1",
+      "title": "Chapter 1",
+      "info": "Student completed Earning Money",
+      "standards": [
                     {
-                        "id": "b",
-                        "title": "CCSS.ELA-Literacy.WHST.6-8.1b",
-                        "name": "Supporting Claims",
-                        "description": "Write arguments to support claims with clear reasons and relevant evidence",
-                        "info": "Support claim(s) with logical reasoning and relevant, accurate data and evidence that demonstrate an understanding of the topic or text, using credible sources.",
-                        "icon": "achievement-green"
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Earning Money"
                     }
                 ]
             },
             {
-                "id": "21st.Century.Skills",
-                "description": "21st Century Skills",
-                "title": "21st Century Skills",
-                "subGroups": [
+      "id": "Chapter_2",
+      "title": "Chapter 2",
+      "info": "Student completed Human Capital and Time & Needs",
+      "standards": [
                     {
-                        "id": "a",
-                        "title": "Problem Solving",
-                        "name": "Problem Solving",
-                        "description": "Distinguish among fact, opinion, and reasoned judgement in a text",
-                        "info": "Experimentation of new and familiar concepts while processing￼information until a viable solution is reached.",
-                        "icon": "achievement-red"
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Human Capital and Time & Needs"
+        }
+      ]
                     },
                     {
-                        "id": "b",
-                        "title": "Citizenship",
-                        "name": "Citizenship",
-                        "description": "Distinguish among facts, reasoned judgement based on research findings, and speculation in a text",
-                        "info": "Demonstration of proper technology use, global awareness, and moral capacity in and outside of the classroom.",
-                        "icon": "achievement-yellow"
+      "id": "Chapter_3",
+      "title": "Chapter 3",
+      "info": "Student completed Expenses and Net Worth",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Expenses and Net Worth"
                     }
                 ]
+    },
+    {
+      "id": "Chapter_4",
+      "title": "Chapter 4",
+      "info": "Student completed Saving & Budgeting",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Saving & Budgeting"
             }
         ]
     },
-    "achievements": [
         {
-            "id": "Bot Champion",
-            "title": "Bot Champion",
-            "info": "Student has won three argubot battles in a row!",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
-                    "subGroup": "a"
-                }
-            ]
-        },
+      "id": "Earns Money",
+      "title": "Earns Money",
+      "info": "Student regularly achieving positive net growth",
+      "standards": [
         {
-            "id": "Evidence Cadet",
-            "title": "Evidence Cadet",
-            "info": "Great detective work! Student has collected a wide range of evidence.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
-                    "subGroup": "a"
-                }
-            ]
-        },
-        {
-            "id": "Bot Defender",
-            "title": "Bot Defender",
-            "info": "Student dominated a battle by successfully critiquing an opposing argument while defending his/her own.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
-                    "subGroup": "b"
-                }
-            ]
-        },
-        {
-            "id": "Core Champion",
-            "title": "Core Champion",
-            "info": "Student has 100% accuracy at identifying strengths and weaknesses of claim-data pairs for his/her 5 most recent attempts.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
-                    "subGroup": "b"
-                }
-            ]
-        },
-        {
-            "id": "Core Cadet",
-            "title": "Core Cadet",
-            "info": "Student has completed greater than 15 Claim Cores with a high success rate!",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "CCSS.ELA-Literacy.WHST.6-8.1",
-                    "subGroup": "b"
-                }
-            ]
-        },
-        {
-            "id": "Deliberate",
-            "title": "Deliberate",
-            "info": "Gathered 100% evidence before equipping an argubot.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "21st.Century.Skills",
-                    "subGroup": "a"
-                }
-            ]
-        },
-        {
-            "id": "Bold",
-            "title": "Bold",
-            "info": "Student is taking the initiative to change positions at difficult times in order to make a better argument.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "21st.Century.Skills",
-                    "subGroup": "a"
-                }
-            ]
-        },
-        {
-            "id": "Persistent",
-            "title": "Persistent",
-            "info": "After failing a battle, immediately selects the option to try again.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "21st.Century.Skills",
-                    "subGroup": "a"
-                }
-            ]
-        },
-        {
-            "id": "Curious",
-            "title": "Curious",
-            "info": "Touches all the objects in a scene before leaving the room.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "21st.Century.Skills",
-                    "subGroup": "b"
-                }
-            ]
-        },
-        {
-            "id": "Empathetic",
-            "title": "Empathetic",
-            "info": "The student is choosing empathetic dialogue when speaking with other characters.",
-            "standards": [
-                {
-                    "id": "CCSS",
-                    "group": "21st.Century.Skills",
-                    "subGroup": "b"
-                }
-            ]
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student regularly achieving positive net growth"
         }
-    ]
+      ]
+    },
+    {
+      "id": "Balances Time and Needs",
+      "title": "Balances Time and Needs",
+      "info": "Student achieves positive growth after needs added",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student achieves positive growth after needs added"
+        }
+      ]
+    },
+    {
+      "id": "Pays All Expenses",
+      "title": "Pays All Expenses",
+      "info": "Student regularly paying all expenses",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student regularly paying all expenses"
+        }
+      ]
+    },
+    {
+      "id": "Effectively Uses Savings",
+      "title": "Effectively Uses Savings",
+      "info": "Student depositing money into savings successfully when reminded",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student depositing money into savings successfully when reminded"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_5",
+      "title": "Chapter 5",
+      "info": "Student completed Transportation",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Transportation"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_6",
+      "title": "Chapter 6",
+      "info": "Student completed Emergencies",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Emergencies"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_7",
+      "title": "Chapter 7",
+      "info": "Student completed Savings & Buying a Car",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Savings & Buying a Car"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_8",
+      "title": "Chapter 8",
+      "info": "Student completed Costs of Owning a Car",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Costs of Owning a Car"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_9",
+      "title": "Chapter 9",
+      "info": "Student completed Insurance",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Insurance"
+        }
+      ]
+    },
+    {
+      "id": "Chapter_10",
+      "title": "Chapter 10",
+      "info": "Student completed Higher Education",
+      "standards": [
+        {
+          "id": "CCSS",
+          "group": "Student_Progress",
+          "subGroup": "Student completed Higher Education"
+        }
+      ]
+    }
+  ]
 }
