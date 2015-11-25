@@ -7,12 +7,14 @@ var Util       = require('../../core/util.js');
 var dConst    = require('../dash.const.js');
 
 module.exports = {
-    getUserGameAchievements: getUserGameAchievements,
-    getGameDetails:         getGameDetails,
-    getGameReports:         getGameReports,
-    getGameMissions:        getGameMissions,
-    saveAssessmentResults:  saveAssessmentResults,
-    approveDeveloperGame:   approveDeveloperGame
+    getUserGameAchievements:    getUserGameAchievements,
+    getGameDetails:             getGameDetails,
+    getGameReports:             getGameReports,
+    getGameMissions:            getGameMissions,
+    saveAssessmentResults:      saveAssessmentResults,
+    approveDeveloperGame:       approveDeveloperGame,
+    rejectDeveloperGame:        rejectDeveloperGame,
+    requestInfoDeveloperGame:   requestInfoDeveloperGame
 };
 
 var exampleIn = {};
@@ -287,14 +289,41 @@ function approveDeveloperGame(req, res) {
     var gameId = req.params.gameId.toUpperCase();
     var url = this.options.gameDevelopers.submissionAPI.destination
         + "/api/v2/dash/replace/"+gameId+"/" + dConst.code;
-
+    var isSelf = !!this.options.gameDevelopers.submissionAPI.isSelf;
+    
+    var dashService = this.serviceManager.get("dash").service;
+    var gameData;
+    
     this.telmStore.getGameInformation(gameId)
         .then(function(data) {
-            return this.requestUtil.request(url, data);
+            gameData = data;
+            gameData.basic.visible = true;
+            return this.requestUtil.request(url, gameData);
         }.bind(this))
         .then(function(results) {
-            console.log("Dash: approveDeveloperGame Result - ", results)
-            this.requestUtil.jsonResponse(res, {status: "ok"});
+            if (!results || !results.update || results.update !== "complete") {
+                return results; // error
+            }
+            // This is redundant if submissionAPI.destination is this server.
+            if (isSelf) {
+                return gameData;
+            }
+            return dashService.telmStore.updateGameInformation(gameId, gameData);
+        }.bind(this))
+        .then(function(results) {
+            if (results && results.basic !== undefined) {
+                return dashService.telmStore.setDeveloperGameApproved(gameId, userId);
+            }
+            return results; // pass along error
+        }.bind(this))
+        .then(function(results) {
+            if (results && results.status !== undefined) {
+                console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
+                this.requestUtil.jsonResponse(res, {status: "ok"});
+            } else {
+                console.error("Dash: approveDeveloperGame Error - ", result);
+                this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+            }
         }.bind(this))
         .catch(function(err) {
             console.error("Dash: approveDeveloperGame Error - ", err);

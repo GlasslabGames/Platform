@@ -49,11 +49,17 @@ module.exports = {
         organizationKey: "o"
     },
     datastore: {
-      keys: {
-          user: "u",
-          developer: "di",
-          developerGameAwaitingApproval: "dgaa"
-      }
+        keys: {
+            user: "u",
+            developer: "di",
+            developerGameApprovalActivity: "dgaa"
+        },
+        activity: {
+            submitted: "submitted",
+            approved: "approved",
+            rejected: "rejected",
+            pulled: "pulled"
+        }
     },
     webapp: {
         api: '/api',

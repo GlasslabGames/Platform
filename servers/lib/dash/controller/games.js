@@ -670,7 +670,7 @@ function submitGameForApproval(req, res){
     getDeveloperGameIds.call(this,userId)
         .then(function(developerGames) {
             if(!!developerGames[gameId]) {
-                return this.telmStore.setDeveloperGameAwaitingApproval(gameId, userId);
+                return this.telmStore.setDeveloperGameAwaitingApproval(gameId, userId, userId);
             } else {
                 return when.reject(userId + " not a developer for "+gameId);
             }
@@ -680,7 +680,8 @@ function submitGameForApproval(req, res){
         }.bind(this))
         .catch(function(err) {
             console.error("Dash: submitGameForApproval Error", err);
-            this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
+            var errKey = (typeof err === 'string' ? errKey = err : "dash.general");
+            this.requestUtil.errorResponse(res, {key: errKey}, 500);
         }.bind(this));
 }
 

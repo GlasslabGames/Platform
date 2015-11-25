@@ -324,7 +324,7 @@ var gdv_getAllDeveloperProfiles = function(doc, meta)
 
 var gdv_getAllDeveloperGamesAwaitingApproval = function(doc, meta) {
     var values = meta.id.split(':');
-    if(values[0] === 'dgaa'){
+    if(values[0] === 'dgaa' && (!doc.hasOwnProperty('status') || doc['status'] == "submitted")){
         emit( meta.id );
     }
 }
@@ -3272,21 +3272,90 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesAwaitingApproval = function() {
     }.bind(this));
 };
 
-TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, userId){
+TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, userId, agentId){
     return when.promise(function(resolve, reject){
-        var key = tConst.datastore.keys.developerGameAwaitingApproval + ":" + gameId;
-        var data = {
-            gameId: gameId,
-            userId: userId,
-            ts: Date.now()
-        };
-        this.client.set(key, data, function(err, results){
-            if(err){
-                console.error("Couchbase TelemetryStore: setDeveloperGameAwaitingApproval Error -", err);
+        var key = tConst.datastore.keys.developerGameApprovalActivity + ":" + gameId;
+        var data;
+        
+        this.client.get(key, function(err, results) {
+            var now = Date.now();
+            if(err) {
+                if(err.code != 13) {
+                    console.error("Couchbase TelemetryStore: setDeveloperGameAwaitingApproval Error -", err);
+                    reject(err);
+                    return;
+                }
+                
+                // new entry
+                data = {
+                    gameId: gameId,
+                    userId: userId,
+                    ts: now,
+                    status: tConst.datastore.activity.submitted,
+                    activity: [ {
+                        action: tConst.datastore.activity.submitted,
+                        ts: now,
+                        agent: agentId
+                    } ]
+                };
+            } else {
+                data = results.value;
+                data.userId = userId;
+                data.ts = now;
+                data.status = tConst.datastore.activity.submitted;
+                if (data.activity === undefined) {
+                    // migrate old doc
+                    data.activity = [];
+                }
+                data.activity.push({
+                        action: tConst.datastore.activity.submitted,
+                        ts: now,
+                        agent: agentId
+                    });
+            }
+            
+            this.client.set(key, data, function(err, results){
+                if(err){
+                    console.error("Couchbase TelemetryStore: setDeveloperGameAwaitingApproval Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve(data);
+            }.bind(this));
+        }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.setDeveloperGameApproved = function(gameId, agentId){
+    return when.promise(function(resolve, reject){
+        var key = tConst.datastore.keys.developerGameApprovalActivity + ":" + gameId;
+        var data;
+        
+        this.client.get(key, function(err, results) {
+            var now = Date.now();
+            if(err) {
+                console.error("Couchbase TelemetryStore: setDeveloperGameApproved Error -", err);
                 reject(err);
                 return;
             }
-            resolve(data);
+
+            data = results.value;
+            data.ts = now;
+            data.status = tConst.datastore.activity.approved;
+            data.activity.push({
+                    action: tConst.datastore.activity.approved,
+                    ts: now,
+                    agent: agentId
+                });
+            
+            this.client.set(key, data, function(err, results){
+                if(err){
+                    console.error("Couchbase TelemetryStore: setDeveloperGameApproved Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve(data);
+            }.bind(this));
         }.bind(this));
     }.bind(this));
 };

@@ -185,7 +185,8 @@
     },
     "gameDevelopers": {
         "submissionAPI": {
-            "destination": "https://auto.playfully.org"
+            "destination": "https://auto.playfully.org",
+            "isSelf": false
         }
     },
     "research": {
