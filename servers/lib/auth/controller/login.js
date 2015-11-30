@@ -34,7 +34,10 @@ function logout(req, res){
     this.stats.increment("info", "Logout");
     req.logout();
     //res.redirect("/");
-    res.clearCookie('connect.sid', { path: '/' });
+    // GLAS-359: Hack to check user-agent to workaround Water Bears bug
+    if (!req.headers['user-agent'].match(/Water Bears/)) {
+        res.clearCookie('connect.sid', { path: '/' });
+    }
     this.requestUtil.jsonResponse(res, {} );
 }
 
