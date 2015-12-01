@@ -27,6 +27,7 @@ module.exports = {
     createNewGame:                   createNewGame,
     submitGameForApproval:           submitGameForApproval,
     getAllDeveloperGamesAwaitingApproval: getAllDeveloperGamesAwaitingApproval,
+    getAllDeveloperGamesRejected:    getAllDeveloperGamesRejected,
     getApprovedGamesOrgInfo:         getApprovedGamesOrgInfo,
     updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
@@ -670,7 +671,7 @@ function submitGameForApproval(req, res){
     getDeveloperGameIds.call(this,userId)
         .then(function(developerGames) {
             if(!!developerGames[gameId]) {
-                return this.telmStore.setDeveloperGameAwaitingApproval(gameId, userId, userId);
+                return this.telmStore.setDeveloperGameStatus(gameId, userId, userId, dConst.gameApproval.status.submitted);
             } else {
                 return when.reject(userId + " not a developer for "+gameId);
             }
@@ -695,31 +696,74 @@ function getAllDeveloperGamesAwaitingApproval(req, res){
     this.telmStore.getAllDeveloperGamesAwaitingApproval()
         .then(function(results) {
             if (_.isObject(results)) {
-                var promiseList = [results];
+                var promiseList = [];
                 for (var did in results) {
                     var game = results[did];
-                    promiseList.push(game);
-                    promiseList.push(this.telmStore.getDeveloperOrganization(game.userId));
-                    promiseList.push(this.telmStore._getGameInformation(game.gameId, false, false));
+                    if (game.status == dConst.gameApproval.status.submitted) {
+                        promiseList.push([did, game]);
+                        promiseList.push(this.telmStore.getDeveloperOrganization(game.userId));
+                        promiseList.push(this.telmStore._getGameInformation(game.gameId, false, false));
+                    }
                 }
                 return when.all(promiseList);
             }
             return [];
         }.bind(this))
         .then(function(results) {
-            if (_.isArray(results) && results.length > 0) {
-                var orgData = results;
-                results = results[0];
-                for (var i=1;i<orgData.length;) {
-                    var game = orgData[i++];
-                    game.organization = orgData[i++];
-                    game.basic = orgData[i++].basic;
-                }
+            var games = { };
+            for (var i=0;i<results.length;) {
+                var did = results[i][0];
+                var game = results[i++][1];
+                game.organization = results[i++];
+                game.basic = results[i++].basic;
+                games[did] = game;
             }
-            this.requestUtil.jsonResponse(res, results);
+            this.requestUtil.jsonResponse(res, games);
         }.bind(this))
         .catch(function(err) {
             console.error("Dash: getAllDeveloperGamesAwaitingApproval Error", err);
+            this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
+        }.bind(this));
+}
+
+function getAllDeveloperGamesRejected(req, res){
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    this.telmStore.getAllDeveloperGamesRejected()
+        .then(function(results) {
+            if (_.isObject(results)) {
+                var promiseList = [];
+                for (var did in results) {
+                    var game = results[did];
+                    if (game.status == dConst.gameApproval.status.rejected ||
+                        game.status == dConst.gameApproval.status.pulled) {
+              
+                        promiseList.push([did, game]);
+                        promiseList.push(this.telmStore.getDeveloperOrganization(game.userId));
+                        promiseList.push(this.telmStore._getGameInformation(game.gameId, false, false));
+                    }
+                }
+                return when.all(promiseList);
+            }
+            return [];
+        }.bind(this))
+        .then(function(results) {
+            var games = { };
+            for (var i=0;i<results.length;) {
+                var did = results[i][0];
+                var game = results[i++][1];
+                game.organization = results[i++];
+                game.basic = results[i++].basic;
+                games[did] = game;
+            }
+            this.requestUtil.jsonResponse(res, games);
+        }.bind(this))
+        .catch(function(err) {
+            console.error("Dash: getAllDeveloperGamesRejected Error", err);
             this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }

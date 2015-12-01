@@ -21,5 +21,13 @@ module.exports = {
         tweetKey: 't',
         countKey: 'count'
     },
+    gameApproval: {
+        status: {
+            submitted:  "submitted",
+            approved:   "approved",
+            rejected:   "rejected",
+            pulled:     "pulled"
+        }
+    },
     code: "KSBpNw5U70f9ASjySf0IXrN3i00K4GlayI4R"
 };

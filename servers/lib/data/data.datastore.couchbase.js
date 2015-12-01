@@ -329,6 +329,13 @@ var gdv_getAllDeveloperGamesAwaitingApproval = function(doc, meta) {
     }
 }
 
+var gdv_getAllDeveloperGamesRejected = function(doc, meta) {
+    var values = meta.id.split(':');
+    if(values[0] === 'dgaa' && (doc['status'] == "rejected" || doc['status'] == "pulled")){
+        emit( meta.id );
+    }
+}
+
 var gdv_getAllMatches = function(doc, meta){
     var values = meta.id.split(':');
     if((values[0] === 'gd') &&
@@ -402,6 +409,9 @@ var gdv_getAllGameSaves = function(doc, meta){
             },
             getAllDeveloperGamesAwaitingApproval: {
                 map: gdv_getAllDeveloperGamesAwaitingApproval
+            },
+            getAllDeveloperGamesRejected: {
+                map: gdv_getAllDeveloperGamesRejected
             },
             getAllMatches: {
                 map: gdv_getAllMatches
@@ -3272,7 +3282,42 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesAwaitingApproval = function() {
     }.bind(this));
 };
 
-TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, userId, agentId){
+TelemDS_Couchbase.prototype.getAllDeveloperGamesRejected = function() {
+    return when.promise(function(resolve, reject){
+        var map = "getAllDeveloperGamesRejected";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results) {
+                if (err) {
+                    console.error("Couchbase TelemetryStore: getAllDeveloperGamesRejected Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function (err, results) {
+                    if (err) {
+                        console.error("CouchBase TelemetryStore: getAllDeveloperGamesRejected Error -", err);
+                        reject(err);
+                        return;
+                    }
+                    var devProfiles = {};
+                    _.forEach(results, function (developer, key) {
+                        var value = developer.value;
+                        if(typeof value === "string"){
+                            value = JSON.parse(value)
+                        }
+                        devProfiles[key] = value;
+                    });
+                    resolve(devProfiles);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.setDeveloperGameStatus = function(gameId, userId, agentId, status){
     return when.promise(function(resolve, reject){
         var key = tConst.datastore.keys.developerGameApprovalActivity + ":" + gameId;
         var data;
@@ -3281,7 +3326,7 @@ TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, 
             var now = Date.now();
             if(err) {
                 if(err.code != 13) {
-                    console.error("Couchbase TelemetryStore: setDeveloperGameAwaitingApproval Error -", err);
+                    console.error("Couchbase TelemetryStore: setDeveloperGameStatus Error -", err);
                     reject(err);
                     return;
                 }
@@ -3289,26 +3334,28 @@ TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, 
                 // new entry
                 data = {
                     gameId: gameId,
-                    userId: userId,
+                    userId: (userId != 0 ? userId : agentId),
                     ts: now,
-                    status: tConst.datastore.activity.submitted,
+                    status: status,
                     activity: [ {
-                        action: tConst.datastore.activity.submitted,
+                        action: status,
                         ts: now,
                         agent: agentId
                     } ]
                 };
             } else {
                 data = results.value;
-                data.userId = userId;
+                if (userId != 0) {
+                    data.userId = userId;
+                }
                 data.ts = now;
-                data.status = tConst.datastore.activity.submitted;
+                data.status = status;
                 if (data.activity === undefined) {
                     // migrate old doc
                     data.activity = [];
                 }
                 data.activity.push({
-                        action: tConst.datastore.activity.submitted,
+                        action: status,
                         ts: now,
                         agent: agentId
                     });
@@ -3316,7 +3363,7 @@ TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, 
             
             this.client.set(key, data, function(err, results){
                 if(err){
-                    console.error("Couchbase TelemetryStore: setDeveloperGameAwaitingApproval Error -", err);
+                    console.error("Couchbase TelemetryStore: setDeveloperGameStatus Error -", err);
                     reject(err);
                     return;
                 }
@@ -3326,37 +3373,25 @@ TelemDS_Couchbase.prototype.setDeveloperGameAwaitingApproval = function(gameId, 
     }.bind(this));
 };
 
-TelemDS_Couchbase.prototype.setDeveloperGameApproved = function(gameId, agentId){
+TelemDS_Couchbase.prototype.getDeveloperGameStatus = function(gameId, allowMissing) {
     return when.promise(function(resolve, reject){
         var key = tConst.datastore.keys.developerGameApprovalActivity + ":" + gameId;
         var data;
         
         this.client.get(key, function(err, results) {
-            var now = Date.now();
             if(err) {
-                console.error("Couchbase TelemetryStore: setDeveloperGameApproved Error -", err);
-                reject(err);
-                return;
-            }
-
-            data = results.value;
-            data.ts = now;
-            data.status = tConst.datastore.activity.approved;
-            data.activity.push({
-                    action: tConst.datastore.activity.approved,
-                    ts: now,
-                    agent: agentId
-                });
-            
-            this.client.set(key, data, function(err, results){
-                if(err){
-                    console.error("Couchbase TelemetryStore: setDeveloperGameApproved Error -", err);
+                if(!allowMissing || err.code != 13) {
+                    console.error("Couchbase TelemetryStore: getDeveloperGameStatus Error -", err);
                     reject(err);
                     return;
                 }
-                resolve(data);
-            }.bind(this));
+                
+                resolve("missing");
+            } else {
+                resolve(results.value);
+            }
         }.bind(this));
     }.bind(this));
-};
+}
+
 

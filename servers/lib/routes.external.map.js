@@ -307,6 +307,15 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
+            api: "/api/v2/dash/games/rejected",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAllDeveloperGamesRejected"
+            }
+        },
+        {
             api: "/api/v2/dash/games/active/details",
             service: "dash",
             controller: "games",

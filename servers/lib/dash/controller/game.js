@@ -2,9 +2,10 @@
 var _          = require('lodash');
 var when       = require('when');
 var handlebars = require('handlebars');
+var path       = require('path');
 //
 var Util       = require('../../core/util.js');
-var dConst    = require('../dash.const.js');
+var dConst     = require('../dash.const.js');
 
 module.exports = {
     getUserGameAchievements:    getUserGameAchievements,
@@ -304,7 +305,7 @@ function approveDeveloperGame(req, res) {
             if (!results || !results.update || results.update !== "complete") {
                 return results; // error
             }
-            // This is redundant if submissionAPI.destination is this server.
+            // Calling updateGameInformation is assumed redundant if isSelf is true.
             if (isSelf) {
                 return gameData;
             }
@@ -312,12 +313,14 @@ function approveDeveloperGame(req, res) {
         }.bind(this))
         .then(function(results) {
             if (results && results.basic !== undefined) {
-                return dashService.telmStore.setDeveloperGameApproved(gameId, userId);
+                return dashService.telmStore.setDeveloperGameStatus(gameId, 0, userId, dConst.gameApproval.status.approved);
             }
             return results; // pass along error
         }.bind(this))
         .then(function(results) {
             if (results && results.status !== undefined) {
+                sendDeveloperGameApprovedEmail.call(this, gameId, req.protocol, req.headers.host);
+              
                 console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
                 this.requestUtil.jsonResponse(res, {status: "ok"});
             } else {
@@ -331,10 +334,7 @@ function approveDeveloperGame(req, res) {
         }.bind(this));
 }
 
-
 function rejectDeveloperGame(req, res) {
-/*
-    var userId = req.user.id;
     if(req.user.role !== "admin"){
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
@@ -344,32 +344,181 @@ function rejectDeveloperGame(req, res) {
         this.options.gameDevelopers.submissionAPI &&
         this.options.gameDevelopers.submissionAPI.destination))
     {
-        console.error("Dash: rejectDeveloperGame Error - destination not configured");
+        console.error("Dash: approveDeveloperGame Error - destination not configured");
         this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         return;
     }
 
+    var userId = req.user.id;
+    var reason = req.body.reason;
     var gameId = req.params.gameId.toUpperCase();
     var url = this.options.gameDevelopers.submissionAPI.destination
         + "/api/v2/dash/replace/"+gameId+"/" + dConst.code;
-
-    this.telmStore.getGameInformation(gameId)
+    var isSelf = !!this.options.gameDevelopers.submissionAPI.isSelf;
+    var action = dConst.gameApproval.status.pulled;
+    var dashService = this.serviceManager.get("dash").service;
+    var gameData;
+    
+    this.telmStore.getDeveloperGameStatus(gameId, true)
         .then(function(data) {
-            return this.requestUtil.request(url, data);
+            if (typeof data !== 'string') {
+                if (data.status == dConst.gameApproval.status.submitted) {
+                    action = dConst.gameApproval.status.rejected;
+                }
+            }
+            return this.telmStore.getGameInformation(gameId);
+        }.bind(this))
+        .then(function(data) {
+            gameData = data;
+            gameData.basic.visible = false;
+            return this.requestUtil.request(url, gameData);
         }.bind(this))
         .then(function(results) {
-            console.log("Dash: rejectDeveloperGame Result - ", results)
-            this.requestUtil.jsonResponse(res, {status: "ok"});
+            if (!results || !results.update || results.update !== "complete") {
+                return results; // error
+            }
+            // This is redundant if submissionAPI.destination is this server.
+            if (isSelf) {
+                return gameData;
+            }
+            return dashService.telmStore.updateGameInformation(gameId, gameData);
+        }.bind(this))
+        .then(function(results) {
+            if (results && results.basic !== undefined) {
+                return dashService.telmStore.setDeveloperGameStatus(gameId, 0, userId, action);
+            }
+            return results; // pass along error
+        }.bind(this))
+        .then(function(results) {
+            if (results && results.status !== undefined) {
+                sendDeveloperGameRejectedEmail.call(this, gameId, action, reason, req.protocol, req.headers.host);
+
+                console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
+                this.requestUtil.jsonResponse(res, {status: "ok"});
+            } else {
+                console.error("Dash: approveDeveloperGame Error - ", result);
+                this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+            }
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: rejectDeveloperGame Error - ", err);
+            console.error("Dash: approveDeveloperGame Error - ", err);
             this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         }.bind(this));
-*/
 }
 
 // maybe this should be in user.js
 function requestInfoDeveloperGame(req, res) {
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    var reason = req.body.reason;
+    var gameId = req.params.gameId.toUpperCase();
+
+    sendDeveloperGameRequestInfoEmail.call(this, gameId, reason, req.protocol, req.headers.host)
+    .then(function(results) {
+        console.log("Dash: requestInfoDeveloperGame Result - email sent");
+        this.requestUtil.jsonResponse(res, {status: "ok"});
+    }.bind(this))
+    .catch(function(err) {
+        console.error("Dash: requestInfoDeveloperGame Error - ", err);
+        this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+    }.bind(this));
 }
 
+function sendDeveloperGameApprovedEmail(gameId, protocol, host) {
+    var dashService = this.serviceManager.get("dash").service;
+    var authService = this.serviceManager.get("auth").service;
+    
+    return dashService.telmStore.getDeveloperGameStatus(gameId, false)
+    .then(function(activity) {
+        return authService.getAuthStore().findUser('id', activity.userId)
+    }.bind(this))
+    .then(function(userData) {
+        var emailData = {
+            subject: "GlassLab Games - Game approved for distribution",
+            to: userData.email,
+            user: userData,
+            gameId: gameId,
+            host: protocol + "://" + host
+        };
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join(__dirname, "../email-templates"),
+            this.stats);
+        return email.send('submitted-game-approved', emailData);
+    }.bind(this))
+    .then(function(){
+        // all ok
+    }.bind(this))
+    // error
+    .then(null, function(err){
+        console.error('failed to send email:',  err);
+    }.bind(this))
+}
+
+function sendDeveloperGameRejectedEmail(gameId, action, reason, protocol, host) {
+    var dashService = this.serviceManager.get("dash").service;
+    var authService = this.serviceManager.get("auth").service;
+    
+    return dashService.telmStore.getDeveloperGameStatus(gameId)
+    .then(function(activity) {
+        return authService.getAuthStore().findUser('id', activity.userId)
+    }.bind(this))
+    .then(function(userData) {
+        var emailData = {
+            subject: action === dConst.gameApproval.status.pulled ? "GlassLab Games - Game pulled from distribution" : "GlassLab Games - Submitted game rejected",
+            to: userData.email,
+            user: userData,
+            gameId: gameId,
+            reason: reason,
+            host: protocol + "://" + host
+        };
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join(__dirname, "../email-templates"),
+            this.stats);
+        return email.send(action === dConst.gameApproval.status.pulled ? 'developer-game-pulled' : 'developer-game-rejected', emailData);
+    }.bind(this))
+    .then(function(){
+        // all ok
+    }.bind(this))
+    // error
+    .then(null, function(err){
+        console.error('failed to send email:',  err);
+    }.bind(this))
+}
+
+function sendDeveloperGameRequestInfoEmail(gameId, reason, protocol, host) {
+    var dashService = this.serviceManager.get("dash").service;
+    var authService = this.serviceManager.get("auth").service;
+    
+    return dashService.telmStore.getDeveloperGameStatus(gameId)
+    .then(function(activity) {
+        return authService.getAuthStore().findUser('id', activity.userId)
+    }.bind(this))
+    .then(function(userData) {
+        var emailData = {
+            subject: "GlassLab Games - Information requested",
+            to: userData.email,
+            user: userData,
+            gameId: gameId,
+            reason: reason,
+            host: protocol + "://" + host
+        };
+        var email = new Util.Email(
+            this.options.auth.email,
+            path.join(__dirname, "../email-templates"),
+            this.stats);
+        return email.send('developer-request-info', emailData);
+    }.bind(this))
+    .then(function(){
+        // all ok
+    }.bind(this))
+    // error
+    .then(null, function(err){
+        console.error('failed to send email:',  err);
+    }.bind(this))
+}
 

@@ -53,12 +53,6 @@ module.exports = {
             user: "u",
             developer: "di",
             developerGameApprovalActivity: "dgaa"
-        },
-        activity: {
-            submitted: "submitted",
-            approved: "approved",
-            rejected: "rejected",
-            pulled: "pulled"
         }
     },
     webapp: {
