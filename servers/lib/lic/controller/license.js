@@ -31,6 +31,7 @@ module.exports = {
     getActivePurchaseOrderInfo: 		getActivePurchaseOrderInfo,
     getOpenPurchaseOrders: 				getOpenPurchaseOrders,
     getNotOpenPurchaseOrders:			getNotOpenPurchaseOrders,
+    getOpenPurchaseOrderForUser:		getOpenPurchaseOrderForUser,
     cancelActivePurchaseOrder: 			cancelActivePurchaseOrder,
     receivePurchaseOrder: 				receivePurchaseOrder,
     rejectPurchaseOrder: 				rejectPurchaseOrder,
@@ -2113,6 +2114,23 @@ function getNotOpenPurchaseOrders(req, res) {
     	}.bind(this))
     	.then(null, function(err) {
             console.error("Get Not Open Purchase Orders Error -",err);
+            this.requestUtil.errorResponse(res, { key: "lic.general"});
+    	}.bind(this));
+}
+
+// gets open purchase orders (pending, received, invoiced) for specific user
+function getOpenPurchaseOrderForUser( req, res ) {
+    if(!(req && req.user && ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) && req.params && req.params.hasOwnProperty("userId") ) ) {
+        this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+        return;
+    }
+
+    this.myds.getOpenPurchaseOrderForUser( req.params.userId )
+    	.then( function(results) {
+    		this.requestUtil.jsonResponse(res, results);
+    	}.bind(this))
+    	.then(null, function(err) {
+            console.error("Get Open Purchase Order For User Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }

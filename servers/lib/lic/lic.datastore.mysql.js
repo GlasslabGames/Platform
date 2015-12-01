@@ -748,6 +748,20 @@ Lic_MySQL.prototype.getNotOpenPurchaseOrders = function() {
 	}.bind(this));
 };
 
+Lic_MySQL.prototype.getOpenPurchaseOrderForUser = function( userId ) {
+	return when.promise(function(resolve, reject){
+		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received', 'invoiced') AND user_id = " + userId + ";";
+		this.ds.query(Q)
+		.then(function(results){
+			resolve(results);
+		})
+		.then(null, function(err){
+			console.error("Get Open Purchase Order for User Error -",err);
+			reject(err);
+		});
+	}.bind(this));
+};
+
 Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE purchase_order_key = '" + key + "';";
