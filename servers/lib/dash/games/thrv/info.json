@@ -90,18 +90,18 @@
         "list": [
             {
                 "id": "sowo",
-               "enabled": true,
-               "name": "Shout Out and Watch Out Report",
-               "header": {
-                   "text": "Shout Out and Watch Out Report",
-                   "image": "assets/game-banner-AW-1.jpg",
-                   "skinny": "assets/skinny-banner-AW-1.jpg",
-                   "large": "assets/skinny-banner-AW-1@2x.jpg"
-               },
-               "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
-               "table": {
-                   "labels": [],
-                   "groups": [
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-AW-1.jpg",
+                    "skinny": "assets/skinny-banner-AW-1.jpg",
+                    "large": "assets/skinny-banner-AW-1@2x.jpg"
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
+                "table": {
+                    "labels": [],
+                    "groups": [
                         {
                             "id": "so",
                             "title": "Shout Out!",
@@ -139,8 +139,8 @@
                                 }
                             ]
                         }
-                   ]
-               }
+                    ]
+                }
             },
             {
                 "id": "achievements",

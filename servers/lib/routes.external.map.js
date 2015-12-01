@@ -635,7 +635,7 @@ module.exports = {
                 get: "getCurrentPlan"
             }
         },
-         {
+        {
             requireAuth: true,
             requireHttps: true,
             api: "/api/v2/license/planforuser",
@@ -645,7 +645,7 @@ module.exports = {
                 get: "getPlanForUser"
             }
         },
-       {
+		{
             requireAuth: true,
             requireHttps: true,
             api: "/api/v2/license/students",
@@ -835,6 +835,16 @@ module.exports = {
             controller: "license",
             method: {
                 get: "getNotOpenPurchaseOrders"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/openforuser/:userId",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getOpenPurchaseOrderForUser"
             }
         },
         {

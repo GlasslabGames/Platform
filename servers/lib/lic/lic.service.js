@@ -59,6 +59,13 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
         .then(function(){
+            return this.myds.updatePOTable();
+        }.bind(this))
+        .then(function(updated){
+            if(updated) {
+                console.log("LicService: MySQL Purchase Order Table Updated!");
+            }
+
             return this.cbds.connect();
         }.bind(this))
         .then(function(){
