@@ -814,7 +814,7 @@ function _canClassEnable(licenseId, games){
                 var license = results[0][0];
                 var freeGameIds = results[1];
                 var plan = license["package_type"];
-                var lConst = require("../../lic/lic.const.js");
+                var lConst = this.serviceManager.get("lic").lib.Const;
                 var availablePremiumGames = {};
                 lConst.plan[plan].browserGames.forEach(function(game){
                     availablePremiumGames[game] = true;

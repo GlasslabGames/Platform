@@ -96,7 +96,7 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "DashDataStore.Connect");
             }.bind(this))
         .then(function(){
-            _buildLicPackages.call(this);
+            return _buildLicPackages.call(this);
         }.bind(this))
         .then(function(){
             setInterval(_refreshGameFiles.bind(this), this.options.webapp.refreshGamesInterval || 30000);
@@ -111,7 +111,7 @@ function _refreshGameFiles(){
     //console.log("_refreshGameFiles");
     this._loadGameFiles()
         .then(function() {
-            _buildLicPackages().call(this);
+            return _buildLicPackages.call(this);
         }.bind(this));
 }
 
@@ -132,6 +132,7 @@ function _buildLicPackages(){
         _(games).forEach(function(game){
             gameInfo = game.info.basic;
             if(!gameInfo.packages){
+                console.error("DashService: _buildLicPackages - gameInfo does not have packages defined", gameInfo.gameId);
                 return;
             }
             var packages = gameInfo.packages.split(", ");
@@ -194,6 +195,8 @@ function _buildLicPackages(){
         //    }
         //    resolve();
         //}.bind(this));
+
+        resolve();
     }.bind(this));
 }
 
@@ -575,6 +578,10 @@ DashService.prototype._loadGameFiles = function(){
                     ids = couchId.split(':');
                     type = ids[0];
                     gameId = ids[1];
+
+                    if (gameId === "TEMPLATE") {
+                        return;
+                    }
 
                     // _loadGameFiles() is failing - crashes if no achievements !?
                     // console.log('  _loadGameFiles() .. type, gameId =', type, gameId);
