@@ -169,13 +169,14 @@
                 "title": "Research",
                 "list": [
                     {
-                        "category": "",
+                        "category": "Research Articles",
                         "list": [
                             {
-                                "name": "",
-                                "link": ""
+                                "name": "Use Your Brainz Research Brief",
+                                "link": "http://www.ifyoucan.org/wp-content/uploads/2014/09/Learning-in-IF...-March-2014.pdf"
                             }
                         ]
+
                     }
                 ]
             },
