@@ -16,10 +16,10 @@
                 "large": "/assets/platform-ipad@2x.png"
             }
         },
-        "price": "Coming Soon",
+        "price": "Premium",
         "packages": "iPad Games",
-        "release": "dev",
-        "releaseDate": "TBD",
+        "release": "live",
+        "releaseDate": "December 9, 2015",
         "shortDescription": "Developed during the first ever White House Game Jam 2014, Battleground 538 is a turn-based strategy game that demonstrates how the electoral college system shapes and drives the way elections are won... and lost.",
         "description": "Developed during the first ever White House Game Jam 2014, Battleground 538 is a turn-based strategy game that demonstrates how the electoral college system shapes and drives the way elections are won... and lost.",
         "developer": {
@@ -60,17 +60,44 @@
         "list": []
     },
     "details": {
-        "buttons": [],
+        "buttons": [
+            {
+                "name": "Download",
+                "type": "download",
+                "authRequired": false,
+                "links": [
+                    {
+                        "target": "_blank",
+                        "name": "iPad",
+                        "link": "https://itunes.apple.com/us/app/battleground-538/id1045727750?mt=8",
+                        "type": "ios-appstore"
+                    }
+                ]
+            }
+        ],
         "pages": {
             "product": {
                 "order": 1,
                 "enabled": true,
                 "id": "product",
-                "title": "About Battleground 538",
-                "header": "Placeholder Header",
+                "title": "Product Description",
+                "header": "About the Game",
                 "about": "Developed during the first ever White House Game Jam 2014, Battleground 538 is a turn-based strategy game that demonstrates how the electoral college system shapes and drives the way elections are won... and lost.<br> <br>Players are top political strategists, tasked with deciding where to invest a candidate’s precious resources over the final 12 weeks of the presidential campaign. Each in-game week, the player receives cash from their campaign committee; as fundraising increases, players can choose to do a variety of activities, from extra staff training to complete coastal domination.<br><br>The game features 4 historical presidential elections:<br><br><ul><li>Obama vs. Romney (2012)</li><li>Bush vs. Gore (2000)</li><li>Kennedy vs. Dixon (1960)</li><li>Polk vs. Clay (1844)</li></ul>For the more adventurous political strategists, Battleground 538 also includes 3 special game modes where swing states are randomly generated - or completely up for grabs!",
-                "video": "",
-                "brochure": ""
+                "video": "https://www.youtube.com/watch?v=ScNPy3y4bhc",
+                "brochure": "",
+                "curriculum": [
+                    "Engaging tool teaches young voters about the electoral college",
+                    "Replayability allows exploration of the concept from many angles",
+                    "Calculating strategy addresses critical math common score standards",
+                    "Competitive two-player game creates excitement and promotes discourse and critical thinking, addressing ELA common core standards",
+                    "Simulation of U.S. Government creates empathy with governmental systems and promotes civic engagement"
+                ],
+                "slideshow": [
+                    {
+                        "type": "image",
+                        "url": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/480x360BG.jpg"
+                    }
+                ]
             },
             "standards": {
                 "order": 2,
@@ -80,15 +107,19 @@
                 "title": "Standards",
                 "CCSS": [
                     {
-                        "category": "Placeholder Standards Category",
+                        "category": "ELA Common Core",
                         "groups": [
                             {
-                                "name": "Placeholder Group",
                                 "list": [
                                     {
-                                        "name": "Placeholder Standard",
-                                        "link": "Placeholder Link",
-                                        "description": "Placeholder Description"
+                                        "name": "CCSS.ELA-Literacy.RH.6-8.7",
+                                        "link": "http://www.corestandards.org/ELA-Literacy/RH/6-8/7/",
+                                        "description": "Integrate visual information (e.g., in charts, graphs, photographs, videos, or maps) with other information in print and digital texts"
+                                    },
+                                    {
+                                        "name": "CCSS.ELA-Literacy.RH.9-10.4",
+                                        "link": "http://www.corestandards.org/ELA-Literacy/RH/9-10/4/",
+                                        "description": "Determine the meaning of words and phrases as they are used in a text, including vocabulary describing political, social, or economic aspects of history/social science"
                                     }
                                 ]
                             }
@@ -98,26 +129,21 @@
             },
             "lessonPlans": {
                 "order": 3,
-                "enabled": false,
+                "enabled": true,
                 "authRequired": true,
                 "id": "lessonPlans",
-                "title": "Lesson Plans & Videos",
+                "title": "Lesson Plans",
                 "list": [
                     {
                         "category": "Lesson Plans",
                         "list": [
                             {
-                                "name": "",
-                                "link": ""
-                            }
-                        ]
-                    },
-                    {
-                        "category": "Videos",
-                        "list": [
+                                "name": "Game Overview",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/lesson-plans/Battleground+538+Overview.pdf"
+                            },
                             {
-                                "name": "",
-                                "link": ""
+                                "name": "Lesson 1",
+                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/lesson-plans/1/BATTLEGROUND+538+Lesson+1.pdf"
                             }
                         ]
                     }
