@@ -1,0 +1,278 @@
+{
+    "basic": {
+        "gameId": "NSQR",
+        "enabled": true,
+        "visible": true,
+        "maintenance": null,
+        "shortName": "Nine Squares",
+        "longName": "Nine Squares",
+        "grades": "1-12",
+        "subject": "Strategy",
+        "type": "App",
+        "platform": {
+            "type": "Flash/Browser",
+            "icon": {
+                "small": "/assets/platform-browser.png",
+                "large": "/assets/platform-browser@2x.png"
+            }
+        },
+        "price": "Free",
+        "packages": "PC/Mac, Chromebook/Web Games",
+        "release": "dev",
+        "releaseDate": "not yet",
+        "shortDescription": "Get three-in-a-row.",
+        "description": "Capture any 3 squares in a row, before your opponent, Horizontally, vertically, or diagonally.",
+        "developer": {
+            "id": "TEMP",
+            "name": "Developer Name",
+            "logo": {
+                "small": "/assets/glasslab-logo.png",
+                "large": "/assets/glasslab-logo-2x.png"
+            },
+            "description": "Placeholder Developer Description"
+        },
+        "settings": {
+            "canCreateMatches": false
+        },
+        "license": {
+            "type": "loginType",
+            "loginType": "glasslabv2,icivics,edmodo",
+            "valid": true,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
+        },
+        "thumbnail": {
+            "small": "/assets/thumb-game-AA-1.png",
+            "large": "/assets/thumb-game-AA-1.png"
+        },
+        "card": {
+            "small": "/assets/game-card-AA-1.jpg",
+            "large": "/assets/game-card-AA-1@2x.jpg"
+        },
+        "banners": {
+            "product": "/assets/game-banner-AA-1.png",
+            "reports": "/assets/game-banner-AA-1.png"
+        }
+    },
+    "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "so1": {
+                    "name": "Always a Draw",
+                    "description": "This player got a draw in the previous match."
+                },
+                "so2": {
+                    "name": "Gotcha",
+                    "description": "This player saw the other players mistake and took the win in the previous round."
+                },
+                "wo1": {
+                    "name": "Dooh",
+                    "description": "The player made a mistak and lost the previous round."
+                }
+            }
+        }
+    ],
+    "reports": {
+        "list": [
+            {
+                "id": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "/assets/game-banner-AW-1.jpg",
+                    "skinny": "/assets/skinny-banner-AW-1.jpg",
+                    "large": "/assets/skinny-banner-AW-1@2x.jpg"
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "title": "",
+                                    "description": "This player correctly matched all of the reasoning wheel sentences in the last case played."
+                                },
+                                {
+                                    "id": "so2",
+                                    "title": "",
+                                    "description": "This player correctly objected to at least two of the other side's arguments in the last case played."
+                                },
+                                {
+                                    "id": "so3",
+                                    "title": "",
+                                    "description": "This player chose Supreme Court precedent or Constitutional support at least two times within the first four moves of the last case played, and chose no irrelevant support during the game."
+                                },
+                                {
+                                    "id": "so4",
+                                    "title": "",
+                                    "description": "The player has reviewed all of the opponents cards in the last case played."
+                                },
+                                {
+                                    "id": "so5",
+                                    "title": "",
+                                    "description": "The player reviewed AND correctly passed or objected to all of the opponent's cards in the last case played."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo1",
+                                    "title": "",
+                                    "description": "These players have chosen irrelevant support for their side of the case at least two times during the last case played."
+                                },
+                                {
+                                    "id": "wo2",
+                                    "title": "",
+                                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first five moves of the last case played."
+                                },
+                                {
+                                    "id": "wo3",
+                                    "title": "",
+                                    "description": "This player did not match the reasoning wheel sentence correctly at all during the last case played."
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "",
+                                    "description": "The player has not reviewed any of the opponents cards in the last case played."
+                                },
+                                {
+                                    "id": "wo5",
+                                    "title": "",
+                                    "description": "Player did not successfully object during the last case played."
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "id": "achievements",
+                "enabled": true,
+                "name": "Learning Events & Time Played",
+                "header": {
+                    "text": "Learning Events & Time Played",
+                    "image": "/assets/game-banner-AW-1.jpg",
+                    "skinny": "/assets/skinny-banner-AW-1.jpg",
+                    "large": "/assets/skinny-banner-AW-1@2x.jpg"
+                },
+                "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
+                "groups": []
+            }
+        ]
+    },
+    "details": {
+        "buttons": [],
+        "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Placeholder Product Description",
+                "header": "Placeholder Header",
+                "about": "Placeholder About Section.",
+                "video": "",
+                "brochure": ""
+            },
+            "standards": {
+                "order": 2,
+                "enabled": true,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards",
+                "CCSS": [
+                    {
+                        "category": "Placeholder Standards Category",
+                        "groups": [
+                            {
+                                "name": "Placeholder Group",
+                                "list": [
+                                    {
+                                        "name": "Placeholder Standard",
+                                        "link": "Placeholder Link",
+                                        "description": "Placeholder Description"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": false,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans & Videos",
+                "list": [
+                    {
+                        "category": "Lesson Plans",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    },
+                    {
+                        "category": "Videos",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "research": {
+                "order": 4,
+                "enabled": false,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                    {
+                        "category": "",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": false,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                    {
+                        "reviewer": "",
+                        "review": ""
+                    }
+                ]
+            }
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "https://plus.google.com/117864084582459836584/posts"
+        }
+    }
+}

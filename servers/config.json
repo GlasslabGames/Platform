@@ -29,9 +29,28 @@
                 "password": "glasslab",
                 "ttl": 86400, "//": "24 hours in seconds"
             }
+        },
+        "cors": {
+        	"acceptAll" : false,
+        	"whitelist": [
+        		"http://new.wwf.local", 
+        		"https://new.wwf.local", 
+        		"http://www.wordswithfriendsedu.com", 
+        		"http://edu.zwf-staging.zynga.com", 
+        		"http://s3-us-west-1.amazonaws.com",
+        		"https://s3-us-west-1.amazonaws.com"
+        	]
         }
     },
+    "registration" : {
+    	"developer" : {
+    		"protocol" : "https",
+    		"additionalServers" : [], "//": "domains of servers to also perform registration",
+    		"secretKey" : "", "//": "key shared by all servers that jointly register"
+    	}
+    },
     "webapp": {
+        "refreshGamesInterval": 30000,
         "staticContentPath": "../../Playfully.org/build",
         "datastore": {
             "mysql": {
@@ -164,9 +183,16 @@
         "host": "localhost",
         "port": 8003
     },
+    "gameDevelopers": {
+        "submissionAPI": {
+            "destination": "https://auto.playfully.org",
+            "isSelf": false
+        }
+    },
     "research": {
         "csvTimeout": {"minutes": 10},
         "dataChunkSize": 2000,
+        "queryArchivesOnly": true,
         "datastore": {
             "couchbase": {
                 "host":     "localhost:8091",
@@ -214,9 +240,43 @@
         "first_login":   "2015-09-02 23:59:01"
     },
     "env_stage": {
-        "first_login":   "2015-09-03 23:59:01"
+        "first_login":   "2015-09-06 23:59:01"
     },
     "env_prod": {
-        "first_login":   "2015-09-09 23:59:01"
+        "first_login":   "2015-10-07 23:59:01"
+    },
+    "configMod": {
+        "modSectionAbc": {
+            "modNameAbc": {
+                "aa": "aa"
+            }
+        },
+        "test-section": {
+            "This modName does not match any keyName.": {
+                "bbb": "bbb will not be used"
+            }
+        },
+        "buildEnv": {
+            "//": "if configKeys.buildEnv: local is in hydra.config.json ...",
+            "local": {
+                "bart": "simpson just for testing",
+                "services": {
+                    "port": 8043,
+                    "portSSL": 8043,
+                    "portNonSSL": 8080,
+                    "first_login": "2015-09-03 23:59:01"
+                }
+            },
+            "autoDev": {
+                "services": {
+                    "first_login":   "2015-09-04 23:59:01"
+                }
+            },
+            "prod": {
+                "services": {
+                    "first_login":   "2015-10-07 23:59:01"
+                }
+            }
+        }
     }
 }

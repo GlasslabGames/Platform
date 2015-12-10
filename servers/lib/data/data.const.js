@@ -45,11 +45,15 @@ module.exports = {
         gameAchievementKey: 'ga',
         matchKey: 'm'
     },
+    developer: {
+        organizationKey: "o"
+    },
     datastore: {
-      keys: {
-          user: "u",
-          developer: "di"
-      }
+        keys: {
+            user: "u",
+            developer: "di",
+            developerGameApprovalActivity: "dgaa"
+        }
     },
     webapp: {
         api: '/api',

@@ -262,6 +262,33 @@ S3Util.prototype.getSignedUrls = function(docType, pathParams, isDirectory){
 };
 
 
+// grabs signed keys for all objects that fall within a particular prefix directory structure
+S3Util.prototype.getSignedKeys = function(docType, pathParams, isDirectory){
+    return when.promise(function(resolve, reject){
+        var prefix = _s3PrefixBuilder(pathParams, isDirectory);
+        this.listS3Objects(prefix)
+            .then(function(list){
+                var signedKeyList = [];
+                list.forEach(function(object){
+                    var key = object.Key;
+                    docType = docType || '*';
+                    var endType = key.slice(key.lastIndexOf('.')+1);
+                    if(endType === docType || docType === '*'){
+                        signedKeyList.push(key);
+                    }
+                }.bind(this));
+                return when.all(signedKeyList);
+            }.bind(this))
+            .then(function(signedKeyList){
+                resolve(signedKeyList);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            }.bind(this));
+    }.bind(this));
+};
+
+
 // only works if you have awscli installed and configured with aws credentials
 // can be used to move or rename an object in s3 just as mv would be used in the unix terminal
 function _mvS3Object(startKey, endKey){

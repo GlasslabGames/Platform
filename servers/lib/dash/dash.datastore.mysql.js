@@ -90,6 +90,39 @@ WebStore_MySQL.prototype.getUserBadgeListById = function(id) {
     }.bind(this));
 };
 
+WebStore_MySQL.prototype.getResellers = function() {
+    return when.promise(function(resolve, reject) {
+        var Q = "SELECT id, username, first_name as firstName, last_name as lastName, email, system_role as role FROM GL_USER WHERE system_role='" + lConst.role.reseller + "' or system_role='" + lConst.role.reseller_candidate + "'";
+
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
+
+WebStore_MySQL.prototype.updateUserRole = function( id, role ) {
+    if( ! ( id || role ) ) {
+        reject({"error": "failure", "exception": "invalid argument"}, 500);
+        return;
+    }
+
+    return when.promise(function(resolve, reject) {
+        var Q = "UPDATE GL_USER SET system_role='" + role + "' WHERE id=" + id;
+
+        this.ds.query(Q)
+            .then(function(results){
+                resolve(results);
+            })
+            .then(function(err){
+                reject(err);
+            });
+    }.bind(this));
+}
+
 WebStore_MySQL.prototype.getUserInfoById = function(id) {
 // add promise wrapper
     return when.promise(function(resolve, reject) {
@@ -128,7 +161,7 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                     // TODO: remove this when we have clarity on the multi-standards design
                     results.standards = results.standards ? results.standards : "CCSS";
                     user = results;
-                    if (user.role === "instructor" || user.role === "developer" || user.role === "admin"){
+                    if (user.role === "instructor" || user.role === "developer" || user.role === "admin" || user.role === "reseller"){
                         user.permits = aConst.permits[user.role];
                     }
                     if(results.role === "instructor"){
@@ -143,7 +176,13 @@ WebStore_MySQL.prototype.getUserInfoById = function(id) {
                 if(!((results === "none")||(results.length===0))){
                     // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
                     user.hadTrial = true;
-                    console.log("user had trial or previous subscriptions: ", user.username);
+					user.hadSubscribe = false;
+					for (i=0;i<results.length;i++) {
+						if (results[i].package_type !== 'trial') {
+							user.hadSubscribe = true;
+							break;
+						}
+					}
                 }
                 return this.getLicenseInfoByInstructor(id);
             }.bind(this))

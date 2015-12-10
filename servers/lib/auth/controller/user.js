@@ -2,6 +2,7 @@
 var path      = require('path');
 var _         = require('lodash');
 var when      = require('when');
+var request   = require('request');
 var lConst    = require('../../lms/lms.const.js');
 var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
@@ -10,12 +11,17 @@ module.exports = {
     getUserProfileData:			getUserProfileData,
     registerUserV1:				registerUserV1,
     registerUserV2:				registerUserV2,
+    unregisterUserV2:			unregisterUserV2,
     verifyEmailCode:			verifyEmailCode,
     verifyBetaCode:				verifyBetaCode,
     verifyDeveloperCode:		verifyDeveloperCode,
     getAllDevelopers: 	 		getAllDevelopers,
     alterDeveloperVerifyCodeStatus: alterDeveloperVerifyCodeStatus,
     getUserDataById:			getUserDataById,
+    getResellers:				getResellers,
+    updateUserRole:				updateUserRole,
+    getUserDataByEmail:         getUserDataByEmail,
+    getUserDataByUserName:      getUserDataByUserName,
     updateUserData:				updateUserData,
     getUserBadgeList:			getUserBadgeList,
     updateUserBadgeList:		updateUserBadgeList,
@@ -88,7 +94,7 @@ function getUserDataById(req, res, next) {
         // check perms before returning user info
         this.webstore.getUserInfoById(req.params.userId)
             .then(function(userData){
-                return this.checkUserPerminsToUserData(userData, loginUserSessionData)
+                return this.checkUserPerminsToUserData(userData, loginUserSessionData);
             }.bind(this))
             // ok, send data
             .then(function(userData){
@@ -103,6 +109,99 @@ function getUserDataById(req, res, next) {
     }
 }
 
+function getResellers(req, res, next) {
+    if(req.user.role !== "admin"){
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to get resellers but not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user ) {
+    	this.webstore.getResellers()
+            .then(function(results){
+                this.requestUtil.jsonResponse(res, results);
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+function updateUserRole(req, res, next) {
+    if(req.user.role !== "admin"){
+        console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
+            req.user.username, 'attempted to set user role but not an admin.');
+
+        this.requestUtil.errorResponse(res, { key: "user.permit.invalid"});
+        return;
+    }
+
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.params &&
+        req.params.hasOwnProperty("userId") &&
+        req.params.hasOwnProperty("role")) {
+    	this.webstore.updateUserRole( req.params.userId, req.params.role )
+            .then(function(results){
+                this.requestUtil.jsonResponse(res, results);
+            }.bind(this))
+            // error
+            .then(null, function(err){
+                this.requestUtil.errorResponse(res, err);
+            }.bind(this))
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+function getUserDataByEmail(req, res, next) {
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.query &&
+        req.query.email) {
+            this.getAuthStore().findUser( 'email', req.query.email )
+            .then(function(userData) {
+                var userId = userData.id;
+                this.requestUtil.jsonResponse(res, userData);
+            }.bind(this))
+            .then(null, function(err){
+                var empty = {};
+                this.requestUtil.jsonResponse(res, empty);
+            }.bind(this));
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
+function getUserDataByUserName(req, res, next) {
+    if( req.session &&
+        req.session.passport &&
+        req.session.passport.user &&
+        req.user.role === "admin" &&
+        req.query &&
+        req.query.username) {
+            this.getAuthStore().findUser( 'USERNAME', req.query.username )
+            .then(function(userData) {
+                this.requestUtil.jsonResponse(res, userData);
+            }.bind(this))
+            .then(null, function(err){
+                var empty = {};
+                this.requestUtil.jsonResponse(res, empty);
+            }.bind(this));
+    } else {
+        this.requestUtil.errorResponse(res, "not logged in");
+    }
+}
+
 exampleIn.updateUserData = {
     "userId":        25,
     "username":      "test2",
@@ -111,13 +210,12 @@ exampleIn.updateUserData = {
     "email":         "test2@email.com",
     "password":      "test"
 };
+
 function updateUserData(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Update.User");
-    //console.log("Auth updateUserRoute - body:", req.body);
     if( !(req.body.userId) )
     {
         this.stats.increment("error", "Route.Update.User.MissingId");
-        //this.requestUtil.errorResponse(res, "missing the userId", 400);
         this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
         return;
     }
@@ -418,6 +516,8 @@ function registerUserV1(req, res, next) {
 function registerUserV2(req, res, next, serviceManager) {
     this.stats.increment("info", "Route.Register.User");
 
+    var multiRegPromise = null;
+        
     var regData = {
         username:      "",
         firstName:     "",
@@ -457,7 +557,7 @@ function registerUserV2(req, res, next, serviceManager) {
             return;
         }
     }
-    else if(regData.role == lConst.role.instructor) {
+    else if( (regData.role == lConst.role.instructor) || (regData.role == lConst.role.reseller_candidate) ) {
         // email and username is the same
         req.body.username   = req.body.email;
         regData.username    = Util.ConvertToString(req.body.username);
@@ -519,8 +619,13 @@ function registerUserV2(req, res, next, serviceManager) {
         regData.firstName   = Util.ConvertToString(req.body.firstName);
         regData.lastName    = Util.ConvertToString(req.body.lastName);
         regData.email       = Util.ConvertToString(req.body.email);
+        regData.organization = Util.ConvertToString(req.body.organization);
+        regData.orgRole = Util.ConvertToString(req.body.orgRole);
+        regData.numGames = Util.ConvertToString(req.body.numGames);
+        regData.subjects = Util.ConvertToString(req.body.subjects);
+        regData.interest = Util.ConvertToString(req.body.interest);
         regData.verifyCode  = Util.CreateUUID();
-        regData.verifyCodeStatus  = 'approve';
+        regData.verifyCodeStatus  = (Util.ConvertToString(req.body.shadow) ? aConst.verifyCode.status.shadow : aConst.verifyCode.status.approve);
 
         if(!regData.username) {
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
@@ -537,6 +642,29 @@ function registerUserV2(req, res, next, serviceManager) {
         if(!regData.email) {
             this.requestUtil.errorResponse(res, {key:"user.create.input.missing.email"}, 400);
             return;
+        }
+        
+        if (this.options.registration &&
+        	this.options.registration.developer && 
+        	_.isArray(this.options.registration.developer.additionalServers)) {
+        
+			var additionalServers = this.options.registration.developer.additionalServers;
+		
+			if (additionalServers.length > 0) {
+			
+				var multiRegInfo = {
+					username:	regData.username,
+					firstName:  regData.firstName,
+					lastName:   regData.lastName,
+					password:   regData.password,
+					email:		regData.email,
+					role:		regData.role,
+					shadow:		true
+				};
+				var protocol = this.options.registration.developer.protocol || "http";
+
+                multiRegPromise = multiServerRegistration(multiRegInfo, additionalServers, protocol);
+			}
         }
     }
     else {
@@ -605,7 +733,7 @@ function registerUserV2(req, res, next, serviceManager) {
                     }
                 }
                 // if instructor
-                else if( regData.role == lConst.role.instructor )
+			    else if( (regData.role == lConst.role.instructor) || (regData.role == lConst.role.reseller_candidate) )
                 {
                     var promise;
                     if(req.body.newsletter) {
@@ -649,7 +777,28 @@ function registerUserV2(req, res, next, serviceManager) {
                 }
                 // if developer
                 else if( regData.role == lConst.role.developer ) {
-                	this.requestUtil.jsonResponse(res, {});
+                    var orgData = {
+                        userId: userID,
+                        username: regData.username,
+                        firstName: regData.firstName,
+                        lastName: regData.lastName,
+                        email: regData.email,
+                        organization: regData.organization,
+                        role: regData.orgRole,
+                        numGames: regData.numGames,
+                        subjects: regData.subjects,
+                        interest: regData.interest
+                    };
+
+                    var dashService = this.serviceManager.get("dash").service;
+                    dashService.telmStore.createDeveloperOrganization(userID, orgData)
+                    .then(function() {
+                        this.requestUtil.jsonResponse(res, {});
+                    }.bind(this))
+                    .then(null, function(err){
+                        this.requestUtil.errorResponse(res, {key:"user.create.general"});
+                    }.bind(this));
+                    
                 /*
                     sendDeveloperConfirmEmail.call( this, regData, req.protocol, req.headers.host )
                         .then(function(){
@@ -677,8 +826,18 @@ function registerUserV2(req, res, next, serviceManager) {
     //var developerProfile;
     // instructor
     if( regData.role == lConst.role.instructor ||
+		regData.role == lConst.role.reseller_candidate ||
         regData.role == lConst.role.developer ) {
-        register(regData)
+            // either kick the reg ball off with multi-sever reg or a dummy promise
+            var firstPromise = multiRegPromise ? multiRegPromise : when.promise(function(resolve) { resolve(true) });
+
+            firstPromise
+            .then(function(result) {
+                if (result) return register(regData);
+
+                this.requestUtil.errorResponse(res, {key:"user.create.general"}, 400);
+                reject();
+            }.bind(this))
             //.then(function(){
                 //if(regData.role === lConst.role.developer && gameId){
                 //    var dashService = this.serviceManager.get("dash").service;
@@ -701,6 +860,28 @@ function registerUserV2(req, res, next, serviceManager) {
             //}.bind(this))
             .then(null, function(err){
                 console.log("Registration Error -",err);
+                
+				if( regData.role == lConst.role.developer && multiRegPromise) {
+					// 'unregister' user created on other servers
+					var additionalServers = this.options.registration.developer.additionalServers;
+					var params = { cb: new Date().getTime() };
+					var multiUnregInfo = {
+						username:	regData.username
+					};
+					var protocol = this.options.registration.developer.protocol || "http";
+					
+					additionalServers.forEach(function(server) {
+						// don't care about response
+						request({
+							method: 'POST',
+							url: protocol + '://' + server + '/api/v2/auth/user/unregister',
+							qs: params,
+  							json: true,
+							body: multiUnregInfo  			
+						});
+					});
+				}
+
             });
     }
     // else student
@@ -762,6 +943,7 @@ function registerUserV2(req, res, next, serviceManager) {
 
     this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role));
 }
+
 // if a course is a premium course, enroll student in license. else, do nothing
 function _enrollPremiumIfPremium(userId, courseId, hasLicense){
     return when.promise(function(resolve, reject){
@@ -892,6 +1074,85 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
         }.bind(this))
 }
 
+function remoteRegistration(url, regInfo, params) {
+	return when.promise(function(resolve, reject) {
+		console.log("remoteRegistration to server", url);
+		request({
+			method: 'POST',
+			url: url + '/api/v2/auth/user/register',
+			qs: params,
+  			json: true,
+			body: regInfo  			
+		}, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				console.log("remoteRegistration success!");
+				resolve({});
+			} else {
+				console.log("remoteRegistration failed!");
+				reject({ errmsg: error, code: response ? response.statusCode : 400 });
+			}
+		});
+	}.bind(this));
+}
+
+function multiServerRegistration(regInfo, additionalServers, protocol) {
+    return when.promise(function(resolve, reject) {
+
+        var params = { cb: new Date().getTime() };
+        var promiseList = [];
+        
+        additionalServers.forEach(function(server) {
+            var url = protocol + "://" + server;
+            promiseList.push(remoteRegistration(url, regInfo, params));
+        });
+        
+        when.all(promiseList)
+        .then(function(results){
+            console.log("calls to remoteRegistration: success!");
+            resolve(true);
+        }.bind(this), function(err) {
+            console.log("calls to remoteRegistration: failed", err.errMsg, err.code);
+            
+            // clean-up 
+            var multiUnregInfo = {
+                username:	regInfo.username
+            };
+            additionalServers.forEach(function(server) {
+                // don't care about response
+               request({
+                    method: 'POST',
+                    url: protocol + '://' + server + '/api/v2/auth/user/unregister',
+                    qs: params,
+                    json: true,
+                    body: multiUnregInfo  			
+                });
+            }.bind(this));
+
+            resolve(false)
+        }.bind(this));
+    }.bind(this));
+}
+
+function unregisterUserV2(req, res, next, serviceManager) {
+    this.stats.increment("info", "Route.Register.User.Unregister");
+
+	var username = Util.ConvertToString(req.body.username);
+	
+	if(!username) {
+		this.requestUtil.errorResponse(res, {key:"user.create.input.missing.username"}, 400);
+		return;
+	}
+
+	this.unregisterUser(username)
+	.then(function(data) {
+		this.requestUtil.jsonResponse(res, {"text": "OK", "statusCode":200});
+	}.bind(this),
+    function(err) {
+        this.requestUtil.errorResponse(res, {key:"user.create.general"}, 400);
+    }.bind(this));
+
+}
+
 function verifyBetaCode(req, res, next) {
     if( !(req.params.code &&
         _.isString(req.params.code) &&
@@ -1006,8 +1267,18 @@ function verifyDeveloperCode(req, res, next) {
 }
 
 function alterDeveloperVerifyCodeStatus(req, res, next) {
-    if(req.user.role !== "admin"){
+	console.log("alterDeveloperVerifyCodeStatus start");
 
+	var reqSecretKey = req.body.secretKey ? Util.ConvertToString(req.body.secretKey) : "";
+	var wantSecretKey = "";
+	
+	if (this.options.registration && 
+		this.options.registration.developer &&
+		this.options.registration.developer.secretKey) {
+			wantSecretKey = this.options.registration.developer.secretKey
+	}
+	
+    if(req.user.role !== "admin" && reqSerectKey != wantSecretKey){
         console.log(Util.DateGMTString(), 'user', req.user.id, req.user.role,
             req.user.username, 'attempted to alter developer verify status but not an admin.');
 
@@ -1015,14 +1286,25 @@ function alterDeveloperVerifyCodeStatus(req, res, next) {
         return;
     }
 
-    if( !(req.body.userId &&
+	// can be userId or username
+	var field = null;
+	var value = null;
+	if (req.body.userId) {
+		field = "id";
+		value = req.body.userId;
+	} else if (req.body.username) {
+		field = "username";
+		value = req.body.username;
+	}	
+	
+    if( !(field &&
     	req.body.status &&
         _.isString(req.body.status) &&
         req.body.status.length) ) {
         this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 401);
     }
 
-    this.getAuthStore().findUser("id", req.body.userId)
+    this.getAuthStore().findUser(field, value)
         .then(function(userData) {
             if( userData.verifyCodeStatus !== req.body.status ) {
                 return when.resolve(userData);
@@ -1043,10 +1325,12 @@ function alterDeveloperVerifyCodeStatus(req, res, next) {
         .then(function(userData) {
             if(!userData) return; // no data so skip
 
-            // send verification email to registered user
+            // send verification email to registered user, but not if request sent from another server
             if (userData.verifyCodeStatus == aConst.verifyCode.status.approve && req.body.status == aConst.verifyCode.status.sent) {
 	            return sendDeveloperVerifyEmail.call(this, userData, req.protocol, req.headers.host, userData.verifyCode);
 	        } else {
+				userData.verifyCode = "NULL";
+				userData.verifyCodeExpiration = "NULL"; 
 	        	userData.verifyCodeStatus = req.body.status;
 	        	return this.glassLabStrategy.updateUserData(userData);
 	        }
@@ -1073,13 +1357,49 @@ function getAllDevelopers(req, res, next) {
     }
 	
 	var result = { pending: [], approved: [] };
-	
+    var dashService = this.serviceManager.get("dash").service;
+	var currentDev;
+    
 	this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.approve)
 		.then(function(pending) {
 			if (_.isArray(pending)) {
 				result.pending = pending;
 			}
-			console.log("developer", "got pending");
+
+            var promiseList = [];
+            for (var i=0;i<pending.length;i++) {
+                var dev = pending[i];
+                promiseList.push(dev);
+                promiseList.push(dashService.telmStore.getDeveloperOrganization(dev.id));
+            }
+            return when.all(promiseList);
+        }.bind(this))
+		.then(function(pendingOrg){
+            if (_.isArray(pendingOrg)) {
+                currentDev = null;
+                for (var i=0;i<pendingOrg.length;i++) {
+                    var data = pendingOrg[i];
+                    if (currentDev) {
+                        if (typeof data === 'string') {
+                            currentDev.organization = "";
+                            currentDev.orgRole = "";
+                            currentDev.numGames = "0";
+                            currentDev.subjects = "";
+                            currentDev.interest = "";
+                        } else {
+                            currentDev.organization = data.organization;
+                            currentDev.orgRole = data.role;
+                            currentDev.numGames = data.numGames;
+                            currentDev.subjects = data.subjects;
+                            currentDev.interest = data.interest;
+                        }
+                        currentDev = null;
+                    } else {
+                        currentDev = data;
+                    }
+                }
+            }
+
 			return this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.verified);
 		}.bind(this))
 		// ok, send data
@@ -1087,11 +1407,46 @@ function getAllDevelopers(req, res, next) {
 			if (_.isArray(approved)) {
 				result.approved = approved;
 			}
-			console.log("developer", "got approved");
+
+            var promiseList = [];
+            for (var i=0;i<approved.length;i++) {
+                var dev = approved[i];
+                promiseList.push(dev);
+                promiseList.push(dashService.telmStore.getDeveloperOrganization(dev.id));
+            }
+            return when.all(promiseList);
+        }.bind(this))
+		.then(function(approvedOrg){
+            if (_.isArray(approvedOrg)) {
+                currentDev = null;
+                for (var i=0;i<approvedOrg.length;i++) {
+                    var data = approvedOrg[i];
+                    if (currentDev) {
+                        if (typeof data === 'string') {
+                            currentDev.organization = "";
+                            currentDev.orgRole = "";
+                            currentDev.numGames = "0";
+                            currentDev.subjects = "";
+                            currentDev.interest = "";
+                        } else {
+                            currentDev.organization = data.organization;
+                            currentDev.orgRole = data.role;
+                            currentDev.numGames = data.numGames;
+                            currentDev.subjects = data.subjects;
+                            currentDev.interest = data.interest;
+                        }
+                        currentDev = null;
+                    } else {
+                        currentDev = data;
+                    }
+                }
+            }
+
 			this.requestUtil.jsonResponse(res, result);
 		}.bind(this))
 		// error
 		.then(null, function(err){
+            console.log("getAllDevelopers error:", err);
 			this.requestUtil.errorResponse(res, err);
 		}.bind(this))
 }
@@ -1240,6 +1595,37 @@ function verifyEmailCode(req, res, next, serviceManager) {
                     // automatically login user in
                     return this.glassLabStrategy.updateUserData(userData)
                         .then(function() {
+                        
+                        	if (this.options.registration &&
+								this.options.registration.developer && 
+								this.options.registration.developer.secretKey &&
+								_.isArray(this.options.registration.developer.additionalServers)) {
+		
+								var additionalServers = this.options.registration.developer.additionalServers;
+		
+								if (additionalServers.length > 0) {
+									var alterInfo = {
+										secretKey: this.options.registration.developer.secretKey,
+										username: userData.username,
+										status: aConst.verifyCode.status.verified
+									};
+									var protocolMulti = this.options.registration.developer.protocol || "http";
+                                    var params = { cb: new Date().getTime() };
+
+									additionalServers.forEach(function(server) {
+										// don't care about response
+										request({
+											method: 'POST',
+											url: protocolMulti + '://' + server + '/api/v2/auth/alter-developer-status',
+											qs: params,
+											json: true,
+											body: alterInfo  			
+										});
+									}.bind(this));
+
+								}
+							}                
+
                             return when.promise(function(resolve,reject) {
                                 req.body.verifyCode = req.params.code;
                                 serviceManager.internalRoute('/api/v2/auth/login/glasslab', 'post', [req, res, next]);
@@ -1554,7 +1940,7 @@ function requestDeveloperGameAccess(req, res){
                 return developerProfile;
             } else if(!!developerProfile[gameId] &&
                 developerProfile[gameId].verifyCodeStatus) {
-                if( developerProfile[gameId].verifyCodeStatus === "approve" ) {
+                if( developerProfile[gameId].verifyCodeStatus === aConst.verifyCode.status.approve ) {
                     return "already requested";
                 }
                 else {
@@ -1597,6 +1983,7 @@ function requestDeveloperGameAccess(req, res){
 function sendDeveloperGameConfirmEmail(userId, devEmail, gameId, developerProfile, protocol, host) {
     return when.promise(function(resolve, reject){
         var verifyCode = Util.CreateUUID();
+        console.log( "dev game code ", verifyCode); 
         developerProfile[gameId].verifyCode = verifyCode;
         developerProfile[gameId].verifyCodeStatus = aConst.verifyCode.status.approve;
         this.authDataStore.setDeveloperProfile(userId, developerProfile)
@@ -1977,9 +2364,9 @@ function _deleteStudentAccount(studentId){
                 var promiseList = [];
                 _(licenses).forEach(function(license){
                     var licenseId = license.id;
-                    var seats = license["package_size_tier"];
-                    var studentSeats = lConst.seats[seats].studentSeats;
-                    promiseList.push(licService.updateStudentSeatsRemaining(licenseId, studentSeats));
+                    var seats = {};
+                    licService._getPOSeats( license[ "package_size_tier" ], seats );
+                    promiseList.push(licService.updateStudentSeatsRemaining(licenseId, seats.studentSeats));
                 });
                 return when.all(promiseList);
             })

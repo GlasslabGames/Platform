@@ -127,6 +127,12 @@ return when.promise(function(resolve, reject) {
             return;
         }
 
+        if ( user.role == lConst.role.reseller_candidate ) {
+            this.stats.increment("error", "Route.Login.Auth");
+            reject({ message: _.merge( {key:"user.login.invalid"}, info ), code: 401 });
+            return;
+        }
+
         resolve(user);
     }.bind(this));
 
@@ -205,8 +211,9 @@ return when.promise(function(resolve, reject) {
                     console.log("Developer Couchbase Error - ", err);
                     reject(err);
                 }.bind(this))
-        }
-        else {
+        } else if ( user.role == lConst.role.reseller ) {
+        	resolve(user);
+        } else {
             console.log("error", "Route.Login.Auth.LogIn.InvalidRole");
             this.stats.increment("error", "Route.Login.Auth.LogIn.InvalidRole");
             reject(new Error("invalid role"));

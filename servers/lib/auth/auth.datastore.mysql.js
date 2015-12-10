@@ -345,6 +345,13 @@ return when.promise(function(resolve, reject) {
             if(!((results === "none") || (results.length===0))){
                 // any license results are sufficient for "hadTrial" (I believe if they paid and expired, they cannot get a trial.  IF this is not true, we'll might need to add a column to track trial usage after all.)
                 user.hadTrial = true;
+                user.hadSubscribe = false;
+				for (i=0;i<results.length;i++) {
+					if (results[i].package_type !== 'trial') {
+						user.hadSubscribe = true;
+						break;
+					}
+				}
             }
             return this.getLicenseInfoByInstructor(user.id);
         }.bind(this))
@@ -788,7 +795,7 @@ Auth_MySQL.prototype.getUserById = function(userId){
 
 Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
+        var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
             "WHERE status in ('active','pending','po-received','po-rejected', 'po-pending', 'invite-pending') and user_id = " + userId+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
@@ -834,12 +841,12 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
 
 Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT id, FIRST_NAME, LAST_NAME, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
+        var Q = "SELECT id, FIRST_NAME, LAST_NAME, EMAIL, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
         return this.ds.query(Q)
             .then(function(results){
                 var developers = [];
                 results.forEach(function(result){
-                    developers.push({ id: result.id, name: result.FIRST_NAME + ' ' + result.LAST_NAME, date: result.pretty_date, fulldate: result.date_created });
+                    developers.push({ id: result.id, name: result.FIRST_NAME + ' ' + result.LAST_NAME, email: result.EMAIL, date: result.pretty_date, fulldate: result.date_created });
                 }.bind(this));
                 return when.all(developers);
             }.bind(this))
@@ -851,3 +858,17 @@ Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
             });
     }.bind(this));
 };
+
+Auth_MySQL.prototype.deleteShadowUser = function(username) {
+    return when.promise(function(resolve, reject){
+        //var Q = 'DELETE FROM GL_USER WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
+        var Q = "UPDATE GL_USER SET username='failmultireg{" + username + "}', VERIFY_CODE_STATUS=NULL WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
+        return this.ds.query(Q)
+            .then(function(results){ 
+                resolve(results);
+            }.bind(this))
+            .then(null, function(err){
+                reject(err);
+            });
+    }.bind(this));
+}

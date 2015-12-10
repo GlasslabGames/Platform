@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "THRV",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Thrive 'n' Shine",
         "longName": "Thrive 'n' Shine",
@@ -55,9 +55,108 @@
             "reports": "/assets/game-banner-AA-1.png"
         }
     },
-    "assessment": [],
+    "assessment": [
+        {
+            "enabled": true,
+            "id": "sowo",
+            "dataProcessScope": "gameSession",
+            "engine": "javascript",
+            "trigger": "endSession",
+            "rules": {
+                "so1": {
+                    "name": "200 In Savings",
+                    "description": "Student deposited over $200 in their savings account."
+                },
+                "so2": {
+                    "name": "500 In Savings",
+                    "description": "Student deposited over $500 in their savings account."
+                },
+                "so3": {
+                    "name": "1000 In Savings",
+                    "description": "Student deposited over $1000 in their savings account."
+                },
+                "so4": {
+                    "name": "5000 In Savings",
+                    "description": "Student deposited over $5000 in their savings account."
+                },
+                "wo8": {
+                    "name": "test data in db",
+                    "description": "Test data has been read into the db from file possibly corrupting good data."
+                }
+            }
+        }
+    ],
     "reports": {
-        "list": []
+        "list": [
+            {
+                "id": "sowo",
+                "enabled": true,
+                "name": "Shout Out and Watch Out Report",
+                "header": {
+                    "text": "Shout Out and Watch Out Report",
+                    "image": "assets/game-banner-AW-1.jpg",
+                    "skinny": "assets/skinny-banner-AW-1.jpg",
+                    "large": "assets/skinny-banner-AW-1@2x.jpg"
+                },
+                "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
+                "table": {
+                    "labels": [],
+                    "groups": [
+                        {
+                            "id": "so",
+                            "title": "Shout Out!",
+                            "headers": [
+                                {
+                                    "id": "so1",
+                                    "title": "200 In Savings",
+                                    "description": "Student deposited over $200 in their savings account."
+                                },
+                                {
+                                    "id": "so2",
+                                    "title": "500 In Savings",
+                                    "description": "Student deposited over $500 in their savings account."
+                                },
+                                {
+                                    "id": "so3",
+                                    "title": "1000 In Savings",
+                                    "description": "Student deposited over $1000 in their savings account."
+                                },
+                                {
+                                    "id": "so4",
+                                    "title": "5000 In Savings",
+                                    "description": "Student deposited over $5000 in their savings account."
+                                }
+                            ]
+                        },
+                        {
+                            "id": "wo",
+                            "title": "Watch Out!",
+                            "headers": [
+                                {
+                                    "id": "wo4",
+                                    "title": "broke",
+                                    "description": "Student lost all their savings."
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "id": "achievements",
+                "assessmentId": "none",
+                "enabled": true,
+                "name": "Learning Events & Time Played",
+                "header": {
+                    "text": "Learning Events & Time Played",
+                    "image": "assets/game-banner-AA-1.png",
+                    "skinny": "assets/skinny-banner-AA-1.png",
+                    "large": "assets/skinny-banner-AA-1@2x.png"
+                },
+                "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
+                "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
+            }
+        ]
     },
     "details": {
         "buttons": [],

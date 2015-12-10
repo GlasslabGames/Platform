@@ -624,7 +624,8 @@ function updateCourseInfo(req, res, next, serviceManager)
         }
         var courseData = req.body;
         var courseId = courseData.id = req.params.courseId;
-
+		var oldCourseData = null;
+		
         // check if enrolled
         this.myds.isEnrolledInCourse(userData.id, courseId)
             .then(function(isEnrolled){
@@ -634,12 +635,40 @@ function updateCourseInfo(req, res, next, serviceManager)
                     return "course.general";
                 }
             }.bind(this))
-            .then(function(oldCourseData){
-                if(typeof oldCourseData === "string"){
-                    return oldCourseData;
+            .then(function(_oldCourseData){
+                if(typeof _oldCourseData === "string"){
+                    return _oldCourseData;
                 }
+                oldCourseData = _oldCourseData;
+				if(!courseData.archived && oldCourseData.archived) {
+					var dataService = this.serviceManager.get("data").service;
+					return dataService.cbds.getGamesForCourse(courseId);
+				}
+				return oldCourseData;
+            }.bind(this))
+            .then(function(result){
+                if(typeof result === "string"){
+                    return result;
+                }
+                // if not "id" field, then actually list of games
+                if (result.id === undefined) {
+                	var games = result;
+					var anyWasAssigned = false;
+					for (var key in games) {
+						var game = games[key];
+						if (game.wasAssigned) {
+							anyWasAssigned = true;
+							break;
+						}
+					}
+					if (anyWasAssigned) {
+						courseData.premiumGamesAssigned = true;
+					}
+                }
+
                 var licenseId = req.user.licenseId;
                 var userId = req.user.id;
+                               
                 //return _updateCourseInfo.call(this, courseData, oldCourseData, userId, licenseId);
                 // delete between comments if above commented out helper method works well
                 var licService = this.serviceManager.get("lic").service;
@@ -670,7 +699,7 @@ function updateCourseInfo(req, res, next, serviceManager)
                     }
                 }
                 if(!courseData.premiumGamesAssigned && oldCourseData.premiumGamesAssigned) {
-                    return licService.unassignPremiumCourses(courseId, licenseId);
+                    return licService.unassignPremiumCourses(courseId, licenseId, courseData.archived);
                 }
             }.bind(this))
             .then(function(status){
@@ -785,7 +814,7 @@ function _canClassEnable(licenseId, games){
                 var license = results[0][0];
                 var freeGameIds = results[1];
                 var plan = license["package_type"];
-                var lConst = require("../../lic/lic.const.js");
+                var lConst = this.serviceManager.get("lic").lib.Const;
                 var availablePremiumGames = {};
                 lConst.plan[plan].browserGames.forEach(function(game){
                     availablePremiumGames[game] = true;
@@ -1051,6 +1080,10 @@ function verifyCode(req, res, next) {
         .then(function(info) {
             courseInfo = info;
             if (courseInfo) {
+                var isArchived = courseInfo.archived;
+                if (isArchived) {
+                    return "is archived";
+                }
                 var isPremium = courseInfo.premiumGamesAssigned;
                 if (isPremium) {
                     licService = this.serviceManager.get("lic").service;
@@ -1094,6 +1127,10 @@ function verifyCode(req, res, next) {
             }
             if(status === "lms.course.not.premium"){
                 this.requestUtil.errorResponse(res, { key: "lms.course.not.premium"});
+                return;
+            }
+            if (status === "is archived") {
+                this.requestUtil.errorResponse(res, { key: "lms.course.is.archived"});
                 return;
             }
             if( courseInfo &&

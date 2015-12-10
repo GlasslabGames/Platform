@@ -271,6 +271,51 @@ module.exports = {
         //    }
         //},
         {
+            requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/approve",
+            service: "dash",
+            controller: "game",
+            method: {
+                post: "approveDeveloperGame"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/reject",
+            service: "dash",
+            controller: "game",
+            method: {
+                post: "rejectDeveloperGame"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/requestInfo",
+            service: "dash",
+            controller: "game",
+            method: {
+                post: "requestInfoDeveloperGame"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/games/awaiting-approval",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAllDeveloperGamesAwaitingApproval"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/games/rejected",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAllDeveloperGamesRejected"
+            }
+        },
+        {
             api: "/api/v2/dash/games/active/details",
             service: "dash",
             controller: "games",
@@ -319,6 +364,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/games/approved",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getApprovedGamesOrgInfo"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/dash/myGames",
             service: "dash",
@@ -359,6 +412,14 @@ module.exports = {
             controller: "games",
             method: {
                 get: "reloadGameFiles"
+            }
+        },
+        {
+            api: "/api/v2/dash/replace/:gameId/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "replaceGameInfo"
             }
         },
         {
@@ -428,6 +489,24 @@ module.exports = {
             controller: "games",
             method: {
                 post: "updateDeveloperGameInfo"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/new-game/:gameId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "createNewGame"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/developer/submit/:gameId",
+            service: "dash",
+            controller: "games",
+            method: {
+                post: "submitGameForApproval"
             }
         },
         // ---------------------------------------------------
@@ -559,6 +638,16 @@ module.exports = {
         {
             requireAuth: true,
             requireHttps: true,
+            api: "/api/v2/license/planforuser",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getPlanForUser"
+            }
+        },
+		{
+            requireAuth: true,
+            requireHttps: true,
             api: "/api/v2/license/students",
             service: "lic",
             controller: "license",
@@ -606,6 +695,16 @@ module.exports = {
             controller: "license",
             method: {
                 post: "upgradeLicense"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/alter",
+            service: "lic",
+            controller: "license",
+            method: {
+                post: "alterLicense"
             }
         },
         {
@@ -716,6 +815,36 @@ module.exports = {
             controller: "license",
             method: {
                 get: "getActivePurchaseOrderInfo"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/open",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getOpenPurchaseOrders"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/notopen",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getNotOpenPurchaseOrders"
+            }
+        },
+        {
+            requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/license/po/openforuser/:userId",
+            service: "lic",
+            controller: "license",
+            method: {
+                get: "getOpenPurchaseOrderForUser"
             }
         },
         {
@@ -876,6 +1005,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/user/unregister",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "unregisterUserV2"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/auth/user/profile",
             service: "auth",
@@ -892,6 +1029,42 @@ module.exports = {
             method: {
                 get: "getUserDataById",
                 post: "updateUserData"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/userResellers",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getResellers",
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/user/:userId/updateRole/:role",
+            service: "auth",
+            controller: "user",
+            method: {
+                post: "updateUserRole",
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/userbyemail",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserDataByEmail",
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/auth/userbyusername",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "getUserDataByUserName",
             }
         },
         {

@@ -1,8 +1,8 @@
 {
     "basic": {
         "gameId": "WWF",
-        "enabled": false,
-        "visible": false,
+        "enabled": true,
+        "visible": true,
         "maintenance": null,
         "shortName": "Unannounced Game",
         "longName": "Unannounced Game",
@@ -64,12 +64,16 @@
             "trigger": "activity",
             "rules": {
                 "wo1": {
-                    "name": "Player hasn't viewed academic word list in 3 turns",
-                    "description": "Player hasn't viewed academic word list in 3 turns"
+                    "name": "Hasn't viewed Power Word List in 3 turns",
+                    "description": "Hasn't viewed Power Word List in 3 turns"
+                },
+                "wo4": {
+                    "name": "Used two Definition Hints in a single turn (\"word freebie\") but didn't play the associated Power Word",
+                    "description": "Used two Definition Hints in a single turn (\"word freebie\") but didn't play the associated Power Word"
                 },
                 "wo5": {
-                    "name": "Player hasn’t played an Academic Word in 5 turns",
-                    "description": "Player hasn’t played an Academic Word in 5 turns"
+                    "name": "Hasn't played a Power Word in 5 turns",
+                    "description": "Hasn't played a Power Word in 5 turns"
                 },
                 "wo10": {
                     "name": "On the same turn, the student looked up an Academic Word Bonus Word but still got the Academic Word Bonus wrong",
@@ -84,54 +88,61 @@
                     "description": "Streak of 5 turns on which student didn't play a word"
                 },
                 "so2": {
-                    "name": "Student has looked up 8 or more academic words in a game",
-                    "description": "Student has looked up 8 or more academic words in a game"
+                    "name": "Looked up 8 or more Power Words in a single game",
+                    "description": "Looked up 8 or more Power Words in a single game"
                 },
                 "so5": {
-                    "name": "Played more than 5 Academic Words in a game",
-                    "description": "Played more than 5 Academic Words in a game"
+                    "name": "Played more than 5 Power Words in a single game",
+                    "description": "Played more than 5 Power Words in a single game"
                 },
                 "so6": {
-                    "name": "Streak of 3 Academic Words played in a row during one game",
-                    "description": "Streak of 3 Academic Words played in a row during one game"
+                    "name": "Played 3 Power Words in a row in a single game",
+                    "description": "Played 3 Power Words in a row in a single game"
                 },
                 "so7": {
-                    "name": "Played two Academic Words during one turn",
-                    "description": "Played two Academic Words during one turn"
+                    "name": "Played 2 Power Words in a single turn",
+                    "description": "Played 2 Power Words in a single turn"
                 },
                 "so8": {
-                    "name": "Student played 50 Power Words",
-                    "description": "Student played 50 Power Words"
+                    "name": "Played 50 Power Words",
+                    "description": "Played 50 Power Words"
                 },
                 "so9": {
-                    "name": "Student played 100 of Power Words",
-                    "description": "Student played 100 of Power Words"
+                    "name": "Played 100 of Power Words",
+                    "description": "Played 100 of Power Words"
                 },
                 "so10": {
-                    "name": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus",
-                    "description": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus"
+                    "name": "Got the Power Word Bonus correct after looking up the Power Word",
+                    "description": "Got the Power Word Bonus correct after looking up the Power Word"
                 },
                 "so11": {
-                    "name": "Earned 3 or more Academic Word Bonuses in one game",
-                    "description": "Earned 3 or more Academic Word Bonuses in one game"
+                    "name": "Earned 3 or more Power Word Bonuses in a single game",
+                    "description": "Earned 3 or more Power Word Bonuses in a single game"
                 },
                 "so12": {
-                    "name": "Won 4 games (cumulatively, not neccessarily in a row)",
-                    "description": "Won 4 games (cumulatively, not neccessarily in a row)"
+                    "name": "Won 4 games",
+                    "description": "Won 4 games"
                 },
                 "so13": {
-                    "name": "Student completed 10 games",
-                    "description": "Student completed 10 games"
+                    "name": "Completed 10 games",
+                    "description": "Completed 10 games"
                 },
                 "so14": {
-                    "name": "Student completed 50 games",
-                    "description": "Student completed 50 games"
+                    "name": "Completed 50 games",
+                    "description": "Completed 50 games"
                 },
                 "so15": {
                     "name": "Played a word worth more than 50 points",
                     "description": "Played a word worth more than 50 points"
                 }
             }
+        },
+        {
+            "enabled": true,
+            "id": "standards",
+            "dataProcessScope": "gameSession",
+            "engine": "standards",
+            "trigger": "activity"
         }
     ],
     "reports": {
@@ -157,57 +168,57 @@
                                 {
                                     "id": "so2",
                                     "title": "",
-                                    "description": "Student has looked up 8 or more academic words in a game"
+                                    "description": "Looked up 8 or more Power Words in a single game"
                                 },
                                 {
                                     "id": "so5",
                                     "title": "",
-                                    "description": "Played more than 5 Academic Words in a game"
+                                    "description": "Played more than 5 Power Words in a single game"
                                 },
                                 {
                                     "id": "so6",
                                     "title": "",
-                                    "description": "Streak of 3 Academic Words played (in a row during one game)"
+                                    "description": "Played 3 Power Words in a row in a single game"
                                 },
                                 {
                                     "id": "so7",
                                     "title": "",
-                                    "description": "Played two Academic Words during one turn"
+                                    "description": "Played 2 Power Words in a single turn"
                                 },
                                 {
                                     "id": "so8",
                                     "title": "",
-                                    "description": "Student played 50 Power Words"
+                                    "description": "Played 50 Power Words"
                                 },
                                 {
                                     "id": "so9",
                                     "title": "",
-                                    "description": "Student played 100 of Power Words"
+                                    "description": "Played 100 of Power Words"
                                 },
                                 {
                                     "id": "so10",
                                     "title": "",
-                                    "description": "On the same turn, the student looked up an Academic Word Bonus Word AND got the Academic Word Bonus "
+                                    "description": "Got the Power Word Bonus correct after looking up the Power Word"
                                 },
                                 {
                                     "id": "so11",
                                     "title": "",
-                                    "description": "Earned 3 or more Academic Word Bonuses in one game"
+                                    "description": "Earned 3 or more Power Word Bonuses in a single game"
                                 },
                                 {
                                     "id": "so12",
                                     "title": "",
-                                    "description": "Won 4 games (cumulatively, not neccessarily in a row)"
+                                    "description": "Won 4 games"
                                 },
                                 {
                                     "id": "so13",
                                     "title": "",
-                                    "description": "Student completed 10 games"
+                                    "description": "Completed 10 games"
                                 },
                                 {
                                     "id": "so14",
                                     "title": "",
-                                    "description": "Student completed 50 games"
+                                    "description": "Completed 50 games"
                                 },
                                 {
                                     "id": "so15",
@@ -223,12 +234,17 @@
                                 {
                                     "id": "wo1",
                                     "title": "",
-                                    "description": "Player hasn't viewed academic word list in 3 turns"
+                                    "description": "Hasn't viewed Power Word List in 3 turns"
+                                },
+                                {
+                                    "id": "wo4",
+                                    "title": "",
+                                    "description": "Used two Definition Hints in a single turn (\"word freebie\") but didn't play the associated Power Word"
                                 },
                                 {
                                     "id": "wo5",
                                     "title": "",
-                                    "description": "Player hasn’t played an Academic Word in 5 turns"
+                                    "description": "Hasn't played a Power Word in 5 turns"
                                 },
                                 {
                                     "id": "wo10",
@@ -250,6 +266,138 @@
                     ]
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!)."
+            },
+            {
+                "id": "standards",
+                "assessmentId": "standards",
+                "enabled": true,
+                "name": "Standards Report",
+                "header": {
+                    "text": "Standards Report",
+                    "image": "assets/game-banner-PRIMA.png",
+                    "skinny": "assets/skinny-banner-PRIMA.jpg",
+                    "large": "assets/skinny-banner-PRIMA@2x.jpg"
+                },
+                "description": "This report shows students’ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
+                "table": {
+                    "groups": [
+                        {
+                            "name": "Common Core",
+                            "subjects": [
+                                {
+                                    "name": "English Language Art",
+                                    "standards": [
+                                        {
+                                            "id": "L.6.6",
+                                            "title": "L.6.6",
+                                            "description": "Acquire and use accurately grade-appropriate general academic and domain-specific words and phrases; gather vocabulary knowledge when considering a word or phrase important to comprehension or expression.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.7.6",
+                                            "title": "L.7.6",
+                                            "description": "Acquire and use accurately grade-appropriate general academic and domain-specific words and phrases; gather vocabulary knowledge when considering a word or phrase important to comprehension or expression.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.8.6",
+                                            "title": "L.8.6",
+                                            "description": "Acquire and use accurately grade-appropriate general academic and domain-specific words and phrases; gather vocabulary knowledge when considering a word or phrase important to comprehension or expression.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.4.4.A",
+                                            "title": "L.4.4.A",
+                                            "description": "Use context (e.g., definitions, examples, or restatements in text) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.5.4.C",
+                                            "title": "L.5.4.C",
+                                            "description": "Consult reference materials (e.g., dictionaries, glossaries, thesauruses), both print and digital, to find the pronunciation and determine or clarify the precise meaning of key words and phrases.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.6.4.A",
+                                            "title": "L.6.4.A",
+                                            "description": "Use context (e.g., the overall meaning of a sentence or paragraph; a word's position or function in a sentence) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.7.4.A",
+                                            "title": "L.7.4.A",
+                                            "description": "Use context (e.g., the overall meaning of a sentence or paragraph; a word's position or function in a sentence) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        },
+                                        {
+                                            "id": "L.8.4.A",
+                                            "title": "L.8.4.A",
+                                            "description": "Use context (e.g., the overall meaning of a sentence or paragraph; a word's position or function in a sentence) as a clue to the meaning of a word or phrase.",
+                                            "alignment": "TBA",
+                                            "progress": {
+                                                "Not-Started": "Standard progress not yet started.",
+                                                "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                                                "Partial": "TBA",
+                                                "Full": "TBA",
+                                                "Watchout": "TBA"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+
             }
         ]
     },

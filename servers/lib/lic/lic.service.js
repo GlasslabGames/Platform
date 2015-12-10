@@ -59,6 +59,13 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "MySQL.Connect");
             }.bind(this))
         .then(function(){
+            return this.myds.updatePOTable();
+        }.bind(this))
+        .then(function(updated){
+            if(updated) {
+                console.log("LicService: MySQL Purchase Order Table Updated!");
+            }
+
             return this.cbds.connect();
         }.bind(this))
         .then(function(){
@@ -91,7 +98,40 @@ function _cronTask() {
     this.serviceManager.internalRoute('/api/v2/license/inspect', 'post', [mockReq, mockRes]);
 };
 
-LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
+
+
+LicService.prototype._getPOSeats = function(  package_size_tier, seats ) {
+    var packageSize = package_size_tier.trim();
+
+    if ( packageSize[0] == '_' ) {
+        var index = packageSize.lastIndexOf( '_' );
+        var studentSeats = parseInt( packageSize.slice( 1, index ) );
+        var educatorSeats = parseInt( packageSize.slice( index + 1 ) );
+
+        seats.size = "Custom";
+        seats.studentSeats = studentSeats;
+        seats.educatorSeats = educatorSeats;
+        seats.seatId = studentSeats;
+
+        // Discounts
+        if ( studentSeats < 11 ) {
+            seats.discount = 0;
+        } else if ( studentSeats < 31 ) {
+            seats.discount = 20;
+        } else if ( studentSeats < 121 ) {
+            seats.discount = 25;
+        } else if ( studentSeats < 501 ) {
+            seats.discount = 30;
+        } else {
+            seats.discount = 35;
+        }
+    } else {
+        _.merge(seats, lConst.seats[ packageSize ]);
+    }
+};
+
+
+LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, archived){
     return when.promise(function(resolve, reject){
         var studentSeats;
         var studentList;
@@ -109,7 +149,9 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
                 });
                 var license = results[0][0];
                 var packageSize = license["package_size_tier"];
-                studentSeats = lConst.seats[packageSize].studentSeats;
+                var seats = {};
+                this._getPOSeats( packageSize, seats );
+                studentSeats = seats.studentSeats;
                 studentList = results[1];
                 _(studentList).forEach(function(student){
                     _(student).forEach(function(premiumCourse, courseId, courseList){
@@ -124,7 +166,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
             .then(function(){
                 promiseList = [];
                 courseIds.forEach(function(id){
-                    promiseList.push(_unassignPremiumGames.call(this, id));
+                    promiseList.push(_unassignPremiumGames.call(this, id, archived));
                 }.bind(this));
                 return when.all(promiseList);
             }.bind(this))
@@ -145,7 +187,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId){
     }.bind(this));
 };
 
-function _unassignPremiumGames(courseId){
+function _unassignPremiumGames(courseId, archived){
     return when.promise(function(resolve, reject){
         var lmsService = this.serviceManager.get("lms").service;
         var games;
@@ -169,6 +211,11 @@ function _unassignPremiumGames(courseId){
                 _(games).forEach(function(game, key){
                     basicInfo = infoObj[key];
                     if(basicInfo.price === "Premium" || basicInfo.price === "TBD" || basicInfo.price === "Coming Soon"){
+                    	if (archived && game.assigned)
+                    		game.wasAssigned = true;
+                    	else if (game.wasAssigned !== undefined)
+                    		delete game.wasAssigned;
+                    		
                         game.assigned = false;
                     }
                 });
@@ -193,6 +240,8 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
         promiseList.push(lmsService.myds.getStudentIdsForCourse(courseId));
         promiseList.push(this.cbds.getStudentsByLicense(licenseId));
         promiseList.push(this.myds.getLicenseById(licenseId));
+		var dataService = this.serviceManager.get("data").service;
+		promiseList.push(dataService.cbds.getGamesForCourse(courseId));
         when.all(promiseList)
             .then(function(results){
                 // get an id list of all students in a course and all students in license
@@ -253,12 +302,14 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                     return status;
                 }
                 var size = license["package_size_tier"];
-                var studentSeats = lConst.seats[size].studentSeats;
+                var seats = {};
+                this._getPOSeats( size, seats );
+                var studentSeats = seats.studentSeats;
                 // change the student_count_remaining field in the license table
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(status){
-                if(typeof status === "string"){
+                if(typeof status === "string" && status != "skip"){
                     resolve(status);
                 }
                 resolve();
@@ -308,6 +359,8 @@ function _assignPremiumGames(courseId, plan){
                     if(basicInfo.price === "Premium" || basicInfo.price === "TBD" || basicInfo.price === "Coming Soon"){
                         if(availableGames[game.id]){
                             game.assigned = true;
+                            if (game.wasAssigned !== undefined)
+                    			delete game.wasAssigned;
                         }
                     }
                 });
@@ -365,7 +418,9 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                     return;
                 }
                 // if student is no longer a premium student, update the seat count
-                var studentSeats = lConst.seats[seats].studentSeats;
+                var iseats = {};
+                this._getPOSeats( seats, iseats );
+                var studentSeats = iseats.studentSeats;
                 this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function(status){
@@ -419,7 +474,10 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if (typeof status === "string") {
                     return status;
                 }
-                var studentSeats = lConst.seats[seats].studentSeats;
+
+                var iseats = {};
+                this._getPOSeats( seats, iseats );
+                var studentSeats = iseats.studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function (status) {

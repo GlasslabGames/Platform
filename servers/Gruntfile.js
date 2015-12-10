@@ -11,6 +11,13 @@ module.exports = function (grunt) {
 									timeout: 20000,		// NOTE - reduced; may need extention for email checking
                 },
                 src: ['supertest/*.js']
+            },
+            sdktest: {
+                options: {
+									reporter: 'spec',
+									timeout: 20000,		// NOTE - reduced; may need extention for email checking
+                },
+                src: ['sdktest/sdkTest.js']
             }
         },
 
@@ -45,6 +52,7 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('default', ['createVersionFile']);
-    grunt.registerTask('test', ['mochaTest']);
+    grunt.registerTask('test', ['mochaTest:test']);
+    grunt.registerTask('sdktest', ['mochaTest:sdktest']);
 
 };

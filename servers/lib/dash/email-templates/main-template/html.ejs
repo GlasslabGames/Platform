@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        a { text-decoration: none; }
+        a:hover, a:active, a:focus { text-decoration: none; }
+        a span { color: #11ADB7; }
+        a span:hover, a span:active, a span:focus { color: #0d8284; }
+    </style>
+</head>
+<body padding="10px" margin="0" style="margin: 0; padding: 10px;" bgcolor="#F0F0F0">
+<table border="0" width="100%" cellpadding="0" cellspacing="0" >
+<tr><td align="center">
+
+    <div style="border: 1px #FFFFFF red; background-color: #FFFFFF; width: 580px; border-radius: 10px; padding: 40px;">
+        <table border="0" width="100%" cellpadding="0" cellspacing="0" style="color: #555555; font-family: Sans-serif; font-size: 11pt;">
+            <!-- logo -->
+            <tr><td height="60px" align="center" valign="top">
+                    <img src="{{= host }}/assets/email-template/gl-games-beta-logo.png" />
+                </td></tr>
+            <!-- header -->
+            <tr><td height="53px" align="center" valign="middle" style="font-family: 'Bitter', serif; font-size: 24px; font-weight:bold; border-top: 3px solid #5AC2D4; border-bottom: 3px solid #5AC2D4;">
+                {{= subject }}
+            </td></tr>
+            <!-- body -->
+            <tr><td style="padding-top: 33px;">
+                {{- body }}
+            </td></tr>
+        </table>
+    </div>
+
+<!-- footer -->
+<tr><td class="footer" align="center" valign="bottom">
+    <div style="padding-top: 16px;">
+        <img src="{{= host }}/assets/email-template/GL_logo_round.png" />
+    </div>
+    <div style="font-family: Sans-serif; font-size: 8pt;">
+        &copy; 2014 GlassLab, Inc. | All Rights Reserved<br/>
+        GlassLab, Inc. 209 Redwood Shores Pkwy, Redwood City, CA 94065<br/>
+        <a href="{{= host }}/privacy" target="_blank">Privacy Policy</a><br/>
+    </div>
+</td></tr>
+
+</table>
+</body>
+</html>

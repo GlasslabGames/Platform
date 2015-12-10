@@ -149,57 +149,6 @@ function ServiceManager(configFiles){
     this.awss3            = new Util.S3Util(this.options);
     this.stripe           = new Util.StripeUtil(this.options);
 
-
-    // test customer APIs
-    /*this.stripe.createCustomer({
-        card: "tok_15SG1TKpKFgczHmqa4GUNm7j",
-        description: "Customer for ben@glasslabgames.org",
-        email: "ben@glasslabgames.org"
-    });*/
-    /*this.stripe.createCustomer({
-        //card: "tok_15SG1TKpKFgczHmqa4GUNm7j",
-        card: {
-            number: 4242424242424242,
-            exp_month: 1,
-            exp_year: 2020,
-            cvc: 123
-        },
-        description: "Customer for Ben Dapkiewicz",
-        email: "ben@glasslabgames.org",
-        plan: 'test_chromebook',
-        quantity: 12475
-    });*/
-    //this.stripe.retrieveCustomer( "cus_5soWj36tEnUT8x" );
-    //this.stripe.retrieveSubscription( "cus_5soWj36tEnUT8x", "sub_5soW5S5k2b0Szt" );
-    //this.stripe.retrieveCoupon( "TEST_AMOUNTOFF" );
-    /*this.stripe.updateCustomer( "cus_5dvnWd0fs5Icru", {
-        description: "Customer for Ben Dapkiewicz"
-    });*/
-
-    // test subscription APIs
-    /*this.stripe.createSubscription("cus_5eBOgRMql5L1yF", {
-        card: {
-            number: 4242424242424242,
-            exp_month: 1,
-            exp_year: 2020,
-            cvc: 123
-        },
-        plan: 'test_chromebook',
-        quantity: 12475
-    });*/
-
-    /*this.stripe.listCustomers( { limit: 100 } )
-        .then(function(data) {
-            for( var i = 0; i < data.data.length; i++ ) {
-                _deleteCustomer.call( this, data.data[i].id );
-            }
-        }.bind(this));*/
-
-    // test plan APIs
-    //this.stripe.listPlans();
-    //this.stripe.retrievePlan( 'test_pcmac' );
-
-
     try{
         this.routesMap = require('../routes.map.js');
     } catch(err){
@@ -209,15 +158,6 @@ function ServiceManager(configFiles){
     this.services  = {};
     this.routeList = {};
 }
-
-/*function _deleteCustomer( custId ) {
-    return when.promise(function(resolve, reject){
-        this.stripe.deleteCustomer( custId )
-            .then(function(results) {
-                resolve();
-            }.bind(this))
-    }.bind(this));
-}*/
 
 ServiceManager.prototype.loadVersionFile = function() {
 // add promise wrapper
@@ -282,17 +222,21 @@ return when.promise(function(resolve, reject) {
                 this.app.use(Util.GetMorganLogger(this.options, this.stats));
                 
                 this.app.use(compression());
-              this.app.use(function (req, res, next) { console.log("no-op"); next(); });
+                this.app.use(function (req, res, next) {
+                    // console.log("no-op");
+                    next();
+                });
               
                 this.app.use(cookieParser());
-                this.app.use(bodyParser.urlencoded());
-                this.app.use(bodyParser.json());
+                this.app.use(bodyParser.urlencoded({limit: "500kb", extended: false}));
+                this.app.use(bodyParser.json({limit: "500kb"}));
                 this.app.use(methodOverride());
                 
-                var whitelist = [ "http://new.wwf.local", "https://new.wwf.local", "http://www.wordswithfriendsedu.com", "http://edu.zwf-staging.zynga.com", "http://s3-us-west-1.amazonaws.com", "https://s3-us-west-1.amazonaws.com" ];
+                var acceptAll = this.options.services.cors.acceptAll || false;
+                var whitelist = this.options.services.cors.whitelist || [];
                 var corsOptions = {
                     origin: function( origin, callback ) {
-                        var originIsWhitelisted = whitelist.indexOf( origin ) !== -1;
+                        var originIsWhitelisted = acceptAll || whitelist.indexOf( origin ) !== -1;
                         callback( null, originIsWhitelisted );
                     },
                     credentials: true
@@ -799,19 +743,19 @@ ServiceManager.prototype.start = function(port) {
 
                             if(req.secure){
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
-                                if(forwProto){
-                                console.log(Util.DateGMTString()+' Secure Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
-                                }else{
-                                    console.log(Util.DateGMTString()+' Secure Request -- port = '+reqPort+'  -- host = '+host);
-                                }
+                                // if(forwProto){
+                                // console.log(Util.DateGMTString()+' Secure Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
+                                // }else{
+                                //     console.log(Util.DateGMTString()+' Secure Request -- port = '+reqPort+'  -- host = '+host);
+                                // }
                                 next();
                             }else{
 
-                                if(forwProto){
-                                console.log(Util.DateGMTString()+' INSECURE Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
-                                }else{
-                                    console.log(Util.DateGMTString()+' INSECURE Request -- port = '+reqPort+'  -- host = '+host);
-                                }
+                                // if(forwProto){
+                                // console.log(Util.DateGMTString()+' INSECURE Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
+                                // }else{
+                                //     console.log(Util.DateGMTString()+' INSECURE Request -- port = '+reqPort+'  -- host = '+host);
+                                // }
 
                                 // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
 
@@ -1002,6 +946,7 @@ var countDailyActiveUsers = function(stats){
     var first_login;
     // var first_login = this.options.services.first_login || '2015-09-03 23:59:02';
 
+    // update to use configMod ...
     if("dev" == this.options.env){
         first_login = this.options.env_dev.first_login;
     } else if("stage" == this.options.env){

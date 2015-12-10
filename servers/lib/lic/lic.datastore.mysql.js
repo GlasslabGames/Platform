@@ -56,6 +56,52 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Lic_MySQL.prototype.updatePOTable = function() {
+	return when.promise(function(resolve, reject) {
+
+    var Q = "DESCRIBE GL_PURCHASE_ORDER";
+    this.ds.query(Q)
+        .then(function(results) {
+            var updating = false;
+
+            var hasResllerLog = false;
+
+            var promiseList = [];
+            var Q = "";
+
+            for (var i = 0; i < results.length; i++) {
+                if (results[i]['Field'] == 'RESELLER_LOG') {
+                    hasResllerLog = true;
+                }
+            }
+
+            if ( ! hasResllerLog ) {
+                updating = true;
+                Q = "ALTER TABLE GL_PURCHASE_ORDER ADD COLUMN RESELLER_LOG TEXT NULL DEFAULT NULL AFTER date_created";
+                console.log( "               ", Q );
+                promiseList.push(this.ds.query(Q));
+            }
+
+            if (promiseList.length) {
+                when.all(promiseList)
+                    .then(function(results) {
+                        resolve(true);
+                    }.bind(this))
+                    .then(null, function(err) {
+                        reject({"error": "failure", "exception": err}, 500);
+                    }.bind(this));
+            }
+            if (!updating) {
+                resolve(false);
+            }
+        }.bind(this),
+        function (err) {
+            reject({"error": "failure", "exception": err}, 500);
+        }.bind(this));
+
+	}.bind(this));
+};
+
 Lic_MySQL.prototype.createLicensingTables = function(){
     return when.promise(function(resolve, reject){
         var Q = "CREATE TABLE GL_LICENSE\n" +
@@ -640,7 +686,7 @@ Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
         var valuesString = values.join(",");
         var Q = "INSERT INTO GL_PURCHASE_ORDER " +
             "(user_id,license_id,status,purchase_order_number," +
-            "purchase_order_key,phone,email,name,payment,action,date_created) " +
+            "purchase_order_key,phone,email,name,payment,current_package_type,current_package_size_tier,action,date_created) " +
             "VALUES (" + valuesString + ");";
         this.ds.query(Q)
             .then(function(results){
@@ -672,6 +718,48 @@ Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
                 reject(err);
             });
     }.bind(this));
+};
+
+Lic_MySQL.prototype.getOpenPurchaseOrders = function() {
+	return when.promise(function(resolve, reject){
+		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received', 'invoiced');";
+		this.ds.query(Q)
+		.then(function(results){
+			resolve(results);
+		})
+		.then(null, function(err){
+			console.error("Get Open Purchase Orders Error -",err);
+			reject(err);
+		});
+	}.bind(this));
+};
+
+Lic_MySQL.prototype.getNotOpenPurchaseOrders = function() {
+	return when.promise(function(resolve, reject){
+		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status NOT IN ('pending', 'received', 'invoiced');";
+		this.ds.query(Q)
+		.then(function(results){
+			resolve(results);
+		})
+		.then(null, function(err){
+			console.error("Get Open Purchase Orders Error -",err);
+			reject(err);
+		});
+	}.bind(this));
+};
+
+Lic_MySQL.prototype.getOpenPurchaseOrderForUser = function( userId ) {
+	return when.promise(function(resolve, reject){
+		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received', 'invoiced') AND user_id = " + userId + ";";
+		this.ds.query(Q)
+		.then(function(results){
+			resolve(results);
+		})
+		.then(null, function(err){
+			console.error("Get Open Purchase Order for User Error -",err);
+			reject(err);
+		});
+	}.bind(this));
 };
 
 Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
@@ -721,6 +809,36 @@ Lic_MySQL.prototype.updatePurchaseOrderById = function(purchaseOrderId, updateFi
                 reject(err);
             });
     }.bind(this));
+};
+
+Lic_MySQL.prototype.logResellerActionForPO = function(purchaseOrderId, logJSON){
+	this.getPurchaseOrderById( purchaseOrderId )
+		.then( function( purchaseOrder ) {
+            if( !purchaseOrder || purchaseOrder === "no purchase order" ) {
+            	reject( "no purchase order" );
+            	return;
+            }
+
+            var resellerLog = [];
+            var logStr = '';
+            if ( !purchaseOrder[ "RESELLER_LOG" ] ) {
+            	resellerLog.push( logJSON );
+            	logStr = JSON.stringify( resellerLog );
+            } else {
+            	resellerLog = JSON.parse( purchaseOrder[ "RESELLER_LOG" ] );
+            	resellerLog.push( logJSON );
+            	logStr = JSON.stringify( resellerLog );
+            }
+
+			var updateFields = [];
+			var resellerLog = "RESELLER_LOG = '" + logStr + "'";
+			updateFields.push(resellerLog);
+
+			return this.updatePurchaseOrderById( purchaseOrderId, updateFields );
+		}.bind(this))
+		.then( null, function(err ) {
+			reject( err );
+		})
 };
 
 Lic_MySQL.prototype.updateLicenseByPurchaseOrderId = function(purchaseOrderId, updateFields){

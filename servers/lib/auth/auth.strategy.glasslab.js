@@ -624,7 +624,8 @@ return when.promise(function(resolve, reject) {
         resolve(userData);
     }
     // are admin
-    else if(loginUserData.role == lConst.role.admin) {
+    else if( (loginUserData.role == lConst.role.admin) ||
+             (loginUserData.role == lConst.role.reseller) ) {
         resolve(userData);
     }
     // if instructor, then check if student their course
@@ -655,3 +656,19 @@ return when.promise(function(resolve, reject) {
 }.bind(this));
 // end promise wrapper
 };
+
+Glasslab_Strategy.prototype.unregisterUser = function(username){
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+	this._service.getAuthStore().deleteShadowUser(username)
+	.then(function() { 
+		resolve(username);
+	}.bind(this),
+		function(err, code){
+		reject({"error": "unexpected error"}, 403);
+	});
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+}

@@ -76,26 +76,6 @@
             "engine": "javascript",
             "trigger": "endSession",
             "rules": {
-                "wo1": {
-                    "name": "",
-                    "description": "These players have chosen irrelevant support for their side of the case at least two times during the last case played."
-                },
-                "wo2": {
-                    "name": "",
-                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first three moves of the last case played."
-                },
-                "wo3": {
-                    "name": "",
-                    "description": "This player did not match the reasoning wheel sentence correctly at all during the last case played."
-                },
-                "wo4": {
-                    "name": "",
-                    "description": "The player has not reviewed any of the opponents cards in the last case played."
-                },
-                "wo5": {
-                    "name": "",
-                    "description": "Player did not successfully object during the last case played."
-                },
                 "so1": {
                     "name": "",
                     "description": "This player correctly matched all of the reasoning wheel sentences in the last case played."
@@ -115,6 +95,26 @@
                 "so5": {
                     "name": "",
                     "description": "The player reviewed AND correctly passed or objected to all of the opponent's cards in the last case played."
+                },
+                "wo1": {
+                    "name": "",
+                    "description": "These players have chosen irrelevant support for their side of the case at least two times during the last case played."
+                },
+                "wo2": {
+                    "name": "",
+                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first three moves of the last case played."
+                },
+                "wo3": {
+                    "name": "",
+                    "description": "This player did not match the reasoning wheel sentence correctly at all during the last case played."
+                },
+                "wo4": {
+                    "name": "",
+                    "description": "The player has not reviewed any of the opponents cards in the last case played."
+                },
+                "wo5": {
+                    "name": "no objections",
+                    "description": "Player did not successfully object during the last case played."
                 }
             }
         }

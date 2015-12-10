@@ -13,6 +13,15 @@ start() {
     ./service_start.sh app-external "app-external.js"
     ./service_start.sh app-internal "app-internal.js"
     ./service_start.sh app-archiver "app-archiver.js"
+
+    if [ $(grep -c hydra ~/.log.io/harvester.conf) -eq 0 ]
+        then
+            cp logging/harvester.conf ~/.log.io/
+    fi
+
+    # explicitly use "-c node" to override how these two scripts usually start
+    forever start -c node node_modules/log.io/bin/log.io-server
+    forever start -c node node_modules/log.io/bin/log.io-harvester
 }
 
 stop() {
@@ -20,6 +29,9 @@ stop() {
     forever stop app-external.js
     forever stop app-internal.js
     forever stop app-archiver.js
+
+    forever stop node_modules/log.io/bin/log.io-harvester
+    forever stop node_modules/log.io/bin/log.io-server
 }
 
 case "$1" in

@@ -1,0 +1,28 @@
+{
+  "env": "dev",
+  "auth": {
+    "email": {
+      "from": "<build@glasslabgames.org>",
+      "transport": {
+        "service": "Gmail",
+        "auth": {
+          "user": "build@glasslabgames.org",
+          "pass": "glasslab"
+        }
+      }
+    },
+    "beta": {
+      "email": {
+        "to": "build@glasslabgames.org",
+        "from": "Playfully Beta <build@glasslabgames.org>",
+        "transport": {
+          "service": "Gmail",
+          "auth": {
+            "user": "build@glasslabgames.org",
+            "pass": "glasslab"
+          }
+        }
+      }
+    }
+  }
+}
