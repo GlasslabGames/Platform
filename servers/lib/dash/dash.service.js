@@ -131,6 +131,9 @@ function _buildLicPackages(){
         var gameInfo;
         _(games).forEach(function(game){
             gameInfo = game.info.basic;
+            if(!gameInfo) {
+                return;
+            }
             if(!gameInfo.packages){
                 console.error("DashService: _buildLicPackages - gameInfo does not have packages defined", gameInfo.gameId);
                 return;
