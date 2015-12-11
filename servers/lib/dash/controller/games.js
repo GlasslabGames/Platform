@@ -935,56 +935,67 @@ function generateBadgeCode( req, res ) {
         return;
     }
 
-    var url = "https://api-prod.lrng.org/api/v1/badge/" + badgeId + "/earned-code/generate";
+    // Check if user already has badge
+    // If not, get earned-code
+    // add to user's badge list
+	var newBadge = { id: parseInt( badgeId ), redeemed: false, code: "" };
+    this.webstore.getUserBadgeListById( userId )
+        .then(function(results) {
+            if ( ! results ) {
+                results = [];
+            }
+            return results;
+        }.bind(this))
+        .then(function( badgeList ) {
+            // Ignore if already exists
+            badgeList.forEach( function( badge ) {
+                if ( badgeId == badge.id ) {
+                	// Do not get an earned-code, just ignore
+                	console.log( "---> generateBadgeCode: Earned badge already existed for user/badge: ", userId, badgeId );
+                    this.stats.increment("info", "Route.Update.User.Done");
+                    this.requestUtil.jsonResponse(res, data);
+                    return;
+                }
+            });
 
-    this.requestUtil.postRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" }, null,
-        function( err, result, data ) {
-            if ( data ) {
-                // data {"status":"ok","data":{"code":"35664e6779763b3e784e7d426f5a3e3f4d402632"}}
-                var dataJSON = JSON.parse( data );
-                var newBadge = { id: parseInt( badgeId ), redeemed: false, code: dataJSON.data.code };
+			badgeList.push( newBadge );
 
-                this.webstore.getUserBadgeListById( userId )
-                    .then(function(results) {
-                        if ( ! results ) {
-                            results = [];
-                        }
-                        return results;
-                    }.bind(this))
-                        .then(function( badgeList ) {
-                            var add = true;
+            return badgeList;
+        }.bind(this))
+        .then( function( badgeList ) {
+		    var url = "https://api-prod.lrng.org/api/v1/badge/" + badgeId + "/earned-code/generate";
 
-                            // Ignore if already exists
-                            badgeList.forEach( function( badge ) {
-                                if ( newBadge.id == badge.id ) {
-                                    add = false;
-                                }
-                            });
+		    this.requestUtil.postRequest( url, { "token": "b0a20a70-61a8-11e5-9d70-feff819cdc9" }, null,
+		        function( err, result, data ) {
+		            if ( data ) {
+		                // data {"status":"ok","data":{"code":"35664e6779763b3e784e7d426f5a3e3f4d402632"}}
+		                var dataJSON = JSON.parse( data );
 
-                            if ( add ) {
-                                badgeList.push( newBadge );
+                        badgeList.forEach( function( badge ) {
+                            if ( badgeId == badge.id ) {
+				                badge.code = dataJSON.data.code;
                             }
+                        });
 
-                            return badgeList;
-                        }.bind(this))
-                            .then( function( badgeList ) {
-                                return this.serviceManager.get("auth").service.getAuthStore().updateUserBadgeList( userId, badgeList );
-                            }.bind(this))
-                                .then(function( data ) {
-                                    this.stats.increment("info", "Route.Update.User.Done");
-                                    this.requestUtil.jsonResponse(res, data);
-                                }.bind(this))
-                // catch all errors
+                        return this.serviceManager.get("auth").service.getAuthStore().updateUserBadgeList( userId, badgeList );
+		            } else {
+		            	if ( ! err ) {
+		            		err = "failed to retrieve earned code";
+		            	}
+
+		                this.requestUtil.errorResponse(res, err, 400);
+		                return;
+		            }
+		        }.bind(this))
+                .then(function( data ) {
+                    this.stats.increment("info", "Route.Update.User.Done");
+                    this.requestUtil.jsonResponse(res, data);
+                }.bind(this))
                 .then(null, function(err){
                     this.stats.increment("error", "Route.Update.User");
-                    console.error("Auth - updateUserBadgeListRoute error:", err);
+                    console.error("Auth - updateUserBadgeList error:", err);
                     this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
                 }.bind(this));
-
-
-            } else if ( err ) {
-                this.requestUtil.errorResponse(res, err, 400);
-            }
         }.bind(this));
 }
 
