@@ -204,6 +204,8 @@ module.exports = {
     Email:              require('./util.email.js'),
     S3Util:             require('./util.s3.js'),
     StripeUtil:         require('./util.stripe.js'),
+    LogUtil:            require('./util.log.js'),
+
     ConvertToString:    convertToString,
     PromiseContinue:    promiseContinue,
     PromiseError:       promiseError,

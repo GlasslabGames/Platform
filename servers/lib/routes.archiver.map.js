@@ -1034,6 +1034,14 @@ module.exports = {
                 get: "runMonitor"
             }
         },
+        {
+            api: "/api/v2/monitor/info",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "monitorInfo"
+            }
+        },
     // ---------------------------------------------------
     // Version 1
     // ---------------------------------------------------

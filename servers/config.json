@@ -220,12 +220,29 @@
                 "external": {
                     "host":     "localhost",
                     "protocol": "https"
+                },
+                "internal": {
+                    "host":     "localhost:8002",
+                    "protocol": "http"
+                },
+                "assessment": {
+                    "host":     "localhost:8003",
+                    "protocol": "http",
+                    "skip":     true, "//": "false if assessment server is running"
+                },
+                "archiver": {
+                    "host":     "localhost:8004",
+                    "protocol": "http",
+                    "skip":     false, "//": "true if monitor is archiver when testing"
                 }
+            },
+            "logger": {
+                "host":     "localhost:28778",
+                "protocol": "http"
             },
             "couchbase": {
                 "host":     "localhost:8091",
                 "protocol": "https",
-                "bucket":   "glasslab_gamedata",
                 "username": "Administrator",
                 "password": "glasslab"
             },

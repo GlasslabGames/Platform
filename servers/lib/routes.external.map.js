@@ -1247,6 +1247,15 @@ module.exports = {
             }
         },
 */
+        // monitoring routes
+        {
+            api: "/api/v2/monitor/info",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "monitorInfo"
+            }
+        },
 
     // ---------------------------------------------------
     // Research

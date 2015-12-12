@@ -12,12 +12,23 @@ var MySQL  = require('../../core/datastore.mysql.js');
 var runningMonitor = false;
 
 module.exports = {
-    runMonitor: runMonitor
+    runMonitor: runMonitor,
+    monitorInfo: monitorInfo
 };
+
+// used by monitor to test another monitor/archiver active
+function monitorInfo(req, res){
+    console.log("monitorInfo");
+
+    var data = {
+        logCounts: this.serviceManager.logUtil.getLogCounts()
+    };
+    this.requestUtil.jsonResponse(res, data);
+}
 
 // changes runningMonitor state to true, starting monitor if not active
 function runMonitor(req, res){
-    console.log("runMonitor: enter");
+    console.log("runMonitor");
 
     if( !(req.params.code &&
         _.isString(req.params.code) &&
@@ -69,8 +80,8 @@ function runMonitor(req, res){
             allErrors.push("----- " + result.system + " -----");
             allErrors.push.apply(allErrors, result.messages);
         }
- 
-        return appServerStatus.call(this);
+
+        return loggerStatus.call(this);
     }.bind(this))
     .then(function(result) {
         if (result.status !== "good") {
@@ -78,6 +89,47 @@ function runMonitor(req, res){
             allErrors.push("----- " + result.system + " -----");
             allErrors.push.apply(allErrors, result.messages);
         }
+ 
+        if (this.options.monitor &&
+            this.options.monitor.tests &&
+            this.options.monitor.tests.app) {
+
+            var promiseList = [];
+            var app = this.options.monitor.tests.app
+            for (var name in app) {
+                if (app.hasOwnProperty(name)) {
+                    server = app[name];
+                    if (!server.skip) {
+                        if (name === 'external') {
+                            promiseList.push(externalServerStatus.call(this,
+                                server.protocol + "://" + server.host));
+                        } else if (name === 'internal') {
+                            promiseList.push(internalServerStatus.call(this,
+                                server.protocol + "://" + server.host));
+                        } else if (name === 'archiver') {
+                            promiseList.push(archiverServerStatus.call(this,
+                                server.protocol + "://" + server.host));
+                        } else if (name === 'assessment') {
+                            promiseList.push(assessmentServerStatus.call(this,
+                                server.protocol + "://" + server.host));
+                        }
+                    }
+                }
+            }
+            return when.all(promiseList);
+        }
+        
+        console.log("app servers monitor missing config data");
+        return when.reject({ errmsg: "missing config data", code: 400 });
+    }.bind(this))
+    .then(function(results) {
+        results.forEach(function(result) {
+            if (result.status !== "good") {
+                console.log(result.system, "reported alert");
+                allErrors.push("----- " + result.system + " -----");
+                allErrors.push.apply(allErrors, result.messages);
+            }
+        }.bind(this));
 
         // additional tests can be inserted into the chain
         
@@ -123,48 +175,94 @@ function couchBaseStatus() {
         
             var host = this.options.monitor.tests.couchbase.host;
             var protocol = this.options.monitor.tests.couchbase.protocol;
-            //var bucket = this.options.monitor.tests.couchbase.bucket;
             var username = this.options.monitor.tests.couchbase.username;
             var password = this.options.monitor.tests.couchbase.password;
-
-            var url = protocol + '://' + host + '/nodeStatuses';
+            var urlBase = protocol + "://" + host;
             var auth = new Buffer(username + ":" + password).toString('base64');
-            
-            this.requestUtil.getRequest(url, { "Authorization": "Basic " + auth },
-                function(error, response, body) {
-                    console.log("couchBaseStatus: process /nodeStatuses");
+            var messages = [];
 
-                    if (!error && response.statusCode == 200) {
-                        var messages = [];
-                        
-                        var json = JSON.parse(body);
-                        _(json).forEach(function(value, key){
-                            // is status 'healthy'?
-                            if (value.status !== "healthy") {
-                                messages.push("Node " + key + " has status '" + value.status + "'");
-                            }
-                        });
+            couchbaseStatusPools.call(this, urlBase, auth)
+            .then(function(result) {
+                if (result.messages.length > 0) {
+                    messages.push.apply(messages, result.messages);
+                }
 
-                        var result = {
-                            system: "couchbase",
-                            status: (messages.length > 0 ? "bad" : "good"),
-                            messages: messages
-                        };
-                        resolve(result);
-                    } else {
-                        console.log("cousebase monitor /nodeStatuses failed!");
-                        var result = {
-                            system: "couchbase",
-                            status: "bad",
-                            messages: [ "Failed to connect to Coushbase server at " + host ]
-                        };
-                        resolve(result);
+                if (result.connect === 'no') {
+                    return "connect fail";
+                }
+                return couchbaseStatusBuckets.call(this, urlBase, result.bucketsURI, auth);
+            }.bind(this))
+            .then(function(result) {
+                if (typeof result !== 'string') {
+                    if (result.messages.length > 0) {
+                        messages.push.apply(messages, result.messages);
                     }
-                }.bind(this));
+                }
+
+                var data = {
+                    system: "couchbase",
+                    status: (messages.length > 0 ? "bad" : "good"),
+                    messages: messages
+                };
+                resolve(data);
+            }.bind(this));
         } else {
             console.log("cousebase monitor missing config data");
             reject({ errmsg: "missing config data", code: 400 });
         }
+    }.bind(this));
+}
+
+function couchbaseStatusPools(host, auth) {
+    console.log("couchbaseStatusPools: enter");
+    
+    return when.promise(function(resolve, reject) {
+        var url = host + '/pools/default';
+        this.requestUtil.getRequest(url, { "Authorization": "Basic " + auth },
+            function(error, response, body) {
+                console.log("couchbaseStatusPools: process /pools/default");
+
+                if (!error && response.statusCode == 200) {
+                    var messages = [];
+                    var json = JSON.parse(body);
+                    json.nodes.forEach(function(node){
+                        // is status 'healthy'?
+                        if (node.status !== "healthy") {
+                            messages.push("Node " + node.hostname + " has status '" + node.status + "'");
+                        }
+                    });
+                    resolve({ connect: "yes", messages: messages, bucketsURI: json.buckets.uri });
+                } else {
+                    resolve({ connect: "no", messages: [ "Failed to connect to Coushbase server at " + host ] });
+                }
+            }.bind(this));
+    }.bind(this));
+}
+
+function couchbaseStatusBuckets(host, uri, auth) {
+    return when.promise(function(resolve, reject) {
+        var url = host + uri;
+        this.requestUtil.getRequest(url, { "Authorization": "Basic " + auth },
+            function(error, response, body) {
+                console.log("couchBaseStatus: process", uri);
+
+                if (!error && response.statusCode == 200) {
+                    var messages = [];
+                    
+                    var json = JSON.parse(body);
+                    /*
+                    json.nodes.forEach(function(node){
+                        // is status 'healthy'?
+                        if (node.status !== "healthy") {
+                            messages.push("Node " + node.hostname + " has status '" + node.status + "'");
+                        }
+                    });
+                    */
+                    resolve({ connect: "yes", messages: messages });
+                } else {
+                    resolve({ connect: "no", messages: [ "Failed to connect to Coushbase server at " + host ] });
+                }
+            }.bind(this));
     }.bind(this));
 }
 
@@ -226,50 +324,207 @@ function mysqlStatus() {
     }.bind(this));
 }
 
-function appServerStatus() {
-    console.log("appServerStatus: enter");
+function externalServerStatus(host) {
+    console.log("externalServerStatus: enter");
+
+    return when.promise(function(resolve, reject) {
+        var messages = [];
+        
+        this.requestUtil.request(host + '/api/v2/monitor/info')
+        .then(function(result) {
+            console.log("externalServerStatus: process /api/v2/monitor/info");
+
+            if (!result.logCounts) {
+                var data = {
+                    system: "internal",
+                    status: "bad",
+                    messages: [ "/api/v2/monitor/info return bad data at " + host ]
+                };
+                resolve(data);
+                return;
+            }
+            
+            var data = {
+                system: "external",
+                status: (messages.length > 0 ? "bad" : "good"),
+                messages: messages
+            };
+            resolve(data);
+        }.bind(this))
+        .then(null, function(err) {
+            console.log("externalServerStatus monitor failed!");
+
+            var data = {
+                system: "external",
+                status: "bad",
+                messages: [ "Error " + JSON.stringify(err) + " for " + host ]
+            };
+            resolve(data);
+            
+        }.bind(this));
+    }.bind(this));
+}
+
+function internalServerStatus(host) {
+    console.log("internalServerStatus: enter");
+
+    return when.promise(function(resolve, reject) {
+        var messages = [];
+        
+        this.requestUtil.request(host + '/api/v2/monitor/info')
+        .then(function(result) {
+            console.log("internalServerStatus: process /api/v2/monitor/info");
+
+            if (!result.logCounts) {
+                var data = {
+                    system: "internal",
+                    status: "bad",
+                    messages: [ "/api/v2/monitor/info return bad data at " + host ]
+                };
+                resolve(data);
+                return;
+            }
+            
+            var data = {
+                system: "internal",
+                status: (messages.length > 0 ? "bad" : "good"),
+                messages: messages
+            };
+            resolve(data);
+        }.bind(this))
+        .then(null, function(err) {
+            console.log("internalServerStatus monitor failed!");
+
+            var data = {
+                system: "internal",
+                status: "bad",
+                messages: [ "Error " + JSON.stringify(err) + " for " + host ]
+            };
+            resolve(data);
+            
+        }.bind(this));
+    }.bind(this));
+}
+
+function archiverServerStatus(host) {
+    console.log("archiverServerStatus: enter");
+
+    return when.promise(function(resolve, reject) {
+        var messages = [];
+        
+        this.requestUtil.request(host + '/api/v2/monitor/info')
+        .then(function(result) {
+            console.log("archiverServerStatus: process /api/v2/monitor/info");
+
+            if (!result.logCounts) {
+                var data = {
+                    system: "archiver",
+                    status: "bad",
+                    messages: [ "/api/v2/monitor/info return bad data at " + host ]
+                };
+                resolve(data);
+                return;
+            }
+            
+            var data = {
+                system: "archiver",
+                status: (messages.length > 0 ? "bad" : "good"),
+                messages: messages
+            };
+            resolve(data);
+        }.bind(this))
+        .then(null, function(err) {
+            console.log("archiverServerStatus monitor failed!");
+
+            var data = {
+                system: "archiver",
+                status: "bad",
+                messages: [ "Error " + JSON.stringify(err) + " for " + host ]
+            };
+            resolve(data);
+            
+        }.bind(this));
+    }.bind(this));
+}
+
+
+function assessmentServerStatus(host) {
+    console.log("assessmentServerStatus: enter");
+
+    return when.promise(function(resolve, reject) {
+        var messages = [];
+        
+        this.requestUtil.request(host + '/int/v1/aeng/processStatus')
+        .then(function(result) {
+            console.log("assessmentServerStatus: process /int/v1/aeng/processStatus");
+
+            if (!result.hasOwnProperty("jobCount")) {
+                var data = {
+                    system: "assessment",
+                    status: "bad",
+                    messages: [ "/int/v1/aeng/processStatus missing jobCount at " + host ]
+                };
+                resolve(data);
+                return;
+            }
+            
+            var data = {
+                system: "assessment",
+                status: (messages.length > 0 ? "bad" : "good"),
+                messages: messages
+            };
+            resolve(data);
+        }.bind(this))
+        .then(null, function(err) {
+            console.log("assessmentServerStatus monitor failed!");
+
+            var data = {
+                system: "assessment",
+                status: "bad",
+                messages: [ "Error " + JSON.stringify(err) + " for " + host ]
+            };
+            resolve(data);
+            
+        }.bind(this));
+    }.bind(this));
+}
+
+function loggerStatus() {
+    console.log("loggerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         if (this.options.monitor &&
             this.options.monitor.tests &&
-            this.options.monitor.tests.app &&
-            this.options.monitor.tests.app.external) {
+            this.options.monitor.tests.logger) {
         
-            var host = this.options.monitor.tests.app.external.host;
-            var protocol = this.options.monitor.tests.app.external.protocol;
-            var url = protocol + '://' + host + '/sdk/connect';
+            var host = this.options.monitor.tests.logger.host;
+            var protocol = this.options.monitor.tests.logger.protocol;
+            var url = protocol + "://" + host;
 
             this.requestUtil.getRequest(url, { },
                 function(error, response, body) {
-                    console.log("appServerStatus: process /sdk/conenct");
+                    console.log("loggerStatus: process /");
 
                     if (!error && response.statusCode == 200) {
-                        var messages = [];
-
-                        if (!body || body.indexOf("http") !== 0) {
-                            messages.push("/sdk/connect replied with bad URL");
-                        }
-                        
-                        var result = {
-                            system: "application server",
-                            status: (messages.length > 0 ? "bad" : "good"),
-                            messages: messages
+                        var data = {
+                            system: "logger",
+                            status: "good",
+                            messages: [ ]
                         };
-                        resolve(result);
+                        resolve(data);
                     } else {
-                        console.log("appserver monitor failed!");
-
-                        var result = {
-                            system: "application server",
+                        var data = {
+                            system: "logger",
                             status: "bad",
-                            messages: [ "Unable to connect to app server at " + host ]
+                            messages: ["Unable to connect to logger server at " + host]
                         };
-                        resolve(result);
+                        resolve(data);
                     }
                 }.bind(this));
         } else {
-            console.log("appserver monitor missing config data");
+            console.log("logger monitor missing config data");
             reject({ errmsg: "missing config data", code: 400 });
         }
     }.bind(this));
 }
+

@@ -59,6 +59,8 @@ function ServiceManager(configFiles){
     // this == {}
 
     Util              = require('../core/util.js');
+    this.logUtil      = new Util.LogUtil(); // begin enhanced logging
+    
     var ConfigManager = require('../core/config.manager.js');
 
     var startScript = process.argv[1].split("servers/")[1];
