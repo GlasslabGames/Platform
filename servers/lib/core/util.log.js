@@ -10,7 +10,7 @@ function LogUtil() {
     ["log", "info", "warn", "error"].forEach(function(method) {
         var oldMethod = console[method].bind(console);
         console[method] = function() {
-            var args = [moment().format("YYYY-MM-DD HH:mm:ss"), logPrefix[method]];
+            var args = [moment().utc().format("YYYY-MM-DD HH:mm:ss"), logPrefix[method]];
             args.push.apply(args, arguments);
             oldMethod.apply(
                 console,

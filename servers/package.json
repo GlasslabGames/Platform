@@ -27,6 +27,7 @@
     "lodash": "2.4.x",
     "log.io": "0.3.x",
     "mailchimp": "1.1.x",
+    "memwatch-next": "0.2.x",
     "method-override": "2.3.x",
     "moment": "2.5.x",
     "morgan": "1.6.x",

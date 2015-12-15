@@ -217,12 +217,13 @@
         },
         "tests": {
             "app": {
+                "//": "for these servers, host can be a string or an array of strings",
                 "external": {
-                    "host":     "localhost",
+                    "host":     [ "localhost" ],
                     "protocol": "https"
                 },
                 "internal": {
-                    "host":     "localhost:8002",
+                    "host":     [ "localhost:8002" ],
                     "protocol": "http"
                 },
                 "assessment": {
@@ -253,7 +254,13 @@
                 "database": "glasslab_dev"
             },
             "per_check_limits": {
-                "mysql_max_aborted_connects": 10
+                "mysql_max_aborted_connects": 10,
+                "external_max_errors_reported": 100,
+                "internal_max_errors_reported": 100,
+                "archiver_max_errors_reported": 100,
+                "external_max_cpu_usage": 0.5,
+                "internal_max_cpu_usage": 0.5,
+                "archiver_max_cpu_usage": 0.5
             }
         },
         "alert": {

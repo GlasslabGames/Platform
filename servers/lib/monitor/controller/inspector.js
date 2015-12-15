@@ -3,26 +3,51 @@ var path      = require('path');
 var _         = require('lodash');
 var when      = require('when');
 var moment    = require('moment');
+var os        = require('os');
+var memwatch = require('memwatch-next');
+
 //var request   = require('request');
 var mConst    = require('../monitor.const.js');
 var Util      = require('../../core/util.js');
 var MySQL  = require('../../core/datastore.mysql.js');
-
-
-var runningMonitor = false;
 
 module.exports = {
     runMonitor: runMonitor,
     monitorInfo: monitorInfo
 };
 
+
+var runningMonitor = false;
+var memWatchActive = false;
+var lastLeakInfo = null;
+
 // used by monitor to test another monitor/archiver active
 function monitorInfo(req, res){
     console.log("monitorInfo");
 
+    if (!memWatchActive) {
+        memWatchActive = true;
+        memwatch.on('leak', function(info) {
+            lastLeakInfo = info;
+        });
+        memwatch.on('stats', function(stats) {
+            console.info("GC:", "FULLGC", stats.num_full_gc, "INCGC", stats.num_inc_gc, "COMPACT",
+                stats.heap_compactions, "TREND", stats.usage_trend, "ESTBASE", stats.estimated_base, "CURBASE", stats.current_base, "MIN", stats.min, "MAX", stats.max);
+        });
+    }
+    
+    // memwatch.gc(); // used to test receiving stats events
+    
     var data = {
-        logCounts: this.serviceManager.logUtil.getLogCounts()
+        logCounts: this.serviceManager.logUtil.getLogCounts(),
+        cpuAverage: os.loadavg(),
+        cpuCount: os.cpus().length,
+        memoryUsage: process.memoryUsage(),
+        leakInfo: lastLeakInfo,
     };
+
+    lastLeakInfo = null;
+
     this.requestUtil.jsonResponse(res, data);
 }
 
@@ -81,14 +106,36 @@ function runMonitor(req, res){
             allErrors.push.apply(allErrors, result.messages);
         }
 
-        return loggerStatus.call(this);
-    }.bind(this))
-    .then(function(result) {
-        if (result.status !== "good") {
-            console.log(result.system, "reported alert");
-            allErrors.push("----- " + result.system + " -----");
-            allErrors.push.apply(allErrors, result.messages);
+        if (this.options.monitor &&
+            this.options.monitor.tests &&
+            this.options.monitor.tests.logger) {
+          
+            var promiseList = [];
+        
+            var hosts = _.cloneDeep(this.options.monitor.tests.logger.host);
+            if (typeof hosts === 'string') {
+                hosts = [hosts];
+            }
+            var protocol = this.options.monitor.tests.logger.protocol;
+
+            hosts.forEach(function (host) {
+                promiseList.push(loggerStatus.call(this, protocol + "://" + host));
+            }.bind(this));
+
+            return when.all(promiseList);
         }
+
+        console.log("logger server monitor missing config data");
+        return when.reject({ errmsg: "missing config data", code: 400 });
+    }.bind(this))
+    .then(function(results) {
+        results.forEach(function(result) {
+            if (result.status !== "good") {
+                console.log(result.system, "reported alert");
+                allErrors.push("----- " + result.system + " -----");
+                allErrors.push.apply(allErrors, result.messages);
+            }
+        }.bind(this));
  
         if (this.options.monitor &&
             this.options.monitor.tests &&
@@ -100,18 +147,30 @@ function runMonitor(req, res){
                 if (app.hasOwnProperty(name)) {
                     server = app[name];
                     if (!server.skip) {
+                        var hosts = _.cloneDeep(server.host);
+                        if (typeof hosts === 'string') {
+                            hosts = [hosts];
+                        }
                         if (name === 'external') {
-                            promiseList.push(externalServerStatus.call(this,
-                                server.protocol + "://" + server.host));
+                            hosts.forEach(function (host) {
+                                promiseList.push(externalServerStatus.call(this,
+                                    server.protocol + "://" + host));
+                            }.bind(this));
                         } else if (name === 'internal') {
-                            promiseList.push(internalServerStatus.call(this,
-                                server.protocol + "://" + server.host));
+                            hosts.forEach(function (host) {
+                                promiseList.push(internalServerStatus.call(this,
+                                    server.protocol + "://" + host));
+                            }.bind(this));
                         } else if (name === 'archiver') {
-                            promiseList.push(archiverServerStatus.call(this,
-                                server.protocol + "://" + server.host));
+                            hosts.forEach(function (host) {
+                                promiseList.push(archiverServerStatus.call(this,
+                                    server.protocol + "://" + host));
+                            }.bind(this));
                         } else if (name === 'assessment') {
-                            promiseList.push(assessmentServerStatus.call(this,
-                                server.protocol + "://" + server.host));
+                            hosts.forEach(function (host) {
+                                promiseList.push(assessmentServerStatus.call(this,
+                                    server.protocol + "://" + host));
+                            }.bind(this));
                         }
                     }
                 }
@@ -306,10 +365,6 @@ function mysqlStatus() {
                     //return "abort";
                 }
 
-//            }.bind(this))
-//            .then(function(results){
-            
-
                 var result = {
                     system: "mysql",
                     status: (messages.length > 0 ? "bad" : "good"),
@@ -344,6 +399,31 @@ function externalServerStatus(host) {
                 return;
             }
             
+            var per_check_limits = this.options.monitor.tests.per_check_limits;
+            if (per_check_limits) {
+                var external_errors_reported = result.logCounts.error;
+                
+                if (per_check_limits.external_max_errors_reported && this.workingdata.external_errors_reported !== undefined) {
+                    var delta = external_errors_reported - this.workingdata.external_errors_reported;
+                    if (delta > per_check_limits.external_max_errors_reported) {
+                        messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.external_max_errors_reported + "] to external server at " + host);
+                    }
+                }
+                this.workingdata.external_errors_reported = external_errors_reported;
+
+                if (result.leakInfo) {
+                    messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on external server at " + host);
+                }
+
+                if (result.cpuCount && per_check_limits.external_max_cpu_usage) {
+                    // of the 1, 5 and 15 min load avaerages, use 5 min
+                    var usage = result.cpuAverage[1] / result.cpuCount;
+                    if (usage > per_check_limits.external_max_cpu_usage) {
+                        messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.external_max_cpu_usage + "] to external server at " + host);
+                    }
+                }
+            }
+
             var data = {
                 system: "external",
                 status: (messages.length > 0 ? "bad" : "good"),
@@ -385,6 +465,31 @@ function internalServerStatus(host) {
                 return;
             }
             
+            var per_check_limits = this.options.monitor.tests.per_check_limits;
+            if (per_check_limits) {
+                var internal_errors_reported = result.logCounts.error;
+                
+                if (per_check_limits.internal_max_errors_reported && this.workingdata.internal_errors_reported !== undefined) {
+                    var delta = internal_errors_reported - this.workingdata.internal_errors_reported;
+                    if (delta > per_check_limits.internal_max_errors_reported) {
+                        messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.internal_max_errors_reported + "] to internal server at " + host);
+                    }
+                }
+                this.workingdata.internal_errors_reported = internal_errors_reported;
+
+                if (result.leakInfo) {
+                    messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on internal server at " + host);
+                }
+
+                if (result.cpuCount && per_check_limits.internal_max_cpu_usage) {
+                    // of the 1, 5 and 15 min load avaerages, use 5 min
+                    var usage = result.cpuAverage[1] / result.cpuCount;
+                    if (usage > per_check_limits.internal_max_cpu_usage) {
+                        messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.internal_max_cpu_usage + "] to internal server at " + host);
+                    }
+                }
+            }
+
             var data = {
                 system: "internal",
                 status: (messages.length > 0 ? "bad" : "good"),
@@ -426,6 +531,31 @@ function archiverServerStatus(host) {
                 return;
             }
             
+            var per_check_limits = this.options.monitor.tests.per_check_limits;
+            if (per_check_limits) {
+                var archiver_errors_reported = result.logCounts.error;
+                
+                if (per_check_limits.archiver_max_errors_reported && this.workingdata.archiver_errors_reported !== undefined) {
+                    var delta = archiver_errors_reported - this.workingdata.archiver_errors_reported;
+                    if (delta > per_check_limits.archiver_max_errors_reported) {
+                        messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.archiver_max_errors_reported + "] to archiver server at " + host);
+                    }
+                }
+                this.workingdata.archiver_errors_reported = archiver_errors_reported;
+
+                if (result.leakInfo) {
+                    messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on archiver server at " + host);
+                }
+
+                if (result.cpuCount && per_check_limits.archiver_max_cpu_usage) {
+                    // of the 1, 5 and 15 min load avaerages, use 5 min
+                    var usage = result.cpuAverage[1] / result.cpuCount;
+                    if (usage > per_check_limits.archiver_max_cpu_usage) {
+                        messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.archiver_max_cpu_usage + "] to archiver server at " + host);
+                    }
+                }
+            }
+
             var data = {
                 system: "archiver",
                 status: (messages.length > 0 ? "bad" : "good"),
@@ -446,7 +576,6 @@ function archiverServerStatus(host) {
         }.bind(this));
     }.bind(this));
 }
-
 
 function assessmentServerStatus(host) {
     console.log("assessmentServerStatus: enter");
@@ -489,42 +618,29 @@ function assessmentServerStatus(host) {
     }.bind(this));
 }
 
-function loggerStatus() {
+function loggerStatus(url) {
     console.log("loggerStatus: enter");
 
     return when.promise(function(resolve, reject) {
-        if (this.options.monitor &&
-            this.options.monitor.tests &&
-            this.options.monitor.tests.logger) {
-        
-            var host = this.options.monitor.tests.logger.host;
-            var protocol = this.options.monitor.tests.logger.protocol;
-            var url = protocol + "://" + host;
+        this.requestUtil.getRequest(url, { },
+            function(error, response, body) {
+                console.log("loggerStatus: process");
 
-            this.requestUtil.getRequest(url, { },
-                function(error, response, body) {
-                    console.log("loggerStatus: process /");
-
-                    if (!error && response.statusCode == 200) {
-                        var data = {
-                            system: "logger",
-                            status: "good",
-                            messages: [ ]
-                        };
-                        resolve(data);
-                    } else {
-                        var data = {
-                            system: "logger",
-                            status: "bad",
-                            messages: ["Unable to connect to logger server at " + host]
-                        };
-                        resolve(data);
-                    }
-                }.bind(this));
-        } else {
-            console.log("logger monitor missing config data");
-            reject({ errmsg: "missing config data", code: 400 });
-        }
+                if (!error && response.statusCode == 200) {
+                    var data = {
+                        system: "logger",
+                        status: "good",
+                        messages: [ ]
+                    };
+                    resolve(data);
+                } else {
+                    var data = {
+                        system: "logger",
+                        status: "bad",
+                        messages: ["Unable to connect to logger server at " + host]
+                    };
+                    resolve(data);
+                }
+            }.bind(this));
     }.bind(this));
 }
-
