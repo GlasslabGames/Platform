@@ -5,7 +5,7 @@
  *  lodash     - https://github.com/lodash/lodash
  *  when       - https://github.com/cujojs/when
  *  express    - https://github.com/visionmedia/express
- *  multiparty - https://github.com/superjoe30/node-multiparty
+ *  multiparty - https://github.com/andrewrk/node-multiparty
  *
  */
 

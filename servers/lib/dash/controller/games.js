@@ -4,6 +4,9 @@ var when      = require('when');
 var Util      = require('../../core/util.js');
 var dConst    = require('../dash.const.js');
 var fs = require('fs');
+var multiparty = require('multiparty');
+var mmm = require('mmmagic'),
+    Magic = mmm.Magic;
 
 module.exports = {
     getActiveGamesBasicInfo:         getActiveGamesBasicInfo,
@@ -19,6 +22,7 @@ module.exports = {
     badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
     replaceGameInfo:                 replaceGameInfo,
+    uploadGameImage:                 uploadGameImage,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
     getDeveloperGamesInfo:           getDeveloperGamesInfo,
@@ -784,6 +788,8 @@ function getDeveloperGamesInfo(req, res){
                         if (gameInfo && gameInfo.basic) {
                             basicGameInfo[gameId] = gameInfo.basic;
                         }
+                    }, function(err) {
+                        // ignore
                     });
             }.bind(this))
                 .catch(function (err) {
@@ -841,7 +847,8 @@ function updateDeveloperGameInfo(req, res){
             if(!gameIds[gameId]){
                 return "no access";
             }
-            //_writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
+            //uncommented out for testing
+            _writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
             return this.telmStore.updateGameInformation(gameId, data);
         }.bind(this))
         .then(function(status){
@@ -901,6 +908,63 @@ function _writeToInfoJSONFiles(gameId, data){
             resolve();
         });
     });
+}
+
+function uploadGameImage(req, res) {
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    var gameId = req.params.gameId;
+
+    var form = new multiparty.Form();
+    form.parse(req, function(err, fields, files) {
+        if(err) {
+            console.error("Dash: uploadGameImage formParse Error -", err);
+            this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        }
+
+        _.forEach(files, function(file, key) {
+            if(_.isArray(file) && file[0]) {
+                file = file[0];
+            } else {
+                this.requestUtil.errorResponse(res, {key:"dash.info.missing"},500);
+            }
+
+            var data = fs.readFileSync(file.path);
+
+            var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+            magic.detect(data, function(err, mimeType) {
+                if(err) {
+                    this.requestUtil.errorResponse(res, {key:"dash.info.missing"},500);
+                    throw err;
+                }
+                console.log(mimeType);
+                if (['image/png', 'image/jpeg'].indexOf(mimeType) === -1) {
+                    this.requestUtil.errorResponse(res, {key:"dash.type.invalid"},500);
+                    return;
+                }
+
+                var fileName = gameId + "/images/" + file.fieldName + "." + file.originalFilename;
+                var extraParams = {
+                    ACL: "public-read",
+                    ContentType: mimeType
+                };
+
+                this.serviceManager.awss3.createS3Object( fileName, data, extraParams, "playfully-games" )
+                    .then(function(){
+
+                        this.requestUtil.jsonResponse(res, {path: "https://s3-us-west-1.amazonaws.com/playfully-games/" + fileName});
+                    }.bind(this))
+                    .catch(function(err){
+                        console.error("Dash: uploadGameImage putS3Object Error -", err);
+                        this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+                    }.bind(this));
+
+            }.bind(this));
+        }.bind(this));
+    }.bind(this));
 }
 
 function getBadgeJSON(req, res){

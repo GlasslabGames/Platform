@@ -99,12 +99,16 @@ S3Util.prototype.createS3Bucket = function( bucket ) {
     }.bind( this ) );
 };
 
-S3Util.prototype.createS3Object = function(key, data) {
+S3Util.prototype.createS3Object = function(key, data, extraParams, bucket) {
     return when.promise(function(resolve, reject){
         var params = {};
-        params.Bucket = this.bucket;
+        params.Bucket = bucket || this.bucket;
         params.Body = data;
         params.Key = key;
+        if(_.isObject(extraParams)) {
+            _.merge(params, extraParams);
+        }
+
         this.s3.putObject(params, function(err, results){
             if(err){
                 console.error('S3 Create Object Error - ', err);
@@ -118,10 +122,10 @@ S3Util.prototype.createS3Object = function(key, data) {
 };
 
 // gets s3 object from playfully bucket
-S3Util.prototype.getS3Object = function(key){
+S3Util.prototype.getS3Object = function(key, bucket){
     return when.promise(function(resolve, reject){
         var params = {};
-        params.Bucket = this.bucket;
+        params.Bucket = bucket || this.bucket;
         params.Key = key;
 
         this.s3.getObject(params, function(err, results){
@@ -137,14 +141,17 @@ S3Util.prototype.getS3Object = function(key){
     }.bind(this));
 };
 
-// gets s3 object from playfully bucket
-S3Util.prototype.putS3Object = function(key, data){
+// puts s3 object from playfully bucket
+S3Util.prototype.putS3Object = function(key, data, extraParams, bucket){
     var copiedData = data + "";
     return when.promise(function(resolve, reject){
         var params = {};
-        params.Bucket = this.bucket;
+        params.Bucket = bucket || this.bucket;
         params.Key = key;
         params.Body = copiedData;
+        if(_.isObject(extraParams)) {
+            _.merge(params, extraParams);
+        }
 
         this.s3.putObject(params, function(err, results){
             if(err){
@@ -159,10 +166,10 @@ S3Util.prototype.putS3Object = function(key, data){
 };
 
 // deletes s3 object from playfully bucket
-S3Util.prototype.deleteS3Object = function(key){
+S3Util.prototype.deleteS3Object = function(key, bucket){
     return when.promise(function(resolve, reject){
         var params = {};
-        params.Bucket = this.bucket;
+        params.Bucket = bucket || this.bucket;
         params.Key = key;
 
         this.s3.deleteObject(params, function(err, results){
@@ -178,12 +185,12 @@ S3Util.prototype.deleteS3Object = function(key){
 };
 
 // updates s3 object from playfully bucket
-S3Util.prototype.updateS3Object = function(key, data){
+S3Util.prototype.updateS3Object = function(key, data, bucket){
     return when.promise(function(resolve, reject){
-        this.getS3Object(key)
+        this.getS3Object(key, bucket)
             .then(function(object){
                 _.merge(object, data);
-                return this.createS3Object(key, object);
+                return this.createS3Object(key, object, bucket);
             }.bind(this))
             .then(function(){
                 resolve();
@@ -195,10 +202,10 @@ S3Util.prototype.updateS3Object = function(key, data){
 };
 
 // lists all the s3 objects in playfully bucket
-S3Util.prototype.listS3Objects = function(prefix){
+S3Util.prototype.listS3Objects = function(prefix, bucket){
     return when.promise(function(resolve, reject){
         var params = {};
-        params.Bucket = this.bucket;
+        params.Bucket = bucket || this.bucket;
         params.Prefix = prefix;
         this.s3.listObjects(params, function(err, data){
             if(err){
@@ -219,9 +226,9 @@ S3Util.prototype.listS3Objects = function(prefix){
 };
 
 // grabs url signed for get requests, for csv parser page
-S3Util.prototype._getSignedUrl = function(key) {
+S3Util.prototype._getSignedUrl = function(key, bucket) {
     var params = {};
-    params.Bucket = this.bucket;
+    params.Bucket = bucket || this.bucket;
     params.Key = key;
     return when.promise(function(resolve, reject){
         this.s3.getSignedUrl('getObject', params, function (err, url) {
