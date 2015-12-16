@@ -208,6 +208,9 @@
         }
     },
     "monitor": {
+        "memwatch": {
+            "logStats": false
+        },
         "datastore": {
             "couchbase": {
                 "host":     "localhost:8091",

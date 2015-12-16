@@ -23,20 +23,16 @@ var lastLeakInfo = null;
 
 // used by monitor to test another monitor/archiver active
 function monitorInfo(req, res){
-    console.log("monitorInfo");
+    //console.log("monitorInfo");
 
     if (!memWatchActive) {
         memWatchActive = true;
         memwatch.on('leak', function(info) {
             lastLeakInfo = info;
         });
-        memwatch.on('stats', function(stats) {
-            console.info("GC:", "FULLGC", stats.num_full_gc, "INCGC", stats.num_inc_gc, "COMPACT",
-                stats.heap_compactions, "TREND", stats.usage_trend, "ESTBASE", stats.estimated_base, "CURBASE", stats.current_base, "MIN", stats.min, "MAX", stats.max);
-        });
     }
     
-    // memwatch.gc(); // used to test receiving stats events
+    //memwatch.gc(); // used to test receiving stats events
     
     var data = {
         logCounts: this.serviceManager.logUtil.getLogCounts(),
@@ -53,7 +49,7 @@ function monitorInfo(req, res){
 
 // changes runningMonitor state to true, starting monitor if not active
 function runMonitor(req, res){
-    console.log("runMonitor");
+    //console.log("runMonitor");
 
     if( !(req.params.code &&
         _.isString(req.params.code) &&
@@ -67,7 +63,7 @@ function runMonitor(req, res){
         this.options.monitor.alert &&
         this.options.monitor.alert.email) ) {
         // if has email setup
-        console.error("Email for alert not configured");
+        console.errorExt("MonitorService", "Email for alert not configured");
         this.requestUtil.errorResponse(res, {key:"monitor.misconfigured"}, 401);
         return;
     }
@@ -84,7 +80,7 @@ function runMonitor(req, res){
     } else{
         // runningArchive state is false. change to true
         runningMonitor = true;
-        console.log("runningMonitor = true");
+        //console.log("runningMonitor = true");
     }
 
     var allErrors = [];
@@ -92,7 +88,7 @@ function runMonitor(req, res){
     couchBaseStatus.call(this)
     .then(function(result) {
         if (result.status !== "good") {
-            console.log(result.system, "reported alert");
+            //console.log(result.system, "reported alert");
             allErrors.push("----- " + result.system + " -----");
             allErrors.push.apply(allErrors, result.messages);
         }
@@ -101,7 +97,7 @@ function runMonitor(req, res){
     }.bind(this))
     .then(function(result) {
         if (result.status !== "good") {
-            console.log(result.system, "reported alert");
+            //console.log(result.system, "reported alert");
             allErrors.push("----- " + result.system + " -----");
             allErrors.push.apply(allErrors, result.messages);
         }
@@ -125,13 +121,13 @@ function runMonitor(req, res){
             return when.all(promiseList);
         }
 
-        console.log("logger server monitor missing config data");
+        console.warnExt("MonitorService", "missing config data for logger servers");
         return when.reject({ errmsg: "missing config data", code: 400 });
     }.bind(this))
     .then(function(results) {
         results.forEach(function(result) {
             if (result.status !== "good") {
-                console.log(result.system, "reported alert");
+                //console.log(result.system, "reported alert");
                 allErrors.push("----- " + result.system + " -----");
                 allErrors.push.apply(allErrors, result.messages);
             }
@@ -178,13 +174,13 @@ function runMonitor(req, res){
             return when.all(promiseList);
         }
         
-        console.log("app servers monitor missing config data");
+        console.warnExt("MonitorService", "missing config data for app servers");
         return when.reject({ errmsg: "missing config data", code: 400 });
     }.bind(this))
     .then(function(results) {
         results.forEach(function(result) {
             if (result.status !== "good") {
-                console.log(result.system, "reported alert");
+                //console.log(result.system, "reported alert");
                 allErrors.push("----- " + result.system + " -----");
                 allErrors.push.apply(allErrors, result.messages);
             }
@@ -196,7 +192,7 @@ function runMonitor(req, res){
         //allErrors.push.apply(allErrors, [ "This has been a test." ]);
         
         runningMonitor = false;
-        console.log("runningMonitor = false");
+        //console.log("runningMonitor = false");
 
         if (allErrors.length > 0) {
             // Send an alert email
@@ -219,13 +215,13 @@ function runMonitor(req, res){
     }.bind(this))
     .then(null, function(err) {
         runningMonitor = false;
-        console.log("runMonitor error:", err, ", running false");
+        //console.log("runMonitor error:", err, ", running false");
         this.requestUtil.errorResponse(res, {key:"monitor.internal.error"}, 401);
     }.bind(this));
 }
 
 function couchBaseStatus() {
-    console.log("couchBaseStatus: enter");
+    //console.log("couchBaseStatus: enter");
 
     return when.promise(function(resolve, reject) {
         if (this.options.monitor &&
@@ -266,20 +262,20 @@ function couchBaseStatus() {
                 resolve(data);
             }.bind(this));
         } else {
-            console.log("cousebase monitor missing config data");
+            console.warnExt("MonitorService", "missing config data for Couchbase server");
             reject({ errmsg: "missing config data", code: 400 });
         }
     }.bind(this));
 }
 
 function couchbaseStatusPools(host, auth) {
-    console.log("couchbaseStatusPools: enter");
+    //console.log("couchbaseStatusPools: enter");
     
     return when.promise(function(resolve, reject) {
         var url = host + '/pools/default';
         this.requestUtil.getRequest(url, { "Authorization": "Basic " + auth },
             function(error, response, body) {
-                console.log("couchbaseStatusPools: process /pools/default");
+                //console.log("couchbaseStatusPools: process /pools/default");
 
                 if (!error && response.statusCode == 200) {
                     var messages = [];
@@ -303,7 +299,7 @@ function couchbaseStatusBuckets(host, uri, auth) {
         var url = host + uri;
         this.requestUtil.getRequest(url, { "Authorization": "Basic " + auth },
             function(error, response, body) {
-                console.log("couchBaseStatus: process", uri);
+                //console.log("couchBaseStatus: process", uri);
 
                 if (!error && response.statusCode == 200) {
                     var messages = [];
@@ -326,7 +322,7 @@ function couchbaseStatusBuckets(host, uri, auth) {
 }
 
 function mysqlStatus() {
-    console.log("mysqlStatus: enter");
+    //console.log("mysqlStatus: enter");
 
     // http://blog.webyog.com/2012/09/03/top-10-things-to-monitor-on-your-mysql/
     
@@ -344,7 +340,7 @@ function mysqlStatus() {
             this.monds.query(Q)
             .then(function(results) {
                 if(results.length > 0) {
-                    console.log("mysqlStatus: process aborted_connects");
+                    //console.log("mysqlStatus: process aborted_connects");
 
                     results = results[0];
                   
@@ -373,21 +369,21 @@ function mysqlStatus() {
                 resolve(result);
             }.bind(this));
         } else {
-            console.log("mysql monitor missing config data");
+            console.warnExt("MonitorService", "missing config data for mysql server");
             reject({ errmsg: "missing config data", code: 400 });
         }
     }.bind(this));
 }
 
 function externalServerStatus(host) {
-    console.log("externalServerStatus: enter");
+    //console.log("externalServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         var messages = [];
         
         this.requestUtil.request(host + '/api/v2/monitor/info')
         .then(function(result) {
-            console.log("externalServerStatus: process /api/v2/monitor/info");
+            //console.log("externalServerStatus: process /api/v2/monitor/info");
 
             if (!result.logCounts) {
                 var data = {
@@ -432,7 +428,7 @@ function externalServerStatus(host) {
             resolve(data);
         }.bind(this))
         .then(null, function(err) {
-            console.log("externalServerStatus monitor failed!");
+            //console.log("externalServerStatus monitor failed!");
 
             var data = {
                 system: "external",
@@ -446,14 +442,14 @@ function externalServerStatus(host) {
 }
 
 function internalServerStatus(host) {
-    console.log("internalServerStatus: enter");
+    //console.log("internalServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         var messages = [];
         
         this.requestUtil.request(host + '/api/v2/monitor/info')
         .then(function(result) {
-            console.log("internalServerStatus: process /api/v2/monitor/info");
+            //console.log("internalServerStatus: process /api/v2/monitor/info");
 
             if (!result.logCounts) {
                 var data = {
@@ -498,7 +494,7 @@ function internalServerStatus(host) {
             resolve(data);
         }.bind(this))
         .then(null, function(err) {
-            console.log("internalServerStatus monitor failed!");
+            //console.log("internalServerStatus monitor failed!");
 
             var data = {
                 system: "internal",
@@ -512,14 +508,14 @@ function internalServerStatus(host) {
 }
 
 function archiverServerStatus(host) {
-    console.log("archiverServerStatus: enter");
+    //console.log("archiverServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         var messages = [];
         
         this.requestUtil.request(host + '/api/v2/monitor/info')
         .then(function(result) {
-            console.log("archiverServerStatus: process /api/v2/monitor/info");
+            //console.log("archiverServerStatus: process /api/v2/monitor/info");
 
             if (!result.logCounts) {
                 var data = {
@@ -564,7 +560,7 @@ function archiverServerStatus(host) {
             resolve(data);
         }.bind(this))
         .then(null, function(err) {
-            console.log("archiverServerStatus monitor failed!");
+            //console.log("archiverServerStatus monitor failed!");
 
             var data = {
                 system: "archiver",
@@ -578,14 +574,14 @@ function archiverServerStatus(host) {
 }
 
 function assessmentServerStatus(host) {
-    console.log("assessmentServerStatus: enter");
+    //console.log("assessmentServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         var messages = [];
         
         this.requestUtil.request(host + '/int/v1/aeng/processStatus')
         .then(function(result) {
-            console.log("assessmentServerStatus: process /int/v1/aeng/processStatus");
+            //console.log("assessmentServerStatus: process /int/v1/aeng/processStatus");
 
             if (!result.hasOwnProperty("jobCount")) {
                 var data = {
@@ -605,7 +601,7 @@ function assessmentServerStatus(host) {
             resolve(data);
         }.bind(this))
         .then(null, function(err) {
-            console.log("assessmentServerStatus monitor failed!");
+            //console.log("assessmentServerStatus monitor failed!");
 
             var data = {
                 system: "assessment",
@@ -619,12 +615,12 @@ function assessmentServerStatus(host) {
 }
 
 function loggerStatus(url) {
-    console.log("loggerStatus: enter");
+    //console.log("loggerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         this.requestUtil.getRequest(url, { },
             function(error, response, body) {
-                console.log("loggerStatus: process");
+                //console.log("loggerStatus: process");
 
                 if (!error && response.statusCode == 200) {
                     var data = {

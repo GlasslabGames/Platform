@@ -8,6 +8,7 @@
 
 var fs        = require('fs');
 var path      = require('path');
+var memwatch  = require('memwatch-next');
 
 var _         = require('lodash');
 var when      = require('when');
@@ -57,10 +58,16 @@ function MonitorService(options, serviceManager){
         this.workingdata = { };
         
         var validServer = this.options.services.name && options.monitor.cron.server == this.options.services.name;
-        this.cron        = new CronJob(this.options.monitor.cron.time,
-                                       _cronTask.bind(this),
-                                       this.options.monitor.cron.enabled && validServer);
+        this.cron = new CronJob(this.options.monitor.cron.time,
+                            _cronTask.bind(this),
+                            this.options.monitor.cron.enabled && validServer);
 
+        if (this.options.monitor.memwatch.logStats) {
+            memwatch.on('stats', function(stats) {
+                console.infoExt("GC", "FULLGC", stats.num_full_gc, "INCGC", stats.num_inc_gc, "COMPACT", stats.heap_compactions, "TREND", stats.usage_trend, "ESTBASE", stats.estimated_base, "CURBASE", stats.current_base, "MIN", stats.min, "MAX", stats.max);
+            });
+        }
+        
         this.serviceManager = serviceManager;
         
     } catch(err) {
