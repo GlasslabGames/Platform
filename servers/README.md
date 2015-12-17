@@ -16,9 +16,8 @@ Dependencies
 4. **MySQL** - Stage/Prod uses RDS
 5. **Couchbase** - Stage/Prod uses separate instances
 
-
 OSX Installation
-------------
+----------------
 1. Install **Homebrew** and **Homebrew Services**
    * http://brew.sh/
     ```sh
@@ -47,7 +46,7 @@ OSX Installation
   * Use NPM to install forever process manager globally
   ```sh
   $ sudo npm install forever -g
-  ```
+
 4. Install **MySQL**
    1. Use Brew to install MySQL
     ```sh
@@ -176,6 +175,24 @@ OSX Installation
 8. Ensure that xcode is installed (used for building node_modules, must be up to date with OS-X)
 
 9. Installation Complete
+
+OSX Reboot
+----------
+1. Not sure if shell environment is properly restored on reboot, so:
+		. ~/.nvm/nvm.sh
+
+2. Install **Forever** node process manager
+  * Use NPM to install forever process manager globally
+  ```sh
+  $ sudo npm install forever -g
+
+3. Ensure that Couchbase is up and running.
+  * Launch from Launchpad
+  * Confirm it's ready via link:
+    http://127.0.0.1:8091/index.html
+
+4. Launch server (/Platform/servers)
+  $ sudo ./service.sh start
 
 Linux (Ubuntu 12.04) Installation
 ------------
