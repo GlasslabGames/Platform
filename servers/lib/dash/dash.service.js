@@ -655,7 +655,7 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
 
                         // add achievements to 'achievements' reports
                         for (var i = 0; i < list.length; i++) {
-                            if (_.isObject(list[i]) &&
+                            if (_.isObject(list[i]) && list[i].id &&
                                 list[i].id === 'achievements') {
                                 this._games[gameId].info.reports.list[i].achievements = achievements[index++];
                                 break;

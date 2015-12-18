@@ -17,6 +17,7 @@ module.exports = {
     verifyDeveloperCode:		verifyDeveloperCode,
     getAllDevelopers: 	 		getAllDevelopers,
     alterDeveloperVerifyCodeStatus: alterDeveloperVerifyCodeStatus,
+    addUserBadgeList:			addUserBadgeList,
     getUserDataById:			getUserDataById,
     getResellers:				getResellers,
     updateUserRole:				updateUserRole,
