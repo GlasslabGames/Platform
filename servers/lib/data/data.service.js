@@ -97,7 +97,7 @@ DataService.prototype._validateGameVersion = function(gameVersion){
     if( gameMajorDelimeter < 0 ||
         majorMinorDelimeter < 0 ||
         minorRevisionDelimeter < 0 ) {
-        console.warn( "Game version format was invalid:", gameVersion );
+        console.warnExt("DataService", "Game version format was invalid:", gameVersion );
         this.stats.increment("warn", "ValidateGameVersion.Invalid.GameVersion");
         return false;
     }
@@ -125,7 +125,7 @@ DataService.prototype._validateGameVersion = function(gameVersion){
     var validGameVersions = tConst.game.versions;
     // Check existence of the game key
     if( !validGameVersions.hasOwnProperty(game) ) {
-        console.warn( "Game type " + game + " did not exist as a valid version." );
+        console.warnExt("DataService", "Game type", game, "did not exist as a valid version.");
         this.stats.increment("warn", "ValidateGameVersion.Invalid.GameType");
         return false;
     }
@@ -135,7 +135,7 @@ DataService.prototype._validateGameVersion = function(gameVersion){
     if( major < versionInfo.major ||
         minor < versionInfo.minor ||
         revision < versionInfo.revision ) {
-        console.warn( "Game version is invalid and needs to be updated:", gameVersion );
+        console.warnExt("DataService", "Game version is invalid and needs to be updated:", gameVersion );
         this.stats.increment("warn", "ValidateGameVersion.Invalid.GameVersion");
         return false;
     }
@@ -180,7 +180,7 @@ DataService.prototype._validateSendBatch = function(res, data, gameSessionId){
 
             // catch all errors
             .then(null, function(err){
-                console.error("DataService: Error -", err);
+                console.errorExt("DataService", err);
                 this.stats.increment("error", "ValidateSendBatch");
                 this.requestUtil.errorResponse(res, err, 500);
             }.bind(this));
@@ -464,7 +464,7 @@ return when.promise(function(resolve, reject) {
 
                                     this.addActivity(userId, gameId, gameSessionId)
                                         .then(null, function(err){
-                                            console.error("DataService: addActivity Error -", err);
+                                            console.errorExt("DataService", "addActivity Error -", err);
                                         }.bind(this));
 
                                     resolve();
@@ -480,7 +480,7 @@ return when.promise(function(resolve, reject) {
             }.bind(this) );
 
     } else {
-        console.error("DataService: Error - invalid data type");
+        console.errorExt("DataService", "invalid data type");
         this.stats.increment("error", "SaveBatch2.Invalid.DataType");
         reject(new Error("invalid data type"));
         return;
@@ -506,7 +506,7 @@ DataService.prototype.addActivity = function(userId, gameId, gameSessionId) {
         })
         .then(null, function(err){
             if(err.code == 'ECONNREFUSED') {
-                console.error("Can not connect to Assessment Server, check if the server is running");
+                console.errorExt("DataService", "Can not connect to Assessment Server, check if the server is running");
             }
             return err;
         }.bind(this));

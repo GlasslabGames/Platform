@@ -325,7 +325,7 @@ LMS_MySQL.prototype.removeStudentFromAllCourses = function(userId){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Remove Student From All Courses Error -", err);
+                console.errorExt("LMSStore MySQL", "Remove Student From All Courses Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -835,7 +835,7 @@ return when.promise(function(resolve, reject) {
                             err.code === "ER_DUP_ENTRY") {
                             reject({key:"course.notUnique.name"}, 400);
                         } else {
-                            console.error("updateCourseInfo UPDATE err:", err);
+                            console.errorExt("LMSStore MySQL", "updateCourseInfo UPDATE err:", err);
                             reject({key:"course.general"}, 400);
                         }
                     }.bind(this)
@@ -845,7 +845,7 @@ return when.promise(function(resolve, reject) {
             }
         }.bind(this),
         function(err){
-            console.error("updateCourseInfo SELECT err:", err);
+            console.errorExt("LMSStore MySQL", "updateCourseInfo SELECT err:", err);
             reject({key:"course.general"}, 400);
         }.bind(this)
     );
@@ -1055,7 +1055,7 @@ LMS_MySQL.prototype.isCoursePremium = function(courseId){
                 resolve(state);
             }.bind(this))
             .then(null, function(err){
-                console.error("Is Course Premium Error -", err);
+                console.errorExt("LMSStore MySQL", "Is Course Premium Error -", err);
                 reject(err);
             });
     }.bind(this));

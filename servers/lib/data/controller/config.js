@@ -61,7 +61,7 @@ function index(req, res, next, serviceManager)
                     this.requestUtil.jsonResponse(res, config);
                 }.bind(this))
                     .then(null, function(err){
-                        console.error("Data Service: Get Config Error -", err);
+                        console.errorExt("DataService", "Get Config Error -", err);
                         this.requestUtil.errorResponse(res, {key: "data.config.error", statusCode: 500});
                     }.bind(this));
             }

@@ -14,7 +14,7 @@ function StripeUtil(options){
 
     // Set the Stripe config
     if( !this.options.stripe || !this.options.stripe.test || !this.options.stripe.live ) {
-        console.error( "Stripe Utility Error - you do not have Stripe configured!" );
+        console.errorExt( "StripeUtility", "you do not have Stripe configured!" );
         return;
     }
 
@@ -35,7 +35,7 @@ StripeUtil.prototype.createCustomer = function( params ) {
         // Call the Stripe customers.create API
         this.stripe.customers.create( params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to create a new customer: ", params, err );
+                console.errorExt( "StripeUtility", "failed to create a new customer: ", params, err );
                 reject( err );
             }
             else {
@@ -51,7 +51,7 @@ StripeUtil.prototype.retrieveCustomer = function( customerId ) {
         // Call the Stripe customers.retrieve API
         this.stripe.customers.retrieve( customerId, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to retrieve the customer: ", customerId, err );
+                console.errorExt( "StripeUtility", "failed to retrieve the customer: ", customerId, err );
                 reject( err );
             }
             else {
@@ -67,7 +67,7 @@ StripeUtil.prototype.updateCustomer = function( customerId, params ) {
         // Call the Stripe customers.update API
         this.stripe.customers.update( customerId, params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to update the customer: ", customerId, params, err );
+                console.errorExt( "StripeUtility", "failed to update the customer: ", customerId, params, err );
                 reject( err );
             }
             else {
@@ -83,7 +83,7 @@ StripeUtil.prototype.deleteCustomer = function( customerId ) {
         // Call the Stripe customers.del API
         this.stripe.customers.del( customerId, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to delete the customer: ", customerId, err );
+                console.errorExt( "StripeUtility", "failed to delete the customer: ", customerId, err );
                 reject( err );
             }
             else {
@@ -99,7 +99,7 @@ StripeUtil.prototype.listCustomers = function( params ) {
         // Call the Stripe customers.list API
         this.stripe.customers.list( params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to list the customers: ", params, err );
+                console.errorExt( "StripeUtility", "failed to list the customers: ", params, err );
                 reject( err );
             }
             else {
@@ -118,7 +118,7 @@ StripeUtil.prototype.createSubscription = function( customerId, params ) {
         // Call the Stripe customers.createSubscription API
         this.stripe.customers.createSubscription( customerId, params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to create a new subscription: ", customerId, params, err );
+                console.errorExt( "StripeUtility", "failed to create a new subscription: ", customerId, params, err );
                 reject( err );
             }
             else {
@@ -134,7 +134,7 @@ StripeUtil.prototype.retrieveSubscription = function( customerId, subscriptionId
         // Call the Stripe customers.retrieveSubscription API
         this.stripe.customers.retrieveSubscription( customerId, subscriptionId, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to retrieve the subscription: ", customerId, subscriptionId, err );
+                console.errorExt( "StripeUtility", "failed to retrieve the subscription: ", customerId, subscriptionId, err );
                 reject( err );
             }
             else {
@@ -150,7 +150,7 @@ StripeUtil.prototype.updateSubscription = function( customerId, subscriptionId, 
         // Call the Stripe customers.updateSubscription API
         this.stripe.customers.updateSubscription( customerId, subscriptionId, params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to update the subscription: ", customerId, subscriptionId, params, err );
+                console.errorExt( "StripeUtility", " failed to update the subscription: ", customerId, subscriptionId, params, err );
                 reject( err );
             }
             else {
@@ -166,7 +166,7 @@ StripeUtil.prototype.cancelSubscription = function( customerId, subscriptionId )
         // Call the Stripe customers.updateSubscription API. By passing in a stripe_planId, plan is enabled
         this.stripe.customers.cancelSubscription( customerId, subscriptionId, { at_period_end: true }, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to cancel the subscription: ", customerId, subscriptionId, err );
+                console.errorExt( "StripeUtility", "failed to cancel the subscription: ", customerId, subscriptionId, err );
                 reject( err );
             }
             else {
@@ -182,7 +182,7 @@ StripeUtil.prototype.renewSubscription = function( customerId, subscriptionId, p
         // Call the Stripe customers.cancelSubscription API
         this.stripe.customers.updateSubscription( customerId, subscriptionId, params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to enable subscription auto-renew: ", customerId, subscriptionId, err );
+                console.errorExt( "StripeUtility", "failed to enable subscription auto-renew: ", customerId, subscriptionId, err );
                 reject( err );
             }
             else {
@@ -198,7 +198,7 @@ StripeUtil.prototype.listSubscriptions = function( customerId ) {
         // Call the Stripe customers.cancelSubscription API
         this.stripe.customers.listSubscriptions( customerId, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to list the active subscription: ", customerId, err );
+                console.errorExt( "StripeUtility", "failed to list the active subscription: ", customerId, err );
                 reject( err );
             }
             else {
@@ -217,7 +217,7 @@ StripeUtil.prototype.retrievePlan = function( planId ) {
         // Call the Stripe plans.retrieve API
         this.stripe.plans.retrieve( planId, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to retrieve the plan: ", planId, err );
+                console.errorExt("StripeUtility", "failed to retrieve the plan: ", planId, err );
                 reject( err );
             }
             else {
@@ -233,7 +233,7 @@ StripeUtil.prototype.listPlans = function() {
         // Call the Stripe plans.list API
         this.stripe.plans.list( function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to list the plans: ", err );
+                console.errorExt("StripeUtility", "failed to list the plans: ", err );
                 reject( err );
             }
             else {
@@ -252,7 +252,7 @@ StripeUtil.prototype.createCard = function( customerId, params ) {
         // Call the Stripe customers.createCard API
         this.stripe.customers.createCard(customerId, params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to create a new card: ", customerId, params, err );
+                console.errorExt("StripeUtility", "failed to create a new card: ", customerId, params, err );
                 reject( err );
             }
             else {
@@ -268,7 +268,7 @@ StripeUtil.prototype.retrieveCard = function( customerId, cardId ) {
         // Call the Stripe customers.retrieveCard API
         this.stripe.customers.retrieveCard( customerId, cardId, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to retrieve the card: ", customerId, cardId, err );
+                console.errorExt("StripeUtility", "failed to retrieve the card: ", customerId, cardId, err );
                 reject( err );
             }
             else {
@@ -284,7 +284,7 @@ StripeUtil.prototype.updateCard = function( customerId, cardId, params ) {
         // Call the Stripe customers.updateCard API
         this.stripe.customers.updateCard( customerId, cardId, params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to update the card: ", customerId, cardId, params, err );
+                console.errorExt("StripeUtility", "failed to update the card: ", customerId, cardId, params, err );
                 reject( err );
             }
             else {
@@ -303,7 +303,7 @@ StripeUtil.prototype.createCoupon = function( params ) {
         // Call the Stripe coupons.create API
         this.stripe.coupons.create(params, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to create a new coupon: ", params, err );
+                console.errorExt("StripeUtility", "failed to create a new coupon: ", params, err );
                 reject( err );
             }
             else {
@@ -319,7 +319,7 @@ StripeUtil.prototype.retrieveCoupon = function( couponId ) {
         // Call the Stripe coupons.retrieveCard API
         this.stripe.coupons.retrieve( couponId, function( err, result ) {
             if( err ) {
-                console.error( "Stripe Utility Error - failed to retrieve the coupon: ", couponId, err );
+                console.errorExt("StripeUtility", "failed to retrieve the coupon: ", couponId, err );
                 reject( err );
             }
             else {
@@ -341,14 +341,14 @@ StripeUtil.prototype.chargeInvoice = function(customerId){
                     resolve();
                     return;
                 }
-                console.error( "Stripe Utility Error - failed to create invoice: ", customerId, err);
+                console.errorExt("StripeUtility", "failed to create invoice: ", customerId, err);
                 reject(err);
             }
             else {
                 var invoiceId = invoice.id;
                 this.stripe.invoices.pay(invoiceId, function(err, invoice){
                     if( err ) {
-                        console.error( "Stripe Utility Error - failed to pay invoice: ", invoiceId, err);
+                        console.errorExt("StripeUtility", "failed to pay invoice: ", invoiceId, err);
                         reject(err);
                     } else{
                         console.log( "Stripe Utility Successfully paid Invoice: ", invoiceId, invoice);

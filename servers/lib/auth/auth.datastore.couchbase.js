@@ -43,13 +43,13 @@ return when.promise(function(resolve, reject) {
         connectionTimeout: this.options.timeout || 5000,
         operationTimeout:  this.options.timeout || 5000
     }, function(err) {
-        console.error("CouchBase AuthStore: Error -", err);
+        console.errorExt("AuthService Couchbase", err);
 
         if(err) throw err;
     }.bind(this));
 
     this.client.on('error', function (err) {
-        console.error("CouchBase AuthStore: Error -", err);
+        console.errorExt("AuthService Couchbase", err);
         reject(err);
     }.bind(this));
 
@@ -67,7 +67,7 @@ AuthDS_Couchbase.prototype.setDeveloperProfile = function(userId, data){
         var key = aConst.datastore.keys.developer + ":" + aConst.datastore.keys.user + ":" + userId;
         this.client.set(key, data, function(err, results){
             if(err){
-                console.error("Couchbase AuthDataStore: Create Developer Profile Error -", err);
+                console.errorExt("AuthService Couchbase", "Create Developer Profile Error -", err);
                 reject(err);
                 return;
             }

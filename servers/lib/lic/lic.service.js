@@ -181,7 +181,7 @@ LicService.prototype.unassignPremiumCourses = function(courseIds, licenseId, arc
                 resolve();
             })
             .then(null, function(err){
-                console.error("Unassign Instructor Premium Courses Error -",err);
+                console.errorExt("LicService", "Unassign Instructor Premium Courses Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -225,7 +225,7 @@ function _unassignPremiumGames(courseId, archived){
                 resolve()
             })
             .then(null,function(err){
-                console.error("Unassign Premium Games Error -",err);
+                console.errorExt("LicService", "Unassign Premium Games Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -315,7 +315,7 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Assign Premium Course Error -",err);
+                console.errorExt("LicService", "Assign Premium Course Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -370,7 +370,7 @@ function _assignPremiumGames(courseId, plan){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Assign Premium Games Error -",err);
+                console.errorExt("LicService", "Assign Premium Games Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -431,7 +431,7 @@ LicService.prototype.removeStudentFromPremiumCourse = function(userId, courseId)
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Remove Student From Premium Course Error -", err);
+                console.errorExt("LicService", "Remove Student From Premium Course Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -488,7 +488,7 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 resolve();
             }.bind(this))
             .then(null, function (err) {
-                console.error("Enroll Student In Premium Course Error -", err);
+                console.errorExt("LicService", "Enroll Student In Premium Course Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -507,7 +507,7 @@ LicService.prototype.updateEducatorSeatsRemaining = function(licenseId, seats){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Update Educator Seats Remaining Error -",err);
+                console.errorExt("LicService", "Update Educator Seats Remaining Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -526,7 +526,7 @@ LicService.prototype.updateStudentSeatsRemaining = function(licenseId, seats){
                 resolve();
             })
             .then(null,function(err){
-                console.error("Update Student Seats Remaining Error -",err);
+                console.errorExt("LicService", "Update Student Seats Remaining Error -",err);
                 reject(err);
             });
     }.bind(this));

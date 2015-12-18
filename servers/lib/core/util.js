@@ -158,7 +158,7 @@ function getMorganLogger(options, stats){
 
         // status is null
         if(!status) {
-            console.error("Error null status for response!!!");
+            console.warnExt("Util", "Error null status for response!!!");
             status = "";
         }
 
@@ -244,7 +244,7 @@ function updateSession(req){
                 resolve()
             });
         } catch(err){
-            console.error("Session Reload Error -",err);
+            console.errorExt("Util", "Session Reload Error -",err);
             reject(err);
         }
     }.bind(this));

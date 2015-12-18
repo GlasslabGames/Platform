@@ -735,7 +735,7 @@ console.log('\n\n\n');
                 var originalBodyOverflow = document.body.style.overflow;
                 var overlay = document.getElementById("gl-sdk-overlay");
                 if(!overlay) {
-                    console.error("overlay not found");
+                    console.errorExt("SDK", "overlay not found");
                     return;
                 }
                 overlay.className = "enabled";
@@ -746,7 +746,7 @@ console.log('\n\n\n');
 
                         var overlay = document.getElementById("gl-sdk-overlay");
                         if(!overlay) {
-                            console.error("overlay not found");
+                            console.errorExt("SDK", "overlay not found");
                             return;
                         }
                         overlay.className = "";

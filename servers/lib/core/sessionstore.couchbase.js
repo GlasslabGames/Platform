@@ -50,14 +50,14 @@ module.exports = function(session){
             connectionTimeout: this.options.timeout || 5000,
             operationTimeout:  this.options.timeout || 5000
         }, function(err) {
-            console.error("[SessionStore] CouchBase TelemetryStore: Error -", err);
+            console.errorExt("SessionStore CouchBase", err);
             reject(err);
             if(err) throw err;
         }.bind(this));
 
         this.client.on('error', function (err) {
             this.stats.increment("error", "Generic");
-            console.error("[SessionStore] CouchBase TelemetryStore: Error -", err);
+            console.errorExt("SessionStore CouchBase", err);
             this.emit('disconnect');
             reject(err);
         }.bind(this));
@@ -95,7 +95,7 @@ module.exports = function(session){
                         return done();
                     } else {
                         this.stats.increment("error", "Get");
-                        console.error("CouchBase SessionStore: Get Error -", err);
+                        console.errorExt("SessionStore CouchBase", "Get Error -", err);
                         return done(err);
                     }
                 }
@@ -106,7 +106,7 @@ module.exports = function(session){
             }.bind(this));
 
         } catch (err) {
-            console.error("CouchBase SessionStore: Get Error -", err);
+            console.errorExt("SessionStore CouchBase", "Get Error -", err);
             this.stats.increment("info", "Route.ValidateSession");
             done(err);
         }
@@ -157,7 +157,7 @@ module.exports = function(session){
             */
 
         } catch (err) {
-            console.error("CouchBase SessionStore: Set Error -", err);
+            console.errorExt("SessionStore CouchBase", "Set Error -", err);
             this.stats.increment("error", "Set.Catch");
             done(err);
         }
@@ -180,7 +180,7 @@ module.exports = function(session){
             },
             function(err, result){
                 if(err){
-                    console.error("CouchBase SessionStore: setSession Error -", err);
+                    console.errorExt("SessionStore CouchBase", "setSession Error -", err);
                     this.stats.increment("error", "SetSession");
                     return done(err);
                 }
@@ -198,7 +198,7 @@ module.exports = function(session){
             this.client.remove(key, done);
             this.stats.increment("info", "Destroy");
         } catch (err) {
-            console.error("CouchBase SessionStore: Destroy Error -", err);
+            console.errorExt("SessionStore CouchBase", "Destroy Error -", err);
             this.stats.increment("error", "Destroy");
             done(err);
         }

@@ -54,13 +54,13 @@ return when.promise(function(resolve, reject) {
         connectionTimeout: this.options.timeout || 5000,
         operationTimeout:  this.options.timeout || 5000
     }, function(err) {
-        console.error("[Data] CouchBase TelemetryStore: Error -", err);
+        console.errorExt("DataStore Couchbase TelemetryStore", err);
 
         if(err) throw err;
     }.bind(this));
 
     this.client.on('error', function (err) {
-        console.error("[Data] CouchBase TelemetryStore: Error -", err);
+        console.errorExt("DataStore Couchbase TelemetryStore", err);
         reject(err);
     }.bind(this));
 
@@ -445,7 +445,7 @@ var gdv_getAllGameSaves = function(doc, meta){
                     .then( resolve, reject );
                 return;
             } else {
-                console.error("err", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", err);
                 reject(err);
                 return;
             }
@@ -474,7 +474,7 @@ return when.promise(function(resolve, reject) {
     console.log("Updating telemetry Design Document...");
     this.client.setDesignDoc("telemetry", this.telemDDoc, function(err){
         if(err) {
-            console.error("err", err);
+            console.errorExt("DataStore Couchbase TelemetryStore", err);
             reject(err);
             return;
         }
@@ -737,7 +737,7 @@ TelemDS_Couchbase.prototype._migrate_Events_AddingGameId = function(myds) {
 
                                             delete events[i].clientId;
                                         } else {
-                                            console.error("CouchBase TelemetryStore: Migrating Event clientId does not match possible!! Event:", events[i]);
+                                            console.errorExt("DataStore Couchbase TelemetryStore", "Migrating Event clientId does not match possible!! Event:", events[i]);
                                             ok = false;
                                         }
                                     }
@@ -770,7 +770,7 @@ TelemDS_Couchbase.prototype._migrate_Events_AddingGameId = function(myds) {
                             }
                         }
                         catch(err) {
-                            console.error("CouchBase TelemetryStore: Migrating getRawEvents Error:", err);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Migrating getRawEvents Error:", err);
                         }
                     }.bind(this));
 
@@ -807,7 +807,7 @@ return when.promise(function(resolve, reject) {
 
                 // only if errors
                 if(errList.length) {
-                    console.error("CouchBase TelemetryStore: Remove Keys Error -", errList);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Remove Keys Error -", errList);
                     reject(err);
                     return;
                 }
@@ -833,7 +833,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results) {
             if(err){
-                console.error("CouchBase TelemetryStore: Get Last DeviceId By GameId View Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Last DeviceId By GameId View Error -", err);
                 reject(err);
                 return;
             }
@@ -870,7 +870,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Get Achievements View Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Achievements View Error -", err);
                 reject(err);
                 return;
             }
@@ -885,7 +885,7 @@ return when.promise(function(resolve, reject) {
             this._chunk_getMulti(keys, {},
                 function(err, results){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Multi Get Achievements Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get Achievements Error -", err);
                         reject(err);
                         return;
                     }
@@ -914,7 +914,7 @@ return when.promise(function(resolve, reject) {
             // "NO - No such key"
             if(err){
                 if(err.code != 13){
-                    console.error("CouchBase TelemetryStore: Update DataSchema Version Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Update DataSchema Version Error -", err);
                     reject(err);
                     return;
                 }
@@ -941,7 +941,7 @@ return when.promise(function(resolve, reject) {
         // "NO - No such key"
         if(err){
             if(err.code != 13){
-                console.error("CouchBase TelemetryStore: Get DataSchema Info Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get DataSchema Info Error -", err);
                 reject(err);
                 return;
             }
@@ -1018,7 +1018,7 @@ return when.promise(function(resolve, reject) {
             }.bind(this),
                 // saveEvents error
                 function(err) {
-                    console.error("Assessment: Couchbase Error: could not save events, err:", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Assessment - could not save events -", err);
                     stats.increment('error', 'MigrateEvents.Couchbase.SaveEvents');
                 }.bind(this))
 
@@ -1031,7 +1031,7 @@ return when.promise(function(resolve, reject) {
             }.bind(this),
                 // disableArchiveEvents, error
                 function() {
-                    console.error("Assessment: MySQL Error: could not remove events");
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Assessment - MySQL Error: could not remove events");
                     stats.increment('error', 'MigrateEvents.MySQL.RemoveEvents');
 
                     reject(new Error("Assessment: MySQL Error: could not remove events"));
@@ -1058,7 +1058,7 @@ TelemDS_Couchbase.prototype._setEventCounter = function(gameId, lastId){
         },
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: Incr Event Count Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Incr Event Count Error -", err);
                 reject(err);
                 return;
             }
@@ -1095,7 +1095,7 @@ return when.promise(function(resolve, reject) {
     // https://github.com/couchbase/couchnode/blob/master/lib/connection.js
     this.client.setMulti(kv, {}, function(err){
         if(err) {
-            console.error("CouchBase TelemetryStore: Set Event Error -", err);
+            console.errorExt("DataStore Couchbase TelemetryStore", "Set Event Error -", err);
             reject(err);
             return;
         }
@@ -1122,7 +1122,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: Incr Event Count Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Incr Event Count Error -", err);
                 reject(err);
                 return;
             }
@@ -1153,7 +1153,7 @@ return when.promise(function(resolve, reject) {
             // https://github.com/couchbase/couchnode/blob/master/lib/connection.js
             this.client.addMulti(kv, {}, function(err){
                 if(err){
-                    console.error("CouchBase TelemetryStore: Set Event Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Set Event Error -", err);
                     reject(err);
                     return;
                 }
@@ -1180,7 +1180,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Get Events View Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Events View Error -", err);
                 reject(err);
                 return;
             }
@@ -1212,7 +1212,7 @@ return when.promise(function(resolve, reject) {
             this._chunk_getMulti(keys, {},
                 function(err, results){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Multi Get Events Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get Events Error -", err);
                         reject(err);
                         return;
                     }
@@ -1298,7 +1298,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Get Events View Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Events View Error -", err);
                 reject(err);
                 return;
             }
@@ -1320,9 +1320,9 @@ return when.promise(function(resolve, reject) {
                                     errors.push( results[r].error );
                                 }
                             }
-                            console.error("CouchBase TelemetryStore: Multi Get RawEvents Errors -", errors);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get RawEvents Errors -", errors);
                         } else {
-                            console.error("CouchBase TelemetryStore: Multi Get RawEvents Error -", err);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get RawEvents Error -", err);
                             reject(err);
                             return;
                         }
@@ -1357,7 +1357,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Get Events View Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Events View Error -", err);
                 reject(err);
                 return;
             }
@@ -1380,7 +1380,7 @@ return when.promise(function(resolve, reject) {
     var key = tConst.game.dataKey+":"+tConst.game.gameSessionKey+":"+gameSessionId;
     this.client.get(key, function(err, data){
         if(err){
-            console.error("CouchBase TelemetryStore: Validate Session Error -", err);
+            console.errorExt("DataStore Couchbase TelemetryStore", "Validate Session Error -", err);
             reject(err);
             return;
         }
@@ -1414,7 +1414,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results) {
             if(err){
-                console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Sessions By UserId Error -", err);
                 reject(err);
                 return;
             }
@@ -1480,7 +1480,7 @@ TelemDS_Couchbase.prototype.getRawGameSessionsInfoByUserId = function(gameId, us
             },
             function(err, results) {
                 if(err){
-                    console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Get Sessions By UserId Error -", err);
                     reject(err);
                     return;
                 }
@@ -1531,7 +1531,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results) {
             if(err){
-                console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Sessions By UserId Error -", err);
                 reject(err);
                 return;
             }
@@ -1577,7 +1577,7 @@ return when.promise(function(resolve, reject) {
         },
         function(err, results) {
             if(err){
-                console.error("CouchBase TelemetryStore: Get Sessions By UserId Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Sessions By UserId Error -", err);
                 reject(err);
                 return;
             }
@@ -1592,11 +1592,11 @@ return when.promise(function(resolve, reject) {
                                     errors.push( results[r].error );
                                 }
                             }
-                            console.error("CouchBase TelemetryStore: Multi Get All GameSessions Errors -", errors);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get All GameSessions Errors -", errors);
                             reject(err);
                             return;
                         } else {
-                            console.error("CouchBase TelemetryStore: Multi Get All GameSessions Error -", err);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get All GameSessions Error -", err);
                             reject(err);
                             return;
                         }
@@ -1624,7 +1624,7 @@ return when.promise(function(resolve, reject) {
     this.client.get(key,
         function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Get Game Session Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Game Session Error -", err);
                 reject(err);
                 return;
             }
@@ -1667,7 +1667,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
 // ------------------------------------------------
 
         if(err) {
-            console.error("CouchBase TelemetryStore: Get Events View Error -", err);
+            console.errorExt("DataStore Couchbase TelemetryStore", "Get Events View Error -", err);
             reject(err);
             return;
         }
@@ -1679,7 +1679,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
             this._chunk_getMulti(keys, {},
                 function(err, results){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Multi Get CleanUp GameSessions Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get CleanUp GameSessions Error -", err);
                         reject(err);
                         return;
                     }
@@ -1699,7 +1699,7 @@ TelemDS_Couchbase.prototype._cleanUpGameSessions = function(err, results){
                     this.client.setMulti(datalist, {},
                         function(err){
                             if(err){
-                                console.error("CouchBase TelemetryStore: Multi Set CleanUp GameSessions Error -", err);
+                                console.errorExt("DataStore Couchbase TelemetryStore", "Multi Set CleanUp GameSessions Error -", err);
                                 reject(err);
                                 return;
                             }
@@ -1755,7 +1755,7 @@ return when.promise(function(resolve, reject) {
 
     this.client.add(key, data, function(err) {
         if(err){
-            console.error("CouchBase TelemetryStore: Start Game Session Error -", err);
+            console.errorExt("DataStore Couchbase TelemetryStore", "Start Game Session Error -", err);
             reject(err);
             return;
         }
@@ -1778,7 +1778,7 @@ return when.promise(function(resolve, reject) {
     this.client.get(key,
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: End Game Session V2 Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "End Game Session V2 Error -", err);
                 reject(err);
                 return;
             }
@@ -1792,7 +1792,7 @@ return when.promise(function(resolve, reject) {
             this.client.replace(key, gameSessionData,
                 function(err, data){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Start Game Session Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Start Game Session Error -", err);
                         reject(err);
                         return;
                     }
@@ -1818,10 +1818,10 @@ return when.promise(function(resolve, reject) {
         function(err, data){
             if(err){
                 if(err.code == 13) {
-                    console.warn("CouchBase TelemetryStore: End Q - Session Id Missing -", gameSessionId);
+                    console.warnExt("DataStore Couchbase TelemetryStore", "End Q - Session Id Missing -", gameSessionId);
                     resolve();
                 } else {
-                    console.error("CouchBase TelemetryStore: End Q Session Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "End Q Session Error -", err);
                     reject(err);
                 }
                 return;
@@ -1834,7 +1834,7 @@ return when.promise(function(resolve, reject) {
             this.client.replace(key, gameSessionData,
                 function(err, data){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Start Game Session Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Start Game Session Error -", err);
                         reject(err);
                         return;
                     }
@@ -1858,7 +1858,7 @@ return when.promise(function(resolve, reject) {
     this.client.get(key,
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: Cleanup Q Session Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Cleanup Q Session Error -", err);
                 reject(err);
                 return;
             }
@@ -1870,7 +1870,7 @@ return when.promise(function(resolve, reject) {
             this.client.replace(key, gameSessionData,
                 function(err, data){
                     if(err){
-                        console.error("CouchBase TelemetryStore: Start Game Session Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Start Game Session Error -", err);
                         reject(err);
                         return;
                     }
@@ -1894,7 +1894,7 @@ var key = tConst.game.dataKey+":"+tConst.game.saveKey+":"+gameId+":"+userId;
 this.client.set(key, data,
     function(err, data){
         if(err){
-            console.error("CouchBase TelemetryStore: Save Game Data Error -", err);
+            console.errorExt("DataStore Couchbase TelemetryStore", "Save Game Data Error -", err);
             reject(err);
             return;
         }
@@ -1917,7 +1917,7 @@ return when.promise(function(resolve, reject) {
     this.client.remove(key, {},
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: Remove Game Data Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Remove Game Data Error -", err);
                 reject(err);
                 return;
             }
@@ -1942,7 +1942,7 @@ return when.promise(function(resolve, reject) {
         // NOT "No such key"
         if(err) {
             if(err.code != 13) {
-                console.error("CouchBase DataStore: Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", err);
             }
 
             reject(err);
@@ -1969,7 +1969,7 @@ return when.promise(function(resolve, reject) {
     this.client.set(key, data,
         function(err, data){
             if(err){
-                console.error("CouchBase TelemetryStore: Save User Pref Data Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Save User Pref Data Error -", err);
                 reject(err);
                 return;
             }
@@ -1999,7 +1999,7 @@ TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, device
                         devices: {}
                     };
                 } else {
-                    console.error("CouchBase DataStore: Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", err);
                     reject(err);
                     return;
                 }
@@ -2022,7 +2022,7 @@ TelemDS_Couchbase.prototype.updateUserDeviceId = function(userId, gameId, device
             this.client.set(key, userDeviceInfo,
                 function(err, data) {
                     if(err) {
-                        console.error("CouchBase DataStore: Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", err);
                         reject(err);
                         return;
                     }
@@ -2053,7 +2053,7 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
-                console.error("CouchBase DataStore: Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", err);
                 reject(err);
                 return;
             }
@@ -2067,7 +2067,7 @@ TelemDS_Couchbase.prototype.getMultiUserLastDeviceId = function(userIds, gameId)
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(device.error.code != 13) {
-                        console.error("CouchBase DataStore: Error -", device.error);
+                        console.errorExt("DataStore Couchbase TelemetryStore", device.error);
                         failed = device.error;
                         return;
                     }
@@ -2113,7 +2113,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
-                console.error("CouchBase DataStore: getMultiUserSavedGames Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "getMultiUserSavedGames Error -", err);
                 reject(err);
                 return;
             }
@@ -2132,7 +2132,7 @@ TelemDS_Couchbase.prototype.getMultiUserSavedGames = function(userIds, gameId) {
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(gamedata.error.code != 13) {
-                        console.error("CouchBase DataStore: getMultiUserSavedGames Error -", gamedata.error);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getMultiUserSavedGames Error -", gamedata.error);
                         failed = gamedata.error;
                         return;
                     }
@@ -2183,7 +2183,7 @@ return when.promise(function(resolve, reject) {
             if(err){
                 // NOT "No such key"
                 if(err.code != 13) {
-                    console.error("CouchBase TelemetryStore: Get User Pref Data Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Get User Pref Data Error -", err);
                     reject(err);
                     return;
                 }
@@ -2216,7 +2216,7 @@ return when.promise(function(resolve, reject) {
             // it's ok if one fails, need to check them all for errors
             if( err &&
                 !err.code == 4101) {
-                console.error("CouchBase DataStore: getMultiGamePlayInfo Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "getMultiGamePlayInfo Error -", err);
                 reject(err);
                 return;
             }
@@ -2235,7 +2235,7 @@ return when.promise(function(resolve, reject) {
                     // it's ok if no device in list for a user
                     // otherwise fail
                     if(gamedata.error.code != 13) {
-                        console.error("CouchBase DataStore: getMultiGamePlayInfo Error -", gamedata.error);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getMultiGamePlayInfo Error -", gamedata.error);
                         failed = gamedata.error;
                         return;
                     }
@@ -2282,7 +2282,7 @@ TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, 
             if(err) {
                 // "NO - No such key"
                 if(err.code != 13) {
-                    console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "addTotalTimePlayed Error -", err);
                     reject(err);
                     return;
                 }
@@ -2303,7 +2303,7 @@ TelemDS_Couchbase.prototype.addDiffToTotalTimePlayed = function(userId, gameId, 
             this.client.set(key, playInfo,
                 function(err, data) {
                     if(err) {
-                        console.error("CouchBase DataStore: addTotalTimePlayed Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "addTotalTimePlayed Error -", err);
                         reject(err);
                         return;
                     }
@@ -2341,7 +2341,7 @@ return when.promise(function(resolve, reject) {
         if(err) {
             // "NO - No such key"
             if(err.code != 13) {
-                console.error("CouchBase DataStore: postGameAchievement Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "postGameAchievement Error -", err);
                 reject(err);
                 return;
             }
@@ -2367,7 +2367,7 @@ return when.promise(function(resolve, reject) {
         this.client.set(key, playInfo,
             function(err, data) {
                 if(err) {
-                    console.error("CouchBase DataStore: postGameAchievement Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "postGameAchievement Error -", err);
                     reject(err);
                     return;
                 }
@@ -2396,7 +2396,7 @@ return when.promise(function(resolve, reject) {
             if(err){
                 // NOT "No such key"
                 if(err.code != 13) {
-                    console.error("CouchBase TelemetryStore: Get Event Count Data Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Get Event Count Data Error -", err);
                     reject(err);
                     return;
                 }
@@ -2423,7 +2423,7 @@ return when.promise(function(resolve, reject) {
     this.client.set(key, data,
         function(err, data) {
             if(err) {
-                console.error("CouchBase TelemetryStore: Save Assessment Results Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Save Assessment Results Error -", err);
                 reject(err);
                 return;
             }
@@ -2450,7 +2450,7 @@ TelemDS_Couchbase.prototype.getAssessmentResults = function(userId, gameId, asse
                 if(err) {
                     // NOT "No such key"
                     if(err.code != 13) {
-                        console.error("CouchBase TelemetryStore: Get Assessment Results Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Get Assessment Results Error -", err);
                         reject(err);
                         return;
                     }
@@ -2482,7 +2482,7 @@ return when.promise(function(resolve, reject) {
         if(err) {
             // NOT "No such key"
             if(err.code != 13) {
-                console.error("CouchBase TelemetryStore: Get Config Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Config Error -", err);
                 reject(err);
                 return;
             }
@@ -2510,7 +2510,7 @@ return when.promise(function(resolve, reject) {
     this.client.set(key, config,
         function(err, data) {
             if(err) {
-                console.error("CouchBase TelemetryStore: Set Config Error - ", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Set Config Error - ", err);
                 reject(err);
                 return;
             }
@@ -2541,7 +2541,7 @@ return when.promise(function(resolve, reject) {
                 if(err.code == 13) {
                     resolve({});
                 } else {
-                    console.error("CouchBase TelemetryStore: Get Games For Course Error - ", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Get Games For Course Error - ", err);
                     reject(err);
                 }
                 return;
@@ -2569,7 +2569,7 @@ return when.promise(function(resolve, reject) {
     this.client.set(key, data,
         function(err, data) {
             if(err) {
-                console.error("CouchBase TelemetryStore: Set Games For Course Error - ", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Set Games For Course Error - ", err);
                 reject(err);
                 return;
             }
@@ -2590,7 +2590,7 @@ return when.promise(function(resolve, reject) {
     this.client.setMulti(kv, {},
         function(err, data) {
             if(err) {
-                console.error("CouchBase TelemetryStore: Multi Set Games For Course Error - ", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Multi Set Games For Course Error - ", err);
                 reject(err);
                 return;
             }
@@ -2620,7 +2620,7 @@ return when.promise(function(resolve, reject) {
         function(err, data) {
             if(err) {
                 if(err.code != 4101) {
-                    console.error("CouchBase TelemetryStore: Get Games For Course Error - ", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Get Games For Course Error - ", err);
                     reject(err);
                     return;
                 }
@@ -2651,7 +2651,7 @@ return when.promise(function(resolve, reject) {
     // get data
     this.client.get(key, function(err, results) {
         if(err){
-            console.error("CouchBase TelemetryStore: Start Game Session Error -", err);
+            console.errorExt("DataStore Couchbase TelemetryStore", "Start Game Session Error -", err);
             reject(err);
             return;
         }
@@ -2689,7 +2689,7 @@ TelemDS_Couchbase.prototype._getGameInformation = function(gameId, isAchievement
         // get data
         this.client.get(key, function(err, results) {
             if(err && !test){
-                console.error("Couchbase TelemetryStore: Get Game Information Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Game Information Error -", err);
                 reject(err);
                 return;
             } else if(err){
@@ -2714,7 +2714,7 @@ TelemDS_Couchbase.prototype._createGameInformation = function(gameId, data, isAc
 
         this.client.set(key, data, function(err, results){
             if(err){
-                console.error("Couchbase TelemetryStore: Create Game Information Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Create Game Information Error -", err);
                 reject(err);
                 return;
             }
@@ -2742,7 +2742,7 @@ TelemDS_Couchbase.prototype._updateGameInformation = function(gameId, data, isAc
                 var mergedData = _.merge(results, data);
                 this.client.set(key, mergedData, function(err, results){
                     if(err){
-                        console.error("Couchbase TelemetryStore: Update Game Information Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Update Game Information Error -", err);
                         reject(err);
                         return;
                     }
@@ -2800,7 +2800,7 @@ TelemDS_Couchbase.prototype._getAllGameInformation = function(type){
             },
             function(err, results) {
                 if(err) {
-                    console.error("Couchbase TelemetryStore: Get Game " + type + " Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Get Game " + type + " Error -", err);
                     reject(err);
                     return;
                 }
@@ -2814,11 +2814,11 @@ TelemDS_Couchbase.prototype._getAllGameInformation = function(type){
                                     errors.push( results[r].error );
                                 }
                             }
-                            console.error("CouchBase TelemetryStore: Get Game " + type + " Errors -", errors);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Get Game " + type + " Errors -", errors);
                             reject(err);
                             return;
                         } else {
-                            console.error("CouchBase TelemetryStore: Get Game " + type + " Error -", err);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Get Game " + type + " Error -", err);
                             reject(err);
                             return;
                         }
@@ -2853,7 +2853,7 @@ TelemDS_Couchbase.prototype.getDeveloperProfile = function(userId, test){
         var key = tConst.datastore.keys.developer + ":" + tConst.datastore.keys.user + ":" + userId;
         this.client.get(key, function(err, results) {
             if(err && !test){
-                console.error("DashDS Error - " + err);
+                console.errorExt("DataStore Couchbase TelemetryStore", err);
                 reject(err);
             } else if (err){
                 resolve("no profile");
@@ -2872,7 +2872,7 @@ TelemDS_Couchbase.prototype.getAllDeveloperProfiles = function(){
             },
             function(err, results) {
                 if (err) {
-                    console.error("Couchbase TelemetryStore: Get Developer Profiles Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Get Developer Profiles Error -", err);
                     reject(err);
                     return;
                 }
@@ -2880,7 +2880,7 @@ TelemDS_Couchbase.prototype.getAllDeveloperProfiles = function(){
                 var keys = _.pluck(results, 'id');
                 this._chunk_getMulti(keys, {}, function (err, results) {
                     if (err) {
-                        console.error("CouchBase TelemetryStore: Get Developer Profiles Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Get Developer Profiles Error -", err);
                         reject(err);
                         return;
                     }
@@ -2904,7 +2904,7 @@ TelemDS_Couchbase.prototype.createMatch = function(gameId, matchData) {
         var key = tConst.game.dataKey + "::" + tConst.game.matchKey + "::" + gameId;
         this.client.incr(key, {initial: 1}, function (err, data) {
             if (err) {
-                console.error("CouchBase DataStore: Incr Match Count Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Incr Match Count Error -", err);
                 reject(err);
                 return;
             }
@@ -2916,7 +2916,7 @@ TelemDS_Couchbase.prototype.createMatch = function(gameId, matchData) {
             key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
             this.client.add(key, match, function (err, results) {
                 if (err) {
-                    console.error("CouchBase DataStore: Create Match Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Create Match Error -", err);
                     reject(err);
                     return;
                 }
@@ -2931,7 +2931,7 @@ TelemDS_Couchbase.prototype.getMatch = function(gameId, matchId){
         var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
         this.client.get(key, function(err, results){
             if(err){
-                console.error("CouchBase DataStore: Get Match Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Match Error -", err);
                 reject(err);
                 return;
             }
@@ -2945,7 +2945,7 @@ TelemDS_Couchbase.prototype.updateMatch = function(gameId, matchId, data){
         var key = tConst.game.dataKey + ":" + tConst.game.matchKey + ":" + gameId + ":" + matchId;
         this.client.set(key, data, function(err, results){
             if(err){
-                console.error("CouchBase DataStore: Update Match Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Update Match Error -", err);
                 reject(err);
                 return;
             }
@@ -2977,7 +2977,7 @@ TelemDS_Couchbase.prototype.multiGetMatches = function(gameId, matchIds){
                     resolve(results);
                     return;
                 }
-                console.error("CouchBase DataStore: Get Matches Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Matches Error -", err);
                 reject(err);
                 return;
             }
@@ -2990,7 +2990,7 @@ TelemDS_Couchbase.prototype.multiSetMatches = function(matches){
     return when.promise(function(resolve, reject){
         this._chunk_setMulti(matches, {}, function(err, results){
             if(err){
-                console.error("CouchBase DataStore: Update Matches Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Update Matches Error -", err);
                 reject(err);
                 return;
             }
@@ -3050,9 +3050,9 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId,
                                 errors.push( results[r].error );
                             }
                         }
-                        console.error("CouchBase TelemetryStore: Get Game Matches: View Errors -", errors);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Get Game Matches: View Errors -", errors);
                     } else{
-                        console.error("CouchBase TelemetryStore: Get Game Matches: View Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Get Game Matches: View Error -", err);
                     }
                     reject(err);
                     return;
@@ -3074,9 +3074,9 @@ TelemDS_Couchbase.prototype.getAllGameMatchesByUserId = function(gameId, userId,
                                     errors.push( results[r].error );
                                 }
                             }
-                            console.error("CouchBase TelemetryStore: Get Game Matches: Multi Get Errors -", errors);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Get Game Matches: Multi Get Errors -", errors);
                         } else{
-                            console.error("CouchBase TelemetryStore: Get Game Matches: Multi Get Error -", err);
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Get Game Matches: Multi Get Error -", err);
                         }
                         reject(err);
                         return;
@@ -3104,14 +3104,14 @@ TelemDS_Couchbase.prototype.getAllCourseGameProfiles = function(){
             },
             function(err, results){
                 if(err){
-                    console.error("Couchbase TelemetryStore: Update All Course Game Profiles Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Update All Course Game Profiles Error -", err);
                     reject(err);
                     return;
                 }
                 var keys = _.pluck(results, "id");
                 this._chunk_getMulti(keys, {}, function(err, results){
                     if(err){
-                        console.error("Couchbase TelemetryStore: Update All Course Game Profiles Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Update All Course Game Profiles Error -", err);
                         reject(err);
                         return;
                     }
@@ -3145,7 +3145,7 @@ TelemDS_Couchbase.prototype.getGamesCourseMap = function(gameIds){
                 resolve(gameCourseMap);
             })
             .then(null, function(err){
-                console.error("Get Games Course Map Error -",err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Games Course Map Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -3155,7 +3155,7 @@ TelemDS_Couchbase.prototype.multiSetCourseGameProfiles = function(courses){
     return when.promise(function(resolve, reject){
         this._chunk_setMulti(courses, {}, function(err, results){
             if(err){
-                console.error("Couchbase DataStore: Update Course Game Profiles Error -",err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Update Course Game Profiles Error -",err);
                 reject(err);
                 return;
             }
@@ -3174,7 +3174,7 @@ TelemDS_Couchbase.prototype.multiGetCourseGameProfiles = function(courseIds){
         });
         this._chunk_getMulti(keys, {}, function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Multi Get Course Game Profiles Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Multi Get Course Game Profiles Error -", err);
                 reject(err);
                 return;
             }
@@ -3192,7 +3192,7 @@ TelemDS_Couchbase.prototype.deleteGameSavesByGameId = function(gameId){
             startkey: key
         }, function(err, results){
             if(err){
-                console.error("CouchBase TelemetryStore: Delete Game Saves By Game Id Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Delete Game Saves By Game Id Error -", err);
                 reject(err);
                 return;
             }
@@ -3202,7 +3202,7 @@ TelemDS_Couchbase.prototype.deleteGameSavesByGameId = function(gameId){
                     resolve()
                 })
                 .then(null, function(err){
-                    console.error("Delete Game Saves By Game Id -", gameId, " Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "Delete Game Saves By Game Id -", gameId, " Error -", err);
                     reject(err);
                 });
             resolve(results);
@@ -3217,7 +3217,7 @@ TelemDS_Couchbase.prototype.createDeveloperOrganization = function(devId, data){
 
         this.client.set(key, data, function(err, results){
             if(err){
-                console.error("Couchbase TelemetryStore: Create Developer Organization Error -", err);
+                console.errorExt("DataStore Couchbase TelemetryStore", "Create Developer Organization Error -", err);
                 reject(err);
                 return;
             }
@@ -3234,7 +3234,7 @@ TelemDS_Couchbase.prototype.getDeveloperOrganization = function(devId){
         this.client.get(key, function(err, results) {
             if(err) {
                 if(err.code != 13) {
-                    console.error("CouchBase TelemetryStore: Get Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", err);
                     reject(err);
                     return;
                 }
@@ -3256,7 +3256,7 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesAwaitingApproval = function() {
             },
             function(err, results) {
                 if (err) {
-                    console.error("Couchbase TelemetryStore: getAllDeveloperGamesAwaitingApproval Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGamesAwaitingApproval Error -", err);
                     reject(err);
                     return;
                 }
@@ -3264,7 +3264,7 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesAwaitingApproval = function() {
                 var keys = _.pluck(results, 'id');
                 this._chunk_getMulti(keys, {}, function (err, results) {
                     if (err) {
-                        console.error("CouchBase TelemetryStore: getAllDeveloperGamesAwaitingApproval Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGamesAwaitingApproval Error -", err);
                         reject(err);
                         return;
                     }
@@ -3291,7 +3291,7 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesRejected = function() {
             },
             function(err, results) {
                 if (err) {
-                    console.error("Couchbase TelemetryStore: getAllDeveloperGamesRejected Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGamesRejected Error -", err);
                     reject(err);
                     return;
                 }
@@ -3299,7 +3299,7 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesRejected = function() {
                 var keys = _.pluck(results, 'id');
                 this._chunk_getMulti(keys, {}, function (err, results) {
                     if (err) {
-                        console.error("CouchBase TelemetryStore: getAllDeveloperGamesRejected Error -", err);
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGamesRejected Error -", err);
                         reject(err);
                         return;
                     }
@@ -3326,7 +3326,7 @@ TelemDS_Couchbase.prototype.setDeveloperGameStatus = function(gameId, userId, ag
             var now = Date.now();
             if(err) {
                 if(err.code != 13) {
-                    console.error("Couchbase TelemetryStore: setDeveloperGameStatus Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "setDeveloperGameStatus Error -", err);
                     reject(err);
                     return;
                 }
@@ -3363,7 +3363,7 @@ TelemDS_Couchbase.prototype.setDeveloperGameStatus = function(gameId, userId, ag
             
             this.client.set(key, data, function(err, results){
                 if(err){
-                    console.error("Couchbase TelemetryStore: setDeveloperGameStatus Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "setDeveloperGameStatus Error -", err);
                     reject(err);
                     return;
                 }
@@ -3381,7 +3381,7 @@ TelemDS_Couchbase.prototype.getDeveloperGameStatus = function(gameId, allowMissi
         this.client.get(key, function(err, results) {
             if(err) {
                 if(!allowMissing || err.code != 13) {
-                    console.error("Couchbase TelemetryStore: getDeveloperGameStatus Error -", err);
+                    console.errorExt("DataStore Couchbase TelemetryStore", "getDeveloperGameStatus Error -", err);
                     reject(err);
                     return;
                 }

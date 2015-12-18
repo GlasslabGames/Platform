@@ -62,10 +62,22 @@ function MonitorService(options, serviceManager){
                             _cronTask.bind(this),
                             this.options.monitor.cron.enabled && validServer);
 
-        if (this.options.monitor.memwatch.logStats) {
+        if (this.options.monitor.memwatch.log || this.options.monitor.memwatch.stats) {
             memwatch.on('stats', function(stats) {
-                console.infoExt("GC", "FULLGC", stats.num_full_gc, "INCGC", stats.num_inc_gc, "COMPACT", stats.heap_compactions, "TREND", stats.usage_trend, "ESTBASE", stats.estimated_base, "CURBASE", stats.current_base, "MIN", stats.min, "MAX", stats.max);
-            });
+                if (this.options.monitor.memwatch.log) {
+                    console.infoExt("GC", "FULLGC", stats.num_full_gc, "INCGC", stats.num_inc_gc, "COMPACT", stats.heap_compactions, "TREND", stats.usage_trend, "ESTBASE", stats.estimated_base, "CURBASE", stats.current_base, "MIN", stats.min, "MAX", stats.max);
+                }
+                if (this.options.monitor.memwatch.stats) {
+                    this.stats.set("info", "num_full_gc", stats.num_full_gc);
+                    this.stats.set("info", "num_inc_gc", stats.num_full_gc);
+                    this.stats.set("info", "heap_compactions", stats.heap_compactions);
+                    this.stats.set("info", "usage_trend", stats.usage_trend);
+                    this.stats.set("info", "estimated_base", stats.estimated_base);
+                    this.stats.set("info", "current_base", stats.current_base);
+                    this.stats.set("info", "min_base", stats.min);
+                    this.stats.set("info", "max_base", stats.max);
+                }
+            }.bind(this));
         }
         
         this.serviceManager = serviceManager;

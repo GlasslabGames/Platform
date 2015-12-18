@@ -223,7 +223,7 @@ Lic_MySQL.prototype.insertToLicenseTable = function(values){
                 resolve(results.insertId);
             })
             .then(null, function(err){
-                console.error("Insert To License Table Error -",err);
+                console.errorExt("DataStore MySQL", "Insert To License Table Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -239,7 +239,7 @@ Lic_MySQL.prototype.insertToLicenseMapTable = function(values){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Insert To License Map Table Error -",err);
+                console.errorExt("DataStore MySQL", "Insert To License Map Table Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -253,7 +253,7 @@ Lic_MySQL.prototype.getLicenseById = function(licenseId){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get License By Id Error -",err);
+                console.errorExt("DataStore MySQL", "Get License By Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -267,7 +267,7 @@ Lic_MySQL.prototype.getCustomerIdByUserId = function(userId){
                 resolve(results[0].customerId);
             })
             .then(null, function(err){
-                console.error("Get Customer Id By User Id Error -",err);
+                console.errorExt("DataStore MySQL", "Get Customer Id By User Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -281,7 +281,7 @@ Lic_MySQL.prototype.setCustomerIdByUserId = function(userId, customerId){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Set Customer Id By User Id Error -",err);
+                console.errorExt("DataStore MySQL", "Set Customer Id By User Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -295,7 +295,7 @@ Lic_MySQL.prototype.removeSubscriptionIdsByUserId = function(userId){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Remove Subscription Ids By User Id Error -",err);
+                console.errorExt("DataStore MySQL", "Remove Subscription Ids By User Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -309,7 +309,7 @@ Lic_MySQL.prototype.countEducatorSeatsByLicense = function(licenseId, seats){
                 resolve(results[0]["COUNT(*)"]);
             })
             .then(null, function(err){
-                console.error("Update Educator Sears Remaining Error -",err);
+                console.errorExt("DataStore MySQL", "Update Educator Sears Remaining Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -324,7 +324,7 @@ Lic_MySQL.prototype.updateLicenseById = function(licenseId, updateFields){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Update License By Id Error -",err);
+                console.errorExt("DataStore MySQL", "Update License By Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -339,7 +339,7 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get Users BY Ids Error -",err);
+                console.errorExt("DataStore MySQL", "Get Users BY Ids Error -",err);
                 reject(err);
             });
     }.bind(this))
@@ -354,7 +354,7 @@ Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Map By Instructors Error -",err);
+                console.errorExt("DataStore MySQL", "Get License Map By Instructors Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -373,7 +373,7 @@ Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Map By Instructors Error -",err);
+                console.errorExt("DataStore MySQL", "Get License Map By Instructors Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -388,7 +388,7 @@ Lic_MySQL.prototype.userHasLicenseMap = function(userId){
                 resolve(state);
             })
             .then(null, function(err){
-                console.error("Get License Map By User Error -",error);
+                console.errorExt("DataStore MySQL", "Get License Map By User Error -",error);
                 reject(err);
             });
     }.bind(this));
@@ -405,7 +405,7 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get Instructors By License Error -",err);
+                console.errorExt("DataStore MySQL", "Get Instructors By License Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -419,7 +419,7 @@ Lic_MySQL.prototype.getAllInstructorsNonCustomers = function(){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get All Instructors Non Customers Error -",err);
+                console.errorExt("DataStore MySQL", "Get All Instructors Non Customers Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -439,7 +439,7 @@ Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
                 resolve(output);
             })
             .then(null, function(err){
-                console.error("Get Courses By Instructor Error -",err);
+                console.errorExt("DataStore MySQL", "Get Courses By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -474,7 +474,7 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
                 resolve(courseTeacherMap);
             })
             .then(null, function(err){
-                console.error("Get Course Teacher Map By License Error -",err);
+                console.errorExt("DataStore MySQL", "Get Course Teacher Map By License Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -493,7 +493,7 @@ Lic_MySQL.prototype.getUsersByEmail = function(emails){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get Users By Email Error -",err);
+                console.errorExt("DataStore MySQL", "Get Users By Email Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -513,7 +513,7 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Multi Insert Temp Users By Email Error -",err);
+                console.errorExt("DataStore MySQL", "Multi Insert Temp Users By Email Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -546,7 +546,7 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds, invite)
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Multi Insert License Map Error -",err);
+                console.errorExt("DataStore MySQL", "Multi Insert License Map Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -561,7 +561,7 @@ Lic_MySQL.prototype.multiGetLicenseMap = function(licenseId, userIds){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Multi Get License Map Error -",err);
+                console.errorExt("Multi Get License Map Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -579,7 +579,7 @@ Lic_MySQL.prototype.multiUpdateLicenseMapStatus = function(licenseId, userIds, s
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Multi Update License Map Error -",err);
+                console.errorExt("Multi Update License Map Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -593,7 +593,7 @@ Lic_MySQL.prototype.getUserById = function(userId){
                 resolve(results[0]);
             })
             .then(null, function(err){
-                console.error("Get User By Id Error -",err);
+                console.errorExt("Get User By Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -607,7 +607,7 @@ Lic_MySQL.prototype.getUserByEmail = function(email){
                 resolve(results[0]);
             })
             .then(null, function(err){
-                console.error("Get User By Id Error -",err);
+                console.errorExt("Get User By Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -625,7 +625,7 @@ Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, us
               resolve(results);
           }.bind(this))
           .then(null, function(err){
-              console.error("Update License Map By License Instructor Error -",err);
+              console.errorExt("DataStore MySQL", "Update License Map By License Instructor Error -",err);
               reject(err);
           });
   }.bind(this));
@@ -639,7 +639,7 @@ Lic_MySQL.prototype.assignPremiumCourse = function(courseId){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Assign Premium Course Error -", err);
+                console.errorExt("DataStore MySQL", "Assign Premium Course Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -654,7 +654,7 @@ Lic_MySQL.prototype.unassignPremiumCourses = function(courses){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Unassign Premium Courses Error -", err);
+                console.errorExt("DataStore MySQL", "Unassign Premium Courses Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -674,7 +674,7 @@ Lic_MySQL.prototype.getLicenseFromPremiumCourse = function(courseId){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get License From Premium Course Error -",err);
+                console.errorExt("DataStore MySQL", "Get License From Premium Course Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -693,7 +693,7 @@ Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
                 resolve(results.insertId);
             })
             .then(null, function(err){
-                console.error("Insert to Purchase Order Table Error -",err);
+                console.errorExt("DataStore MySQL", "Insert to Purchase Order Table Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -707,14 +707,14 @@ Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
             .then(function(results){
                 if(results.length > 1){
                     var err = { status: "There should only be one purchase order with status pending or received"};
-                    console.error("Get Active Purchase Order By User Id Error -",err);
+                    console.errorExt("DataStore MySQL", "Get Active Purchase Order By User Id Error -",err);
                     reject(err);
                 }
                 var order = results[0] || "no active order";
                 resolve(order);
             })
             .then(null, function(err){
-                console.error("Get Active Purchase Order By User Id Error -",err);
+                console.errorExt("DataStore MySQL", "Get Active Purchase Order By User Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -728,7 +728,7 @@ Lic_MySQL.prototype.getOpenPurchaseOrders = function() {
 			resolve(results);
 		})
 		.then(null, function(err){
-			console.error("Get Open Purchase Orders Error -",err);
+			console.errorExt("DataStore MySQL", "Get Open Purchase Orders Error -",err);
 			reject(err);
 		});
 	}.bind(this));
@@ -742,7 +742,7 @@ Lic_MySQL.prototype.getNotOpenPurchaseOrders = function() {
 			resolve(results);
 		})
 		.then(null, function(err){
-			console.error("Get Open Purchase Orders Error -",err);
+			console.errorExt("DataStore MySQL", "Get Open Purchase Orders Error -",err);
 			reject(err);
 		});
 	}.bind(this));
@@ -756,7 +756,7 @@ Lic_MySQL.prototype.getOpenPurchaseOrderForUser = function( userId ) {
 			resolve(results);
 		})
 		.then(null, function(err){
-			console.error("Get Open Purchase Order for User Error -",err);
+			console.errorExt("DataStore MySQL", "Get Open Purchase Order for User Error -",err);
 			reject(err);
 		});
 	}.bind(this));
@@ -769,14 +769,14 @@ Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
             .then(function(results){
                 if(results.length > 1){
                     var err = { status: "key should be unique"};
-                    console.error("Get Purchase Order By Purchase Order Key Error -",err);
+                    console.errorExt("DataStore MySQL", "Get Purchase Order By Purchase Order Key Error -",err);
                     reject(error);
                 }
                 var order = results[0] || "no active order";
                 resolve(order);
             })
             .then(null, function(err){
-                console.error("Get Purchase Order By Purchase Order Key Error -",err);
+                console.errorExt("DataStore MySQL", "Get Purchase Order By Purchase Order Key Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -790,7 +790,7 @@ Lic_MySQL.prototype.getPurchaseOrderById = function(purchaseOrderId){
                 resolve(results[0]);
             })
             .then(null, function(err){
-                console.error("Get Purchase Order By Id Error -",err);
+                console.errorExt("DataStore MySQL", "Get Purchase Order By Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -805,7 +805,7 @@ Lic_MySQL.prototype.updatePurchaseOrderById = function(purchaseOrderId, updateFi
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Update Active Purchase Order By User Id Error -",err);
+                console.errorExt("DataStore MySQL", "Update Active Purchase Order By User Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -850,7 +850,7 @@ Lic_MySQL.prototype.updateLicenseByPurchaseOrderId = function(purchaseOrderId, u
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Update License By Purchase Order Id");
+                console.errorExt("DataStore MySQL", "Update License By Purchase Order Id");
                 reject(err);
             });
     }.bind(this));
@@ -866,7 +866,7 @@ Lic_MySQL.prototype.updateRecentLicenseMapByUserId = function(userId, updateFiel
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Update License Map By User Id Status Error -",err);
+                console.errorExt("DataStore MySQL", "Update License Map By User Id Status Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -886,7 +886,7 @@ Lic_MySQL.prototype.getInstitutionIdByKeys = function(keys){
                 }
             })
             .then(null, function(err){
-                console.error("Get Institution Id By Keys Error -",err);
+                console.errorExt("DataStore MySQL", "Get Institution Id By Keys Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -903,7 +903,7 @@ Lic_MySQL.prototype.insertToInstitutionTable = function(values){
                 resolve(results.insertId);
             })
             .then(null, function(err){
-                console.error("Insert To Institution Table Error -",err);
+                console.errorExt("DataStore MySQL", "Insert To Institution Table Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -920,7 +920,7 @@ Lic_MySQL.prototype.getLicensesForInspection = function(){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get Licenses For Expire Renew Error -",err);
+                console.errorExt("DataStore MySQL", "Get Licenses For Expire Renew Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -934,7 +934,7 @@ Lic_MySQL.prototype.getLicenseMapByLicenseId = function(licenseId){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Get License Map By License Error -",err);
+                console.errorExt("DataStore MySQL", "Get License Map By License Error -",err);
                 reject(err);
             });
     }.bind(this));

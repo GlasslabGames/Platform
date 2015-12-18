@@ -209,7 +209,8 @@
     },
     "monitor": {
         "memwatch": {
-            "logStats": false
+            "log": false,
+            "stats": false
         },
         "datastore": {
             "couchbase": {
@@ -219,6 +220,7 @@
             }
         },
         "tests": {
+            "stats": true,
             "app": {
                 "//": "for these servers, host can be a string or an array of strings",
                 "external": {

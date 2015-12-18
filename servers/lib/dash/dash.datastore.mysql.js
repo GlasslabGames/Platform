@@ -289,7 +289,7 @@ function _addLicenseInfoToUser(user, results){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Add License Info to User Error -",err);
+                console.errorExt("DashStore MySql", "Add License Info to User Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -421,7 +421,7 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Info By Instructor Error -",err);
+                console.errorExt("DashStore MySql", "Get License Info By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -443,7 +443,7 @@ WebStore_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Record Count By Instructor Error -",err);
+                console.errorExt("DashStore MySql", "Get License Record Count By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));

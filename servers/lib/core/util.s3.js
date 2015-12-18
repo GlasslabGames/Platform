@@ -16,7 +16,7 @@ function S3Util(options){
 
     // Set the AWS config
     if( !this.options.awsAccess ) {
-        console.error( "AWS Utility Error - you do not have AWS configured!" );
+        console.errorExt( "AWSUtility", "you do not have AWS configured!" );
         return;
     }
     aws.config = this.options.awsAccess;
@@ -88,7 +88,7 @@ S3Util.prototype.createS3Bucket = function( bucket ) {
         params.Bucket = bucket;
         this.s3.createBucket( params, function( err, data ) {
             if( err ) {
-                console.error( "S3 Create Bucket Error - ", err );
+                console.errorExt( "AWSUtility", "S3 Create Bucket Error - ", err );
                 reject( "Create Bucket" );
             }
             else {
@@ -111,7 +111,7 @@ S3Util.prototype.createS3Object = function(key, data, extraParams, bucket) {
 
         this.s3.putObject(params, function(err, results){
             if(err){
-                console.error('S3 Create Object Error - ', err);
+                console.errorExt( "AWSUtility", 'S3 Create Object Error - ', err);
                 reject('create');
             } else{
                 console.log('S3 Object created');
@@ -130,7 +130,7 @@ S3Util.prototype.getS3Object = function(key, bucket){
 
         this.s3.getObject(params, function(err, results){
             if(err){
-                console.error('S3 Get Object Error - ', err);
+                console.errorExt( "AWSUtility", 'S3 Get Object Error - ', err);
                 reject('get');
             } else{
                 console.log('S3 Object Get');
@@ -155,7 +155,7 @@ S3Util.prototype.putS3Object = function(key, data, extraParams, bucket){
 
         this.s3.putObject(params, function(err, results){
             if(err){
-                console.error('S3 Put Object Error - ', err);
+                console.errorExt( "AWSUtility", 'S3 Put Object Error - ', err);
                 reject('put object');
             } else{
                 console.log('S3 Object Put');
@@ -174,7 +174,7 @@ S3Util.prototype.deleteS3Object = function(key, bucket){
 
         this.s3.deleteObject(params, function(err, results){
             if(err){
-                console.error('S3 Delete Object Error - ', err);
+                console.errorExt( "AWSUtility", 'S3 Delete Object Error - ', err);
                 reject('delete');
             } else{
                 console.log('S3 Object Deleted');
@@ -209,7 +209,7 @@ S3Util.prototype.listS3Objects = function(prefix, bucket){
         params.Prefix = prefix;
         this.s3.listObjects(params, function(err, data){
             if(err){
-                console.error('S3 List Objects Error - ', err);
+                console.errorExt( "AWSUtility", 'S3 List Objects Error - ', err);
                 reject(err);
             } else{
                 var list = data.Contents;
@@ -233,7 +233,7 @@ S3Util.prototype._getSignedUrl = function(key, bucket) {
     return when.promise(function(resolve, reject){
         this.s3.getSignedUrl('getObject', params, function (err, url) {
             if (err) {
-                console.error('Get Signed Url Error - ', err);
+                console.errorExt( "AWSUtility", 'Get Signed Url Error - ', err);
                 reject('signedUrl');
             } else {
                 resolve(url);

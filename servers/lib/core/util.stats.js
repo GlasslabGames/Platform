@@ -26,7 +26,7 @@ function Stats(options, root){
 
     statsdInst = new StatsD(this.options.statsd);
     statsdInst.socket.on('error', function(err) {
-        return console.error("StatsD: Error connecting to server. ", err);
+        return console.errorExt("StatsD", "Error connecting to server. ", err);
     });
 
     this.sRoot = root;

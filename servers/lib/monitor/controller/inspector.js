@@ -21,7 +21,7 @@ var runningMonitor = false;
 var memWatchActive = false;
 var lastLeakInfo = null;
 
-// used by monitor to test another monitor/archiver active
+// used by monitor to test another server active and get stats
 function monitorInfo(req, res){
     //console.log("monitorInfo");
 
@@ -32,7 +32,7 @@ function monitorInfo(req, res){
         });
     }
     
-    //memwatch.gc(); // used to test receiving stats events
+    memwatch.gc(); // used to test receiving stats events
     
     var data = {
         logCounts: this.serviceManager.logUtil.getLogCounts(),
@@ -49,7 +49,7 @@ function monitorInfo(req, res){
 
 // changes runningMonitor state to true, starting monitor if not active
 function runMonitor(req, res){
-    //console.log("runMonitor");
+    //consooe.log("runMonitor");
 
     if( !(req.params.code &&
         _.isString(req.params.code) &&
@@ -80,9 +80,10 @@ function runMonitor(req, res){
     } else{
         // runningArchive state is false. change to true
         runningMonitor = true;
-        //console.log("runningMonitor = true");
+        //consooe.log("runningMonitor = true");
     }
 
+    var doStats = this.options.monitor.tests.stats;
     var allErrors = [];
 
     couchBaseStatus.call(this)
@@ -178,11 +179,33 @@ function runMonitor(req, res){
         return when.reject({ errmsg: "missing config data", code: 400 });
     }.bind(this))
     .then(function(results) {
+        var statsData = { };
         results.forEach(function(result) {
+            var system = result.system;
             if (result.status !== "good") {
                 //console.log(result.system, "reported alert");
-                allErrors.push("----- " + result.system + " -----");
+                allErrors.push("----- " + system + " -----");
                 allErrors.push.apply(allErrors, result.messages);
+            }
+
+            if (doStats) {
+                if (statsData[system] === undefined) {
+                    statsData[system] = {
+                        up: 0,
+                        monitor_info: 0,
+                        leak: 0,
+                        excess_errors: 0,
+                        excess_cpu_usage: 0
+                    };
+                }
+                
+                statsData[system].up += result.stats.up;
+                if (result.stats.up) {
+                    statsData[system].monitor_info += result.stats.monitor_info;
+                    statsData[system].leak += result.stats.leak;
+                    statsData[system].excess_errors += result.stats.excess_errors;
+                    statsData[system].excess_cpu_usage += result.stats.excess_cpu_usage;
+                }
             }
         }.bind(this));
 
@@ -191,9 +214,18 @@ function runMonitor(req, res){
         //allErrors.push("----- DEBUG -----");
         //allErrors.push.apply(allErrors, [ "This has been a test." ]);
         
-        runningMonitor = false;
-        //console.log("runningMonitor = false");
-
+        if (doStats) {
+            _.forEach(statsData, function(value, key) {
+                this.stats.set("info", key + "_up", value.up);
+                if (value.up) {
+                    this.stats.set("info", key + "_monitor_info", value.monitor_info);
+                    this.stats.set("info", key + "_leak", value.leak);
+                    this.stats.set("info", key + "_excess_errors", value.excess_errors);
+                    this.stats.set("info", key + "_excess_cpu_usage", value.excess_cpu_usage);
+                }
+            }.bind(this));
+        }
+        
         if (allErrors.length > 0) {
             // Send an alert email
             var emailData = {
@@ -209,9 +241,12 @@ function runMonitor(req, res){
             email.send( "monitor-status", emailData );
           
             this.requestUtil.jsonResponse(res, { status: "Alert sent" });
-            return;
+        } else {
+            this.requestUtil.jsonResponse(res, { status: "OK" });
         }
-        this.requestUtil.jsonResponse(res, { status: "OK" });
+
+        runningMonitor = false;
+        //consooe.log("runningMonitor = false");
     }.bind(this))
     .then(null, function(err) {
         runningMonitor = false;
@@ -221,7 +256,7 @@ function runMonitor(req, res){
 }
 
 function couchBaseStatus() {
-    //console.log("couchBaseStatus: enter");
+    //consooe.log("couchBaseStatus: enter");
 
     return when.promise(function(resolve, reject) {
         if (this.options.monitor &&
@@ -269,25 +304,33 @@ function couchBaseStatus() {
 }
 
 function couchbaseStatusPools(host, auth) {
-    //console.log("couchbaseStatusPools: enter");
+    //consooe.log("couchbaseStatusPools: enter");
     
     return when.promise(function(resolve, reject) {
         var url = host + '/pools/default';
         this.requestUtil.getRequest(url, { "Authorization": "Basic " + auth },
             function(error, response, body) {
-                //console.log("couchbaseStatusPools: process /pools/default");
-
+                //consooe.log("couchbaseStatusPools: process /pools/default");
+                var doStats = this.options.monitor.tests.stats;
                 if (!error && response.statusCode == 200) {
                     var messages = [];
+                    var count = 0;
                     var json = JSON.parse(body);
                     json.nodes.forEach(function(node){
                         // is status 'healthy'?
                         if (node.status !== "healthy") {
                             messages.push("Node " + node.hostname + " has status '" + node.status + "'");
+                            count++;
                         }
                     });
+                    if (doStats) {
+                        this.stats.set("info", "couchbase_nodes_healthy", count);
+                    }
                     resolve({ connect: "yes", messages: messages, bucketsURI: json.buckets.uri });
                 } else {
+                    if (doStats) {
+                        this.stats.set("info", "couchbase_nodes_healthy", 0);
+                    }
                     resolve({ connect: "no", messages: [ "Failed to connect to Coushbase server at " + host ] });
                 }
             }.bind(this));
@@ -299,20 +342,15 @@ function couchbaseStatusBuckets(host, uri, auth) {
         var url = host + uri;
         this.requestUtil.getRequest(url, { "Authorization": "Basic " + auth },
             function(error, response, body) {
-                //console.log("couchBaseStatus: process", uri);
+                //consooe.log("couchBaseStatus: process", uri);
 
                 if (!error && response.statusCode == 200) {
                     var messages = [];
                     
                     var json = JSON.parse(body);
-                    /*
-                    json.nodes.forEach(function(node){
-                        // is status 'healthy'?
-                        if (node.status !== "healthy") {
-                            messages.push("Node " + node.hostname + " has status '" + node.status + "'");
-                        }
-                    });
-                    */
+
+                    // TODO
+                    
                     resolve({ connect: "yes", messages: messages });
                 } else {
                     resolve({ connect: "no", messages: [ "Failed to connect to Coushbase server at " + host ] });
@@ -322,7 +360,7 @@ function couchbaseStatusBuckets(host, uri, auth) {
 }
 
 function mysqlStatus() {
-    //console.log("mysqlStatus: enter");
+    //consooe.log("mysqlStatus: enter");
 
     // http://blog.webyog.com/2012/09/03/top-10-things-to-monitor-on-your-mysql/
     
@@ -339,8 +377,10 @@ function mysqlStatus() {
             Q = "SHOW GLOBAL STATUS LIKE 'aborted_connects'";
             this.monds.query(Q)
             .then(function(results) {
+                var doStats = this.options.monitor.tests.stats;
+
                 if(results.length > 0) {
-                    //console.log("mysqlStatus: process aborted_connects");
+                    //consooe.log("mysqlStatus: process aborted_connects");
 
                     results = results[0];
                   
@@ -353,10 +393,19 @@ function mysqlStatus() {
                         if (delta > max_aborted_connects) {
                             messages.push("Excessive per check aborted connects [" + delta + " > " + max_aborted_connects + "] to mysql server at " + host);
                         }
+                        if (doStats) {
+                            this.stats.set("info", "mysql_aborted_connects_per_check", delta);
+                        }
+                    }
+                    if (doStats) {
+                        this.stats.set("info", "mysql_up", 1);
                     }
                     this.workingdata.aborted_connects = aborted_connects;
                 } else {
                     // not good
+                    if (doStats) {
+                        this.stats.set("info", "mysql_up", 0);
+                    }
                     messages.push("Unable to connect to mysql server at " + host);
                     //return "abort";
                 }
@@ -376,54 +425,61 @@ function mysqlStatus() {
 }
 
 function externalServerStatus(host) {
-    //console.log("externalServerStatus: enter");
+    //consooe.log("externalServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         var messages = [];
         
         this.requestUtil.request(host + '/api/v2/monitor/info')
         .then(function(result) {
-            //console.log("externalServerStatus: process /api/v2/monitor/info");
+            //consooe.log("externalServerStatus: process /api/v2/monitor/info");
+
+            var statsData = {
+                up: 1,
+                monitor_info: 1,
+                leak: 0,
+                excess_errors: 0,
+                excess_cpu_usage: 0
+            };
 
             if (!result.logCounts) {
-                var data = {
-                    system: "internal",
-                    status: "bad",
-                    messages: [ "/api/v2/monitor/info return bad data at " + host ]
-                };
-                resolve(data);
-                return;
+                messages.push("/api/v2/monitor/info return bad data at " + host);
+                statsData.monitor_info = 0;
+            } else {
+                var per_check_limits = this.options.monitor.tests.per_check_limits;
+                if (per_check_limits) {
+                    var external_errors_reported = result.logCounts.error;
+                    
+                    if (per_check_limits.external_max_errors_reported && this.workingdata.external_errors_reported !== undefined) {
+                        var delta = external_errors_reported - this.workingdata.external_errors_reported;
+                        if (delta > per_check_limits.external_max_errors_reported) {
+                            messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.external_max_errors_reported + "] to external server at " + host);
+                            statsData.excess_errors = 1;
+                        }
+                    }
+                    this.workingdata.external_errors_reported = external_errors_reported;
+                  
+                    if (result.leakInfo) {
+                        messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on external server at " + host);
+                        statsData.leak = 1;
+                    }
+
+                    if (result.cpuCount && per_check_limits.external_max_cpu_usage) {
+                        // of the 1, 5 and 15 min load avaerages, use 5 min
+                        var usage = result.cpuAverage[1] / result.cpuCount;
+                        if (usage > per_check_limits.external_max_cpu_usage) {
+                            messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.external_max_cpu_usage + "] to external server at " + host);
+                            statsData.excess_cpu_usage = 1;
+                        }
+                    }
+                }
             }
             
-            var per_check_limits = this.options.monitor.tests.per_check_limits;
-            if (per_check_limits) {
-                var external_errors_reported = result.logCounts.error;
-                
-                if (per_check_limits.external_max_errors_reported && this.workingdata.external_errors_reported !== undefined) {
-                    var delta = external_errors_reported - this.workingdata.external_errors_reported;
-                    if (delta > per_check_limits.external_max_errors_reported) {
-                        messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.external_max_errors_reported + "] to external server at " + host);
-                    }
-                }
-                this.workingdata.external_errors_reported = external_errors_reported;
-
-                if (result.leakInfo) {
-                    messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on external server at " + host);
-                }
-
-                if (result.cpuCount && per_check_limits.external_max_cpu_usage) {
-                    // of the 1, 5 and 15 min load avaerages, use 5 min
-                    var usage = result.cpuAverage[1] / result.cpuCount;
-                    if (usage > per_check_limits.external_max_cpu_usage) {
-                        messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.external_max_cpu_usage + "] to external server at " + host);
-                    }
-                }
-            }
-
             var data = {
                 system: "external",
                 status: (messages.length > 0 ? "bad" : "good"),
-                messages: messages
+                messages: messages,
+                stats: statsData
             };
             resolve(data);
         }.bind(this))
@@ -433,7 +489,8 @@ function externalServerStatus(host) {
             var data = {
                 system: "external",
                 status: "bad",
-                messages: [ "Error " + JSON.stringify(err) + " for " + host ]
+                messages: [ "Error " + JSON.stringify(err) + " for " + host ],
+                statsData: { up: 0 }
             };
             resolve(data);
             
@@ -442,54 +499,61 @@ function externalServerStatus(host) {
 }
 
 function internalServerStatus(host) {
-    //console.log("internalServerStatus: enter");
+    //consooe.log("internalServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         var messages = [];
         
         this.requestUtil.request(host + '/api/v2/monitor/info')
         .then(function(result) {
-            //console.log("internalServerStatus: process /api/v2/monitor/info");
+            //consooe.log("internalServerStatus: process /api/v2/monitor/info");
+
+            var statsData = {
+                up: 1,
+                monitor_info: 1,
+                leak: 0,
+                excess_errors: 0,
+                excess_cpu_usage: 0
+            };
 
             if (!result.logCounts) {
-                var data = {
-                    system: "internal",
-                    status: "bad",
-                    messages: [ "/api/v2/monitor/info return bad data at " + host ]
-                };
-                resolve(data);
-                return;
+                messages.push("/api/v2/monitor/info return bad data at " + host);
+                statsData.monitor_info = 0;
+            } else {
+                var per_check_limits = this.options.monitor.tests.per_check_limits;
+                if (per_check_limits) {
+                    var internal_errors_reported = result.logCounts.error;
+                    
+                    if (per_check_limits.internal_max_errors_reported && this.workingdata.internal_errors_reported !== undefined) {
+                        var delta = internal_errors_reported - this.workingdata.internal_errors_reported;
+                        if (delta > per_check_limits.internal_max_errors_reported) {
+                            messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.internal_max_errors_reported + "] to internal server at " + host);
+                            statsData.excess_errors = 1;
+                        }
+                    }
+                    this.workingdata.internal_errors_reported = internal_errors_reported;
+
+                    if (result.leakInfo) {
+                        messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on internal server at " + host);
+                        statsData.leak = 1;
+                    }
+
+                    if (result.cpuCount && per_check_limits.internal_max_cpu_usage) {
+                        // of the 1, 5 and 15 min load avaerages, use 5 min
+                        var usage = result.cpuAverage[1] / result.cpuCount;
+                        if (usage > per_check_limits.internal_max_cpu_usage) {
+                            messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.internal_max_cpu_usage + "] to internal server at " + host);
+                            statsData.excess_cpu_usage = 1;
+                        }
+                    }
+                }
             }
             
-            var per_check_limits = this.options.monitor.tests.per_check_limits;
-            if (per_check_limits) {
-                var internal_errors_reported = result.logCounts.error;
-                
-                if (per_check_limits.internal_max_errors_reported && this.workingdata.internal_errors_reported !== undefined) {
-                    var delta = internal_errors_reported - this.workingdata.internal_errors_reported;
-                    if (delta > per_check_limits.internal_max_errors_reported) {
-                        messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.internal_max_errors_reported + "] to internal server at " + host);
-                    }
-                }
-                this.workingdata.internal_errors_reported = internal_errors_reported;
-
-                if (result.leakInfo) {
-                    messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on internal server at " + host);
-                }
-
-                if (result.cpuCount && per_check_limits.internal_max_cpu_usage) {
-                    // of the 1, 5 and 15 min load avaerages, use 5 min
-                    var usage = result.cpuAverage[1] / result.cpuCount;
-                    if (usage > per_check_limits.internal_max_cpu_usage) {
-                        messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.internal_max_cpu_usage + "] to internal server at " + host);
-                    }
-                }
-            }
-
             var data = {
                 system: "internal",
                 status: (messages.length > 0 ? "bad" : "good"),
-                messages: messages
+                messages: messages,
+                stats: statsData
             };
             resolve(data);
         }.bind(this))
@@ -499,7 +563,8 @@ function internalServerStatus(host) {
             var data = {
                 system: "internal",
                 status: "bad",
-                messages: [ "Error " + JSON.stringify(err) + " for " + host ]
+                messages: [ "Error " + JSON.stringify(err) + " for " + host ],
+                statsData: { up: 0 }
             };
             resolve(data);
             
@@ -508,54 +573,61 @@ function internalServerStatus(host) {
 }
 
 function archiverServerStatus(host) {
-    //console.log("archiverServerStatus: enter");
+    //consooe.log("archiverServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
         var messages = [];
         
         this.requestUtil.request(host + '/api/v2/monitor/info')
         .then(function(result) {
-            //console.log("archiverServerStatus: process /api/v2/monitor/info");
+            //consooe.log("archiverServerStatus: process /api/v2/monitor/info");
+
+            var statsData = {
+                up: 1,
+                monitor_info: 1,
+                leak: 0,
+                excess_errors: 0,
+                excess_cpu_usage: 0
+            };
 
             if (!result.logCounts) {
-                var data = {
-                    system: "archiver",
-                    status: "bad",
-                    messages: [ "/api/v2/monitor/info return bad data at " + host ]
-                };
-                resolve(data);
-                return;
+                messages.push("/api/v2/monitor/info return bad data at " + host);
+                statsData.monitor_info = 0;
+            } else {
+                var per_check_limits = this.options.monitor.tests.per_check_limits;
+                if (per_check_limits) {
+                    var archiver_errors_reported = result.logCounts.error;
+                    
+                    if (per_check_limits.archiver_max_errors_reported && this.workingdata.archiver_errors_reported !== undefined) {
+                        var delta = archiver_errors_reported - this.workingdata.archiver_errors_reported;
+                        if (delta > per_check_limits.archiver_max_errors_reported) {
+                            messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.archiver_max_errors_reported + "] to archiver server at " + host);
+                            statsData.excess_errors = 1;
+                        }
+                    }
+                    this.workingdata.archiver_errors_reported = archiver_errors_reported;
+
+                    if (result.leakInfo) {
+                        messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on archiver server at " + host);
+                        statsData.leak = 1;
+                    }
+
+                    if (result.cpuCount && per_check_limits.archiver_max_cpu_usage) {
+                        // of the 1, 5 and 15 min load avaerages, use 5 min
+                        var usage = result.cpuAverage[1] / result.cpuCount;
+                        if (usage > per_check_limits.archiver_max_cpu_usage) {
+                            messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.archiver_max_cpu_usage + "] to archiver server at " + host);
+                            statsData.excess_cpu_usage = 1;
+                        }
+                    }
+                }
             }
             
-            var per_check_limits = this.options.monitor.tests.per_check_limits;
-            if (per_check_limits) {
-                var archiver_errors_reported = result.logCounts.error;
-                
-                if (per_check_limits.archiver_max_errors_reported && this.workingdata.archiver_errors_reported !== undefined) {
-                    var delta = archiver_errors_reported - this.workingdata.archiver_errors_reported;
-                    if (delta > per_check_limits.archiver_max_errors_reported) {
-                        messages.push("Excessive per check errors reported [" + delta + " > " + per_check_limits.archiver_max_errors_reported + "] to archiver server at " + host);
-                    }
-                }
-                this.workingdata.archiver_errors_reported = archiver_errors_reported;
-
-                if (result.leakInfo) {
-                    messages.push("Leak - " + result.leakInfo.reason + ", growth " + result.leakInfo.growth + " (" + result.leakInfo.start + " to " + result.leakInfo.end + ") on archiver server at " + host);
-                }
-
-                if (result.cpuCount && per_check_limits.archiver_max_cpu_usage) {
-                    // of the 1, 5 and 15 min load avaerages, use 5 min
-                    var usage = result.cpuAverage[1] / result.cpuCount;
-                    if (usage > per_check_limits.archiver_max_cpu_usage) {
-                        messages.push("CPU usage exceeds limit [" + usage + " > " + per_check_limits.archiver_max_cpu_usage + "] to archiver server at " + host);
-                    }
-                }
-            }
-
             var data = {
                 system: "archiver",
                 status: (messages.length > 0 ? "bad" : "good"),
-                messages: messages
+                messages: messages,
+                stats: statsData
             };
             resolve(data);
         }.bind(this))
@@ -565,7 +637,8 @@ function archiverServerStatus(host) {
             var data = {
                 system: "archiver",
                 status: "bad",
-                messages: [ "Error " + JSON.stringify(err) + " for " + host ]
+                messages: [ "Error " + JSON.stringify(err) + " for " + host ],
+                statsData: { up: 0 }
             };
             resolve(data);
             
@@ -574,9 +647,10 @@ function archiverServerStatus(host) {
 }
 
 function assessmentServerStatus(host) {
-    //console.log("assessmentServerStatus: enter");
+    //consooe.log("assessmentServerStatus: enter");
 
     return when.promise(function(resolve, reject) {
+        var doStats = this.options.monitor.tests.stats;
         var messages = [];
         
         this.requestUtil.request(host + '/int/v1/aeng/processStatus')
@@ -593,15 +667,24 @@ function assessmentServerStatus(host) {
                 return;
             }
             
+            if (doStats) {
+                this.stats.set("info", "assessment_up", 1);
+            }
+
             var data = {
                 system: "assessment",
                 status: (messages.length > 0 ? "bad" : "good"),
-                messages: messages
+                messages: messages,
+                stats: statsData
             };
             resolve(data);
         }.bind(this))
         .then(null, function(err) {
             //console.log("assessmentServerStatus monitor failed!");
+
+            if (doStats) {
+                this.stats.set("info", "assessment_up", 0);
+            }
 
             var data = {
                 system: "assessment",
@@ -621,8 +704,13 @@ function loggerStatus(url) {
         this.requestUtil.getRequest(url, { },
             function(error, response, body) {
                 //console.log("loggerStatus: process");
+                var doStats = this.options.monitor.tests.stats;
 
                 if (!error && response.statusCode == 200) {
+                    if (doStats) {
+                        this.stats.set("info", "logger_up", 1);
+                    }
+
                     var data = {
                         system: "logger",
                         status: "good",
@@ -630,6 +718,10 @@ function loggerStatus(url) {
                     };
                     resolve(data);
                 } else {
+                    if (doStats) {
+                        this.stats.set("info", "logger_up", 0);
+                    }
+
                     var data = {
                         system: "logger",
                         status: "bad",

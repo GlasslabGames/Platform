@@ -124,7 +124,7 @@ function getPlanLicenseGamesBasicInfo(req, res){
             this.requestUtil.jsonResponse(res, outGames);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get License Games Basic Info Error -",err);
+            console.errorExt("DashService", "Get License Games Basic Info Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -171,7 +171,7 @@ function getAvailableGamesObj(req, res){
             this.requestUtil.jsonResponse(res, availableGames);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Available Game Map Error -",err);
+            console.errorExt("DashService", "Get Available Game Map Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -190,7 +190,7 @@ function getGamesBasicInfoByPlan(req, res){
             this.requestUtil.jsonResponse(res, outGames);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Games Basic Info By Plan Error -",err);
+            console.errorExt("DashService", "Get Games Basic Info By Plan Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -224,7 +224,7 @@ function _getPlanGamesBasicInfo(type){
                 resolve([gamesInfo, availableGames]);
             })
             .then(null, function(err){
-                console.error("Get Plan Games Basic Info Error -",err);
+                console.errorExt("DashService", "Get Plan Games Basic Info Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -646,7 +646,7 @@ function createNewGame(req, res){
                         return this.telmStore.createGameInformation(gameId, gameData);
                     }.bind(this))
                     .catch(function(err) {
-                        console.error("createNewGame Error Updating Profile", err);
+                        console.errorExt("DashService", "createNewGame Error Updating Profile", err);
                         this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
                     }.bind(this))
                     .done(function() {
@@ -659,7 +659,7 @@ function createNewGame(req, res){
             }
         }.bind(this))
         .catch(function (err) {
-            console.error("createNewGame Error", err);
+            console.errorExt("DashService", "createNewGame Error", err);
             this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }
@@ -684,7 +684,7 @@ function submitGameForApproval(req, res){
             this.requestUtil.jsonResponse(res, {status: "ok"});
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: submitGameForApproval Error", err);
+            console.errorExt("DashService", "submitGameForApproval Error", err);
             var errKey = (typeof err === 'string' ? errKey = err : "dash.general");
             this.requestUtil.errorResponse(res, {key: errKey}, 500);
         }.bind(this));
@@ -725,7 +725,7 @@ function getAllDeveloperGamesAwaitingApproval(req, res){
             this.requestUtil.jsonResponse(res, games);
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: getAllDeveloperGamesAwaitingApproval Error", err);
+            console.errorExt("DashService", "getAllDeveloperGamesAwaitingApproval Error", err);
             this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }
@@ -767,7 +767,7 @@ function getAllDeveloperGamesRejected(req, res){
             this.requestUtil.jsonResponse(res, games);
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: getAllDeveloperGamesRejected Error", err);
+            console.errorExt("DashService", "getAllDeveloperGamesRejected Error", err);
             this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }
@@ -793,7 +793,7 @@ function getDeveloperGamesInfo(req, res){
                     });
             }.bind(this))
                 .catch(function (err) {
-                    console.error("Dash: Get Developer Profile Error basicGameInfo", err);
+                    console.errorExt("DashService", "Get Developer Profile Error basicGameInfo", err);
                     this.requestUtil.errorResponse(res, err);
                 }.bind(this))
                 .done(function (result) {
@@ -921,7 +921,7 @@ function uploadGameImage(req, res) {
     var form = new multiparty.Form();
     form.parse(req, function(err, fields, files) {
         if(err) {
-            console.error("Dash: uploadGameImage formParse Error -", err);
+            console.errorExt("DashService", "uploadGameImage formParse Error -", err);
             this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         }
 
@@ -958,7 +958,7 @@ function uploadGameImage(req, res) {
                         this.requestUtil.jsonResponse(res, {path: "https://s3-us-west-1.amazonaws.com/playfully-games/" + fileName});
                     }.bind(this))
                     .catch(function(err){
-                        console.error("Dash: uploadGameImage putS3Object Error -", err);
+                        console.errorExt("DashService", "uploadGameImage putS3Object Error -", err);
                         this.requestUtil.errorResponse(res, {key:"dash.general"},500);
                     }.bind(this));
 
@@ -1057,7 +1057,7 @@ function generateBadgeCode( req, res ) {
                 }.bind(this))
                 .then(null, function(err){
                     this.stats.increment("error", "Route.Update.User");
-                    console.error("Auth - updateUserBadgeList error:", err);
+                    console.errorExt("DashService", "updateUserBadgeList error:", err);
                     this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
                 }.bind(this));
         }.bind(this));

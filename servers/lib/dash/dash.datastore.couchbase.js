@@ -44,13 +44,13 @@ return when.promise(function(resolve, reject) {
         operationTimeout:  this.options.timeout || 60000
     };
     this.client = new couchbase.Connection(options, function(err) {
-        console.error("CouchBase DashStore: Error -", err);
+        console.errorExt("DashStore Couchbase", err);
 
         if(err) throw err;
     }.bind(this));
 
     this.client.on('error', function (err) {
-        console.error("CouchBase DashStore: Error -", err);
+        console.errorExt("DashStore Couchbase", err);
         reject(err);
     }.bind(this));
 
@@ -77,7 +77,7 @@ DashDS_Couchbase.prototype.getMessageCenterCount = function( messageId ) {
         this.client.get(key, function(err, data) {
             var count = 0;
             if(err) {
-                console.error( "CouchBase DashStore: Get Message Center Count Error -", err );
+                console.errorExt("DashStore Couchbase", "Get Message Center Count Error -", err );
                 reject(err);
                 return;
             }
@@ -107,7 +107,7 @@ DashDS_Couchbase.prototype.getMessageCenterMessages = function(messageType, limi
 
                 this.client.getMulti( keys, {}, function( err, results ) {
                     if( err ) {
-                        console.error( "CouchBase DashStore: Get Message Center Messages Error -", err );
+                        console.errorExt("DashStore Couchbase", "Get Message Center Messages Error -", err );
                         reject( err );
                         return;
                     }
@@ -131,7 +131,7 @@ DashDS_Couchbase.prototype.saveMessageCenterMessage = function( messageType, mes
         var key = tConst.dataStore.dataKey + "::" + tConst.dataStore.countKey + "::" + tConst.dataStore[ messageType + "Key" ];
         this.client.incr(key, {initial: 1}, function(err, data) {
             if(err) {
-                console.error( "CouchBase DashStore: Incr Message Center Count Error -", err );
+                console.errorExt("DashStore Couchbase", "Incr Message Center Count Error -", err );
                 reject(err);
                 return;
             }
@@ -139,7 +139,7 @@ DashDS_Couchbase.prototype.saveMessageCenterMessage = function( messageType, mes
             key = tConst.dataStore.dataKey + ":" + tConst.dataStore.messageCenterKey + ":" + tConst.dataStore[ messageType + "Key" ] + ":" + data.value;
             this.client.add(key, messageData, function(err, results){
                 if(err) {
-                    console.error( "CouchBase DashStore: Set Message Center Message Error -", err );
+                    console.errorExt("DashStore Couchbase", "Set Message Center Message Error -", err );
                     reject(err);
                     return;
                 }

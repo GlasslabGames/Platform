@@ -453,7 +453,7 @@ function _addLicenseInfoToUser(user, results){
                 resolve();
             }.bind(this))
             .then(null,function(err){
-                console.error("Add License Info to User Error -",err);
+                console.errorExt("AuthService MySQL", "Add License Info to User Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -642,7 +642,7 @@ Auth_MySQL.prototype.updateTempUser = function(userData, existingId){
                 resolve(data.insertId);
             }.bind(this))
             .then(null, function(err) {
-                console.error("Update Temp User Error -",err);
+                console.errorExt("AuthService MySQL", "Update Temp User Error -",err);
                 reject({"error": "failure", "exception": err}, 500);
             }.bind(this));
     }.bind(this));
@@ -811,7 +811,7 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Info By Instructor Error -",err);
+                console.errorExt("AuthService MySQL", "Get License Info By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -833,7 +833,7 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Record Count By Instructor Error -",err);
+                console.errorExt("AuthService MySQL", "Get License Record Count By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));

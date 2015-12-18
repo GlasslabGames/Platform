@@ -76,7 +76,7 @@ function getSubscriptionPackages(req, res){
         };
         this.requestUtil.jsonResponse(res, output);
     } catch(err){
-        console.error("Get Subscription Packages Error -",err);
+        console.errorExt("LicService", "Get Subscription Packages Error -",err);
         this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
     }
 }
@@ -240,7 +240,7 @@ function _getPlanInternal(req, res, userId, licenseId, licenseOwnerId, callback)
         this.requestUtil.jsonResponse(res, output, 200);
     }.bind(this))
     .then(null, function(err){
-        console.error("Get Current Plan Error -",err);
+        console.errorExt("LicService", "Get Current Plan Error -",err);
         this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
     }.bind(this));
 }
@@ -332,7 +332,7 @@ function getStudentsInLicense(req, res){
             this.requestUtil.jsonResponse(res, output);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Students in License Error -",err);
+            console.errorExt("LicService", "Get Students in License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -399,7 +399,7 @@ function getBillingInfo(req, res){
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Customer Id Error -",err);
+            console.errorExt("LicService", "Get Customer Id Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -448,7 +448,7 @@ function updateBillingInfo(req, res){
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
-            console.error("Update Billing Info Error -",err);
+            console.errorExt("LicService", "Update Billing Info Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -535,7 +535,7 @@ function subscribeToLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Subscribe To License Error -",err);
+            console.errorExt("LicService", "Subscribe To License Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -630,7 +630,7 @@ function subscribeToTrialLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Subscribe To Trial License Error -",err);
+            console.errorExt("LicService", "Subscribe To Trial License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -809,7 +809,7 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
             }
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade License Error -",err);
+            console.errorExt("LicService", "Upgrade License Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -910,7 +910,7 @@ function upgradeTrialLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade Trial License Error -",err);
+            console.errorExt("LicService", "Upgrade Trial License Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -1045,7 +1045,7 @@ function validatePromoCode(req, res) {
             this.requestUtil.jsonResponse(res, promoCodeInfo);
         }.bind(this))
         .then(null, function(err) {
-            console.error("Validate Promo Code Error -",err);
+            console.errorExt("LicService", "Validate Promo Code Error -",err);
             this.requestUtil.errorResponse(res, {key: "lic.promoCode.invalid"});
         }.bind(this));
 }
@@ -1084,7 +1084,7 @@ function cancelLicenseAutoRenew(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel License Error -",err);
+            console.errorExt("LicService", "Cancel License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1151,7 +1151,7 @@ function enableLicenseAutoRenew(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Renew License Error -",err);
+            console.errorExt("LicService", "Renew License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1406,7 +1406,7 @@ function addTeachersToLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Add Teachers to License Error - ",err);
+            console.errorExt("LicService", "Add Teachers to License Error - ",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1450,7 +1450,7 @@ function setLicenseMapStatusToActive(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok" }, 200);
         }.bind(this))
         .then(null, function(err){
-            console.error("Set License Map Status to Active Error -",err);
+            console.errorExt("LicService", "Set License Map Status to Active Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1502,7 +1502,7 @@ function removeTeacherFromLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Remove Teacher From License Error -",err);
+            console.errorExt("LicService", "Remove Teacher From License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1565,7 +1565,7 @@ function teacherLeavesLicense(req, res){
             this.requestUtil.jsonResponse(res, { status: 'success' });
         }.bind(this))
         .then(null, function(err){
-            console.error("Teacher Leaves License Error -",err);
+            console.errorExt("LicService", "Teacher Leaves License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1648,7 +1648,7 @@ function subscribeToLicensePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Subscribe to License Purchase Order Error -",err);
+            console.errorExt("LicService", "Subscribe to License Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1674,7 +1674,7 @@ function _createStripeCustomer(userId, params){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Create Customer Id Error -",err);
+                console.errorExt("LicService", "Create Customer Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -1809,7 +1809,7 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                 resolve(licenseId);
             })
             .then(null, function(err){
-                console.error("Purchase Order Subscribe Error -",err);
+                console.errorExt("LicService", "Purchase Order Subscribe Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -1946,7 +1946,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade Trial License Purchase Order Error -",err);
+            console.errorExt("LicService", "Upgrade Trial License Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
     // email response
@@ -2029,7 +2029,7 @@ function upgradeLicensePurchaseOrder(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade License Purchase Order Error -",err);
+            console.errorExt("LicService", "Upgrade License Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2079,7 +2079,7 @@ function getActivePurchaseOrderInfo(req, res){
             this.requestUtil.jsonResponse(res, output);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Active Purchase Order Info Error -",err);
+            console.errorExt("LicService", "Get Active Purchase Order Info Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2096,7 +2096,7 @@ function getOpenPurchaseOrders(req, res) {
     		this.requestUtil.jsonResponse(res, results);
     	}.bind(this))
     	.then(null, function(err) {
-            console.error("Get Open Purchase Orders Error -",err);
+            console.errorExt("LicService", "Get Open Purchase Orders Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }
@@ -2113,7 +2113,7 @@ function getNotOpenPurchaseOrders(req, res) {
     		this.requestUtil.jsonResponse(res, results);
     	}.bind(this))
     	.then(null, function(err) {
-            console.error("Get Not Open Purchase Orders Error -",err);
+            console.errorExt("LicService", "Get Not Open Purchase Orders Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }
@@ -2130,7 +2130,7 @@ function getOpenPurchaseOrderForUser( req, res ) {
     		this.requestUtil.jsonResponse(res, results);
     	}.bind(this))
     	.then(null, function(err) {
-            console.error("Get Open Purchase Order For User Error -",err);
+            console.errorExt("LicService", "Get Open Purchase Order For User Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }
@@ -2183,7 +2183,7 @@ function cancelActivePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel Active Purchase Order Error -",err);
+            console.errorExt("LicService", "Cancel Active Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key:"lic.general"});
         }.bind(this));
 }
@@ -2257,7 +2257,7 @@ function setLicenseMapStatusToNull(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Set Instructor License Map Status To Null Error -",err);
+            console.errorExt("LicService", "Set Instructor License Map Status To Null Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2375,7 +2375,7 @@ function rejectPurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok "});
         }.bind(this))
         .then(null, function(err){
-            console.error("Reject Purchase Order Error -",err);
+            console.errorExt("LicService", "Reject Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2521,7 +2521,7 @@ function receivePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok "});
 		}.bind(this) )
         .then(null, function(err){
-            console.error("Received Purchase Order Error -",err);
+            console.errorExt("LicService", "Received Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -2562,7 +2562,7 @@ function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expiration
                 resolve();
             })
             .then(null, function(err){
-                console.error("Received Subscribe Purchase Order Error -",err);
+                console.errorExt("LicService", "Received Subscribe Purchase Order Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2594,7 +2594,7 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Received Trial Upgrade Purchase Order -",err);
+                console.errorExt("LicService", "Received Trial Upgrade Purchase Order -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2651,7 +2651,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Received Upgrade Purchase Order -",err);
+                console.errorExt("LicService", "Received Upgrade Purchase Order -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2728,7 +2728,7 @@ function invoicePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Invoice Purchase Order Error -",err);
+            console.errorExt("LicService", "Invoice Purchase Order Error -",err);
             this.requestUtil.errorReponse(res, err);
         }.bind(this));
 }
@@ -2822,7 +2822,7 @@ function approvePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Approve Purchase Order Error -",err);
+            console.errorExt("LicService", "Approve Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -2862,7 +2862,7 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
                 resolve([ownerData, billerData]);
             }.bind(this))
             .then(null, function(err){
-                console.error("Gather Purchase Order Email Data Error -",err);
+                console.errorExt("LicService", "Gather Purchase Order Email Data Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2892,7 +2892,7 @@ function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId
                 resolve();
             })
             .then(null, function(err){
-                console.error("Reject Purchase Order Request Error -",err);
+                console.errorExt("LicService", "Reject Purchase Order Request Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -2917,7 +2917,7 @@ function _switchToPurchaseOrder(userId, licenseId){
             resolve();
         })
         .then(null, function(err){
-            console.error("Switch to Purchase Order Error -",err);
+            console.errorExt("LicService", "Switch to Purchase Order Error -",err);
             reject(err);
         });
     }.bind(this));
@@ -2938,7 +2938,7 @@ function _switchToCreditCard(licenseId){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Switch to Credit Card Error -",err);
+                console.errorExt("LicService", "Switch to Credit Card Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2992,7 +2992,7 @@ function migrateToTrialLegacy(req, res){
                             resolve()
                         })
                         .then(null, function(err){
-                            console.error("Create Trial Legacy User Error -", err);
+                            console.errorExt("LicService", "Create Trial Legacy User Error -", err);
                             err.errorUserId = userId;
                             err.instructors = instructors;
                             err.index = index;
@@ -3027,7 +3027,7 @@ function migrateToTrialLegacy(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
         .then(null, function(err){
-            console.error("Migrate to Trial Legacy Error -",err);
+            console.errorExt("LicService", "Migrate to Trial Legacy Error -",err);
             this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
 }
@@ -3112,7 +3112,7 @@ function cancelLicense(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel License Error -", err);
+            console.errorExt("LicService", "Cancel License Error -", err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -3187,7 +3187,7 @@ function cancelLicenseInternal(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel License Internal Error -",err);
+            console.errorExt("LicService", "Cancel License Internal Error -",err);
             this.requestUtil.jsonResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -3349,7 +3349,7 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
-            console.error("Subscribe to License Purchase Order Internal Error -",err);
+            console.errorExt("LicService", "Subscribe to License Purchase Order Internal Error -",err);
         }.bind(this));
 }
 
@@ -3439,7 +3439,7 @@ function inspectLicenses(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Inspect Licenses Error -",err);
+            console.errorExt("LicService", "Inspect Licenses Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -3517,7 +3517,7 @@ function _expireLicense(license, protocol, host){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Expire License Error -",err);
+                console.errorExt("LicService", "Expire License Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -3577,7 +3577,7 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Renew License Error -",err);
+                console.errorExt("LicService", "Renew License Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -3619,12 +3619,12 @@ function _expiringSoonEmails(userId, licenseId, daysToGo, expDate, isTrial, prot
                         resolve();
                     })
                     .then(null, function(err){
-                        console.error("Expiring Soon Emails Error -", err);
+                        console.errorExt("LicService", "Expiring Soon Emails Error -", err);
                         reject(err);
                     }.bind(this));
             }.bind(this))
             .then(null, function(err){
-                console.error("Expiring Soon Emails Error -", err);
+                console.errorExt("LicService", "Expiring Soon Emails Error -", err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -3684,7 +3684,7 @@ function trialMoveToTeacher(req, res){
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, { key: "lic.general"});
-            console.error("Trial Move To Teacher Error -",err);
+            console.errorExt("LicService", "Trial Move To Teacher Error -",err);
         }.bind(this));
 }
 
@@ -3739,7 +3739,7 @@ function _storeSchoolInformation(schoolInfo){
                 resolve(institutionId);
             })
             .then(null, function(err){
-                console.error("Store School Information Error -", err);
+                console.errorExt("LicService", "Store School Information Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -3811,7 +3811,7 @@ function _createSubscription(req, userId, schoolInfo, stripeInfo, planInfo){
                 resolve({"expirationDate": expirationDate});
             })
             .then(null, function(err){
-                console.error("Create Subscription Error -",err);
+                console.errorExt("LicService", "Create Subscription Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -3870,7 +3870,7 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
                 resolve(output);
             })
             .then(null, function(err){
-                console.error("Carry Out Stripe Transaction Error -",err);
+                console.errorExt("LicService", "Carry Out Stripe Transaction Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -4000,7 +4000,7 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                 resolve(licenseId);
             })
             .then(null, function(err){
-                console.error("Create License Error -",err);
+                console.errorExt("LicService", "Create License Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -4024,7 +4024,7 @@ function _updateStripeSubscription(customerId, subscriptionId, params, autoRenew
                 resolve()
             })
             .then(null, function(err){
-                console.error("Upgrade Stripe Subscription Error -",err);
+                console.errorExt("LicService", "Upgrade Stripe Subscription Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -4117,7 +4117,7 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
                 resolve(status);
             })
             .then(null, function(err){
-                console.error("Unassign Premium Courses When Upgrading Error -",err);
+                console.errorExt("LicService", "Unassign Premium Courses When Upgrading Error -",err);
                 reject(err)
             })
     }.bind(this));
@@ -4156,7 +4156,7 @@ function _cancelAutoRenew(userId, licenseId){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Cancel Auto Renew Error -", err);
+                console.errorExt("LicService", "Cancel Auto Renew Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -4222,7 +4222,7 @@ function _endLicense(userId, licenseId, autoRenew){
                 resolve(emailList);
             }.bind(this))
             .then(null, function(err){
-                console.error("End License Error -",err);
+                console.errorExt("LicService", "End License Error -",err);
                 reject(err);
             });
     }.bind(this))
@@ -4421,7 +4421,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 resolve(emails);
             })
             .then(null, function(err){
-                console.error("Remove Instructor From License Error -",err);
+                console.errorExt("LicService", "Remove Instructor From License Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -4460,7 +4460,7 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 resolve(state);
             })
             .then(null, function (err) {
-                console.error('Validate License Instructor Access Error - ', err);
+                console.errorExt("LicService", 'Validate License Instructor Access Error - ', err);
                 reject(err);
             });
     }.bind(this));
@@ -4494,7 +4494,7 @@ function _validateLicenseUpgradeTrial(userId, licenseId) {
                 resolve(state);
             })
             .then(null, function (err) {
-                console.error('Validate License Instructor Access Error - ', err);
+                console.errorExt("LicService", 'Validate License Instructor Access Error - ', err);
                 reject(err);
             });
     }.bind(this));
@@ -4642,7 +4642,7 @@ function _sendEmailResponse(email, data, protocol, host, template){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Send Email Response Error -",err);
+                console.errorExt("LicService", "Send Email Response Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -4676,7 +4676,7 @@ function verifyLicense(req, res, next) {
             }.bind(this))
 
             .then(null, function(err) {
-                console.error("LicService - verifyLicense:", err);
+                console.errorExt("LicService", "verifyLicense -", err);
                 this.requestUtil.errorResponse(res, {error:"server error", key:"server.error"}, 500);
             }.bind(this));
 
@@ -4815,7 +4815,7 @@ function registerLicense(req, res, next) {
 
             // catch all errors
             .then(null, function(err) {
-                console.error("LicService - registerLicense:", err);
+                console.errorExt("LicService", "registerLicense -", err);
                 this.requestUtil.errorResponse(res, {error:"server error", key:"server.error"}, 500);
             }.bind(this));
 
