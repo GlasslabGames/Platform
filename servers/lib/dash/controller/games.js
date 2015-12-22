@@ -835,10 +835,10 @@ function updateDeveloperGameInfo(req, res){
             } else if (role === "developer") {
                 return getDeveloperGameIds.call(this, userId)
                     .then(function(gameIds){
-                        if(!gameIds[gameId]){
-                            return when.reject({key:"dash.access.invalid", reason:"developer not approved for game "+gameId});
+                        if(gameIds[gameId]){
+                            return when.resolve(role);
                         }
-                        return when.resolve(role);
+                        return when.reject({key:"dash.access.invalid", reason:"developer not approved for game "+gameId});
                     }.bind(this));
             } else {
                 return when.reject({key:"dash.access.invalid"});
@@ -869,14 +869,14 @@ function updateDeveloperGameInfo(req, res){
             return this.telmStore.updateGameInformation(gameId, validationResult);
         }.bind(this))
 
-        .done(function(status){
-            this.requestUtil.jsonResponse(res, {update: "complete"});
-        }.bind(this))
-
         .catch(function(err){
             console.error("Dash: Update Developer Game Info Error -", err);
             this.requestUtil.errorResponse(res, {update: "failed", error: err}, 401);
             this.stats.increment("error", "UpdateDeveloperGameInfo.Catch");
+        }.bind(this))
+
+        .done(function(status){
+            this.requestUtil.jsonResponse(res, {update: "complete"});
         }.bind(this));
 }
 
