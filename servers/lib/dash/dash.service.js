@@ -241,7 +241,15 @@ DashService.prototype._isValidGameId = function(gameId){
 };
 
 DashService.prototype.validateGameInfo = function(data) {
-    return this._validate(data);
+    return when.promise(function(resolve, reject) {
+        setTimeout(function() {
+            if (this._validate(data)) {
+                resolve(data);
+            } else {
+                reject(this._validate.errors);
+            }
+        }.bind(this), 0);
+    }.bind(this));
 };
 
 // TODO: replace this with DB lookup, return promise
