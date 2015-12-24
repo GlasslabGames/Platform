@@ -758,15 +758,11 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
             }
             var promiseList = [{},{},{},{}];
             var updateFields = [];
-            var packageType = {package_type: planInfo.type};
-            updateFields.push(packageType);
-            var packageSizeTier = {package_size_tier: planInfo.seats};
-            updateFields.push(packageSizeTier);
-            var lastUpgradedString = {last_upgraded: new Date()};
-            updateFields.push(lastUpgradedString);
+            updateFields.push({package_type: planInfo.type});
+            updateFields.push({package_size_tier: planInfo.seats});
+            updateFields.push({last_upgraded: new Date()});
             if(promoCode){
-                var promoCodeString = {promo: planInfo.promoCode};
-                updateFields.push(promoCodeString);
+                updateFields.push({promo: planInfo.promoCode});
             }
             promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
             var seats = {};
@@ -2201,8 +2197,7 @@ function setLicenseMapStatusToNull(req, res){
                 return status;
             }
             var userIdList = [req.user.id];
-            var statusString = {status: null};
-            var updateFields = [statusString];
+            var updateFields = [{status: null}];
 
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
@@ -2521,24 +2516,16 @@ function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expiration
 
     return when.promise(function(resolve, reject) {
         var updateFields = [];
-        var active = {active: 1};
-        updateFields.push(active);
+        updateFields.push({active: 1});
 
         // NOTE: KMY: All new subscriptions will use the new format now
-        var seats = {package_size_tier: "_" + planInfo.students + "_" + planInfo.educators};
-        updateFields.push(seats);
-
-        var educatorSeatsRemaining = {educator_seats_remaining: planInfo.educators};
-        updateFields.push(educatorSeatsRemaining);
-        var studentSeatsRemaining = {student_seats_remaining: planInfo.students};
-        updateFields.push(studentSeatsRemaining);
-        var plan = {package_type: planInfo.type};
-        updateFields.push(plan);
-        var expirationDateString = {expiration_date: expirationDate};
-        updateFields.push(expirationDateString);
+        updateFields.push({package_size_tier: "_" + planInfo.students + "_" + planInfo.educators});
+        updateFields.push({educator_seats_remaining: planInfo.educators});
+        updateFields.push({student_seats_remaining: planInfo.students});
+        updateFields.push({package_type: planInfo.type});
+        updateFields.push({expiration_date: expirationDate});
         if(planInfo.promoCode){
-            var promoString = {promo: planInfo.promoCode};
-            updateFields.push(promoString);
+            updateFields.push({promo: planInfo.promoCode});
         }
 
         this.myds.updateLicenseById(licenseId, updateFields)
@@ -3252,8 +3239,7 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
                 if(map.status === "active"){
                     promiseList[0] = this.myds.getLicenseById(licenseId);
                 } else{
-                    var statusString = {status: null};
-                    var updateFields = [statusString];
+                    var updateFields = [{status: null}];
                     promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [user.id], updateFields);
                 }
             }.bind(this));
@@ -3649,8 +3635,7 @@ function trialMoveToTeacher(req, res){
                 return status;
             }
             var updateFields = [];
-            var statusString = {status: "active"};
-            updateFields.push(statusString);
+            updateFields.push({status: "active"});
             return this.myds.updateLicenseMapByLicenseInstructor(inviteLicenseId,[userId], updateFields);
         }.bind(this))
         .then(function(){
