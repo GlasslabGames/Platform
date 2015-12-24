@@ -429,7 +429,7 @@ TelemDS_Mysql.prototype.disableArchiveEvents = function(ids){
 // add promise wrapper
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-        var Q = "UPDATE GL_ACTIVITY_EVENTS_ARCHIVE SET version=-1 WHERE id IN ("+ids.join(',')+")";
+        var Q = "UPDATE GL_ACTIVITY_EVENTS_ARCHIVE SET version=-1 WHERE id IN ("+this.ds.escape(ids)+")";
         //console.log('Q:', Q);
 
         this.ds.query(Q).then( resolve, reject );
@@ -481,7 +481,7 @@ TelemDS_Mysql.prototype.getSessionsByUserId = function(userId) {
     return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-        var Q = "SELECT session_id as sessionId FROM GL_SESSION WHERE activity_id IS NOT NULL AND user_id="+userId;
+        var Q = "SELECT session_id as sessionId FROM GL_SESSION WHERE activity_id IS NOT NULL AND user_id="+this.ds.escape(userId);
         this.ds.query(Q)
             .then(
                 function(data) {
@@ -597,8 +597,7 @@ return when.promise(function(resolve, reject) {
 
 TelemDS_Mysql.prototype.getUsersByIds = function(ids){
     return when.promise(function(resolve, reject){
-        var idsString = ids.join(',');
-        var Q = "SELECT * FROM GL_USER WHERE id in (" + idsString +  ");";
+        var Q = "SELECT * FROM GL_USER WHERE id in (" + this.ds.escape(ids) +  ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);

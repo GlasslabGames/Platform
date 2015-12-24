@@ -158,7 +158,7 @@ function getMorganLogger(options, stats){
 
         // status is null
         if(!status) {
-            console.error("Error null status for response!!!");
+            console.warnExt("Util", "Error null status for response!!!");
             status = "";
         }
 
@@ -204,6 +204,8 @@ module.exports = {
     Email:              require('./util.email.js'),
     S3Util:             require('./util.s3.js'),
     StripeUtil:         require('./util.stripe.js'),
+    LogUtil:            require('./util.log.js'),
+
     ConvertToString:    convertToString,
     PromiseContinue:    promiseContinue,
     PromiseError:       promiseError,
@@ -242,7 +244,7 @@ function updateSession(req){
                 resolve()
             });
         } catch(err){
-            console.error("Session Reload Error -",err);
+            console.errorExt("Util", "Session Reload Error -",err);
             reject(err);
         }
     }.bind(this));

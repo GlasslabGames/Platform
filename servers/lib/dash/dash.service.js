@@ -135,7 +135,7 @@ function _buildLicPackages(){
                 return;
             }
             if(!gameInfo.packages){
-                console.error("DashService: _buildLicPackages - gameInfo does not have packages defined", gameInfo.gameId);
+                console.warnExt("DashService", "_buildLicPackages - gameInfo does not have packages defined", gameInfo.gameId);
                 return;
             }
             var packages = gameInfo.packages.split(", ");
@@ -241,7 +241,15 @@ DashService.prototype._isValidGameId = function(gameId){
 };
 
 DashService.prototype.validateGameInfo = function(data) {
-    return this._validate(data);
+    return when.promise(function(resolve, reject) {
+        setTimeout(function() {
+            if (this._validate(data)) {
+                resolve(data);
+            } else {
+                reject(this._validate.errors);
+            }
+        }.bind(this), 0);
+    }.bind(this));
 };
 
 // TODO: replace this with DB lookup, return promise
@@ -524,7 +532,7 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
                                         delete require.cache[filePath];
                                         gameData = require(filePath);
                                     } catch(err) {
-                                        console.error("migrateGameFiles filePath:", filePath, ", Error:", err);
+                                        console.errorExt("DashService", "migrateGameFiles filePath:", filePath, ", Error:", err);
                                     }
                                     if(name === 'info'){
                                         promiseList.push(this.telmStore.createGameInformation(gameId, gameData));
@@ -544,7 +552,7 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
                     reject(err);
                 }.bind(this));
         } catch(err) {
-            console.error("DashService: Migrate Game Files Error -", err);
+            console.errorExt("DashService", "Migrate Game Files Error -", err);
             reject(err);
         }
     }.bind(this));
@@ -603,7 +611,7 @@ DashService.prototype._loadGameFiles = function(){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("DashService: Load Game Files Error -", err);
+                console.errorExt("DashService", "Load Game Files Error -", err);
                 reject(err);
             }.bind(this));
 
@@ -655,7 +663,7 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
 
                         // add achievements to 'achievements' reports
                         for (var i = 0; i < list.length; i++) {
-                            if (_.isObject(list[i]) &&
+                            if (_.isObject(list[i]) && list[i].id &&
                                 list[i].id === 'achievements') {
                                 this._games[gameId].info.reports.list[i].achievements = achievements[index++];
                                 break;
@@ -722,7 +730,7 @@ DashService.prototype._oldLoadGameFiles = function() {
                             try {
                                 this._games[gameId][name] = require(filePath);
                             } catch(err) {
-                                console.error("loadGameFiles filePath:", filePath, ", Error:", err);
+                                console.errorExt("DashService", "loadGameFiles filePath:", filePath, ", Error:", err);
                             }
                         }
                     }.bind(this));
@@ -786,10 +794,10 @@ DashService.prototype._oldLoadGameFiles = function() {
                     resolve();
                 }.bind(this))
                 .then(null, function(err){
-                    console.error("DashService: Load Game Files Error -", err);
+                    console.errorExt("DashService", "Load Game Files Error -", err);
                 }.bind(this));
         } catch(err) {
-            console.error("DashService: Load Game Files Error -", err);
+            console.errorExt("DashService", "Load Game Files Error -", err);
         }
 
 // ------------------------------------------------

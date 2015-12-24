@@ -178,7 +178,7 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
 
                     }.bind(this))
                     .then(null,function(){
-                        console.error("Get SOWO Error - Key is not defined in database");
+                        console.errorExt("DashService", "Get SOWO Error - Key is not defined in database");
                     }.bind(this));
 
                 promiseList.push(p);
@@ -473,7 +473,7 @@ function _getMissionProgress(req, res, reportId, gameId, courseId) {
             }.bind(this))
             // catch all errors
             .then(null, function(err){
-                console.error("getMissionProgress Error:", err);
+                console.errorExt("DashService", "getMissionProgress Error -", err);
                 this.requestUtil.errorResponse(res, {key:"report.general"});
             }.bind(this));
         }.bind(this));
@@ -540,7 +540,7 @@ return when.promise(function(resolve, reject) {
             resolve(userData);
         }.bind(this))
         .then(null,function(err){
-            console.error("getMissionTimePlayed Error:", err);
+            console.errorExt("DashService", "getMissionTimePlayed Error -", err);
             this.requestUtil.errorResponse(res, {key:"report.general"});
         }.bind(this));
 
@@ -607,7 +607,7 @@ function _getCompetency(req, res, reportId, gameId, courseId) {
                         return outAssessmentData;
                     }.bind(this))
                     .then(null,function(err){
-                        console.error("Get Competency Error - Key is not defined in database");
+                        console.errorExt("DashService", "Get Competency Error - Key is not defined in database");
                         p = 'reject';
                     });
                 if(p !== 'reject'){
@@ -685,7 +685,7 @@ function _getStandards(req, res, reportId, gameId, courseId) {
 
                     }.bind(this))
                     .then(null, function(err){
-                        console.error("Get Standards Error 1 -", err);
+                        console.errorExt("DashService", "Get Standards Error 1 -", err);
                     }.bind(this));
 
                 promiseList.push(p);
@@ -697,12 +697,12 @@ function _getStandards(req, res, reportId, gameId, courseId) {
                 }.bind(this))
                 .then(null, function(err){
                     // give some error code
-                    console.error("Get Standards Error 2 -", err);
+                    console.errorExt("DashService", "Get Standards Error 2 -", err);
                     this.requestUtil.errorResponse(res, { key: "dash.general"});
                 }.bind(this));
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Standards Error 3 -", err);
+            console.errorExt("DashService", "Get Standards Error 3 -", err);
             this.requestUtil.errorResponse(res, { key: "dash.general"});
         }.bind(this));
 }

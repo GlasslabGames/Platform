@@ -282,7 +282,7 @@ function approveDeveloperGame(req, res) {
         this.options.gameDevelopers.submissionAPI &&
         this.options.gameDevelopers.submissionAPI.destination))
     {
-        console.error("Dash: approveDeveloperGame Error - destination not configured");
+        console.errorExt("DashService", "approveDeveloperGame Error - destination not configured");
         this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         return;
     }
@@ -324,12 +324,12 @@ function approveDeveloperGame(req, res) {
                 console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
                 this.requestUtil.jsonResponse(res, {status: "ok"});
             } else {
-                console.error("Dash: approveDeveloperGame Error - ", result);
+                console.errorExt("DashService", "approveDeveloperGame Error - ", result);
                 this.requestUtil.errorResponse(res, {key:"dash.general"},500);
             }
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: approveDeveloperGame Error - ", err);
+            console.errorExt("DashService", "approveDeveloperGame Error - ", err);
             this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         }.bind(this));
 }
@@ -344,7 +344,7 @@ function rejectDeveloperGame(req, res) {
         this.options.gameDevelopers.submissionAPI &&
         this.options.gameDevelopers.submissionAPI.destination))
     {
-        console.error("Dash: approveDeveloperGame Error - destination not configured");
+        console.errorExt("DashService", "approveDeveloperGame Error - destination not configured");
         this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         return;
     }
@@ -396,12 +396,12 @@ function rejectDeveloperGame(req, res) {
                 console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
                 this.requestUtil.jsonResponse(res, {status: "ok"});
             } else {
-                console.error("Dash: approveDeveloperGame Error - ", result);
+                console.errorExt("DashService", "approveDeveloperGame Error - ", result);
                 this.requestUtil.errorResponse(res, {key:"dash.general"},500);
             }
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: approveDeveloperGame Error - ", err);
+            console.errorExt("DashService", "approveDeveloperGame Error - ", err);
             this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         }.bind(this));
 }
@@ -422,7 +422,7 @@ function requestInfoDeveloperGame(req, res) {
         this.requestUtil.jsonResponse(res, {status: "ok"});
     }.bind(this))
     .catch(function(err) {
-        console.error("Dash: requestInfoDeveloperGame Error - ", err);
+        console.errorExt("DashService", "requestInfoDeveloperGame Error - ", err);
         this.requestUtil.errorResponse(res, {key:"dash.general"},500);
     }.bind(this));
 }
@@ -454,7 +454,7 @@ function sendDeveloperGameApprovedEmail(gameId, protocol, host) {
     }.bind(this))
     // error
     .then(null, function(err){
-        console.error('failed to send email:',  err);
+        console.errorExt("DashService", 'failed to send email -',  err);
     }.bind(this))
 }
 
@@ -486,7 +486,7 @@ function sendDeveloperGameRejectedEmail(gameId, action, reason, protocol, host) 
     }.bind(this))
     // error
     .then(null, function(err){
-        console.error('failed to send email:',  err);
+        console.errorExt("DashService", "failed to send email -",  err);
     }.bind(this))
 }
 
@@ -518,7 +518,7 @@ function sendDeveloperGameRequestInfoEmail(gameId, reason, protocol, host) {
     }.bind(this))
     // error
     .then(null, function(err){
-        console.error('failed to send email:',  err);
+        console.errorExt("DashService", 'failed to send email -',  err);
     }.bind(this))
 }
 

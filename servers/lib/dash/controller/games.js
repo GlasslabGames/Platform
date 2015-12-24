@@ -1,9 +1,13 @@
 var _         = require('lodash');
 var when      = require('when');
+var fn        = require('when/function');
 //
 var Util      = require('../../core/util.js');
 var dConst    = require('../dash.const.js');
 var fs = require('fs');
+var multiparty = require('multiparty');
+var mmm = require('mmmagic'),
+    Magic = mmm.Magic;
 
 module.exports = {
     getActiveGamesBasicInfo:         getActiveGamesBasicInfo,
@@ -19,6 +23,7 @@ module.exports = {
     badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
     replaceGameInfo:                 replaceGameInfo,
+    uploadGameImage:                 uploadGameImage,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
     getDeveloperGamesInfo:           getDeveloperGamesInfo,
@@ -120,7 +125,7 @@ function getPlanLicenseGamesBasicInfo(req, res){
             this.requestUtil.jsonResponse(res, outGames);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get License Games Basic Info Error -",err);
+            console.errorExt("DashService", "Get License Games Basic Info Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -167,7 +172,7 @@ function getAvailableGamesObj(req, res){
             this.requestUtil.jsonResponse(res, availableGames);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Available Game Map Error -",err);
+            console.errorExt("DashService", "Get Available Game Map Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -186,7 +191,7 @@ function getGamesBasicInfoByPlan(req, res){
             this.requestUtil.jsonResponse(res, outGames);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Games Basic Info By Plan Error -",err);
+            console.errorExt("DashService", "Get Games Basic Info By Plan Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -220,7 +225,7 @@ function _getPlanGamesBasicInfo(type){
                 resolve([gamesInfo, availableGames]);
             })
             .then(null, function(err){
-                console.error("Get Plan Games Basic Info Error -",err);
+                console.errorExt("DashService", "Get Plan Games Basic Info Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -642,7 +647,7 @@ function createNewGame(req, res){
                         return this.telmStore.createGameInformation(gameId, gameData);
                     }.bind(this))
                     .catch(function(err) {
-                        console.error("createNewGame Error Updating Profile", err);
+                        console.errorExt("DashService", "createNewGame Error Updating Profile", err);
                         this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
                     }.bind(this))
                     .done(function() {
@@ -655,7 +660,7 @@ function createNewGame(req, res){
             }
         }.bind(this))
         .catch(function (err) {
-            console.error("createNewGame Error", err);
+            console.errorExt("DashService", "createNewGame Error", err);
             this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }
@@ -680,7 +685,7 @@ function submitGameForApproval(req, res){
             this.requestUtil.jsonResponse(res, {status: "ok"});
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: submitGameForApproval Error", err);
+            console.errorExt("DashService", "submitGameForApproval Error", err);
             var errKey = (typeof err === 'string' ? errKey = err : "dash.general");
             this.requestUtil.errorResponse(res, {key: errKey}, 500);
         }.bind(this));
@@ -721,7 +726,7 @@ function getAllDeveloperGamesAwaitingApproval(req, res){
             this.requestUtil.jsonResponse(res, games);
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: getAllDeveloperGamesAwaitingApproval Error", err);
+            console.errorExt("DashService", "getAllDeveloperGamesAwaitingApproval Error", err);
             this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }
@@ -763,7 +768,7 @@ function getAllDeveloperGamesRejected(req, res){
             this.requestUtil.jsonResponse(res, games);
         }.bind(this))
         .catch(function(err) {
-            console.error("Dash: getAllDeveloperGamesRejected Error", err);
+            console.errorExt("DashService", "getAllDeveloperGamesRejected Error", err);
             this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }
@@ -784,10 +789,12 @@ function getDeveloperGamesInfo(req, res){
                         if (gameInfo && gameInfo.basic) {
                             basicGameInfo[gameId] = gameInfo.basic;
                         }
+                    }, function(err) {
+                        // ignore
                     });
             }.bind(this))
                 .catch(function (err) {
-                    console.error("Dash: Get Developer Profile Error basicGameInfo", err);
+                    console.errorExt("DashService", "Get Developer Profile Error basicGameInfo", err);
                     this.requestUtil.errorResponse(res, err);
                 }.bind(this))
                 .done(function (result) {
@@ -820,47 +827,56 @@ function getDeveloperGameInfo(req, res) {
 function updateDeveloperGameInfo(req, res){
     var userId = req.user.id;
     var gameId = req.params.gameId;
-    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
-        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
-        return;
-    }
-    try {
-        var data = JSON.parse(req.body.jsonStr);
-    } catch(err) {
-        this.requestUtil.errorResponse(res, {key:"dash.info.malformed"});
-        return;
-    }
 
-    if (!this.validateGameInfo(data)) {
-        this.requestUtil.errorResponse(res, {key:"dash.data.invalid"},500);
-        return;
-    }
-
-    getDeveloperGameIds.call(this,userId)
-        .then(function(gameIds){
-            if(!gameIds[gameId]){
-                return "no access";
-            }
-            //_writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
-            return this.telmStore.updateGameInformation(gameId, data);
-        }.bind(this))
-        .then(function(status){
-            if(status !== "no object" && status !== "no access"){
-                //this.buildGameForGamesObject(data, gameId);
-                res.end('{"update":"complete"}');
-            } else{
-                this.requestUtil.errorResponse(res, {key:"dash.access.invalid"});
+    when(req.user.role)
+        .then(function(role) {
+            if (role === "admin") {
+                return when.resolve(role);
+            } else if (role === "developer") {
+                return getDeveloperGameIds.call(this, userId)
+                    .then(function(gameIds){
+                        if(gameIds[gameId]){
+                            return when.resolve(role);
+                        }
+                        return when.reject({key:"dash.access.invalid", reason:"developer not approved for game "+gameId});
+                    }.bind(this));
+            } else {
+                return when.reject({key:"dash.access.invalid"});
             }
         }.bind(this))
-        .then(null, function(err){
-            var error = {
-                update: "failed",
-                error: err
-            };
-            error = JSON.stringify(error);
-            console.trace("Dash: Update Developer Game Info Error -", err);
-            this.requestUtil.errorResponse(res, error, 401);
+
+        .then(function(permissionCheckResult) {
+            return fn.call(JSON.parse, req.body.jsonStr)
+                .catch(function(err) {
+                    return when.reject({key:"dash.data.invalid", reason: err.toString()});
+                });
+        }.bind(this))
+
+        .then(function(jsonParseResult) {
+            if (gameId && gameId === jsonParseResult.basic.gameId) {
+                return when.resolve(jsonParseResult);
+            }
+            return when.reject({key:"dash.gameId.invalid"});
+        }.bind(this))
+
+        .then(function(jsonParseResult) {
+            return this.validateGameInfo(jsonParseResult);
+        }.bind(this))
+
+        .then(function(validationResult){
+            //uncommented out for testing
+            //_writeToInfoJSONFiles(gameId, JSON.stringify(validationResult, null, 4));
+            return this.telmStore.updateGameInformation(gameId, validationResult);
+        }.bind(this))
+
+        .catch(function(err){
+            console.error("Dash: Update Developer Game Info Error -", err);
+            this.requestUtil.errorResponse(res, {update: "failed", error: err}, 401);
             this.stats.increment("error", "UpdateDeveloperGameInfo.Catch");
+        }.bind(this))
+
+        .done(function(status){
+            this.requestUtil.jsonResponse(res, {update: "complete"});
         }.bind(this));
 }
 
@@ -901,6 +917,63 @@ function _writeToInfoJSONFiles(gameId, data){
             resolve();
         });
     });
+}
+
+function uploadGameImage(req, res) {
+    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    var gameId = req.params.gameId;
+
+    var form = new multiparty.Form();
+    form.parse(req, function(err, fields, files) {
+        if(err) {
+            console.errorExt("DashService", "uploadGameImage formParse Error -", err);
+            this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        }
+
+        _.forEach(files, function(file, key) {
+            if(_.isArray(file) && file[0]) {
+                file = file[0];
+            } else {
+                this.requestUtil.errorResponse(res, {key:"dash.info.missing"},500);
+            }
+
+            var data = fs.readFileSync(file.path);
+
+            var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+            magic.detect(data, function(err, mimeType) {
+                if(err) {
+                    this.requestUtil.errorResponse(res, {key:"dash.info.missing"},500);
+                    throw err;
+                }
+                console.log(mimeType);
+                if (['image/png', 'image/jpeg'].indexOf(mimeType) === -1) {
+                    this.requestUtil.errorResponse(res, {key:"dash.type.invalid"},500);
+                    return;
+                }
+
+                var fileName = gameId + "/images/" + file.fieldName + "." + file.originalFilename;
+                var extraParams = {
+                    ACL: "public-read",
+                    ContentType: mimeType
+                };
+
+                this.serviceManager.awss3.createS3Object( fileName, data, extraParams, "playfully-games" )
+                    .then(function(){
+
+                        this.requestUtil.jsonResponse(res, {path: "https://s3-us-west-1.amazonaws.com/playfully-games/" + fileName});
+                    }.bind(this))
+                    .catch(function(err){
+                        console.errorExt("DashService", "uploadGameImage putS3Object Error -", err);
+                        this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+                    }.bind(this));
+
+            }.bind(this));
+        }.bind(this));
+    }.bind(this));
 }
 
 function getBadgeJSON(req, res){
@@ -993,7 +1066,7 @@ function generateBadgeCode( req, res ) {
                 }.bind(this))
                 .then(null, function(err){
                     this.stats.increment("error", "Route.Update.User");
-                    console.error("Auth - updateUserBadgeList error:", err);
+                    console.errorExt("DashService", "updateUserBadgeList error:", err);
                     this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
                 }.bind(this));
         }.bind(this));

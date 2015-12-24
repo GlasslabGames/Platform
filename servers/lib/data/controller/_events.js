@@ -61,7 +61,7 @@ function getUserEvents(req, res, next){
 
                     // error
                     .then(null, function(err){
-                        console.error("err:", err);
+                        console.errorExt("DataService", err);
                     }.bind(this));
 
             }.bind(this));
@@ -125,7 +125,7 @@ function addActivity(userId, gameId, gameSessionId) {
         })
         .then(null, function(err){
             if(err.code == 'ECONNREFUSED') {
-                console.error("Can not connect to Assessment Server, check if the server is running");
+                console.errorExt("DataService", "Can not connect to Assessment Server, check if the server is running");
             }
             return err;
         }.bind(this));

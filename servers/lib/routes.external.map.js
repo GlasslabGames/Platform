@@ -479,16 +479,17 @@ module.exports = {
             service: "dash",
             controller: "games",
             method: {
-                get: "getDeveloperGameInfo"
+                get: "getDeveloperGameInfo",
+                post: "updateDeveloperGameInfo"
             }
         },
         {
             requireAuth: true,
-            api: "/api/v2/dash/developer/info/game/:gameId",
+            api: "/api/v2/dash/developer/info/game/:gameId/image",
             service: "dash",
             controller: "games",
             method: {
-                post: "updateDeveloperGameInfo"
+                post: "uploadGameImage"
             }
         },
         {
@@ -1247,6 +1248,15 @@ module.exports = {
             }
         },
 */
+        // monitoring routes
+        {
+            api: "/api/v2/monitor/info",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "monitorInfo"
+            }
+        },
 
     // ---------------------------------------------------
     // Research

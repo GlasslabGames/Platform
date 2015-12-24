@@ -9,6 +9,7 @@ var Data           = require('./lib/data/data.js');
 var Dash           = require('./lib/dash/dash.js');
 var Admin          = require('./lib/admin/admin.js');
 // Research
+var Monitor        = require('./lib/monitor/monitor.js');
 
 var manager = new ServiceManager("~/hydra.config.json");
 
@@ -24,6 +25,7 @@ manager.add( Dash );
 manager.add( Data );
 manager.add( Admin );
 // Research
+manager.add( Monitor );
 
 manager.start();
 //manager.start(8002);

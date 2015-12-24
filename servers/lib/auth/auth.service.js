@@ -357,7 +357,7 @@ return when.promise(function(resolve, reject) {
 
         // catch all errors
         .then(null, function(err, code){
-            console.error("AuthAccount: AddOrFindUser Error -", err);
+            console.errorExt("AuthService", "addOrUpdate_SSO_UserData Error -", err);
             return reject(err, code);
         }.bind(this));
 // ------------------------------------------------
@@ -383,7 +383,7 @@ return when.promise(function(resolve, reject) {
             if(err.key === "course.notUnique.name"){
                 return this.lmsStore.getCourseInfoFromKey('lmsId', courseData.lmsId);
             } else {
-                console.error("addOrUpdate_SSO_Course Error:", err);
+                console.errorExt("AuthService", "addOrUpdate_SSO_Course Error:", err);
                 reject(err);
             }
         }.bind(this))

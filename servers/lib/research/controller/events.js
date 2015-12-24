@@ -637,7 +637,7 @@ function _archiveEventsByLimit(gameId, startDateTime, endDateTime, parsedSchemaD
                         } else {
                             // if all seconds in array were in the last second, do a manual pull on the data
                             manualSecond = new Date(lastSecond).toJSON();
-                            console.error( "Archiving: Number of Events at this second >= query limit:", manualSecond );
+                            console.errorExt("ResearchService", "Archiving - Number of Events at this second >= query limit:", manualSecond );
                             events = [];
                         }
                         updatedDateTime = moment(lastEventTime);
@@ -931,7 +931,7 @@ function getEventsByDate(req, res, next){
                 endDate = moment(startDate).add(endDate);
             } catch(err) {
                 // error is ok, just ignore dateRange
-                console.error("dateRange err:", err);
+                console.errorExt("ResearchService", "dateRange err -", err);
             }
         }
         if(req.query.endDate) {

@@ -5,7 +5,7 @@
  *  lodash     - https://github.com/lodash/lodash
  *  when       - https://github.com/cujojs/when
  *  express    - https://github.com/visionmedia/express
- *  multiparty - https://github.com/superjoe30/node-multiparty
+ *  multiparty - https://github.com/andrewrk/node-multiparty
  *
  */
 
@@ -51,7 +51,7 @@ var Util;
 module.exports = ServiceManager;
 
 process.on('uncaughtException', function(err) {
-    console.error("ServiceManager: Uncaught Error -", err, ", stack:", err.stack);
+    console.errorExt("ServiceManager", "Uncaught Error -", err, ", stack:", err.stack);
 });
 
 function ServiceManager(configFiles){
@@ -59,6 +59,8 @@ function ServiceManager(configFiles){
     // this == {}
 
     Util              = require('../core/util.js');
+    this.logUtil      = new Util.LogUtil(); // begin enhanced logging
+    
     var ConfigManager = require('../core/config.manager.js');
 
     var startScript = process.argv[1].split("servers/")[1];
@@ -271,7 +273,7 @@ ServiceManager.prototype.add = function(lib) {
                 lib: lib
             };
         } else {
-            console.warn("ServiceManager: Service", lib.ServiceName, "Already added");
+            console.warnExt("ServiceManager", "Service", lib.ServiceName, "Already added");
         }
     }
 };
@@ -463,7 +465,7 @@ ServiceManager.prototype.setupStaticRoutes = function() {
                         this.stats.increment("error", "Route.Auth.Fail");
                         // error in auth, redirect back to login
                         //console.log("headers:", req.headers);
-                        console.error("Not Authenticated");
+                        console.errorExt("ServiceManager", "Not Authenticated");
 
                         res.clearCookie('connect.sid', { path: '/' });
                         res.redirect("/login");
@@ -601,11 +603,11 @@ ServiceManager.prototype.setupApiRoutes = function() {
                         }.bind(this));
                     }
                 } else {
-                    console.warn("Function \""+funcName+"\" not found in controller \""+a.controller+"\".");
+                    console.warnExt("ServiceManager", "Function \""+funcName+"\" not found in controller \""+a.controller+"\".");
                 }
             }.bind(this));
         } else {
-            console.warn("Service \""+a.service+"\" not found in services.");
+            console.warnExt("ServiceManager", "Service \""+a.service+"\" not found in services.");
         }
     }.bind(this));
 };
@@ -653,7 +655,7 @@ ServiceManager.prototype.start = function(port) {
             // var data = JSON.parse(str);
             // console.log('    --> date from Version File = '+data.date);
         }, function(err) { // reject(err)
-            console.error("ServiceManager: Failed to Load Version File -", err);
+            console.errorExt("ServiceManager", "Failed to Load Version File -", err);
         });
 
     // start express (session store,...), then start services
@@ -892,13 +894,13 @@ ServiceManager.prototype.start = function(port) {
                 }.bind(this))
 
                 .then(null, function(err){
-                    console.error("ServiceManager: Service Error -", err);
+                    console.errorExt("ServiceManager", "Service Error -", err);
                 }.bind(this));
 
         }.bind(this))
         // catch all
         .then(null, function(err){
-            console.error("ServiceManager: Start Error -", err);
+            console.errorExt("ServiceManager", "Start Error -", err);
         }.bind(this));
 };
 
@@ -1008,7 +1010,7 @@ var countDailyActiveUsers = function(stats){
         Q = "SELECT COUNT(id) as num FROM GL_USER " +
             "WHERE " +
             "( ENABLED = 1 AND last_login IS NULL " +
-            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP('" + first_login + "') ) ";
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP(" + this.ds.escape(first_login) + ") ) ";
 
             //  2015-09-03 23:59:01 == first day last_login was available on this platform ?
             // after 30 days all of the maybe MAU expire
@@ -1036,7 +1038,7 @@ var countDailyActiveUsers = function(stats){
             "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= last_login ) " +
             "OR " +
             "( ENABLED = 1 AND last_login IS NULL " +
-            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP('" + first_login + "') ) ";
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP(" + this.ds.escape(first_login) + ") ) ";
 
         this.ds.query(Q)
             .then(function(results){

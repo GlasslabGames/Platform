@@ -1026,6 +1026,22 @@ module.exports = {
                 get: "stopArchive"
             }
         },
+        {
+            api: "/api/v2/monitor/code/:code/run",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "runMonitor"
+            }
+        },
+        {
+            api: "/api/v2/monitor/info",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "monitorInfo"
+            }
+        },
     // ---------------------------------------------------
     // Version 1
     // ---------------------------------------------------

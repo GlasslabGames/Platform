@@ -102,6 +102,15 @@ module.exports = {
             method: {
                 post: "updateGameConfigs"
             }
+        },
+        // monitoring routes
+        {
+            api: "/api/v2/monitor/info",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "monitorInfo"
+            }
         }
     ]
 };
