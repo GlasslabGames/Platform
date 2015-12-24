@@ -87,9 +87,8 @@ function glassLabLogin(req, res, next) {
             // for DAU -- Daily Active Users stats
             // update login timestamp
 
-            Q = "UPDATE GL_USER SET last_login = NOW() WHERE id = " + user.id + ";";
+            Q = "UPDATE GL_USER SET last_login = NOW() WHERE id = " + this.ds.escape(user.id) + ";";
 
-            // ds.query(Q)
             this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]);

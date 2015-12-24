@@ -1,5 +1,6 @@
 var _         = require('lodash');
 var when      = require('when');
+var fn        = require('when/function');
 //
 var Util      = require('../../core/util.js');
 var dConst    = require('../dash.const.js');
@@ -826,50 +827,58 @@ function getDeveloperGameInfo(req, res) {
 function updateDeveloperGameInfo(req, res){
     var userId = req.user.id;
     var gameId = req.params.gameId;
-    if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
-        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
-        return;
-    }
-    try {
-        var data = JSON.parse(req.body.jsonStr);
-    } catch(err) {
-        this.requestUtil.errorResponse(res, {key:"dash.info.malformed"});
-        return;
-    }
 
-    if (!this.validateGameInfo(data)) {
-        this.requestUtil.errorResponse(res, {key:"dash.data.invalid"},500);
-        return;
-    }
-
-    getDeveloperGameIds.call(this,userId)
-        .then(function(gameIds){
-            if(!gameIds[gameId]){
-                return "no access";
+    when(req.user.role)
+        .then(function(role) {
+            if (role === "admin") {
+                return when.resolve(role);
+            } else if (role === "developer") {
+                return getDeveloperGameIds.call(this, userId)
+                    .then(function(gameIds){
+                        if(gameIds[gameId]){
+                            return when.resolve(role);
+                        }
+                        return when.reject({key:"dash.access.invalid", reason:"developer not approved for game "+gameId});
+                    }.bind(this));
+            } else {
+                return when.reject({key:"dash.access.invalid"});
             }
+        }.bind(this))
+
+        .then(function(permissionCheckResult) {
+            return fn.call(JSON.parse, req.body.jsonStr)
+                .catch(function(err) {
+                    return when.reject({key:"dash.data.invalid", reason: err.toString()});
+                });
+        }.bind(this))
+
+        .then(function(jsonParseResult) {
+            if (gameId && gameId === jsonParseResult.basic.gameId) {
+                return when.resolve(jsonParseResult);
+            }
+            return when.reject({key:"dash.gameId.invalid"});
+        }.bind(this))
+
+        .then(function(jsonParseResult) {
+            return this.validateGameInfo(jsonParseResult);
+        }.bind(this))
+
+        .then(function(validationResult){
             //uncommented out for testing
-            _writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
+            //_writeToInfoJSONFiles(gameId, JSON.stringify(validationResult, null, 4));
             if (req.body.overwrite)
-                return this.telmStore.createGameInformation(gameId, data);
-            return this.telmStore.updateGameInformation(gameId, data);
+                return this.telmStore.createGameInformation(gameId, validationResult);
+            return this.telmStore.updateGameInformation(gameId, validationResult);
         }.bind(this))
-        .then(function(status){
-            if(status !== "no object" && status !== "no access"){
-                //this.buildGameForGamesObject(data, gameId);
-                res.end('{"update":"complete"}');
-            } else{
-                this.requestUtil.errorResponse(res, {key:"dash.access.invalid"});
-            }
-        }.bind(this))
-        .then(null, function(err){
-            var error = {
-                update: "failed",
-                error: err
-            };
-            error = JSON.stringify(error);
-            console.trace("Dash: Update Developer Game Info Error -", err);
-            this.requestUtil.errorResponse(res, error, 401);
+
+        .catch(function(err){
+            console.error("Dash: Update Developer Game Info Error -", err);
+            this.requestUtil.errorResponse(res, {update: "failed", error: err}, 401);
             this.stats.increment("error", "UpdateDeveloperGameInfo.Catch");
+        }.bind(this))
+
+        .done(function(status){
+            this.requestUtil.jsonResponse(res, {update: "complete"});
         }.bind(this));
 }
 

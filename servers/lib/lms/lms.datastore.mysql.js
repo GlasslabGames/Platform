@@ -319,7 +319,7 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.removeStudentFromAllCourses = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "DELETE FROM GL_MEMBERSHIP WHERE ROLE = 'student' AND user_id = " + userId + ";";
+        var Q = "DELETE FROM GL_MEMBERSHIP WHERE ROLE = 'student' AND user_id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -1014,7 +1014,7 @@ return when.promise(function(resolve, reject) {
             co.code \
         FROM GL_COURSE c \
         JOIN GL_CODE co on co.course_id=c.id \
-        WHERE c." + key + "=" + this.ds.escape(value);
+        WHERE c." + this.ds.escapeId(key) + "=" + this.ds.escape(value);
 
     this.ds.query(Q)
         .then(function(results) {
@@ -1047,7 +1047,7 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.isCoursePremium = function(courseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT premium_games_assigned > 0 as premiumGamesAssigned FROM GL_COURSE WHERE id = " + courseId + ";";
+        var Q = "SELECT premium_games_assigned > 0 as premiumGamesAssigned FROM GL_COURSE WHERE id = " + this.ds.escape(courseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 results = results[0];
