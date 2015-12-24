@@ -849,6 +849,8 @@ function updateDeveloperGameInfo(req, res){
             }
             //uncommented out for testing
             _writeToInfoJSONFiles(gameId, JSON.stringify(data, null, 4));
+            if (req.body.overwrite)
+                return this.telmStore.createGameInformation(gameId, data);
             return this.telmStore.updateGameInformation(gameId, data);
         }.bind(this))
         .then(function(status){
