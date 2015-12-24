@@ -66,6 +66,7 @@ return when.promise(function(resolve, reject) {
 
     this.pool.getConnection(function(err, connection) {
         if(err) {
+            console.errorExt("MySQL", "Query Failed getConnection -", query);
             reject(err);
             return;
         }
@@ -74,6 +75,7 @@ return when.promise(function(resolve, reject) {
             connection.release();
 
             if(err) {
+                console.errorExt("MySQL", "Query Failed -", query);
                 reject(err);
                 return;
             }

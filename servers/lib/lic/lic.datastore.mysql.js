@@ -611,8 +611,9 @@ Lic_MySQL.prototype.getUserByEmail = function(email){
 Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, userIds, updateFields){
   return when.promise(function(resolve, reject){
       var Q = "UPDATE GL_LICENSE_MAP SET " + this.ds.escape(updateFields) +
-          "WHERE user_id IN (" + this.ds.escape(userIds) + ") " +
-          "AND license_id = " + this.ds.escape(licenseId) +";";
+          " WHERE user_id IN (" + this.ds.escape(userIds) + ") " +
+          " AND license_id = " + this.ds.escape(licenseId) +";";
+      console.logExt("DataStore MySQL", "Update License Map By License Instructor Query -", Q);
       this.ds.query(Q)
           .then(function(results){
               resolve(results);
