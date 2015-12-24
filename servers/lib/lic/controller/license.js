@@ -727,12 +727,11 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
                 }
               
                 var updateFields = [];
-                var active = "active = 1";
+                var active = {active: 1};
                 updateFields.push(active);
                 var oldDate = new Date(license["expiration_date"]);
-                oldDate.setFullYear(oldDate.getFullYear() + 1);
-                var expDate = oldDate.toISOString().slice(0, 19).replace('T', ' ');
-                var expirationDate = "expiration_date = '" + expDate + "'";
+                var expDate = oldDate.setFullYear(oldDate.getFullYear() + 1);
+                var expirationDate = {expiration_date: expDate};
                 updateFields.push(expirationDate);
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }
@@ -759,16 +758,11 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
             }
             var promiseList = [{},{},{},{}];
             var updateFields = [];
-            var packageType = "package_type = '" +  planInfo.type + "'";
-            updateFields.push(packageType);
-            var packageSizeTier = "package_size_tier = '" + planInfo.seats + "'";
-            updateFields.push(packageSizeTier);
-            var lastUpgraded = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            var lastUpgradedString = "last_upgraded = '" + lastUpgraded + "'";
-            updateFields.push(lastUpgradedString);
+            updateFields.push({package_type: planInfo.type});
+            updateFields.push({package_size_tier: planInfo.seats});
+            updateFields.push({last_upgraded: new Date()});
             if(promoCode){
-                var promoCodeString = "promo = '" + planInfo.promoCode + "'";
-                updateFields.push(promoCodeString);
+                updateFields.push({promo: planInfo.promoCode});
             }
             promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
             var seats = {};
@@ -1135,7 +1129,7 @@ function enableLicenseAutoRenew(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            var autoRenew = "auto_renew = TRUE";
+            var autoRenew = {auto_renew: true};
             var updateFields = [autoRenew];
             return this.myds.updateLicenseById(licenseId, updateFields);
         }.bind(this))
@@ -1431,7 +1425,7 @@ function setLicenseMapStatusToActive(req, res){
                 return status;
             }
             var userIdList = [userId];
-            var statusField = "status = 'active'";
+            var statusField = {status: "active"};
             var updateFields = [statusField];
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
@@ -1790,13 +1784,12 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                     return purchaseOrderId;
                 }
                 //update license table with po id
-                purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
-                var updateFields = [purchaseOrderId];
+                var updateFields = [{purchase_order_id: purchaseOrderId}];
                 var promiseList = [];
                 promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
                 promiseList.push(this.cbds.createLicenseStudentObject(licenseId));
                 if (purchaseOrderInfo.approve) {
-                    var mapUpdateFields = ["status='active'"];
+                    var mapUpdateFields = [{status: "active"}];
                     promiseList.push(this.myds.updateLicenseMapByLicenseInstructor(licenseId,[userId],mapUpdateFields));
                 }
                 return when.all(promiseList);
@@ -1822,24 +1815,20 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, planI
     var status;
     var purchaseOrderNumber;
     if(purchaseOrderInfo.number){
-        status = (purchaseOrderInfo.approve ? "'approved'" : "'received'");
+        status = (purchaseOrderInfo.approve ? "approved" : "received");
         purchaseOrderNumber = purchaseOrderInfo.number;
     } else{
-        status = "'pending'";
+        status = "pending";
         purchaseOrderNumber = Util.CreateUUID();
     }
     values.push(status);
 
-    var storePONumber = "'" + purchaseOrderNumber + "'";
-    values.push( storePONumber );
+    values.push( purchaseOrderNumber );
     // license id added to guarantee uniqueness.  table also requires a unique value
     var purchaseOrderKey = purchaseOrderNumber + "-" + licenseId;
     purchaseOrderInfo.key = purchaseOrderKey;
-    purchaseOrderKey = "'" + purchaseOrderKey + "'";
     values.push(purchaseOrderKey);
-    var phone = "'" + purchaseOrderInfo.phone + "'";
     values.push(phone);
-    var email = "'" + purchaseOrderInfo.email.toLowerCase() + "'";
     values.push(email);
     var name;
     if(purchaseOrderInfo.lastName){
@@ -1848,26 +1837,24 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, planI
         name = purchaseOrderInfo.firstName;
     }
     purchaseOrderInfo.name = name;
-    name = "'" + name + "'";
     values.push(name);
     var payment = "" + purchaseOrderInfo.payment;
     if(payment.indexOf(".") === -1){
         payment = purchaseOrderInfo.payment + ".00";
     }
     purchaseOrderInfo.payment = payment;
-    payment = "'" + payment + "'";
     values.push(payment);
 
     // Added current_package_type and current_package_size_tier
-    var current_package_type = "'" + planInfo.type + "'";
+    var current_package_type = planInfo.type;
     values.push( current_package_type );
 
-    var current_package_size_tier = "'" + planInfo.seats + "'";
+    var current_package_size_tier = planInfo.seats;
     values.push( current_package_size_tier );
 
     action = "'" + action + "'";
     values.push(action);
-    var dateCreated = "NOW()";
+    var dateCreated = new Date();
     values.push(dateCreated);
     return values;
 }
@@ -2002,8 +1989,7 @@ function upgradeLicensePurchaseOrder(req, res){
                 return purchaseOrderId;
             }
             // update license table purchaseOrderId column
-            purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
-            var updateFields = [purchaseOrderId];
+            var updateFields = [{purchase_order_id: purchaseOrderId}];
             return this.myds.updateLicenseById(licenseId, updateFields);
         }.bind(this))
         .then(function(status){
@@ -2211,8 +2197,7 @@ function setLicenseMapStatusToNull(req, res){
                 return status;
             }
             var userIdList = [req.user.id];
-            var statusString = "status = NULL";
-            var updateFields = [statusString];
+            var updateFields = [{status: null}];
 
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
@@ -2436,11 +2421,11 @@ function receivePurchaseOrder(req, res){
                 expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
             }
             var updateFields = [];
-            var status = "status = 'received'";
+            var status = {status: "received"};
             updateFields.push(status);
-            var number = "purchase_order_number = '" + purchaseOrderNumber + "'";
+            var number = {purchase_order_number: purchaseOrderNumber};
             updateFields.push(number);
-            var paymentAmount = "payment = '" + payment + "'";
+            var paymentAmount = {payment: payment};
             updateFields.push(paymentAmount);
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
@@ -2531,30 +2516,22 @@ function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expiration
 
     return when.promise(function(resolve, reject) {
         var updateFields = [];
-        var active = "active = 1";
-        updateFields.push(active);
+        updateFields.push({active: 1});
 
         // NOTE: KMY: All new subscriptions will use the new format now
-        var seats = "package_size_tier = '_" + planInfo.students + "_" + planInfo.educators + "'";
-        updateFields.push(seats);
-
-        var educatorSeatsRemaining = "educator_seats_remaining = " + planInfo.educators;
-        updateFields.push(educatorSeatsRemaining);
-        var studentSeatsRemaining = "student_seats_remaining = " + planInfo.students;
-        updateFields.push(studentSeatsRemaining);
-        var plan = "package_type = '" + planInfo.type + "'";
-        updateFields.push(plan);
-        var expirationDateString = "expiration_date = '" + expirationDate + "'";
-        updateFields.push(expirationDateString);
+        updateFields.push({package_size_tier: "_" + planInfo.students + "_" + planInfo.educators});
+        updateFields.push({educator_seats_remaining: planInfo.educators});
+        updateFields.push({student_seats_remaining: planInfo.students});
+        updateFields.push({package_type: planInfo.type});
+        updateFields.push({expiration_date: expirationDate});
         if(planInfo.promoCode){
-            var promoString = "promo = '" + planInfo.promoCode + "'";
-            updateFields.push(promoString);
+            updateFields.push({promo: planInfo.promoCode});
         }
 
         this.myds.updateLicenseById(licenseId, updateFields)
             .then(function () {
                 var updateFields = [];
-                var status = "status = 'po-received'";
+                var status = {status: "po-received"};
                 updateFields.push(status);
                 return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
             }.bind(this))
@@ -2616,8 +2593,8 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
             }.bind(this))
             .then(function(license){
                 license = license[0];
-                var oldPlan = "current_package_type = '" + license["package_type"] + "'";
-                var oldSeats = "current_package_size_tier = '" + license["package_size_tier"] + "'";
+                var oldPlan = {current_package_type: license["package_type"]};
+                var oldSeats = {current_package_size_tier: license["package_size_tier"]};
                 var updateFields = [oldPlan, oldSeats];
                 return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
             }.bind(this))
@@ -2626,10 +2603,10 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
                 var updateFields = [];
 
                 // NOTE: KMY: All new subscriptions will use the new format now
-                var packageSize = "package_size_tier = '_" + planInfo.students + "_" + planInfo.instructors + "'";
+                var packageSize = {package_size_tier: "_" + planInfo.students + "_" + planInfo.instructors};
                 updateFields.push(packageSize);
 
-                var packageType = "package_type = '" + plan + "'";
+                var packageType = {package_type: plan};
                 updateFields.push(packageType);
                 promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
 
@@ -2642,7 +2619,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
                     var studentSeats = seats.studentSeats;
                     promiseList[2] = this.updateStudentSeatsRemaining(licenseId, studentSeats);
                 }
-                var lmUpdateFields = ["status = 'po-received'"];
+                var lmUpdateFields = {status: "po-received"};
                 promiseList[3] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], lmUpdateFields);
                 //promiseList[4] = this.myds.getInstructorsByLicense(licenseId);
                 return when.all(promiseList);
@@ -2698,7 +2675,7 @@ function invoicePurchaseOrder(req, res){
             purchaseOrderId = purchaseOrder.id;
 
             var updateFields = [];
-            var status = "status = 'invoiced'";
+            var status = {status: "invoiced"};
             updateFields.push(status);
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
@@ -2779,7 +2756,7 @@ function approvePurchaseOrder(req, res){
 
             licenseId = purchaseOrder.license_id;
             var updateFields = [];
-            var status = "status = 'approved'";
+            var status = {status: "approved"};
             updateFields.push(status);
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
@@ -2871,10 +2848,10 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
 function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId, status, purchaseOrderNumber, action){
     return when.promise(function(resolve, reject){
         var updateFields = [];
-        var statusUpdate = "status = '" + status + "'";
+        var statusUpdate = {status: status};
         updateFields.push(statusUpdate);
         if(purchaseOrderNumber){
-            purchaseOrderNumber = "purchase_order_number = '" + purchaseOrderNumber + "'";
+            purchaseOrderNumber = {purchase_order_number: purchaseOrderNumber};
             updateFields.push(purchaseOrderNumber);
         }
         this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
@@ -2883,7 +2860,7 @@ function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId
             }.bind(this))
             .then(function(){
                 if(status === "rejected"){
-                    var licenseMapStatus = "status = 'po-rejected'";
+                    var licenseMapStatus = {status: "po-rejected"};
                     var updateFields = [licenseMapStatus];
                     return this.myds.updateRecentLicenseMapByUserId(userId, updateFields);
                 }
@@ -2903,8 +2880,8 @@ function _switchToPurchaseOrder(userId, licenseId){
     // cancel auto renew
     _cancelAutoRenew.call(this, userId, licenseId)
         .then(function(){
-            var paymentType = "payment_type = 'purchase-order'";
-            var autoRenew = "auto_renew = 0";
+            var paymentType = {payment_type: "purchase-order"};
+            var autoRenew = {auto_renew: 0};
             var updateFields = [paymentType, autoRenew];
             // update license table
             return this.myds.updateLicenseById(licenseId, updateFields);
@@ -2925,8 +2902,8 @@ function _switchToPurchaseOrder(userId, licenseId){
 
 function _switchToCreditCard(licenseId){
     return when.promise(function(resolve, reject){
-        var paymentType = "payment_type = 'credit-card'";
-        var autoRenew = "auto_renew = 1";
+        var paymentType = {payment_type: "credit-card"};
+        var autoRenew = {auto_renew: 1};
         var updateFields = [paymentType, autoRenew];
         // update license table
         this.myds.updateLicenseById(licenseId, updateFields)
@@ -3262,8 +3239,7 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
                 if(map.status === "active"){
                     promiseList[0] = this.myds.getLicenseById(licenseId);
                 } else{
-                    var statusString = "status = NULL";
-                    var updateFields = [statusString];
+                    var updateFields = [{status: null}];
                     promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [user.id], updateFields);
                 }
             }.bind(this));
@@ -3531,7 +3507,6 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
 
         var expDate = new Date(oldLicense.expiration_date);
         expDate.setFullYear(expDate.getFullYear() + 1);
-        expDate = date.toISOString().slice(0, 19).replace('T', ' ');
 
         this.myds.getUserById(userId)
             .then(function (results) {
@@ -3540,9 +3515,9 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
             }.bind(this))
             .then(function(){
                 var updateFields = [];
-                var active = "active = 1";
+                var active = {active: 1};
                 updateFields.push(active);
-                var expirationDate = "expiration_date = '" + expDate + "'";
+                var expirationDate = {expiration_date: expDate};
                 updateFields.push(expirationDate);
                 var promiseList = [];
                 promiseList.push(this.myds.getLicenseMapByLicenseId(newLicenseId));
@@ -3553,8 +3528,8 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
                 var licenseMaps = results[0];
                 var userIds = _.pluck(licenseMaps, "user_id");
                 var updateFields = [];
-                var status = "status = 'active'";
-                updateFields.push('active');
+                var status = {status: "active"};
+                updateFields.push(status);
                 return this.myds.updateLicenseMapByLicenseInstructor(newLicenseId, userIds, updateFields);
             }.bind(this))
             .then(function(status){
@@ -3660,8 +3635,7 @@ function trialMoveToTeacher(req, res){
                 return status;
             }
             var updateFields = [];
-            var statusString = "status = 'active'";
-            updateFields.push(statusString);
+            updateFields.push({status: "active"});
             return this.myds.updateLicenseMapByLicenseInstructor(inviteLicenseId,[userId], updateFields);
         }.bind(this))
         .then(function(){
@@ -3697,9 +3671,9 @@ function _storeSchoolInformation(schoolInfo){
         var institutionId;
 
         var keys = [];
-        keys.push("TITLE = " + title);
-        keys.push("CITY = "+ city);
-        keys.push("STATE = " + state);
+        keys.push({TITLE: title});
+        keys.push({CITY: city});
+        keys.push({STATE: state});
         this.myds.getInstitutionIdByKeys(keys)
             .then(function(results){
                 if(typeof results === "number"){
@@ -3707,14 +3681,14 @@ function _storeSchoolInformation(schoolInfo){
                     return "exists";
                 }
                 var version = 3;
-                var code = "NULL";
+                var code = null;
                 var enabled = 1;
-                var secret = "NULL";
-                var shared = "NULL";
-                var zip = "'" + schoolInfo.zipCode + "'";
-                var address = "'" + schoolInfo.address + "'";
-                var dateCreated = "NOW()";
-                var lastUpdated = "NOW()";
+                var secret = null;
+                var shared = null;
+                var zip = schoolInfo.zipCode;
+                var address = schoolInfo.address;
+                var dateCreated = new Date();
+                var lastUpdated = dateCreated;
 
                 var values = [];
                 values.push(version);
@@ -3919,42 +3893,41 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
         promise
             .then(function(institutionId){
                 var seatsTier = planInfo.seats;
-                var type = "'" + planInfo.type + "'";
+                var type = planInfo.type;
                 var licenseKey;
                 if(planInfo.licenseKey){
-                    licenseKey = "'" + planInfo.licenseKey + "'";
+                    licenseKey = planInfo.licenseKey;
                 } else{
-                    licenseKey = "NULL";
+                    licenseKey = null;
                 }
                 var promo;
                 if(planInfo.promoCode){
-                    promo = "'" + planInfo.promoCode + "'";
+                    promo = planInfo.promoCode;
                 } else{
-                    promo = "NULL";
+                    promo = null;
                 }
-                var expirationDate = "'" + data.expirationDate + "'";
+                var expirationDate = data.expirationDate;
                 var educatorSeatsRemaining = planInfo.educators;
                 var studentSeatsRemaining = planInfo.students;
-                seatsTier = "'" + seatsTier + "'";
                 var subscriptionId;
                 if(!data.subscriptionId){
-                    subscriptionId = "NULL";
+                    subscriptionId = null;
                 } else{
-                    subscriptionId = "'" + data.subscriptionId + "'";
+                    subscriptionId = data.subscriptionId;
                 }
                 var active = 1;
                 var autoRenew = 0;
                 var paymentType;
                 if(data.purchaseOrder){
-                    paymentType = "'purchase-order'";
+                    paymentType = "purchase-order";
                     if(!data.received){
                         active = 0;
                     }
                 } else{
-                    paymentType = "'credit-card'";
+                    paymentType = "credit-card";
                 }
-                var dateCreated = "NOW()";
-                var lastUpgraded = "NULL";
+                var dateCreated = new Date();
+                var lastUpgraded = null;
                 var values = [];
                 values.push(userId);
                 values.push(licenseKey);
@@ -3981,14 +3954,14 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                 values.push(licenseId);
                 if(data.purchaseOrder){
                     if(data.received){
-                        values.push("'po-received'");
+                        values.push("po-received");
                     } else{
-                        values.push("'po-pending'");
+                        values.push("po-pending");
                     }
                 } else{
-                    values.push("'active'");
+                    values.push("active");
                 }
-                var dateCreated = "NOW()";
+                var dateCreated = new Date();
                 values.push(dateCreated);
                 return this.myds.insertToLicenseMapTable(values);
             }.bind(this))
@@ -4144,7 +4117,7 @@ function _cancelAutoRenew(userId, licenseId){
                 if(typeof status === "string"){
                     return status;
                 }
-                var autoRenew = "auto_renew = FALSE";
+                var autoRenew = {auto_renew: false};
                 var updateFields = [autoRenew];
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }.bind(this))
@@ -4209,8 +4182,8 @@ function _endLicense(userId, licenseId, autoRenew){
                         emailList.push(email[1]);
                     }
                 });
-                var active = "active = 0";
-                var purchaseOrderId = "purchase_order_id = NULL";
+                var active = {active: 0};
+                var purchaseOrderId = {purchase_order_id: null};
                 var updateFields = [active, purchaseOrderId];
                 return this.myds.updateLicenseById(licenseId, updateFields)
             }.bind(this))
@@ -4372,7 +4345,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                     return state;
                 }
                 //remove instructor from premium license
-                var updateFields = ["status = NULL"];
+                var updateFields = [{status: null}];
                 return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [teacherId], updateFields);
             }.bind(this))
             .then(function(state){

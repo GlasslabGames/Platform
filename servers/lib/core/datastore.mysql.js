@@ -31,15 +31,33 @@ function MySQL(options){
     this.pool = mysql.createPool(this.options);
 }
 MySQL.prototype.escape = function(value) {
+    // todo: remove commented out Array section after testing, also update same file in Assessment
+    // remove explicit array handling - mysql.escape already does something with arrays:
+    // https://www.npmjs.com/package/mysql#escaping-query-values
+    // > Arrays are turned into list, e.g. ['a', 'b'] turns into 'a', 'b'
+    // use MySQL.prototype.escapeArray instead
+    // actually not even that is necessary if you're just going to join(',') the results together
+
     // if array, escape all items in array
+    //if(_.isArray(value)) {
+    //    return _.map(value, function(item){
+    //        return mysql.escape(item);
+    //    });
+    //} else {
+        return mysql.escape(value);
+    //}
+};
+
+MySQL.prototype.escapeId = mysql.escapeId;
+
+MySQL.prototype.escapeArray = function(value) {
     if(_.isArray(value)) {
         return _.map(value, function(item){
             return mysql.escape(item);
         });
-    } else {
-        return mysql.escape(value);
     }
-};
+    throw new Error("escapeArray called on non-Array");
+}
 
 MySQL.prototype.query = function(query) {
 // add promise wrapper
@@ -48,6 +66,7 @@ return when.promise(function(resolve, reject) {
 
     this.pool.getConnection(function(err, connection) {
         if(err) {
+            console.errorExt("MySQL", "Query Failed getConnection -", query);
             reject(err);
             return;
         }
@@ -56,6 +75,7 @@ return when.promise(function(resolve, reject) {
             connection.release();
 
             if(err) {
+                console.errorExt("MySQL", "Query Failed -", query);
                 reject(err);
                 return;
             }

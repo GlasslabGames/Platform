@@ -1010,7 +1010,7 @@ var countDailyActiveUsers = function(stats){
         Q = "SELECT COUNT(id) as num FROM GL_USER " +
             "WHERE " +
             "( ENABLED = 1 AND last_login IS NULL " +
-            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP('" + first_login + "') ) ";
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP(" + this.ds.escape(first_login) + ") ) ";
 
             //  2015-09-03 23:59:01 == first day last_login was available on this platform ?
             // after 30 days all of the maybe MAU expire
@@ -1038,7 +1038,7 @@ var countDailyActiveUsers = function(stats){
             "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= last_login ) " +
             "OR " +
             "( ENABLED = 1 AND last_login IS NULL " +
-            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP('" + first_login + "') ) ";
+            "AND DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= TIMESTAMP(" + this.ds.escape(first_login) + ") ) ";
 
         this.ds.query(Q)
             .then(function(results){
