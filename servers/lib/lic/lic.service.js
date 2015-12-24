@@ -499,8 +499,7 @@ LicService.prototype.updateEducatorSeatsRemaining = function(licenseId, seats){
         this.myds.countEducatorSeatsByLicense(licenseId)
             .then(function(count){
                 var seatsRemaining = seats - count +1;
-                var seatsRemainingString = "educator_seats_remaining = " + seatsRemaining;
-                var updateFields = [seatsRemainingString];
+                var updateFields = [{educator_seats_remaining: seatsRemaining}];
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }.bind(this))
             .then(function(){
@@ -518,8 +517,7 @@ LicService.prototype.updateStudentSeatsRemaining = function(licenseId, seats){
         this.cbds.countActiveStudentsByLicense(licenseId)
             .then(function(count){
                 var seatsRemaining = seats - count;
-                var seatsRemainingString = "student_seats_remaining = " + seatsRemaining;
-                var updateFields = [seatsRemainingString];
+                var updateFields = [{student_seats_remaining: seatsRemaining}];
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }.bind(this))
             .then(function(){

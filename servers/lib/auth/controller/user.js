@@ -2469,7 +2469,7 @@ function _deleteInstructorAccount(userId, req){
                     promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
                     if(license.user_id !== userId){
                         var updateFields = [];
-                        var status = "status = NULL";
+                        var status = {status: null};
                         updateFields.push(status);
                         promiseList.push(licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields));
                     }

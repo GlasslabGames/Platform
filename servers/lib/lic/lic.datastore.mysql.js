@@ -212,12 +212,11 @@ Lic_MySQL.prototype.createLicensingTables = function(){
 
 Lic_MySQL.prototype.insertToLicenseTable = function(values){
     return when.promise(function(resolve, reject){
-        var valuesString = values.join(",");
         var Q = "INSERT INTO GL_LICENSE\n" +
             "(user_id,license_key,package_type,package_size_tier,expiration_date," +
             "active,educator_seats_remaining,student_seats_remaining,promo," +
             "subscription_id,auto_renew,payment_type,institution_id,date_created,last_upgraded)\n" +
-            "VALUES (" + valuesString + ");";
+            "VALUES (" + this.ds.escape(values) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results.insertId);
@@ -231,9 +230,8 @@ Lic_MySQL.prototype.insertToLicenseTable = function(values){
 
 Lic_MySQL.prototype.insertToLicenseMapTable = function(values){
     return when.promise(function(resolve, reject){
-        var valuesString = values.join(",");
         var Q = "INSERT INTO GL_LICENSE_MAP (user_id,license_id,status,date_created)\n" +
-            "VALUES (" + valuesString + ");";
+            "VALUES (" + this.ds.escape(values) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -247,7 +245,7 @@ Lic_MySQL.prototype.insertToLicenseMapTable = function(values){
 
 Lic_MySQL.prototype.getLicenseById = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_LICENSE WHERE id = " + licenseId + ";";
+        var Q = "SELECT * FROM GL_LICENSE WHERE id = " + this.ds.escape(licenseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -261,7 +259,7 @@ Lic_MySQL.prototype.getLicenseById = function(licenseId){
 
 Lic_MySQL.prototype.getCustomerIdByUserId = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT customer_id as customerId FROM GL_USER WHERE id = " + userId + ";";
+        var Q = "SELECT customer_id as customerId FROM GL_USER WHERE id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0].customerId);
@@ -275,7 +273,7 @@ Lic_MySQL.prototype.getCustomerIdByUserId = function(userId){
 
 Lic_MySQL.prototype.setCustomerIdByUserId = function(userId, customerId){
     return when.promise(function(resolve, reject){
-        var Q = "UPDATE GL_USER SET customer_id = '" + customerId + "' WHERE id = " + userId + ";";
+        var Q = "UPDATE GL_USER SET customer_id = " + this.ds.escape(customerId) + " WHERE id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -289,7 +287,7 @@ Lic_MySQL.prototype.setCustomerIdByUserId = function(userId, customerId){
 
 Lic_MySQL.prototype.removeSubscriptionIdsByUserId = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "UPDATE GL_LICENSE SET subscription_id = NULL where user_id = " + userId + ";";
+        var Q = "UPDATE GL_LICENSE SET subscription_id = NULL where user_id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(){
                 resolve();
@@ -303,7 +301,9 @@ Lic_MySQL.prototype.removeSubscriptionIdsByUserId = function(userId){
 
 Lic_MySQL.prototype.countEducatorSeatsByLicense = function(licenseId, seats){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP WHERE status in ('active','pending','invite-pending','po-received') and license_id = " + licenseId + ";";
+        var Q = "SELECT COUNT(*) FROM GL_LICENSE_MAP "+
+            " WHERE status in ('active','pending','invite-pending','po-received')"+
+            " AND license_id = " + this.ds.escape(licenseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]["COUNT(*)"]);
@@ -317,8 +317,8 @@ Lic_MySQL.prototype.countEducatorSeatsByLicense = function(licenseId, seats){
 
 Lic_MySQL.prototype.updateLicenseById = function(licenseId, updateFields){
     return when.promise(function(resolve, reject){
-        var updateString = updateFields.join(",");
-        var Q = "UPDATE GL_LICENSE SET " + updateString + " WHERE id = " + licenseId + ";";
+        var Q = "UPDATE GL_LICENSE SET " + this.ds.escape(updateFields) +
+            " WHERE id = " + this.ds.escape(licenseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -332,8 +332,7 @@ Lic_MySQL.prototype.updateLicenseById = function(licenseId, updateFields){
 
 Lic_MySQL.prototype.getUsersByIds = function(ids){
     return when.promise(function(resolve, reject){
-        var idsString = ids.join(',');
-        var Q = "SELECT * FROM GL_USER WHERE id in (" + idsString + ");";
+        var Q = "SELECT * FROM GL_USER WHERE id in (" + this.ds.escape(ids) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -347,8 +346,9 @@ Lic_MySQL.prototype.getUsersByIds = function(ids){
 
 Lic_MySQL.prototype.getLicenseMapByInstructors = function(userIds){
     return when.promise(function(resolve, reject){
-        var userIdsString = userIds.join(",");
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE status in ('active','pending','po-pending','po-received','po-rejected','invite-pending') and user_id in (" + userIdsString + ");";
+        var Q = "SELECT * FROM GL_LICENSE_MAP " +
+            " WHERE status in ('active','pending','po-pending','po-received','po-rejected','invite-pending') " +
+            " AND user_id in (" + this.ds.escape(userIds) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -366,7 +366,7 @@ Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
         var Q = "SELECT * FROM GL_LICENSE_MAP as mp" +
             " INNER JOIN ( SELECT * FROM GL_LICENSE ) as lic" +
             " ON ( mp.user_id = lic.user_id AND mp.license_id = lic.id)" +
-            " WHERE mp.user_id = " + userId + ";";
+            " WHERE mp.user_id = " + this.ds.escape(userId) + ";";
 
         this.ds.query(Q)
             .then(function(results){
@@ -381,7 +381,7 @@ Lic_MySQL.prototype.getLicenseMapByUser = function(userId){
 
 Lic_MySQL.prototype.userHasLicenseMap = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + userId + ";";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 var state = results.length > 0;
@@ -399,7 +399,8 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
         var Q = "SELECT u.id,u.first_name as firstName,u.last_name as lastName,u.email,lm.status FROM GL_USER as u\n" +
             "JOIN GL_LICENSE_MAP as lm\n" +
             "ON lm.user_id = u.id\n" +
-            "WHERE lm.license_id = " + licenseId + " and lm.status in ('active','pending','po-received','po-pending','invite-pending');";
+            "WHERE lm.license_id = " + this.ds.escape(licenseId) +
+            " and lm.status in ('active','pending','po-received','po-pending','invite-pending');";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -427,7 +428,7 @@ Lic_MySQL.prototype.getAllInstructorsNonCustomers = function(){
 
 Lic_MySQL.prototype.getCoursesByInstructor = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + userId + ";";
+        var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 var output = [];
@@ -451,7 +452,7 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
             "JOIN\n" +
             "(SELECT id,username,first_name,last_name FROM GL_USER as u\n" +
                 "JOIN\n" +
-                    "(SELECT user_id FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ") as lm\n" +
+                    "(SELECT user_id FROM GL_LICENSE_MAP WHERE license_id = " + this.ds.escape(licenseId) + ") as lm\n" +
                     "ON lm.user_id = u.id\n" +
             ") as teachers\n" +
             "ON teachers.id = m.user_id\n" +
@@ -482,12 +483,7 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
 
 Lic_MySQL.prototype.getUsersByEmail = function(emails){
     return when.promise(function(resolve, reject){
-        var emailsStringified = [];
-        emails.forEach(function(email){
-            emailsStringified.push("'" + email + "'");
-        });
-        var emailsString = emailsStringified.join(',');
-        var Q = "SELECT * FROM GL_USER WHERE email in (" + emailsString + ");";
+        var Q = "SELECT * FROM GL_USER WHERE email in (" + this.ds.escape(emails) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -520,8 +516,8 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
 };
 
 function _insertTempUserValueWithEmail(email){
-    email = email.toLowerCase();
-    var value = "('" + email + "','" + email + "',0,NOW(),1,'temp','temp',NOW()," +
+    email = this.ds.escape(email.toLowerCase());
+    var value = "(" + email + "," + email + ",0,NOW(),1,'temp','temp',NOW()," +
     "'pass','instructor',0,'glasslabv2','invited')";
     return value;
 }
@@ -531,12 +527,12 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds, invite)
         var inputs = [];
         var startValues;
         if(invite){
-            startValues = "('invite-pending',NOW()," + licenseId + ",";
+            startValues = "('invite-pending',NOW()," + this.ds.escape(licenseId) + ",";
         } else{
-            startValues = "('pending',NOW()," + licenseId + ",";
+            startValues = "('pending',NOW()," + this.ds.escape(licenseId) + ",";
         }
         userIds.forEach(function(id){
-            inputs.push(startValues + id + ")")
+            inputs.push(startValues + this.ds.escape(id) + ")")
         });
         var insertValues = inputs.join(',');
 
@@ -554,8 +550,8 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds, invite)
 
 Lic_MySQL.prototype.multiGetLicenseMap = function(licenseId, userIds){
     return when.promise(function(resolve, reject){
-        var userIdsString = userIds.join(",");
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id in (" + userIds + ") and license_id = " + licenseId + ";";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE user_id in (" + this.ds.escape(userIds) + ") " +
+            " AND license_id = " + this.ds.escape(licenseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -569,11 +565,9 @@ Lic_MySQL.prototype.multiGetLicenseMap = function(licenseId, userIds){
 
 Lic_MySQL.prototype.multiUpdateLicenseMapStatus = function(licenseId, userIds, status){
     return when.promise(function(resolve, reject){
-        if(status !== "NULL"){
-            status = "'" + status + "'";
-        }
-        var userIdsString = userIds.join(',');
-        var Q = "UPDATE GL_LICENSE_MAP SET status = " + status + " WHERE user_id in(" + userIdsString + ") and license_id = " + licenseId + ";";
+        var Q = "UPDATE GL_LICENSE_MAP SET status = " + this.ds.escape(status) +
+            " WHERE user_id in(" + this.ds.escape(userIds) + ") " +
+            " AND license_id = " + this.ds.escape(licenseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -587,7 +581,7 @@ Lic_MySQL.prototype.multiUpdateLicenseMapStatus = function(licenseId, userIds, s
 
 Lic_MySQL.prototype.getUserById = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_USER WHERE id = " + userId + ";";
+        var Q = "SELECT * FROM GL_USER WHERE id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]);
@@ -601,7 +595,7 @@ Lic_MySQL.prototype.getUserById = function(userId){
 
 Lic_MySQL.prototype.getUserByEmail = function(email){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_USER WHERE EMAIL = '" + email + "';";
+        var Q = "SELECT * FROM GL_USER WHERE EMAIL = " + this.ds.escape(email) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]);
@@ -616,10 +610,9 @@ Lic_MySQL.prototype.getUserByEmail = function(email){
 
 Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, userIds, updateFields){
   return when.promise(function(resolve, reject){
-      var updateFieldsString = updateFields.join(", ");
-      var userIdsString = userIds.join(",");
-      var Q = "UPDATE GL_LICENSE_MAP SET " + updateFieldsString + "\n" +
-          "WHERE user_id IN (" + userIdsString + ") and license_id = " + licenseId +";";
+      var Q = "UPDATE GL_LICENSE_MAP SET " + this.ds.escape(updateFields) +
+          "WHERE user_id IN (" + this.ds.escape(userIds) + ") " +
+          "AND license_id = " + this.ds.escape(licenseId) +";";
       this.ds.query(Q)
           .then(function(results){
               resolve(results);
@@ -633,7 +626,7 @@ Lic_MySQL.prototype.updateLicenseMapByLicenseInstructor = function(licenseId, us
 
 Lic_MySQL.prototype.assignPremiumCourse = function(courseId){
     return when.promise(function(resolve, reject){
-        var Q = "UPDATE GL_COURSE SET premium_games_assigned = TRUE WHERE id = " + courseId + ";";
+        var Q = "UPDATE GL_COURSE SET premium_games_assigned = TRUE WHERE id = " + this.ds.escape(courseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -647,8 +640,7 @@ Lic_MySQL.prototype.assignPremiumCourse = function(courseId){
 
 Lic_MySQL.prototype.unassignPremiumCourses = function(courses){
     return when.promise(function(resolve, reject){
-        var coursesString = courses.join(",");
-        var Q = "UPDATE GL_COURSE SET premium_games_assigned = FALSE WHERE id in (" + coursesString + ");";
+        var Q = "UPDATE GL_COURSE SET premium_games_assigned = FALSE WHERE id in (" + this.ds.escape(courses) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -664,7 +656,7 @@ Lic_MySQL.prototype.getLicenseFromPremiumCourse = function(courseId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_LICENSE AS l JOIN\n" +
             "(SELECT license_id FROM GL_LICENSE_MAP AS lm JOIN\n" +
-                "(SELECT user_id FROM GL_MEMBERSHIP WHERE ROLE = 'instructor' and course_id = " + courseId + ") AS m\n" +
+                "(SELECT user_id FROM GL_MEMBERSHIP WHERE ROLE = 'instructor' and course_id = " + this.ds.escape(courseId) + ") AS m\n" +
             "ON m.user_id = lm.user_id WHERE status IN('active','pending','po-received')) AS lm\n" +
             "ON lm.license_id = l.id;";
         this.ds.query(Q)
@@ -683,11 +675,10 @@ Lic_MySQL.prototype.getLicenseFromPremiumCourse = function(courseId){
 // need to edit once table schema has been approved
 Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
     return when.promise(function(resolve, reject){
-        var valuesString = values.join(",");
         var Q = "INSERT INTO GL_PURCHASE_ORDER " +
             "(user_id,license_id,status,purchase_order_number," +
             "purchase_order_key,phone,email,name,payment,current_package_type,current_package_size_tier,action,date_created) " +
-            "VALUES (" + valuesString + ");";
+            "VALUES (" + this.ds.escape(values) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results.insertId);
@@ -702,7 +693,7 @@ Lic_MySQL.prototype.insertToPurchaseOrderTable = function(values){
 Lic_MySQL.prototype.getActivePurchaseOrderByUserId = function(userId){
     // an active purchase order is one that is in progress, either with a status of pending or received
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received') and user_id = " + userId + ";";
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received') and user_id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 if(results.length > 1){
@@ -750,7 +741,7 @@ Lic_MySQL.prototype.getNotOpenPurchaseOrders = function() {
 
 Lic_MySQL.prototype.getOpenPurchaseOrderForUser = function( userId ) {
 	return when.promise(function(resolve, reject){
-		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received', 'invoiced') AND user_id = " + userId + ";";
+		var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE status IN ('pending', 'received', 'invoiced') AND user_id = " + this.ds.escape(userId) + ";";
 		this.ds.query(Q)
 		.then(function(results){
 			resolve(results);
@@ -764,7 +755,7 @@ Lic_MySQL.prototype.getOpenPurchaseOrderForUser = function( userId ) {
 
 Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE purchase_order_key = '" + key + "';";
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE purchase_order_key = " + this.ds.escape(key) + ";";
         this.ds.query(Q)
             .then(function(results){
                 if(results.length > 1){
@@ -784,7 +775,7 @@ Lic_MySQL.prototype.getPurchaseOrderByPurchaseOrderKey = function(key){
 
 Lic_MySQL.prototype.getPurchaseOrderById = function(purchaseOrderId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE id = " + purchaseOrderId + ";";
+        var Q = "SELECT * FROM GL_PURCHASE_ORDER WHERE id = " + this.ds.escape(purchaseOrderId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]);
@@ -798,8 +789,8 @@ Lic_MySQL.prototype.getPurchaseOrderById = function(purchaseOrderId){
 
 Lic_MySQL.prototype.updatePurchaseOrderById = function(purchaseOrderId, updateFields){
     return when.promise(function(resolve, reject){
-        var updateFieldsString = updateFields.join(",");
-        var Q = "UPDATE GL_PURCHASE_ORDER SET " + updateFieldsString + " WHERE id = " + purchaseOrderId + ";";
+        var Q = "UPDATE GL_PURCHASE_ORDER SET " + this.ds.escape(updateFields) +
+            " WHERE id = " + this.ds.escape(purchaseOrderId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -831,7 +822,7 @@ Lic_MySQL.prototype.logResellerActionForPO = function(purchaseOrderId, logJSON){
             }
 
 			var updateFields = [];
-			var resellerLog = "RESELLER_LOG = '" + logStr + "'";
+			var resellerLog = {RESELLER_LOG: logStr};
 			updateFields.push(resellerLog);
 
 			return this.updatePurchaseOrderById( purchaseOrderId, updateFields );
@@ -843,8 +834,8 @@ Lic_MySQL.prototype.logResellerActionForPO = function(purchaseOrderId, logJSON){
 
 Lic_MySQL.prototype.updateLicenseByPurchaseOrderId = function(purchaseOrderId, updateFields){
     return when.promise(function(resolve, reject){
-        var updateFieldsString = updateFields.join(",");
-        var Q = "UPDATE GL_LICENSE SET " + updateFieldsString + " WHERE purchase_order_id = " + purchaseOrderId + ";";
+        var Q = "UPDATE GL_LICENSE SET " + this.ds.escape(updateFields) +
+            " WHERE purchase_order_id = " + this.ds.escape(purchaseOrderId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -859,8 +850,8 @@ Lic_MySQL.prototype.updateLicenseByPurchaseOrderId = function(purchaseOrderId, u
 // only update most recent license map entry for a user, so a trial will not be altered when we shut down a bad purchase order
 Lic_MySQL.prototype.updateRecentLicenseMapByUserId = function(userId, updateFields){
     return when.promise(function(resolve, reject){
-        var updateFieldsString = updateFields.join(",");
-        var Q = "UPDATE GL_LICENSE_MAP SET " + updateFieldsString + " WHERE user_id = " + userId + " ORDER BY id DESC LIMIT 1;";
+        var Q = "UPDATE GL_LICENSE_MAP SET " + this.ds.escape(updateFields) +
+            " WHERE user_id = " + this.ds.escape(userId) + " ORDER BY id DESC LIMIT 1;";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
@@ -875,7 +866,7 @@ Lic_MySQL.prototype.updateRecentLicenseMapByUserId = function(userId, updateFiel
 // discovers the institution id from a given set of keys
 Lic_MySQL.prototype.getInstitutionIdByKeys = function(keys){
     return when.promise(function(resolve, reject){
-        var keysString = keys.join(" and ");
+        var keysString = this.ds.escapeArray(keys).join(" and ");
         var Q = "SELECT * FROM GL_INSTITUTION WHERE " + keysString + ";";
         this.ds.query(Q)
             .then(function(results){
@@ -894,10 +885,9 @@ Lic_MySQL.prototype.getInstitutionIdByKeys = function(keys){
 
 Lic_MySQL.prototype.insertToInstitutionTable = function(values){
     return when.promise(function(resolve, reject){
-        var valuesString = values.join(",");
         var Q = "INSERT INTO GL_INSTITUTION\n" +
             "(version,CITY,code,ENABLED,SECRET,SHARED,STATE,TITLE,ZIP,ADDRESS,DATE_CREATED,LAST_UPDATED)\n" +
-            "VALUES (" + valuesString + ");";
+            "VALUES (" + this.ds.escape(values) + ");";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results.insertId);
@@ -928,7 +918,7 @@ Lic_MySQL.prototype.getLicensesForInspection = function(){
 
 Lic_MySQL.prototype.getLicenseMapByLicenseId = function(licenseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE license_id = " + licenseId + ";";
+        var Q = "SELECT * FROM GL_LICENSE_MAP WHERE license_id = " + this.ds.escape(licenseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
