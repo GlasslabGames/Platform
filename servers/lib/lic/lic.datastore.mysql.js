@@ -822,9 +822,7 @@ Lic_MySQL.prototype.logResellerActionForPO = function(purchaseOrderId, logJSON){
             	logStr = JSON.stringify( resellerLog );
             }
 
-			var updateFields = [];
-			var resellerLog = {RESELLER_LOG: logStr};
-			updateFields.push(resellerLog);
+			var updateFields = {RESELLER_LOG: logStr};
 
 			return this.updatePurchaseOrderById( purchaseOrderId, updateFields );
 		}.bind(this))

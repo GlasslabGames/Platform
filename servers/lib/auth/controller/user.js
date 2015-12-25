@@ -2468,9 +2468,7 @@ function _deleteInstructorAccount(userId, req){
                     // finds all licenses an instructor was an owner of in the past, and removes the subscription id
                     promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
                     if(license.user_id !== userId){
-                        var updateFields = [];
-                        var status = {status: null};
-                        updateFields.push(status);
+                        var updateFields = {status: null};
                         promiseList.push(licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields));
                     }
                     return when.all(promiseList);
