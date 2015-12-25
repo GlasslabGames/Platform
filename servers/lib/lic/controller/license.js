@@ -3884,13 +3884,12 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
     return when.promise(function(resolve, reject){
         var licenseId;
         var values;
-        var promise;
-        if(schoolInfo === "NULL"){
-            promise = Util.PromiseContinue("NULL");
+        if(schoolInfo === "NULL" || !schoolInfo){
+            schoolInfo = null;
         } else{
-            promise = _storeSchoolInformation.call(this, schoolInfo);
+            schoolInfo = _storeSchoolInformation.call(this, schoolInfo);
         }
-        promise
+        when(schoolInfo)
             .then(function(institutionId){
                 var seatsTier = planInfo.seats;
                 var type = planInfo.type;
