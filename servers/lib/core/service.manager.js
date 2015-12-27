@@ -252,7 +252,7 @@ return when.promise(function(resolve, reject) {
                         , httpOnly : this.options.services.session.cookie.httpOnly || false
                         //, maxAge: 1000 * 60 * 24 // 24 hours
                     }, this.options.services.session.cookie),
-                    store:  this.exsStore
+                    store:  this.exsStore, resave: true, saveUninitialized: true
                 }));
 
                 resolve();
