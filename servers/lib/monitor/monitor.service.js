@@ -58,9 +58,9 @@ function MonitorService(options, serviceManager){
         this.workingdata = { };
         
         var validServer = this.options.services.name && options.monitor.cron.server == this.options.services.name;
-        this.cron = new CronJob(this.options.monitor.cron.time,
-                            _cronTask.bind(this),
-                            this.options.monitor.cron.enabled && validServer);
+        this.cronEnabled = this.options.monitor.cron.enabled && validServer;
+        console.log("new CronJob");
+        this.cron = new CronJob(this.options.monitor.cron.time, _cronTask.bind(this));
 
         if (this.options.monitor.memwatch.log || this.options.monitor.memwatch.stats) {
             memwatch.on('stats', function(stats) {
@@ -104,7 +104,10 @@ return when.promise(function(resolve, reject) {
             this.stats.increment("error", "Couchbase.Connect");
         }.bind(this))
         .then(function () {
-            this.cron.start();
+            if (this.cronEnabled) {
+                console.log("cron start");
+                this.cron.start();
+            }
         }.bind(this))
         .then(resolve, reject);
 
