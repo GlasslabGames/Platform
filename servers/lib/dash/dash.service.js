@@ -228,15 +228,15 @@ DashService.prototype.isValidGameId = function(gameId) {
 
 DashService.prototype._isValidGameId = function(gameId){
     return when.promise(function(resolve, reject) {
-            for (var g in this._games) {
-                if (g == gameId &&
-                    this._games[g] &&
-                    this._games[g].info &&
-                    this._games[g].info.basic) {
-                    return resolve();
-                }
+        for (var g in this._games) {
+            if (g == gameId &&
+                this._games[g] &&
+                this._games[g].info &&
+                this._games[g].info.basic) {
+                return resolve();
             }
-            reject();
+        }
+        reject({class: "DashService", method: "_isValidGameId", args: {gameId: gameId}});
     }.bind(this) );
 };
 
@@ -270,7 +270,7 @@ DashService.prototype.getListOfVisibleGameIds = function() {
         if(gameIds.length !== 0){
             resolve(gameIds);
         } else{
-            reject();
+            reject({class: "DashService", method: "getListOfVisibleGameIds"});
         }
     }.bind(this) );
 };
@@ -293,7 +293,7 @@ DashService.prototype.getListOfAllGameIds = function() {
         if(gameIds.length !== 0){
             resolve(gameIds);
         } else{
-            reject();
+            reject({class: "DashService", method: "getListOfAllGameIds"});
         }
     }.bind(this) );
 };
@@ -313,7 +313,7 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
         if(gameIds.length !== 0){
             resolve(gameIds);
         } else{
-            reject();
+            reject({class: "DashService", method: "getListOfAllFreeGameIds"});
         }
     }.bind(this));
 };
@@ -328,7 +328,7 @@ DashService.prototype.getGameReports = function(gameId) {
             this._games[gameId].info.hasOwnProperty('reports')) {
             resolve(this._games[gameId].info.reports);
         } else {
-            reject([]);
+            reject({class: "DashService", method: "getGameReports", args: {gameId: gameId}});
         }
     }.bind(this));
 };
@@ -346,7 +346,7 @@ DashService.prototype.getGameAchievements = function(gameId) {
             this._games[gameId].hasOwnProperty('achievements') ) {
             resolve(this._games[gameId].achievements);
         } else {
-            reject({});
+            reject({class: "DashService", method: "getGameAchievements", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -361,7 +361,7 @@ DashService.prototype.getGameDetails = function(gameId) {
             this._games[gameId].info.hasOwnProperty('details') ) {
             resolve(this._games[gameId].info.details);
         } else {
-            reject({});
+            reject({class: "DashService", method: "getGameDetails", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -377,7 +377,7 @@ DashService.prototype.getGameMissions = function(gameId) {
             this._games[gameId].info.hasOwnProperty('missions') ) {
             resolve(this._games[gameId].info.missions);
         } else {
-            reject(null);
+            reject({class: "DashService", method: "getGameMissions", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -392,7 +392,7 @@ DashService.prototype.getGameBasicInfo = function(gameId) {
             this._games[gameId].info.hasOwnProperty('basic') ) {
             resolve(this._games[gameId].info.basic);
         } else {
-            reject(null);
+            reject({class: "DashService", method: "getGameBasicInfo", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -419,7 +419,7 @@ DashService.prototype.getGameReportInfo = function(gameId, reportId) {
                 resolve(list[i]);
             }
         }
-        reject();
+        reject({class: "DashService", method: "getGameReportInfo", args: {gameId: gameId, reportId: reportId}});
     }.bind(this) );
 };
 
@@ -433,7 +433,7 @@ DashService.prototype.getGameReleases = function(gameId) {
             this._games[gameId].info.hasOwnProperty('releases') ) {
             resolve(this._games[gameId].info.releases);
         } else {
-            reject({});
+            reject({class: "DashService", method: "getGameReleases", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
