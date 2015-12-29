@@ -501,7 +501,7 @@ function createMatch(req, res){
             this.requestUtil.jsonResponse(res, match);
         }.bind(this))
         .then(null, function(err){
-            console.error(err);
+            console.errorExt("DataService", err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -529,7 +529,7 @@ function getMatch(req, res) {
             this.requestUtil.jsonResponse(res, match);
         }.bind(this))
         .then(null, function(err) {
-            console.error("Get Match Error -",err);
+            console.errorExt("DataService", "Get Match Error -",err);
             this.requestUtil.errorResponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }
@@ -752,7 +752,7 @@ function completeMatch(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
         .then(null, function(err){
-            console.error("Complet Match Error -",err);
+            console.errorExt("DataService", "Complete Match Error -",err);
             this.requestUtil.errorResponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }
@@ -768,7 +768,7 @@ function deleteGameSaves(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Delete Game Saves Error -", err);
+            console.errorExt("DataService", "Delete Game Saves Error -", err);
             this.requestUtil.errorReponse(res, { key: "data.gameId.general"});
         }.bind(this));
 }

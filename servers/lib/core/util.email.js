@@ -32,7 +32,7 @@ return when.promise(function(resolve, reject) {
         // errors
         .then(null, function(err){
             if(this.stats) this.stats.increment("error", "Email."+templateName+".ReadingTemplates");
-            console.error("Email: Error reading templates -", err);
+            console.errorExt("Email", "Error reading templates -", err);
             reject({error: "internal error, try again later"});
         }.bind(this));
 // ------------------------------------------------
@@ -74,7 +74,7 @@ return when.promise(function(resolve, reject) {
         // errors
         .then(null, function(err) {
             if(this.stats) this.stats.increment("error", "Email."+templateName+".ReadingTemplates");
-            console.error("Email: Error reading templates -", err);
+            console.errorExt("Email", "Error reading templates -", err);
             reject({error: "internal error, try again later"});
         }.bind(this));
 
@@ -160,7 +160,7 @@ return when.promise(function(resolve, reject) {
             transport.sendMail(emailSettings, function(err, responseStatus) {
                 if (err) {
                     if(this.stats) this.stats.increment("error", "Email."+templateName+".SendEmail");
-                    console.error("Email: Error sending email -", err);
+                    console.errorExt("Email", "Error sending email -", err);
 
                     if(process.env.HYDRA_ENV == 'dev') {
                         // if dev env it's ok if email does not work
@@ -179,7 +179,7 @@ return when.promise(function(resolve, reject) {
         // errors
         .then(null, function(err){
             if(this.stats) this.stats.increment("error", "Email."+templateName+".ReadingTemplates");
-            console.error("Email: Error reading templates -", err);
+            console.errorExt("Email", "Error reading templates -", err);
             reject({error: "internal error, try again later"});
         }.bind(this));
 

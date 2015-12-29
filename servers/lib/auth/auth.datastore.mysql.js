@@ -214,7 +214,7 @@ Auth_MySQL.prototype.setInstructorsFtueStatuses = function(){
 
 Auth_MySQL.prototype.setInstructorFtue = function(id){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + id + ";";
+        var Q = "SELECT course_id FROM GL_MEMBERSHIP WHERE user_id = " + this.ds.escape(id) + ";";
         this.ds.query(Q)
             .then(function(results){
                 if(results.length === 0){
@@ -225,7 +225,7 @@ Auth_MySQL.prototype.setInstructorFtue = function(id){
                     var preQ = "SELECT user_id FROM GL_MEMBERSHIP WHERE course_id = ";
                     results.forEach(function(course){
                         courseId = course.course_id;
-                        Q = preQ + courseId + ";";
+                        Q = preQ + this.ds.escape(courseId) + ";";
                         courses.push(this.ds.query(Q));
                     }.bind(this));
                     return when.all(courses);
@@ -247,7 +247,8 @@ Auth_MySQL.prototype.setInstructorFtue = function(id){
                         value = 2;
                     }
                 }
-                Q = "UPDATE GL_USER SET ftue_checklist = " + value + " WHERE id = " + id + ";";
+                Q = "UPDATE GL_USER SET ftue_checklist = " + this.ds.escape(value)
+                    + " WHERE id = " + this.ds.escape(id) + ";";
                 return this.ds.query(Q);
             }.bind(this))
             .then(function(){
@@ -289,15 +290,7 @@ return when.promise(function(resolve, reject) {
         FROM \
             GL_USER \
         WHERE \
-            ENABLED=1 AND ";
-
-    value = this.ds.escape(value);
-    if(_.isArray(value)) {
-        Q += type+" in ("+value.join(',')+")";
-    } else {
-        // already escaped
-        Q += type+"="+value;
-    }
+            ENABLED=1 AND " + this.ds.escapeId(type) + " IN ("+this.ds.escape(value)+")";
 
     //console.log("Q:", Q);
     var user;
@@ -453,7 +446,7 @@ function _addLicenseInfoToUser(user, results){
                 resolve();
             }.bind(this))
             .then(null,function(err){
-                console.error("Add License Info to User Error -",err);
+                console.errorExt("AuthService MySQL", "Add License Info to User Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -465,8 +458,8 @@ Auth_MySQL.prototype.updateUserBadgeList = function(userId, badgeList) {
 
         var Q = "UPDATE GL_USER " +
             "SET last_updated=NOW(), " +
-            "badge_list='" + badgeListStr + "' " +
-            "WHERE id=" + userId;
+            "badge_list=" + this.ds.escape(badgeListStr) + " " +
+            "WHERE id=" + this.ds.escape(userId);
 
         this.ds.query(Q).then( resolve, reject );
     }.bind(this));
@@ -636,13 +629,13 @@ Auth_MySQL.prototype.updateTempUser = function(userData, existingId){
 
         var updateFieldsString = updateFields.join(", ");
 
-        var Q = "UPDATE GL_USER SET " + updateFieldsString + " WHERE id = " + existingId + ";";
+        var Q = "UPDATE GL_USER SET " + updateFieldsString + " WHERE id = " + this.ds.escape(existingId) + ";";
         this.ds.query(Q)
             .then(function(data){
                 resolve(data.insertId);
             }.bind(this))
             .then(null, function(err) {
-                console.error("Update Temp User Error -",err);
+                console.errorExt("AuthService MySQL", "Update Temp User Error -",err);
                 reject({"error": "failure", "exception": err}, 500);
             }.bind(this));
     }.bind(this));
@@ -767,7 +760,7 @@ return when.promise(function(resolve, reject) {
 
 Auth_MySQL.prototype.getUserEmail = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT email FROM GL_USER WHERE id = " + userId;
+        var Q = "SELECT email FROM GL_USER WHERE id = " + this.ds.escape(userId);
 
         this.ds.query(Q)
             .then(function(results){
@@ -781,7 +774,7 @@ Auth_MySQL.prototype.getUserEmail = function(userId){
 
 Auth_MySQL.prototype.getUserById = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_USER WHERE id = " + userId;
+        var Q = "SELECT * FROM GL_USER WHERE id = " + this.ds.escape(userId);
 
         this.ds.query(Q)
             .then(function(results){
@@ -797,7 +790,7 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
-            "WHERE status in ('active','pending','po-received','po-rejected', 'po-pending', 'invite-pending') and user_id = " + userId+ ") as lm\n" +
+            "WHERE status in ('active','pending','po-received','po-rejected', 'po-pending', 'invite-pending') and user_id = " + this.ds.escape(userId)+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
         var licenseInfo;
         this.ds.query(Q)
@@ -811,7 +804,7 @@ Auth_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Info By Instructor Error -",err);
+                console.errorExt("AuthService MySQL", "Get License Info By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -821,7 +814,7 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
-            "WHERE user_id = " + userId+ ") as lm\n" +
+            "WHERE user_id = " + this.ds.escape(userId)+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
         var licenseInfo;
         this.ds.query(Q)
@@ -833,7 +826,7 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Record Count By Instructor Error -",err);
+                console.errorExt("AuthService MySQL", "Get License Record Count By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -841,7 +834,7 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
 
 Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT id, FIRST_NAME, LAST_NAME, EMAIL, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = '" + verifyCode + "';";
+        var Q = "SELECT id, FIRST_NAME, LAST_NAME, EMAIL, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = " + this.ds.escape(verifyCode) + ";";
         return this.ds.query(Q)
             .then(function(results){
                 var developers = [];
@@ -862,7 +855,7 @@ Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
 Auth_MySQL.prototype.deleteShadowUser = function(username) {
     return when.promise(function(resolve, reject){
         //var Q = 'DELETE FROM GL_USER WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
-        var Q = "UPDATE GL_USER SET username='failmultireg{" + username + "}', VERIFY_CODE_STATUS=NULL WHERE username='" + username + "' AND VERIFY_CODE_STATUS='shadow';";
+        var Q = "UPDATE GL_USER SET username="+this.ds.escape("failmultireg{" + username + "}")+", VERIFY_CODE_STATUS=NULL WHERE username=" + this.ds.escape(username) + " AND VERIFY_CODE_STATUS='shadow';";
         return this.ds.query(Q)
             .then(function(results){ 
                 resolve(results);

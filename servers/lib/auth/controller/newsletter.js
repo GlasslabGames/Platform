@@ -36,7 +36,7 @@ function subscribe(req, res, next) {
         // errors
         .then(null, function(err){
             this.stats.increment("error", "Route.Register.User.SubscribeToNewsletter");
-            console.error("Auth: RegisterUserV2 - Error", err);
+            console.errorExt("AuthService", "RegisterUserV2 -", err);
             this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
         }.bind(this))
 }

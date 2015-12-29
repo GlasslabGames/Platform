@@ -33,13 +33,13 @@ Lic_Couchbase.prototype.connect = function(){
             connectionTimeout: this.options.timeout || 6000,
             operationTimeout:  this.options.timeout || 6000
         }, function(err) {
-            console.error("[Lic] CouchBase LicDataStore: Error -", err);
+            console.errorExt("LicStore Couchbase", err);
 
             if(err) throw err;
         }.bind(this));
 
         this.client.on('error', function (err) {
-            console.error("[Lic] CouchBase LicDataStore: Error -", err);
+            console.errorExt("LicStore Couchbase", err);
             reject(err);
         }.bind(this));
 
@@ -58,7 +58,7 @@ Lic_Couchbase.prototype.getStudentsByLicense = function(licenseId){
         var key = lConst.datastore.licenseKey + ":" + licenseId;
         this.client.get(key, function(err, results){
             if(err){
-                console.error("Couchbase LicStore: Get Active Students By License Error -", err);
+                console.errorExt("LicStore Couchbase", "Get Active Students By License Error -", err);
                 reject(err);
                 return;
             }
@@ -75,7 +75,7 @@ Lic_Couchbase.prototype.getActiveStudentsByLicense = function(licenseId){
         var key = lConst.datastore.licenseKey + ":" + licenseId;
         this.client.get(key, function(err, results){
             if(err){
-                console.error("Couchbase LicStore: Get Active Students By License Error -", err);
+                console.errorExt("LicStore Couchbase", "Get Active Students By License Error -", err);
                 reject(err);
                 return;
             }
@@ -99,7 +99,7 @@ Lic_Couchbase.prototype.countActiveStudentsByLicense = function(licenseId){
         var key = lConst.datastore.licenseKey + ":" + licenseId;
         this.client.get(key, function(err, results){
             if(err){
-                console.error("Couchbase LicStore: Count Active Students By License Error -", err);
+                console.errorExt("LicStore Couchbase", "Count Active Students By License Error -", err);
                 reject(err);
                 return;
             }
@@ -125,7 +125,7 @@ Lic_Couchbase.prototype.updateStudentsByLicense = function(licenseId, data){
         var key = lConst.datastore.licenseKey + ":" + licenseId;
         this.client.set(key, data, function(err, results){
             if(err){
-                console.error("Couchbase LicStore: Update Active Students By License Error -",err);
+                console.errorExt("LicStore Couchbase", "Update Active Students By License Error -",err);
                 reject(err);
                 return;
             }
@@ -141,7 +141,7 @@ Lic_Couchbase.prototype.createLicenseStudentObject = function(licenseId){
         data.students = {};
         this.client.set(key, data, function(err, results){
             if(err){
-                console.error("Couchbase LicStore: Create License Student Object Error -",err);
+                console.errorExt("LicStore Couchbase", "Create License Student Object Error -",err);
                 reject(err);
                 return;
             }
@@ -168,7 +168,7 @@ Lic_Couchbase.prototype.updateEmailLastSentTimestamp = function(licenseId, email
         var metadata = {expiry: ttl || 0};
         this.client.set(key, data, metadata, function(err, results){
             if(err){
-                console.error("Couchbase LicStore: Update Email Timestamp Error -",err);
+                console.errorExt("LicStore Couchbase", "Update Email Timestamp Error -",err);
                 reject(err);
                 return;
             }

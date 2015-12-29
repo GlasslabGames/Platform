@@ -43,13 +43,13 @@ return when.promise(function(resolve, reject) {
         operationTimeout:  this.options.timeout || 60000
     };
     this.client = new couchbase.Connection(options, function(err) {
-        console.error("CouchBase ResearchStore: Error -", err);
+        console.errorExt("ResearchStore Couchbase", err);
 
         if(err) throw err;
     }.bind(this));
 
     this.client.on('error', function (err) {
-        console.error("CouchBase ResearchStore: Error -", err);
+        console.errorExt("ResearchStore Couchbase", err);
         reject(err);
     }.bind(this));
 
@@ -101,7 +101,7 @@ return when.promise(function(resolve, reject) {
         options,
         function(err, results){
            if(err){
-                console.error("CouchBase ResearchStore: Get Events View Error -", err);
+                console.errorExt("ResearchStore Couchbase", "Get Events View Error -", err);
                 reject(err);
                 return;
             }
@@ -209,10 +209,7 @@ return when.promise(function(resolve, reject) {
                     }
 
                 } else {
-                    console.error("CouchBase ResearchStore: Multi Get Sessions Error -", err);
-                    if (results) {
-                        console.error("CouchBase ResearchStore: Multi Get Sessions Error - results:", results);
-                    }
+                    console.errorExt("ResearchStore Couchbase", "Multi Get Sessions Error -", err, ", results -", results);
                     reject(err);
                     return;
                 }
@@ -242,10 +239,7 @@ return when.promise(function(resolve, reject) {
     this.client.getMulti(keys, {},
         function (err, results) {
             if (err) {
-                console.error("CouchBase ResearchStore: Multi Get Events Error -", err);
-                if (results) {
-                    console.error("CouchBase ResearchStore: Multi Get Events Error - results:", results);
-                }
+                console.errorExt("ResearchStore Couchbase", "Multi Get Events Error -", err, ", results -", results);
                 reject(err);
                 return;
             }

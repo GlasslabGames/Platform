@@ -319,13 +319,13 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.removeStudentFromAllCourses = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "DELETE FROM GL_MEMBERSHIP WHERE ROLE = 'student' AND user_id = " + userId + ";";
+        var Q = "DELETE FROM GL_MEMBERSHIP WHERE ROLE = 'student' AND user_id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results);
             })
             .then(null, function(err){
-                console.error("Remove Student From All Courses Error -", err);
+                console.errorExt("LMSStore MySQL", "Remove Student From All Courses Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -835,7 +835,7 @@ return when.promise(function(resolve, reject) {
                             err.code === "ER_DUP_ENTRY") {
                             reject({key:"course.notUnique.name"}, 400);
                         } else {
-                            console.error("updateCourseInfo UPDATE err:", err);
+                            console.errorExt("LMSStore MySQL", "updateCourseInfo UPDATE err:", err);
                             reject({key:"course.general"}, 400);
                         }
                     }.bind(this)
@@ -845,7 +845,7 @@ return when.promise(function(resolve, reject) {
             }
         }.bind(this),
         function(err){
-            console.error("updateCourseInfo SELECT err:", err);
+            console.errorExt("LMSStore MySQL", "updateCourseInfo SELECT err:", err);
             reject({key:"course.general"}, 400);
         }.bind(this)
     );
@@ -1014,7 +1014,7 @@ return when.promise(function(resolve, reject) {
             co.code \
         FROM GL_COURSE c \
         JOIN GL_CODE co on co.course_id=c.id \
-        WHERE c." + key + "=" + this.ds.escape(value);
+        WHERE c." + this.ds.escapeId(key) + "=" + this.ds.escape(value);
 
     this.ds.query(Q)
         .then(function(results) {
@@ -1047,7 +1047,7 @@ return when.promise(function(resolve, reject) {
 
 LMS_MySQL.prototype.isCoursePremium = function(courseId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT premium_games_assigned > 0 as premiumGamesAssigned FROM GL_COURSE WHERE id = " + courseId + ";";
+        var Q = "SELECT premium_games_assigned > 0 as premiumGamesAssigned FROM GL_COURSE WHERE id = " + this.ds.escape(courseId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 results = results[0];
@@ -1055,7 +1055,7 @@ LMS_MySQL.prototype.isCoursePremium = function(courseId){
                 resolve(state);
             }.bind(this))
             .then(null, function(err){
-                console.error("Is Course Premium Error -", err);
+                console.errorExt("LMSStore MySQL", "Is Course Premium Error -", err);
                 reject(err);
             });
     }.bind(this));

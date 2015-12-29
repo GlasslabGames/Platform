@@ -193,7 +193,7 @@ RequestUtil.prototype.sendRequest = function(options, data, resOut, done){
         });
 
         sreq.on("error", function(err) {
-            console.error("Auth: sendRequest Error -", err.message);
+            console.errorExt("Util", "sendRequest Error -", err.message);
             if(resOut) {
                 resOut.writeHead(500);
                 resOut.end();

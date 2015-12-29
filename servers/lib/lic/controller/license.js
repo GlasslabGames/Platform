@@ -76,7 +76,7 @@ function getSubscriptionPackages(req, res){
         };
         this.requestUtil.jsonResponse(res, output);
     } catch(err){
-        console.error("Get Subscription Packages Error -",err);
+        console.errorExt("LicService", "Get Subscription Packages Error -",err);
         this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
     }
 }
@@ -98,7 +98,7 @@ function getCurrentPlan(req, res){
     var userId = req.user.id;
     var licenseId = req.user.licenseId;
     var licenseOwnerId = req.user.licenseOwnerId;
-    
+
     _getPlanInternal.call(this, req, res, userId, licenseId, licenseOwnerId);
 }
 
@@ -116,7 +116,7 @@ function getPlanForUser(req, res){
         var userId = req.query.userId;
         var licenseId = req.query.licenseId;
         var licenseOwnerId = req.query.licenseOwnerId;
-        
+
         _getPlanInternal.call(this, req, res, userId, licenseId, licenseOwnerId);
     } else {
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
@@ -178,7 +178,7 @@ function _getPlanInternal(req, res, userId, licenseId, licenseOwnerId, callback)
         } else{
             output["canUpgrade"] = false;
         }
-        
+
         var packageType = license["package_type"];
         var packageSize = license["package_size_tier"];
         var packageDetails = {};
@@ -214,7 +214,7 @@ function _getPlanInternal(req, res, userId, licenseId, licenseOwnerId, callback)
         output.rejectedTeachers = req.rejectedTeachers || [];
         output.approvedTeachers = req.approvedTeachers || [];
         delete output["packageDetails"]["stripe_planId"];
-        
+
         if (output["institutionId"]) {
             var lmsService = this.serviceManager.get("lms").service;
             return lmsService.myds.getInstitution(output["institutionId"]);
@@ -240,7 +240,7 @@ function _getPlanInternal(req, res, userId, licenseId, licenseOwnerId, callback)
         this.requestUtil.jsonResponse(res, output, 200);
     }.bind(this))
     .then(null, function(err){
-        console.error("Get Current Plan Error -",err);
+        console.errorExt("LicService", "Get Current Plan Error -",err);
         this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
     }.bind(this));
 }
@@ -332,7 +332,7 @@ function getStudentsInLicense(req, res){
             this.requestUtil.jsonResponse(res, output);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Students in License Error -",err);
+            console.errorExt("LicService", "Get Students in License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -399,7 +399,7 @@ function getBillingInfo(req, res){
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Customer Id Error -",err);
+            console.errorExt("LicService", "Get Customer Id Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -448,7 +448,7 @@ function updateBillingInfo(req, res){
             this.requestUtil.jsonResponse(res, billingInfo);
         }.bind(this))
         .then(null, function(err){
-            console.error("Update Billing Info Error -",err);
+            console.errorExt("LicService", "Update Billing Info Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -535,7 +535,7 @@ function subscribeToLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Subscribe To License Error -",err);
+            console.errorExt("LicService", "Subscribe To License Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -630,7 +630,7 @@ function subscribeToTrialLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Subscribe To Trial License Error -",err);
+            console.errorExt("LicService", "Subscribe To Trial License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -658,20 +658,20 @@ function upgradeLicense(req, res){
     var planInfo = req.body.planInfo;
     var stripeInfo = req.body.stripeInfo || {};
     var emailData = {};
-    
+
     emailData.licenseOwnerEmail = req.user.email;
     emailData.ownerName = req.user.firstName + " " + req.user.lastName;
     emailData.ownerFirstName = req.user.firstName;
     emailData.ownerLastName = req.user.lastName;
 
     var completionInfo = { complete: "email" };
-    
+
     _doUpgradeLicense.call(this, req, res, userId, licenseId, planInfo, stripInfo, emailData, completionInfo);
 }
 
 function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, emailData, completionInfo) {
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
-    
+
     var instructors;
     var promoCode = null;
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
@@ -725,15 +725,13 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
                 if (!planInfo.yearAdded) {
                     return {};
                 }
-              
-                var updateFields = [];
-                var active = "active = 1";
-                updateFields.push(active);
+
                 var oldDate = new Date(license["expiration_date"]);
-                oldDate.setFullYear(oldDate.getFullYear() + 1);
-                var expDate = oldDate.toISOString().slice(0, 19).replace('T', ' ');
-                var expirationDate = "expiration_date = '" + expDate + "'";
-                updateFields.push(expirationDate);
+                var expDate = oldDate.setFullYear(oldDate.getFullYear() + 1);
+                var updateFields = {
+                    active: 1,
+                    expiration_date: expDate
+                };
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }
             var subscriptionId = license["subscription_id"];
@@ -758,17 +756,13 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
                 return status;
             }
             var promiseList = [{},{},{},{}];
-            var updateFields = [];
-            var packageType = "package_type = '" +  planInfo.type + "'";
-            updateFields.push(packageType);
-            var packageSizeTier = "package_size_tier = '" + planInfo.seats + "'";
-            updateFields.push(packageSizeTier);
-            var lastUpgraded = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            var lastUpgradedString = "last_upgraded = '" + lastUpgraded + "'";
-            updateFields.push(lastUpgradedString);
+            var updateFields = {
+                package_type: planInfo.type,
+                package_size_tier: planInfo.seats,
+                last_upgraded: new Date()
+            };
             if(promoCode){
-                var promoCodeString = "promo = '" + planInfo.promoCode + "'";
-                updateFields.push(promoCodeString);
+                updateFields.promo = planInfo.promoCode;
             }
             promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
             var seats = {};
@@ -799,7 +793,7 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
                 _errorLicensingAccess.call(this, res, status);
                 return;
             }
-            
+
             if (completionInfo.complete === "email") {
                 instructors = status[3];
                 _upgradeLicenseEmailResponse.call(this, emailData.licenseOwnerEmail, instructors, emailData, completionInfo.req.protocol, completionInfo.req.headers.host);
@@ -809,7 +803,7 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
             }
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade License Error -",err);
+            console.errorExt("LicService", "Upgrade License Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -910,7 +904,7 @@ function upgradeTrialLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade Trial License Error -",err);
+            console.errorExt("LicService", "Upgrade Trial License Error -",err);
             if(err.code === "card_declined"){
                 this.requestUtil.errorResponse(res, { key: "lic.card.declined"});
                 return;
@@ -936,21 +930,21 @@ function alterLicense(req, res){
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    
+
     var licenseInfo = req.body.licenseInfo;
     var planInfo = req.body.planInfo;
     var schoolInfo = req.body.schoolInfo;
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    
+
     if (!licenseInfo.userId) {
         this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
         return;
     }
-    
+
     _getPlanInternal.call(this, req, res, licenseInfo.userId, licenseInfo.licenseId, licenseInfo.licenseOwnerId, function(oldPlanInfo) {
-    
+
         var didSetInstitution = false;
-        
+
         var upgradeCallback = function() {
             this.requestUtil.jsonResponse(res, "ok", 200);
         }
@@ -963,9 +957,9 @@ function alterLicense(req, res){
                 this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
                 return;
             }
-            
+
             console.log("Admin did account upgrade of user " + licenseInfo.userId + " from trial to " + planInfo.type + "/" + planInfo.seats + " on " + (new Date()) + " from IP " + ip + ", admin id " + req.user.id);
-        
+
             var userEmail = licenseInfo.email;
             var purchaseOrderInfo = {
                 firstName: "internal",
@@ -976,15 +970,15 @@ function alterLicense(req, res){
                 number: 1,
                 approve: true
             };
-            
+
             didSetInstitution = true;
-            
+
             _doSubscribeToLicenseInternal.call(this, userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "callback", callback: upgradeCallback }, req, res);
             return;
 
         } else if (oldPlanInfo.packageDetails.planId !== planInfo.type || oldPlanInfo.packageDetails.seatId !== planInfo.seats || planInfo.yearAdded) {
             // premium change
-            
+
             console.log("Admin did account upgrade of user " + licenseInfo.userId + " from " + oldPlanInfo.packageDetails.planId + "/" + oldPlanInfo.packageDetails.seatId + " to " + planInfo.type + "/" + planInfo.seats + (planInfo.yearAdded ? " w/year added" : "") + " on " + (new Date()) + " from IP " + ip + ", admin id " + req.user.id);
 
             var userId = licenseInfo.userId;
@@ -997,7 +991,7 @@ function alterLicense(req, res){
             _doUpgradeLicense.call(this, res, req, userId, licenseId, planInfo, stripeInfo, emailData, completionInfo);
             return;
         }
-    
+
         // debug
         this.requestUtil.jsonResponse(res, "ok", 200);
     }.bind(this));
@@ -1045,7 +1039,7 @@ function validatePromoCode(req, res) {
             this.requestUtil.jsonResponse(res, promoCodeInfo);
         }.bind(this))
         .then(null, function(err) {
-            console.error("Validate Promo Code Error -",err);
+            console.errorExt("LicService", "Validate Promo Code Error -",err);
             this.requestUtil.errorResponse(res, {key: "lic.promoCode.invalid"});
         }.bind(this));
 }
@@ -1084,7 +1078,7 @@ function cancelLicenseAutoRenew(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel License Error -",err);
+            console.errorExt("LicService", "Cancel License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1135,8 +1129,7 @@ function enableLicenseAutoRenew(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            var autoRenew = "auto_renew = TRUE";
-            var updateFields = [autoRenew];
+            var updateFields = {auto_renew: true};
             return this.myds.updateLicenseById(licenseId, updateFields);
         }.bind(this))
         .then(function(status){
@@ -1151,7 +1144,7 @@ function enableLicenseAutoRenew(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Renew License Error -",err);
+            console.errorExt("LicService", "Renew License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1406,7 +1399,7 @@ function addTeachersToLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Add Teachers to License Error - ",err);
+            console.errorExt("LicService", "Add Teachers to License Error - ",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1431,8 +1424,7 @@ function setLicenseMapStatusToActive(req, res){
                 return status;
             }
             var userIdList = [userId];
-            var statusField = "status = 'active'";
-            var updateFields = [statusField];
+            var updateFields = {status: "active"};
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
         .then(function(status){
@@ -1450,7 +1442,7 @@ function setLicenseMapStatusToActive(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok" }, 200);
         }.bind(this))
         .then(null, function(err){
-            console.error("Set License Map Status to Active Error -",err);
+            console.errorExt("LicService", "Set License Map Status to Active Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1502,7 +1494,7 @@ function removeTeacherFromLicense(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Remove Teacher From License Error -",err);
+            console.errorExt("LicService", "Remove Teacher From License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1565,7 +1557,7 @@ function teacherLeavesLicense(req, res){
             this.requestUtil.jsonResponse(res, { status: 'success' });
         }.bind(this))
         .then(null, function(err){
-            console.error("Teacher Leaves License Error -",err);
+            console.errorExt("LicService", "Teacher Leaves License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1648,7 +1640,7 @@ function subscribeToLicensePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Subscribe to License Purchase Order Error -",err);
+            console.errorExt("LicService", "Subscribe to License Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
 }
@@ -1674,7 +1666,7 @@ function _createStripeCustomer(userId, params){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Create Customer Id Error -",err);
+                console.errorExt("LicService", "Create Customer Id Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -1790,13 +1782,12 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                     return purchaseOrderId;
                 }
                 //update license table with po id
-                purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
-                var updateFields = [purchaseOrderId];
+                var updateFields = {purchase_order_id: purchaseOrderId};
                 var promiseList = [];
                 promiseList.push(this.myds.updateLicenseById(licenseId, updateFields));
                 promiseList.push(this.cbds.createLicenseStudentObject(licenseId));
                 if (purchaseOrderInfo.approve) {
-                    var mapUpdateFields = ["status='active'"];
+                    var mapUpdateFields = {status: "active"};
                     promiseList.push(this.myds.updateLicenseMapByLicenseInstructor(licenseId,[userId],mapUpdateFields));
                 }
                 return when.all(promiseList);
@@ -1809,7 +1800,7 @@ function _purchaseOrderSubscribe(userId, schoolInfo, planInfo, purchaseOrderInfo
                 resolve(licenseId);
             })
             .then(null, function(err){
-                console.error("Purchase Order Subscribe Error -",err);
+                console.errorExt("LicService", "Purchase Order Subscribe Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -1822,24 +1813,20 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, planI
     var status;
     var purchaseOrderNumber;
     if(purchaseOrderInfo.number){
-        status = (purchaseOrderInfo.approve ? "'approved'" : "'received'");
+        status = (purchaseOrderInfo.approve ? "approved" : "received");
         purchaseOrderNumber = purchaseOrderInfo.number;
     } else{
-        status = "'pending'";
+        status = "pending";
         purchaseOrderNumber = Util.CreateUUID();
     }
     values.push(status);
 
-    var storePONumber = "'" + purchaseOrderNumber + "'";
-    values.push( storePONumber );
+    values.push( purchaseOrderNumber );
     // license id added to guarantee uniqueness.  table also requires a unique value
     var purchaseOrderKey = purchaseOrderNumber + "-" + licenseId;
     purchaseOrderInfo.key = purchaseOrderKey;
-    purchaseOrderKey = "'" + purchaseOrderKey + "'";
     values.push(purchaseOrderKey);
-    var phone = "'" + purchaseOrderInfo.phone + "'";
     values.push(phone);
-    var email = "'" + purchaseOrderInfo.email.toLowerCase() + "'";
     values.push(email);
     var name;
     if(purchaseOrderInfo.lastName){
@@ -1848,26 +1835,24 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, planI
         name = purchaseOrderInfo.firstName;
     }
     purchaseOrderInfo.name = name;
-    name = "'" + name + "'";
     values.push(name);
     var payment = "" + purchaseOrderInfo.payment;
     if(payment.indexOf(".") === -1){
         payment = purchaseOrderInfo.payment + ".00";
     }
     purchaseOrderInfo.payment = payment;
-    payment = "'" + payment + "'";
     values.push(payment);
 
     // Added current_package_type and current_package_size_tier
-    var current_package_type = "'" + planInfo.type + "'";
+    var current_package_type = planInfo.type;
     values.push( current_package_type );
 
-    var current_package_size_tier = "'" + planInfo.seats + "'";
+    var current_package_size_tier = planInfo.seats;
     values.push( current_package_size_tier );
 
     action = "'" + action + "'";
     values.push(action);
-    var dateCreated = "NOW()";
+    var dateCreated = new Date();
     values.push(dateCreated);
     return values;
 }
@@ -1946,7 +1931,7 @@ function upgradeTrialLicensePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade Trial License Purchase Order Error -",err);
+            console.errorExt("LicService", "Upgrade Trial License Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
     // email response
@@ -2002,8 +1987,7 @@ function upgradeLicensePurchaseOrder(req, res){
                 return purchaseOrderId;
             }
             // update license table purchaseOrderId column
-            purchaseOrderId = "purchase_order_id = " + purchaseOrderId;
-            var updateFields = [purchaseOrderId];
+            var updateFields = {purchase_order_id: purchaseOrderId};
             return this.myds.updateLicenseById(licenseId, updateFields);
         }.bind(this))
         .then(function(status){
@@ -2029,7 +2013,7 @@ function upgradeLicensePurchaseOrder(req, res){
             this.serviceManager.internalRoute('/api/v2/license/plan', 'get',[req,res]);
         }.bind(this))
         .then(null, function(err){
-            console.error("Upgrade License Purchase Order Error -",err);
+            console.errorExt("LicService", "Upgrade License Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2079,7 +2063,7 @@ function getActivePurchaseOrderInfo(req, res){
             this.requestUtil.jsonResponse(res, output);
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Active Purchase Order Info Error -",err);
+            console.errorExt("LicService", "Get Active Purchase Order Info Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2096,7 +2080,7 @@ function getOpenPurchaseOrders(req, res) {
     		this.requestUtil.jsonResponse(res, results);
     	}.bind(this))
     	.then(null, function(err) {
-            console.error("Get Open Purchase Orders Error -",err);
+            console.errorExt("LicService", "Get Open Purchase Orders Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }
@@ -2113,7 +2097,7 @@ function getNotOpenPurchaseOrders(req, res) {
     		this.requestUtil.jsonResponse(res, results);
     	}.bind(this))
     	.then(null, function(err) {
-            console.error("Get Not Open Purchase Orders Error -",err);
+            console.errorExt("LicService", "Get Not Open Purchase Orders Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }
@@ -2130,7 +2114,7 @@ function getOpenPurchaseOrderForUser( req, res ) {
     		this.requestUtil.jsonResponse(res, results);
     	}.bind(this))
     	.then(null, function(err) {
-            console.error("Get Open Purchase Order For User Error -",err);
+            console.errorExt("LicService", "Get Open Purchase Order For User Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
     	}.bind(this));
 }
@@ -2183,7 +2167,7 @@ function cancelActivePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel Active Purchase Order Error -",err);
+            console.errorExt("LicService", "Cancel Active Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key:"lic.general"});
         }.bind(this));
 }
@@ -2211,8 +2195,7 @@ function setLicenseMapStatusToNull(req, res){
                 return status;
             }
             var userIdList = [req.user.id];
-            var statusString = "status = NULL";
-            var updateFields = [statusString];
+            var updateFields = {status: null};
 
             return this.myds.updateLicenseMapByLicenseInstructor(licenseId,userIdList,updateFields);
         }.bind(this))
@@ -2257,7 +2240,7 @@ function setLicenseMapStatusToNull(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Set Instructor License Map Status To Null Error -",err);
+            console.errorExt("LicService", "Set Instructor License Map Status To Null Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2375,7 +2358,7 @@ function rejectPurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok "});
         }.bind(this))
         .then(null, function(err){
-            console.error("Reject Purchase Order Error -",err);
+            console.errorExt("LicService", "Reject Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -2435,13 +2418,11 @@ function receivePurchaseOrder(req, res){
                 date.setFullYear(date.getFullYear()+1);
                 expirationDate = date.toISOString().slice(0, 19).replace('T', ' ');
             }
-            var updateFields = [];
-            var status = "status = 'received'";
-            updateFields.push(status);
-            var number = "purchase_order_number = '" + purchaseOrderNumber + "'";
-            updateFields.push(number);
-            var paymentAmount = "payment = '" + payment + "'";
-            updateFields.push(paymentAmount);
+            var updateFields = {
+                status: "received",
+                purchase_order_number: purchaseOrderNumber,
+                payment: payment
+            };
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
         .then(function(state){
@@ -2521,7 +2502,7 @@ function receivePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok "});
 		}.bind(this) )
         .then(null, function(err){
-            console.error("Received Purchase Order Error -",err);
+            console.errorExt("LicService", "Received Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -2530,39 +2511,29 @@ function _receivedSubscribePurchaseOrder(userId, licenseId, planInfo, expiration
     _fixupFixedSeats( planInfo );
 
     return when.promise(function(resolve, reject) {
-        var updateFields = [];
-        var active = "active = 1";
-        updateFields.push(active);
-
-        // NOTE: KMY: All new subscriptions will use the new format now
-        var seats = "package_size_tier = '_" + planInfo.students + "_" + planInfo.educators + "'";
-        updateFields.push(seats);
-
-        var educatorSeatsRemaining = "educator_seats_remaining = " + planInfo.educators;
-        updateFields.push(educatorSeatsRemaining);
-        var studentSeatsRemaining = "student_seats_remaining = " + planInfo.students;
-        updateFields.push(studentSeatsRemaining);
-        var plan = "package_type = '" + planInfo.type + "'";
-        updateFields.push(plan);
-        var expirationDateString = "expiration_date = '" + expirationDate + "'";
-        updateFields.push(expirationDateString);
+        var updateFields = {
+            active: 1,
+            // NOTE: KMY: All new subscriptions will use the new format now
+            package_size_tier: "_" + planInfo.students + "_" + planInfo.educators,
+            educator_seats_remaining: planInfo.educators,
+            student_seats_remaining: planInfo.students,
+            package_type: planInfo.type,
+            expiration_date: expirationDate
+        };
         if(planInfo.promoCode){
-            var promoString = "promo = '" + planInfo.promoCode + "'";
-            updateFields.push(promoString);
+            updateFields.promo = planInfo.promoCode;
         }
 
         this.myds.updateLicenseById(licenseId, updateFields)
             .then(function () {
-                var updateFields = [];
-                var status = "status = 'po-received'";
-                updateFields.push(status);
+                var updateFields = {status: "po-received"};
                 return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields);
             }.bind(this))
             .then(function(){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Received Subscribe Purchase Order Error -",err);
+                console.errorExt("LicService", "Received Subscribe Purchase Order Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2594,7 +2565,7 @@ function _receivedTrialUpgradePurchaseOrder(userId, licenseId, planInfo, expirat
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Received Trial Upgrade Purchase Order -",err);
+                console.errorExt("LicService", "Received Trial Upgrade Purchase Order -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2616,21 +2587,19 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
             }.bind(this))
             .then(function(license){
                 license = license[0];
-                var oldPlan = "current_package_type = '" + license["package_type"] + "'";
-                var oldSeats = "current_package_size_tier = '" + license["package_size_tier"] + "'";
-                var updateFields = [oldPlan, oldSeats];
+                var updateFields = {
+                    current_package_type: license["package_type"],
+                    current_package_size_tier: license["package_size_tier"]
+                };
                 return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
             }.bind(this))
             .then(function(){
                 var promiseList = [{},{},{},{}];
-                var updateFields = [];
-
-                // NOTE: KMY: All new subscriptions will use the new format now
-                var packageSize = "package_size_tier = '_" + planInfo.students + "_" + planInfo.instructors + "'";
-                updateFields.push(packageSize);
-
-                var packageType = "package_type = '" + plan + "'";
-                updateFields.push(packageType);
+                var updateFields = {
+                    // NOTE: KMY: All new subscriptions will use the new format now
+                    package_size_tier: "_" + planInfo.students + "_" + planInfo.instructors,
+                    package_type: plan
+                };
                 promiseList[0] = this.myds.updateLicenseById(licenseId, updateFields);
 
                 var seats = {};
@@ -2642,7 +2611,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
                     var studentSeats = seats.studentSeats;
                     promiseList[2] = this.updateStudentSeatsRemaining(licenseId, studentSeats);
                 }
-                var lmUpdateFields = ["status = 'po-received'"];
+                var lmUpdateFields = {status: "po-received"};
                 promiseList[3] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], lmUpdateFields);
                 //promiseList[4] = this.myds.getInstructorsByLicense(licenseId);
                 return when.all(promiseList);
@@ -2651,7 +2620,7 @@ function _receivedUpgradePurchaseOrder(userId, licenseId, planInfo, purchaseOrde
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Received Upgrade Purchase Order -",err);
+                console.errorExt("LicService", "Received Upgrade Purchase Order -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2697,9 +2666,7 @@ function invoicePurchaseOrder(req, res){
             }
             purchaseOrderId = purchaseOrder.id;
 
-            var updateFields = [];
-            var status = "status = 'invoiced'";
-            updateFields.push(status);
+            var updateFields = {status: "invoiced"};
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
         .then(function(status){
@@ -2728,7 +2695,7 @@ function invoicePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Invoice Purchase Order Error -",err);
+            console.errorExt("LicService", "Invoice Purchase Order Error -",err);
             this.requestUtil.errorReponse(res, err);
         }.bind(this));
 }
@@ -2778,9 +2745,7 @@ function approvePurchaseOrder(req, res){
             purchaseOrderInfo.action = purchaseOrder.action;
 
             licenseId = purchaseOrder.license_id;
-            var updateFields = [];
-            var status = "status = 'approved'";
-            updateFields.push(status);
+            var updateFields = {status: "approved"};
             return this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields);
         }.bind(this))
         .then(function(status){
@@ -2822,7 +2787,7 @@ function approvePurchaseOrder(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Approve Purchase Order Error -",err);
+            console.errorExt("LicService", "Approve Purchase Order Error -",err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }
@@ -2862,7 +2827,7 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
                 resolve([ownerData, billerData]);
             }.bind(this))
             .then(null, function(err){
-                console.error("Gather Purchase Order Email Data Error -",err);
+                console.errorExt("LicService", "Gather Purchase Order Email Data Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2870,12 +2835,9 @@ function _gatherPurchaseOrderEmailData(userId, licenseId, subject, billingName, 
 
 function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId, status, purchaseOrderNumber, action){
     return when.promise(function(resolve, reject){
-        var updateFields = [];
-        var statusUpdate = "status = '" + status + "'";
-        updateFields.push(statusUpdate);
+        var updateFields = {status: status};
         if(purchaseOrderNumber){
-            purchaseOrderNumber = "purchase_order_number = '" + purchaseOrderNumber + "'";
-            updateFields.push(purchaseOrderNumber);
+            updateFields.purchase_order_number = purchaseOrderNumber;
         }
         this.myds.updatePurchaseOrderById(purchaseOrderId, updateFields)
             .then(function(){
@@ -2883,8 +2845,7 @@ function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId
             }.bind(this))
             .then(function(){
                 if(status === "rejected"){
-                    var licenseMapStatus = "status = 'po-rejected'";
-                    var updateFields = [licenseMapStatus];
+                    var updateFields = {status: "po-rejected"};
                     return this.myds.updateRecentLicenseMapByUserId(userId, updateFields);
                 }
             }.bind(this))
@@ -2892,7 +2853,7 @@ function _updateTablesUponPurchaseOrderReject(userId, licenseId, purchaseOrderId
                 resolve();
             })
             .then(null, function(err){
-                console.error("Reject Purchase Order Request Error -",err);
+                console.errorExt("LicService", "Reject Purchase Order Request Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -2903,9 +2864,10 @@ function _switchToPurchaseOrder(userId, licenseId){
     // cancel auto renew
     _cancelAutoRenew.call(this, userId, licenseId)
         .then(function(){
-            var paymentType = "payment_type = 'purchase-order'";
-            var autoRenew = "auto_renew = 0";
-            var updateFields = [paymentType, autoRenew];
+            var updateFields = {
+                payment_type: "purchase-order",
+                auto_renew: 0
+            };
             // update license table
             return this.myds.updateLicenseById(licenseId, updateFields);
         }.bind(this))
@@ -2917,7 +2879,7 @@ function _switchToPurchaseOrder(userId, licenseId){
             resolve();
         })
         .then(null, function(err){
-            console.error("Switch to Purchase Order Error -",err);
+            console.errorExt("LicService", "Switch to Purchase Order Error -",err);
             reject(err);
         });
     }.bind(this));
@@ -2925,9 +2887,10 @@ function _switchToPurchaseOrder(userId, licenseId){
 
 function _switchToCreditCard(licenseId){
     return when.promise(function(resolve, reject){
-        var paymentType = "payment_type = 'credit-card'";
-        var autoRenew = "auto_renew = 1";
-        var updateFields = [paymentType, autoRenew];
+        var updateFields = {
+            payment_type: "credit-card",
+            auto_renew: 1
+        };
         // update license table
         this.myds.updateLicenseById(licenseId, updateFields)
             .then(function(){
@@ -2938,7 +2901,7 @@ function _switchToCreditCard(licenseId){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Switch to Credit Card Error -",err);
+                console.errorExt("LicService", "Switch to Credit Card Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2992,7 +2955,7 @@ function migrateToTrialLegacy(req, res){
                             resolve()
                         })
                         .then(null, function(err){
-                            console.error("Create Trial Legacy User Error -", err);
+                            console.errorExt("LicService", "Create Trial Legacy User Error -", err);
                             err.errorUserId = userId;
                             err.instructors = instructors;
                             err.index = index;
@@ -3027,7 +2990,7 @@ function migrateToTrialLegacy(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok" });
         }.bind(this))
         .then(null, function(err){
-            console.error("Migrate to Trial Legacy Error -",err);
+            console.errorExt("LicService", "Migrate to Trial Legacy Error -",err);
             this.requestUtil.errorResponse(res, err, 500);
         }.bind(this));
 }
@@ -3112,7 +3075,7 @@ function cancelLicense(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel License Error -", err);
+            console.errorExt("LicService", "Cancel License Error -", err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -3187,7 +3150,7 @@ function cancelLicenseInternal(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Cancel License Internal Error -",err);
+            console.errorExt("LicService", "Cancel License Internal Error -",err);
             this.requestUtil.jsonResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -3262,8 +3225,7 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
                 if(map.status === "active"){
                     promiseList[0] = this.myds.getLicenseById(licenseId);
                 } else{
-                    var statusString = "status = NULL";
-                    var updateFields = [statusString];
+                    var updateFields = {status: null};
                     promiseList[1] = this.myds.updateLicenseMapByLicenseInstructor(licenseId, [user.id], updateFields);
                 }
             }.bind(this));
@@ -3298,7 +3260,7 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
                 this.requestUtil.errorResponse(res, { key: "lic.create.denied" });
                 return;
             }
-            
+
             if (completionInfo.complete === "email") {
                 var emails = [];
                 if(this.options.env === "prod"){
@@ -3341,15 +3303,15 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
                 _sendEmailResponse.call(this, userEmail, data, req.protocol, req.headers.host, template);
 
                 this.requestUtil.jsonResponse(res, { status: "ok"});
-              
+
             } else if (completionInfo.complete === "callback") {
-            
+
                 completionInfo.callback.call(this);
             }
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
-            console.error("Subscribe to License Purchase Order Internal Error -",err);
+            console.errorExt("LicService", "Subscribe to License Purchase Order Internal Error -",err);
         }.bind(this));
 }
 
@@ -3439,7 +3401,7 @@ function inspectLicenses(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Inspect Licenses Error -",err);
+            console.errorExt("LicService", "Inspect Licenses Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -3517,7 +3479,7 @@ function _expireLicense(license, protocol, host){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Expire License Error -",err);
+                console.errorExt("LicService", "Expire License Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -3531,7 +3493,6 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
 
         var expDate = new Date(oldLicense.expiration_date);
         expDate.setFullYear(expDate.getFullYear() + 1);
-        expDate = date.toISOString().slice(0, 19).replace('T', ' ');
 
         this.myds.getUserById(userId)
             .then(function (results) {
@@ -3539,11 +3500,10 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
                 return _endLicense.call(this, userId, oldLicenseId, false);
             }.bind(this))
             .then(function(){
-                var updateFields = [];
-                var active = "active = 1";
-                updateFields.push(active);
-                var expirationDate = "expiration_date = '" + expDate + "'";
-                updateFields.push(expirationDate);
+                var updateFields = {
+                    active: 1,
+                    expiration_date: expDate
+                };
                 var promiseList = [];
                 promiseList.push(this.myds.getLicenseMapByLicenseId(newLicenseId));
                 promiseList.push(this.myds.updateLicenseById(newLicenseId, updateFields));
@@ -3552,9 +3512,7 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
             .then(function(results){
                 var licenseMaps = results[0];
                 var userIds = _.pluck(licenseMaps, "user_id");
-                var updateFields = [];
-                var status = "status = 'active'";
-                updateFields.push('active');
+                var updateFields = {status: "active"};
                 return this.myds.updateLicenseMapByLicenseInstructor(newLicenseId, userIds, updateFields);
             }.bind(this))
             .then(function(status){
@@ -3577,7 +3535,7 @@ function _renewLicense(oldLicense, newLicenseId, protocol, host){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Renew License Error -",err);
+                console.errorExt("LicService", "Renew License Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -3619,12 +3577,12 @@ function _expiringSoonEmails(userId, licenseId, daysToGo, expDate, isTrial, prot
                         resolve();
                     })
                     .then(null, function(err){
-                        console.error("Expiring Soon Emails Error -", err);
+                        console.errorExt("LicService", "Expiring Soon Emails Error -", err);
                         reject(err);
                     }.bind(this));
             }.bind(this))
             .then(null, function(err){
-                console.error("Expiring Soon Emails Error -", err);
+                console.errorExt("LicService", "Expiring Soon Emails Error -", err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -3659,9 +3617,7 @@ function trialMoveToTeacher(req, res){
             if(typeof status === "string"){
                 return status;
             }
-            var updateFields = [];
-            var statusString = "status = 'active'";
-            updateFields.push(statusString);
+            var updateFields = {status: "active"};
             return this.myds.updateLicenseMapByLicenseInstructor(inviteLicenseId,[userId], updateFields);
         }.bind(this))
         .then(function(){
@@ -3684,7 +3640,7 @@ function trialMoveToTeacher(req, res){
         }.bind(this))
         .then(null, function(err){
             this.requestUtil.errorResponse(res, { key: "lic.general"});
-            console.error("Trial Move To Teacher Error -",err);
+            console.errorExt("LicService", "Trial Move To Teacher Error -",err);
         }.bind(this));
 }
 
@@ -3697,9 +3653,9 @@ function _storeSchoolInformation(schoolInfo){
         var institutionId;
 
         var keys = [];
-        keys.push("TITLE = " + title);
-        keys.push("CITY = "+ city);
-        keys.push("STATE = " + state);
+        keys.push({TITLE: title});
+        keys.push({CITY: city});
+        keys.push({STATE: state});
         this.myds.getInstitutionIdByKeys(keys)
             .then(function(results){
                 if(typeof results === "number"){
@@ -3707,14 +3663,14 @@ function _storeSchoolInformation(schoolInfo){
                     return "exists";
                 }
                 var version = 3;
-                var code = "NULL";
+                var code = null;
                 var enabled = 1;
-                var secret = "NULL";
-                var shared = "NULL";
-                var zip = "'" + schoolInfo.zipCode + "'";
-                var address = "'" + schoolInfo.address + "'";
-                var dateCreated = "NOW()";
-                var lastUpdated = "NOW()";
+                var secret = null;
+                var shared = null;
+                var zip = schoolInfo.zipCode;
+                var address = schoolInfo.address;
+                var dateCreated = new Date();
+                var lastUpdated = dateCreated;
 
                 var values = [];
                 values.push(version);
@@ -3739,7 +3695,7 @@ function _storeSchoolInformation(schoolInfo){
                 resolve(institutionId);
             })
             .then(null, function(err){
-                console.error("Store School Information Error -", err);
+                console.errorExt("LicService", "Store School Information Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -3811,7 +3767,7 @@ function _createSubscription(req, userId, schoolInfo, stripeInfo, planInfo){
                 resolve({"expirationDate": expirationDate});
             })
             .then(null, function(err){
-                console.error("Create Subscription Error -",err);
+                console.errorExt("LicService", "Create Subscription Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -3870,7 +3826,7 @@ function _carryOutStripeTransaction(userId, email, name, stripeInfo, planInfo){
                 resolve(output);
             })
             .then(null, function(err){
-                console.error("Carry Out Stripe Transaction Error -",err);
+                console.errorExt("LicService", "Carry Out Stripe Transaction Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -3910,51 +3866,49 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
     return when.promise(function(resolve, reject){
         var licenseId;
         var values;
-        var promise;
-        if(schoolInfo === "NULL"){
-            promise = Util.PromiseContinue("NULL");
+        if(schoolInfo === "NULL" || !schoolInfo){
+            schoolInfo = null;
         } else{
-            promise = _storeSchoolInformation.call(this, schoolInfo);
+            schoolInfo = _storeSchoolInformation.call(this, schoolInfo);
         }
-        promise
+        when(schoolInfo)
             .then(function(institutionId){
                 var seatsTier = planInfo.seats;
-                var type = "'" + planInfo.type + "'";
+                var type = planInfo.type;
                 var licenseKey;
                 if(planInfo.licenseKey){
-                    licenseKey = "'" + planInfo.licenseKey + "'";
+                    licenseKey = planInfo.licenseKey;
                 } else{
-                    licenseKey = "NULL";
+                    licenseKey = null;
                 }
                 var promo;
                 if(planInfo.promoCode){
-                    promo = "'" + planInfo.promoCode + "'";
+                    promo = planInfo.promoCode;
                 } else{
-                    promo = "NULL";
+                    promo = null;
                 }
-                var expirationDate = "'" + data.expirationDate + "'";
+                var expirationDate = data.expirationDate;
                 var educatorSeatsRemaining = planInfo.educators;
                 var studentSeatsRemaining = planInfo.students;
-                seatsTier = "'" + seatsTier + "'";
                 var subscriptionId;
                 if(!data.subscriptionId){
-                    subscriptionId = "NULL";
+                    subscriptionId = null;
                 } else{
-                    subscriptionId = "'" + data.subscriptionId + "'";
+                    subscriptionId = data.subscriptionId;
                 }
                 var active = 1;
                 var autoRenew = 0;
                 var paymentType;
                 if(data.purchaseOrder){
-                    paymentType = "'purchase-order'";
+                    paymentType = "purchase-order";
                     if(!data.received){
                         active = 0;
                     }
                 } else{
-                    paymentType = "'credit-card'";
+                    paymentType = "credit-card";
                 }
-                var dateCreated = "NOW()";
-                var lastUpgraded = "NULL";
+                var dateCreated = new Date();
+                var lastUpgraded = null;
                 var values = [];
                 values.push(userId);
                 values.push(licenseKey);
@@ -3981,14 +3935,14 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                 values.push(licenseId);
                 if(data.purchaseOrder){
                     if(data.received){
-                        values.push("'po-received'");
+                        values.push("po-received");
                     } else{
-                        values.push("'po-pending'");
+                        values.push("po-pending");
                     }
                 } else{
-                    values.push("'active'");
+                    values.push("active");
                 }
-                var dateCreated = "NOW()";
+                var dateCreated = new Date();
                 values.push(dateCreated);
                 return this.myds.insertToLicenseMapTable(values);
             }.bind(this))
@@ -4000,7 +3954,7 @@ function _createLicenseSQL(userId, schoolInfo, planInfo, data){
                 resolve(licenseId);
             })
             .then(null, function(err){
-                console.error("Create License Error -",err);
+                console.errorExt("LicService", "Create License Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -4024,7 +3978,7 @@ function _updateStripeSubscription(customerId, subscriptionId, params, autoRenew
                 resolve()
             })
             .then(null, function(err){
-                console.error("Upgrade Stripe Subscription Error -",err);
+                console.errorExt("LicService", "Upgrade Stripe Subscription Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -4117,7 +4071,7 @@ function _unassignCoursesWhenUpgrading(licenseId, plan){
                 resolve(status);
             })
             .then(null, function(err){
-                console.error("Unassign Premium Courses When Upgrading Error -",err);
+                console.errorExt("LicService", "Unassign Premium Courses When Upgrading Error -",err);
                 reject(err)
             })
     }.bind(this));
@@ -4144,8 +4098,7 @@ function _cancelAutoRenew(userId, licenseId){
                 if(typeof status === "string"){
                     return status;
                 }
-                var autoRenew = "auto_renew = FALSE";
-                var updateFields = [autoRenew];
+                var updateFields = {auto_renew: false};
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }.bind(this))
             .then(function(status){
@@ -4156,7 +4109,7 @@ function _cancelAutoRenew(userId, licenseId){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Cancel Auto Renew Error -", err);
+                console.errorExt("LicService", "Cancel Auto Renew Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -4209,9 +4162,10 @@ function _endLicense(userId, licenseId, autoRenew){
                         emailList.push(email[1]);
                     }
                 });
-                var active = "active = 0";
-                var purchaseOrderId = "purchase_order_id = NULL";
-                var updateFields = [active, purchaseOrderId];
+                var updateFields = {
+                    active: 0,
+                    purchase_order_id: null
+                };
                 return this.myds.updateLicenseById(licenseId, updateFields)
             }.bind(this))
             .then(function(status){
@@ -4222,7 +4176,7 @@ function _endLicense(userId, licenseId, autoRenew){
                 resolve(emailList);
             }.bind(this))
             .then(null, function(err){
-                console.error("End License Error -",err);
+                console.errorExt("LicService", "End License Error -",err);
                 reject(err);
             });
     }.bind(this))
@@ -4372,7 +4326,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                     return state;
                 }
                 //remove instructor from premium license
-                var updateFields = ["status = NULL"];
+                var updateFields = {status: null};
                 return this.myds.updateLicenseMapByLicenseInstructor(licenseId, [teacherId], updateFields);
             }.bind(this))
             .then(function(state){
@@ -4421,7 +4375,7 @@ function _removeInstructorFromLicense(licenseId, teacherEmail, licenseOwnerId, e
                 resolve(emails);
             })
             .then(null, function(err){
-                console.error("Remove Instructor From License Error -",err);
+                console.errorExt("LicService", "Remove Instructor From License Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -4460,7 +4414,7 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 resolve(state);
             })
             .then(null, function (err) {
-                console.error('Validate License Instructor Access Error - ', err);
+                console.errorExt("LicService", 'Validate License Instructor Access Error - ', err);
                 reject(err);
             });
     }.bind(this));
@@ -4494,7 +4448,7 @@ function _validateLicenseUpgradeTrial(userId, licenseId) {
                 resolve(state);
             })
             .then(null, function (err) {
-                console.error('Validate License Instructor Access Error - ', err);
+                console.errorExt("LicService", 'Validate License Instructor Access Error - ', err);
                 reject(err);
             });
     }.bind(this));
@@ -4642,7 +4596,7 @@ function _sendEmailResponse(email, data, protocol, host, template){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Send Email Response Error -",err);
+                console.errorExt("LicService", "Send Email Response Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -4676,7 +4630,7 @@ function verifyLicense(req, res, next) {
             }.bind(this))
 
             .then(null, function(err) {
-                console.error("LicService - verifyLicense:", err);
+                console.errorExt("LicService", "verifyLicense -", err);
                 this.requestUtil.errorResponse(res, {error:"server error", key:"server.error"}, 500);
             }.bind(this));
 
@@ -4815,7 +4769,7 @@ function registerLicense(req, res, next) {
 
             // catch all errors
             .then(null, function(err) {
-                console.error("LicService - registerLicense:", err);
+                console.errorExt("LicService", "registerLicense -", err);
                 this.requestUtil.errorResponse(res, {error:"server error", key:"server.error"}, 500);
             }.bind(this));
 

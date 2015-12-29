@@ -121,6 +121,10 @@ module.exports = {
     "research.startDate.missing":           "Missing startDate or startEpoc",
     "research.arguments.missing":           "Missing Arguments",
     "research.endDate.missing":             "Missing endDate",
+    // monitor
+    "monitor.access.invalid":               "Invalid Access",
+    "monitor.misconfigured":                "Monitor mis-configured",
+    "monitor.internal.error":               "Monitor internal error",
     // lms
     "lms.game.invalid":                     "Cannot access another license's premium game",
     "lms.course.premium.corrupted":         "Course labels itself as a premium course, but it is not associated with a license",

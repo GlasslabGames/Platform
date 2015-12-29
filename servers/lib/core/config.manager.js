@@ -39,7 +39,7 @@ ConfigManager.prototype.loadSync = function(files, fileType) {
                         );
                     }
                 } else {
-                    console.info("ConfigManager: Loading file \"" + file + "\" failed");
+                    console.infoExt("ConfigManager", "Loading file \"" + file + "\" failed");
                 }
             }
 
@@ -50,10 +50,10 @@ ConfigManager.prototype.loadSync = function(files, fileType) {
                 return this.modConfig(this.config);
             }
         } catch(err){
-            console.error("ConfigManager: Error loading config files (",files,"):", err);
+            console.errorExt("ConfigManager", "Error loading config files (",files,"):", err);
         }
     } else {
-        console.error("ConfigManager: Files input not array or string");
+        console.errorExt("ConfigManager", "Files input not array or string");
     }
 
     return null;
@@ -98,11 +98,8 @@ ConfigManager.prototype.modConfig = function(oldConfig) {
                     // console.log('    ---------------- ----------------');
                     configOut = _.merge( configOut, subConfig);
                 } else {
-                    console.warn('    There is a key for mod section ' + m + ' but there is ' +
-                        'no modName in the section that matches the keyName.');
+                    console.warnExt("Config", 'There is a key for mod section ' + m + ' but there is no modName in the section that matches the keyName.');
                 }
-            // } else {
-            //     console.warn('    no config key found for config mod section', k);
             }
         });
 

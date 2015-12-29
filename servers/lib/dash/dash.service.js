@@ -135,7 +135,7 @@ function _buildLicPackages(){
                 return;
             }
             if(!gameInfo.packages){
-                console.error("DashService: _buildLicPackages - gameInfo does not have packages defined", gameInfo.gameId);
+                console.warnExt("DashService", "_buildLicPackages - gameInfo does not have packages defined", gameInfo.gameId);
                 return;
             }
             var packages = gameInfo.packages.split(", ");
@@ -228,20 +228,28 @@ DashService.prototype.isValidGameId = function(gameId) {
 
 DashService.prototype._isValidGameId = function(gameId){
     return when.promise(function(resolve, reject) {
-            for (var g in this._games) {
-                if (g == gameId &&
-                    this._games[g] &&
-                    this._games[g].info &&
-                    this._games[g].info.basic) {
-                    return resolve();
-                }
+        for (var g in this._games) {
+            if (g == gameId &&
+                this._games[g] &&
+                this._games[g].info &&
+                this._games[g].info.basic) {
+                return resolve();
             }
-            reject();
+        }
+        reject({class: "DashService", method: "_isValidGameId", args: {gameId: gameId}});
     }.bind(this) );
 };
 
 DashService.prototype.validateGameInfo = function(data) {
-    return this._validate(data);
+    return when.promise(function(resolve, reject) {
+        setTimeout(function() {
+            if (this._validate(data)) {
+                resolve(data);
+            } else {
+                reject(this._validate.errors);
+            }
+        }.bind(this), 0);
+    }.bind(this));
 };
 
 // TODO: replace this with DB lookup, return promise
@@ -262,7 +270,7 @@ DashService.prototype.getListOfVisibleGameIds = function() {
         if(gameIds.length !== 0){
             resolve(gameIds);
         } else{
-            reject();
+            reject({class: "DashService", method: "getListOfVisibleGameIds"});
         }
     }.bind(this) );
 };
@@ -285,7 +293,7 @@ DashService.prototype.getListOfAllGameIds = function() {
         if(gameIds.length !== 0){
             resolve(gameIds);
         } else{
-            reject();
+            reject({class: "DashService", method: "getListOfAllGameIds"});
         }
     }.bind(this) );
 };
@@ -305,7 +313,7 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
         if(gameIds.length !== 0){
             resolve(gameIds);
         } else{
-            reject();
+            reject({class: "DashService", method: "getListOfAllFreeGameIds"});
         }
     }.bind(this));
 };
@@ -320,7 +328,7 @@ DashService.prototype.getGameReports = function(gameId) {
             this._games[gameId].info.hasOwnProperty('reports')) {
             resolve(this._games[gameId].info.reports);
         } else {
-            reject([]);
+            reject({class: "DashService", method: "getGameReports", args: {gameId: gameId}});
         }
     }.bind(this));
 };
@@ -338,7 +346,7 @@ DashService.prototype.getGameAchievements = function(gameId) {
             this._games[gameId].hasOwnProperty('achievements') ) {
             resolve(this._games[gameId].achievements);
         } else {
-            reject({});
+            reject({class: "DashService", method: "getGameAchievements", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -353,7 +361,7 @@ DashService.prototype.getGameDetails = function(gameId) {
             this._games[gameId].info.hasOwnProperty('details') ) {
             resolve(this._games[gameId].info.details);
         } else {
-            reject({});
+            reject({class: "DashService", method: "getGameDetails", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -369,7 +377,7 @@ DashService.prototype.getGameMissions = function(gameId) {
             this._games[gameId].info.hasOwnProperty('missions') ) {
             resolve(this._games[gameId].info.missions);
         } else {
-            reject(null);
+            reject({class: "DashService", method: "getGameMissions", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -384,7 +392,7 @@ DashService.prototype.getGameBasicInfo = function(gameId) {
             this._games[gameId].info.hasOwnProperty('basic') ) {
             resolve(this._games[gameId].info.basic);
         } else {
-            reject(null);
+            reject({class: "DashService", method: "getGameBasicInfo", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -411,7 +419,7 @@ DashService.prototype.getGameReportInfo = function(gameId, reportId) {
                 resolve(list[i]);
             }
         }
-        reject();
+        reject({class: "DashService", method: "getGameReportInfo", args: {gameId: gameId, reportId: reportId}});
     }.bind(this) );
 };
 
@@ -425,7 +433,7 @@ DashService.prototype.getGameReleases = function(gameId) {
             this._games[gameId].info.hasOwnProperty('releases') ) {
             resolve(this._games[gameId].info.releases);
         } else {
-            reject({});
+            reject({class: "DashService", method: "getGameReleases", args: {gameId: gameId}});
         }
     }.bind(this) );
 };
@@ -524,7 +532,7 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
                                         delete require.cache[filePath];
                                         gameData = require(filePath);
                                     } catch(err) {
-                                        console.error("migrateGameFiles filePath:", filePath, ", Error:", err);
+                                        console.errorExt("DashService", "migrateGameFiles filePath:", filePath, ", Error:", err);
                                     }
                                     if(name === 'info'){
                                         promiseList.push(this.telmStore.createGameInformation(gameId, gameData));
@@ -544,7 +552,7 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
                     reject(err);
                 }.bind(this));
         } catch(err) {
-            console.error("DashService: Migrate Game Files Error -", err);
+            console.errorExt("DashService", "Migrate Game Files Error -", err);
             reject(err);
         }
     }.bind(this));
@@ -603,7 +611,7 @@ DashService.prototype._loadGameFiles = function(){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("DashService: Load Game Files Error -", err);
+                console.errorExt("DashService", "Load Game Files Error -", err);
                 reject(err);
             }.bind(this));
 
@@ -655,7 +663,7 @@ DashService.prototype._buildGamesObject = function(gameInformation, gameAchievem
 
                         // add achievements to 'achievements' reports
                         for (var i = 0; i < list.length; i++) {
-                            if (_.isObject(list[i]) &&
+                            if (_.isObject(list[i]) && list[i].id &&
                                 list[i].id === 'achievements') {
                                 this._games[gameId].info.reports.list[i].achievements = achievements[index++];
                                 break;
@@ -722,7 +730,7 @@ DashService.prototype._oldLoadGameFiles = function() {
                             try {
                                 this._games[gameId][name] = require(filePath);
                             } catch(err) {
-                                console.error("loadGameFiles filePath:", filePath, ", Error:", err);
+                                console.errorExt("DashService", "loadGameFiles filePath:", filePath, ", Error:", err);
                             }
                         }
                     }.bind(this));
@@ -786,10 +794,10 @@ DashService.prototype._oldLoadGameFiles = function() {
                     resolve();
                 }.bind(this))
                 .then(null, function(err){
-                    console.error("DashService: Load Game Files Error -", err);
+                    console.errorExt("DashService", "Load Game Files Error -", err);
                 }.bind(this));
         } catch(err) {
-            console.error("DashService: Load Game Files Error -", err);
+            console.errorExt("DashService", "Load Game Files Error -", err);
         }
 
 // ------------------------------------------------

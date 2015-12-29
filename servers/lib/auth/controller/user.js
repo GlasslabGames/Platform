@@ -17,6 +17,7 @@ module.exports = {
     verifyDeveloperCode:		verifyDeveloperCode,
     getAllDevelopers: 	 		getAllDevelopers,
     alterDeveloperVerifyCodeStatus: alterDeveloperVerifyCodeStatus,
+    addUserBadgeList:			addUserBadgeList,
     getUserDataById:			getUserDataById,
     getResellers:				getResellers,
     updateUserRole:				updateUserRole,
@@ -258,7 +259,7 @@ function updateUserData(req, res, next, serviceManager) {
         // error
         .then(null, function(err){
             this.stats.increment("error", "Route.Update.User");
-            console.error("Auth - updateUserRoute error:", err);
+            console.errorExt("AuthService", "updateUserRoute error -", err);
             //this.requestUtil.errorResponse(res, err, 400);
             this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
         }.bind(this) );
@@ -323,7 +324,7 @@ function updateUserBadgeList(req, res, next) {
     	}.bind(this))
 		.then(null,function(err) {
             this.stats.increment("error", "Route.Update.User");
-            console.error("Auth - updateUserBadgeListRoute error:", err);
+            console.errorExt("AuthService", "updateUserBadgeListRoute error -", err);
             this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
 		}.bind(this));
 };
@@ -385,7 +386,7 @@ function addUserBadgeList(req, res, next) {
 	// catch all errors
     .then(null, function(err){
 	    this.stats.increment("error", "Route.Update.User");
-	    console.error("Auth - updateUserBadgeListRoute error:", err);
+	    console.errorExt("AuthService", "updateUserBadgeListRoute error -", err);
 	    this.requestUtil.errorResponse(res, {key:"user.update.general"}, 400);
     }.bind(this));
 };
@@ -427,7 +428,7 @@ function registerUserV1(req, res, next) {
         if(!code) code = 500;
 
         this.stats.increment("error", "Route.Register.User");
-        console.error("AuthServer registerUser Error:", err);
+        console.errorExt("AuthService", "AuthServer registerUser Error -", err);
         this.requestUtil.jsonResponse(res, err, code);
     }.bind(this);
 
@@ -724,7 +725,7 @@ function registerUserV2(req, res, next, serviceManager) {
                             }.bind(this))
                             // catch all errors
                             .then(null, function(err){
-                                console.error("Register Error -",err);
+                                console.errorExt("AuthService", "Register Error -",err);
                                 registerErr(err, 404);
                             });
                     } else {
@@ -744,7 +745,7 @@ function registerUserV2(req, res, next, serviceManager) {
                             // errors
                             .then(null, function(err){
                                 this.stats.increment("error", "Route.Register.User.SubscribeToNewsletter");
-                                console.error("Auth: RegisterUserV2 - Error", err);
+                                console.errorExt("AuthService", "RegisterUserV2 -", err);
                                 this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
                             }.bind(this))
                     } else {
@@ -770,7 +771,7 @@ function registerUserV2(req, res, next, serviceManager) {
                         // error
                         .then(null, function(err){
                             this.stats.increment("error", "Route.Register.User.sendRegisterEmail");
-                            console.error("Auth: RegisterUserV2 - Error", err);
+                            console.errorExt("AuthService", "RegisterUserV2 -", err);
                             this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
                         }.bind(this))
 
@@ -798,20 +799,6 @@ function registerUserV2(req, res, next, serviceManager) {
                     .then(null, function(err){
                         this.requestUtil.errorResponse(res, {key:"user.create.general"});
                     }.bind(this));
-                    
-                /*
-                    sendDeveloperConfirmEmail.call( this, regData, req.protocol, req.headers.host )
-                        .then(function(){
-                            this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(regData.role)+".Created");
-                            this.requestUtil.jsonResponse(res, {});
-                        }.bind(this))
-                        // error
-                        .then(null, function(err){
-                            this.stats.increment("error", "Route.Register.User.sendRegisterEmail");
-                            console.error("Auth: RegisterUserV2 - Error", err);
-                            this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
-                        }.bind(this))
-                */
                 }
             }.bind(this))
             // catch all errors
@@ -934,7 +921,7 @@ function registerUserV2(req, res, next, serviceManager) {
                 // catch all errors
                 .then(null, function(err){
                     registerErr(err, 404);
-                    console.error("Student Registration Error -",err);
+                    console.errorExt("AuthService", "Student Registration Error -",err);
                 });
         } else {
             register(regData);
@@ -1004,7 +991,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
                         }.bind(this))
                         // error
                         .then(null, function(err){
-                            console.error('failed to send email:',  err);
+                            console.errorExt("AuthService", 'failed to send email -',  err);
                         }.bind(this));
 
                 }.bind(this));
@@ -1015,7 +1002,7 @@ function sendBetaConfirmEmail(regData, protocol, host) {
                 err.error == "user not found") {
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
             } else {
-                console.error("AuthService: sendBetaConfirmEmail Error -", err);
+                console.errorExt("AuthService", "sendBetaConfirmEmail Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
             }
         }.bind(this))
@@ -1057,7 +1044,7 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
                         }.bind(this))
                         // error
                         .then(null, function(err){
-                            console.error('failed to send email:',  err);
+                            console.errorExt("AuthService", 'failed to send email -',  err);
                         }.bind(this));
 
                 }.bind(this));
@@ -1068,7 +1055,7 @@ function sendDeveloperConfirmEmail(regData, protocol, host) {
                 err.error == "user not found") {
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
             } else {
-                console.error("AuthService: sendDeveloperConfirmEmail Error -", err);
+                console.errorExt("AuthService", "sendDeveloperConfirmEmail Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
             }
         }.bind(this))
@@ -1189,7 +1176,7 @@ function verifyBetaCode(req, res, next) {
                 err.error == "user not found") {
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
             } else {
-                console.error("AuthService: validateBetaCode Error -", err);
+                console.errorExt("AuthService", "validateBetaCode Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
             }
         }.bind(this))
@@ -1245,7 +1232,7 @@ function verifyDeveloperCode(req, res, next) {
                     err.error == "user not found") {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
                 } else {
-                    console.error("AuthService: verifyDeveloperCode Error -", err);
+                    console.errorExt("AuthService", "verifyDeveloperCode Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                 }
             }.bind(this))
@@ -1318,7 +1305,7 @@ function alterDeveloperVerifyCodeStatus(req, res, next) {
                     err.error == "user not found") {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
                 } else {
-                    console.error("AuthService: verifyDeveloperCode Error -", err);
+                    console.errorExt("AuthService", "verifyDeveloperCode Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                 }
             }.bind(this))
@@ -1494,7 +1481,7 @@ function sendVerifyEmail(regData, protocol, host) {
                         }.bind(this))
                         // error
                         .then(null, function(err){
-                            console.error('failed to send email:',  err);
+                            console.errorExt("AuthService", 'failed to send email -',  err);
                         }.bind(this));
 
                 }.bind(this));
@@ -1505,7 +1492,7 @@ function sendVerifyEmail(regData, protocol, host) {
                 err.error == "user not found") {
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
             } else {
-                console.error("AuthService: sendVerifyEmail Error -", err);
+                console.errorExt("AuthService", "sendVerifyEmail Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
             }
         }.bind(this))
@@ -1551,7 +1538,7 @@ function sendDeveloperVerifyEmail(regData, protocol, host) {
                         }.bind(this))
                         // error
                         .then(null, function(err){
-                            console.error('failed to send email:',  err);
+                            console.errorExt("AuthService", 'failed to send email:',  err);
                         }.bind(this));
 
                 }.bind(this));
@@ -1562,7 +1549,7 @@ function sendDeveloperVerifyEmail(regData, protocol, host) {
                 err.error == "user not found") {
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
             } else {
-                console.error("AuthService: sendVerifyEmail Error -", err);
+                console.errorExt("AuthService", "sendVerifyEmail Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
             }
         }.bind(this))
@@ -1648,7 +1635,7 @@ function verifyEmailCode(req, res, next, serviceManager) {
                     err.error == "user not found") {
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.code.missing"}, 400);
                 } else {
-                    console.error("AuthService: verifyEmailCode Error -", err);
+                    console.errorExt("AuthService", "verifyEmailCode Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
                 }
         }.bind(this))
@@ -1803,7 +1790,7 @@ function resetPasswordSend(req, res, next) {
                             this.requestUtil.errorResponse(res, err, 500);
                         }.bind(this));
                 } else {
-                    console.error("AuthService: resetPasswordSend Error -", err);
+                    console.errorExt("AuthService", "resetPasswordSend Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
                 }
             }.bind(this))
@@ -1847,7 +1834,7 @@ function resetPasswordVerify(req, res, next) {
                     err.error == "user not found") {
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.code.expired"}, 400);
                 } else {
-                    console.error("AuthService: resetPasswordVerify Error -", err);
+                    console.errorExt("AuthService", "resetPasswordVerify Error -", err);
                     this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
                 }
             }.bind(this));
@@ -1898,7 +1885,7 @@ function resetPasswordUpdate(req, res, next) {
 							}.bind(this));
 					}.bind(this))
 					.then(null, function() {
-	                	console.error("AuthService: resetPasswordUpdate Error - validate");
+	                	console.errorExt("AuthService", "resetPasswordUpdate Error - validate");
     	            	this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
             		}.bind(this));
                 }
@@ -1906,7 +1893,7 @@ function resetPasswordUpdate(req, res, next) {
 
             // catch all errors
             .then(null, function(err) {
-                console.error("AuthService: resetPasswordUpdate Error -", err);
+                console.errorExt("AuthService", "resetPasswordUpdate Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.passwordReset.general"}, 400);
             }.bind(this));
 
@@ -2008,7 +1995,7 @@ function sendDeveloperGameConfirmEmail(userId, devEmail, gameId, developerProfil
             }.bind(this))
             // error
             .then(null, function(err){
-                console.error("AuthService: sendDeveloperGameConfirmEmail Error -", err);
+                console.errorExt("AuthService", "sendDeveloperGameConfirmEmail Error -", err);
                 this.requestUtil.errorResponse(res, {key:"user.verifyGameEmail.general"}, 400);
                 reject("errorResponse");
             }.bind(this))
@@ -2173,7 +2160,7 @@ function eraseStudentInfo(req, res){
 
     }.bind(this))
     .then(null, function(err){
-        console.error(Util.DateGMTString(), 'Delete User Error -',err);
+        console.errorExt("AuthService", 'Delete User Error -',err);
         if(err.error === "user not found"){
             this.requestUtil.errorResponse(res, { key: "user.delete.access"});
             return;
@@ -2256,7 +2243,7 @@ function eraseInstructorInfo(req, res){
           
     }.bind(this))
     .then(null, function(err){
-          console.error(Util.DateGMTString(), 'Delete User Error -',err);
+          console.errorExt("AuthService", 'Delete User Error -',err);
           if(err.error === "user not found"){
             this.requestUtil.errorResponse(res, { key: "user.delete.access"});
             return;
@@ -2310,7 +2297,7 @@ function deleteUser(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Delete User Error -",err);
+            console.errorExt("AuthService", "Delete User Error -",err);
             if(err.error === "user not found"){
                 this.requestUtil.errorResponse(res, { key: "user.delete.access"});
                 return;
@@ -2381,7 +2368,7 @@ function _deleteStudentAccount(studentId){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Delete Student Account Error");
+                console.errorExt("AuthService", "Delete Student Account Error");
                 reject(err);
             }.bind(this));
     }.bind(this));
@@ -2481,9 +2468,7 @@ function _deleteInstructorAccount(userId, req){
                     // finds all licenses an instructor was an owner of in the past, and removes the subscription id
                     promiseList.push(licService.myds.removeSubscriptionIdsByUserId(userId));
                     if(license.user_id !== userId){
-                        var updateFields = [];
-                        var status = "status = NULL";
-                        updateFields.push(status);
+                        var updateFields = {status: null};
                         promiseList.push(licService.myds.updateLicenseMapByLicenseInstructor(licenseId, [userId], updateFields));
                     }
                     return when.all(promiseList);
@@ -2514,7 +2499,7 @@ function _deleteInstructorAccount(userId, req){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.error("Delete Instructor Account Error -",err);
+                console.errorExt("AuthService", "Delete Instructor Account Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -2553,7 +2538,7 @@ function _hashEmail(email){
                 resolve(hashedEmail);
             })
             .then(null, function(err){
-                console.error("Hash Email Error -",err);
+                console.errorExt("AuthService", "Hash Email Error -",err);
                 reject(err);
             });
     }.bind(this));

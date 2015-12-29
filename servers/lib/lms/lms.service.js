@@ -496,7 +496,7 @@ return when.promise(function(resolve, reject) {
         resolve();
     })
     .then(null, function(err){
-        console.error("Enroll in Course Error -",err);
+        console.errorExt("LMSService", "Enroll in Course Error -",err);
         reject(err);
     });
 // ------------------------------------------------
@@ -529,7 +529,7 @@ LMSService.prototype.updateCBLMSInEnabledCourse = function(courseId, courseGames
                 resolve();
             })
             .then(null, function(err){
-                console.error("Update CB LMS In Enabled Course Error -",err);
+                console.errorExt("LMSService", "Update CB LMS In Enabled Course Error -",err);
                 reject(err);
             }.bind(this));
     }.bind(this));

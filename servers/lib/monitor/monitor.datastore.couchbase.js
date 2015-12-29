@@ -1,6 +1,5 @@
-
 /**
- * Auth Couchbase Datastore Module
+ * Monitor DataStore Module
  *
  * Module dependencies:
  *  lodash     - https://github.com/lodash/lodash
@@ -10,16 +9,16 @@
 // Third-party libs
 var _         = require('lodash');
 var when      = require('when');
+var guard     = require('when/guard');
 var couchbase = require('couchbase');
 // load at runtime
-var Util, aConst;
+var Util;
 
-module.exports = AuthDS_Couchbase;
+module.exports = MonitorDS_Couchbase;
 
-function AuthDS_Couchbase(options){
+function MonitorDS_Couchbase(options){
     // Glasslab libs
     Util   = require('../core/util.js');
-    aConst = require('./auth.const.js');
 
     this.options = _.merge(
         {
@@ -32,46 +31,34 @@ function AuthDS_Couchbase(options){
     );
 }
 
-AuthDS_Couchbase.prototype.connect = function(){
+MonitorDS_Couchbase.prototype.connect = function(){
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    this.client = new couchbase.Connection({
+    var options = {
         host:     this.options.host,
         bucket:   this.options.bucket,
         password: this.options.password,
-        connectionTimeout: this.options.timeout || 5000,
-        operationTimeout:  this.options.timeout || 5000
-    }, function(err) {
-        console.errorExt("AuthService Couchbase", err);
+        connectionTimeout: this.options.timeout || 60000,
+        operationTimeout:  this.options.timeout || 60000
+    };
+    this.client = new couchbase.Connection(options, function(err) {
+        console.errorExt("MonitorStore Couchbase", err);
 
         if(err) throw err;
     }.bind(this));
 
     this.client.on('error', function (err) {
-        console.errorExt("AuthService Couchbase", err);
+        console.errorExt("MonitorStore Couchbase", err);
         reject(err);
     }.bind(this));
 
     this.client.on('connect', function () {
+        //console.log("CouchBase MonitorStore: Options -", options);
         resolve();
     }.bind(this));
 
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
-};
-
-AuthDS_Couchbase.prototype.setDeveloperProfile = function(userId, data){
-    return when.promise(function(resolve, reject){
-        var key = aConst.datastore.keys.developer + ":" + aConst.datastore.keys.user + ":" + userId;
-        this.client.set(key, data, function(err, results){
-            if(err){
-                console.errorExt("AuthService Couchbase", "Create Developer Profile Error -", err);
-                reject(err);
-                return;
-            }
-            resolve(data);
-        }.bind(this));
-    }.bind(this));
 };

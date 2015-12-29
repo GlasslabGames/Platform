@@ -134,7 +134,7 @@ function startSessionV2(req, outRes){
 
             // catch all errors
             .then(null,  function(err) {
-                console.error("Start Session Error:", err);
+                console.errorExt("DataService", "Start Session Error -", err);
                 this.stats.increment("error", "StartSession.General");
                 this.requestUtil.errorResponse(outRes, err, 500);
             }.bind(this) );
@@ -208,14 +208,14 @@ function endSessionV2(req, outRes){
 
                 // catch all errors
                 .then(null, function(err) {
-                    console.error("End Session Error:", err);
+                    console.errorExt("DataService", "End Session Error -", err);
                     this.stats.increment("error", "Route.EndSession.CatchAll");
                     this.requestUtil.errorResponse(outRes, err, 500);
                 }.bind(this) );
 
         } else {
             var err = "gameSessionId missing!";
-            console.error("Error:", err);
+            console.errorExt("DataService", err);
             this.stats.increment("error", "Route.EndSession.GameSessionIdMissing");
             this.requestUtil.errorResponse(outRes, err, 500);
         }
@@ -245,7 +245,7 @@ function pushJob(userId, gameId, gameSessionId) {
         })
         .then(null, function(err){
             if(err.code == 'ECONNREFUSED') {
-                console.error("Can not connect to Assessment Server, check if the server is running");
+                console.errorExt("DataService", "Can not connect to Assessment Server, check if the server is running");
             }
             return err;
         }.bind(this));

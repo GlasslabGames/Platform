@@ -63,7 +63,7 @@ function enrollInCourse(req, res, next) {
                     this.requestUtil.jsonResponse(res, {});
                 }.bind(this),
                 function(err){
-                    console.error("Enroll in Course Error -",err);
+                    console.errorExt("LMSService", "Enroll in Course Error -",err);
                     this.requestUtil.errorResponse(res, err);
                 }.bind(this))
         } else {
@@ -164,7 +164,7 @@ function unenrollUserFromCourse(req, res, next, serviceManager) {
                                 serviceManager.internalRoute('/api/v2/lms/course/:courseId/info', 'get', [req, res, next]);
                             }.bind(this))
                             .then(null, function(err){
-                                console.error("Unenroll User From Course Error -",err);
+                                console.errorExt("LMSService", "Unenroll User From Course Error -",err);
                                 this.requestUtil.errorResponse(res, err);
                             }.bind(this));
                     } else {
@@ -324,14 +324,14 @@ function getEnrolledCourses(req, res, next) {
                             this.requestUtil.jsonResponse(res, courses);
                         }.bind(this),
                         function(err){
-                            console.error("LMS Service: getCoursesDetails Error -", err);
+                            console.errorExt("LMSService", "getCoursesDetails Error -", err);
                             this.requestUtil.errorResponse(res, {key:"course.general"});
                         }.bind(this)
                     );
 
             }.bind(this))
             .then(null, function(err){
-                console.error("LMS Service: getEnrolledCourses Error -", err);
+                console.errorExt("LMSService","getEnrolledCourses Error -", err);
                 this.requestUtil.errorResponse(res, {key:"course.general"});
             }.bind(this))
     } else {
@@ -496,7 +496,7 @@ function _checkForGameAccess(licenseId, games, newGameIds){
                 resolve([abort, premiumGamesAssigned]);
             }.bind(this))
             .then(null, function(err){
-                console.error("Check For Game Access Error -",err);
+                console.errorExt("LMSService", "Check For Game Access Error -",err);
                 reject(err);
             })
     }.bind(this));
@@ -768,7 +768,7 @@ function _updateCourseInfo(courseData, oldCourseData, userData){
                         return "no game to enable";
                     })
                     .then(null, function(err){
-                        console.error("Enable Course Error -",err);
+                        console.errorExt("LMSService", "Enable Course Error -",err);
                         return reject(err);
                     });
             } else{
@@ -796,7 +796,7 @@ function _updateCourseInfo(courseData, oldCourseData, userData){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Update Course Info Error -",err);
+                console.errorExt("LMSService", "Update Course Info Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -839,7 +839,7 @@ function _canClassEnable(licenseId, games){
                 resolve(canEnable);
             }.bind(this))
             .then(null, function(err){
-                console.error("Check If Calss Can Enable Error -",err);
+                console.errorExt("LMSService", "Check If Calss Can Enable Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -988,7 +988,7 @@ function _changePremiumGamesAssignedStatus(courseId, games, licenseId, userId){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Change Course Assignment Status Error -", err);
+                console.errorExt("LMSService", "Change Course Assignment Status Error -", err);
                 reject(err);
             });
     }.bind(this));
@@ -1220,7 +1220,7 @@ function verifyAccessToGameInCourse(req, res, next) {
             this.requestUtil.errorResponse(res, { key: "lms.access.invalid"});
         }.bind(this))
         .then(null, function(err){
-            console.error("Verify Access to Game In Course Error -",err);
+            console.errorExt("LMSService", "Verify Access to Game In Course Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
 }
@@ -1237,7 +1237,7 @@ function getGamesCourseMap(req, res){
             this.requestUtil.jsonResponse(res, { status: "ok", data: gameCourseMap});
         }.bind(this))
         .then(null, function(err){
-            console.error("Get Game Course Map Error", err);
+            console.errorExt("LMSService", "Get Game Course Map Error", err);
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
 }

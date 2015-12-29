@@ -92,7 +92,9 @@ WebStore_MySQL.prototype.getUserBadgeListById = function(id) {
 
 WebStore_MySQL.prototype.getResellers = function() {
     return when.promise(function(resolve, reject) {
-        var Q = "SELECT id, username, first_name as firstName, last_name as lastName, email, system_role as role FROM GL_USER WHERE system_role='" + lConst.role.reseller + "' or system_role='" + lConst.role.reseller_candidate + "'";
+        var Q = "SELECT id, username, first_name as firstName, last_name as lastName, email, system_role as role "
+            + " FROM GL_USER WHERE system_role=" + this.ds.escape(lConst.role.reseller)
+            + " or system_role=" + this.ds.escape(lConst.role.reseller_candidate);
 
         this.ds.query(Q)
             .then(function(results){
@@ -111,7 +113,7 @@ WebStore_MySQL.prototype.updateUserRole = function( id, role ) {
     }
 
     return when.promise(function(resolve, reject) {
-        var Q = "UPDATE GL_USER SET system_role='" + role + "' WHERE id=" + id;
+        var Q = "UPDATE GL_USER SET system_role=" + this.ds.escape(role) + " WHERE id=" + this.ds.escape(id);
 
         this.ds.query(Q)
             .then(function(results){
@@ -289,7 +291,7 @@ function _addLicenseInfoToUser(user, results){
                 resolve();
             })
             .then(null, function(err){
-                console.error("Add License Info to User Error -",err);
+                console.errorExt("DashStore MySql", "Add License Info to User Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -297,7 +299,7 @@ function _addLicenseInfoToUser(user, results){
 
 WebStore_MySQL.prototype.getUserById = function(userId){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT * FROM GL_USER WHERE id = " + userId + ";";
+        var Q = "SELECT * FROM GL_USER WHERE id = " + this.ds.escape(userId) + ";";
         this.ds.query(Q)
             .then(function(results){
                 resolve(results[0]);
@@ -382,7 +384,7 @@ return when.promise(function(resolve, reject) {
                     IN (SELECT course_id \
                         FROM GL_MEMBERSHIP \
                         WHERE user_id="+this.ds.escape(userId);
-        Q += ") AND (role='"+lConst.role.instructor+"'))";
+        Q += ") AND (role="+this.ds.escape(lConst.role.instructor)+"))";
 
     //console.log("Q:", Q);
     this.ds.query(Q).then(function(results) {
@@ -409,7 +411,7 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
-            "WHERE status in ('active','pending', 'po-received', 'po-rejected', 'po-pending', 'invite-pending') and user_id = " + userId+ ") as lm\n" +
+            "WHERE status in ('active','pending', 'po-received', 'po-rejected', 'po-pending', 'invite-pending') and user_id = " + this.ds.escape(userId)+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
         var licenseInfo;
         this.ds.query(Q)
@@ -421,7 +423,7 @@ WebStore_MySQL.prototype.getLicenseInfoByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Info By Instructor Error -",err);
+                console.errorExt("DashStore MySql", "Get License Info By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
@@ -431,7 +433,7 @@ WebStore_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
     return when.promise(function(resolve, reject){
         var Q = "SELECT lic.id,lic.user_id,lic.expiration_date,lic.package_type,lic.payment_type,lm.status,lm.date_created FROM GL_LICENSE as lic JOIN\n" +
             "(SELECT license_id,status,date_created FROM GL_LICENSE_MAP\n" +
-            "WHERE user_id = " + userId+ ") as lm\n" +
+            "WHERE user_id = " + this.ds.escape(userId)+ ") as lm\n" +
             "ON lic.id = lm.license_id;";
         var licenseInfo;
         this.ds.query(Q)
@@ -443,7 +445,7 @@ WebStore_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
                 resolve(results);
             }.bind(this))
             .then(null, function(err){
-                console.error("Get License Record Count By Instructor Error -",err);
+                console.errorExt("DashStore MySql", "Get License Record Count By Instructor Error -",err);
                 reject(err);
             });
     }.bind(this));
