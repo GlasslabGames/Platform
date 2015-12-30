@@ -882,7 +882,7 @@ function updateDeveloperGameInfo(req, res){
         }.bind(this))
 
         .done(function(status){
-
+            //
         }.bind(this));
 }
 
