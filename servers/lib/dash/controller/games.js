@@ -871,6 +871,10 @@ function updateDeveloperGameInfo(req, res){
             return this.telmStore.updateGameInformation(gameId, validationResult);
         }.bind(this))
 
+        .then(function(status){
+            this.requestUtil.jsonResponse(res, {update: "complete"});
+        }.bind(this))
+
         .catch(function(err){
             console.error("Dash: Update Developer Game Info Error -", err);
             this.requestUtil.errorResponse(res, {update: "failed", error: err}, 401);
@@ -878,7 +882,7 @@ function updateDeveloperGameInfo(req, res){
         }.bind(this))
 
         .done(function(status){
-            this.requestUtil.jsonResponse(res, {update: "complete"});
+
         }.bind(this));
 }
 
