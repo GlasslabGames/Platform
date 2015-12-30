@@ -963,6 +963,11 @@ function alterLicense(req, res){
                 planInfo.type = 'chromebook';
             }
 
+            if (planInfo.type === 'trial') {
+                // if plan type wasn't set, default to chromebook
+                planInfo.type = 'chromebook';
+            }
+
             console.log("Admin did account upgrade of user " + licenseInfo.userId + " from trial to " + planInfo.type + "/" + planInfo.seats + " on " + (new Date()) + " from IP " + ip + ", admin id " + req.user.id);
 
             var userEmail = licenseInfo.email;
