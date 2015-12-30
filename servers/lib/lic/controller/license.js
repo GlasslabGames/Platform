@@ -958,6 +958,11 @@ function alterLicense(req, res){
                 return;
             }
 
+            if (planInfo.type === 'trial') {
+                // if plan type wasn't set, default to chromebook
+                planInfo.type = 'chromebook';
+            }
+
             console.log("Admin did account upgrade of user " + licenseInfo.userId + " from trial to " + planInfo.type + "/" + planInfo.seats + " on " + (new Date()) + " from IP " + ip + ", admin id " + req.user.id);
 
             var userEmail = licenseInfo.email;
@@ -1826,7 +1831,9 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, planI
     var purchaseOrderKey = purchaseOrderNumber + "-" + licenseId;
     purchaseOrderInfo.key = purchaseOrderKey;
     values.push(purchaseOrderKey);
+    var phone = purchaseOrderInfo.phone;
     values.push(phone);
+    var email = purchaseOrderInfo.email;
     values.push(email);
     var name;
     if(purchaseOrderInfo.lastName){
