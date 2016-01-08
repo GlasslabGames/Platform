@@ -5,7 +5,8 @@
     "title": " ",
     "options": {
         "disable_collapse": false,
-        "disable_edit_json": false
+        "disable_edit_json": false,
+        "disable_properties": false
     },
     "definitions": {
         "root": {
@@ -159,6 +160,7 @@
                             "type": "string"
                         },
                         "icon": {
+                            "format": "grid",
                             "$ref": "#/definitions/image"
                         }
                     }
@@ -176,10 +178,12 @@
                     "type": "string"
                 },
                 "shortDescription": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "textarea"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "textarea"
                 },
                 "developer": {
                     "type": "object",
@@ -191,6 +195,7 @@
                             "type": "string"
                         },
                         "logo": {
+                            "format": "grid",
                             "$ref": "#/definitions/image"
                         },
                         "description": {
@@ -234,6 +239,7 @@
                 "thumbnail": {
                     "title": "thumbnail",
                     "description": "150x120",
+                    "format": "grid",
                     "$ref": "#/definitions/image"
                 },
                 "card": {
@@ -303,7 +309,6 @@
                 "longName",
                 "grades",
                 "subject",
-                "skills",
                 "type",
                 "platform",
                 "price",
