@@ -27,7 +27,7 @@
             "name": "GlassLab, Inc.",
             "logo": {
                 "small": "/assets/glasslab-logo.png",
-                "large": "/assets/glasslab-logo-2x.png"
+                "large": "/assets/glasslab-logo.png"
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
@@ -48,7 +48,7 @@
         },
         "card": {
             "small": "/assets/game-card-AA-1.jpg",
-            "large": "/assets/game-card-AA-1@2x.jpg"
+            "large": "/assets/game-card-AA-1.jpg"
         },
         "banners": {
             "product": "/assets/game-banner-AA-1.png",
@@ -375,23 +375,18 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_1.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_2.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_3.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_4.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_5.png"
                     }
                 ]
@@ -446,18 +441,13 @@
                                 "list": [
                                     {
                                         "name": "Reason Effectively",
-                                        "sublist": [
-                                            "Use various types of reasoning (inductive, deductive, etc.) as appropriate to the situation."
-                                        ]
+                                        "link": "",
+                                        "description": "- Use various types of reasoning (inductive, deductive, etc.) as appropriate to the situation"
                                     },
                                     {
                                         "name": "Making Judgments and Decisions",
-                                        "sublist": [
-                                            "Effectively analyze and evaluate evidence, arguments, claims and beliefs",
-                                            "Analyze and evaluate major alternative points of view",
-                                            "Synthesize and make connections between information and arguments",
-                                            "Interpret information and draw conclusions based on the best analysis"
-                                        ]
+                                        "link": "",
+                                        "description": "- Effectively analyze and evaluate evidence, arguments, claims and beliefs\n- Analyze and evaluate major alternative points of view\n- Synthesize and make connections between information and arguments\n- Interpret information and draw conclusions based on the best analysis"
                                     }
                                 ]
                             }
