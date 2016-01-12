@@ -850,8 +850,7 @@
                                                             "type": "string"
                                                         },
                                                         "standard": {
-                                                            "type": "string",
-                                                            "enum": ["CCSS", "TEKS"]
+                                                            "type": "string"
                                                         }
                                                     }
                                                 }
