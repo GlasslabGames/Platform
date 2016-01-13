@@ -641,7 +641,7 @@ function createNewGame(req, res){
                     }.bind(this))
                     .then(function() {
                         var gameData = _.cloneDeep(this._newGameTemplate);
-                        gameData.basic.gameId = gameId;
+                        gameData.basic.gameId = gameData.basic.shortName = gameData.basic.longName = gameId;
                         gameData.basic.enabled = true;
                         gameData.basic.visible = false;
                         return this.telmStore.createGameInformation(gameId, gameData);
