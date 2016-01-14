@@ -8,6 +8,7 @@ var fs = require('fs');
 var multiparty = require('multiparty');
 var mmm = require('mmmagic'),
     Magic = mmm.Magic;
+var crypto = require('crypto');
 
 module.exports = {
     getActiveGamesBasicInfo:         getActiveGamesBasicInfo,
@@ -23,7 +24,7 @@ module.exports = {
     badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
     replaceGameInfo:                 replaceGameInfo,
-    uploadGameImage:                 uploadGameImage,
+    uploadGameFile:                  uploadGameFile,
     getDeveloperProfile:             getDeveloperProfile,
     getDeveloperGameIds:             getDeveloperGameIds,
     getDeveloperGamesInfo:           getDeveloperGamesInfo,
@@ -925,7 +926,7 @@ function _writeToInfoJSONFiles(gameId, data){
     });
 }
 
-function uploadGameImage(req, res) {
+function uploadGameFile(req, res) {
     if ( (req.user.role !== "developer") && (req.user.role !== "admin") ) {
         this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
         return;
@@ -936,7 +937,7 @@ function uploadGameImage(req, res) {
     var form = new multiparty.Form();
     form.parse(req, function(err, fields, files) {
         if(err) {
-            console.errorExt("DashService", "uploadGameImage formParse Error -", err);
+            console.errorExt("DashService", "uploadGameFile formParse Error -", err);
             this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         }
 
@@ -955,25 +956,32 @@ function uploadGameImage(req, res) {
                     this.requestUtil.errorResponse(res, {key:"dash.info.missing"},500);
                     throw err;
                 }
-                console.log(mimeType);
-                if (['image/png', 'image/jpeg'].indexOf(mimeType) === -1) {
+                var filePath;
+
+                if (mimeType.indexOf("image/") === 0) {
+                    var checksum = crypto.createHash("md5").update(data).digest("hex");
+                    filePath = gameId + "/images/" + checksum + '.' +(file.originalFilename.split(".").pop());
+                } else if (mimeType === 'application/pdf') {
+                    filePath = gameId + "/docs/" + file.originalFilename;
+                } else {
                     this.requestUtil.errorResponse(res, {key:"dash.type.invalid"},500);
                     return;
                 }
 
-                var fileName = gameId + "/images/" + file.fieldName + "." + file.originalFilename;
                 var extraParams = {
                     ACL: "public-read",
                     ContentType: mimeType
                 };
 
-                this.serviceManager.awss3.createS3Object( fileName, data, extraParams, "playfully-games" )
+                this.serviceManager.awss3.createS3Object( filePath, data, extraParams, "playfully-games" )
                     .then(function(){
 
-                        this.requestUtil.jsonResponse(res, {path: "https://s3-us-west-1.amazonaws.com/playfully-games/" + fileName});
+                        this.requestUtil.jsonResponse(res, {
+                            path: "https://s3-us-west-1.amazonaws.com/playfully-games/" + filePath
+                        });
                     }.bind(this))
                     .catch(function(err){
-                        console.errorExt("DashService", "uploadGameImage putS3Object Error -", err);
+                        console.errorExt("DashService", "uploadGameFile putS3Object Error -", err);
                         this.requestUtil.errorResponse(res, {key:"dash.general"},500);
                     }.bind(this));
 
