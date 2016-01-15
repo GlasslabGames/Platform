@@ -78,50 +78,16 @@
                 "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
-                "CCSS": [
-                    {
-                        "category": "Placeholder Standards Category",
-                        "groups": [
-                            {
-                                "name": "Placeholder Group",
-                                "list": [
-                                    {
-                                        "name": "Placeholder Standard",
-                                        "link": "Placeholder Link",
-                                        "description": "Placeholder Description"
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
+                "CCSS": [],
+                "TEKS": []
             },
             "lessonPlans": {
                 "order": 3,
                 "enabled": false,
                 "authRequired": true,
                 "id": "lessonPlans",
-                "title": "Lesson Plans & Videos",
-                "list": [
-                    {
-                        "category": "Lesson Plans",
-                        "list": [
-                            {
-                                "name": "",
-                                "link": ""
-                            }
-                        ]
-                    },
-                    {
-                        "category": "Videos",
-                        "list": [
-                            {
-                                "name": "",
-                                "link": ""
-                            }
-                        ]
-                    }
-                ]
+                "title": "Lesson Plans",
+                "list": []
             },
             "research": {
                 "order": 4,
