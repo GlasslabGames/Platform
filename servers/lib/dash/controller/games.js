@@ -839,17 +839,17 @@ function updateDeveloperGameInfo(req, res){
                         if(gameIds[gameId]){
                             return when.resolve(role);
                         }
-                        return when.reject({key:"dash.access.invalid", reason:"developer not approved for game "+gameId});
+                        return when.reject({key:"dash.gameId.access.denied"});
                     }.bind(this));
             } else {
-                return when.reject({key:"dash.access.invalid"});
+                return when.reject({key:"dash.permission.denied"});
             }
         }.bind(this))
 
         .then(function(permissionCheckResult) {
             return fn.call(JSON.parse, req.body.jsonStr)
                 .catch(function(err) {
-                    return when.reject({key:"dash.data.invalid", reason: err.toString()});
+                    return when.reject({key:"dash.general", reason: err.toString()});
                 });
         }.bind(this))
 
@@ -861,14 +861,18 @@ function updateDeveloperGameInfo(req, res){
         }.bind(this))
 
         .then(function(jsonParseResult) {
-            return this.validateGameInfo(jsonParseResult);
+            return this.validateGameInfo(jsonParseResult)
+                .catch(function (errors) {
+                    return when.reject({key:"dash.gameInfo.invalid", errors: errors});
+                });
         }.bind(this))
 
         .then(function(validationResult){
             //uncommented out for testing
             //_writeToInfoJSONFiles(gameId, JSON.stringify(validationResult, null, 4));
-            if (req.body.overwrite)
+            if (req.body.overwrite) {
                 return this.telmStore.createGameInformation(gameId, validationResult);
+            }
             return this.telmStore.updateGameInformation(gameId, validationResult);
         }.bind(this))
 
@@ -878,7 +882,7 @@ function updateDeveloperGameInfo(req, res){
 
         .catch(function(err){
             console.error("Dash: Update Developer Game Info Error -", err);
-            this.requestUtil.errorResponse(res, {update: "failed", error: err}, 401);
+            this.requestUtil.errorResponse(res, err, 401);
             this.stats.increment("error", "UpdateDeveloperGameInfo.Catch");
         }.bind(this))
 
@@ -973,11 +977,11 @@ function uploadGameFile(req, res) {
                     ContentType: mimeType
                 };
 
-                this.serviceManager.awss3.createS3Object( filePath, data, extraParams, "playfully-games" )
+                this.serviceManager.awss3.createS3Object( filePath, data, extraParams, "playfully-cms" )
                     .then(function(){
 
                         this.requestUtil.jsonResponse(res, {
-                            path: "https://s3-us-west-1.amazonaws.com/playfully-games/" + filePath
+                            path: "https://s3-us-west-1.amazonaws.com/playfully-cms/" + filePath
                         });
                     }.bind(this))
                     .catch(function(err){
