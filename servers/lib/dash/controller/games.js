@@ -964,9 +964,9 @@ function uploadGameFile(req, res) {
 
                 if (mimeType.indexOf("image/") === 0) {
                     var checksum = crypto.createHash("md5").update(data).digest("hex");
-                    filePath = gameId + "/images/" + checksum + '.' +(file.originalFilename.split(".").pop());
+                    filePath = "cms/" + gameId + "/images/" + checksum + '.' +(file.originalFilename.split(".").pop());
                 } else if (mimeType === 'application/pdf') {
-                    filePath = gameId + "/docs/" + file.originalFilename;
+                    filePath = "cms/" + gameId + "/docs/" + file.originalFilename;
                 } else {
                     this.requestUtil.errorResponse(res, {key:"dash.type.invalid"},500);
                     return;
@@ -977,11 +977,11 @@ function uploadGameFile(req, res) {
                     ContentType: mimeType
                 };
 
-                this.serviceManager.awss3.createS3Object( filePath, data, extraParams, "playfully-cms" )
+                this.serviceManager.awss3.createS3Object( filePath, data, extraParams )
                     .then(function(){
 
                         this.requestUtil.jsonResponse(res, {
-                            path: "https://s3-us-west-1.amazonaws.com/playfully-cms/" + filePath
+                            path: "https://s3-us-west-1.amazonaws.com/playfully/" + filePath
                         });
                     }.bind(this))
                     .catch(function(err){
