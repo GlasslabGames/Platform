@@ -27,7 +27,7 @@
             "name": "BrainQuake Inc.",
             "logo": {
                 "small": "/assets/dev-logo-brainquake.png",
-                "large": "/assets/dev-logo-brainquake@2x.png"
+                "large": "/assets/dev-logo-brainquake.png"
             },
             "description": "The tools people have to develop and assess their math proficiency are outdated.  Most people misunderstand their own math proficiency because it’s based on the wrong data. BrainQuake builds the right tools to provide our players with the right data, because in a data-driven world, math gets people jobs. Our core products create learning opportunities and provide incredibly powerful analysis, insight and opportunities to improve math proficiency."
         },
@@ -44,15 +44,22 @@
         },
         "thumbnail": {
             "small": "/assets/thumb-game-WT.png",
-            "large": "/assets/thumb-game-WT@2x.png"
+            "large": "/assets/thumb-game-WT.png"
         },
         "card": {
             "small": "/assets/game-card-WT.png",
-            "large": "/assets/game-card-WT@2x.png"
+            "large": "/assets/game-card-WT.png"
         },
         "banners": {
             "product": "/assets/game-banner-WT.png",
             "reports": "/assets/game-banner-WT.png"
+        },
+        "skills": {
+            "primary": "",
+            "secondary": "",
+            "academicSkills": [],
+            "_21stCenturySkills": [],
+            "_21stCenturyReadiness": []
         }
     },
     "assessment": [
@@ -63,22 +70,6 @@
             "engine": "javascript",
             "trigger": "endSession",
             "rules": {
-                "wo1": {
-                    "name": "No negative rotate",
-                    "description": "This is the fifth puzzle that requires a negative rotation. Confirm student has realized the gear can be rotated counter-clockwise and understands how to count backwards to solve puzzles."
-                },
-                "wo2": {
-                    "name": "No multi-rotate",
-                    "description": "This is the tenth puzzle that requires multi-rotation. Confirm student has realized the gear can be rotated in a multiplicative fashion and understands how to use multiplication to solve puzzles more efficiently."
-                },
-                "wo3": {
-                    "name": "No strategy",
-                    "description": "The student has not shown signs of the strategic thinking required to obtain a multi-step solution. The more advanced puzzles in this room (and all later puzzles) require algebraic and algorithmic thinking."
-                },
-                "wo4": {
-                    "name": "No combinations",
-                    "description": "The player seems unable to decompose an integer into a sum of two multiples. This is a crucial skill for algebra."
-                },
                 "so1": {
                     "name": "Multi-rotate",
                     "description": "Player has discovered multi-rotation and used it successfully."
@@ -106,6 +97,22 @@
                 "so7": {
                     "name": "Better solution",
                     "description": "Player has solved the problem in fewer moves than the target threshold. This shows considerable creative mathematical thinking ability."
+                },
+                "wo1": {
+                    "name": "No negative rotate",
+                    "description": "This is the fifth puzzle that requires a negative rotation. Confirm student has realized the gear can be rotated counter-clockwise and understands how to count backwards to solve puzzles."
+                },
+                "wo2": {
+                    "name": "No multi-rotate",
+                    "description": "This is the tenth puzzle that requires multi-rotation. Confirm student has realized the gear can be rotated in a multiplicative fashion and understands how to use multiplication to solve puzzles more efficiently."
+                },
+                "wo3": {
+                    "name": "No strategy",
+                    "description": "The student has not shown signs of the strategic thinking required to obtain a multi-step solution. The more advanced puzzles in this room (and all later puzzles) require algebraic and algorithmic thinking."
+                },
+                "wo4": {
+                    "name": "No combinations",
+                    "description": "The player seems unable to decompose an integer into a sum of two multiples. This is a crucial skill for algebra."
                 }
             }
         }
@@ -133,9 +140,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "/assets/game-banner-WT.png",
+                    "image": "/assets/skinny-banner-WT.png",
                     "skinny": "/assets/skinny-banner-WT.png",
-                    "large": "/assets/skinny-banner-WT@2x.png"
+                    "large": "/assets/skinny-banner-WT.png"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -189,22 +196,26 @@
                                 {
                                     "id": "wo1",
                                     "title": "No negative rotate",
-                                    "description": "This is the fifth puzzle that requires a negative rotation. Confirm student has realized the gear can be rotated counter-clockwise and understands how to count backwards to solve puzzles."
+                                    "description": "This is the fifth puzzle that requires a negative rotation. Confirm student has realized the gear can be rotated counter-clockwise and understands how to count backwards to solve puzzles.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo2",
                                     "title": "No multi-rotate",
-                                    "description": "This is the tenth puzzle that requires multi-rotation. Confirm student has realized the gear can be rotated in a multiplicative fashion and understands how to use multiplication to solve puzzles more efficiently."
+                                    "description": "This is the tenth puzzle that requires multi-rotation. Confirm student has realized the gear can be rotated in a multiplicative fashion and understands how to use multiplication to solve puzzles more efficiently.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo3",
                                     "title": "No strategy",
-                                    "description": "The student has not shown signs of the strategic thinking required to obtain a multi-step solution. The more advanced puzzles in this room (and all later puzzles) require algebraic and algorithmic thinking."
+                                    "description": "The student has not shown signs of the strategic thinking required to obtain a multi-step solution. The more advanced puzzles in this room (and all later puzzles) require algebraic and algorithmic thinking.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo4",
                                     "title": "No combinations",
-                                    "description": "The player seems unable to decompose an integer into a sum of two multiples. This is a crucial skill for algebra."
+                                    "description": "The player seems unable to decompose an integer into a sum of two multiples. This is a crucial skill for algebra.",
+                                    "whatNow": {}
                                 }
                             ]
                         }
@@ -246,34 +257,28 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/WT-carousel_1.PNG"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/WT-carousel_2.PNG"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/WT-carousel_3.PNG"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/WT-carousel_4.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/WT-carousel_5.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/WT-carousel_6.PNG"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/WT-carousel_7.PNG"
                     }
-                ]
+                ],
+                "brochure": ""
             },
             "standards": {
                 "order": 2,
@@ -363,7 +368,7 @@
                 "enabled": true,
                 "authRequired": true,
                 "id": "lessonPlans",
-                "title": "Lesson Plans and Videos",
+                "title": "Lesson Plans & Videos",
                 "list": [
                     {
                         "category": "Lesson Plans and Guides",
@@ -408,6 +413,17 @@
                         ]
                     }
                 ]
+            },
+            "research": {
+                "enabled": false,
+                "list": []
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": false,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": []
             }
         },
         "banners": {

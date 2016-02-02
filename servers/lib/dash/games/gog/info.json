@@ -10,7 +10,7 @@
         "subject": "Math",
         "type": "Browser",
         "platform": {
-            "type": "Browser/Flash",
+            "type": "Browser",
             "icon": {
                 "small": "/assets/platform-browser.png",
                 "large": "/assets/platform-browser@2x.png"
@@ -20,14 +20,14 @@
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "live",
         "releaseDate": "Dec 21, 2014",
-        "shortDescription": "PLACEHOLDER SHORT DESCRIPTION",
+        "shortDescription": "Game Over Gopher is an exciting tower defense game built around the coordinate grid. To defend a prize carrot, the player selects various tools to “feed” the space gophers marching hungrily toward it. Game Over Gopher guides students in plotting.",
         "description": "Game Over Gopher is an exciting tower defense game built around the coordinate grid. To defend a prize carrot, the player selects various tools to “feed” the space gophers marching hungrily toward it. Game Over Gopher guides students in plotting.",
         "developer": {
             "id": "MS",
             "name": "Math Snacks",
             "logo": {
                 "small": "/assets/dev-logo-mathsnacks.png",
-                "large": "/assets/dev-logo-mathsnacks@2x.png"
+                "large": "/assets/dev-logo-mathsnacks.png"
             },
             "description": "Funded by the National Science Foundation, Math Snacks is a suite of interactive educational learning modules including games, animations, apps, and supplementary teacher/learner materials.<br /><br />Regardless of socio-economic status, grade level, type of school, or education level of parents, research shows students consistently struggle with the same content in mathematics learning. Facilitating math and science learning for youth is a social and economic justice issue. Without solid math skills, many fields of study, including science, are inaccessible. This affects minorities and low-income populations disproportionately. Math education is cumulative, in that each grade builds on concepts taught in the previous grades. Gaps in math knowledge in 6th grade learners profoundly influence their performance in high school and college.<br /><br />Math Snacks focuses on developing educational media to help students grasp frequently misunderstood core mathematics concepts that constrain their math achievement as early as middle school and impact lifelong career choices and achievement. Mathematics educators, mathematicians, learning specialists and game developers collaborated to develop games and media tools that are easy to access and use. Although each module is a small \"mathematical snack\" in itself, together they provide rich nourishment for the middle school curriculum."
         },
@@ -44,11 +44,11 @@
         },
         "thumbnail": {
             "small": "/assets/thumb-game-GOG.png",
-            "large": "/assets/thumb-game-GOG@2x.png"
+            "large": "/assets/thumb-game-GOG.png"
         },
         "card": {
             "small": "/assets/game-card-GOG.png",
-            "large": "/assets/game-card-GOG@2x.png"
+            "large": "/assets/game-card-GOG.png"
         },
         "banners": {
             "product": "/assets/game-banner-GOG.png",
@@ -57,14 +57,21 @@
         "play": {
             "type": "page",
             "page": {
-                "title": "Game Over Gopher",
                 "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/151/gog.swf",
+                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/GOG/game/151/gog.swf",
                 "format": "swf",
                 "size": {
                     "width": 800,
                     "height": 600
                 }
             }
+        },
+        "skills": {
+            "primary": "",
+            "secondary": "",
+            "academicSkills": [],
+            "_21stCenturySkills": [],
+            "_21stCenturyReadiness": []
         }
     },
     "assessment": [
@@ -75,6 +82,22 @@
             "engine": "javascript",
             "trigger": "endSession",
             "rules": {
+                "so1": {
+                    "name": "Challenge Round Skill",
+                    "description": "The player has successfully solved a challenge round in fewer than 5 guesses."
+                },
+                "so2": {
+                    "name": "Tool Expert",
+                    "description": "Player has successfully used every tool in Game Over Gopher."
+                },
+                "so3": {
+                    "name": "Challenge Round Expert",
+                    "description": "Player has completed all challenge rounds."
+                },
+                "so4": {
+                    "name": "Game Over Gopher Expert",
+                    "description": "Player has completed all 14 levels."
+                },
                 "wo1": {
                     "name": "Struggling with Level",
                     "description": "This student has failed a level at least 3 times, and may be struggling to understand basic gameplay mechanics."
@@ -97,23 +120,7 @@
                 },
                 "wo6": {
                     "name": "Struggling with Challenge Round",
-                    "description": "Player may not understand how to predict points on a graph, and have struggled with a challenge level."
-                },
-                "so1": {
-                    "name": "Challenge Round Skill",
-                    "description": "The player has successfully solved a challenge round in fewer than 5 guesses."
-                },
-                "so2": {
-                    "name": "Tool Expert",
-                    "description": "Player has successfully used every tool in Game Over Gopher."
-                },
-                "so3": {
-                    "name": "Challenge Round Expert",
-                    "description": "Player has completed all challenge rounds."
-                },
-                "so4": {
-                    "name": "Game Over Gopher Expert",
-                    "description": "Player has completed all 14 levels."
+                    "description": "Player may not understand how to predict points on a graph, and have struggled with challenge level [n]."
                 }
             }
         }
@@ -141,9 +148,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "/assets/game-banner-GOG.png",
+                    "image": "/assets/skinny-banner-GOG.png",
                     "skinny": "/assets/skinny-banner-GOG.png",
-                    "large": "/assets/skinny-banner-GOG@2x.png"
+                    "large": "/assets/skinny-banner-GOG.png"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -182,32 +189,38 @@
                                 {
                                     "id": "wo1",
                                     "title": "Struggling with Level",
-                                    "description": "This student has failed a level at least 3 times, and may be struggling to understand basic gameplay mechanics."
+                                    "description": "This student has failed a level at least 3 times, and may be struggling to understand basic gameplay mechanics.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo2",
                                     "title": "No Corn Silos",
-                                    "description": "Player has not used the Corn Silo tool, and may be having trouble manipulating x and y coordinates to choose a location on the path."
+                                    "description": "Player has not used the Corn Silo tool, and may be having trouble manipulating x and y coordinates to choose a location on the path.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo3",
                                     "title": "No Iceberg Lettuce",
-                                    "description": "Player has not used the Iceberg Lettuce tool, and may not be able to locate the origin (0,0)."
+                                    "description": "Player has not used the Iceberg Lettuce tool, and may not be able to locate the origin (0,0).",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo4",
                                     "title": "No Melon Strike",
-                                    "description": "Player has not used the Melon Strike tool, and may not understand quadrant names."
+                                    "description": "Player has not used the Melon Strike tool, and may not understand quadrant names.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo5",
                                     "title": "No Wheatgrass Blaster",
-                                    "description": "Player has not used the Wheatgrass Blaster tool, and may not understand how to create a vertical or horizontal line using x or y coordinates."
+                                    "description": "Player has not used the Wheatgrass Blaster tool, and may not understand how to create a vertical or horizontal line using x or y coordinates.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo6",
                                     "title": "Struggling with Challenge Round",
-                                    "description": "Player may not understand how to predict points on a graph, and have struggled with challenge level [n]."
+                                    "description": "Player may not understand how to predict points on a graph, and have struggled with challenge level [n].",
+                                    "whatNow": {}
                                 }
                             ]
                         }
@@ -246,15 +259,12 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/GOG-carousel_1.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/GOG-carousel_2.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/GOG-carousel_3.png"
                     }
                 ]
@@ -334,33 +344,21 @@
                         "category": "Lesson Plans",
                         "list": [
                             {
-                                "name": "Here are some simple strategies for using Math Snacks games in your classroom:",
-                                "link": "",
-                                "description": ""
+                                "name": "Here are some simple strategies for using Math Snacks games in your classroom:"
                             },
                             {
-                                "name": "",
-                                "link": "",
                                 "description": "We know you may not have time to play the game all the way through. Play through at least the first level, and watch the Gameplay video for each one, to get an understanding of what changes from level to level."
                             },
                             {
-                                "name": "",
-                                "link": "",
                                 "description": "Watch the Teaching video for each game. Each is shorter than 10 minutes, and gives really important strategies for teaching with the game, and engaging students in follow up activities to help them apply what they've learned."
                             },
                             {
-                                "name": "",
-                                "link": "",
                                 "description": "Secure lab time and secure the proper number of computers or iPads for students. All games and animations are available online. Ratio Rumble, and Pearl Diver are also on the iPad. Most games will take 2-3 hours for students to play."
                             },
                             {
-                                "name": "",
-                                "link": "",
                                 "description": "Games can be played in different ways: students can play individually, in pairs, in small groups or in one large group using a Smartboard, depending on the technology available in your classroom or computer lab."
                             },
                             {
-                                "name": "",
-                                "link": "",
                                 "description": "Don't be afraid to let the game teach. Math Snacks games aren’t designed to measure what your students already know, but to give students the chance go understand concepts. They won’t succeed at every level their first time playing, and they aren't supposed to. Let your students make mistakes, talk with each other, create strategies and learn from those mistakes."
                             },
                             {
@@ -411,8 +409,7 @@
                                 "link": "http://www.igi-global.com/chapter/teachers-learn-effectively-integrate-mobile/74907"
                             },
                             {
-                                "name": "The learning games design model: Immersion, collaboration, and outcomes-driven development",
-                                "link": ""
+                                "name": "The learning games design model: Immersion, collaboration, and outcomes-driven development"
                             },
                             {
                                 "name": "21st Century learning: The role of serious games",
@@ -431,12 +428,7 @@
                 "enabled": false,
                 "id": "reviews",
                 "title": "Reviews",
-                "list": [
-                    {
-                        "reviewer": "PLACEHOLDER REVIEWER",
-                        "review": "PLACEHOLDER REVIEW"
-                    }
-                ]
+                "list": []
             }
         },
         "social": {

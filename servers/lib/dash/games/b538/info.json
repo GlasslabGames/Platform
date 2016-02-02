@@ -27,7 +27,7 @@
             "name": "GlassLab, Inc.",
             "logo": {
                 "small": "/assets/glasslab-logo.png",
-                "large": "/assets/glasslab-logo-2x.png"
+                "large": "/assets/glasslab-logo.png"
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
@@ -44,15 +44,22 @@
         },
         "thumbnail": {
             "small": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/150x120BG.jpg",
-            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/300x240BG.jpg"
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/150x120BG.jpg"
         },
         "card": {
             "small": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/300x240BG.jpg",
-            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/600x480BG.jpg"
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/300x240BG.jpg"
         },
         "banners": {
             "product": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/940x300BG.jpg",
             "reports": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/940x300BG.jpg"
+        },
+        "skills": {
+            "primary": "",
+            "secondary": "",
+            "academicSkills": [],
+            "_21stCenturySkills": [],
+            "_21stCenturyReadiness": []
         }
     },
     "assessment": [],
@@ -95,7 +102,6 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/480x360BG.jpg"
                     }
                 ]
@@ -156,29 +162,14 @@
                 "authRequired": true,
                 "id": "research",
                 "title": "Research",
-                "list": [
-                    {
-                        "category": "",
-                        "list": [
-                            {
-                                "name": "",
-                                "link": ""
-                            }
-                        ]
-                    }
-                ]
+                "list": []
             },
             "reviews": {
                 "order": 5,
                 "enabled": false,
                 "id": "reviews",
                 "title": "Reviews",
-                "list": [
-                    {
-                        "reviewer": "",
-                        "review": ""
-                    }
-                ]
+                "list": []
             }
         },
         "social": {

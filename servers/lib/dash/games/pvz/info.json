@@ -12,8 +12,8 @@
         "platform": {
             "type": "iPad",
             "icon": {
-                "small": "/assets/platform-browser.png",
-                "large": "/assets/platform-browser@2x.png"
+                "small": "/assets/platform-ipad.png",
+                "large": "/assets/platform-ipad@2x.png"
             }
         },
         "price": "Premium",
@@ -27,7 +27,7 @@
             "name": "GlassLab, Inc.",
             "logo": {
                 "small": "/assets/glasslab-logo.png",
-                "large": "/assets/glasslab-logo-2x.png"
+                "large": "/assets/glasslab-logo.png"
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
@@ -44,15 +44,22 @@
         },
         "thumbnail": {
             "small": "/assets/thumb-game-PVZ.png",
-            "large": "/assets/thumb-game-PVZ@2x.png"
+            "large": "/assets/thumb-game-PVZ.png"
         },
         "card": {
             "small": "/assets/game-card-PVZ.png",
-            "large": "/assets/game-card-PVZ@2x.png"
+            "large": "/assets/game-card-PVZ.png"
         },
         "banners": {
             "product": "/assets/game-banner-PVZ.png",
             "reports": "/assets/game-banner-PVZ.png"
+        },
+        "skills": {
+            "primary": "",
+            "secondary": "",
+            "academicSkills": [],
+            "_21stCenturySkills": [],
+            "_21stCenturyReadiness": []
         }
     },
     "assessment": [
@@ -70,46 +77,6 @@
             "engine": "javascript",
             "trigger": "endSession",
             "rules": {
-                "wo1": {
-                    "name": "Sunflowers in front of lane",
-                    "description": "Student places sunflowers near the front of the lane where they are more vulnerable."
-                },
-                "wo2": {
-                    "name": "Walnuts in back of lane",
-                    "description": "Student places walnuts near the back of the lane where they can't protect other plants."
-                },
-                "wo3": {
-                    "name": "Potato mines diffused",
-                    "description": "Student places potato mines such that they are diffused before arming."
-                },
-                "wo4": {
-                    "name": "Not enough sunflowers",
-                    "description": "Student places less than 4 sunflowers before the second wave of zombies."
-                },
-                "wo5": {
-                    "name": "Not collecting sun",
-                    "description": "Student collects less than (RATIO * 100) % of sun produced."
-                },
-                "wo6": {
-                    "name": "Inefficient plant food use",
-                    "description": "Student uses plant food in situations that don't require it."
-                },
-                "wo7": {
-                    "name": "Losing to difficult zombies",
-                    "description": "Student is defeated when fast, tough, or many zombies are in a lane."
-                },
-                "wo8": {
-                    "name": "Not improving plant layout",
-                    "description": "Student is not trying a more effective plant layout when retrying a level."
-                },
-                "wo9": {
-                    "name": "Ineffective use of shovel",
-                    "description": "Student is not using the shovel to strengthen their lanes."
-                },
-                "wo10": {
-                    "name": "Not replacing eaten plants",
-                    "description": "Student is not replacing plants quickly after they are eaten."
-                },
                 "so1": {
                     "name": "Sunflowers protected",
                     "description": "Student places sunflowers near the back of the lane where they are less vulnerable."
@@ -153,6 +120,46 @@
                 "so11": {
                     "name": "Defeated Gargantuar!",
                     "description": "Student has successfully defeated the Gargantuar zombie without using a lawnmower."
+                },
+                "wo1": {
+                    "name": "Sunflowers in front of lane",
+                    "description": "Student places sunflowers near the front of the lane where they are more vulnerable."
+                },
+                "wo2": {
+                    "name": "Walnuts in back of lane",
+                    "description": "Student places walnuts near the back of the lane where they can't protect other plants."
+                },
+                "wo3": {
+                    "name": "Potato mines diffused",
+                    "description": "Student places potato mines such that they are diffused before arming."
+                },
+                "wo4": {
+                    "name": "Not enough sunflowers",
+                    "description": "Student places less than 4 sunflowers before the second wave of zombies."
+                },
+                "wo5": {
+                    "name": "Not collecting sun",
+                    "description": "Student collects less than (RATIO * 100) % of sun produced."
+                },
+                "wo6": {
+                    "name": "Inefficient plant food use",
+                    "description": "Student uses plant food in situations that don't require it."
+                },
+                "wo7": {
+                    "name": "Losing to difficult zombies",
+                    "description": "Student is defeated when fast, tough, or many zombies are in a lane."
+                },
+                "wo8": {
+                    "name": "Not improving plant layout",
+                    "description": "Student is not trying a more effective plant layout when retrying a level."
+                },
+                "wo9": {
+                    "name": "Ineffective use of shovel",
+                    "description": "Student is not using the shovel to strengthen their lanes."
+                },
+                "wo10": {
+                    "name": "Not replacing eaten plants",
+                    "description": "Student is not replacing plants quickly after they are eaten."
                 }
             }
         }
@@ -233,9 +240,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "/assets/game-banner-PVZ.png",
+                    "image": "/assets/skinny-banner-PVZ.png",
                     "skinny": "/assets/skinny-banner-PVZ.png",
-                    "large": "/assets/skinny-banner-PVZ@2x.png"
+                    "large": "/assets/skinny-banner-PVZ.png"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -317,8 +324,7 @@
                                             "Can they attack the zombies?",
                                             "What happens if the zombies attack the sunflowers?",
                                             "Where does it make the most sense to plant the sunflowers? Why?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -332,8 +338,7 @@
                                             "Can they attack the zombies?",
                                             "What happens if the zombies attack the walnuts?",
                                             "Where does it make the most sense to plant the walnuts? Why?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -347,8 +352,7 @@
                                             "Can zombies eat the mines?",
                                             "How can you tell if a mine will defeat a zombie or be eaten?",
                                             "Where does it make the most sense to plant the potato mines? Why?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -361,8 +365,7 @@
                                             "What happens if you don't plant any sunflowers?",
                                             "What happens if you only plant sunflowers?",
                                             "What is the best number of sunflowers to plant? Why?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -376,8 +379,7 @@
                                             "What happens if you don't collect it?",
                                             "How long do you have before it disappears?",
                                             "What is the ideal strategy when it comes to picking up suns? Why?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -392,8 +394,7 @@
                                             "Does it work differently depending on the type of plant?",
                                             "When does it make sense to use it on one plant versus another?",
                                             "What situations make the most sense for using plant food?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -407,8 +408,7 @@
                                             "What is your defense for tough zombies?",
                                             "What is your defense for fast zombies?",
                                             "What else can you try to use to stop them?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -422,8 +422,7 @@
                                             "Where do you like to plant them?",
                                             "What would happen if you placed that plant more toward the front or the back?",
                                             "Is there a better way to arrange the plants?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -436,8 +435,7 @@
                                             "Why would you want to remove a plant?",
                                             "Is there a time when a plant isn't being effective? Why?",
                                             "Is there a time when you want to replace a plant with a different one? Why?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -452,8 +450,7 @@
                                             "How can you maintain the safety of that lane?",
                                             "How does it impact your sun?",
                                             "What is the best way to deal with a plant being eaten?"
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 }
                             ]
@@ -498,23 +495,18 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/PVZ-carousel_1.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/PVZ-carousel_2.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/PVZ-carousel_3.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/PVZ-carousel_4.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/PVZ-carousel_5.jpg"
                     }
                 ]
@@ -732,18 +724,14 @@
                 "enabled": false,
                 "id": "reviews",
                 "title": "Reviews",
-                "list": [
-                    {
-                        "reviewer": "PLACEHOLDER REVIEWER",
-                        "review": "PLACEHOLDER REVIEW"
-                    }
-                ]
+                "list": []
             }
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",
             "google": "https://plus.google.com/117864084582459836584/posts"
-        }
+        },
+        "applink": ""
     }
 }

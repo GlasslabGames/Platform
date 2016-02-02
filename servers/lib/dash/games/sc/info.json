@@ -10,7 +10,7 @@
         "subject": "21st Century Skills, Science, ELA",
         "type": "Client Download",
         "platform": {
-            "type": "PC & Mac",
+            "type": "PC/Mac",
             "icon": {
                 "small": "/assets/platform-client.png",
                 "large": "/assets/platform-client@2x.png"
@@ -27,7 +27,7 @@
             "name": "GlassLab, Inc.",
             "logo": {
                 "small": "/assets/glasslab-logo.png",
-                "large": "/assets/glasslab-logo2x.png"
+                "large": "/assets/glasslab-logo.png"
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
@@ -49,7 +49,7 @@
         },
         "card": {
             "small": "/assets/game-card-SC.jpg",
-            "large": "/assets/game-card-SC@2x.jpg"
+            "large": "/assets/game-card-SC.jpg"
         },
         "banners": {
             "product": "/assets/game-banner-SC.jpg",
@@ -57,6 +57,13 @@
         },
         "play": {
             "type": "missions"
+        },
+        "skills": {
+            "primary": "",
+            "secondary": "",
+            "academicSkills": [],
+            "_21stCenturySkills": [],
+            "_21stCenturyReadiness": []
         }
     },
     "assessment": [
@@ -67,37 +74,37 @@
             "engine": "javascript",
             "trigger": "endSession",
             "rules": {
-                "park_wo1": {
-                    "name": "Parktown - Crazy Plopper",
-                    "description": "Places too many bus stops."
-                },
                 "park_so1": {
-                    "name": "Parktown - Housing Mogul",
-                    "description": "Zone residential areas to increase #students"
-                },
-                "alex_wo1": {
-                    "name": "Alexandria - NoZoner",
-                    "description": "Less than 15 zones (Commercial/Industrial) within a certain amount of time."
+                    "name": "Housing Mogul",
+                    "description": "Parktown - zoned residential areas to increase # of students"
                 },
                 "alex_so1": {
-                    "name": "Alexandria - Industrial Champion",
-                    "description": "More commercial zones plopped than industrial"
-                },
-                "sierra_wo1": {
-                    "name": "Sierra - Brown Out",
-                    "description": "More than two attempts AND no power outage/failure"
+                    "name": "Industrial Champion",
+                    "description": "Alexandria - More commercial zones plopped than industrial"
                 },
                 "sierra_so1": {
-                    "name": "Sierra - Smog Destroyer",
-                    "description": "Bulldoze the first coal plant AND no power outage/failure"
-                },
-                "jack_wo1": {
-                    "name": "Jackson City - Home Builder",
-                    "description": "Misunderstanding: zone residential to bring in more people for increased jobs"
+                    "name": "Smog Destroyer I",
+                    "description": "Sierra - Bulldoze the first coal plant AND no power outage/failure"
                 },
                 "jack_so1": {
-                    "name": "Jackson City - Smog Destroyer",
-                    "description": "Bulldoze the first coal plant AND no power outage/failure"
+                    "name": "Smog Destroyer II",
+                    "description": "Jackson City - Bulldoze the first coal plant AND no power outage/failure"
+                },
+                "park_wo1": {
+                    "name": "Crazy Plopper",
+                    "description": "Parktown - Places too many bus stops"
+                },
+                "alex_wo1": {
+                    "name": "No Zoner",
+                    "description": "Alexandria - Less than 15 zones (Commercial/Industrial) within a certain amount of time"
+                },
+                "sierra_wo1": {
+                    "name": "Brown Out",
+                    "description": "Sierra - The student has made multiple attempts but continues to run low on power for the city"
+                },
+                "jack_wo1": {
+                    "name": "Home Builder",
+                    "description": "Jackson City - Misunderstanding: zone residential to bring in more people for increased jobs"
                 }
             }
         },
@@ -156,9 +163,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "/assets/game-banner-SC.jpg",
+                    "image": "/assets/skinny-banner-SC.jpg",
                     "skinny": "/assets/skinny-banner-SC.jpg",
-                    "large": "/assets/skinny-banner-SC@2x.jpg"
+                    "large": "/assets/skinny-banner-SC.jpg"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -200,12 +207,12 @@
                                     "description": "Parktown - Places too many bus stops",
                                     "whatNow": {
                                         "intro": "Ask this student to think aloud and observe her/his gameplay to reveal the cause of their decision to place too many bus stops. Make sure the student understands the goals of this mission and how to check their progress toward those goals. ",
+                                        "summary": "If they are not checking the bus coverage on the map, ask what the education and residential tools do, and how they alter the map. If they are placing a lot of stops to increase the number of enrolled students, ask them how many students they currently have enrolled, and how many total students their number of stops can accommodate. If they don't seem to be taking cost into consideration, ask how much it costs to install/maintain bus stops. ",
                                         "actionPoints": [
                                             "What are the goals of this mission?",
                                             "What is the current number of enrolled students?",
                                             "How can we enroll more students in school?"
-                                        ],
-                                        "summary": "If they are not checking the bus coverage on the map, ask what the education and residential tools do, and how they alter the map. If they are placing a lot of stops to increase the number of enrolled students, ask them how many students they currently have enrolled, and how many total students their number of stops can accommodate. If they don't seem to be taking cost into consideration, ask how much it costs to install/maintain bus stops. "
+                                        ]
                                     }
                                 },
                                 {
@@ -214,13 +221,13 @@
                                     "description": "Alexandria - Less than 15 zones (Commercial/Industrial) within a certain amount of time",
                                     "whatNow": {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision not to place enough job producing zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
+                                        "summary": "If they don't seem to be using the zoning tool, ask them what it is and what it does. If they are placing residential zones, ask them why, and where the new citizens are going to work.",
                                         "actionPoints": [
                                             "What are the goals of this mission?",
                                             "What is the current number of jobs?",
                                             "What is the rate of job growth?",
                                             "How can we create more jobs?"
-                                        ],
-                                        "summary": "If they don't seem to be using the zoning tool, ask them what it is and what it does. If they are placing residential zones, ask them why, and where the new citizens are going to work."
+                                        ]
                                     }
                                 },
                                 {
@@ -229,6 +236,7 @@
                                     "description": "Sierra - The student has made multiple attempts but continues to run low on power for the city",
                                     "whatNow": {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to remove too many power producing structures. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
+                                        "summary": "If they are removing pollution-generating structures and running low on power, ask them what else those structures produce and how they can replace those services before removing the structures.",
                                         "actionPoints": [
                                             "What are the goals of this mission?",
                                             "How much pollution do you currently generate?",
@@ -237,8 +245,7 @@
                                             "Where is the power coming from?",
                                             "How can we reduce pollution?",
                                             "How can we produce more power?"
-                                        ],
-                                        "summary": "If they are removing pollution-generating structures and running low on power, ask them what else those structures produce and how they can replace those services before removing the structures."
+                                        ]
                                     }
                                 },
                                 {
@@ -247,6 +254,7 @@
                                     "description": "Jackson City - Misunderstanding: zone residential to bring in more people for increased jobs",
                                     "whatNow": {
                                         "intro": "Ask this student to think aloud, or observe their gameplay to reveal the cause of their decision to place residential zones. Make sure the student understands the goals of this mission and how to check their progress toward those goals:",
+                                        "summary": "If they don't seem to be using the zoning tool, ask them what it is and what it does. If they are placing residential zones, ask them why, and where the new citizens are going to work.",
                                         "actionPoints": [
                                             "What are the goals of this mission?",
                                             "What is the current number of jobs?",
@@ -259,8 +267,7 @@
                                             "How can we produce more power?",
                                             "How much is the population currently changing?",
                                             "How much are your simoleons currently changing?"
-                                        ],
-                                        "summary": "If they don't seem to be using the zoning tool, ask them what it is and what it does. If they are placing residential zones, ask them why, and where the new citizens are going to work."
+                                        ]
                                     }
                                 }
                             ]
@@ -466,23 +473,18 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/SCE_start.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SCE_HUD.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SCE_advisorUI.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SCE_UI.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SCE_results.jpg"
                     }
                 ]
@@ -906,8 +908,7 @@
                                 "link": "http://vimeo.com/102270816"
                             }
                         ]
-                    },
-                    {}
+                    }
                 ]
             },
             "research": {
