@@ -940,16 +940,16 @@
                 "title": "Game Badges",
                 "list": [
                     {
-                      "id": 9,
-                      "orgId": 3
+                        "id": 9,
+                        "orgId": 3
                     },
                     {
-                      "id": 10,
-                      "orgId": 3
+                        "id": 10,
+                        "orgId": 3
                     },
                     {
-                      "id": 27,
-                      "orgId": 3
+                        "id": 27,
+                        "orgId": 3
                     }
                 ]
             },
