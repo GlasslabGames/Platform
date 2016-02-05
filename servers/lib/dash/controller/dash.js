@@ -1,6 +1,7 @@
 var _         = require('lodash');
 var when      = require('when');
 var lConst    = require('../dash.const.js');
+var moment    = require('moment');
 //
 
 module.exports = {
@@ -158,31 +159,83 @@ function exportReportData(req, res){
     .then(function(qOut1) {
         out[0] = qOut1[0];
         // console.log('  this.dashStore.getReportDataP2() pass\n', qOut1[0]);
-    }, function(err){
+
+        return this.dashStore.getReportDataP2('student');
+    }.bind(this), function(err){
         console.log('  this.dashStore.getReportDataP2() fail', err);
         // this.requestUtil.errorResponse(res, err); ?
-    }.bind(this) );
+    }.bind(this) )
 
-    this.dashStore.getReportDataP2('student')
+
     .then(function(qOut2) {
         out[1] = qOut2[0];
         // console.log('  this.dashStore.getReportDataP2("student") pass\n', qOut2[0]);
-    }, function(err){
+        return this.dashStore.getReportDataP2('instructor');
+    }.bind(this), function(err){
         console.log('  this.dashStore.getReportDataP2("student") fail', err);
-    }.bind(this) );
+    }.bind(this) )
 
-    this.dashStore.getReportDataP2('instructor')
+
     .then(function(qOut3) {
         out[2] = qOut3[0];
         // console.log('  this.dashStore.getReportDataP2("instructor") pass\n', qOut3[0]);
-    }, function(err){
+        return this.dashStore.getReportDataP3();
+    }.bind(this), function(err){
         console.log('  this.dashStore.getReportDataP2("instructor") fail', err);
-    }.bind(this) );
+    }.bind(this) )
 
-    this.dashStore.getReportDataP1()
+
+    .then(function(enrolledStudents) {
+        var courseIds = Object.keys(_.reduce(enrolledStudents, function(result, row) {
+            result[row.course_id] = [];
+            return result;
+        }.bind(this), {}));
+
+
+        return when.reduce(courseIds, function (result, courseId) {
+                console.log("llama", courseId);
+                return this.telmStore.getGamesForCourse(courseId)
+                    .then(function(games) {
+                        console.log("llama2", games);
+                        result[courseId] = games;
+                    }.bind(this));
+
+            }.bind(this), {})
+            .then(function(courseGamesLookup) {
+                console.log("alpaca", courseGamesLookup);
+
+                var result = {};
+                _.forEach(enrolledStudents, function(row) {
+                    var date = moment(row.date).format('YYYYMMDD');
+                    if (!result[date]) {
+                        result[date] = {};
+                    }
+                    console.log("llama3", result);
+                    _.forEach(courseGamesLookup[row.course_id], function(data, gameId) {
+                        if(!result[date][gameId]) {
+                            result[date][gameId] = 0;
+                        }
+                        console.log("llama4", result);
+                        result[date][gameId] += row.numStudents;
+                        console.log("llama5", result);
+                    });
+                });
+
+                return result;
+            }.bind(this), function(err) {
+                console.log("alpaca2", err);
+            });
+
+    }.bind(this))
+
     .then(function(qOut4) {
-        out[3] = qOut4[0];
+        out[3] = qOut4;
         this.requestUtil.jsonResponse(res, out);
+    }.bind(this))
+
+    .catch(function (err) {
+        out.push(err);
+        this.requestUtil.errorResponse(res, out, 503);
     }.bind(this));
 
     // this.requestUtil.jsonResponse(res, out);
