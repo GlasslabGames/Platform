@@ -572,42 +572,24 @@ WebStore_MySQL.prototype.getReportDataP3 = function(userId){
     return when.promise(function(resolve, reject){
 
         var results;
-        var Q = "SELECT * FROM GL_USER WHERE id = " + 263 + ";";
-        Q = "SELECT EMAIL FROM GL_USER;"
-        this.ds.query(Q).then(function(results){
+        var Q = ' \
+         \
+        SELECT date(date_created) as `date`, course_id, count(*) as numStudent FROM playfully_prod_live.GL_MEMBERSHIP \
+        where \
+        date_created >= date(date_sub(now(), interval 60 day)) \
+        and ROLE = "student" \
+        group by 1, 2 \
+        order by date_created DESC \
+         \
+        ';
 
-            // results = [ { id: 263, ...
-
-            // console.log('XXXXXXXXXXXXXXXX  resolve  XXXX XXXX XXXX XXXX', results);
-
-            var funcOut = [];
-            var vals = [];
-
-            results.forEach(function(el){
-                // console.log('>>>>>>>>'+el[fileld]);
-                console.log('>>>>>>>>'+el.EMAIL);
-                console.log('    fff'+el.key);
+        this.ds.query(Q)
+            .then(function (results) {
+                resolve(results);
+            })
+            .then(null, function (err) {
+                reject(err);
             });
-
-            // var keys = Object.keys(results[0]);
-            // keys.forEach(function(k) {
-            //     vals.push(results[0][k]);
-            // });
-            // funcOut.push( vals.join('\n') );
-
-            // console.log('====++++ ', keys);
-            // console.log('====++++ ', vals);
-
-            funcOut = ["func out man."];
-
-            if(0 == funcOut.length){ funcOut = []; }
-            resolve(funcOut);
-
-        })
-        .then(null, function(err){
-            // console.log('XXXXXXXXXXXXXXXX  reject  XXXXXXXXXXXXXXXX');
-            reject(err);
-        });
 
     }.bind(this));
 };
