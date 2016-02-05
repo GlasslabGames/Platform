@@ -67,11 +67,16 @@
             }
         },
         "skills": {
-            "primary": "",
-            "secondary": "",
-            "academicSkills": [],
-            "_21stCenturySkills": [],
-            "_21stCenturyReadiness": []
+            "academicSkills": [
+                "Mathematics"
+            ],
+            "_21stCenturySkills": [
+                "Problem Solving",
+                "System Thinking"
+            ],
+            "_21stCenturyReadiness": [],
+            "primary": "Mathematics",
+            "secondary": "Problem Solving"
         }
     },
     "assessment": [

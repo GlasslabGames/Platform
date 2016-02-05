@@ -55,11 +55,20 @@
             "reports": "https://s3-us-west-1.amazonaws.com/playfully-games/B538/images/940x300BG.jpg"
         },
         "skills": {
-            "primary": "",
-            "secondary": "",
-            "academicSkills": [],
-            "_21stCenturySkills": [],
-            "_21stCenturyReadiness": []
+            "academicSkills": [
+                "English Language Arts",
+                "Social Studies"
+            ],
+            "_21stCenturySkills": [
+                "Problem Solving",
+                "System Thinking"
+            ],
+            "_21stCenturyReadiness": [
+                "Life Skills",
+                "Leadership"
+            ],
+            "primary": "Social Studies",
+            "secondary": "System Thinking"
         }
     },
     "assessment": [],

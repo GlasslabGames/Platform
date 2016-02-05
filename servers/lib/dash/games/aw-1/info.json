@@ -68,11 +68,17 @@
             }
         },
         "skills": {
-            "primary": "",
-            "secondary": "",
-            "academicSkills": [],
-            "_21stCenturySkills": [],
-            "_21stCenturyReadiness": []
+            "academicSkills": [
+                "English Language Arts",
+                "Social Studies"
+            ],
+            "_21stCenturySkills": [
+                "System Thinking",
+                "Communication"
+            ],
+            "_21stCenturyReadiness": [],
+            "primary": "Social Studies",
+            "secondary": "English Language Arts"
         }
     },
     "assessment": [

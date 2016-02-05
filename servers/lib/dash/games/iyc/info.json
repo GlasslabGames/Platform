@@ -55,11 +55,17 @@
         },
         "maintenance": null,
         "skills": {
-            "primary": "",
-            "secondary": "",
             "academicSkills": [],
-            "_21stCenturySkills": [],
-            "_21stCenturyReadiness": []
+            "_21stCenturySkills": [
+                "System Thinking",
+                "Communication"
+            ],
+            "_21stCenturyReadiness": [
+                "Life Skills",
+                "Leadership"
+            ],
+            "primary": "Life Skills",
+            "secondary": "Communication"
         }
     },
     "assessment": [],

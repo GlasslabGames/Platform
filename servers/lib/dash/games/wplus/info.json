@@ -55,11 +55,17 @@
             "reports": "/assets/game-banner-WPLUS.png"
         },
         "skills": {
-            "primary": "",
-            "secondary": "",
-            "academicSkills": [],
-            "_21stCenturySkills": [],
-            "_21stCenturyReadiness": []
+            "academicSkills": [
+                "Science"
+            ],
+            "_21stCenturySkills": [
+                "Problem Solving",
+                "System Thinking",
+                "Creativity"
+            ],
+            "_21stCenturyReadiness": [],
+            "primary": "System Thinking",
+            "secondary": "Creativity"
         }
     },
     "assessment": [

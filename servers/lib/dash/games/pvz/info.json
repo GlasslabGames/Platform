@@ -55,11 +55,15 @@
             "reports": "/assets/game-banner-PVZ.png"
         },
         "skills": {
-            "primary": "",
-            "secondary": "",
-            "academicSkills": [],
-            "_21stCenturySkills": [],
-            "_21stCenturyReadiness": []
+            "academicSkills": [
+                "Mathematics"
+            ],
+            "_21stCenturySkills": [
+                "Problem Solving"
+            ],
+            "_21stCenturyReadiness": [],
+            "primary": "Problem Solving",
+            "secondary": "Mathematics"
         }
     },
     "assessment": [

@@ -59,11 +59,19 @@
             "type": "missions"
         },
         "skills": {
-            "primary": "",
-            "secondary": "",
-            "academicSkills": [],
-            "_21stCenturySkills": [],
-            "_21stCenturyReadiness": []
+            "academicSkills": [
+                "English Language Arts",
+                "Social Studies"
+            ],
+            "_21stCenturySkills": [
+                "Problem Solving",
+                "System Thinking"
+            ],
+            "_21stCenturyReadiness": [
+                "Leadership"
+            ],
+            "primary": "System Thinking",
+            "secondary": "Social Studies"
         }
     },
     "assessment": [
