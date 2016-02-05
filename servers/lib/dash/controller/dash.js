@@ -193,31 +193,26 @@ function exportReportData(req, res){
 
 
         return when.reduce(courseIds, function (result, courseId) {
-                console.log("llama", courseId);
                 return this.telmStore.getGamesForCourse(courseId)
                     .then(function(games) {
-                        console.log("llama2", games);
                         result[courseId] = games;
+                        return result;
                     }.bind(this));
 
             }.bind(this), {})
             .then(function(courseGamesLookup) {
-                console.log("alpaca", courseGamesLookup);
-
                 var result = {};
                 _.forEach(enrolledStudents, function(row) {
                     var date = moment(row.date).format('YYYYMMDD');
                     if (!result[date]) {
                         result[date] = {};
                     }
-                    console.log("llama3", result);
                     _.forEach(courseGamesLookup[row.course_id], function(data, gameId) {
                         if(!result[date][gameId]) {
                             result[date][gameId] = 0;
                         }
-                        console.log("llama4", result);
-                        result[date][gameId] += row.numStudents;
-                        console.log("llama5", result);
+                        result[date][gameId] += row.numStudent;
+
                     });
                 });
 

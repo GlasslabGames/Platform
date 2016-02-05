@@ -574,7 +574,7 @@ WebStore_MySQL.prototype.getReportDataP3 = function(userId){
         var results;
         var Q = ' \
          \
-        SELECT date(date_created) as `date`, course_id, count(*) as numStudent FROM playfully_prod_live.GL_MEMBERSHIP \
+        SELECT date(date_created) as `date`, course_id, count(*) as numStudent FROM GL_MEMBERSHIP \
         where \
         date_created >= date(date_sub(now(), interval 60 day)) \
         and ROLE = "student" \
