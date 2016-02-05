@@ -218,7 +218,7 @@ function exportReportData(req, res){
 
                 return result;
             }.bind(this), function(err) {
-                console.log("alpaca2", err);
+                console.log(' this.dashStore.getReportDataP3() fail ', err);
             });
 
     }.bind(this))
