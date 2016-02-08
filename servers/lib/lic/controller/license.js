@@ -957,6 +957,11 @@ function alterLicense(req, res){
                 this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
                 return;
             }
+            
+            if (planInfo.type === 'trial') {
+                // if plan type wasn't set, default to chromebook
+                planInfo.type = 'chromebook';
+            }
 
             if (planInfo.type === 'trial') {
                 // if plan type wasn't set, default to chromebook

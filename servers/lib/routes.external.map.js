@@ -272,6 +272,24 @@ module.exports = {
         //},
         {
             requireAuth: true,
+            api: "/api/v2/admin/games-submission-target",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getDeveloperGameSubmissionTarget"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/from-submission-target",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getGameInfoFromSubmissionTarget"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/dash/game/:gameId/approve",
             service: "dash",
             controller: "game",
@@ -474,7 +492,7 @@ module.exports = {
             }
         },
         {
-            requireAuth: true,
+            //requireAuth: true,
             api: "/api/v2/dash/developer/info/game/:gameId",
             service: "dash",
             controller: "games",
@@ -485,11 +503,11 @@ module.exports = {
         },
         {
             requireAuth: true,
-            api: "/api/v2/dash/developer/info/game/:gameId/image",
+            api: "/api/v2/dash/developer/info/game/:gameId/upload",
             service: "dash",
             controller: "games",
             method: {
-                post: "uploadGameImage"
+                post: "uploadGameFile"
             }
         },
         {

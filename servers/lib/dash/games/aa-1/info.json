@@ -27,7 +27,7 @@
             "name": "GlassLab, Inc.",
             "logo": {
                 "small": "/assets/glasslab-logo.png",
-                "large": "/assets/glasslab-logo-2x.png"
+                "large": "/assets/glasslab-logo.png"
             },
             "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
@@ -48,15 +48,23 @@
         },
         "card": {
             "small": "/assets/game-card-AA-1.jpg",
-            "large": "/assets/game-card-AA-1@2x.jpg"
+            "large": "/assets/game-card-AA-1.jpg"
         },
         "banners": {
             "product": "/assets/game-banner-AA-1.png",
             "reports": "/assets/game-banner-AA-1.png"
         },
-        "play": {
-            "type": "download",
-            "link": "https://itunes.apple.com/us/app/argubot-academy-edu/id912031024?mt=8"
+        "skills": {
+            "academicSkills": [
+                "English Language Arts"
+            ],
+            "_21stCenturySkills": [
+                "System Thinking",
+                "Communication"
+            ],
+            "_21stCenturyReadiness": [],
+            "primary": "English Language Arts",
+            "secondary": "Communication"
         }
     },
     "assessment": [
@@ -67,17 +75,21 @@
             "engine": "javascript",
             "trigger": "activity",
             "rules": {
-                "wo1": {
-                    "name": "Contradictory Mechanic",
-                    "description": "Student is struggling with claim-data pairs. They are consistently using evidence that contradicts their claim. More core construction practice is needed."
-                },
-                "wo3": {
-                    "name": "Straggler",
-                    "description": "Struggling with identifying strengths and weaknesses of claim-data pairs."
-                },
                 "so1": {
                     "name": "Nailed It!",
                     "description": "Outstanding performance at identifying weaknesses of claim-data pairs."
+                },
+                "wo1": {
+                    "name": "Contradictory Mechanic",
+                    "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more contradictory pairs."
+                },
+                "wo2": {
+                    "name": "Irrelevant Mechanic",
+                    "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more pairs with irrelevant evidence."
+                },
+                "wo3": {
+                    "name": "Straggler",
+                    "description": "Student is having difficulty distinguishing between evidence that is 'not supporting' and 'not relevant' in opponent arguments."
                 }
             }
         },
@@ -112,9 +124,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "/assets/game-banner-AA-1.png",
+                    "image": "/assets/skinny-banner-AA-1.jpg",
                     "skinny": "/assets/skinny-banner-AA-1.jpg",
-                    "large": "/assets/skinny-banner-AA-1@2x.jpg"
+                    "large": "/assets/skinny-banner-AA-1.jpg"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -141,12 +153,12 @@
                                     "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more contradictory pairs.",
                                     "whatNow": {
                                         "intro": "In continued play by the student, support her/him in thinking aloud about choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                                        "summary": "Use the gameplay context to tease out and change misconceptions about contradictory vs valid evidence.",
                                         "actionPoints": [
                                             "talk through what contradictory evidence means",
                                             "identify pieces of contradictory evidence in the current game level, or",
                                             "use the contradictory evidence to equip a robot or fight a battle."
-                                        ],
-                                        "summary": "Use the gameplay context to tease out and change misconceptions about contradictory vs valid evidence."
+                                        ]
                                     }
                                 },
                                 {
@@ -155,12 +167,12 @@
                                     "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more pairs with irrelevant evidence.",
                                     "whatNow": {
                                         "intro": "Join the student during play, talking through his or her choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                                        "summary": "Use the gameplay context to tease out and change misconceptions about irrelevant vs valid evidence.",
                                         "actionPoints": [
                                             "talk through what irrelevant evidence means",
                                             "identify pieces of irrelevant evidence in the current game level, or",
                                             "use the irrelevant evidence to equip a robot or fight a battle"
-                                        ],
-                                        "summary": "Use the gameplay context to tease out and change misconceptions about irrelevant vs valid evidence."
+                                        ]
                                     }
                                 },
                                 {
@@ -169,14 +181,14 @@
                                     "description": "Student is having difficulty distinguishing between evidence that is 'not supporting' and 'not relevant' in opponent arguments.",
                                     "whatNow": {
                                         "intro": "As the student continues play, engage her/him in chat about game progression. To help understand what the student knows, encourage discussion about kinds of evidence she/he is seeing anywhere in the current game level. Help the student:",
+                                        "summary": "Use gameplay context to tease out and change misconceptions about 'not supporting' and 'not relevant' argument critique.",
                                         "actionPoints": [
                                             "Identify evidence that comes up, and support a think-aloud about what evidence is and what it means in the game scene.",
                                             "Next, specifically talk through supporting and relevant evidence that comes up (e.g. during next gathering of evidence or claim core construction). ",
                                             "If a game battle happens, discuss with the student what active arguments she/he is making (if possible, making reference to the idea of supporting and relevant evidence).",
                                             "During the battle, as the student defends their bot, and can choose a way to critique an opponent's argument, take a moment to talk about the 'not supporting' and 'not relevant' options with the student. ",
                                             "Continue to support the student throughout the battle, particularly during 'not supporting' and 'not relevant' choices during the 'critique opponent's argument' phase. "
-                                        ],
-                                        "summary": "Use gameplay context to tease out and change misconceptions about 'not supporting' and 'not relevant' argument critique."
+                                        ]
                                     }
                                 }
                             ]
@@ -379,23 +391,18 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_1.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_2.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_3.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_4.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AA-1-carousel_5.png"
                     }
                 ]
@@ -450,18 +457,11 @@
                                 "list": [
                                     {
                                         "name": "Reason Effectively",
-                                        "sublist": [
-                                            "Use various types of reasoning (inductive, deductive, etc.) as appropriate to the situation."
-                                        ]
+                                        "description": "- Use various types of reasoning (inductive, deductive, etc.) as appropriate to the situation"
                                     },
                                     {
                                         "name": "Making Judgments and Decisions",
-                                        "sublist": [
-                                            "Effectively analyze and evaluate evidence, arguments, claims and beliefs",
-                                            "Analyze and evaluate major alternative points of view",
-                                            "Synthesize and make connections between information and arguments",
-                                            "Interpret information and draw conclusions based on the best analysis"
-                                        ]
+                                        "description": "- Effectively analyze and evaluate evidence, arguments, claims and beliefs\n- Analyze and evaluate major alternative points of view\n- Synthesize and make connections between information and arguments\n- Interpret information and draw conclusions based on the best analysis"
                                     }
                                 ]
                             }
@@ -492,8 +492,7 @@
                                 "link": "https://s3-us-west-2.amazonaws.com/playfully/Routine_1.zip"
                             },
                             {
-                                "name": "Argubot Academy: More Routines Coming Soon!",
-                                "link": ""
+                                "name": "Argubot Academy: More Routines Coming Soon!"
                             }
                         ]
                     },
@@ -502,7 +501,7 @@
                         "list": [
                             {
                                 "name": "Walkthrough",
-                                "link": " https://vimeo.com/105931525"
+                                "link": "https://vimeo.com/105931525"
                             }
                         ]
                     }

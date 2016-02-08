@@ -5,7 +5,8 @@
     "title": " ",
     "options": {
         "disable_collapse": false,
-        "disable_edit_json": false
+        "disable_edit_json": false,
+        "disable_properties": false
     },
     "definitions": {
         "root": {
@@ -84,6 +85,74 @@
                 "type": {
                     "type": "string"
                 },
+                "skills": {
+                    "type": "object",
+                    "properties": {
+                        "primary": {
+                            "type": "string",
+                            "title": "Primary Skill (exact spelling)"
+                        },
+                        "secondary": {
+                            "type": "string",
+                            "title": "Secondary Skill (optional, exact spelling)"
+                        },
+                        "academicSkills": {
+                            "type": "array",
+                            "title": "Academic Skills (max two)",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "English Language Arts",
+                                    "Mathematics",
+                                    "Social Studies",
+                                    "Science",
+                                    "Foreign Language",
+                                    "Arts",
+                                    "Health and Phys Ed"
+                                ]
+                            }
+                        },
+                        "_21stCenturySkills": {
+                            "type": "array",
+                            "title": "21st Century Skills (max two)",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Collaboration",
+                                    "Problem Solving",
+                                    "System Thinking",
+                                    "Creativity",
+                                    "Communication"
+                                ]
+                            }
+                        },
+                        "_21stCenturyReadiness": {
+                            "type": "array",
+                            "title": "21st Century Readiness (max two)",
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string",
+                                "enum": [
+                                    "Financial Literacy",
+                                    "Life Skills",
+                                    "Career Skills",
+                                    "Technology",
+                                    "Leadership"
+                                ]
+                            }
+                        }
+                    },
+                    "required": [
+                        "primary",
+                        "secondary",
+                        "academicSkills",
+                        "_21stCenturySkills",
+                        "_21stCenturyReadiness"
+                    ],
+                    "additionalProperties": false
+                },
                 "platform": {
                     "type": "object",
                     "properties": {
@@ -91,6 +160,7 @@
                             "type": "string"
                         },
                         "icon": {
+                            "format": "grid",
                             "$ref": "#/definitions/image"
                         }
                     }
@@ -108,10 +178,12 @@
                     "type": "string"
                 },
                 "shortDescription": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "textarea"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "textarea"
                 },
                 "developer": {
                     "type": "object",
@@ -123,6 +195,7 @@
                             "type": "string"
                         },
                         "logo": {
+                            "format": "grid",
                             "$ref": "#/definitions/image"
                         },
                         "description": {
@@ -166,6 +239,7 @@
                 "thumbnail": {
                     "title": "thumbnail",
                     "description": "150x120",
+                    "format": "grid",
                     "$ref": "#/definitions/image"
                 },
                 "card": {
@@ -776,8 +850,7 @@
                                                             "type": "string"
                                                         },
                                                         "standard": {
-                                                            "type": "string",
-                                                            "enum": ["CCSS", "TEKS"]
+                                                            "type": "string"
                                                         }
                                                     }
                                                 }

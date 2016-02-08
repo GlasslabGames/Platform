@@ -55,12 +55,12 @@ function MonitorService(options, serviceManager){
         );
         this.monds = new MySQL(connectOptions);
         
-        this.workingdata = { };
+        this.workingdata = { reports: { } };
         
         var validServer = this.options.services.name && options.monitor.cron.server == this.options.services.name;
-        this.cron = new CronJob(this.options.monitor.cron.time,
-                            _cronTask.bind(this),
-                            this.options.monitor.cron.enabled && validServer);
+        this.cronEnabled = this.options.monitor.cron.enabled && validServer;
+        console.log("new CronJob");
+        this.cron = new CronJob(this.options.monitor.cron.time, _cronTask.bind(this));
 
         if (this.options.monitor.memwatch.log || this.options.monitor.memwatch.stats) {
             memwatch.on('stats', function(stats) {
@@ -103,41 +103,14 @@ return when.promise(function(resolve, reject) {
             console.trace("MonitorService: Couchbase DS Error -", err);
             this.stats.increment("error", "Couchbase.Connect");
         }.bind(this))
-
-        .then(function(){
-            /*
-            // load csv file
-            var dir = __dirname+'/parser_schema/';
-            //console.log("dir:", dir);
-            fs.readdir(dir, function(error, files) {
-                _.forEach(files, function(file){
-                    var fullFile = dir + file;
-
-                    var gameId = path.basename(file, path.extname(file));
-                    gameId = gameId.toUpperCase();
-
-                    // skip all dot files
-                    if(gameId.charAt(0) == '.') {
-                        return;
-                    }
-
-                    this.store.getCsvDataByGameId(gameId)
-                        .then(function(data){
-                            // only set data if none exist
-                            if(!data) {
-                                return this.store.setCsvDataByGameId(gameId, fs.readFileSync(fullFile, {encoding: 'utf8'}) );
-                            }
-                        }.bind(this))
-                        .then(resolve, reject);
-
-                }.bind(this));
-            }.bind(this));
-            */
-            
-            resolve();
+        .then(function () {
+            if (this.cronEnabled) {
+                console.log("cron start");
+                this.cron.start();
+            }
         }.bind(this))
+        .then(resolve, reject);
 
-        .then(null, reject);
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -145,10 +118,13 @@ return when.promise(function(resolve, reject) {
 
 function _cronTask() {
     console.log('Monitor cronTask start');
-    var mockReq = {};
-    var mockRes = {
-        writeHead: function(){/*console.log('Monitor cronTask mockRes.writeHead()', arguments)*/},
+    var mockReq = {
+        "params": { "code": mConst.code },
+        "protocol": this.options.monitor.cron.protocol || "http",
+        "headers": {"host": this.options.monitor.cron.host || "localhost:8001"}
+    }, mockRes = {
+        writeHead: function(){ /* console.log('Monitor cronTask mock res.writeHead()', arguments) */ },
         end: function(){console.log('Monitor cronTask response:', arguments)},
     };
-    this.serviceManager.internalRoute('/api/v2/monitor/code/'+mConst.code+'/run', 'post', [mockReq, mockRes]);
+    this.serviceManager.internalRoute('/api/v2/monitor/code/:code/run', 'get', [mockReq, mockRes]);
 };

@@ -8,10 +8,10 @@
         "grades": "4-8+",
         "subject": "Social-Emotional Learning",
         "type": "App",
-        "price": "Coming Soon",
-        "packages": "TBD",
-        "release": "dev",
-        "releaseDate": "TBD",
+        "price": "Premium",
+        "packages": "iPad Games",
+        "release": "live",
+        "releaseDate": "January 22, 2016",
         "platform": {
             "type": "iPad",
             "icon": {
@@ -26,9 +26,9 @@
             "name": "GlassLab, Inc.",
             "logo": {
                 "small": "/assets/glasslab-logo.png",
-                "large": "/assets/glasslab-logo-2x.png"
+                "large": "/assets/glasslab-logo.png"
             },
-            "description": "Placeholder Developer Description"
+            "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.  The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.  GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
         "settings": {
             "canCreateMatches": false
@@ -43,37 +43,66 @@
         },
         "thumbnail": {
             "small": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/150x120.jpg",
-            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/300x240.jpg"
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/150x120.jpg"
         },
         "card": {
             "small": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/300x240.jpg",
-            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/600x480.jpg"
+            "large": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/300x240.jpg"
         },
         "banners": {
             "product": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/940x300.jpg",
             "reports": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/images/940x300.jpg"
+        },
+        "maintenance": null,
+        "skills": {
+            "academicSkills": [],
+            "_21stCenturySkills": [
+                "System Thinking",
+                "Communication"
+            ],
+            "_21stCenturyReadiness": [
+                "Life Skills",
+                "Leadership"
+            ],
+            "primary": "Life Skills",
+            "secondary": "Communication"
         }
     },
-    "assessment": [
-    ],
+    "assessment": [],
     "reports": {
-        "list": [
-        ]
+        "list": []
     },
     "details": {
-        "buttons": [
-        ],
+        "buttons": [],
         "pages": {
             "product": {
                 "order": 1,
                 "enabled": true,
                 "id": "product",
-                "title": "Placeholder Product Description",
-                "header": "Placeholder Header",
-                "about": "IF EDU is a chapter-based adventure game for the iPad that enables and empowers students to learn how to make healthy decisions, and how to demonstrate empathy and compassion. The game combines interactive storytelling and commercial quality gameplay to engage, motivate, and inspire. Created for elementary and middle school students, each IF chapter contains one month’s worth of in-class lessons. \n\n •Originally developed by Trip Hawkin’s If You Can Company \n •Addresses critical SEL skills and character education \n •12 chapters of commercial quality gameplay and character/world design with vivid storytelling \n •Appropriate for students in grades 4 and beyond",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "IF EDU is a chapter-based adventure game for the iPad that enables and empowers students to learn how to make healthy decisions, and how to demonstrate empathy and compassion. The game combines interactive storytelling and commercial quality gameplay to engage, motivate, and inspire. Created for elementary and middle school students, each IF chapter contains one month’s worth of in-class lessons.<br><br>•Originally developed by Trip Hawkin’s If You Can Company<br>•Addresses critical SEL skills and character education<br>•12 chapters of commercial quality gameplay and character/world design with vivid storytelling  <br>•Appropriate for students in grades 4 and beyond",
                 "video": "https://youtu.be/LvJU4C0bL3g",
                 "brochure": "",
-                "curriculum": "How it Fits the Curriculum: \n\n At present, there is no nationally accepted standard for SEL. The most widely adopted definition was developed by Chicago-based Collaborative for Academic, Social, and Emotional Learning (CASEL), which divides SEL into five key ‘competencies’: \n\n •Self-awareness: ability to accurately recognize one’s emotions and thoughts and their influence on behavior \n •Self-management: ability to regulate one’s emotions, thoughts, and behaviors effectively in different situations \n •Social awareness: ability to take the perspective of and empathize with others from diverse backgrounds and cultures \n •Relationship skills: ability to establish healthy and rewarding relationships with diverse individuals and groups \n •Responsible decision-making: ability to make constructive and respectful choices about personal behavior and social interactions based on consideration of ethical standards, safety concerns, social norms, the realistic evaluation of consequences of various actions, and the well-being of self and others"
+                "curriculum": [
+                    "How it Fits the Curriculum:  At present, there is no nationally accepted standard for SEL. The most widely adopted definition was developed by Chicago-based Collaborative for Academic, Social, and Emotional Learning (CASEL), which divides SEL into five key ‘competencies’:",
+                    "Self-awareness: ability to accurately recognize one’s emotions and thoughts and their influence on behavior",
+                    "Self-management: ability to regulate one’s emotions, thoughts, and behaviors effectively in different situations",
+                    "Social awareness: ability to take the perspective of and empathize with others from diverse backgrounds and cultures",
+                    "Relationship skills: ability to establish healthy and rewarding relationships with diverse individuals and groups",
+                    "Responsible decision-making: ability to make constructive and respectful choices about personal behavior and social interactions based on consideration of ethical standards, safety concerns, social norms, the realistic evaluation of consequences of various actions, and the well-being of self and others"
+                ],
+                "slideshow": [
+                    {
+                        "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/images/c45c54b429cbb6562c04dde322d3faee.png"
+                    },
+                    {
+                        "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/images/52db07713b43bfd140685746224227e1.png"
+                    },
+                    {
+                        "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/images/5cea8e28040a0f39de2b6fc6836adcc0.png"
+                    }
+                ]
             },
             "standards": {
                 "order": 2,
@@ -89,7 +118,7 @@
                                 "list": [
                                     {
                                         "name": "ExSEL Goals",
-                                        "link": "http://www.http://ifyoucan.org/exsel-goals",
+                                        "link": "http://static1.squarespace.com/static/513f79f9e4b05ce7b70e9673/t/52f95691e4b0a41caba778b8/1392072337661/casel-brief-on-state-standards-january-2014.pdf",
                                         "description": "Every “move” your child makes in the game is a choice. “Behind the scenes” we’re assessing each choice against 20 distinct Social & Emotional Learning (SEL) skills."
                                     }
                                 ]
@@ -100,62 +129,53 @@
             },
             "lessonPlans": {
                 "order": 3,
-                "enabled": false,
+                "enabled": true,
                 "authRequired": true,
                 "id": "lessonPlans",
-                "title": "Lesson Plans & Videos",
+                "title": "Lesson Plans",
                 "list": [
                     {
                         "category": "Lesson Plans",
                         "list": [
                             {
                                 "name": "Chapter 1",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-overviews/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter1.pdf"
                             },
                             {
                                 "name": "Chapter 2",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-2-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter2.pdf"
                             },
                             {
                                 "name": "Chapter 3",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-3-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter3.pdf"
                             },
                             {
                                 "name": "Chapter 4",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-4-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter4.pdf"
                             },
                             {
                                 "name": "Chapter 5",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-5-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter5.pdf"
                             },
                             {
                                 "name": "Chapter 6",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-6-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter6.pdf"
                             },
                             {
                                 "name": "Chapter 7",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-7-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter7.pdf"
                             },
                             {
                                 "name": "Chapter 8",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-8-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter8.pdf"
                             },
                             {
                                 "name": "Chapter 9",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapter-9-overview/"
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter9.pdf"
                             },
                             {
                                 "name": "Chapter 10-12",
-                                "link": "http://www.ifyoucan.org/chapter-overviews-2/chapters/"
-                            }
-                        ]
-                    },
-                    {
-                        "category": "Videos",
-                        "list": [
-                            {
-                                "name": "",
-                                "link": ""
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Chapter10-12.pdf"
                             }
                         ]
                     }
@@ -163,20 +183,20 @@
             },
             "research": {
                 "order": 4,
-                "enabled": false,
+                "enabled": true,
                 "authRequired": true,
                 "id": "research",
                 "title": "Research",
                 "list": [
                     {
-                        "category": "Research Articles",
+                        "category": "Research",
                         "list": [
                             {
-                                "name": "Use Your Brainz Research Brief",
-                                "link": "https://s3-us-west-1.amazonaws.com/playfully-games/IYC/Learning-in-IF...-March-2014.pdf"
+                                "name": "Learning in IF",
+                                "link": "https://s3-us-west-2.amazonaws.com/playfully-cms/IYC/docs/Learning-in-IF-You-Can-EDU.pdf",
+                                "description": "As part of the release of the commercial version of If You Can, this document: (1) a description of the tool and its goals; (2) the research base for several of the foundational learning principles behind the game and\nits design; (3) a description of the Social and Emotional Learning content used to inform in-game learning; (4) how that content is delivered through the game medium; and (5) how our interdisciplinary team seeks to assess learning with the tool."
                             }
                         ]
-
                     }
                 ]
             },
@@ -185,18 +205,14 @@
                 "enabled": false,
                 "id": "reviews",
                 "title": "Reviews",
-                "list": [
-                    {
-                        "reviewer": "",
-                        "review": ""
-                    }
-                ]
+                "list": []
             }
         },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",
             "google": "https://plus.google.com/117864084582459836584/posts"
-        }
+        },
+        "applink": "https://itunes.apple.com/us/app/if-edu/id1047008019?mt=8"
     }
 }
