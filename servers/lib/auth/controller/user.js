@@ -54,6 +54,9 @@ function getUserProfileData(req, res, next) {
                 return _updateUserSession(userData, req);
             }.bind(this))
             .then(function(){
+                if ('app-archiver' === this.options.services.name) {
+                    userData.archiver = true;
+                }
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error

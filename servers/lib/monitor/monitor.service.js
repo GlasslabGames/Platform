@@ -55,7 +55,7 @@ function MonitorService(options, serviceManager){
         );
         this.monds = new MySQL(connectOptions);
         
-        this.workingdata = { };
+        this.workingdata = { reports: { } };
         
         var validServer = this.options.services.name && options.monitor.cron.server == this.options.services.name;
         this.cronEnabled = this.options.monitor.cron.enabled && validServer;

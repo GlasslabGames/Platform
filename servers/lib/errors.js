@@ -102,6 +102,8 @@ module.exports = {
     "report.assessmentId.missing":          "Missing AssessmentId",
     "report.body.missing":                  "Missing Body",
     // dash
+    "dash.gameId.invalid":                  "Invalid gameId",
+    "dash.gameInfo.invalid":                "Invalid data",
     "dash.permission.denied":               "You do not have permission to perform this operation.",
     "dash.gameId.access.denied":            "You do not have access to this game.",
     "dash.messageId.invalid":               "Invalid messageId",

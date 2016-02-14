@@ -10,7 +10,7 @@
         "subject": "Social Studies",
         "type": "Browser",
         "platform": {
-            "type": "Flash/Browser",
+            "type": "Browser",
             "icon": {
                 "small": "/assets/platform-browser.png",
                 "large": "/assets/platform-browser@2x.png"
@@ -20,14 +20,14 @@
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "live",
         "releaseDate": "Aug 1, 2010",
-        "shortDescription": "Use your reasoning powers to argue landmark Supreme Court cases!",
+        "shortDescription": "Try out your persuasive abilities by arguing a real Supreme Court case. The other lawyer is your competition. Whoever uses the strongest arguments wins!",
         "description": "Try out your persuasive abilities by arguing a real Supreme Court case. The other lawyer is your competition. Whoever uses the strongest arguments wins!",
         "developer": {
             "id": "IC",
             "name": "iCivics",
             "logo": {
                 "small": "/assets/dev-logo-icivics.png",
-                "large": "/assets/dev-logo-icivics@2x.png"
+                "large": "/assets/dev-logo-icivics.png"
             },
             "description": "iCivics is a non-profit organization dedicated to reinvigorating civic learning through interactive and engaging learning resources. Our educational resources empower teachers and prepare the next generation of students to become knowledgeable and engaged citizens. Founded and led by Justice Sandra Day O'Connor, iCivics provides students with the tools they need for active participation and democratic action, and teachers with the materials and support to achieve this. A growing base of more than 40,000 educators and three million students relies on iCivics to provide a high quality civics curriculum each year. iCivics games have been played more than ten million times by students across the country. iCivics.org was awarded the American Library Association's Best Websites for Teaching & Learning, which recognizes sites that foster the qualities of innovation, creativity, active participation and collaboration."
         },
@@ -49,7 +49,7 @@
         },
         "card": {
             "small": "/assets/game-card-AW-1.jpg",
-            "large": "/assets/game-card-AW-1@2x.jpg"
+            "large": "/assets/game-card-AW-1.jpg"
         },
         "banners": {
             "product": "/assets/game-banner-AW-1.jpg",
@@ -58,14 +58,27 @@
         "play": {
             "type": "page",
             "page": {
-                "title": "Argument Wars",
                 "embed": "//cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5-Staging/Main.swf",
+                "embedSecure": "//cdn.icivics.org/sites/default/files/games/ArgumentWars_v1.4.2-GL-R5-Staging/Main.swf",
                 "format": "swf",
                 "size": {
                     "width": 940,
                     "height": 640
                 }
             }
+        },
+        "skills": {
+            "academicSkills": [
+                "English Language Arts",
+                "Social Studies"
+            ],
+            "_21stCenturySkills": [
+                "System Thinking",
+                "Communication"
+            ],
+            "_21stCenturyReadiness": [],
+            "primary": "Social Studies",
+            "secondary": "English Language Arts"
         }
     },
     "assessment": [
@@ -77,43 +90,33 @@
             "trigger": "endSession",
             "rules": {
                 "so1": {
-                    "name": "",
                     "description": "This player correctly matched all of the reasoning wheel sentences in the last case played."
                 },
                 "so2": {
-                    "name": "",
                     "description": "This player correctly objected to at least two of the other side's arguments in the last case played."
                 },
                 "so3": {
-                    "name": "",
                     "description": "This player chose Supreme Court precedent or Constitutional support at least two times within the first four moves of the last case played, and chose no irrelevant support during the game."
                 },
                 "so4": {
-                    "name": "",
                     "description": "The player has reviewed all of the opponents cards in the last case played."
                 },
                 "so5": {
-                    "name": "",
                     "description": "The player reviewed AND correctly passed or objected to all of the opponent's cards in the last case played."
                 },
                 "wo1": {
-                    "name": "",
                     "description": "These players have chosen irrelevant support for their side of the case at least two times during the last case played."
                 },
                 "wo2": {
-                    "name": "",
-                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first three moves of the last case played."
+                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first five moves of the last case played."
                 },
                 "wo3": {
-                    "name": "",
                     "description": "This player did not match the reasoning wheel sentence correctly at all during the last case played."
                 },
                 "wo4": {
-                    "name": "",
                     "description": "The player has not reviewed any of the opponents cards in the last case played."
                 },
                 "wo5": {
-                    "name": "no objections",
                     "description": "Player did not successfully object during the last case played."
                 }
             }
@@ -127,9 +130,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "/assets/game-banner-AW-1.jpg",
+                    "image": "/assets/skinny-banner-AW-1.jpg",
                     "skinny": "/assets/skinny-banner-AW-1.jpg",
-                    "large": "/assets/skinny-banner-AW-1@2x.jpg"
+                    "large": "/assets/skinny-banner-AW-1.jpg"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -141,27 +144,22 @@
                             "headers": [
                                 {
                                     "id": "so1",
-                                    "title": "",
                                     "description": "This player correctly matched all of the reasoning wheel sentences in the last case played."
                                 },
                                 {
                                     "id": "so2",
-                                    "title": "",
                                     "description": "This player correctly objected to at least two of the other side's arguments in the last case played."
                                 },
                                 {
                                     "id": "so3",
-                                    "title": "",
                                     "description": "This player chose Supreme Court precedent or Constitutional support at least two times within the first four moves of the last case played, and chose no irrelevant support during the game."
                                 },
                                 {
                                     "id": "so4",
-                                    "title": "",
                                     "description": "The player has reviewed all of the opponents cards in the last case played."
                                 },
                                 {
                                     "id": "so5",
-                                    "title": "",
                                     "description": "The player reviewed AND correctly passed or objected to all of the opponent's cards in the last case played."
                                 }
                             ]
@@ -172,28 +170,28 @@
                             "headers": [
                                 {
                                     "id": "wo1",
-                                    "title": "",
-                                    "description": "These players have chosen irrelevant support for their side of the case at least two times during the last case played."
+                                    "description": "These players have chosen irrelevant support for their side of the case at least two times during the last case played.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo2",
-                                    "title": "",
-                                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first five moves of the last case played."
+                                    "description": "These players did not choose Supreme Court precedent or Constitutional support in the first five moves of the last case played.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo3",
-                                    "title": "",
-                                    "description": "This player did not match the reasoning wheel sentence correctly at all during the last case played."
+                                    "description": "This player did not match the reasoning wheel sentence correctly at all during the last case played.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo4",
-                                    "title": "",
-                                    "description": "The player has not reviewed any of the opponents cards in the last case played."
+                                    "description": "The player has not reviewed any of the opponents cards in the last case played.",
+                                    "whatNow": {}
                                 },
                                 {
                                     "id": "wo5",
-                                    "title": "",
-                                    "description": "Player did not successfully object during the last case played."
+                                    "description": "Player did not successfully object during the last case played.",
+                                    "whatNow": {}
                                 }
                             ]
                         }
@@ -257,23 +255,18 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/AW-carousel_1.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AW-carousel_3.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AW-carousel_5.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AW-carousel_6.jpg"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/AW-carousel_7.jpg"
                     }
                 ]
@@ -328,37 +321,30 @@
                                 "list": [
                                     {
                                         "name": "TEKS.ELA.6.11B",
-                                        "link": "",
                                         "description": "Identify simply faulty reasoning used in persuasive texts."
                                     },
                                     {
                                         "name": "TEKS.ENGL1.10.A",
-                                        "link": "",
                                         "description": "Analyze the relevance, quality, and credibility of evidence given to support or oppose an argument for a specific audience."
                                     },
                                     {
                                         "name": "TEKS.SS.8.18.B",
-                                        "link": "",
                                         "description": "Summarize the issues, decisions, and significance of landmark Supreme Court cases, including Marbury v. Madison, McCulloch v. Maryland, and Gibbons v. Ogden."
                                     },
                                     {
                                         "name": "TEKS.SS.8.18.C",
-                                        "link": "",
                                         "description": "Evaluate the impact of selected landmark Supreme Court decisions, including Dred Scott v. Sandford, on life in the United States."
                                     },
                                     {
                                         "name": "TEKS.USH.21.A",
-                                        "link": "",
                                         "description": "Analyze the effects of landmark U.S. Supreme Court decisions, including Brown v. Board of Education, and other U.S. Supreme Court decisions such as Plessy v. Ferguson, Hernandez v. Texas, Tinker v. Des Moines, Wisconsin v. Yoder, and White v. Regester."
                                     },
                                     {
                                         "name": "TEKS.USG.13.D",
-                                        "link": "",
                                         "description": "Analyze U.S. Supreme Court interpretations of rights guaranteed by the U.S. Constitution in selected cases, including Engel v. Vitale, Schenck v. United States, Texas v. Johnson, Miranda v. Arizona, Gideon v. Wainwright, Mapp v. Ohio, and Roe v. Wade."
                                     },
                                     {
                                         "name": "TEKS.USG.17.A",
-                                        "link": "",
                                         "description": "Evaluate a U.S. government policy or court decision that has affected a particular racial, ethnic, or religious group such as the Civil Rights Act of 1964 and the U.S. Supreme Court cases of Hernandez v. Texas and Grutter v. Bollinger."
                                     }
                                 ]
@@ -404,7 +390,7 @@
                         "list": [
                             {
                                 "name": "Overview",
-                                "link": " https://www.youtube.com/watch?v=kZF_s1jNBrM"
+                                "link": "https://www.youtube.com/watch?v=kZF_s1jNBrM"
                             }
                         ]
                     }

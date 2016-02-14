@@ -501,8 +501,10 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
             "password,system_role,collect_telemetry,login_type,verify_code_status) VALUES ";
         var values = [];
         emails.forEach(function(email){
-            values.push(_insertTempUserValueWithEmail(email));
-        });
+            email = this.ds.escape(email.toLowerCase());
+            values.push("(" + email + "," + email + ",0,NOW(),1,'temp','temp',NOW()," +
+                "'pass','instructor',0,'glasslabv2','invited')");
+        }.bind(this));
         Q += values.join(",") + ";";
         this.ds.query(Q)
             .then(function(results){
@@ -515,13 +517,6 @@ Lic_MySQL.prototype.multiInsertTempUsersByEmail = function(emails){
     }.bind(this));
 };
 
-function _insertTempUserValueWithEmail(email){
-    email = this.ds.escape(email.toLowerCase());
-    var value = "(" + email + "," + email + ",0,NOW(),1,'temp','temp',NOW()," +
-    "'pass','instructor',0,'glasslabv2','invited')";
-    return value;
-}
-
 Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds, invite){
     return when.promise(function(resolve, reject){
         var inputs = [];
@@ -533,7 +528,7 @@ Lic_MySQL.prototype.multiInsertLicenseMap = function(licenseId, userIds, invite)
         }
         userIds.forEach(function(id){
             inputs.push(startValues + this.ds.escape(id) + ")")
-        });
+        }.bind(this));
         var insertValues = inputs.join(',');
 
         var Q = "INSERT INTO GL_LICENSE_MAP (status,date_created,license_id,user_id) VALUES " + insertValues + ";";

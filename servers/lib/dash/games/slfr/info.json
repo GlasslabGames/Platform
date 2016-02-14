@@ -10,7 +10,7 @@
         "subject": "Math",
         "type": "Browser",
         "platform": {
-            "type": "Browser/Flash",
+            "type": "Browser",
             "icon": {
                 "small": "/assets/platform-browser.png",
                 "large": "/assets/platform-browser@2x.png"
@@ -27,7 +27,7 @@
             "name": "Ululab",
             "logo": {
                 "small": "/assets/dev-logo-ululab.png",
-                "large": "/assets/dev-logo-ululab@2x.png"
+                "large": "/assets/dev-logo-ululab.png"
             },
             "description": "Slice Fractions: School Edition is a fun problem solving game that guides students to intuitively and effectively learn fractions through critical concepts. In this puzzling world, players must slice the right amount of ice and lava to clear the mammoth's path. <br /><br />The game is the fruit of multiple years of research and development by Ululab with the help of math learning experts from the University of Quebec in Montreal (UQAM). It has a smooth progression designed for kids who are new to fractions or who have not yet understood its basic concepts. The environment is free of written instructions, which lets students dive into math reasoning without being obstructed by their literacy level."
         },
@@ -44,11 +44,11 @@
         },
         "thumbnail": {
             "small": "/assets/thumb-game-SLFR.png",
-            "large": "/assets/thumb-game-SLFR@2x.png"
+            "large": "/assets/thumb-game-SLFR.png"
         },
         "card": {
             "small": "/assets/game-card-SLFR.png",
-            "large": "/assets/game-card-SLFR@2x.png"
+            "large": "/assets/game-card-SLFR.png"
         },
         "banners": {
             "product": "/assets/game-banner-SLFR.png",
@@ -57,14 +57,25 @@
         "play": {
             "type": "page",
             "page": {
-                "title": "Slice Fractions",
                 "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/SLFR/game/3/SliceFractionsSchoolEdition.swf",
+                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/SLFR/game/3/SliceFractionsSchoolEdition.swf",
                 "format": "swf",
                 "size": {
                     "width": 800,
                     "height": 600
                 }
             }
+        },
+        "skills": {
+            "academicSkills": [
+                "Mathematics"
+            ],
+            "_21stCenturySkills": [
+                "Problem Solving"
+            ],
+            "_21stCenturyReadiness": [],
+            "primary": "Mathematics",
+            "secondary": "Problem Solving"
         }
     },
     "assessment": [
@@ -75,66 +86,6 @@
             "engine": "javascript",
             "trigger": "endSession",
             "rules": {
-                "wo1": {
-                    "name": "How to Play concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that establishes the basic game rules."
-                },
-                "wo2": {
-                    "name": "Split Groups concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that establishes how to divide a group of blocks into equal parts."
-                },
-                "wo3": {
-                    "name": "Slice Shapes concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that establishes how to divide various shapes into equal parts."
-                },
-                "wo4": {
-                    "name": "Shape Comparison concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that establishes how to compare parts to their whole."
-                },
-                "wo5": {
-                    "name": "Symbolic Numerator concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions through symbols."
-                },
-                "wo6": {
-                    "name": "Fractions Reading concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions by comparing it to a symbolic representation."
-                },
-                "wo7": {
-                    "name": "Denominator concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that explores different ways to divide a whole into equal parts."
-                },
-                "wo8": {
-                    "name": "Numerator concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that explores the impact different numerators have on the quantity of ice or lava."
-                },
-                "wo9": {
-                    "name": "Pie Charts concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that explores ways to divide a shape that resembles a pie chart."
-                },
-                "wo10": {
-                    "name": "Size Comparison concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that explores how to compare fractions to each other to determine which represents the largest quantity and in what proportion."
-                },
-                "wo11": {
-                    "name": "Equivalent Fractions (A) concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that have students manipulate fractions with different denominators to find out which ones are equivalent."
-                },
-                "wo12": {
-                    "name": "Equivalent Fractions (B) concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that offers different contexts in which to use equivalent fractions."
-                },
-                "wo13": {
-                    "name": "Fractions Ordering concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that asks players to place fractions in ascending order."
-                },
-                "wo14": {
-                    "name": "Question Marks concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that makes students deduct the value of the parts of a whole based on the information that is available to them."
-                },
-                "wo15": {
-                    "name": "Subtraction concept - retrying a level often",
-                    "description": "A student repeated a particular level often in a series that explores the notion of subtracting quantities from 1."
-                },
                 "so1": {
                     "name": "How to Play concept - Great planner!",
                     "description": "Student completed every level, without retrying once, in a series that establishes the basic game rules."
@@ -194,6 +145,66 @@
                 "so15": {
                     "name": "Subtraction concept - Great planner!",
                     "description": "Student completed every level, without retrying once, in a series that explores the notion of subtracting quantities from 1."
+                },
+                "wo1": {
+                    "name": "How to Play concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes the basic game rules."
+                },
+                "wo2": {
+                    "name": "Split Groups concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes how to divide a group of blocks into equal parts."
+                },
+                "wo3": {
+                    "name": "Slice Shapes concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes how to divide various shapes into equal parts."
+                },
+                "wo4": {
+                    "name": "Shape Comparison concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that establishes how to compare parts to their whole."
+                },
+                "wo5": {
+                    "name": "Symbolic Numerator concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions through symbols."
+                },
+                "wo6": {
+                    "name": "Fractions Reading concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that introduces the numerical representation of fractions by comparing it to a symbolic representation."
+                },
+                "wo7": {
+                    "name": "Denominator concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores different ways to divide a whole into equal parts."
+                },
+                "wo8": {
+                    "name": "Numerator concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores the impact different numerators have on the quantity of ice or lava."
+                },
+                "wo9": {
+                    "name": "Pie Charts concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores ways to divide a shape that resembles a pie chart."
+                },
+                "wo10": {
+                    "name": "Size Comparison concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores how to compare fractions to each other to determine which represents the largest quantity and in what proportion."
+                },
+                "wo11": {
+                    "name": "Equivalent Fractions (A) concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that have students manipulate fractions with different denominators to find out which ones are equivalent."
+                },
+                "wo12": {
+                    "name": "Equivalent Fractions (B) concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that offers different contexts in which to use equivalent fractions."
+                },
+                "wo13": {
+                    "name": "Fractions Ordering concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that asks players to place fractions in ascending order."
+                },
+                "wo14": {
+                    "name": "Question Marks concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that makes students deduct the value of the parts of a whole based on the information that is available to them."
+                },
+                "wo15": {
+                    "name": "Subtraction concept - retrying a level often",
+                    "description": "A student repeated a particular level often in a series that explores the notion of subtracting quantities from 1."
                 }
             }
         }
@@ -221,9 +232,9 @@
                 "name": "Shout Out and Watch Out Report",
                 "header": {
                     "text": "Shout Out and Watch Out Report",
-                    "image": "/assets/game-banner-SLFR.png",
+                    "image": "/assets/skinny-banner-SLFR.png",
                     "skinny": "/assets/skinny-banner-SLFR.png",
-                    "large": "/assets/skinny-banner-SLFR@2x.png"
+                    "large": "/assets/skinny-banner-SLFR.png"
                 },
                 "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
                 "table": {
@@ -324,8 +335,7 @@
                                             "Bubble can hold objects and will pop when the player clicks on them.",
                                             "Lava cancels out an equivalent amount of ice.",
                                             "Chains are unbreakable."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -337,8 +347,7 @@
                                         "actionPoints": [
                                             "The number of ice columns dictates in how many groups you have to divide lava into.",
                                             "An ice column that is lowered under the ground level indicates it received too much lava."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -351,8 +360,7 @@
                                             "The number of ice columns dictates in how many groups you have to divide lava into.",
                                             "An ice column that is lowered under the ground level indicates it received too much lava.",
                                             "Lava blocks don't need to have the same shape represent equal quantities of lava."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -365,8 +373,7 @@
                                             "White lines represent the whole.",
                                             "Smoke always hides lava behind it.",
                                             "The symbol over smoke represents the lava part of the whole."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -378,8 +385,7 @@
                                         "actionPoints": [
                                             "The number of red blocks over the black line represent the number of lava parts behind the smoke.",
                                             "The shapes drawn in white under the black line represent the whole these parts are compared to. They indicate how that whole is divided."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -391,8 +397,7 @@
                                         "actionPoints": [
                                             "The number over the black line represents the number of parts of a divided whole.",
                                             "The number under the black line represents in how many parts the whole was divided."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -401,7 +406,6 @@
                                     "description": "A student repeated a particular level often in a series that explores different ways to divide a whole into equal parts.",
                                     "whatNow": {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them why some ways of dividing blocks don't seem to work.",
-                                        "actionPoints": [],
                                         "summary": "See if they can figure out by themselves that a whole needs to be split in equal parts to nullify shapes with fractions on them."
                                     }
                                 },
@@ -414,8 +418,7 @@
                                         "actionPoints": [
                                             "A fraction 1/B is the quantity formed by 1 part when a whole is partitioned into B equal parts.",
                                             "A fraction A/B is the quantity formed by a parts of size 1/B."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -424,7 +427,6 @@
                                     "description": "A student repeated a particular level often in a series that explores ways to divide a shape that resembles a pie chart.",
                                     "whatNow": {
                                         "intro": "Join the student during play, talking through his or her choices.",
-                                        "actionPoints": [],
                                         "summary": "Ask them about the different quantities they can make out of a circle."
                                     }
                                 },
@@ -437,8 +439,7 @@
                                         "actionPoints": [
                                             "Doubling the numerator doubles the quantity (2/6 is two times bigger than 1/6).",
                                             "Doubling the denominator divides the quantity in half (2/6 is half of 2/3)."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -447,7 +448,6 @@
                                     "description": "A student repeated a particular level often in a series that have students manipulate fractions with different denominators to find out which ones are equivalent.",
                                     "whatNow": {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them why blocks that have different numbers on them can be of the same quantity.",
-                                        "actionPoints": [],
                                         "summary": "See if they can figure out by themselves that 1/3 is the same as 2/6, because splitting a shape in 3 and taking one piece is the same as splitting it in 6 and taking 2 pieces."
                                     }
                                 },
@@ -457,7 +457,6 @@
                                     "description": "A student repeated a particular level often in a series that offers different contexts in which to use equivalent fractions.",
                                     "whatNow": {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them why blocks that have different numbers on them can be of the same quantity.",
-                                        "actionPoints": [],
                                         "summary": "See if they can figure out by themselves that 1/3 is the same as 2/6, because splitting a shape in 3 and taking one piece is the same as splitting it in 6 and taking 2 pieces."
                                     }
                                 },
@@ -470,8 +469,7 @@
                                         "actionPoints": [
                                             "Fractions with the same denominator should be ordered by using the numerator in ascending order.",
                                             "Fractions with the same numerator should be ordered by using the denominator in descending order."
-                                        ],
-                                        "summary": ""
+                                        ]
                                     }
                                 },
                                 {
@@ -480,7 +478,6 @@
                                     "description": "A student repeated a particular level often in a series that makes students deduct the value of the parts of a whole based on the information that is available to them.",
                                     "whatNow": {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them how they can deduct the quantity hidden behind question marks.",
-                                        "actionPoints": [],
                                         "summary": "See if they can figure out by themselves that the total quantity of a whole shape is 1, therefore all parts in it need to add up to that total."
                                     }
                                 },
@@ -490,7 +487,6 @@
                                     "description": "A student repeated a particular level often in a series that explores the notion of subtracting quantities from 1.",
                                     "whatNow": {
                                         "intro": "Join the student during play, talking through his or her choices. Ask them how they can predict the quantity of ice or lava they will need to arrive at the desired fraction.",
-                                        "actionPoints": [],
                                         "summary": "See if they can figure out by themselves by how much they should reduce ice or lava blocks before using them to nullify the blocks on the ground."
                                     }
                                 }
@@ -532,23 +528,18 @@
                 ],
                 "slideshow": [
                     {
-                        "type": "image",
                         "url": "/assets/SliceFractions-carousel-1.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SliceFractions-carousel-2.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SliceFractions-carousel-3.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SliceFractions-carousel-4.png"
                     },
                     {
-                        "type": "image",
                         "url": "/assets/SliceFractions-carousel-5.png"
                     }
                 ]
@@ -635,6 +626,11 @@
                                         "name": "CCSS.MATH.CONTENT.3.NF.A.3",
                                         "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
                                         "description": "Know that one fraction is X times bigger than 1"
+                                    },
+                                    {
+                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
+                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
+                                        "description": "Know that one fraction is X times bigger than 1"
                                     }
                                 ]
                             },
@@ -669,16 +665,6 @@
                                 ]
                             },
                             {
-                                "name": "Size comparison",
-                                "list": [
-                                    {
-                                        "name": "CCSS.MATH.CONTENT.3.NF.A.3",
-                                        "link": "http://www.corestandards.org/Math/Content/3/NF/A/3/",
-                                        "description": "Know that one fraction is X times bigger than 1"
-                                    }
-                                ]
-                            },
-                            {
                                 "name": "Subtraction",
                                 "list": [
                                     {
@@ -696,91 +682,41 @@
                         "category": "Texas Essential Knowledge and Skills: Math",
                         "groups": [
                             {
-                                "name": "",
                                 "list": [
                                     {
                                         "name": "TEKS.MATH.2.3",
-                                        "link": "",
                                         "description": "The student applies mathematical process standards to recognize and represent fractional units and communicates how they are used to name parts of a whole."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.3.3.A",
-                                        "link": "",
                                         "description": "Represent fractions greater than zero and less than or equal to one with denominators of 2, 3, 4, 6, and 8 using concrete objects and pictorial models, including strip diagrams and number lines."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.3.3.C",
-                                        "link": "",
                                         "description": "Explain that the unit fraction 1/b represents the quantity formed by one part of a whole that has been partitioned into b equal parts where b is a non-zero whole number."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.3.3.D",
-                                        "link": "",
                                         "description": "Compose and decompose a fraction a/b with a numerator greater than zero and less than or equal to b as a sum of parts 1/b."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.3.3.E",
-                                        "link": "",
                                         "description": "Solve problems involving partitioning an object or a set of objects among two or more recipients using pictorial representations of fractions with denominators of 2, 3, 4, 6, and 8."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.3.3.F",
-                                        "link": "",
                                         "description": "Represent equivalent fractions with denominators of 2, 3, 4, 6, and 8 using a variety of objects and pictorial models, including number lines."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.3.3.G",
-                                        "link": "",
                                         "description": "Explain that two fractions are equivalent if and only if they are both represented by the same point on the number line or represent the same portion of a same size whole for an area model."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.3.3.H",
-                                        "link": "",
                                         "description": "Compare two fractions having the same numerator or denominator in problems by reasoning about their sizes and justifying the conclusion using symbols, words, objects, and pictorial models."
-                                    }
-                                ]
-                            },
-                            {
-                                "name": "",
-                                "list": [
+                                    },
                                     {
                                         "name": "TEKS.MATH.4.3.E",
-                                        "link": "",
                                         "description": "Represent and solve addition and subtraction of fractions with equal denominators using objects and pictorial models that build to the number line and properties of operations."
                                     }
                                 ]
@@ -818,7 +754,7 @@
             },
             "research": {
                 "order": 4,
-                "enabled": false,
+                "enabled": true,
                 "authRequired": true,
                 "id": "research",
                 "title": "Research",

@@ -81,7 +81,6 @@ function glassLabLogin(req, res, next) {
         .then(function(user){
             this.requestUtil.jsonResponse(res, user);
 
-            console.log(' this.stats.increment("info", "user.login"); ');
             this.stats.increment("info", "user.login");
 
             // for DAU -- Daily Active Users stats
@@ -132,6 +131,16 @@ return when.promise(function(resolve, reject) {
             return;
         }
 
+        if ('app-archiver' === this.options.services.name) {
+            if (user.role !== lConst.role.admin) {
+                this.stats.increment("error", "Route.Login.Auth");
+                reject({ message: _.merge( {key:"user.login.invalid"}, info ), code: 401 });
+                return;
+            }
+            
+            user.archiver = true;
+        }
+        
         resolve(user);
     }.bind(this));
 

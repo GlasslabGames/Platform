@@ -13,6 +13,8 @@ module.exports = {
     getGameReports:             getGameReports,
     getGameMissions:            getGameMissions,
     saveAssessmentResults:      saveAssessmentResults,
+    getDeveloperGameSubmissionTarget: getDeveloperGameSubmissionTarget,
+    getGameInfoFromSubmissionTarget: getGameInfoFromSubmissionTarget,
     approveDeveloperGame:       approveDeveloperGame,
     rejectDeveloperGame:        rejectDeveloperGame,
     requestInfoDeveloperGame:   requestInfoDeveloperGame
@@ -268,6 +270,55 @@ function saveAssessmentResults(req, res){
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "SaveAssessment.Catch");
         }.bind(this) );
+}
+
+
+function getDeveloperGameSubmissionTarget(req, res) {
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    if ( !(this.options.gameDevelopers &&
+        this.options.gameDevelopers.submissionAPI &&
+        this.options.gameDevelopers.submissionAPI.destination))
+    {
+        console.errorExt("DashService", "getDeveloperGameSubmissionTarget Error - destination not configured");
+        this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        return;
+    }
+
+    this.requestUtil.jsonResponse(res, {url: this.options.gameDevelopers.submissionAPI.destination});
+}
+
+function getGameInfoFromSubmissionTarget(req, res) {
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    if ( !(this.options.gameDevelopers &&
+        this.options.gameDevelopers.submissionAPI &&
+        this.options.gameDevelopers.submissionAPI.destination))
+    {
+        console.errorExt("DashService", "getGameInfoFromSubmissionTarget Error - destination not configured");
+        this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        return;
+    }
+
+    var gameId = req.params.gameId.toUpperCase();
+    var url = this.options.gameDevelopers.submissionAPI.destination
+        + "/api/v2/dash/developer/info/game/"+gameId;
+
+    this.requestUtil.request(url)
+        .then(function(data) {
+            this.requestUtil.jsonResponse(res, data);
+        }.bind(this))
+        .catch(function(err) {
+            this.requestUtil.errorResponse(res, {key:"dash.general"},500);
+        }.bind(this));
 }
 
 

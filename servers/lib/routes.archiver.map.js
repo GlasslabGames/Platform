@@ -871,7 +871,6 @@ module.exports = {
                 get: "getUserDataByEmail",
             }
         },
-           /*
         {
             api: "/api/v2/auth/login/glasslab",
             service: "auth",
@@ -880,7 +879,6 @@ module.exports = {
                 post: "glassLabLogin"
             }
         },
-            */
         {
             api: "/api/v2/auth/login/status",
             service: "auth",
@@ -1032,6 +1030,24 @@ module.exports = {
             controller: "inspector",
             method: {
                 get: "runMonitor"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/monitor/run",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "runMonitor"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/monitor/report",
+            service: "monitor",
+            controller: "inspector",
+            method: {
+                get: "monitorReport"
             }
         },
         {
