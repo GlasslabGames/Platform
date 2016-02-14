@@ -4,8 +4,9 @@ var Util   = require('../../core/util.js');
 var lConst = require('../../lms/lms.const.js');
 
 module.exports = {
-    sendBatchTelemetryV2: sendBatchTelemetryV2,
-    eventsCount:          eventsCount
+    sendBatchTelemetryV2:			sendBatchTelemetryV2,
+    EventsCount:					eventsCount,
+    reportSummarizeStartSessions:	reportSummarizeStartSessions
 };
 
 /*
@@ -71,4 +72,8 @@ function eventsCount(req, res, next, serviceManager){
         console.trace("Collector: Events Count Error -", err);
         this.stats.increment("error", "EventsCount.Catch");
     }
+}
+
+function reportSummarizeStartSessions( req, res, next, serviceManager ) {
+	
 }

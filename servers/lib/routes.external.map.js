@@ -87,6 +87,16 @@ module.exports = {
         },
         {
             requireAuth: true,
+            requireHttps: true,
+            api: "/api/v2/data/events/report/:gameId/:fromDate/:toDate/sumStartSessions",
+            service: "data",
+            controller: "events",
+            method: {
+                get: "reportSummarizeStartSessions"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/data/game/device",
             service: "data",
             controller: "game",
