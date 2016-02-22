@@ -60,6 +60,9 @@ function getReport(req, res, next) {
                 if(reportId == 'sowo') {
                     _getSOWO.call(this, req, res, reportId, gameId, courseId);
                 }
+                else if(reportId == 'progress') {
+                    _getGameProgress.call(this, req, res, reportId, gameId, courseId);
+                }
                 else if(reportId == 'achievements') {
                     _getAchievements.call(this, req, res, reportId, gameId, courseId);
                 }
@@ -191,6 +194,87 @@ function _getSOWO(req, res, reportId, gameId, courseId) {
                     this.requestUtil.jsonResponse(res, outList);
                 }.bind(this) );
         }.bind(this) );
+}
+
+
+function _getGameProgress(req, res, reportId, gameId, courseId) {
+    var assessmentId = reportId;
+    var currentAssessmentData;
+    var outAssessmentData;
+    var assessment;
+    this.getGameAssessmentInfo(gameId)
+        .then(function (results) {
+            //console.log("getGameAssessmentInfo results", results);
+            if (!results) {
+                return;
+            }
+            assessment = results;
+            var lmsService = this.serviceManager.get("lms").service;
+            return lmsService.getStudentsOfCourse(courseId);
+        }.bind(this))
+        .then(function (users) {
+            //console.log("getStudentsOfCourse", users);
+            if (!users) {
+                return;
+            }
+
+            var outList = [];
+            var userMap = {};
+            var promiseList = [];
+            //console.log("assessmentId", assessmentId);
+
+            //get Standards data per game per user
+            users.forEach(function (user) {
+                var userId = user.id;
+
+                var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                    .then(function (assessmentData) {
+                        if (!assessmentData || !assessmentData.results) {
+                            return;
+                        }
+
+                        currentAssessmentData = assessmentData;
+
+
+
+                        for (var i = 0; i < assessment.length; i++) {
+                            //console.log("assessment[i].id", assessment[i].id);
+                            if (assessment[i].id === assessmentId) {
+
+                                outAssessmentData = {};
+                                outAssessmentData.gameId = gameId;
+                                outAssessmentData.userId = userId;
+                                outAssessmentData.assessmentId = assessmentId;
+                                outAssessmentData.results = currentAssessmentData.results;
+
+                                break;
+                            }
+                        }
+
+                        outList.push(outAssessmentData);
+
+                    }.bind(this))
+                    .then(null, function (err) {
+                        console.errorExt("DashService", "getGameProgress Error 1 -", err);
+                    }.bind(this));
+
+                promiseList.push(p);
+            }.bind(this));
+
+            when.all(promiseList)
+                .then(function () {
+                    this.requestUtil.jsonResponse(res, outList);
+                }.bind(this))
+                .then(null, function (err) {
+                    // give some error code
+                    console.errorExt("DashService", "getGameProgress Error 2 -", err);
+                    this.requestUtil.errorResponse(res, {key: "dash.general"});
+                }.bind(this));
+        }.bind(this))
+        .then(null, function (err) {
+            console.errorExt("DashService", "getGameProgress Error 3 -", err);
+            this.requestUtil.errorResponse(res, {key: "dash.general"});
+        }.bind(this));
 }
 
 
