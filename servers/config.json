@@ -248,7 +248,7 @@
             },
             "couchbase": {
                 "host":     "localhost:8091",
-                "protocol": "https",
+                "protocol": "http",
                 "username": "Administrator",
                 "password": "glasslab"
             },
@@ -263,20 +263,20 @@
                 "external_max_errors_reported": 100,
                 "internal_max_errors_reported": 100,
                 "archiver_max_errors_reported": 100,
-                "external_max_cpu_usage": 0.5,
-                "internal_max_cpu_usage": 0.5,
-                "archiver_max_cpu_usage": 0.5
+                "external_max_cpu_usage": 1,
+                "internal_max_cpu_usage": 1,
+                "archiver_max_cpu_usage": 1
             }
         },
         "alert": {
             "email": {
                 "to":   "accounts@glasslabgames.org",
-                "from": "Monitor Server <monitor@glasslabgames.org>",
+                "from": "Monitor Server <build@glasslabgames.org>",
                 "transport": {
                     "service": "Gmail",
                     "auth": {
-                        "user": "monitor@glasslabgames.org",
-                        "pass": "--ReplaceInCustomConfig--"
+                        "user": "build@glasslabgames.org",
+                        "pass": "glasslab"
                     }
                 }
             }

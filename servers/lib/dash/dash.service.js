@@ -134,7 +134,7 @@ function _buildLicPackages(){
             if(!gameInfo) {
                 return;
             }
-            if(!gameInfo.packages){
+            if(!gameInfo.packages && gameInfo.gameId !== "TEST"){
                 console.warnExt("DashService", "_buildLicPackages - gameInfo does not have packages defined", gameInfo.gameId);
                 return;
             }
