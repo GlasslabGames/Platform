@@ -145,7 +145,7 @@ function _getPlanInternal(req, res, userId, licenseId, licenseOwnerId, callback)
         output["studentSeatsRemaining"] = license["student_seats_remaining"];
         output["educatorSeatsRemaining"] = license["educator_seats_remaining"];
         output["expirationDate"] = license["expiration_date"];
-        output["autoRenew"] = license["auto_renew"] === 1 ? true : false;
+        output["autoRenew"] = license["auto_renew"] === 1;
         output["promoCode"] = license["promo"];
         output["institutionId"] = license["institution_id"] ? license["institution_id"] : 0;
 
@@ -191,7 +191,7 @@ function _getPlanInternal(req, res, userId, licenseId, licenseOwnerId, callback)
         return this.myds.getInstructorsByLicense(licenseId);
     }.bind(this))
     .then(function(instructors){
-        if(typeof instructors === "license"){
+        if(typeof instructors === "string"){
             return instructors;
         }
         delete instructors.id;
@@ -666,10 +666,10 @@ function upgradeLicense(req, res){
 
     var completionInfo = { complete: "email" };
 
-    _doUpgradeLicense.call(this, req, res, userId, licenseId, planInfo, stripInfo, emailData, completionInfo);
+    _doUpgradeLicense.call(this, req, res, userId, licenseId, planInfo, stripeInfo, emailData, completionInfo);
 }
 
-function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, emailData, completionInfo) {
+function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripeInfo, emailData, completionInfo) {
     lConst = lConst || this.serviceManager.get("lic").lib.Const;
 
     var instructors;
@@ -721,18 +721,13 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
             if ( oldSeats.studentSeats > newSeats.studentSeats ) {
                 return "downgrade seats";
             }
+            if (planInfo.yearAdded) {
+                var expDate = new Date(license["expiration_date"]);
+                expDate.setFullYear(expDate.getFullYear() + 1);
+                planInfo.expDate = expDate;
+            }
             if (completionInfo.admin) {
-                if (!planInfo.yearAdded) {
-                    return {};
-                }
-
-                var oldDate = new Date(license["expiration_date"]);
-                var expDate = oldDate.setFullYear(oldDate.getFullYear() + 1);
-                var updateFields = {
-                    active: 1,
-                    expiration_date: expDate
-                };
-                return this.myds.updateLicenseById(licenseId, updateFields);
+                return {};
             }
             var subscriptionId = license["subscription_id"];
             var autoRenew = license["auto_renew"] > 0;
@@ -761,6 +756,9 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
                 package_size_tier: planInfo.seats,
                 last_upgraded: new Date()
             };
+            if(planInfo.expDate) {
+                updateFields.expiration_date = planInfo.expDate;
+            }
             if(promoCode){
                 updateFields.promo = planInfo.promoCode;
             }
@@ -796,7 +794,7 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripInfo, ema
 
             if (completionInfo.complete === "email") {
                 instructors = status[3];
-                _upgradeLicenseEmailResponse.call(this, emailData.licenseOwnerEmail, instructors, emailData, completionInfo.req.protocol, completionInfo.req.headers.host);
+                _upgradeLicenseEmailResponse.call(this, emailData.licenseOwnerEmail, instructors, emailData, req.protocol, req.headers.host);
                 this.serviceManager.internalRoute('/api/v2/license/plan', 'get', [req, res]);
             } else if (completionInfo.complete === "callback") {
                 completionInfo.callback.call(this);
@@ -946,7 +944,7 @@ function alterLicense(req, res){
         var didSetInstitution = false;
 
         var upgradeCallback = function() {
-            this.requestUtil.jsonResponse(res, "ok", 200);
+            this.requestUtil.jsonResponse(res, {"upgrade":"ok"}, 200);
         }
 
         // did the plan change?
@@ -958,11 +956,6 @@ function alterLicense(req, res){
                 return;
             }
             
-            if (planInfo.type === 'trial') {
-                // if plan type wasn't set, default to chromebook
-                planInfo.type = 'chromebook';
-            }
-
             if (planInfo.type === 'trial') {
                 // if plan type wasn't set, default to chromebook
                 planInfo.type = 'chromebook';
@@ -1003,7 +996,7 @@ function alterLicense(req, res){
         }
 
         // debug
-        this.requestUtil.jsonResponse(res, "ok", 200);
+        this.requestUtil.jsonResponse(res, {"alter": "ok"}, 200);
     }.bind(this));
 }
 
@@ -1862,7 +1855,6 @@ function _preparePurchaseOrderInsert(userId, licenseId, purchaseOrderInfo, planI
     var current_package_size_tier = planInfo.seats;
     values.push( current_package_size_tier );
 
-    action = "'" + action + "'";
     values.push(action);
     var dateCreated = new Date();
     values.push(dateCreated);
