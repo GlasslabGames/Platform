@@ -173,7 +173,7 @@ function _getPlanInternal(req, res, userId, licenseId, licenseOwnerId, callback)
             } else{
                 output["canUpgrade"] = true;
             }
-        } else if(license["package_type"] === "trial"){
+        } else if(license["package_type"] === "trial" || license["package_type"] === "trialLegacy" ){
             output["canUpgrade"] = true;
         } else{
             output["canUpgrade"] = false;
@@ -725,6 +725,8 @@ function _doUpgradeLicense(req, res, userId, licenseId, planInfo, stripeInfo, em
                 var expDate = new Date(license["expiration_date"]);
                 expDate.setFullYear(expDate.getFullYear() + 1);
                 planInfo.expDate = expDate;
+            } else if (!completionInfo.admin && planInfo.expDate) {
+                delete planInfo.expDate;
             }
             if (completionInfo.admin) {
                 return {};
@@ -979,7 +981,8 @@ function alterLicense(req, res){
             _doSubscribeToLicenseInternal.call(this, userEmail, purchaseOrderInfo, planInfo, schoolInfo, { complete: "callback", callback: upgradeCallback }, req, res);
             return;
 
-        } else if (oldPlanInfo.packageDetails.planId !== planInfo.type || oldPlanInfo.packageDetails.seatId !== planInfo.seats || planInfo.yearAdded) {
+        } else if (oldPlanInfo.packageDetails.planId !== planInfo.type || oldPlanInfo.packageDetails.seatId !== planInfo.seats
+            || oldPlanInfo.expirationDate != planInfo.expDate || planInfo.yearAdded) {
             // premium change
 
             console.log("Admin did account upgrade of user " + licenseInfo.userId + " from " + oldPlanInfo.packageDetails.planId + "/" + oldPlanInfo.packageDetails.seatId + " to " + planInfo.type + "/" + planInfo.seats + (planInfo.yearAdded ? " w/year added" : "") + " on " + (new Date()) + " from IP " + ip + ", admin id " + req.user.id);
