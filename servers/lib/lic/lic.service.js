@@ -197,11 +197,11 @@ function _unassignPremiumGames(courseId, archived){
                 var dashService = this.serviceManager.get("dash").service;
                 var promiseList = [];
                 _(games).forEach(function(game, gameId){
-                    promiseList.push(dashService.getGameBasicInfo(gameId))
+                    promiseList.push(dashService.getGameBasicInfo(gameId)
                         .catch(function() {
                             // deleted game
                             return {gameId: gameId};
-                        });
+                        }));
                 });
                 return when.all(promiseList);
             }.bind(this))
