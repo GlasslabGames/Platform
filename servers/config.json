@@ -224,8 +224,8 @@
             "app": {
                 "//": "for these servers, host can be a string or an array of strings",
                 "external": {
-                    "host":     [ "localhost" ],
-                    "protocol": "https"
+                    "host":     [ "localhost:8001" ],
+                    "protocol": "http"
                 },
                 "internal": {
                     "host":     [ "localhost:8002" ],

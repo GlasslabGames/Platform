@@ -329,9 +329,9 @@ function runMonitor(req, res){
             // Send an alert email
             var emailData = {
                 subject: "Alert from monitor server",
-                to: mConst.email,
+                to: this.options.monitor.alert.email.to,
                 data: { messages: allErrors },
-                host: req.protocol + "://" + req.headers.host
+                host: os.hostname()
             };
             var email = new Util.Email(
                 this.options.monitor.alert.email,
