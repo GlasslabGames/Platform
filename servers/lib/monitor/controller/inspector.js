@@ -114,15 +114,15 @@ exampleOut.monitorReport =
     }
 };
 function monitorReport(req, res){
-    if( !req.session ||
-        !req.session.passport ||
-        !req.session.passport.user ||
-        !req.session.passport.user.role ||
-        !req.session.passport.user.role === "admin") {
-        
-        this.requestUtil.errorResponse(res, {key:"monitor.access.invalid"}, 401);
-        return;
-    }
+    //if( !req.session ||
+    //    !req.session.passport ||
+    //    !req.session.passport.user ||
+    //    !req.session.passport.user.role ||
+    //    !req.session.passport.user.role === "admin") {
+    //
+    //    this.requestUtil.errorResponse(res, {key:"monitor.access.invalid"}, 401);
+    //    return;
+    //}
 
     //console.log(JSON.stringify(this.workingdata.reports));
     

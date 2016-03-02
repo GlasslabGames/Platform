@@ -1042,7 +1042,6 @@ module.exports = {
             }
         },
         {
-            requireAuth: true,
             api: "/api/v2/monitor/report",
             service: "monitor",
             controller: "inspector",

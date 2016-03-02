@@ -263,9 +263,9 @@
                 "external_max_errors_reported": 100,
                 "internal_max_errors_reported": 100,
                 "archiver_max_errors_reported": 100,
-                "external_max_cpu_usage": 1,
-                "internal_max_cpu_usage": 1,
-                "archiver_max_cpu_usage": 1
+                "external_max_cpu_usage": 3,
+                "internal_max_cpu_usage": 3,
+                "archiver_max_cpu_usage": 3
             }
         },
         "alert": {
