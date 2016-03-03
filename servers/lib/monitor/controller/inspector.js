@@ -328,7 +328,7 @@ function runMonitor(req, res){
         if (allErrors.length > 0) {
             // Send an alert email
             var emailData = {
-                subject: "Alert from monitor server",
+                subject: "Alert From Monitor Server",
                 to: this.options.monitor.alert.email.to,
                 data: { messages: allErrors },
                 host: os.hostname()
