@@ -34,6 +34,7 @@ function LicService(options, serviceManager) {
         this.myds        = new LicStore(this.options.lic.datastore.mysql);
         this.cbds        = new LicDataStore(this.options.lic.datastore.couchbase);
         this.stats       = new Util.Stats(this.options, "Lic");
+        this.cronEnabled = !!this.options.lic.cron.time;
         this.cron        = new CronJob(this.options.lic.cron.time, _cronTask.bind(this));
         this.serviceManager = serviceManager;
 
@@ -77,7 +78,9 @@ return when.promise(function(resolve, reject) {
                 this.stats.increment("error", "Couchbase.Connect");
             }.bind(this))
         .then(function () {
-            this.cron.start();
+            if (this.cronEnabled) {
+                this.cron.start();
+            }
         }.bind(this))
         .then(resolve, reject);
 // ------------------------------------------------
