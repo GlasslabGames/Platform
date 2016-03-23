@@ -1300,6 +1300,15 @@ module.exports = {
         },
         {
             requireAuth: true,
+            api: "/api/v2/research/game/:gameId/dev-game-report",
+            service: "research",
+            controller: "events",
+            method: {
+                get: "getDeveloperGameReport"
+            }
+        },
+        {
+            requireAuth: true,
             api: "/api/v2/research/game/:gameId/urls",
             service: "research",
             controller: "events",
