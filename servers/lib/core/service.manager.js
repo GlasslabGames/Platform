@@ -895,12 +895,14 @@ ServiceManager.prototype.start = function(port) {
 
                 .then(null, function(err){
                     console.errorExt("ServiceManager", "Service Error -", err);
+                    process.exit(1);
                 }.bind(this));
 
         }.bind(this))
         // catch all
         .then(null, function(err){
             console.errorExt("ServiceManager", "Start Error -", err);
+            process.exit(1);
         }.bind(this));
 };
 
