@@ -11,6 +11,7 @@ var _         = require('lodash');
 var when      = require('when');
 var guard     = require('when/guard');
 var couchbase = require('couchbase');
+var moment    = require('moment');
 // load at runtime
 var Util;
 
@@ -318,6 +319,37 @@ ResearchDS_Couchbase.prototype.updateArchiveInfo = function(data){
     var archiveKey = 'gd:archiveInfo';
     return when.promise(function(resolve, reject){
         this.client.set(archiveKey, data, function(err, results){
+            if(err){
+                reject(err);
+            }
+            resolve();
+        }.bind(this));
+    }.bind(this));
+};
+
+
+ResearchDS_Couchbase.prototype.getCachedDevGameReport = function(gameId, date){
+    var key = 'gr:'+gameId+':'+moment(date).format("YYYY-MM-DD");
+    return when.promise(function(resolve, reject){
+        this.client.get(key, function(err, results){
+            if(err){
+                if(err.code == 13) {
+                    resolve();
+                    return;
+                }
+                reject(err);
+                return;
+            }
+            var archiveInfo = results.value;
+            resolve(archiveInfo);
+        }.bind(this))
+    }.bind(this));
+};
+
+ResearchDS_Couchbase.prototype.cacheDevGameReport = function(gameId, date, data){
+    var key = 'gr:'+gameId+':'+moment(date).format("YYYY-MM-DD");
+    return when.promise(function(resolve, reject){
+        this.client.set(key, data, function(err, results){
             if(err){
                 reject(err);
             }

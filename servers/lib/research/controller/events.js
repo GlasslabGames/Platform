@@ -11,6 +11,7 @@ var TOTALEVENTS = 0;
 var runningArchive = false;
 
 module.exports = {
+    getDeveloperGameReport: getDeveloperGameReport,
     getEventsByDate: getEventsByDate,
     archiveEvents: archiveEvents,
     stopArchive: stopArchive,
@@ -721,6 +722,187 @@ function swapDateFormatForCSV(key){
     }
 }
 
+function getDeveloperGameReport(req, res, next) {
+    if( !( req.params &&
+        req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, {key: "research.gameId.missing"});
+        return;
+    }
+    var gameId = req.params.gameId;
+    gameId = gameId.toUpperCase();
+
+    console.logExt("Research", "getDeveloperGameReport", gameId);
+
+    _checkForGameAccess.call(this, req.user.id, gameId, req.user.role)
+        .then(function(result){
+            console.logExt("Research", "getDeveloperGameReport _checkForGameAccess", result);
+            if(!result){
+                return when.reject({key: "research.access.invalid"});
+            }
+
+            var today = moment();
+
+            return this.store.getCachedDevGameReport(gameId, today)
+                .then(function(result) {
+                    if(result) {
+                        return result;
+                    }
+
+                    var startDate = moment(today).subtract(31, 'days');
+                    var endDate = moment(today).subtract(1, 'days');
+
+                    return this.store.getEventsByGameIdDate(gameId, startDate.startOf('day').toArray(), endDate.endOf('day').toArray())
+                        .then(function(events) {
+
+                            var dailyActiveUsersMap = {};
+                            var userEventsMap = {};
+                            var eventsBySubcategory = {};
+
+                            events.forEach(function(event) {
+                                var date = moment(event.serverTimeStamp).format('YYYY-MM-DD');
+                                var userId = event.userId;
+
+                                if (!dailyActiveUsersMap[date]) {
+                                    dailyActiveUsersMap[date] = {};
+                                }
+                                dailyActiveUsersMap[date][userId] = true;
+
+                                if (!userEventsMap[userId]) {
+                                    userEventsMap[userId] = [];
+                                }
+
+                                event._time = moment(event.clientTimeStamp).format('YYYY-MM-DD HH:mm:ss');
+
+                                if (event.eventData["Basetype"] === "Unit_Start") {
+                                    userEventsMap[userId].push(event);
+                                } else if (event.eventData["Basetype"] === "Unit_End") {
+                                    userEventsMap[userId].push(event);
+                                }
+                            }.bind(this));
+
+                            _.map(userEventsMap, function(userEvents, userId) {
+                                return userEvents.sort(function(a, b) {return a.clientTimeStamp - b.clientTimeStamp;});
+                            });
+
+
+                            var progressData = {
+                                totalTime: 0,
+                                events: []
+                            };
+
+                            _.forEach(userEventsMap, function(userEvents) {
+
+                                var trackedEventType;
+                                var trackedEventId;
+                                var trackedEventStartTime;
+                                var trackedEventDuration;
+                                var lastUnitStart;
+
+                                for (i = 0; i < userEvents.length; i++) {
+
+                                    var event = userEvents[i];
+
+                                    var subcategory = event.eventData["Subcategory"]; // Unit name
+                                    var unitId = event.eventData["Current_unitID_main"];
+                                    var mainResult = event.eventData["Result_main"]; // success/fail
+
+                                    if (!subcategory || !unitId) {
+                                        continue;
+                                    }
+
+                                    if (!eventsBySubcategory[subcategory]) {
+                                        eventsBySubcategory[subcategory] = {
+                                            start: 0, completed: 0, success: 0, fail: 0,
+                                            totalTime: 0, durations: [], playerLastStart: 0
+                                        };
+                                    }
+
+                                    if (event.eventData["Basetype"] === "Unit_Start") {
+
+                                        lastUnitStart = trackedEventType = subcategory;
+                                        trackedEventId = unitId;
+                                        trackedEventStartTime = event.clientTimeStamp;
+
+                                        eventsBySubcategory[subcategory].start++;
+
+                                    } else if (event.eventData["Basetype"] === "Unit_End") {
+
+                                        if (trackedEventType === subcategory
+                                            && trackedEventId === unitId) {
+
+                                            trackedEventDuration = event.clientTimeStamp - trackedEventStartTime;
+
+                                            progressData.events.push({
+                                                type: trackedEventType,
+                                                id: trackedEventId,
+                                                duration: trackedEventDuration
+                                            });
+                                            progressData.totalTime += trackedEventDuration;
+
+                                            eventsBySubcategory[subcategory].totalTime += trackedEventDuration;
+                                            eventsBySubcategory[subcategory].durations.push(trackedEventDuration);
+                                            eventsBySubcategory[subcategory].completed++;
+                                            if (mainResult) {
+                                                if (mainResult.match(/^success/i)) {
+                                                    eventsBySubcategory[subcategory].success++;
+                                                } else if (mainResult.match(/^fail/i)) {
+                                                    eventsBySubcategory[subcategory].fail++;
+                                                }
+                                            }
+
+                                            // reset tracked fields
+                                            trackedEventType = undefined;
+                                            trackedEventId = undefined;
+                                            trackedEventStartTime = undefined;
+
+                                        }
+                                    }
+                                }
+
+                                if (lastUnitStart && eventsBySubcategory[lastUnitStart]) {
+                                    eventsBySubcategory[lastUnitStart].playerLastStart++;
+                                }
+                            });
+
+                            _.forEach(eventsBySubcategory, function(data, subcategory) {
+                                var durations = data.durations;
+                                delete(data.durations);
+
+                                data.avgTime = Math.round(data.totalTime / durations.length);
+
+                                durations.sort(function(a, b) {return a - b;});
+
+                                if(durations.length % 2) {
+                                    data.medianTime = durations[Math.round((durations.length - 1) / 2)];
+                                } else {
+                                    var medianIndex = Math.round(durations.length / 2);
+                                    data.medianTime = Math.round((durations[medianIndex] + durations[medianIndex - 1]) / 2);
+                                }
+
+                            });
+
+                            dailyActiveUsersMap = _.mapValues(dailyActiveUsersMap, function(date) {
+                                return _.keys(date).length;
+                            });
+
+                            var results = {DAU: dailyActiveUsersMap, units: eventsBySubcategory};
+
+                            this.store.cacheDevGameReport(gameId, today, results)
+
+                            return results;
+                        }.bind(this));
+                }.bind(this));
+
+        }.bind(this))
+        .then(function (results) {
+            this.requestUtil.jsonResponse(res, results);
+        }.bind(this))
+        .catch(function (err) {
+            console.errorExt("Research", "getDeveloperGameReport Error", err);
+            this.requestUtil.errorResponse(res, err, 500);
+        }.bind(this));
+}
+
 function getEventsByDate(req, res, next){
 
     try {
@@ -761,126 +943,6 @@ function getEventsByDate(req, res, next){
         var saveToFile = false;
         if(req.query.saveToFile) {
             saveToFile = (req.query.saveToFile === "true" ? true : false);
-        }
-
-        // If queryArchivesOnly flags is true, don't pull data from DB.
-        // Instead fetch file from archives on AWS.
-        if (this.options.research.queryArchivesOnly) {
-            if(req.query.startDate) {
-                startDate = req.query.startDate;
-                // if starts with " then strip "s
-                if(startDate.charAt(0) == '"') {
-                    startDate = startDate.substring(1, startDate.length-1);
-                }
-            }
-            if(!startDate) {
-                this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
-                return;
-            }
-            if(req.query.endDate) {
-                endDate = req.query.endDate;
-                // if starts with " then strip "s
-                if(endDate.charAt(0) == '"') {
-                    endDate = endDate.substring(1, endDate.length-1);
-                }
-            }
-            if(!endDate) {
-                this.requestUtil.errorResponse(res, {key: "research.endDate.missing"}, 401);
-                return;
-            }
-
-            var tempDate = startDate.split('T');
-            if (tempDate.length == 1) {
-                tempDate = startDate.split(' ');
-            }
-            startDate = tempDate[0];
-            var startMoment = moment(startDate);
-            var curMoment = startMoment.clone();
-            tempDate = endDate.split('T');
-            if (tempDate.length == 1) {
-                tempDate = endDate.split(' ');
-            }
-            endDate = tempDate[0];
-            var endMoment = moment(endDate);
-
-            return when.promise(function(resolve, reject) {
-                _checkForGameAccess.call(this, req.user.id, gameId, req.user.role)
-                    .then(function(state){
-                        if(!state) return "invalid";
-
-                        var keyList = [];
-
-                        function getSignedUrlsForParser(){
-                            var year = curMoment.format("YYYY");
-                            var month = curMoment.format("MM");
-                            var dayString = curMoment.format("DD")
-                            var fileString = gameId + '_' + year + "-" + month + '-';
-                            dayString = fileString + dayString;
-                            var pathParams = ['archives', (this.options.research.s3PathPrefix || this.options.env), gameId, year, month, dayString];
-                            this.serviceManager.awss3.getSignedKeys('csv', pathParams, false)
-                            .then(function(keys){
-                                keys.forEach(function(key){
-                                    keyList.push(key);
-                                });
-                                
-                                if(curMoment.isBefore(endMoment)){
-                                    curMoment.add(1, "days");
-                                    getSignedUrlsForParser.call(this);
-                                } else {
-                                    var promiseList = [];
-                                    keyList.forEach(function(key){
-                                        promiseList.push(this.serviceManager.awss3.getS3Object(key));
-                                    }.bind(this));
-                                    when.all(promiseList)
-                                    .then(function(outList) {
-                                        var pruneHdr = false;
-                                        var workList = [];
-                                        var totalEvents = 0;
-                                        outList.forEach(function(data){
-                                            // Internet comments say split is fastest than regex
-                                            // to do this test and we need the result array
-                                            // in most cases anyway.
-                                            var lines = data.split("\n");
-                                            totalEvents += lines.length - 1;
-                                            if (pruneHdr) {
-                                                workList.push(lines.splice(1, lines.length - 1).join("\n"));
-                                            } else {
-                                                workList.push(data);
-                                            }
-                                            pruneHdr = true;
-                                        });
-                                  
-                                        var outData = workList.join("\n");
-                                        if (saveToFile) {
-                                            var file = gameId
-                                                + "_" + startMoment.format("YYYY-DD-MM")
-                                                + "_" + endMoment.format("YYYY-DD-MM")
-                                                + ".csv";
-                                            this.requestUtil.downloadResponse(res, outData, file, 'text/csv');
-                                        } else {
-                                            this.requestUtil.jsonResponse(res, {
-                                                numEvents: totalEvents,
-                                                data: outData
-                                            });
-                                        }
-                                        resolve();
-                                    }.bind(this));
-                                }
-                            }.bind(this))
-                            .then(null, function(err){
-                                reject(err);
-                                this.requestUtil.errorResponse(res, err, 401);
-                            }.bind(this));
-                        }
-                        getSignedUrlsForParser.call(this);
-                    }.bind(this))
-                    // catch all
-                    .then(null, function (err) {
-                        console.trace("Research: Process Events -", err);
-                        this.requestUtil.errorResponse(res, {error: err});
-                        reject(err);
-                    }.bind(this));
-            }.bind(this));
         }
 
         var startDate = moment({hour: 0});
@@ -967,6 +1029,138 @@ function getEventsByDate(req, res, next){
         //endDate.minute(59);
         //endDate.seconds(59);
         endDate = endDate.utc();
+
+        console.log(startDate);
+
+        // If queryArchivesOnly flags is true, don't pull data from DB.
+        // Instead fetch file from archives on AWS.
+        if (false && this.options.research.queryArchivesOnly) {
+            if(req.query.startDate) {
+                startDate = req.query.startDate;
+                // if starts with " then strip "s
+                if(startDate.charAt(0) == '"') {
+                    startDate = startDate.substring(1, startDate.length-1);
+                }
+            }
+            console.log(startDate);
+            if(!startDate) {
+                this.requestUtil.errorResponse(res, {key: "research.startDate.missing"}, 401);
+                return;
+            }
+            if(req.query.endDate) {
+                endDate = req.query.endDate;
+                // if starts with " then strip "s
+                if(endDate.charAt(0) == '"') {
+                    endDate = endDate.substring(1, endDate.length-1);
+                }
+            }
+            if(!endDate) {
+                this.requestUtil.errorResponse(res, {key: "research.endDate.missing"}, 401);
+                return;
+            }
+
+            var tempDate = startDate.split('T');
+            if (tempDate.length == 1) {
+                tempDate = startDate.split(' ');
+            }
+            startDate = tempDate[0];
+            var startMoment = moment(startDate);
+            var curMoment = startMoment.clone();
+            tempDate = endDate.split('T');
+            if (tempDate.length == 1) {
+                tempDate = endDate.split(' ');
+            }
+            endDate = tempDate[0];
+            var endMoment = moment(endDate);
+
+            console.log(startDate, startMoment, endDate, endMoment);
+
+            return when.promise(function(resolve, reject) {
+                _checkForGameAccess.call(this, req.user.id, gameId, req.user.role)
+                    .then(function(state){
+                        if(!state) return "invalid";
+
+                        var keyList = [];
+
+                        function getSignedUrlsForParser(){
+                            var year = curMoment.format("YYYY");
+                            var month = curMoment.format("MM");
+                            var dayString = curMoment.format("DD")
+                            var fileString = gameId + '_' + year + "-" + month + '-';
+                            dayString = fileString + dayString;
+                            var pathParams = ['archives', (this.options.research.s3PathPrefix || this.options.env), gameId, year, month, dayString];
+                            this.serviceManager.awss3.getSignedKeys('csv', pathParams, false)
+                                .then(function(keys){
+                                    keys.forEach(function(key){
+                                        keyList.push(key);
+                                    });
+
+                                    if(curMoment.isBefore(endMoment)){
+                                        curMoment.add(1, "days");
+                                        getSignedUrlsForParser.call(this);
+                                    } else {
+
+
+
+                                        console.log(keyList);
+
+
+
+                                        var promiseList = [];
+                                        keyList.forEach(function(key){
+                                            promiseList.push(this.serviceManager.awss3.getS3Object(key));
+                                        }.bind(this));
+                                        when.all(promiseList)
+                                            .then(function(outList) {
+                                                var pruneHdr = false;
+                                                var workList = [];
+                                                var totalEvents = 0;
+                                                outList.forEach(function(data){
+                                                    // Internet comments say split is fastest than regex
+                                                    // to do this test and we need the result array
+                                                    // in most cases anyway.
+                                                    var lines = data.split("\n");
+                                                    totalEvents += lines.length - 1;
+                                                    if (pruneHdr) {
+                                                        workList.push(lines.splice(1, lines.length - 1).join("\n"));
+                                                    } else {
+                                                        workList.push(data);
+                                                    }
+                                                    pruneHdr = true;
+                                                });
+
+                                                var outData = workList.join("\n");
+                                                if (saveToFile) {
+                                                    var file = gameId
+                                                        + "_" + startMoment.format("YYYY-DD-MM")
+                                                        + "_" + endMoment.format("YYYY-DD-MM")
+                                                        + ".csv";
+                                                    this.requestUtil.downloadResponse(res, outData, file, 'text/csv');
+                                                } else {
+                                                    this.requestUtil.jsonResponse(res, {
+                                                        numEvents: totalEvents,
+                                                        data: outData
+                                                    });
+                                                }
+                                                resolve();
+                                            }.bind(this));
+                                    }
+                                }.bind(this))
+                                .then(null, function(err){
+                                    reject(err);
+                                    this.requestUtil.errorResponse(res, err, 401);
+                                }.bind(this));
+                        }
+                        getSignedUrlsForParser.call(this);
+                    }.bind(this))
+                    // catch all
+                    .then(null, function (err) {
+                        console.trace("Research: Process Events -", err);
+                        this.requestUtil.errorResponse(res, {error: err});
+                        reject(err);
+                    }.bind(this));
+            }.bind(this));
+        }
 
 
         var timeFormat = "MM/DD/YYYY HH:mm:ss:SSS";
