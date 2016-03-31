@@ -159,6 +159,9 @@ function ServiceManager(configFiles){
 
     this.services  = {};
     this.routeList = {};
+
+    this.lastSessionStoreConnectionTry = null;
+    this.sessionStoreConnectionRetryDelayMS = this.options.services.sessionStoreConnectionRetryDelayMS || 5000;
 }
 
 ServiceManager.prototype.loadVersionFile = function() {
@@ -278,18 +281,27 @@ return when.promise(function(resolve, reject) {
                             return next();
                         }
 
-                        tries ++;
+                        tries++;
 
                         if (tries > 1) {
-                            createSessionStoreConnectionPromise.call(self).then(function() {
-                                expressSessionMiddleWare = createMiddleWareSession.call(self);
+                            self.lastSessionStoreConnectionTry = self.lastSessionStoreConnectionTry || new Date();
+                            if (new Date() - self.lastSessionStoreConnectionTry > self.sessionStoreConnectionRetryDelayMS) {
+                                self.lastSessionStoreConnectionTry = new Date();
+                                console.errorExt("ServiceManager", "Creating new connection to session store, previous connection failed.");
+                                createSessionStoreConnectionPromise.call(self).then(function() {
+                                    expressSessionMiddleWare = createMiddleWareSession.call(self);
 
-                                expressSessionMiddleWare(req, res, lookupSession);
-                            });
+                                    expressSessionMiddleWare(req, res, lookupSession);
+                                });
+                            }
+                            else {
+                                console.warnExt("ServiceManager", "Skipping Creating new connection to session store due to delay.");
+                                var error = new Error("Unable to obtain session");
+                                return next(error);
+                            }
                         } else if (tries > 2) {
                             //usually don't get here but safety valve to stop infinite loop
-                            console.errorExt("ServiceManager", "Session Connect Error -", err2);
-                            var error = new Error("Unable to obtain session");
+                            var error = new Error("Unable to obtain session, made it past 2 tries.");
                             console.errorExt("ServiceManager", "Session Error -", error);
                             return next(error);
                         } else {
