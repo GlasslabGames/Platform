@@ -216,106 +216,103 @@ return when.promise(function(resolve, reject) {
 
             this.app = express();
             this.app.set('port', process.env.PORT || this.options.services.port);
-            // process.env.PORT not used here
 
-            //this.app.configure(function() {
-
-                this.app.use(function (req, res, next) {
-                    res.removeHeader("X-Powered-By");
-                    next();
-                }); 
             this.setupWebAppRoutes();
             // process.env.PORT not used here
 
-                this.app.use(Util.GetMorganLogger(this.options, this.stats));
-                
-                this.app.use(compression());
-                this.app.use(function (req, res, next) {
-                    // console.log("no-op");
-                    next();
+            this.app.use(function (req, res, next) {
+                res.removeHeader("X-Powered-By");
+                next();
+            });
+
+            this.app.use(Util.GetMorganLogger(this.options, this.stats));
+
+            this.app.use(compression());
+            this.app.use(function (req, res, next) {
+                // console.log("no-op");
+                next();
+            });
+
+            this.app.use(cookieParser());
+            this.app.use(bodyParser.urlencoded({limit: "500kb", extended: false}));
+            this.app.use(bodyParser.json({limit: "500kb"}));
+            this.app.use(methodOverride());
+
+            var acceptAll = this.options.services.cors.acceptAll || false;
+            var whitelist = this.options.services.cors.whitelist || [];
+            var corsOptions = {
+                origin: function( origin, callback ) {
+                    var originIsWhitelisted = acceptAll || whitelist.indexOf( origin ) !== -1;
+                    callback( null, originIsWhitelisted );
+                },
+                credentials: true
+            };
+            this.app.use( cors(corsOptions) );
+
+            function createMiddleWareSession() {
+                return expressSession({
+                    secret: this.options.services.session.secret || "keyboard kitty",
+                    cookie: _.merge({
+                        path: this.options.services.session.cookie.path || '/'
+                        , httpOnly : this.options.services.session.cookie.httpOnly || false
+                        //, maxAge: 1000 * 60 * 24 // 24 hours
+                    }, this.options.services.session.cookie),
+                    store:  this.exsStore, resave: true, saveUninitialized: true
                 });
-              
-                this.app.use(cookieParser());
-                this.app.use(bodyParser.urlencoded({limit: "500kb", extended: false}));
-                this.app.use(bodyParser.json({limit: "500kb"}));
-                this.app.use(methodOverride());
-                
-                var acceptAll = this.options.services.cors.acceptAll || false;
-                var whitelist = this.options.services.cors.whitelist || [];
-                var corsOptions = {
-                    origin: function( origin, callback ) {
-                        var originIsWhitelisted = acceptAll || whitelist.indexOf( origin ) !== -1;
-                        callback( null, originIsWhitelisted );
-                    },
-                    credentials: true
-                };
-                this.app.use( cors(corsOptions) );
+            }
 
-                function createMiddleWareSession() {
-                    return expressSession({
-                        secret: this.options.services.session.secret || "keyboard kitty",
-                        cookie: _.merge({
-                            path: this.options.services.session.cookie.path || '/'
-                            , httpOnly : this.options.services.session.cookie.httpOnly || false
-                            //, maxAge: 1000 * 60 * 24 // 24 hours
-                        }, this.options.services.session.cookie),
-                        store:  this.exsStore, resave: true, saveUninitialized: true
-                    });
-                }
+            var expressSessionMiddleWare = createMiddleWareSession.call(this);
+            var self = this;
 
-                var expressSessionMiddleWare = createMiddleWareSession.call(this);
-                var self = this;
+            this.app.use(function (req, res, next) {
+                var tries = 0;
 
-                this.app.use(function (req, res, next) {
-                    var tries = 0;
-
-                    var lookupSession = function(err) {
-                        if (err) {
-                            if (err.code && err.code === 27) {
-                                console.errorExt("ServiceManager", "Session Connect Error -", err);
-                            }
-                            //return next(err); until client is modified to handle this return we should go with old behavior
-                            return next();
-
+                var lookupSession = function(err) {
+                    if (err) {
+                        if (err.code && err.code === 27) {
+                            console.errorExt("ServiceManager", "Session Connect Error -", err);
                         }
+                        //return next(err); until client is modified to handle this return we should go with old behavior
+                        return next();
 
-                        if (req.session !== undefined) {
-                            return next();
+                    }
+
+                    if (req.session !== undefined) {
+                        return next();
+                    }
+
+                    tries++;
+
+                    if (tries > 1) {
+                        self.lastSessionStoreConnectionTry = self.lastSessionStoreConnectionTry || new Date();
+                        if (new Date() - self.lastSessionStoreConnectionTry > self.sessionStoreConnectionRetryDelayMS) {
+                            self.lastSessionStoreConnectionTry = new Date();
+                            console.errorExt("ServiceManager", "Creating new connection to session store, previous connection failed.");
+                            createSessionStoreConnectionPromise.call(self).then(function() {
+                                expressSessionMiddleWare = createMiddleWareSession.call(self);
+
+                                expressSessionMiddleWare(req, res, lookupSession);
+                            });
                         }
-
-                        tries++;
-
-                        if (tries > 1) {
-                            self.lastSessionStoreConnectionTry = self.lastSessionStoreConnectionTry || new Date();
-                            if (new Date() - self.lastSessionStoreConnectionTry > self.sessionStoreConnectionRetryDelayMS) {
-                                self.lastSessionStoreConnectionTry = new Date();
-                                console.errorExt("ServiceManager", "Creating new connection to session store, previous connection failed.");
-                                createSessionStoreConnectionPromise.call(self).then(function() {
-                                    expressSessionMiddleWare = createMiddleWareSession.call(self);
-
-                                    expressSessionMiddleWare(req, res, lookupSession);
-                                });
-                            }
-                            else {
-                                console.warnExt("ServiceManager", "Skipping Creating new connection to session store due to delay.");
-                                var error = new Error("Unable to obtain session");
-                                return next(error);
-                            }
-                        } else if (tries > 2) {
-                            //usually don't get here but safety valve to stop infinite loop
-                            var error = new Error("Unable to obtain session, made it past 2 tries.");
-                            console.errorExt("ServiceManager", "Session Error -", error);
+                        else {
+                            console.warnExt("ServiceManager", "Skipping Creating new connection to session store due to delay.");
+                            var error = new Error("Unable to obtain session");
                             return next(error);
-                        } else {
-                            expressSessionMiddleWare(req, res, lookupSession);
                         }
-                    };
+                    } else if (tries > 2) {
+                        //usually don't get here but safety valve to stop infinite loop
+                        var error = new Error("Unable to obtain session, made it past 2 tries.");
+                        console.errorExt("ServiceManager", "Session Error -", error);
+                        return next(error);
+                    } else {
+                        expressSessionMiddleWare(req, res, lookupSession);
+                    }
+                };
 
-                    lookupSession();
-                });
+                lookupSession();
+            });
 
-                resolve();
-            //}.bind(this))
+            resolve();
         }.bind(this))
         // catch all errors
         .then(null, reject);
