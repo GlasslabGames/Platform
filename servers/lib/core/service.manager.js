@@ -224,6 +224,8 @@ return when.promise(function(resolve, reject) {
                     res.removeHeader("X-Powered-By");
                     next();
                 }); 
+            this.setupWebAppRoutes();
+            // process.env.PORT not used here
 
                 this.app.use(Util.GetMorganLogger(this.options, this.stats));
                 
@@ -350,9 +352,6 @@ ServiceManager.prototype.setupRoutes = function() {
 
     // static routes from map
     this.setupStaticRoutes();
-
-    // webapp routes
-    this.setupWebAppRoutes();
 
     // final default routes
     this.setupDefaultRoutes();
