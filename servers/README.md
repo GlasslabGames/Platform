@@ -176,6 +176,9 @@ OSX Installation
 
 9. Installation Complete
 
+10. Your couchbase db will be empty so you'll want to get game data in there. You currently hit emdpoints with a "magic" code which is a constant in module consts files.
+    For example to populate the games views you'll need to hit this endpoint: "/api/v2/dash/migrate/:code" and for code you'll need to pull it from Platform/servers/lib/dash/dash.const.js
+
 OSX Reboot
 ----------
 1. Not sure if shell environment is properly restored on reboot, so:
