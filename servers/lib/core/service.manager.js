@@ -216,9 +216,9 @@ return when.promise(function(resolve, reject) {
 
             this.app = express();
             this.app.set('port', process.env.PORT || this.options.services.port);
+            // process.env.PORT not used here
 
             this.setupWebAppRoutes();
-            // process.env.PORT not used here
 
             this.app.use(function (req, res, next) {
                 res.removeHeader("X-Powered-By");
