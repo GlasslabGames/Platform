@@ -284,8 +284,7 @@ return when.promise(function(resolve, reject) {
                     tries++;
 
                     if (tries > 1) {
-                        self.lastSessionStoreConnectionTry = self.lastSessionStoreConnectionTry || new Date();
-                        if (new Date() - self.lastSessionStoreConnectionTry > self.sessionStoreConnectionRetryDelayMS) {
+                        if (!self.lastSessionStoreConnectionTry || new Date() - self.lastSessionStoreConnectionTry > self.sessionStoreConnectionRetryDelayMS) {
                             self.lastSessionStoreConnectionTry = new Date();
                             console.errorExt("ServiceManager", "Creating new connection to session store, previous connection failed.");
                             createSessionStoreConnectionPromise.call(self).then(function() {
