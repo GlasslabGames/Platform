@@ -22,6 +22,7 @@ fi
 # stop then start
 #forever stop ${SCRIPT}
 forever start \
+--spinSleepTime 2000 \
 -a \
 -l ${LOG_DIR}/${NAME}.log \
 ${SCRIPT}

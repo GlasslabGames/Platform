@@ -270,7 +270,7 @@ return when.promise(function(resolve, reject) {
     if (password.length >= 6 && password.match(this.upperCaseRegEx) && password.match(this.numberRegEx)) {
         resolve(password);
     } else {
-        reject({"error": "Password too weak", "exception": err}, 500);
+        reject({"error": "Password too weak."}, 500);
     }
 }.bind(this));
 // end promise wrapper
