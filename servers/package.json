@@ -1,6 +1,6 @@
 {
   "name": "Platform-Services",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "private": true,
   "dependencies": {
     "aws-sdk": "2.0.x",
@@ -49,6 +49,7 @@
     "serve-favicon": "2.3.x",
     "serve-index": "1.7.x",
     "serve-static": "1.10.x",
+    "shrinkwrap": "^0.4.0",
     "statsd": "0.7.x",
     "stripe": "3.x.x",
     "time": "^0.11.0",
@@ -61,7 +62,7 @@
   },
   "devDependencies": {
     "chai": "*",
-    "grunt": "*",
+    "grunt": "0.4.5",
     "grunt-git-describe": "*",
     "grunt-mocha": "*",
     "grunt-mocha-test": "*",
