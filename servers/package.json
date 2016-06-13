@@ -55,22 +55,23 @@
     "time": "^0.11.0",
     "validator": "2.0.x",
     "vhost": "3.0.x",
-    "when": "2.7.x"
-  },
-  "optionalDependencies": {
-    "hiredis": "0.1.x"
-  },
-  "devDependencies": {
+    "when": "2.7.x",
+    "grunt-mocha-test": "*",
     "chai": "*",
     "grunt": "0.4.5",
     "grunt-git-describe": "*",
     "grunt-mocha": "*",
-    "grunt-mocha-test": "*",
     "istanbul": "^0.3.0",
     "mail-listener2": "^0.1.7",
     "mocha": "*",
     "superagent": "^0.18.2",
     "supertest": "^1.0.1"
+  },
+  "optionalDependencies": {
+    "hiredis": "0.1.x"
+  },
+  "devDependencies": {
+
   },
   "scripts": {
     "test": "grunt"
