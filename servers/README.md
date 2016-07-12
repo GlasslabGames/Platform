@@ -46,6 +46,7 @@ OSX Installation
   * Use NPM to install forever process manager globally
   ```sh
   $ sudo npm install forever -g
+  ```
 
 4. Install **MySQL**
    1. Use Brew to install MySQL
@@ -161,16 +162,19 @@ OSX Installation
            4. 11211   Client interface (proxy)
 
 7. Setup your config overrides and email access
-   Copy 'Platform/scripts/sample.hydra.config.json' to '~/hydra.config.json'.
 
-   In the 'hydra.config.json' you placed in your root dir '~/', change <user> to your user account name in auth.email.transport:
-    "auth": {
-        "email": {
-             "from": "<accounts@glasslabgames.org>",
-             "transportMethod": "PICKUP",
-             "transport": "/Users/<user>/tmpmail"
+   1. Copy 'Platform/scripts/sample.hydra.config.json' to '~/hydra.config.json'.
+
+   2. In the 'hydra.config.json' you placed in your root dir '~/', change <user> to your user account name in auth.email.transport:
+        ```sh
+        "auth": {
+            "email": {
+                 "from": "<accounts@glasslabgames.org>",
+                 "transportMethod": "PICKUP",
+                 "transport": "/Users/<user>/tmpmail"
+             }
          }
-     }
+         ```
 
 8. Ensure that xcode is installed (used for building node_modules, must be up to date with OS-X)
 
@@ -188,6 +192,7 @@ OSX Reboot
   * Use NPM to install forever process manager globally
   ```sh
   $ sudo npm install forever -g
+  ```
 
 3. Ensure that Couchbase is up and running.
   * Launch from Launchpad
@@ -259,7 +264,7 @@ Linux (Ubuntu 12.04) Installation
 
 Running the app
 ---------------
-1. Start/Stop/Restart servies
+1. Start/Stop/Restart services
   * To start services run the following command:
   ```sh
   $ sudo ./service.sh start
