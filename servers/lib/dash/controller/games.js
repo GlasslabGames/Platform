@@ -716,13 +716,13 @@ function getAllDeveloperGamesAwaitingApproval(req, res){
             return [];
         }.bind(this))
         .then(function(results) {
-            var games = { };
+            var games = [];
             for (var i=0;i<results.length;) {
                 var did = results[i][0];
                 var game = results[i++][1];
                 game.organization = results[i++];
                 game.basic = results[i++].basic;
-                games[did] = game;
+                games.push(game);
             }
             this.requestUtil.jsonResponse(res, games);
         }.bind(this))
@@ -758,13 +758,13 @@ function getAllDeveloperGamesRejected(req, res){
             return [];
         }.bind(this))
         .then(function(results) {
-            var games = { };
+            var games = [];
             for (var i=0;i<results.length;) {
                 var did = results[i][0];
                 var game = results[i++][1];
                 game.organization = results[i++];
                 game.basic = results[i++].basic;
-                games[did] = game;
+                games.push(game);
             }
             this.requestUtil.jsonResponse(res, games);
         }.bind(this))

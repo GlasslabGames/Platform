@@ -345,11 +345,12 @@ function approveDeveloperGame(req, res) {
     
     var dashService = this.serviceManager.get("dash").service;
     var gameData;
-    
+
     this.telmStore.getGameInformation(gameId)
         .then(function(data) {
             gameData = data;
             gameData.basic.visible = true;
+            // console.log("Dash: approveDeveloperGame getGameInformation - ", {gameId: gameId, gameData: gameData, url: url});
             return this.requestUtil.request(url, gameData);
         }.bind(this))
         .then(function(results) {
@@ -360,19 +361,22 @@ function approveDeveloperGame(req, res) {
             if (isSelf) {
                 return gameData;
             }
+            // console.log("Dash: approveDeveloperGame updateGameInformation - ", {gameId: gameId, gameData: gameData });
             return dashService.telmStore.updateGameInformation(gameId, gameData);
         }.bind(this))
         .then(function(results) {
             if (results && results.basic !== undefined) {
+                // console.log("Dash: approveDeveloperGame setDeveloperGameStatus - ", {gameId: gameId, userId: userId });
                 return dashService.telmStore.setDeveloperGameStatus(gameId, 0, userId, dConst.gameApproval.status.approved);
             }
             return results; // pass along error
         }.bind(this))
         .then(function(results) {
             if (results && results.status !== undefined) {
+                // console.log("Dash: approveDeveloperGame sendDeveloperGameApprovedEmail - ", {gameId: gameId});
                 sendDeveloperGameApprovedEmail.call(this, gameId, req.protocol, req.headers.host);
               
-                console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
+                // console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
                 this.requestUtil.jsonResponse(res, {status: "ok"});
             } else {
                 console.errorExt("DashService", "approveDeveloperGame Error - ", result);
@@ -395,7 +399,7 @@ function rejectDeveloperGame(req, res) {
         this.options.gameDevelopers.submissionAPI &&
         this.options.gameDevelopers.submissionAPI.destination))
     {
-        console.errorExt("DashService", "approveDeveloperGame Error - destination not configured");
+        console.errorExt("DashService", "rejectDeveloperGame Error - destination not configured");
         this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         return;
     }
@@ -447,12 +451,12 @@ function rejectDeveloperGame(req, res) {
                 console.log("Dash: approveDeveloperGame Result - ", {update: "complate"});
                 this.requestUtil.jsonResponse(res, {status: "ok"});
             } else {
-                console.errorExt("DashService", "approveDeveloperGame Error - ", result);
+                console.errorExt("DashService", "rejectDeveloperGame Error - ", result);
                 this.requestUtil.errorResponse(res, {key:"dash.general"},500);
             }
         }.bind(this))
         .catch(function(err) {
-            console.errorExt("DashService", "approveDeveloperGame Error - ", err);
+            console.errorExt("DashService", "rejectDeveloperGame Error - ", err);
             this.requestUtil.errorResponse(res, {key:"dash.general"},500);
         }.bind(this));
 }
