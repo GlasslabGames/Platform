@@ -9,10 +9,13 @@ module.exports = {
     connect: connect
 };
 
+
 // http://127.0.0.1:8001/api/v2/data/config/SC
 //
 function index(req, res, next, serviceManager)
 {
+    Util.Request.noCache(res);
+
     gameId = "SC";
     if( req.params &&
         req.params.hasOwnProperty("gameId") ) {
@@ -71,6 +74,8 @@ function index(req, res, next, serviceManager)
 // http://127.0.0.1:8001/sdk/connect
 function connect(req, res, next)
 {
+    Util.Request.noCache(res);
+
     // protocol and host
     var protocol = "http://";
     var host = req.headers.host;

@@ -78,6 +78,7 @@ exampleIn.getGameData = {
 };
 function getGameData(req, res, next)
 {
+    Util.Request.noCache(res);
     // route requireAuth ensures "session.passport.user" exists
     var userId = req.session.passport.user.id;
 
@@ -281,6 +282,8 @@ function postTotalTimePlayed(req, res, next) {
 
 function getGamePlayInfo(req, res, next)
 {
+    Util.Request.noCache(res);
+
     if( !req.body ) {
         this.requestUtil.errorResponse(res, { status: "error", error: "User Preference data missing", key: "missing.data"});
         return;

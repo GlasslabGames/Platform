@@ -35,6 +35,13 @@ RequestUtil.prototype.getFullHostUrl = function(req) {
     return protocal + req.headers.host;
 };
 
+// add no cache headers to HttpServerResponse
+RequestUtil.prototype.noCache = function (res) {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+    res.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+    res.setHeader("Expires", "-1"); // Proxies.
+};
+
 RequestUtil.prototype.errorResponse = function(res, obj, code){
     // default 400 error code
     if(!code) { code = 400; }

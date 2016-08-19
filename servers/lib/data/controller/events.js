@@ -43,6 +43,7 @@ function sendBatchTelemetryV2(req, outRes, next){
 // http://localhost:8001/api/v2/data/eventsCount
 function eventsCount(req, res, next, serviceManager){
     try {
+        Util.Request.noCache(res);
         // TODO: replace this with DB lookup, return promise
         var dash = serviceManager.get("dash").service;
 
