@@ -75,12 +75,18 @@ var sdkTestSuite = function (env, data, routeMap, logLevel) {
 				.get(srvAddr + routes.sdk.connect.path)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
+					expect(res.headers).to.have.property("cache-control", "no-cache, no-store, must-revalidate");
+					expect(res.headers).to.have.property("pragma", "no-cache");
+					expect(res.headers).to.have.property("expires", "-1");
 					expect(res.text).to.eql(data.serverAddress);
-				
+
 					agent
 						.get(srvAddr + routes.sdk.config.path)
 						.end(function (res) {
 							expect(res.status).to.eql(200);
+							expect(res.headers).to.have.property("cache-control", "no-cache, no-store, must-revalidate");
+							expect(res.headers).to.have.property("pragma", "no-cache");
+							expect(res.headers).to.have.property("expires", "-1");
 							expect(res.text).to.contain("eventsMaxSize");
 							expect(res.text).to.contain("eventsMinSize");
 							expect(res.text).to.contain("eventsPeriodSecs");
@@ -94,12 +100,18 @@ var sdkTestSuite = function (env, data, routeMap, logLevel) {
 				.get(srvAddr + routes.sdk.connect.path)
 				.end(function (res) {
 					expect(res.status).to.eql(200);
+					expect(res.headers).to.have.property("cache-control", "no-cache, no-store, must-revalidate");
+					expect(res.headers).to.have.property("pragma", "no-cache");
+					expect(res.headers).to.have.property("expires", "-1");
 					expect(res.text).to.eql(data.serverAddress);
 				
 					agent
 						.get(srvAddr + routes.sdk.config.path)
 						.end(function (res) {
 							expect(res.status).to.eql(200);
+							expect(res.headers).to.have.property("cache-control", "no-cache, no-store, must-revalidate");
+							expect(res.headers).to.have.property("pragma", "no-cache");
+							expect(res.headers).to.have.property("expires", "-1");
 							expect(res.text).to.contain("eventsMaxSize");
 							expect(res.text).to.contain("eventsMinSize");
 							expect(res.text).to.contain("eventsPeriodSecs");
@@ -160,6 +172,9 @@ var sdkTestSuite = function (env, data, routeMap, logLevel) {
                         .type('application/json')
                         .end(function (res) {
                             expect(res.status).to.eql(200);
+							expect(res.headers).to.have.property("cache-control", "no-cache, no-store, must-revalidate");
+							expect(res.headers).to.have.property("pragma", "no-cache");
+							expect(res.headers).to.have.property("expires", "-1");
                             expect(res.body).to.have.ownProperty("totalTimePlayed");
                             totalTimePlayed = res.body.totalTimePlayed;
                             done();
@@ -229,6 +244,9 @@ var sdkTestSuite = function (env, data, routeMap, logLevel) {
                         .type('application/json')
                         .end(function (res) {
                             expect(res.status).to.eql(200);
+							expect(res.headers).to.have.property("cache-control", "no-cache, no-store, must-revalidate");
+							expect(res.headers).to.have.property("pragma", "no-cache");
+							expect(res.headers).to.have.property("expires", "-1");
                             expect(res.body).to.have.ownProperty("playSessionId");
                             playSessionId = res.body.playSessionId;
                             done();
@@ -301,6 +319,9 @@ var sdkTestSuite = function (env, data, routeMap, logLevel) {
 				.type('application/json')
 				.end(function (res) {
 					expect(res.status).to.eql(200);
+					expect(res.headers).to.have.property("cache-control", "no-cache, no-store, must-revalidate");
+					expect(res.headers).to.have.property("pragma", "no-cache");
+					expect(res.headers).to.have.property("expires", "-1");
                     expect(res.body).to.eql(saveGameData);
 					done();
 				});
