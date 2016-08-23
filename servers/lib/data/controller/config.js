@@ -14,8 +14,6 @@ module.exports = {
 //
 function index(req, res, next, serviceManager)
 {
-    Util.Request.noCache(res);
-
     gameId = "SC";
     if( req.params &&
         req.params.hasOwnProperty("gameId") ) {
@@ -61,6 +59,7 @@ function index(req, res, next, serviceManager)
                 }.bind(this), defaultConfig);
 
                 p.then(function(config){
+                    this.requestUtil.noCache(res);
                     this.requestUtil.jsonResponse(res, config);
                 }.bind(this))
                     .then(null, function(err){
@@ -74,8 +73,6 @@ function index(req, res, next, serviceManager)
 // http://127.0.0.1:8001/sdk/connect
 function connect(req, res, next)
 {
-    Util.Request.noCache(res);
-
     // protocol and host
     var protocol = "http://";
     var host = req.headers.host;
@@ -94,6 +91,7 @@ function connect(req, res, next)
         }
     }
 
+    this.requestUtil.noCache(res);
     //send
     res.send( protocol + host );
 }

@@ -18,11 +18,10 @@ exampleOutput.startPlaySession = {
     playSessionId: '1234-5678-901235'
 };
 function startPlaySession(req, res){
-    Util.Request.noCache(res);
     var playSession = {
         playSessionId: Util.CreateUUID()
     };
-
+    this.requestUtil.noCache(res);
     this.requestUtil.jsonResponse(res, playSession);
     this.stats.increment("info", "StartPlaySession.Done");
 }
