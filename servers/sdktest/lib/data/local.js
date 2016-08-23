@@ -1,26 +1,26 @@
 module.exports = {
     
-    serverAddress: 'http://localhost',
+    serverAddress: 'http://localhost:8001',
 
     // gameId for MGO
-    testGameId: 'TEST',
+    testGameId: 'AA-1',
     
     // Manually generated test user
     teacher: {
         id: 286,
-        email: 'mrg@mrg.com',
-        pass:  'A1dack',
+        email: 'louis_teacher@concentricsky.com',
+        pass:  'Password1',
         testClass: {
-            id: 109,
-            title: "Xanadu",
-            grade: "5, 7",
-            code: "U8ADM"
+            id: 97,
+            title: "test class",
+            grade: "6",
+            code: "VH7K1"
         }
     },
     student: {
-        id: 274,
-        name: 'Alma',
-        pass:  'A1dack',
+        id: 262,
+        name: 'louis_student',
+        pass:  'Password1',
         deviceId: '274_Windows_MSIE',
         achievements: [{"group":"CCSS.ELA-Literacy.WHST.6-8.1","subGroup":"a","item":"Bot Champion","won":true},
                        {"group":"CCSS.ELA-Literacy.WHST.6-8.1","subGroup":"a","item":"Evidence Cadet","won":true},

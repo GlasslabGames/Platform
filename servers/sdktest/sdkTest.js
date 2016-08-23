@@ -12,8 +12,8 @@ var sdkTestSuite = require('./lib/sdkTestSuite.js'),
 //////////////////
 
 //var testENVs  = ["prod", "stage", "local", "dev"];  // NOTE - Since local will vary, not included by default.
-var testENVs  = ["stage", "prod"];  // DEBUG - use for testing in isloation
-//var testENVs  = ["local"];  // DEBUG - use for testing in isloation
+//var testENVs  = ["stage", "prod"];  // DEBUG - use for testing in isloation
+var testENVs  = ["local"];  // DEBUG - use for testing in isloation
 
 var logDebug = 0;   // NOTE - 0: quiet, 1: verbose
 

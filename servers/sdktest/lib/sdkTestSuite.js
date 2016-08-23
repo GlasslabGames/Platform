@@ -247,18 +247,69 @@ var sdkTestSuite = function (env, data, routeMap, logLevel) {
                         "gameId": data.testGameId,
                         "gameVersion": 1,
                         "deviceId": student.deviceId,
-                        "gameLevel": 1,
+                        //"gameLevel": 1,
                         "gameSessionId": gameSessionId,
                         "playSessionId": playSessionId,
                         "gameSessionEventOrder": 1,
                         "playSessionEventOrder": 1,
                         "totalTimePlayed": totalTimePlayed,
-                        "eventName": "sdk-test",
-                        "eventData": { "sdk-test": timeStamp }
+                        "eventName": "Set_up_battle",
+                        "eventData": { "sdk-test": timeStamp,"playerTurn": 1,
+							"success": 1 }
                         })
                     .end(function (res) {
                         expect(res.status).to.eql(200);
-                        done();
+						function sendEvent(i) {
+							if (i == 2) {
+								agent
+									.post(srvAddr + routes.sdk.saveTelemEvent.path)
+									.type('application/json')
+									.send({
+										"clientTimeStamp": timeStamp,
+										"gameId": data.testGameId,
+										"gameVersion": 1,
+										"deviceId": student.deviceId,
+										//"gameLevel": 1,
+										"gameSessionId": gameSessionId,
+										"playSessionId": playSessionId,
+										"gameSessionEventOrder": 1,
+										"playSessionEventOrder": 1,
+										"totalTimePlayed": totalTimePlayed,
+										"eventName": "Set_up_battle",
+										"eventData": {
+											"sdk-test": timeStamp, "playerTurn": 1,
+										}
+									})
+									.end(function (res) {
+										expect(res.status).to.eql(200);
+										done();
+									});
+								return;
+							}
+							agent
+								.post(srvAddr + routes.sdk.saveTelemEvent.path)
+								.type('application/json')
+								.send({
+									"clientTimeStamp": timeStamp,
+									"gameId": data.testGameId,
+									"gameVersion": 1,
+									"deviceId": student.deviceId,
+									//"gameLevel": 1,
+									"gameSessionId": gameSessionId,
+									"playSessionId": playSessionId,
+									"gameSessionEventOrder": 1,
+									"playSessionEventOrder": 1,
+									"totalTimePlayed": totalTimePlayed,
+									"eventName": "Finish_battle",
+									"eventData": { "quest": "Quest0-5",
+										"success": 1}
+								})
+								.end(function (res) {
+									expect(res.status).to.eql(200);
+									sendEvent(i+1);
+								});
+						}
+						sendEvent(0);
                     });
             } else {
                 done();

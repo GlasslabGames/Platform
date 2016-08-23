@@ -72,7 +72,8 @@ function requestAccess(name, email, passw) {
 		email:email.replace(/[^\w\.\@\+]/gi, ''),
 		school: 'glassLab',
 		password:passw,
-		role:"instructor"
+		role:"instructor",
+        state:"Oregon"
 	});
 }
 

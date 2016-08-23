@@ -1,20 +1,20 @@
 module.exports = {
     
-    serverAddress: 'http://localhost',
+    serverAddress: 'http://localhost:8001',
 
     // gameId for MGO
     testGameId: 'AA-1',
     
     // Manually generated test user
     teacher: {
-        userId: 6815,
-        email: 'build+manager@glasslabgames.org',
-        pass:  'glasslab123',
+        userId: 256,
+        email: 'louis+teacher@concentricsky.com',
+        pass:  'Password1',
         testClass: {
-            id: 1574,
-            title: "glTestClassSTATIC",
-            grade: "5, 7, 11",
-            code: "GXXGQ"
+            id: 97,
+            title: "test class",
+            grade: "6",
+            code: "VH7K1"
         }
     },
     student: {
