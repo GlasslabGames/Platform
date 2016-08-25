@@ -524,7 +524,7 @@ return when.promise(function(resolve, reject) {
                 } else if(data[0]["verify_code_status"] === "invited") {
                     resolve(data[0].id);
                 } else{
-                    reject({key:"user.notUnique.screenName"});
+                    reject({key:"user.notUnique.screenName", statusCode: 400});
                 }
             } else {
                 resolve();
