@@ -1,11 +1,11 @@
 {
     "basic": {
-        "gameId": "STANFORD-TA",
+        "gameId": "TeachableAgentsPR",
         "enabled": true,
         "visible": false,
         "maintenance": null,
-        "shortName": "",
-        "longName": "",
+        "shortName": "Teachable Agents",
+        "longName": "Teachable Agents",
         "grades": "",
         "subject": "",
         "type": "",
