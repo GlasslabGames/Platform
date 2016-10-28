@@ -75,6 +75,9 @@ function getReport(req, res, next) {
                 else if(reportId === "standards") {
                     _getStandards.call(this, req, res, reportId, gameId, courseId);
                 }
+                else if(reportId === "drk12_b") {
+                    _getStandards.call(this, req, res, reportId, gameId, courseId);
+                }
                 else {
                     this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
                 }
