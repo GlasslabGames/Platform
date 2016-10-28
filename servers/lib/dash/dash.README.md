@@ -144,11 +144,17 @@ Returns basic game info from all games that are currently in an instructor's cou
 
 Updates the _games object with the data stored in the Couchbase info (gi) and assessment (ga) documents, without needing to restart server.
 
- **migrateInfoFiles**
+**migrateInfoFiles**
 
 /api/v2/dash/migrate/:code
 
 Reads data from the info.json files, sends that information to couchbase, and repopulates the _games object without needing to restart server.
+
+**migrateSingleGameInfoFiles**
+
+/api/v2/dash/migrate/:gameName/:code
+
+Reads data from the info.json files for the specified game only, sends that information to couchbase, and repopulates the _games object without needing to restart server.
 
 **getDeveloperProfile**
 

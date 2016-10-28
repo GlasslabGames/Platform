@@ -346,6 +346,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/migrate/:gameName/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "migrateSingleGameInfoFiles"
+            }
+        },
+        {
             api: "/api/v2/dash/reload/:code",
             service: "dash",
             controller: "games",

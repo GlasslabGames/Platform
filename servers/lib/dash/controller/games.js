@@ -23,6 +23,7 @@ module.exports = {
     generateBadgeCode:               generateBadgeCode,
     badgeCodeAwarded:                badgeCodeAwarded,
     migrateInfoFiles:                migrateInfoFiles,
+    migrateSingleGameInfoFiles:      migrateSingleGameInfoFiles,
     replaceGameInfo:                 replaceGameInfo,
     uploadGameFile:                  uploadGameFile,
     getDeveloperProfile:             getDeveloperProfile,
@@ -520,6 +521,42 @@ function getMyGames(req, res) {
         console.trace("Reports: Get MyGames Error -", err);
         this.stats.increment("error", "GetMyGames.Catch");
     }
+}
+
+function migrateSingleGameInfoFiles(req, res) {
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    var gameName = req.params.gameName;
+
+    this._migrateSingleGame(gameName, true)
+        .then(function(){
+            return this._loadGameFiles();
+        }.bind(this))
+        .then(function(){
+            res.end('{"migration": "complete"}');
+        })
+        .then(null, function(err){
+            console.trace("Dash: Migrate Info Error -", err);
+            var error = {
+                migration: "failed",
+                error: err
+            };
+            res.end(JSON.stringify(error));
+            this.stats.increment("error", "MigrateInfo.Catch");
+        }.bind(this));
 }
 
 function migrateInfoFiles(req, res){
