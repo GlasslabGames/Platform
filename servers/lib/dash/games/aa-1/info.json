@@ -105,7 +105,59 @@
             "id": "drk12_b",
             "dataProcessScope": "all",
             "engine": "drk12",
-            "trigger": "activity"
+            "trigger": "activity",
+            "levels": {
+                "Advancing": {
+                    "name": "Advancing",
+                    "color": "green"
+                },
+                "NeedSupport": {
+                    "name": "Need support",
+                    "color": "yellow"
+                },
+                "NotAttempted": {
+                    "name": "Not yet attempted / Not enough data",
+                    "color": "gray"
+                },
+                "NotAvailable": {
+                    "name": "Not available",
+                    "color": "#00000000"
+                }
+            },
+            "skills": {
+                "connecting-evidence": {
+                    "name": "Connecting Evidence to Argument Schemes",
+                    "levels": {
+                        "Advancing": "Youth is advancing their skill in connecting claim-evidence pairs.",
+                        "NeedSupport": "Youth may need support understanding how to apply correct claim-evidence pairs.",
+                        "NotAttempted": "Youth needs to play more of the game to practice this skill."
+                    }
+                },
+                "supporting-claims": {
+                    "name": "Supporting Claims with Evidence",
+                    "levels": {
+                        "Advancing": "Youth is advancing their skill in supporting claims with evidence.",
+                        "NeedSupport": "Youth may need support understanding how to support claims with evidence",
+                        "NotAttempted": "Youth needs to play more of the game to practice this skill."
+                    }
+                },
+                "critical-questions": {
+                    "name": "Using Critical Questions",
+                    "levels": {
+                        "Advancing": "Youth is advancing their skill in using critical questions.",
+                        "NeedSupport": "Youth may need support understanding how to use critical questions.",
+                        "NotAttempted": "Youth needs to play more of the game to practice this skill."
+                    }
+                },
+                "using-backing": {
+                    "name": "Using Backing",
+                    "levels": {
+                        "Advancing": "Youth is advancing their skill in using backing.",
+                        "NeedSupport": "Youth may need support understanding how to use backing.",
+                        "NotAttempted": "Youth needs to play more of the game to practice this skill."
+                    }
+                }
+            }
         }
     ],
     "reports": {
