@@ -76,7 +76,7 @@ function getReport(req, res, next) {
                     _getStandards.call(this, req, res, reportId, gameId, courseId);
                 }
                 else if(reportId === "drk12_b") {
-                    _getStandards.call(this, req, res, reportId, gameId, courseId);
+                    _getDRK12_b.call(this, req, res, reportId, gameId, courseId);
                 }
                 else {
                     this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
@@ -793,3 +793,54 @@ function _getStandards(req, res, reportId, gameId, courseId) {
             this.requestUtil.errorResponse(res, { key: "dash.general"});
         }.bind(this));
 }
+
+
+function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
+
+    var lmsService = this.serviceManager.get("lms").service;
+
+    this.getGameAssessmentInfo(gameId).then(function(assessment) {
+
+        lmsService.getStudentsOfCourse(courseId).then(function(users) {
+            if (!users) return;
+
+            var studentPromises = _.map(users, function(user) {
+                var userId = user.id;
+
+                var p = this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                    .then(function(assessmentData) {
+                        if (!assessmentData || !assessmentData.results) return;
+
+                        var outAssessmentData = _.cloneDeep(assessmentData);
+
+
+                        return outAssessmentData
+                    }.bind(this));
+                return p;
+            }.bind(this));
+
+            when.all(studentPromises).then(function(studentAssessments) {
+
+                // TODO: calculate class skill levels
+                var _calculate_course_skill_average = function() {};
+                var _build_course_progress = function() {};
+                var courseSkills = _calculate_course_skill_average(studentAssessments);
+                var courseProgress = _build_course_progress(studentAssessments);
+
+                var report = {
+                    "gameId": gameId,
+                    "assessmentId": assessmentId,
+                    "timestamp": Util.GetTimeStamp(),
+                    "totalMissions": assessment.missionCount,
+                    "courseProgress": courseProgress,
+                    "courseSkillLevel": courseSkills,
+                    "students": studentAssessments
+                };
+
+                this.requestUtil.jsonResponse(res, report);
+            }.bind(this));
+        }.bind(this));
+
+    }.bind(this));
+}
+
