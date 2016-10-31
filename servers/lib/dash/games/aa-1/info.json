@@ -103,8 +103,8 @@
         {
             "enabled": true,
             "id": "drk12_b",
-            "dataProcessScope": "gameSession",
-            "engine": "drk12_b",
+            "dataProcessScope": "all",
+            "engine": "drk12",
             "trigger": "activity"
         }
     ],
