@@ -131,7 +131,8 @@
                         "Advancing": "Youth is advancing their skill in connecting claim-evidence pairs.",
                         "NeedSupport": "Youth may need support understanding how to apply correct claim-evidence pairs.",
                         "NotAttempted": "Youth needs to play more of the game to practice this skill."
-                    }
+                    },
+                    "missions": [3, 5, 6, 7, 8, 9, 10, 14, 17, 19, 21]
                 },
                 "supporting-claims": {
                     "name": "Supporting Claims with Evidence",
@@ -139,7 +140,8 @@
                         "Advancing": "Youth is advancing their skill in supporting claims with evidence.",
                         "NeedSupport": "Youth may need support understanding how to support claims with evidence",
                         "NotAttempted": "Youth needs to play more of the game to practice this skill."
-                    }
+                    },
+                    "missions": [5, 6, 10, 12, 14, 15, 17, 19, 21]
                 },
                 "critical-questions": {
                     "name": "Using Critical Questions",
@@ -147,7 +149,8 @@
                         "Advancing": "Youth is advancing their skill in using critical questions.",
                         "NeedSupport": "Youth may need support understanding how to use critical questions.",
                         "NotAttempted": "Youth needs to play more of the game to practice this skill."
-                    }
+                    },
+                    "missions": [12, 15, 17, 19, 21]
                 },
                 "using-backing": {
                     "name": "Using Backing",
@@ -155,7 +158,8 @@
                         "Advancing": "Youth is advancing their skill in using backing.",
                         "NeedSupport": "Youth may need support understanding how to use backing.",
                         "NotAttempted": "Youth needs to play more of the game to practice this skill."
-                    }
+                    },
+                    "missions": [12, 16, 17, 19, 20, 21]
                 }
             }
         }
