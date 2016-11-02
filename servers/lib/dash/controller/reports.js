@@ -2,6 +2,7 @@
 var _         = require('lodash');
 var when      = require('when');
 var lConst    = require('../../lms/lms.const.js');
+var Util      = require('../../core/util');
 //
 
 module.exports = {
@@ -831,7 +832,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                     "gameId": gameId,
                     "assessmentId": assessmentId,
                     "timestamp": Util.GetTimeStamp(),
-                    "totalMissions": assessment.missionCount,
+                    "totalMissions": 22,
                     "courseProgress": courseProgress,
                     "courseSkillLevel": courseSkills,
                     "students": studentAssessments
