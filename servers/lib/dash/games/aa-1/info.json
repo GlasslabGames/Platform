@@ -125,7 +125,7 @@
                 }
             },
             "skills": {
-                "connecting-evidence": {
+                "connectingEvidence": {
                     "name": "Connecting Evidence to Argument Schemes",
                     "levels": {
                         "Advancing": "Youth is advancing their skill in connecting claim-evidence pairs.",
@@ -134,7 +134,7 @@
                     },
                     "missions": [3, 5, 6, 7, 8, 9, 10, 14, 17, 19, 21]
                 },
-                "supporting-claims": {
+                "supportingClaims": {
                     "name": "Supporting Claims with Evidence",
                     "levels": {
                         "Advancing": "Youth is advancing their skill in supporting claims with evidence.",
@@ -143,16 +143,16 @@
                     },
                     "missions": [5, 6, 10, 12, 14, 15, 17, 19, 21]
                 },
-                "critical-questions": {
+                "criticalQuestions": {
                     "name": "Using Critical Questions",
                     "levels": {
                         "Advancing": "Youth is advancing their skill in using critical questions.",
-                        "NeedSupport": "Youth may need support understanding how to use critical questions.",
+                        "NeedSupport": "Youth may need suppo understanding how to use critical questions.",
                         "NotAttempted": "Youth needs to play more of the game to practice this skill."
                     },
                     "missions": [12, 15, 17, 19, 21]
                 },
-                "using-backing": {
+                "usingBacking": {
                     "name": "Using Backing",
                     "levels": {
                         "Advancing": "Youth is advancing their skill in using backing.",
