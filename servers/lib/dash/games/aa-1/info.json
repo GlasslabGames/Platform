@@ -109,11 +109,11 @@
             "quests": {
                 "Quest0-1": {
                     "mission": 1,
-                    "skills": [],
+                    "skills": []
                 },
                 "Quest0-2": {
                     "mission": 2,
-                    "skills": [],
+                    "skills": []
                 },
                 "Quest0-3": {
                     "mission": 3,
@@ -121,7 +121,7 @@
                 },
                 "Quest0-4": {
                     "mission": 4,
-                    "skills": [],
+                    "skills": []
                 },
                 "Quest0-5": {
                     "mission": 5,
@@ -169,7 +169,7 @@
                 },
                 "Quest23a": {
                     "mission": 16,
-                    "skills": ["usingBacking"],
+                    "skills": ["usingBacking"]
                 },
                 "Quest24": {
                     "mission": 17,
