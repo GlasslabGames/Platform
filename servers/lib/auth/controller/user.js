@@ -801,7 +801,21 @@ function registerUserV2(req, res, next, serviceManager) {
                     }.bind(this))
                     .then(null, function(err){
                         this.requestUtil.errorResponse(res, {key:"user.create.general"});
-                    }.bind(this));
+                    }.bind(this))
+                    .then(function(){
+                        // GLAS-426 Send the admin an alert email that a new developer is awaiting approval
+                        return sendDeveloperApprovalAdminAlertEmail.call(this, regData, req.protocol, req.headers.host);
+                    }.bind(this))
+                    // all ok
+                    .then(function(){
+                        this.requestUtil.jsonResponse(res, {});
+                    }.bind(this))
+                    // error
+                    .then(null, function(err){
+                        this.stats.increment("error", "Route.Register.User.notifyAdminEmail");
+                        console.errorExt("AuthService", "RegisterUserV2 -", err);
+                        this.requestUtil.errorResponse(res, {key:"user.create.general"}, 500);
+                    }.bind(this))
                 }
             }.bind(this))
             // catch all errors
@@ -1439,6 +1453,59 @@ function getAllDevelopers(req, res, next) {
             console.log("getAllDevelopers error:", err);
 			this.requestUtil.errorResponse(res, err);
 		}.bind(this))
+}
+
+function sendDeveloperApprovalAdminAlertEmail(regData, protocol, host) {
+    if( !(regData.email &&
+        _.isString(regData.email) &&
+        regData.email.length) ) {
+        this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 401);
+    }
+    if(this.options.env === "prod" || this.options.env === "stage"){
+        protocol = "https";
+    }
+
+    return this.getAuthStore().findUser('email', regData.email, false)
+        .then(function(userData) {
+
+            this.getAuthStore().findUser('SYSTEM_ROLE', ['admin'], false)
+                .then(function(adminData){
+                    for(var i = 0; i < adminData.length; i++) {
+                        var emailData = {
+                            subject: "GlassLab Games - A new developer is awaiting approval",
+                            to: adminData[i].email,
+                            user: userData,
+                            host: protocol + "://" + host,
+                            link: protocol + "://" + host + "/admin/developer-approval"
+                        };
+
+                        var email = new Util.Email(
+                            this.options.auth.email,
+                            path.join(__dirname, "../email-templates"),
+                            this.stats);
+                        return email.send('admin-approval-notify', emailData)
+                            .then(function () {
+                                // all ok
+                                return true;
+                            }.bind(this))
+                            // error
+                            .then(null, function (err) {
+                                console.errorExt("AuthService", 'failed to send email -', err);
+                            }.bind(this));
+                    }
+                }.bind(this));
+        }.bind(this))
+        // catch all errors
+        .then(null, function(err) {
+            if( err.error &&
+                err.error == "user not found") {
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.user.emailNotExist"}, 400);
+            } else {
+                console.errorExt("AuthService", "sendDeveloperApprovalAdminAlertEmail Error -", err);
+                this.requestUtil.errorResponse(res, {key:"user.verifyEmail.general"}, 400);
+            }
+        }.bind(this))
+
 }
 
 function sendVerifyEmail(regData, protocol, host) {
