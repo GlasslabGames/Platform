@@ -1310,7 +1310,8 @@ function alterDeveloperVerifyCodeStatus(req, res, next) {
 
     this.getAuthStore().findUser(field, value)
         .then(function(userData) {
-            if( userData.verifyCodeStatus !== req.body.status ) {
+            // Currently allows admins to resend developer verification emails more than once
+            if( userData.verifyCodeStatus !== req.body.status || req.body.status == aConst.verifyCode.status.sent) {
                 return when.resolve(userData);
             }
             else {
@@ -1330,7 +1331,14 @@ function alterDeveloperVerifyCodeStatus(req, res, next) {
             if(!userData) return; // no data so skip
 
             // send verification email to registered user, but not if request sent from another server
-            if (userData.verifyCodeStatus == aConst.verifyCode.status.approve && req.body.status == aConst.verifyCode.status.sent) {
+            if (
+                (userData.verifyCodeStatus == aConst.verifyCode.status.approve && req.body.status == aConst.verifyCode.status.sent ) ||
+                (
+                    // Resend verification email even if a verification email has already been resent
+                    (userData.verifyCodeStatus == aConst.verifyCode.status.sent || userData.verifyCodeStatus == aConst.verifyCode.status.resent) &&
+                    req.body.status == aConst.verifyCode.status.resent
+                )
+            ) {
 	            return sendDeveloperVerifyEmail.call(this, userData, req.protocol, req.headers.host, userData.verifyCode);
 	        } else {
 				userData.verifyCode = "NULL";
@@ -1360,7 +1368,7 @@ function getAllDevelopers(req, res, next) {
         return;
     }
 	
-	var result = { pending: [], approved: [] };
+	var result = { pending: [], approved: [], revoked: [], pendingVerification: [] };
     var dashService = this.serviceManager.get("dash").service;
 	var currentDev;
     
@@ -1404,8 +1412,24 @@ function getAllDevelopers(req, res, next) {
                 }
             }
 
-			return this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.verified);
+			return this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.revoked);
 		}.bind(this))
+        .then(function(revoked){
+            if (_.isArray(revoked)) {
+                result.revoked = revoked;
+            }
+
+            return this.getAuthStore().getDevelopersByVerifyCode(
+                [aConst.verifyCode.status.sent, aConst.verifyCode.status.resent]
+            );
+        }.bind(this))
+        .then(function(pendingVerification){
+            if (_.isArray(pendingVerification)) {
+                result.pendingVerification = pendingVerification;
+            }
+
+            return this.getAuthStore().getDevelopersByVerifyCode(aConst.verifyCode.status.verified);
+        }.bind(this))
 		// ok, send data
 		.then(function(approved){
 			if (_.isArray(approved)) {

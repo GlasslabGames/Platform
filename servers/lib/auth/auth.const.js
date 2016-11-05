@@ -48,6 +48,7 @@ module.exports = {
         expirationInterval: 6048000000, // 1 week in milliseconds
         status: {
             sent:       "sent",
+            resent:     "resent",
             verified:   "verified",
             beta:       "beta",
             approve:    "approve",
