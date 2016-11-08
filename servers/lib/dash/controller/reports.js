@@ -795,9 +795,9 @@ function _getStandards(req, res, reportId, gameId, courseId) {
         }.bind(this));
 }
 
-function _determineLevelForQuest(questInfo, skillId, score) {
+function _determineLevel(skillId, score, questInfo) {
     var grade = score.correct / score.attempts;
-    if (!_.contains(questInfo.skills, skillId)) {
+    if (questInfo && !_.contains(questInfo.skills, skillId)) {
         return "NotAvailable";
     }
     if (grade >= 0.50) {
@@ -853,7 +853,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             if (studentQuestScore) {
                                 skills = _.mapValues(studentQuestScore.skills, function(skillScore, skillId) {
                                     return {
-                                        "level": _determineLevelForQuest(questInfo, skillId, skillScore),
+                                        "level": _determineLevel(skillId, skillScore, questInfo),
                                         "score": skillScore
                                     }
                                 });
@@ -864,7 +864,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                 var score = {"correct":0, "attempts":0};
                                 skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
                                     return {
-                                        "level": _determineLevelForQuest(questInfo, skillId, score),
+                                        "level": _determineLevel(skillId, score, questInfo),
                                         "score": score
                                     }
                                 });
@@ -891,9 +891,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
             when.all(studentPromises).then(function(studentAssessments) {
 
-                // TODO: calculate class skill levels
-                var _calculate_course_skill_average = function() {};
-                var courseSkills = _calculate_course_skill_average(studentAssessments);
+                var courseSkills = _calculate_course_skill_average(studentAssessments, drkInfo);
                 var courseProgress = _build_course_progress(studentAssessments, drkInfo);
 
                 var report = {
@@ -902,7 +900,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                     "timestamp": Util.GetTimeStamp(),
                     "totalMissions": _.keys(drkInfo.quests).length,
                     "courseProgress": courseProgress,
-                    "courseSkillLevel": courseSkills,
+                    "courseSkills": courseSkills,
                     "students": studentAssessments
                 };
 
@@ -935,3 +933,42 @@ function _build_course_progress(studentAssessments, drkInfo) {
     });
 }
 
+function _calculate_course_skill_average(studentAssessments, drkInfo) {
+
+    // build a map of studentId -> skills across all missions
+    var studentSkillScores = _.map(studentAssessments, function(studentReport) {
+        if (studentReport) {
+
+            //reduce the students list of mission -> skills into a total score
+            var acc = _.mapValues(drkInfo.skills, function() { return { "attempts": 0, "correct": 0 } });
+            return _.transform(studentReport.missions, function(result, missionInfo) {
+                _.forOwn(missionInfo.skillLevel, function(missionSkillInfo, skillId) {
+                    result[skillId].attempts += missionSkillInfo.score.attempts;
+                    result[skillId].correct += missionSkillInfo.score.correct;
+                });
+                return result;
+            }, acc);
+        }
+    });
+
+    //reduce the list of student -> skill -> score into just skill -> score
+    var acc = _.mapValues(drkInfo.skills, function() { return { "attempts": 0, "correct": 0 } });
+    var courseSkillTotals = _.transform(studentSkillScores, function(result, studentScore) {
+        if (studentScore) {
+            _.forOwn(studentScore, function(skillScore, skillId) {
+                result[skillId].attempts += skillScore.attempts;
+                result[skillId].correct += skillScore.correct;
+            })
+        }
+        return result;
+    }, acc);
+
+    //determine course levels
+    return _.mapValues(courseSkillTotals, function(skillTotals, skillId) {
+        var level = _determineLevel(skillId, skillTotals);
+        return {
+            'level': level,
+            'score': skillTotals
+        }
+    });
+}
