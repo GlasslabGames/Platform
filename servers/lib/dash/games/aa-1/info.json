@@ -106,6 +106,12 @@
             "dataProcessScope": "all",
             "engine": "drk12",
             "trigger": "activity",
+            "skills": {
+                "connectingEvidence": "Connecting evidence to argumentation schemes",
+                "supportingClaims": "Supporting claims w/ evidence",
+                "criticalQuestions": "Using critical questions",
+                "usingBacking": "Using backing"
+            },
             "quests": {
                 "Quest0-1": {
                     "mission": 1,
