@@ -893,9 +893,8 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                 // TODO: calculate class skill levels
                 var _calculate_course_skill_average = function() {};
-                var _build_course_progress = function() {};
                 var courseSkills = _calculate_course_skill_average(studentAssessments);
-                var courseProgress = _build_course_progress(studentAssessments);
+                var courseProgress = _build_course_progress(studentAssessments, drkInfo);
 
                 var report = {
                     "gameId": gameId,
@@ -912,5 +911,27 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
         }.bind(this));
 
     }.bind(this));
+}
+
+function _build_course_progress(studentAssessments, drkInfo) {
+    var progress = {};
+    _.forEach(studentAssessments, function(studentReport) {
+        if (studentReport) {
+            var mission = studentReport.currentProgress.mission;
+            if (!(mission in progress)) {
+                progress[mission] = 0;
+            }
+            progress[mission] += 1;
+        }
+    });
+
+    return _.map(_.values(drkInfo.quests), function(m) {
+        var missionId = m.mission;
+        var count = progress[missionId] || 0;
+        return {
+            "mission": missionId,
+            "studentCount": count
+        }
+    });
 }
 
