@@ -235,18 +235,22 @@
                 "skills": {
                     "connectingEvidence": {
                         "name": "Connecting Evidence to Argument Schemes",
+                        "description": "Track whether students are correctly matching claims to evidence.",
                         "missions": [3, 5, 6, 7, 8, 9, 10, 14, 17, 19, 21]
                     },
                     "supportingClaims": {
                         "name": "Supporting Claims with Evidence",
+                        "description": "Track whether students are using evidence that is (1) relevant to and (2) does not contradict the claim being made.",
                         "missions": [5, 6, 10, 12, 14, 15, 17, 19, 21]
                     },
                     "criticalQuestions": {
                         "name": "Using Critical Questions",
+                        "description": "Track whether students are asking critical questions to look for weaknesses in their opponent’s arguments.",
                         "missions": [12, 15, 17, 19, 21]
                     },
                     "usingBacking": {
                         "name": "Using Backing",
+                        "description": "Track whether students are using strong supporting evidence to hold up against critical questions.",
                         "missions": [12, 16, 17, 19, 20, 21]
                     }
                 }
