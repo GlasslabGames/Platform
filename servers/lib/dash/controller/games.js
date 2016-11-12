@@ -35,6 +35,8 @@ module.exports = {
     submitGameForApproval:           submitGameForApproval,
     getAllDeveloperGamesAwaitingApproval: getAllDeveloperGamesAwaitingApproval,
     getAllDeveloperGamesRejected:    getAllDeveloperGamesRejected,
+    getAllDeveloperGameAccessRequestsAwaitingApproval: getAllDeveloperGameAccessRequestsAwaitingApproval,
+    getAllDeveloperGameAccessRequestsDenied: getAllDeveloperGameAccessRequestsDenied,
     getApprovedGamesOrgInfo:         getApprovedGamesOrgInfo,
     updateDeveloperGameInfo:         updateDeveloperGameInfo
 };
@@ -843,6 +845,94 @@ function getDeveloperGamesInfo(req, res){
             console.trace("Dash: Get Developer Profile Error -", err);
             this.requestUtil.errorResponse(res, err);
             this.stats.increment("error", "GetDeveloperGamesInfo.Catch");
+        }.bind(this));
+}
+
+function getAllDeveloperGameAccessRequestsAwaitingApproval(req, res){
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    this.telmStore.getAllDeveloperGameAccessRequestsAwaitingApproval()
+        .then(function(results) {
+            if (_.isObject(results)) {
+                var promiseList = [];
+                for (var userId in results) {
+                    for (var gameId in results[userId]) {
+                        promiseList.push([userId, gameId, results[userId][gameId]]);
+                        promiseList.push(this.dashStore.getUserInfoById(userId));
+                        promiseList.push(this.telmStore.getDeveloperOrganization(userId));
+                        promiseList.push(this.telmStore._getGameInformation(gameId, false, false));
+                    }
+                }
+                return when.all(promiseList);
+            }
+            return [];
+        }.bind(this))
+        .then(function(results) {
+            var accessRequestInfos = [];
+            for (var i=0; i<results.length; i+=4) {
+                var requestInfo = {
+                    userId: results[i][0],
+                    gameId: results[i][1],
+                    verifyCode: results[i][2]
+                };
+                requestInfo.devEmail = results[i+1].email;
+                requestInfo.organization = results[i+2];
+                requestInfo.basic = results[i+3].basic;
+                accessRequestInfos.push(requestInfo);
+            }
+            this.requestUtil.jsonResponse(res, accessRequestInfos);
+        }.bind(this))
+        .catch(function(err) {
+            console.errorExt("DashService", "getAllDeveloperGameAccessRequestsAwaitingApproval Error", err);
+            this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
+        }.bind(this));
+}
+
+function getAllDeveloperGameAccessRequestsDenied(req, res){
+    var userId = req.user.id;
+    if(req.user.role !== "admin"){
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"},401);
+        return;
+    }
+
+    this.telmStore.getAllDeveloperGameAccessRequestsDenied()
+        .then(function(results) {
+            if (_.isObject(results)) {
+                var promiseList = [];
+                for (var userId in results) {
+                    for (var gameId in results[userId]) {
+                        promiseList.push([userId, gameId, results[userId][gameId]]);
+                        promiseList.push(this.dashStore.getUserInfoById(userId));
+                        promiseList.push(this.telmStore.getDeveloperOrganization(userId));
+                        promiseList.push(this.telmStore._getGameInformation(gameId, false, false));
+                    }
+                }
+                return when.all(promiseList);
+            }
+            return [];
+        }.bind(this))
+        .then(function(results) {
+            var accessRequestInfos = [];
+            for (var i=0; i<results.length; i+=4) {
+                var requestInfo = {
+                    userId: results[i][0],
+                    gameId: results[i][1],
+                    verifyCode: results[i][2]
+                };
+                requestInfo.devEmail = results[i+1].email;
+                requestInfo.organization = results[i+2];
+                requestInfo.basic = results[i+3].basic;
+                accessRequestInfos.push(requestInfo);
+            }
+            this.requestUtil.jsonResponse(res, accessRequestInfos);
+        }.bind(this))
+        .catch(function(err) {
+            console.errorExt("DashService", "getAllDeveloperGameAccessRequestsDenied Error", err);
+            this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
         }.bind(this));
 }
 

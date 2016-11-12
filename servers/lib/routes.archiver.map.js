@@ -977,6 +977,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/auth/developer/game/:gameId/request/:userId/deny",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "denyDeveloperGameAccess"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/auth/delete/user",
             service: "auth",

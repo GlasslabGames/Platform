@@ -336,6 +336,34 @@ var gdv_getAllDeveloperGamesRejected = function(doc, meta) {
     }
 }
 
+var gdv_getAllDeveloperGameAccessRequestsAwaitingApproval = function(doc, meta) {
+    var values = meta.id.split(':');
+    if(values[0] === 'di' && values[1] === 'u'){
+        for(var gameId in doc){
+            if(!doc[gameId].hasOwnProperty('verifyCodeStatus') || doc[gameId].verifyCodeStatus === 'approve') {
+                emit( values[2], {
+                    "gameId": gameId,
+                    "verifyCode": doc[gameId].verifyCode
+                });
+            }
+        }
+    }
+}
+
+var gdv_getAllDeveloperGameAccessRequestsDenied = function(doc, meta) {
+    var values = meta.id.split(':');
+    if(values[0] === 'di' && values[1] === 'u'){
+        for(var gameId in doc){
+            if(doc[gameId].hasOwnProperty('verifyCodeStatus') && doc[gameId].verifyCodeStatus === 'revoked') {
+                emit( values[2], {
+                    "gameId": gameId,
+                    "verifyCode": doc[gameId].verifyCode
+                });
+            }
+        }
+    }
+}
+
 var gdv_getAllMatches = function(doc, meta){
     var values = meta.id.split(':');
     if((values[0] === 'gd') &&
@@ -412,6 +440,12 @@ var gdv_getAllGameSaves = function(doc, meta){
             },
             getAllDeveloperGamesRejected: {
                 map: gdv_getAllDeveloperGamesRejected
+            },
+            getAllDeveloperGameAccessRequestsAwaitingApproval: {
+                map: gdv_getAllDeveloperGameAccessRequestsAwaitingApproval
+            },
+            getAllDeveloperGameAccessRequestsDenied: {
+                map: gdv_getAllDeveloperGameAccessRequestsDenied
             },
             getAllMatches: {
                 map: gdv_getAllMatches
@@ -3312,6 +3346,90 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesRejected = function() {
                         devProfiles[key] = value;
                     });
                     resolve(devProfiles);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllDeveloperGameAccessRequestsAwaitingApproval = function() {
+    return when.promise(function(resolve, reject){
+        var map = "getAllDeveloperGameAccessRequestsAwaitingApproval";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results) {
+                if (err) {
+                    console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsAwaitingApproval Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function (err, results) {
+                    if (err) {
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsAwaitingApproval Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    var accessRequests = {};
+                    _.forEach(results, function (developerProfile, id) {
+                        var profileId = id.split(':');
+                        var userId = profileId[2];
+                        var value = developerProfile.value;
+                        if (!accessRequests[userId]) {
+                            accessRequests[userId] = {}
+                        }
+                        for (var gameId in value) {
+                            if (value[gameId].verifyCodeStatus === 'approve') {
+                                accessRequests[userId][gameId] = value[gameId].verifyCode;
+                            }
+                        }
+                    });
+                    resolve(accessRequests);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllDeveloperGameAccessRequestsDenied = function() {
+    return when.promise(function(resolve, reject){
+        var map = "getAllDeveloperGameAccessRequestsDenied";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results) {
+                if (err) {
+                    console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsDenied Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function (err, results) {
+                    if (err) {
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsDenied Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    var accessRequests = {};
+                    _.forEach(results, function (developerProfile, id) {
+                        var profileId = id.split(':');
+                        var userId = profileId[2];
+                        var value = developerProfile.value;
+                        if (!accessRequests[userId]) {
+                            accessRequests[userId] = {}
+                        }
+                        for (var gameId in value) {
+                            if (value[gameId].verifyCodeStatus === 'revoked') {
+                                accessRequests[userId][gameId] = value[gameId].verifyCode;
+                            }
+                        }
+                    });
+                    resolve(accessRequests);
                 }.bind(this));
             }.bind(this));
     }.bind(this));

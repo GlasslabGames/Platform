@@ -31,6 +31,7 @@ module.exports = {
     resetPasswordUpdate:		resetPasswordUpdate,
     requestDeveloperGameAccess:	requestDeveloperGameAccess,
     approveDeveloperGameAccess:	approveDeveloperGameAccess,
+    denyDeveloperGameAccess:    denyDeveloperGameAccess,
     eraseStudentInfo:			eraseStudentInfo,
     eraseInstructorInfo:		eraseInstructorInfo,
     deleteUser:					deleteUser
@@ -2125,6 +2126,24 @@ function approveDeveloperGameAccess(req, res){
         }.bind(this))
         .then(function(){
             this.requestUtil.jsonResponse(res, {"text": "Approved Game for Developer. Notification email sent to the Developer", "statusCode":200});
+        }.bind(this))
+        .then(function(err){
+            this.requestUtil.errorResponse(res, {key:"user.verifyGameEmail.general"});
+        }.bind(this));
+}
+
+function denyDeveloperGameAccess(req, res){
+    var gameId = req.params.gameId;
+    var userId = req.params.userId;
+
+    var dashService = this.serviceManager.get("dash").service;
+    dashService.telmStore.getDeveloperProfile(userId)
+        .then(function(profile){
+            profile[gameId].verifyCodeStatus = aConst.verifyCode.status.revoked;
+            return this.authDataStore.setDeveloperProfile(userId, profile);
+        }.bind(this))
+        .then(function(){
+            this.requestUtil.jsonResponse(res, {"text": "Denied Access to Game for Developer.", "statusCode":200});
         }.bind(this))
         .then(function(err){
             this.requestUtil.errorResponse(res, {key:"user.verifyGameEmail.general"});
