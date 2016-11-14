@@ -914,7 +914,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 function _build_course_progress(studentAssessments, drkInfo) {
     var progress = {};
     _.forEach(studentAssessments, function(studentReport) {
-        if (studentReport) {
+        if (studentReport && studentReport.currentProgress && studentReport.currentProgress.mission) {
             var mission = studentReport.currentProgress.mission;
             if (!(mission in progress)) {
                 progress[mission] = 0;
