@@ -364,6 +364,33 @@ var gdv_getAllGameSaves = function(doc, meta){
         emit(meta.id);
     }
 };
+
+var gdv_getLatestGameSessionsByUserId = function (doc, meta) {
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'gs') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('gameId') &&
+        doc.hasOwnProperty('userId') &&
+        doc.hasOwnProperty('serverEndTimeStamp'))
+    {
+        emit([doc.userId, doc.gameId],
+            [doc.serverStartTimeStamp, doc.gameSessionId]);
+    }
+};
+
+var gdv_getLatestGameSessionsByUserId_reduce = function(keys, values, rereduce) {
+    var max;
+
+    values.forEach(function(v) {
+        if (!max || v[0] > max[0]) {
+            max = v;
+        }
+    });
+    return max;
+
+};
+
 // ------------------------------------
 
     this.telemDDoc = {
@@ -421,6 +448,10 @@ var gdv_getAllGameSaves = function(doc, meta){
             },
             getAllGameSaves: {
                 map: gdv_getAllGameSaves
+            },
+            getLatestGameSessionsByUserId: {
+                map: gdv_getLatestGameSessionsByUserId,
+                reduce: gdv_getLatestGameSessionsByUserId_reduce
             }
         }
     };
@@ -429,6 +460,9 @@ var gdv_getAllGameSaves = function(doc, meta){
     for(var i in this.telemDDoc.views) {
         if( this.telemDDoc.views[i].hasOwnProperty('map') ) {
             this.telemDDoc.views[i].map = this.telemDDoc.views[i].map.toString();
+        }
+        if( this.telemDDoc.views[i].hasOwnProperty('reduce') ) {
+            this.telemDDoc.views[i].reduce = this.telemDDoc.views[i].reduce.toString();
         }
     }
     //console.log("telemDDoc:", telemDDoc);
