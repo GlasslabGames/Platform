@@ -45,6 +45,14 @@ module.exports = {
             }
         },
         {
+            api: "/int/v1/data/game/:gameId/latestSessions",
+            service: "data",
+            controller: "_gameSession",
+            method: {
+                get: "getLatestGameSessions"
+            }
+        },
+        {
             api: "/int/v1/data/game/:gameId/user/:userId/events",
             service: "data",
             controller: "_events",

@@ -1551,6 +1551,39 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+TelemDS_Couchbase.prototype.getLatestGameSessions = function(gameId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    this.client.view("telemetry", 'getLatestGameSessionsByUserId').query(
+        {
+            group_level: 2
+        },
+        function(err, results) {
+            if(err){
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Latest Sessions By UserId Error -", err);
+                reject(err);
+                return;
+            }
+
+            var results_for_game = _.filter(results, function(r) { return r.key[1] == gameId; });
+            var mapped_results = _.map(results_for_game, function(r) {
+                return {
+                    userId: r.key[0],
+                    gameId: r.key[1],
+                    gameSessionId: r.value[1],
+                    gameSessionTimestamp: r.value[0]
+                }
+            });
+
+            resolve(mapped_results);
+
+        }.bind(this)
+    );
+// ------------------------------------------------
+}.bind(this));
+};
+
 TelemDS_Couchbase.prototype.getAllGameSessions = function(myds){
     return myds.getAllUserSessions()
         // send as activity
