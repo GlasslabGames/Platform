@@ -495,33 +495,27 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
 function _migrateGame(gameName, dir, telmStore){
     var promiseList = [];
     if(gameName.charAt(0) !== '.'){
+        var gameId = gameName.toUpperCase();
         var gameFiles = fs.readdirSync( path.join(dir, gameName) );
-
-        var gameData = {};
-        var gameId;
 
         gameFiles.forEach(function(file){
             if(file.charAt(0) !== '.'){
                 var name = path.basename(file, path.extname(file));
                 var filePath = path.join(dir, gameName, file);
+                var gameData;
                 try {
                     delete require.cache[filePath];
-                    gameData[name] = require(filePath);
-                    if(name === 'info'){
-                        gameId = gameData[name]["basic"]["gameId"];
-                    }
+                    gameData = require(filePath);
                 } catch(err) {
                     console.errorExt("DashService", "migrateGame filePath:", filePath, ", Error:", err);
                 }
+                if(name === 'info'){
+                    promiseList.push(telmStore.createGameInformation(gameId, gameData));
+                } else if(name === 'achievements'){
+                    promiseList.push(telmStore.createGameAchievements(gameId, gameData));
+                }
             }
         }.bind(this));
-
-        if(gameId && gameData['info']){
-            promiseList.push(telmStore.createGameInformation(gameId, gameData['info']));
-        }
-        if(gameId && gameData['achievements']){
-            promiseList.push(telmStore.createGameAchievements(gameId, gameData['achievements']));
-        }
     }
     return promiseList;
 }
@@ -756,38 +750,30 @@ DashService.prototype._oldLoadGameFiles = function() {
         try {
             var dir = path.join(__dirname, "games");
             var files = fs.readdirSync(dir);
+            var gameId;
             // game achievements initially is an array of promises
             var gameAchievements = [];
             files.forEach(function(gameName){
                 // skip dot files
                 if(gameName.charAt(0) != '.') {
-                    var gameData = {};
-                    var gameId;
+                    gameId = gameName.toUpperCase();
+
+                    // gameName is not case sensitive
+                    this._games[ gameId ] = {};
 
                     var gameFiles = fs.readdirSync( path.join(dir, gameName) );
+
                     gameFiles.forEach(function(file){
                         if(file.charAt(0) != '.') {
                             var name = path.basename(file, path.extname(file));
                             var filePath = path.join(dir, gameName, file);
                             try {
-                                delete require.cache[filePath];
-                                gameData[name] = require(filePath);
-                                if(name === 'info'){
-                                    gameId = gameData[name]["basic"]["gameId"];
-                                }
+                                this._games[gameId][name] = require(filePath);
                             } catch(err) {
                                 console.errorExt("DashService", "loadGameFiles filePath:", filePath, ", Error:", err);
                             }
                         }
                     }.bind(this));
-
-                    this._games[ gameId ] = {};
-
-                    for (var name in gameData) {
-                        if (gameData.hasOwnProperty(key)) {
-                            this._games[gameId][name] = gameData[name];
-                        }
-                    }
 
                     // remove all enabled=false objects
                     this._filterDisabledGameInfo(this._games[gameId]);
