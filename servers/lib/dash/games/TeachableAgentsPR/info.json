@@ -1,35 +1,35 @@
 {
     "basic": {
-        "gameId": "TeachableAgentsPR",
+        "gameId": "TEACHABLEAGENTSPR",
         "enabled": true,
-        "visible": false,
+        "visible": true,
         "maintenance": null,
         "shortName": "Teachable Agents",
         "longName": "Teachable Agents",
         "grades": "",
         "subject": "",
-        "type": "",
+        "type": "Browser",
         "platform": {
-            "type": "iPad",
+            "type": "Browser",
             "icon": {
-                "small": "/assets/platform-ipad.png",
-                "large": "/assets/platform-ipad@2x.png"
+                "small": "/assets/platform-browser.png",
+                "large": "/assets/platform-browser@2x.png"
             }
         },
-        "price": "",
-        "packages": "",
-        "release": "dev",
-        "releaseDate": "",
-        "shortDescription": "",
-        "description": "",
+        "price": "Free",
+        "packages": "PC/Mac, Chromebook/Web Games",
+        "release": "live",
+        "releaseDate": "TBD",
+        "shortDescription": "shortDescription",
+        "description": "description",
         "developer": {
-            "id": "TEMP",
-            "name": "",
+            "id": "GL",
+            "name": "GlassLab, Inc.",
             "logo": {
-                "small": "/assets/dev-logo-placeholder.jpg",
-                "large": "/assets/dev-logo-placeholder@2x.jpg"
+                "small": "/assets/glasslab-logo.png",
+                "large": "/assets/glasslab-logo.png"
             },
-            "description": ""
+            "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
         },
         "settings": {
             "canCreateMatches": false
@@ -37,22 +37,34 @@
         "license": {
             "type": "loginType",
             "loginType": "glasslabv2,icivics,edmodo",
-            "valid": false,
+            "valid": true,
             "message": {
                 "invalid": "Coming Soon!"
             }
         },
         "thumbnail": {
-            "small": "/assets/thumb-placeholder.jpg",
-            "large": "/assets/thumb-placeholder@2x.jpg"
+            "small": "/assets/thumb-game-TeachableAgentsPR.jpg",
+            "large": "/assets/thumb-game-TeachableAgentsPR.jpg"
         },
         "card": {
-            "small": "/assets/game-card-PLACEHOLDER.jpg",
-            "large": "/assets/game-card-PLACEHOLDER@2x.jpg"
+            "small": "/assets/game-card-TeachableAgentsPR.jpg",
+            "large": "/assets/game-card-TeachableAgentsPR.jpg"
         },
         "banners": {
-            "product": "/assets/game-banner-placeholder.png",
-            "reports": "/assets/game-banner-placeholder.png"
+            "product": "/assets/game-banner-TeachableAgentsPR.jpg",
+            "reports": "/assets/game-banner-TeachableAgentsPR.jpg"
+        },
+        "play": {
+            "type": "page",
+            "page": {
+                "embed": "http://ec2-54-183-179-168.us-west-1.compute.amazonaws.com/teachable_agents/StartGame.html",
+                "embedSecure": "http://ec2-54-183-179-168.us-west-1.compute.amazonaws.com/teachable_agents/StartGame.html",
+                "format": "html",
+                "size": {
+                    "width": 800,
+                    "height": 600
+                }
+            }
         }
     },
     "assessment": [],
@@ -60,7 +72,19 @@
         "list": []
     },
     "details": {
-        "buttons": [],
+        "buttons": [
+            {
+                "name": "Play Game",
+                "type": "play",
+                "authRequired": true,
+                "links": [
+                    {
+                        "name": "Play Game",
+                        "type": "play"
+                    }
+                ]
+            }
+        ],
         "pages": {
             "product": {
                 "order": 1,
@@ -74,7 +98,7 @@
             },
             "standards": {
                 "order": 2,
-                "enabled": true,
+                "enabled": false,
                 "authRequired": false,
                 "id": "standards",
                 "title": "Standards",
