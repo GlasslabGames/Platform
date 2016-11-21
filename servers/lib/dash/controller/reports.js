@@ -860,11 +860,13 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         if (!(skillId in latestSkillScores)) {
                                             latestSkillScores[skillId] = {
                                                 mission: questInfo.mission,
-                                                level: skillLevel
+                                                level: skillLevel,
+                                                score: skillScore
                                             }
                                         }
                                         else if (questInfo.mission > latestSkillScores[skillId].mission) {
                                             latestSkillScores[skillId].level = skillLevel;
+                                            latestSkillScores[skillId].score = skillScore;
                                         }
                                     }
 
