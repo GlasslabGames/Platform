@@ -829,6 +829,8 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                         if (!assessmentData || !assessmentData.results) return;
 
                         var latestMission = 0;
+                        var latestSkillScores = {
+                        };
                         var studentQuests = {};
 
                         //build a questId -> skills map for this student
@@ -852,8 +854,22 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             var skills;
                             if (studentQuestScore) {
                                 skills = _.mapValues(studentQuestScore.skills, function(skillScore, skillId) {
+
+                                    var skillLevel = _determineLevel(skillId, skillScore, questInfo);
+                                    if (skillLevel != "Unavailable" && latestSkills[skillId]) {
+                                        if (!(skillId in latestSkills)) {
+                                            latestSkills[skillId] = {
+                                                mission: questInfo.mission,
+                                                level: skillLevel
+                                            }
+                                        }
+                                        else if (questInfo.mission > latestSkills[skillId].mission) {
+                                            latestSkills[skillId].level = skillLevel;
+                                        }
+                                    }
+
                                     return {
-                                        "level": _determineLevel(skillId, skillScore, questInfo),
+                                        "level": skillLevel,
                                         "score": skillScore
                                     }
                                 });
@@ -877,13 +893,15 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                         });
 
-                        // find last played mission
-                        var curMission = _.find(missionProgress, function(p) { return p.mission == latestMission; });
+                        var progress = {
+                            mission: latestMission,
+                            skillLevel: latestSkillScores
+                        };
 
                         // student row
                         return {
                             'userId': assessmentData.userId,
-                            'currentProgress': curMission,
+                            'currentProgress': progress,
                             'missions': missionProgress,
                         }
                     }.bind(this));
