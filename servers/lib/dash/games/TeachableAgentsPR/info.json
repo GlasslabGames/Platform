@@ -1,0 +1,153 @@
+{
+    "basic": {
+        "gameId": "TEACHABLEAGENTSPR",
+        "enabled": true,
+        "visible": true,
+        "maintenance": null,
+        "shortName": "Teachable Agents",
+        "longName": "Teachable Agents",
+        "grades": "",
+        "subject": "",
+        "type": "Browser",
+        "platform": {
+            "type": "Browser",
+            "icon": {
+                "small": "/assets/platform-browser.png",
+                "large": "/assets/platform-browser@2x.png"
+            }
+        },
+        "price": "Free",
+        "packages": "PC/Mac, Chromebook/Web Games",
+        "release": "live",
+        "releaseDate": "TBD",
+        "shortDescription": "shortDescription",
+        "description": "description",
+        "developer": {
+            "id": "GL",
+            "name": "GlassLab, Inc.",
+            "logo": {
+                "small": "/assets/glasslab-logo.png",
+                "large": "/assets/glasslab-logo.png"
+            },
+            "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
+        },
+        "settings": {
+            "canCreateMatches": false
+        },
+        "license": {
+            "type": "loginType",
+            "loginType": "glasslabv2,icivics,edmodo",
+            "valid": true,
+            "message": {
+                "invalid": "Coming Soon!"
+            }
+        },
+        "thumbnail": {
+            "small": "/assets/thumb-game-TeachableAgentsPR.jpg",
+            "large": "/assets/thumb-game-TeachableAgentsPR.jpg"
+        },
+        "card": {
+            "small": "/assets/game-card-TeachableAgentsPR.jpg",
+            "large": "/assets/game-card-TeachableAgentsPR.jpg"
+        },
+        "banners": {
+            "product": "/assets/game-banner-TeachableAgentsPR.jpg",
+            "reports": "/assets/game-banner-TeachableAgentsPR.jpg"
+        },
+        "play": {
+            "type": "page",
+            "page": {
+                "embed": "http://ec2-54-183-179-168.us-west-1.compute.amazonaws.com/teachable_agents/StartGame.html",
+                "embedSecure": "http://ec2-54-183-179-168.us-west-1.compute.amazonaws.com/teachable_agents/StartGame.html",
+                "format": "html",
+                "size": {
+                    "width": 800,
+                    "height": 600
+                }
+            }
+        }
+    },
+    "assessment": [],
+    "reports": {
+        "list": []
+    },
+    "details": {
+        "buttons": [
+            {
+                "name": "Play Game",
+                "type": "play",
+                "authRequired": true,
+                "links": [
+                    {
+                        "name": "Play Game",
+                        "type": "play"
+                    }
+                ]
+            }
+        ],
+        "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "",
+                "video": "",
+                "brochure": ""
+            },
+            "standards": {
+                "order": 2,
+                "enabled": false,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards",
+                "CCSS": [],
+                "TEKS": []
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": false,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans",
+                "list": []
+            },
+            "research": {
+                "order": 4,
+                "enabled": false,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                    {
+                        "category": "",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": false,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                    {
+                        "reviewer": "",
+                        "review": ""
+                    }
+                ]
+            }
+        },
+        "social": {
+            "facebook": "http://facebook.com/glasslabgames",
+            "twitter": "http://twitter.com/glasslabgames",
+            "google": "https://plus.google.com/117864084582459836584/posts"
+        }
+    }
+}

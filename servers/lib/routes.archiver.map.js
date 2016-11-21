@@ -346,6 +346,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/migrate/:gameName/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "migrateSingleGameInfoFiles"
+            }
+        },
+        {
             api: "/api/v2/dash/reload/:code",
             service: "dash",
             controller: "games",
@@ -966,6 +974,14 @@ module.exports = {
             controller: "user",
             method: {
                 get: "approveDeveloperGameAccess"
+            }
+        },
+        {
+            api: "/api/v2/auth/developer/game/:gameId/request/:userId/deny",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "denyDeveloperGameAccess"
             }
         },
         {

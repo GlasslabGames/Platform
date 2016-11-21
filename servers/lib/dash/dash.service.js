@@ -492,6 +492,70 @@ DashService.prototype.getListOfAchievements = function(gameId, playerAchievement
     return achievementsList;
 };
 
+function _migrateGame(gameName, dir, telmStore){
+    var promiseList = [];
+    if(gameName.charAt(0) !== '.'){
+        var gameId = gameName.toUpperCase();
+        var gameFiles = fs.readdirSync( path.join(dir, gameName) );
+
+        gameFiles.forEach(function(file){
+            if(file.charAt(0) !== '.'){
+                var name = path.basename(file, path.extname(file));
+                var filePath = path.join(dir, gameName, file);
+                var gameData;
+                try {
+                    delete require.cache[filePath];
+                    gameData = require(filePath);
+                } catch(err) {
+                    console.errorExt("DashService", "migrateGame filePath:", filePath, ", Error:", err);
+                }
+                if(name === 'info'){
+                    promiseList.push(telmStore.createGameInformation(gameId, gameData));
+                } else if(name === 'achievements'){
+                    promiseList.push(telmStore.createGameAchievements(gameId, gameData));
+                }
+            }
+        }.bind(this));
+    }
+    return promiseList;
+}
+
+DashService.prototype._migrateSingleGame = function(gameName, forceMigrate) {
+    return when.promise(function(resolve, reject){
+        try {
+            // checking to see if this particular key exists, as a sign for if migration has happened
+            // if key does not exist, error will be thrown, but that's ok. Just means key needs to be created
+            // if key exists, but is initialized to a default or empty value, run migration and populate the keys
+            this.telmStore.getGameInformation(gameName.toUpperCase(), true)
+                .then(function(data){
+                    if(forceMigrate || data === 'no object'){
+                        return '{}';
+                    }
+                    return JSON.stringify(data);
+                })
+                .then(function(data){
+                    if(data !== '{}' && data !== '{"click":"to edit","new in 2.0":"there are no reserved field names"}'){
+                        // files have already been migrated, end process
+                        return;
+                    }
+                    console.log("Migrating "+gameName+" info.json and achievements.json files to Couchbase");
+                    var dir = path.join(__dirname, "games");
+                    var promises = _migrateGame(gameName, dir, this.telmStore);
+                    return when.all(promises);
+                }.bind(this))
+                .then(function(){
+                    resolve();
+                }.bind(this))
+                .then(null, function(err){
+                    reject(err);
+                }.bind(this));
+        } catch(err) {
+            console.errorExt("DashService", "Migrate Single Game Error -", err);
+            reject(err);
+        }
+    }.bind(this));
+};
+
 // migrates info.json and achievement.json files to couchbase
 // format is gi:gameId for info.json and ga:gameId for achievements.json
 DashService.prototype._migrateGameFiles = function(forceMigrate) {
@@ -515,33 +579,9 @@ DashService.prototype._migrateGameFiles = function(forceMigrate) {
                     console.log("Migrating info.json and achievements.json files to Couchbase");
                     var dir = path.join(__dirname, "games");
                     var files = fs.readdirSync(dir);
-                    var gameId;
                     var promiseList = [];
                     files.forEach(function(gameName){
-                        if(gameName.charAt(0) !== '.'){
-                            gameId = gameName.toUpperCase();
-
-                            var gameFiles = fs.readdirSync( path.join(dir, gameName) );
-
-                            gameFiles.forEach(function(file){
-                                if(file.charAt(0) !== '.'){
-                                    var name = path.basename(file, path.extname(file));
-                                    var filePath = path.join(dir, gameName, file);
-                                    var gameData;
-                                    try {
-                                        delete require.cache[filePath];
-                                        gameData = require(filePath);
-                                    } catch(err) {
-                                        console.errorExt("DashService", "migrateGameFiles filePath:", filePath, ", Error:", err);
-                                    }
-                                    if(name === 'info'){
-                                        promiseList.push(this.telmStore.createGameInformation(gameId, gameData));
-                                    } else if(name === 'achievements'){
-                                        promiseList.push(this.telmStore.createGameAchievements(gameId, gameData));
-                                    }
-                                }
-                            }.bind(this));
-                        }
+                        promiseList = promiseList.concat(_migrateGame(gameName, dir, this.telmStore));
                     }.bind(this));
                     return when.all(promiseList);
                 }.bind(this))
