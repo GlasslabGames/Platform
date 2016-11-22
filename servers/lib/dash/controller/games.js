@@ -595,12 +595,12 @@ function reprocessGame(req, res){
     }
     var gameId = req.params.gameId.toUpperCase();
 
-    //
+    // send request to assessment
     _internalAssessmentRequest.bind(this)("/int/v1/aeng/queue", {
         "jobType": "reprocess",
         "gameId": gameId
     }).then(
-        function() {
+        function(r) {
             res.end('{"reprocess": "started"}');
         }
     );
@@ -623,7 +623,12 @@ function queueStatus(req, res){
         return;
     }
 
-    //
+    // send request to assessment
+    _internalAssessmentRequest.bind(this)("/int/v1/aeng/processStatus").then(
+        function(r) {
+            res.end(JSON.stringify(r));
+        }
+    );
 }
 
 function migrateInfoFiles(req, res){

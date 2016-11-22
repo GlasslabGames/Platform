@@ -444,7 +444,7 @@ module.exports = {
             }
         },
         {
-            api: "/api/v2/dash/queueStatus",
+            api: "/api/v2/dash/queueStatus/:code",
             service: "dash",
             controller: "games",
             method: {
