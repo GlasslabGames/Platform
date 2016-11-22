@@ -434,6 +434,23 @@ module.exports = {
                 get: "exportReportData"
             }
         },
+
+        {
+            api: "/api/v2/dash/reprocess/:gameId/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "reprocessGame"
+            }
+        },
+        {
+            api: "/api/v2/dash/queueStatus",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "queueStatus"
+            }
+        },
         {
             api: "/api/v2/dash/migrate/:code",
             service: "dash",

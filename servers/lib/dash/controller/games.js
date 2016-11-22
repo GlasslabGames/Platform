@@ -22,6 +22,8 @@ module.exports = {
     getBadgeJSON:                    getBadgeJSON,
     generateBadgeCode:               generateBadgeCode,
     badgeCodeAwarded:                badgeCodeAwarded,
+    reprocessGame:                   reprocessGame,
+    queueStatus:                     queueStatus,
     migrateInfoFiles:                migrateInfoFiles,
     migrateSingleGameInfoFiles:      migrateSingleGameInfoFiles,
     replaceGameInfo:                 replaceGameInfo,
@@ -559,6 +561,69 @@ function migrateSingleGameInfoFiles(req, res) {
             res.end(JSON.stringify(error));
             this.stats.increment("error", "MigrateInfo.Catch");
         }.bind(this));
+}
+
+
+
+
+var _internalAssessmentRequest = function(route, data) {
+    var protocal = this.options.assessment.protocal || 'http:';
+    var host = this.options.assessment.host || 'localhost';
+    var port = this.options.assessment.port || 8003;
+    var url = protocal + "//" + host + ":" + port + route;
+    return this.requestUtil.request(url, data);
+};
+
+function reprocessGame(req, res){
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    if (!(req.params.gameId && _.isString(req.params.gameId) && req.params.gameId.length)) {
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+    }
+    var gameId = req.params.gameId.toUpperCase();
+
+    //
+    _internalAssessmentRequest.bind(this)("/int/v1/aeng/queue", {
+        "jobType": "reprocess",
+        "gameId": gameId
+    }).then(
+        function() {
+            res.end('{"reprocess": "started"}');
+        }
+    );
+}
+
+function queueStatus(req, res){
+
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    //
 }
 
 function migrateInfoFiles(req, res){
