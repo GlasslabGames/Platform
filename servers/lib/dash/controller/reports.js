@@ -818,6 +818,11 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
     this.getGameAssessmentInfo(gameId).then(function(aInfo) {
 
         var drkInfo = _.find(aInfo, function(a) { return a.id == "drk12_b" });
+        if (!drkInfo) {
+            var emptyReport = {}
+            this.requestUtil.jsonResponse(res, emptyReport);
+            return;
+        }
 
         lmsService.getStudentsOfCourse(courseId).then(function(users) {
             if (!users) return;
