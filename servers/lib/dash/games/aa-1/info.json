@@ -224,9 +224,9 @@
                 "id": "drk12_b",
                 "assessmentId": "drk12_b",
                 "enabled": true,
-                "name": "Supporting Claims With Evidence Report",
+                "name": "Progress Report",
                 "header": {
-                    "text": "Supporting Claims With Evidence Report",
+                    "text": "Progress Report",
                     "image": "/assets/game-banner-AA-1.png",
                     "skinny": "/assets/skinny-banner-AA-1.jpg",
                     "large": "/assets/skinny-banner-AA-1@2x.jpg"
