@@ -832,24 +832,25 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                 return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData) {
-                        if (!assessmentData || !assessmentData.results) return;
 
                         var latestMission = 0;
                         var latestSkillScores = {};
                         var studentQuests = {};
 
-                        //build a questId -> skills map for this student
-                        _.forOwn(assessmentData.results.skill, function (skillInfo, skillId) {
-                            _.forEach(skillInfo.quests, function(questSkillInfo) {
-                                if (!(questSkillInfo.questId in studentQuests)) {
-                                    studentQuests[questSkillInfo.questId] = {
-                                        "questId": questSkillInfo.questId,
-                                        "skills": {}
+                        if (assessmentData && assessmentData.results) {
+                            //build a questId -> skills map for this student
+                            _.forOwn(assessmentData.results.skill, function (skillInfo, skillId) {
+                                _.forEach(skillInfo.quests, function(questSkillInfo) {
+                                    if (!(questSkillInfo.questId in studentQuests)) {
+                                        studentQuests[questSkillInfo.questId] = {
+                                            "questId": questSkillInfo.questId,
+                                            "skills": {}
+                                        }
                                     }
-                                }
-                                studentQuests[questSkillInfo.questId].skills[skillId] = questSkillInfo.score;
+                                    studentQuests[questSkillInfo.questId].skills[skillId] = questSkillInfo.score;
+                                });
                             });
-                        });
+                        }
 
                         //iterate over all possible missions and determine levels
                         var missionProgress = _.map(_.keys(drkInfo.quests), function(questId) {
@@ -907,7 +908,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                         // student row
                         return {
-                            'userId': assessmentData.userId,
+                            'userId': userId,
                             'currentProgress': progress,
                             'missions': missionProgress
                         }
