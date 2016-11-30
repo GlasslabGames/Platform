@@ -960,30 +960,14 @@ function _build_course_progress(studentAssessments, drkInfo) {
 
 function _calculate_course_skill_average(studentAssessments, drkInfo) {
 
-    // build a map of studentId -> skills across all missions
-    var studentSkillScores = _.map(studentAssessments, function(studentReport) {
-        if (studentReport) {
-
-            //reduce the students list of mission -> skills into a total score
-            var acc = _.mapValues(drkInfo.skills, function() { return { "attempts": 0, "correct": 0 } });
-            return _.transform(studentReport.missions, function(result, missionInfo) {
-                _.forOwn(missionInfo.skillLevel, function(missionSkillInfo, skillId) {
-                    result[skillId].attempts += missionSkillInfo.score.attempts;
-                    result[skillId].correct += missionSkillInfo.score.correct;
-                });
-                return result;
-            }, acc);
-        }
-    });
-
-    //reduce the list of student -> skill -> score into just skill -> score
+    // sum up each students currentProgress.skillLevels
     var acc = _.mapValues(drkInfo.skills, function() { return { "attempts": 0, "correct": 0 } });
-    var courseSkillTotals = _.transform(studentSkillScores, function(result, studentScore) {
-        if (studentScore) {
-            _.forOwn(studentScore, function(skillScore, skillId) {
-                result[skillId].attempts += skillScore.attempts;
-                result[skillId].correct += skillScore.correct;
-            })
+    var courseSkillTotals = _.transform(studentAssessments, function(result, studentReport) {
+        if (studentReport) {
+            _.forOwn(studentReport.currentProgress.skillLevel, function(missionSkillInfo, skillId) {
+                result[skillId].attempts += missionSkillInfo.score.attempts;
+                result[skillId].correct += missionSkillInfo.score.correct;
+            });
         }
         return result;
     }, acc);
