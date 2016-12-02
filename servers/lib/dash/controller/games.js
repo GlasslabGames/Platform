@@ -595,11 +595,21 @@ function reprocessGame(req, res){
     }
     var gameId = req.params.gameId.toUpperCase();
 
-    // send request to assessment
-    _internalAssessmentRequest.bind(this)("/int/v1/aeng/queue", {
+
+    var jobData = {
         "jobType": "reprocess",
         "gameId": gameId
-    }).then(
+    };
+
+    if (req.query.assessmentId && _.isString(req.query.assessmentId) && req.query.assessmentId.length) {
+        jobData['assessmentId'] = req.query.assessmentId;
+    }
+    if (req.query.onlyMissing && _.isString(req.query.onlyMissing) && req.query.onlyMissing.length) {
+        jobData['onlyMissing'] = req.query.onlyMissing.toLowerCase() == "true";
+    }
+
+    // send request to assessment
+    _internalAssessmentRequest.bind(this)("/int/v1/aeng/queue", jobData).then(
         function(r) {
             res.end('{"reprocess": "started"}');
         }
