@@ -2,6 +2,7 @@
 var _         = require('lodash');
 var when      = require('when');
 var lConst    = require('../../lms/lms.const.js');
+var Util      = require('../../core/util');
 //
 
 module.exports = {
@@ -74,6 +75,9 @@ function getReport(req, res, next) {
                 }
                 else if(reportId === "standards") {
                     _getStandards.call(this, req, res, reportId, gameId, courseId);
+                }
+                else if(reportId === "drk12_b") {
+                    _getDRK12_b.call(this, req, res, reportId, gameId, courseId);
                 }
                 else {
                     this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
@@ -789,4 +793,192 @@ function _getStandards(req, res, reportId, gameId, courseId) {
             console.errorExt("DashService", "Get Standards Error 3 -", err);
             this.requestUtil.errorResponse(res, { key: "dash.general"});
         }.bind(this));
+}
+
+function _determineLevel(skillId, score, questInfo) {
+    var grade = score.correct / score.attempts;
+    if (questInfo && !_.contains(questInfo.skills, skillId)) {
+        return "NotAvailable";
+    }
+    if (grade >= 0.50) {
+        return "Advancing";
+    }
+    else if (score.attempts > 0) {
+        return "NeedSupport";
+    }
+    else {
+        return "NotAttempted";
+    }
+}
+
+function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
+
+    var lmsService = this.serviceManager.get("lms").service;
+
+    this.getGameAssessmentInfo(gameId).then(function(aInfo) {
+
+        var drkInfo = _.find(aInfo, function(a) { return a.id == "drk12_b" });
+        if (!drkInfo) {
+            var emptyReport = {}
+            this.requestUtil.jsonResponse(res, emptyReport);
+            return;
+        }
+
+        lmsService.getStudentsOfCourse(courseId).then(function(users) {
+            if (!users) return;
+
+            var studentPromises = _.map(users, function(user) {
+                var userId = user.id;
+
+                return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                    .then(function(assessmentData) {
+
+                        var latestMission = 0;
+                        var latestSkillScores = {};
+                        var studentQuests = {};
+
+                        if (assessmentData && assessmentData.results) {
+                            //build a questId -> skills map for this student
+                            _.forOwn(assessmentData.results.skill, function (skillInfo, skillId) {
+                                _.forEach(skillInfo.quests, function(questSkillInfo) {
+                                    if (!(questSkillInfo.questId in studentQuests)) {
+                                        studentQuests[questSkillInfo.questId] = {
+                                            "questId": questSkillInfo.questId,
+                                            "skills": {}
+                                        }
+                                    }
+                                    studentQuests[questSkillInfo.questId].skills[skillId] = questSkillInfo.score;
+                                });
+                            });
+                        }
+
+                        //iterate over all possible missions and determine levels
+                        var missionProgress = _.map(_.keys(drkInfo.quests), function(questId) {
+                            var questInfo = drkInfo.quests[questId];
+
+                            var studentQuestScore = studentQuests[questId];
+                            var skills;
+                            if (studentQuestScore) {
+                                skills = _.mapValues(studentQuestScore.skills, function(skillScore, skillId) {
+
+                                    var skillLevel = _determineLevel(skillId, skillScore, questInfo);
+                                    if (skillLevel != "NotAvailable") {
+                                        if (!(skillId in latestSkillScores)) {
+                                            latestSkillScores[skillId] = {
+                                                mission: questInfo.mission,
+                                                level: skillLevel,
+                                                score: skillScore
+                                            }
+                                        }
+                                        else if (questInfo.mission > latestSkillScores[skillId].mission) {
+                                            latestSkillScores[skillId].level = skillLevel;
+                                            latestSkillScores[skillId].score = skillScore;
+                                        }
+                                    }
+
+                                    return {
+                                        "level": skillLevel,
+                                        "score": skillScore
+                                    }
+                                });
+                                if (questInfo.mission > latestMission) {
+                                    latestMission = questInfo.mission;
+                                }
+                            } else {
+                                var score = {"correct":0, "attempts":0};
+                                skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
+                                    return {
+                                        "level": _determineLevel(skillId, score, questInfo),
+                                        "score": score
+                                    }
+                                });
+                            }
+
+                            return {
+                                "mission": questInfo.mission,
+                                "skillLevel": skills
+                            }
+
+                        });
+
+                        var progress = {
+                            mission: latestMission,
+                            skillLevel: latestSkillScores
+                        };
+
+                        // student row
+                        return {
+                            'userId': userId,
+                            'currentProgress': progress,
+                            'missions': missionProgress
+                        }
+                    }.bind(this));
+            }.bind(this));
+
+            when.all(studentPromises).then(function(studentAssessments) {
+
+                var courseSkills = _calculate_course_skill_average(studentAssessments, drkInfo);
+                var courseProgress = _build_course_progress(studentAssessments, drkInfo);
+
+                var report = {
+                    "gameId": gameId,
+                    "assessmentId": assessmentId,
+                    "timestamp": Util.GetTimeStamp(),
+                    "totalMissions": _.keys(drkInfo.quests).length,
+                    "courseProgress": courseProgress,
+                    "courseSkills": courseSkills,
+                    "students": studentAssessments
+                };
+
+                this.requestUtil.jsonResponse(res, report);
+            }.bind(this));
+        }.bind(this));
+
+    }.bind(this));
+}
+
+function _build_course_progress(studentAssessments, drkInfo) {
+    var progress = {};
+    _.forEach(studentAssessments, function(studentReport) {
+        if (studentReport && studentReport.currentProgress && studentReport.currentProgress.mission) {
+            var mission = studentReport.currentProgress.mission;
+            if (!(mission in progress)) {
+                progress[mission] = 0;
+            }
+            progress[mission] += 1;
+        }
+    });
+
+    return _.map(_.values(drkInfo.quests), function(m) {
+        var missionId = m.mission;
+        var count = progress[missionId] || 0;
+        return {
+            "mission": missionId,
+            "studentCount": count
+        }
+    });
+}
+
+function _calculate_course_skill_average(studentAssessments, drkInfo) {
+
+    // sum up each students currentProgress.skillLevels
+    var acc = _.mapValues(drkInfo.skills, function() { return { "attempts": 0, "correct": 0 } });
+    var courseSkillTotals = _.transform(studentAssessments, function(result, studentReport) {
+        if (studentReport) {
+            _.forOwn(studentReport.currentProgress.skillLevel, function(missionSkillInfo, skillId) {
+                result[skillId].attempts += missionSkillInfo.score.attempts;
+                result[skillId].correct += missionSkillInfo.score.correct;
+            });
+        }
+        return result;
+    }, acc);
+
+    //determine course levels
+    return _.mapValues(courseSkillTotals, function(skillTotals, skillId) {
+        var level = _determineLevel(skillId, skillTotals);
+        return {
+            'level': level,
+            'score': skillTotals
+        }
+    });
 }

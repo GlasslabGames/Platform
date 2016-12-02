@@ -334,6 +334,24 @@ module.exports = {
             }
         },
         {
+            requireAuth: true,
+            api: "/api/v2/dash/games/awaiting-access-approval",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAllDeveloperGameAccessRequestsAwaitingApproval"
+            }
+        },
+        {
+            requireAuth: true,
+            api: "/api/v2/dash/games/denied-access",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "getAllDeveloperGameAccessRequestsDenied"
+            }
+        },
+        {
             api: "/api/v2/dash/games/active/details",
             service: "dash",
             controller: "games",
@@ -414,6 +432,23 @@ module.exports = {
             controller: "dash",
             method: {
                 get: "exportReportData"
+            }
+        },
+
+        {
+            api: "/api/v2/dash/reprocess/:gameId/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "reprocessGame"
+            }
+        },
+        {
+            api: "/api/v2/dash/queueStatus/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "queueStatus"
             }
         },
         {
@@ -1242,6 +1277,14 @@ module.exports = {
             controller: "user",
             method: {
                 get: "approveDeveloperGameAccess"
+            }
+        },
+        {
+            api: "/api/v2/auth/developer/game/:gameId/request/:userId/deny",
+            service: "auth",
+            controller: "user",
+            method: {
+                get: "denyDeveloperGameAccess"
             }
         },
 

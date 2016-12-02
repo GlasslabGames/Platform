@@ -834,7 +834,7 @@ Auth_MySQL.prototype.getLicenseRecordsByInstructor = function(userId){
 
 Auth_MySQL.prototype.getDevelopersByVerifyCode = function(verifyCode){
     return when.promise(function(resolve, reject){
-        var Q = "SELECT id, FIRST_NAME, LAST_NAME, EMAIL, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS = " + this.ds.escape(verifyCode) + ";";
+        var Q = "SELECT id, FIRST_NAME, LAST_NAME, EMAIL, date_created, DATE_FORMAT(date_created, '%m/%d/%Y') AS pretty_date FROM GL_USER WHERE SYSTEM_ROLE = 'developer' AND VERIFY_CODE_STATUS IN (" + this.ds.escape(verifyCode) + ");";
         return this.ds.query(Q)
             .then(function(results){
                 var developers = [];

@@ -336,6 +336,34 @@ var gdv_getAllDeveloperGamesRejected = function(doc, meta) {
     }
 }
 
+var gdv_getAllDeveloperGameAccessRequestsAwaitingApproval = function(doc, meta) {
+    var values = meta.id.split(':');
+    if(values[0] === 'di' && values[1] === 'u'){
+        for(var gameId in doc){
+            if(!doc[gameId].hasOwnProperty('verifyCodeStatus') || doc[gameId].verifyCodeStatus === 'approve') {
+                emit( values[2], {
+                    "gameId": gameId,
+                    "verifyCode": doc[gameId].verifyCode
+                });
+            }
+        }
+    }
+}
+
+var gdv_getAllDeveloperGameAccessRequestsDenied = function(doc, meta) {
+    var values = meta.id.split(':');
+    if(values[0] === 'di' && values[1] === 'u'){
+        for(var gameId in doc){
+            if(doc[gameId].hasOwnProperty('verifyCodeStatus') && doc[gameId].verifyCodeStatus === 'revoked') {
+                emit( values[2], {
+                    "gameId": gameId,
+                    "verifyCode": doc[gameId].verifyCode
+                });
+            }
+        }
+    }
+}
+
 var gdv_getAllMatches = function(doc, meta){
     var values = meta.id.split(':');
     if((values[0] === 'gd') &&
@@ -364,6 +392,33 @@ var gdv_getAllGameSaves = function(doc, meta){
         emit(meta.id);
     }
 };
+
+var gdv_getLatestGameSessionsByUserId = function (doc, meta) {
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'gs') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('gameId') &&
+        doc.hasOwnProperty('userId') &&
+        doc.hasOwnProperty('serverEndTimeStamp'))
+    {
+        emit([doc.userId, doc.gameId],
+            [doc.serverStartTimeStamp, doc.gameSessionId]);
+    }
+};
+
+var gdv_getLatestGameSessionsByUserId_reduce = function(keys, values, rereduce) {
+    var max;
+
+    values.forEach(function(v) {
+        if (!max || v[0] > max[0]) {
+            max = v;
+        }
+    });
+    return max;
+
+};
+
 // ------------------------------------
 
     this.telemDDoc = {
@@ -413,6 +468,12 @@ var gdv_getAllGameSaves = function(doc, meta){
             getAllDeveloperGamesRejected: {
                 map: gdv_getAllDeveloperGamesRejected
             },
+            getAllDeveloperGameAccessRequestsAwaitingApproval: {
+                map: gdv_getAllDeveloperGameAccessRequestsAwaitingApproval
+            },
+            getAllDeveloperGameAccessRequestsDenied: {
+                map: gdv_getAllDeveloperGameAccessRequestsDenied
+            },
             getAllMatches: {
                 map: gdv_getAllMatches
             },
@@ -421,6 +482,10 @@ var gdv_getAllGameSaves = function(doc, meta){
             },
             getAllGameSaves: {
                 map: gdv_getAllGameSaves
+            },
+            getLatestGameSessionsByUserId: {
+                map: gdv_getLatestGameSessionsByUserId,
+                reduce: gdv_getLatestGameSessionsByUserId_reduce
             }
         }
     };
@@ -429,6 +494,9 @@ var gdv_getAllGameSaves = function(doc, meta){
     for(var i in this.telemDDoc.views) {
         if( this.telemDDoc.views[i].hasOwnProperty('map') ) {
             this.telemDDoc.views[i].map = this.telemDDoc.views[i].map.toString();
+        }
+        if( this.telemDDoc.views[i].hasOwnProperty('reduce') ) {
+            this.telemDDoc.views[i].reduce = this.telemDDoc.views[i].reduce.toString();
         }
     }
     //console.log("telemDDoc:", telemDDoc);
@@ -1549,6 +1617,39 @@ return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.getLatestGameSessions = function(gameId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+    this.client.view("telemetry", 'getLatestGameSessionsByUserId').query(
+        {
+            group_level: 2
+        },
+        function(err, results) {
+            if(err){
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Latest Sessions By UserId Error -", err);
+                reject(err);
+                return;
+            }
+
+            var results_for_game = _.filter(results, function(r) { return r.key[1] == gameId; });
+            var mapped_results = _.map(results_for_game, function(r) {
+                return {
+                    userId: r.key[0],
+                    gameId: r.key[1],
+                    gameSessionId: r.value[1],
+                    gameSessionTimestamp: r.value[0]
+                }
+            });
+
+            resolve(mapped_results);
+
+        }.bind(this)
+    );
+// ------------------------------------------------
+}.bind(this));
 };
 
 TelemDS_Couchbase.prototype.getAllGameSessions = function(myds){
@@ -3312,6 +3413,90 @@ TelemDS_Couchbase.prototype.getAllDeveloperGamesRejected = function() {
                         devProfiles[key] = value;
                     });
                     resolve(devProfiles);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllDeveloperGameAccessRequestsAwaitingApproval = function() {
+    return when.promise(function(resolve, reject){
+        var map = "getAllDeveloperGameAccessRequestsAwaitingApproval";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results) {
+                if (err) {
+                    console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsAwaitingApproval Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function (err, results) {
+                    if (err) {
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsAwaitingApproval Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    var accessRequests = {};
+                    _.forEach(results, function (developerProfile, id) {
+                        var profileId = id.split(':');
+                        var userId = profileId[2];
+                        var value = developerProfile.value;
+                        if (!accessRequests[userId]) {
+                            accessRequests[userId] = {}
+                        }
+                        for (var gameId in value) {
+                            if (value[gameId].verifyCodeStatus === 'approve') {
+                                accessRequests[userId][gameId] = value[gameId].verifyCode;
+                            }
+                        }
+                    });
+                    resolve(accessRequests);
+                }.bind(this));
+            }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getAllDeveloperGameAccessRequestsDenied = function() {
+    return when.promise(function(resolve, reject){
+        var map = "getAllDeveloperGameAccessRequestsDenied";
+        this.client.view("telemetry", map).query(
+            {
+
+            },
+            function(err, results) {
+                if (err) {
+                    console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsDenied Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                var keys = _.pluck(results, 'id');
+                this._chunk_getMulti(keys, {}, function (err, results) {
+                    if (err) {
+                        console.errorExt("DataStore Couchbase TelemetryStore", "getAllDeveloperGameAccessRequestsDenied Error -", err);
+                        reject(err);
+                        return;
+                    }
+
+                    var accessRequests = {};
+                    _.forEach(results, function (developerProfile, id) {
+                        var profileId = id.split(':');
+                        var userId = profileId[2];
+                        var value = developerProfile.value;
+                        if (!accessRequests[userId]) {
+                            accessRequests[userId] = {}
+                        }
+                        for (var gameId in value) {
+                            if (value[gameId].verifyCodeStatus === 'revoked') {
+                                accessRequests[userId][gameId] = value[gameId].verifyCode;
+                            }
+                        }
+                    });
+                    resolve(accessRequests);
                 }.bind(this));
             }.bind(this));
     }.bind(this));

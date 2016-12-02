@@ -5,7 +5,8 @@ var when      = require('when');
 
 module.exports = {
     getGameSessionEvents: getGameSessionEvents,
-    getGameSessionsInfo:  getGameSessionsInfo
+    getGameSessionsInfo: getGameSessionsInfo,
+    getLatestGameSessions: getLatestGameSessions
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -63,4 +64,41 @@ function getGameSessionsInfo(req, res, next)
         .then(null, function(err){
             this.requestUtil.errorResponse(res, err);
         }.bind(this));
+}
+
+exampleIn.getLatestGameSessions = {
+    gameId: 'AA-1',
+    data: {}
+};
+function getLatestGameSessions(req, res) {
+    try {
+
+        // check input
+        if( !( req.params &&
+            req.params.hasOwnProperty("gameId") ) ) {
+            this.requestUtil.errorResponse(res, {key:"report.gameId.missing", error: "missing gameId"});
+            return;
+        }
+        var gameId = req.params.gameId;
+        // gameIds are not case sensitive
+        gameId = gameId.toUpperCase();
+
+        // if (!this.isValidGameId(gameId)) {
+        //     this.requestUtil.errorResponse(res, {key:"report.gameId.invalid", error: "invalid gameId"});
+        //     return;
+        // }
+
+        this.cbds.getLatestGameSessions(gameId).then(
+            function(results) {
+                this.requestUtil.jsonResponse(res, results);
+            }.bind(this),
+
+            function(err) {
+                this.requestUtil.errorResponse(res,err);
+            }.bind(this)
+        );
+    } catch(err) {
+        console.trace("Reports: getLatestGameSessions Error -", err);
+        this.stats.increment("error", "GetLatestGameSessions.Catch");
+    }
 }
