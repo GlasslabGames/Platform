@@ -231,7 +231,7 @@
                     "skinny": "/assets/skinny-banner-AA-1.jpg",
                     "large": "/assets/skinny-banner-AA-1@2x.jpg"
                 },
-                "description": "Use this report to review your students’ progress on each of the four skills in the argumentation learning trajectory. Click the “Class View” tab to see average progress for the entire class on each skill, and click the “Student View” tab to review progress by individuals",
+                "description": "Use this report to review your students’ progress on each of the four skills in the argumentation learning trajectory. Click the “Class View” tab to see average progress for the entire class on each skill, and click the “Student View” tab to review progress by individuals.",
                 "skills": {
                     "connectingEvidence": {
                         "name": "Connecting Evidence to Argument Schemes",
