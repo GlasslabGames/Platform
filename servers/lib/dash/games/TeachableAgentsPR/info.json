@@ -57,8 +57,8 @@
         "play": {
             "type": "page",
             "page": {
-                "embed": "http://ec2-54-183-179-168.us-west-1.compute.amazonaws.com/teachable_agents/StartGame.html",
-                "embedSecure": "https://ec2-54-183-179-168.us-west-1.compute.amazonaws.com/teachable_agents/StartGame.html",
+                "embed": "http://www.teachableagentsgame.com/StartGame.html",
+                "embedSecure": "https://www.teachableagentsgame.com/StartGame.html",
                 "format": "html",
                 "size": {
                     "width": 800,

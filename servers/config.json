@@ -39,8 +39,8 @@
         		"http://edu.zwf-staging.zynga.com", 
         		"http://s3-us-west-1.amazonaws.com",
         		"https://s3-us-west-1.amazonaws.com",
-                "http://ec2-54-183-179-168.us-west-1.compute.amazonaws.com",
-                "https://ec2-54-183-179-168.us-west-1.compute.amazonaws.com"
+                "http://www.teachableagentsgame.com",
+                "https://www.teachableagentsgame.com"
         	]
         }
     },
