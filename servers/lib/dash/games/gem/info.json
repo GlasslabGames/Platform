@@ -2,16 +2,22 @@
     "basic": {
         "gameId": "GEM",
         "enabled": true,
-        "visible": false,
+        "visible": false, "//": true,
         "maintenance": null,
         "shortName": "Gemini",
         "longName": "Gemini game",
         "grades": "",
         "subject": "",
-        "type": "",
-        "platform": {},
-        "price": "",
-        "packages": "",
+        "type": "Browser",
+        "platform": {
+            "type": "Browser",
+            "icon": {
+                "small": "/assets/platform-browser.png",
+                "large": "/assets/platform-browser@2x.png"
+            }
+        },
+        "price": "Free",
+        "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
         "releaseDate": "TBD",
         "shortDescription": "Gemini game",
@@ -25,7 +31,7 @@
             }
         },
         "settings": {
-            "canCreateMatches": true
+            "canCreateMatches": false
         },
         "license": {
             "type": "loginType",
@@ -46,15 +52,97 @@
         "banners": {
             "product": "/assets/game-banner-AA-1.jpg",
             "reports": "/assets/game-banner-AA-1.jpg"
-        }
+        },
+        "play": {
+            "type": "page",
+            "page": {
+                "embed": "https://s3-us-west-1.amazonaws.com/playfully-games/GEM/game/1/index.html",
+                "embedSecure": "https://s3-us-west-1.amazonaws.com/playfully-games/GEM/game/1/index.html",
+                "format": "html",
+                "size": {
+                    "width": 940,
+                    "height": 640
+                }
+            }
+        },
     },
     "assessment": [],
     "reports": {
         "list": []
     },
     "details": {
-        "buttons": [],
-        "pages": {},
+        "buttons": [
+            {
+                "name": "Play Game",
+                "type": "play",
+                "authRequired": true,
+                "links": [
+                    {
+                        "name": "Play Game",
+                        "type": "play"
+                    }
+                ]
+            }
+        ],
+        "pages": {
+            "product": {
+                "order": 1,
+                "enabled": true,
+                "id": "product",
+                "title": "Product Description",
+                "header": "About the Game",
+                "about": "",
+                "video": "",
+                "brochure": ""
+            },
+            "standards": {
+                "order": 2,
+                "enabled": false,
+                "authRequired": false,
+                "id": "standards",
+                "title": "Standards",
+                "CCSS": [],
+                "TEKS": []
+            },
+            "lessonPlans": {
+                "order": 3,
+                "enabled": false,
+                "authRequired": true,
+                "id": "lessonPlans",
+                "title": "Lesson Plans",
+                "list": []
+            },
+            "research": {
+                "order": 4,
+                "enabled": false,
+                "authRequired": true,
+                "id": "research",
+                "title": "Research",
+                "list": [
+                    {
+                        "category": "",
+                        "list": [
+                            {
+                                "name": "",
+                                "link": ""
+                            }
+                        ]
+                    }
+                ]
+            },
+            "reviews": {
+                "order": 5,
+                "enabled": false,
+                "id": "reviews",
+                "title": "Reviews",
+                "list": [
+                    {
+                        "reviewer": "",
+                        "review": ""
+                    }
+                ]
+            }
+        },
         "social": {
             "facebook": "http://facebook.com/glasslabgames",
             "twitter": "http://twitter.com/glasslabgames",
