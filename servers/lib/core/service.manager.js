@@ -12,6 +12,7 @@
 var fs         = require('fs');
 var http       = require('http');
 var https      = require('https');
+var dirname    = __dirname;
 var path       = require('path');
 var url        = require('url');
 // Third-party libs
@@ -58,12 +59,14 @@ function ServiceManager(configFiles){
     // called as:   new ServiceManager("~/hydra.config.json");
     // this == {}
 
-    Util              = require('../core/util.js');
+    Util              = require(dirname + '/../core/util.js');
     this.logUtil      = new Util.LogUtil(); // begin enhanced logging
     
-    var ConfigManager = require('../core/config.manager.js');
+    var ConfigManager = require(dirname + '/../core/config.manager.js');
 
-    var startScript = process.argv[1].split("servers/")[1];
+
+    var path_parts = process.argv[1].split("/")
+    var startScript = path_parts[path_parts.length-1];
 
     console.log(" **************************************** ");
     console.log("        " + startScript);
@@ -100,7 +103,7 @@ function ServiceManager(configFiles){
     // Add the base config (./config.json from Platform/servers/) at the front of the list.
     // Values in ./config.json will be replaced by newer values in eg. ~/hydra.config.json.
     // [ './config.json', '~/hydra.config.json' ]
-    configFiles.unshift("./config.json");
+    configFiles.unshift(dirname + '/../../config.json');
     this.options = config.loadSync(configFiles);
 
     console.log('Configs loaded');
@@ -152,7 +155,7 @@ function ServiceManager(configFiles){
     this.stripe           = new Util.StripeUtil(this.options);
 
     try{
-        this.routesMap = require('../routes.map.js');
+        this.routesMap = require(dirname + '/../routes.map.js');
     } catch(err){
         console.log("ServiceManager: Could not find default routes map.");
     }
@@ -167,7 +170,7 @@ function ServiceManager(configFiles){
 ServiceManager.prototype.loadVersionFile = function() {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
-    fs.readFile('./version.json', 'utf8', function (err, data) {
+    fs.readFile(dirname + '/version.json', 'utf8', function (err, data) {
         if (err) {
             reject(err);
         } else{
@@ -199,7 +202,7 @@ return when.promise(function(resolve, reject) {
 
     function createSessionStoreConnectionPromise() {
         if (this.options.services.session.store) {
-            var CouchbaseStore = require('./sessionstore.couchbase.js')(expressSession);
+            var CouchbaseStore = require(dirname + '/sessionstore.couchbase.js')(expressSession);
             this.exsStore = new CouchbaseStore(this.options.services.session.store);
             return connectPromise = this.exsStore.glsConnect();
         } else {

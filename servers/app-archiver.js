@@ -1,19 +1,20 @@
 /**
  * App Server
  */
-var ServiceManager = require('./lib/core/service.manager.js');
-var Auth           = require('./lib/auth/auth.js');
-var LMS            = require('./lib/lms/lms.js');
-var Lic            = require('./lib/lic/lic.js');
-var Data           = require('./lib/data/data.js');
-var Dash           = require('./lib/dash/dash.js');
-var Admin          = require('./lib/admin/admin.js');
-var Research       = require('./lib/research/research.js');
-var Monitor        = require('./lib/monitor/monitor.js');
+var path           = __dirname; 
+var ServiceManager = require(path + '/lib/core/service.manager.js');
+var Auth           = require(path + '/lib/auth/auth.js');
+var LMS            = require(path + '/lib/lms/lms.js');
+var Lic            = require(path + '/lib/lic/lic.js');
+var Data           = require(path + '/lib/data/data.js');
+var Dash           = require(path + '/lib/dash/dash.js');
+var Admin          = require(path + '/lib/admin/admin.js');
+var Research       = require(path + '/lib/research/research.js');
+var Monitor        = require(path + '/lib/monitor/monitor.js');
 
 var manager = new ServiceManager("~/hydra.config.json");
 
-manager.setRouteMap('../routes.archiver.map.js');
+manager.setRouteMap(path + '/lib/routes.archiver.map.js');
 manager.setName('app-archiver');
 manager.setPort(8004);
 
