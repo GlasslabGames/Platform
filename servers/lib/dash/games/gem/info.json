@@ -2,10 +2,10 @@
     "basic": {
         "gameId": "GEM",
         "enabled": true,
-        "visible": false, "//": true,
+        "visible": true,
         "maintenance": null,
-        "shortName": "Gemini",
-        "longName": "Gemini game",
+        "shortName": "Deep Sea Challenge",
+        "longName": "Deep Sea Challenge: Collaborative Problem Solving",
         "grades": "",
         "subject": "",
         "type": "Browser",
@@ -20,8 +20,8 @@
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
         "releaseDate": "TBD",
-        "shortDescription": "Gemini game",
-        "description": "For developers without a game ID.",
+        "shortDescription": "Deep Sea Challenge: Collaborative Problem Solving",
+        "description": "Deep Sea Challenge: Collaborative Problem Solving",
         "developer": {
             "id": "GL",
             "name": "GlassLab, Inc.",
@@ -31,7 +31,7 @@
             }
         },
         "settings": {
-            "canCreateMatches": false
+            "canCreateMatches": true
         },
         "license": {
             "type": "loginType",
@@ -42,16 +42,16 @@
             }
         },
         "thumbnail": {
-            "small": "/assets/thumb-game-PVZ.png",
-            "large": "/assets/thumb-game-PVZ.png"
+            "small": "/assets/thumb-game-GEM.jpg",
+            "large": "/assets/thumb-game-GEM.jpg"
         },
         "card": {
-            "small": "",
-            "large": ""
+            "small": "/assets/game-card-GEM.jpg",
+            "large": "/assets/game-card-GEM.jpg"
         },
         "banners": {
-            "product": "/assets/game-banner-AA-1.jpg",
-            "reports": "/assets/game-banner-AA-1.jpg"
+            "product": "/assets/game-banner-GEM.jpg",
+            "reports": "/assets/game-banner-GEM.jpg"
         },
         "play": {
             "type": "page",
