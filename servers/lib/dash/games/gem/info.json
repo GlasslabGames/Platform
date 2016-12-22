@@ -4,8 +4,8 @@
         "enabled": true,
         "visible": true,
         "maintenance": null,
-        "shortName": "Deep Sea Challenge",
-        "longName": "Deep Sea Challenge: Collaborative Problem Solving",
+        "shortName": "Deep Sea Crisis",
+        "longName": "Deep Sea Crisis: Collaborative Problem Solving",
         "grades": "5th - 8th graders",
         "subject": "Collaboration",
         "type": "Browser",
@@ -97,6 +97,32 @@
                 "curriculum": [
                     "Helps build a conceptual and intuitive understanding of collaborative problem solving in any learning environment",
                     "Brings highly engaging, commercial quality gameplay into any learning environment with effective reporting and instructional resources that help educators assess and improve students’ collaborative problem solving skills"
+                ],
+                "slideshow": [
+                    {
+                        "url": "/assets/GEM-carousel_1.png"
+                    },
+                    {
+                        "url": "/assets/GEM-carousel_2.png"
+                    },
+                    {
+                        "url": "/assets/GEM-carousel_3.png"
+                    },
+                    {
+                        "url": "/assets/GEM-carousel_4.png"
+                    },
+                    {
+                        "url": "/assets/GEM-carousel_5.png"
+                    },
+                    {
+                        "url": "/assets/GEM-carousel_6.png"
+                    },
+                    {
+                        "url": "/assets/GEM-carousel_7.png"
+                    },
+                    {
+                        "url": "/assets/GEM-carousel_8.png"
+                    }
                 ]
             },
             "standards": {
