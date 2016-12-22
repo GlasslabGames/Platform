@@ -6,8 +6,8 @@
         "maintenance": null,
         "shortName": "Deep Sea Challenge",
         "longName": "Deep Sea Challenge: Collaborative Problem Solving",
-        "grades": "",
-        "subject": "",
+        "grades": "5th - 8th graders",
+        "subject": "Collaboration",
         "type": "Browser",
         "platform": {
             "type": "Browser",
@@ -20,8 +20,8 @@
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "dev",
         "releaseDate": "TBD",
-        "shortDescription": "Deep Sea Challenge: Collaborative Problem Solving",
-        "description": "Deep Sea Challenge: Collaborative Problem Solving",
+        "shortDescription": "Deep Sea Crisis is a collaborative problem solving game designed for students in grades 6 and beyond. Aligned to 21st century skills and developed in partnership with NOAA and the Hewlett Foundation, this learning tool addresses the need for an engaging learning experience that helps teach students how to use effective communication and collaboration to solve complex problems.",
+        "description": "Deep Sea Crisis is a collaborative problem solving game designed for students in grades 6 and beyond. Aligned to 21st century skills and developed in partnership with NOAA and the Hewlett Foundation, this learning tool addresses the need for an engaging learning experience that helps teach students how to use effective communication and collaboration to solve complex problems. All hands on deck! Two players are put in charge of their very own submarine - and it’s seen quite a few adventures! Players need to keep it from sinking into the depths of the dark, mysterious ocean. One player needs to study their control manual and give instructions quickly, while the other player is in charge of the controls! Disarm all of the emergency alarms before the countdown timer expires to save your ship and keep exploring!",
         "developer": {
             "id": "GL",
             "name": "GlassLab, Inc.",
@@ -91,9 +91,13 @@
                 "id": "product",
                 "title": "Product Description",
                 "header": "About the Game",
-                "about": "",
+                "about": "Deep Sea Crisis is a collaborative problem solving game designed for students in grades 6 and beyond. Aligned to 21st century skills and developed in partnership with NOAA and the Hewlett Foundation, this learning tool addresses the need for an engaging learning experience that helps teach students how to use effective communication and collaboration to solve complex problems. All hands on deck! Two players are put in charge of their very own submarine - and it’s seen quite a few adventures! Players need to keep it from sinking into the depths of the dark, mysterious ocean. One player needs to study their control manual and give instructions quickly, while the other player is in charge of the controls! Disarm all of the emergency alarms before the countdown timer expires to save your ship and keep exploring!",
                 "video": "",
-                "brochure": ""
+                "brochure": "",
+                "curriculum": [
+                    "Helps build a conceptual and intuitive understanding of collaborative problem solving in any learning environment",
+                    "Brings highly engaging, commercial quality gameplay into any learning environment with effective reporting and instructional resources that help educators assess and improve students’ collaborative problem solving skills"
+                ]
             },
             "standards": {
                 "order": 2,
