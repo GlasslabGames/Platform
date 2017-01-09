@@ -42,16 +42,16 @@
             }
         },
         "thumbnail": {
-            "small": "/assets/thumb-game-GEM.jpg",
-            "large": "/assets/thumb-game-GEM.jpg"
+            "small": "/assets/thumb-game-GEM.png",
+            "large": "/assets/thumb-game-GEM.png"
         },
         "card": {
-            "small": "/assets/game-card-GEM.jpg",
-            "large": "/assets/game-card-GEM.jpg"
+            "small": "/assets/game-card-GEM.png",
+            "large": "/assets/game-card-GEM.png"
         },
         "banners": {
-            "product": "/assets/game-banner-GEM.jpg",
-            "reports": "/assets/game-banner-GEM.jpg"
+            "product": "/assets/game-banner-GEM.png",
+            "reports": "/assets/report-banner-GEM.png"
         },
         "play": {
             "type": "page",
