@@ -436,6 +436,14 @@ module.exports = {
         },
 
         {
+            api: "/api/v2/dash/reprocess/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "reprocessSince"
+            }
+        },
+        {
             api: "/api/v2/dash/reprocess/:gameId/:code",
             service: "dash",
             controller: "games",

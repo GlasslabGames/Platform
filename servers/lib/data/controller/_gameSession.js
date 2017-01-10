@@ -6,7 +6,8 @@ var when      = require('when');
 module.exports = {
     getGameSessionEvents: getGameSessionEvents,
     getGameSessionsInfo: getGameSessionsInfo,
-    getLatestGameSessions: getLatestGameSessions
+    getLatestGameSessions: getLatestGameSessions,
+    getGameSessionsSince: getGameSessionsSince
 };
 var exampleIn = {};
 var exampleOut = {};
@@ -100,5 +101,46 @@ function getLatestGameSessions(req, res) {
     } catch(err) {
         console.trace("Reports: getLatestGameSessions Error -", err);
         this.stats.increment("error", "GetLatestGameSessions.Catch");
+    }
+}
+
+exampleIn.getGameSessionsSince = {
+    gameId: 'SC',
+    earliestTimeStamp: '1483727721'
+};
+function getGameSessionsSince(req, res) {
+    try {
+        // check input
+
+
+        if( !( req.params &&
+            req.params.hasOwnProperty("timestamp") ) ) {
+            this.requestUtil.errorResponse(res, {key:"report.timestamp.missing", error: "missing timestamp"});
+            return;
+        }
+        var earliestTimeStamp = parseInt(req.params.timestamp);
+        if (isNaN(earliestTimeStamp)) {
+            this.requestUtil.errorResponse(res, {key:"report.timestamp.invalid", error: "incorrect timestamp"});
+            return;
+        }
+
+        var gameId;  // optional
+        if( ( req.params &&
+            req.params.hasOwnProperty("gameId") ) ) {
+            gameId = req.params.gameId.toUpperCase();
+        }
+
+        this.cbds.getGameSessionsSince(earliestTimeStamp, gameId).then(
+            function(results) {
+                this.requestUtil.jsonResponse(res, results);
+            }.bind(this),
+            function(err) {
+                this.requestUtil.errorResponse(res,err);
+            }.bind(this)
+        );
+
+    } catch(err) {
+        console.trace("Reports: getGameSessionsSince Error -", err);
+        this.stats.increment("error", "GetGameSessionsSince.Catch");
     }
 }

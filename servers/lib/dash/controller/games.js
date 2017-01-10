@@ -22,6 +22,7 @@ module.exports = {
     getBadgeJSON:                    getBadgeJSON,
     generateBadgeCode:               generateBadgeCode,
     badgeCodeAwarded:                badgeCodeAwarded,
+    reprocessSince:                  reprocessSince,
     reprocessGame:                   reprocessGame,
     queueStatus:                     queueStatus,
     migrateInfoFiles:                migrateInfoFiles,
@@ -607,6 +608,41 @@ function reprocessGame(req, res){
     if (req.query.onlyMissing && _.isString(req.query.onlyMissing) && req.query.onlyMissing.length) {
         jobData['onlyMissing'] = req.query.onlyMissing.toLowerCase() == "true";
     }
+
+    // send request to assessment
+    _internalAssessmentRequest.bind(this)("/int/v1/aeng/queue", jobData).then(
+        function(r) {
+            res.end('{"reprocess": "started"}');
+        }
+    );
+}
+
+function reprocessSince(req, res) {
+    if( !(req.params.code &&
+        _.isString(req.params.code) &&
+        req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    var jobData = {
+        "jobType": "reprocess",
+    };
+
+    if (!req.query.since || isNaN(parseInt(req.query.since))) {
+        // need a since
+        this.requestUtil.errorResponse(res, {key:"dash.since.invalid"}, 401);
+        return;
+    }
+    jobData['since'] = parseInt(req.query.since);
 
     // send request to assessment
     _internalAssessmentRequest.bind(this)("/int/v1/aeng/queue", jobData).then(

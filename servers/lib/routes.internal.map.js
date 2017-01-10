@@ -53,6 +53,15 @@ module.exports = {
             }
         },
         {
+            api: "/int/v1/data/game/sessionsSince/:timestamp",
+            service: "data",
+            controller: "_gameSession",
+            method: {
+                get: "getGameSessionsSince"
+            }
+        },
+
+        {
             api: "/int/v1/data/game/:gameId/user/:userId/events",
             service: "data",
             controller: "_events",

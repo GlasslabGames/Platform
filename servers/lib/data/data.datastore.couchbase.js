@@ -419,6 +419,21 @@ var gdv_getLatestGameSessionsByUserId_reduce = function(keys, values, rereduce) 
 
 };
 
+var gdv_getGameSessionsByTimeStamp = function(doc, meta) {
+    var values = meta.id.split(':');
+    if( (values[0] == 'gd') &&
+        (values[1] == 'gs') &&
+        (meta.type == 'json') &&
+        doc.hasOwnProperty('gameId') &&
+        doc.hasOwnProperty('serverStartTimeStamp') &&
+        doc.hasOwnProperty('userId')
+    )
+    {
+        emit( [doc.serverStartTimeStamp, doc.gameId, doc.userId, doc.gameSessionId] );
+    }
+};
+
+
 // ------------------------------------
 
     this.telemDDoc = {
@@ -486,6 +501,9 @@ var gdv_getLatestGameSessionsByUserId_reduce = function(keys, values, rereduce) 
             getLatestGameSessionsByUserId: {
                 map: gdv_getLatestGameSessionsByUserId,
                 reduce: gdv_getLatestGameSessionsByUserId_reduce
+            },
+            getGameSessionsByTimeStamp: {
+                map: gdv_getGameSessionsByTimeStamp
             }
         }
     };
@@ -1648,6 +1666,47 @@ return when.promise(function(resolve, reject) {
 
         }.bind(this)
     );
+// ------------------------------------------------
+}.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getGameSessionsSince = function(earliestTimeStamp, gameId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+    var currentTimeStamp = Util.GetTimeStamp();
+    var startkey = [earliestTimeStamp];
+    var endkey = [currentTimeStamp];
+    if (gameId) {
+        startkey.append(gameId);
+        endkey.append(gameId);
+    }
+    this.client.view("telemetry", 'getGameSessionsByTimeStamp').query(
+        {
+            startkey: startkey,
+            endkey: endkey
+        },
+        function(err, results) {
+            if(err){
+                console.errorExt("DataStore Couchbase TelemetryStore", "Get Latest Sessions By UserId Error -", err);
+                reject(err);
+                return;
+            }
+
+            var mapped_results = _.map(results, function(r) {
+                return {
+                    earliestTimeStamp: r.key[0],
+                    gameId: r.key[1],
+                    userId: r.key[2],
+                    gameSessionId: r.key[3],
+                }
+            });
+            resolve(mapped_results)
+
+        }.bind(this)
+    );
+
 // ------------------------------------------------
 }.bind(this));
 };
