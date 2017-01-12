@@ -1679,8 +1679,8 @@ return when.promise(function(resolve, reject) {
     var startkey = [earliestTimeStamp];
     var endkey = [currentTimeStamp];
     if (gameId) {
-        startkey.append(gameId);
-        endkey.append(gameId);
+        startkey.push(gameId);
+        endkey.push(gameId);
     }
     this.client.view("telemetry", 'getGameSessionsByTimeStamp').query(
         {
@@ -1694,7 +1694,8 @@ return when.promise(function(resolve, reject) {
                 return;
             }
 
-            var mapped_results = _.map(results, function(r) {
+            var filtered_results = gameId ? _.filter(results, function(r) { return r.key[1] == gameId; }) : results;
+            var mapped_results = _.map(filtered_results, function(r) {
                 return {
                     earliestTimeStamp: r.key[0],
                     gameId: r.key[1],

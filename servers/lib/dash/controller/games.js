@@ -644,6 +644,12 @@ function reprocessSince(req, res) {
     }
     jobData['since'] = parseInt(req.query.since);
 
+    if (req.query.gameId) {
+        // optional gameId
+        var gameId = req.query.gameId.toUpperCase();
+        jobData['gameId'] = gameId;
+    }
+
     // send request to assessment
     _internalAssessmentRequest.bind(this)("/int/v1/aeng/queue", jobData).then(
         function(r) {

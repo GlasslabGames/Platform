@@ -125,9 +125,9 @@ function getGameSessionsSince(req, res) {
         }
 
         var gameId;  // optional
-        if( ( req.params &&
-            req.params.hasOwnProperty("gameId") ) ) {
-            gameId = req.params.gameId.toUpperCase();
+        if( ( req.query &&
+            req.query.hasOwnProperty("gameId") ) ) {
+            gameId = req.query.gameId.toUpperCase();
         }
 
         this.cbds.getGameSessionsSince(earliestTimeStamp, gameId).then(
