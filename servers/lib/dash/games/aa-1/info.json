@@ -112,6 +112,12 @@
                 "criticalQuestions": "Using critical questions",
                 "usingBacking": "Using backing"
             },
+            "levels": {
+                "Advancing": "More than the threshold of attempts have been successful",
+                "NeedSupport": "Attempts have been made but success rate is below threshold",
+                "NotAttempted": "No attempts have been made",
+                "NotAvailable": "No opportunities to practice the skill are available"
+            },
             "quests": {
                 "Quest0-1": {
                     "mission": 1,

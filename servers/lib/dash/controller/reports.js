@@ -961,24 +961,33 @@ function _build_course_progress(studentAssessments, drkInfo) {
 
 function _calculate_course_skill_average(studentAssessments, drkInfo) {
 
-    // sum up each students currentProgress.skillLevels
-    var acc = _.mapValues(drkInfo.skills, function() { return { "attempts": 0, "correct": 0 } });
+    // count up students currentProgress.skillLevels
+    var acc = _.mapValues(drkInfo.skills, function() {
+        return _.mapValues(drkInfo.levels, function() { return 0; });
+    });
     var courseSkillTotals = _.transform(studentAssessments, function(result, studentReport) {
-        if (studentReport) {
-            _.forOwn(studentReport.currentProgress.skillLevel, function(missionSkillInfo, skillId) {
-                result[skillId].attempts += missionSkillInfo.score.attempts;
-                result[skillId].correct += missionSkillInfo.score.correct;
-            });
-        }
+
+        _.forOwn(drkInfo.skills, function(skillInfo, skillId) {
+            if (studentReport && (skillId in studentReport.currentProgress.skillLevel)) {
+                var level = studentReport.currentProgress.skillLevel[skillId].level;
+                result[skillId][level] += 1;
+            } else {
+                result[skillId]['NotAttempted'] += 1;
+            }
+
+        });
         return result;
+
     }, acc);
 
-    //determine course levels
-    return _.mapValues(courseSkillTotals, function(skillTotals, skillId) {
-        var level = _determineLevel(skillId, skillTotals);
-        return {
-            'level': level,
-            'score': skillTotals
+    //fold NotAvailable into NotAttempted
+    _.forOwn(courseSkillTotals, function(skillTotals, skillId) {
+        if ('NotAvailable' in courseSkillTotals[skillId]) {
+            var c = courseSkillTotals[skillId]['NotAvailable'];
+            delete courseSkillTotals[skillId]['NotAvailable'];
+            courseSkillTotals[skillId]['NotAttempted'] += c;
         }
     });
+
+    return courseSkillTotals;
 }
