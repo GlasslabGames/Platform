@@ -1,11 +1,11 @@
 {
     "basic": {
-        "gameId": "TEACHABLEAGENTSPR",
+        "gameId": "TEACHABLEAGENTSPRTEST",
         "enabled": true,
         "visible": true,
         "maintenance": null,
-        "shortName": "Teachable Agents",
-        "longName": "Teachable Agents: Planetary Rescue",
+        "shortName": "Teachable Agents Test",
+        "longName": "Teachable Agents Test: Planetary Rescue",
         "grades": "6 - 8",
         "subject": "Science",
         "type": "Browser",
@@ -57,8 +57,8 @@
         "play": {
             "type": "page",
             "page": {
-                "embed": "http://awesome.stanford.edu/fschoice/home/TA2.0/game/StartGame.html",
-                "embedSecure": "https://awesome.stanford.edu/fschoice/home/TA2.0/game/StartGame.html",
+                "embed": "http://www.teachableagentsgame.com",
+                "embedSecure": "https://www.teachableagentsgame.com",
                 "format": "html",
                 "size": {
                     "width": 800,
