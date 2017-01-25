@@ -4402,18 +4402,18 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 } else if (results.length > 2) {
                     state = "invalid records";
                 } else if (results.length === 2) {
-                    if ((results[0]['license_id'] != licenseId && results[1]['license_id'] != licenseId) || (results[0].status !== 'active' && results[1].status !== 'active')) {
+                    if (results[0]['license_id'] != licenseId && results[1]['license_id'] != licenseId) {
                         state = "invalid records";
-                    } else {
+                    } else if (results[0].status === 'active' || results[1].status === 'active') {
                         var oldLic = (results[0].status === 'active' ? 0 : 1);
                         state = results[oldLic]['license_id'];
                     }
                 } else {
 					if( results[0].status === "po-received"){
 						state = results[0]['license_id'];
-					} else if (results[0]['license_id'] != licenseId || results[0].status !== 'active') {
+					} else if (results[0]['license_id'] != licenseId) {
 	                    state = "inconsistent";
-                    } else {
+                    } else if (results[0].status === 'active') {
                         state = results[0]['license_id'];
                     }
                 }
