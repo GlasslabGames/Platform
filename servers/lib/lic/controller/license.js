@@ -1426,7 +1426,7 @@ function setLicenseMapStatusToActive(req, res){
 
     _validateLicenseInstructorAccess.call(this, userId, licenseId)
         .then(function(status){
-            if(typeof status === "string"){
+            if(typeof status === "string" && status !== "pending"){
                 return status;
             }
             var userIdList = [userId];
@@ -4404,18 +4404,28 @@ function _validateLicenseInstructorAccess(userId, licenseId) {
                 } else if (results.length === 2) {
                     if (results[0]['license_id'] != licenseId && results[1]['license_id'] != licenseId) {
                         state = "invalid records";
+                    } else if (results[0].status === 'pending' || results[1].status === 'pending') {
+	                    state = "pending";
                     } else if (results[0].status === 'active' || results[1].status === 'active') {
                         var oldLic = (results[0].status === 'active' ? 0 : 1);
                         state = results[oldLic]['license_id'];
+                    } else {
+	                    state = "invalid records";
                     }
                 } else {
 					if( results[0].status === "po-received"){
 						state = results[0]['license_id'];
 					} else if (results[0]['license_id'] != licenseId) {
-	                    state = "inconsistent";
-                    } else if (results[0].status === 'active') {
-                        state = results[0]['license_id'];
-                    }
+						state = "inconsistent";
+					} else {
+						if (results[0].status === 'pending') {
+							state = "pending";
+						} else if (results[0].status === 'active') {
+							state = results[0]['license_id'];
+						} else {
+							state = "inconsistent";
+                        }
+					}
                 }
 
                 resolve(state);
