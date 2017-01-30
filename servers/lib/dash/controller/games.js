@@ -602,6 +602,9 @@ function reprocessGame(req, res){
         "gameId": gameId
     };
 
+    if (req.query.courseId && _.isString(req.query.courseId) && req.query.courseId.length) {
+        jobData['courseId'] = req.query.courseId;
+    }
     if (req.query.assessmentId && _.isString(req.query.assessmentId) && req.query.assessmentId.length) {
         jobData['assessmentId'] = req.query.assessmentId;
     }
