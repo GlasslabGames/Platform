@@ -847,7 +847,11 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                             "skills": {}
                                         }
                                     }
-                                    studentQuests[questSkillInfo.questId].skills[skillId] = questSkillInfo.score;
+                                    studentQuests[questSkillInfo.questId].skills[skillId] = {
+                                        score: questSkillInfo.score,
+                                        detail: questSkillInfo.detail
+                                    }
+
                                 });
                             });
                         }
@@ -859,7 +863,9 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             var studentQuestScore = studentQuests[questId];
                             var skills;
                             if (studentQuestScore) {
-                                skills = _.mapValues(studentQuestScore.skills, function(skillScore, skillId) {
+                                skills = _.mapValues(studentQuestScore.skills, function(skillInfo, skillId) {
+
+                                    var skillScore = skillInfo.score;
 
                                     var skillLevel = _determineLevel(skillId, skillScore, questInfo);
                                     if (skillLevel != "NotAvailable") {
@@ -867,18 +873,21 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                             latestSkillScores[skillId] = {
                                                 mission: questInfo.mission,
                                                 level: skillLevel,
-                                                score: skillScore
+                                                score: skillScore,
+                                                detail: skillInfo.detail,
                                             }
                                         }
                                         else if (questInfo.mission > latestSkillScores[skillId].mission) {
                                             latestSkillScores[skillId].level = skillLevel;
                                             latestSkillScores[skillId].score = skillScore;
+                                            latestSkillScores[skillId].detail = skillInfo.detail;
                                         }
                                     }
 
                                     return {
                                         "level": skillLevel,
-                                        "score": skillScore
+                                        "score": skillScore,
+                                        "detail": skillInfo.detail,
                                     }
                                 });
                                 if (questInfo.mission > latestMission) {
