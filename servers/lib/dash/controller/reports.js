@@ -868,7 +868,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                     var skillScore = skillInfo.score;
 
                                     var skillLevel = _determineLevel(skillId, skillScore, questInfo);
-                                    if (skillLevel != "NotAvailable") {
+                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
                                         if (!(skillId in latestSkillScores)) {
                                             latestSkillScores[skillId] = {
                                                 mission: questInfo.mission,
@@ -878,6 +878,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                             }
                                         }
                                         else if (questInfo.mission > latestSkillScores[skillId].mission) {
+                                            latestSkillScores[skillId].mission = questInfo.mission;
                                             latestSkillScores[skillId].level = skillLevel;
                                             latestSkillScores[skillId].score = skillScore;
                                             latestSkillScores[skillId].detail = skillInfo.detail;
