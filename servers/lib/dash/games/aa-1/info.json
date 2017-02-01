@@ -119,26 +119,40 @@
                 "NotAvailable": "No opportunities to practice the skill are available"
             },
             "fuseCoreMapping": {
-                "3353": {
-                    "4490": { "correct": true,  "detail": "AUTHORITRON" },
-                    "4486": { "correct": false, "detail": "OBSERVATRON" },
-                    "4489": { "correct": false, "detail": "OBSERVATRON" },
-                    "4491": { "correct": false, "detail": "OBSERVATRON" },
-                    "4487": { "correct": true,  "detail": "CONSEBOT" }
+                "quests": {
+                    "Quest11": {
+                        "4972": { "correct": false, "detail": "CONSEBOT"},
+                        "4973": { "correct": false, "detail": "CONSEBOT"},
+                        "4976": { "correct": true, "detail": "CONSEBOT"},
+                        "4975": { "correct": false, "detail": "AUTHORITRON"},
+                        "4977": { "correct": true, "detail": "AUTHORITRON"},
+                        "4970": { "correct": false, "detail": "AUTHORITRON"},
+                        "4971": { "correct": true, "detail": "OBSERVATRON"},
+                        "4974": { "correct": false, "detail": "OBSERVATRON"}
+                    }
                 },
-                "3354": {
-                    "4493": { "correct": true,  "detail": "AUTHORITRON" },
-                    "4495": { "correct": false, "detail": "AUTHORITRON" },
-                    "4492": { "correct": false, "detail": "OBSERVATRON" },
-                    "4494": { "correct": false, "detail": "OBSERVATRON" },
-                    "4496": { "correct": false, "detail": "CONSEBOT" }
-                },
-                "3357": {
-                    "4510": { "correct": true,  "detail": "AUTHORITRON" },
-                    "4509": { "correct": false, "detail": "OBSERVATRON" },
-                    "4507": { "correct": false, "detail": "CONSEBOT" },
-                    "4508": { "correct": false, "detail": "CONSEBOT" },
-                    "4485": { "correct": true,  "detail": "CONSEBOT" }
+                "claimIds": {
+                  "3353": {
+                      "4490": { "correct": true,  "detail": "AUTHORITRON" },
+                      "4486": { "correct": false, "detail": "OBSERVATRON" },
+                      "4489": { "correct": false, "detail": "OBSERVATRON" },
+                      "4491": { "correct": false, "detail": "OBSERVATRON" },
+                      "4487": { "correct": true,  "detail": "CONSEBOT" }
+                  },
+                  "3354": {
+                      "4493": { "correct": true,  "detail": "AUTHORITRON" },
+                      "4495": { "correct": false, "detail": "AUTHORITRON" },
+                      "4492": { "correct": false, "detail": "OBSERVATRON" },
+                      "4494": { "correct": false, "detail": "OBSERVATRON" },
+                      "4496": { "correct": false, "detail": "CONSEBOT" }
+                  },
+                  "3357": {
+                      "4510": { "correct": true,  "detail": "AUTHORITRON" },
+                      "4509": { "correct": false, "detail": "OBSERVATRON" },
+                      "4507": { "correct": false, "detail": "CONSEBOT" },
+                      "4508": { "correct": false, "detail": "CONSEBOT" },
+                      "4485": { "correct": true,  "detail": "CONSEBOT" }
+                  }
                 }
             },
             "quests": {
