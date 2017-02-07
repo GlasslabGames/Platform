@@ -1074,6 +1074,14 @@ module.exports = {
                 post: "registerUserV2"
             }
         },
+	    {
+		    api: "/api/v2/auth/user/bulkregister",
+		    service: "auth",
+		    controller: "user",
+		    method: {
+			    post: "bulkRegisterStudents"
+		    }
+	    },
         {
             api: "/api/v2/auth/user/unregister",
             service: "auth",
