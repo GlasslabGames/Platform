@@ -1028,8 +1028,7 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 	            this.requestUtil.errorResponse( res, {"notEnoughSpace":true} );
             }
 
-            var usernameMap = {};
-
+	        var usernames = [];
             _(req.body.students).forEach(function(student){
                 var username   = Util.ConvertToString(student.username);
                 var password   = Util.ConvertToString(student.password);
@@ -1040,10 +1039,8 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
                     registerErr(null, null);
                 }
 
-                if (usernameMap[username]) {
+                if (usernames.indexOf(username) >= 0) {
 	                addStudentError(username, "username");
-                } else {
-                    usernameMap[username] = 1;
                 }
 
                 if(!password || !firstName || !lastName) {
@@ -1056,18 +1053,14 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
                 if(firstName === lastName) {
                     addStudentError(username, "duplicate");
                 }
-            }.bind(this));
 
-            var usernames = [];
-            _(req.body.students).forEach(function(student){
-                usernames.push(Util.ConvertToString(student.username));
+	            usernames.push(username);
             }.bind(this));
 
             this.getAuthStore().checkUserNamesUnique(usernames)
                 .then(function(nonuniqueUsernames){
                     if (nonuniqueUsernames.length === 0) {
                         if (Object.keys(studentErrors).length === 0 && studentErrors.constructor === Object) {
-
                             when.all(req.body.students.map(function(student){
 	                            var regData = {
 		                            username:      Util.ConvertToString(student.username),
