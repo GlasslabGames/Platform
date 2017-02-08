@@ -847,7 +847,11 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                             "skills": {}
                                         }
                                     }
-                                    studentQuests[questSkillInfo.questId].skills[skillId] = questSkillInfo.score;
+                                    studentQuests[questSkillInfo.questId].skills[skillId] = {
+                                        score: questSkillInfo.score,
+                                        detail: questSkillInfo.detail
+                                    }
+
                                 });
                             });
                         }
@@ -859,26 +863,32 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             var studentQuestScore = studentQuests[questId];
                             var skills;
                             if (studentQuestScore) {
-                                skills = _.mapValues(studentQuestScore.skills, function(skillScore, skillId) {
+                                skills = _.mapValues(studentQuestScore.skills, function(skillInfo, skillId) {
+
+                                    var skillScore = skillInfo.score;
 
                                     var skillLevel = _determineLevel(skillId, skillScore, questInfo);
-                                    if (skillLevel != "NotAvailable") {
+                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
                                         if (!(skillId in latestSkillScores)) {
                                             latestSkillScores[skillId] = {
                                                 mission: questInfo.mission,
                                                 level: skillLevel,
-                                                score: skillScore
+                                                score: skillScore,
+                                                detail: skillInfo.detail,
                                             }
                                         }
                                         else if (questInfo.mission > latestSkillScores[skillId].mission) {
+                                            latestSkillScores[skillId].mission = questInfo.mission;
                                             latestSkillScores[skillId].level = skillLevel;
                                             latestSkillScores[skillId].score = skillScore;
+                                            latestSkillScores[skillId].detail = skillInfo.detail;
                                         }
                                     }
 
                                     return {
                                         "level": skillLevel,
-                                        "score": skillScore
+                                        "score": skillScore,
+                                        "detail": skillInfo.detail,
                                     }
                                 });
                                 if (questInfo.mission > latestMission) {
@@ -961,24 +971,33 @@ function _build_course_progress(studentAssessments, drkInfo) {
 
 function _calculate_course_skill_average(studentAssessments, drkInfo) {
 
-    // sum up each students currentProgress.skillLevels
-    var acc = _.mapValues(drkInfo.skills, function() { return { "attempts": 0, "correct": 0 } });
+    // count up students currentProgress.skillLevels
+    var acc = _.mapValues(drkInfo.skills, function() {
+        return _.mapValues(drkInfo.levels, function() { return 0; });
+    });
     var courseSkillTotals = _.transform(studentAssessments, function(result, studentReport) {
-        if (studentReport) {
-            _.forOwn(studentReport.currentProgress.skillLevel, function(missionSkillInfo, skillId) {
-                result[skillId].attempts += missionSkillInfo.score.attempts;
-                result[skillId].correct += missionSkillInfo.score.correct;
-            });
-        }
+
+        _.forOwn(drkInfo.skills, function(skillInfo, skillId) {
+            if (studentReport && (skillId in studentReport.currentProgress.skillLevel)) {
+                var level = studentReport.currentProgress.skillLevel[skillId].level;
+                result[skillId][level] += 1;
+            } else {
+                result[skillId]['NotAttempted'] += 1;
+            }
+
+        });
         return result;
+
     }, acc);
 
-    //determine course levels
-    return _.mapValues(courseSkillTotals, function(skillTotals, skillId) {
-        var level = _determineLevel(skillId, skillTotals);
-        return {
-            'level': level,
-            'score': skillTotals
+    //fold NotAvailable into NotAttempted
+    _.forOwn(courseSkillTotals, function(skillTotals, skillId) {
+        if ('NotAvailable' in courseSkillTotals[skillId]) {
+            var c = courseSkillTotals[skillId]['NotAvailable'];
+            delete courseSkillTotals[skillId]['NotAvailable'];
+            courseSkillTotals[skillId]['NotAttempted'] += c;
         }
     });
+
+    return courseSkillTotals;
 }

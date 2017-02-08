@@ -89,15 +89,37 @@ function getLatestGameSessions(req, res) {
         //     return;
         // }
 
-        this.cbds.getLatestGameSessions(gameId).then(
-            function(results) {
-                this.requestUtil.jsonResponse(res, results);
-            }.bind(this),
+        var courseId;  // optional
+        if( ( req.query &&
+            req.query.hasOwnProperty("courseId") ) ) {
+            courseId = req.query.courseId;
+        }
 
+        // if we got a courseId, build a list of studentIds in the course
+        var lmsService = this._serviceManager.get("lms").service;
+        var studentIdsPromise = courseId ?
+            lmsService.getStudentsOfCourse(courseId).then(function(students) {
+                return _.map(students, function(s) { return s.id; })
+            }) : when.promise(function(resolve, reject) { resolve(undefined) }.bind(this));
+
+        studentIdsPromise.then(
+            function(studentIds) {
+
+                this.cbds.getLatestGameSessions(gameId, studentIds).then(
+                    function(results) {
+                        this.requestUtil.jsonResponse(res, results);
+                    }.bind(this),
+
+                    function(err) {
+                        this.requestUtil.errorResponse(res,err);
+                    }.bind(this)
+                );
+
+            }.bind(this),
             function(err) {
                 this.requestUtil.errorResponse(res,err);
-            }.bind(this)
-        );
+            }.bind(this));
+
     } catch(err) {
         console.trace("Reports: getLatestGameSessions Error -", err);
         this.stats.increment("error", "GetLatestGameSessions.Catch");

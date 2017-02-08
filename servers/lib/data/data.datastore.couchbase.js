@@ -1637,14 +1637,18 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
-TelemDS_Couchbase.prototype.getLatestGameSessions = function(gameId) {
+TelemDS_Couchbase.prototype.getLatestGameSessions = function(gameId, studentIds) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
-    this.client.view("telemetry", 'getLatestGameSessionsByUserId').query(
-        {
-            group_level: 2
-        },
+
+    var queryOptions = {
+        group: true
+    };
+    if (studentIds) {
+        queryOptions.keys = _.map(studentIds, function(student_id) { return [student_id, gameId]; });
+    }
+    this.client.view("telemetry", 'getLatestGameSessionsByUserId').query(queryOptions,
         function(err, results) {
             if(err){
                 console.errorExt("DataStore Couchbase TelemetryStore", "Get Latest Sessions By UserId Error -", err);
