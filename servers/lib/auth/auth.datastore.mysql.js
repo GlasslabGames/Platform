@@ -539,6 +539,31 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Auth_MySQL.prototype.checkUserNamesUnique = function(usernames){
+// add promise wrapper
+	return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+        var usernameString = "";
+        for (var i=0; i<usernames.length; i++) {
+	        usernameString += "LOWER("+this.ds.escape(usernames[i])+")";
+	        if (i<usernames.length-1) {
+	            usernameString += ", ";
+            }
+        }
+		var Q = "SELECT LOWER(username) FROM GL_USER WHERE LOWER(username) in ("+usernameString+")";
+		this.ds.query(Q)
+			.then(
+				function(data){
+				    resolve(data);
+				}.bind(this),
+				function(err) {
+					reject({"error": "failure", "exception": err}, 500);
+				}.bind(this)
+			);
+// ------------------------------------------------
+	}.bind(this));
+// end promise wrapper
+};
 
 Auth_MySQL.prototype.addUser = function(userData){
 // add promise wrapper
