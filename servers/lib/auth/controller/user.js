@@ -1054,8 +1054,8 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 								password.match(/[0-9]/) == null || password.match(/[A-Z]/) == null) {
 								addStudentError(username, "password");
 							}
-							if(firstName === lastName) {
-								addStudentError(username, "duplicate");
+							if(lastName.length !== 1) {
+								addStudentError(username, "initial");
 							}
 
 							usernames.push(username);
