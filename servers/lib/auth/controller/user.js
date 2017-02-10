@@ -1040,10 +1040,8 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 							var lastName   = Util.ConvertToString(student.lastName);
 
 							if (!username) {
-								registerErr(null, null);
-							}
-
-							if (usernames.indexOf(username) >= 0) {
+								addStudentError("", "username");
+							} else if (usernames.indexOf(username) >= 0) {
 								addStudentError(username, "username");
 							}
 
