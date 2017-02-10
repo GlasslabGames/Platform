@@ -4,6 +4,7 @@ var _         = require('lodash');
 var when      = require('when');
 var request   = require('request');
 var lConst    = require('../../lms/lms.const.js');
+var licConst    = require('../../lic/lic.const.js');
 var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
 
@@ -995,6 +996,7 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 									if(status === "lic.students.full"){
 										this.stats.increment("error", "Route.Register.User.LicStudentsFull");
 										this.requestUtil.errorResponse( res, {"notEnoughSpace":true} );
+										return;
 									}
 									return this.lmsStore.addUserToCourse(userId, courseId, lConst.role.student);
 								}.bind(this))
@@ -1009,6 +1011,7 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 				}.bind(this);
 
 				var licService = this.serviceManager.get("lic").service;
+				var license;
 				this.lmsStore.isCoursePremium(courseId)
 					.then(function(isPremium){
 						if(typeof isPremium === "string"){
@@ -1019,7 +1022,11 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 						}
 						return licService.myds.getLicenseFromPremiumCourse(courseId);
 					}.bind(this))
-					.then(function(license){
+					.then(function(lic){
+					    license = lic;
+						return this.lmsStore.getCourse(courseId);
+					}.bind(this))
+					.then(function(course){
 						if(license === "user.enroll.code.invalid"){
 							registerErr({key:license}, 404);
 							this.stats.increment("error", "Route.Register.User.InvalidInstitution");
@@ -1030,6 +1037,23 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 						if(studentSeatsRemaining && studentSeatsRemaining < req.body.students.length){
 							this.stats.increment("error", "Route.Register.User.licStudentsFull");
 							this.requestUtil.errorResponse( res, {"notEnoughSpace":true} );
+							return;
+						}
+
+						if (hasLicense) {
+							var packageType = license["package_type"];
+							var packageSize = license["package_size_tier"];
+							var packageDetails = {};
+							var plans = licConst.plan[packageType];
+							var seats = {};
+							licService._getPOSeats(packageSize, seats);
+							_(packageDetails).merge(plans, seats);
+
+							var studentTotal = course.studentCount + req.body.students.length;
+							if (studentTotal > packageDetails.studentSeats) {
+								this.requestUtil.errorResponse(res, {"notEnoughSpace": true});
+								return;
+							}
 						}
 
 						var usernames = [];
