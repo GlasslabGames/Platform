@@ -510,12 +510,6 @@ Lic_MySQL.prototype.getCourse = function(courseId) {
 						results.locked   = results.locked   ? true : false;
 						results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
 
-						// convert string to array
-						results.grade = this._splitGrade(results.grade);
-
-						// normalize archive dates
-						results.archivedDate = Util.GetTimeStamp(results.archivedDate);
-
 						resolve(results);
 					} else {
 						resolve();
