@@ -15,7 +15,7 @@ module.exports = LicService;
 
 function LicService(options, serviceManager) {
     try{
-        var LicStore, Errors;
+        var LicStore, LmsStore, Errors;
 
         this.options = _.merge(
             {
@@ -26,12 +26,14 @@ function LicService(options, serviceManager) {
         // Glasslab libs
         LicStore     = require('./lic.js').Datastore.MySQL;
         LicDataStore = require('./lic.js').Datastore.Couchbase;
+	    //LmsStore     = require('../lms/lms.js').Datastore.MySQL;
         Util         = require('../core/util.js');
         lConst       = require('./lic.js').Const;
         Errors       = require('../errors.js');
 
         this.requestUtil = new Util.Request(this.options, Errors);
         this.myds        = new LicStore(this.options.lic.datastore.mysql);
+	    //this.lmsStore    = new LmsStore(this.options.lms.datastore.mysql);
         this.cbds        = new LicDataStore(this.options.lic.datastore.couchbase);
         this.stats       = new Util.Stats(this.options, "Lic");
         this.cronEnabled = !!this.options.lic.cron.time;
@@ -281,10 +283,14 @@ LicService.prototype.assignPremiumCourse = function(courseId, licenseId){
 
                 // check number of student seats remaining in license
                 license = results[2][0];
-                var studentSeatsRemaining = license["student_seats_remaining"];
+
+	            var packageSize = license["package_size_tier"];
+	            var seats = {};
+	            this._getPOSeats( packageSize, seats );
+
                 // if not enough seats
                 // return proper error message, informing teacher that there are not enough license seats left
-                if(newPremiumStudents.length > studentSeatsRemaining){
+                if(newPremiumStudents.length > seats.studentSeats){
                     return "not enough seats";
                 }
                 // if math adds up correctly, then assign the students
@@ -448,15 +454,25 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
     return when.promise(function(resolve, reject){
         var license;
         var licenseId;
-        var seats;
-        this.myds.getLicenseFromPremiumCourse(courseId)
+        var studentSeats;
+        var studentsInCourse;
+
+	    //this.lmsStore.getCourse(courseId)
+	    this.myds.getCourse(courseId)
+		    .then(function(course){
+                studentsInCourse = course.studentCount;
+			    return this.myds.getLicenseFromPremiumCourse(courseId);
+		    }.bind(this))
             .then(function (results) {
                 if(!results){
                     return "lms.course.not.premium";
                 }
                 license = results;
                 licenseId = license.id;
-                seats = license["package_size_tier"];
+                var seats = license["package_size_tier"];
+	            var iseats = {};
+	            this._getPOSeats( seats, iseats );
+	            studentSeats = iseats.studentSeats;
                 // get active student list
                 return this.cbds.getStudentsByLicense(licenseId);
             }.bind(this))
@@ -464,8 +480,7 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if(typeof studentMap === "string"){
                     return studentMap;
                 }
-                var studentSeatsRemaining = license["student_seats_remaining"];
-                if (studentSeatsRemaining === 0 && !studentMap[userId]) {
+                if (!studentMap[userId] && studentsInCourse >= studentSeats) {
                     return "lic.students.full";
                 }
                 if (studentMap[userId] === undefined) {
@@ -481,10 +496,6 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
                 if (typeof status === "string") {
                     return status;
                 }
-
-                var iseats = {};
-                this._getPOSeats( seats, iseats );
-                var studentSeats = iseats.studentSeats;
                 return this.updateStudentSeatsRemaining(licenseId, studentSeats);
             }.bind(this))
             .then(function (status) {
@@ -523,7 +534,8 @@ LicService.prototype.updateStudentSeatsRemaining = function(licenseId, seats){
     return when.promise(function(resolve, reject){
         this.cbds.countActiveStudentsByLicense(licenseId)
             .then(function(count){
-                var seatsRemaining = seats - count;
+                //var seatsRemaining = seats - count;
+	            var seatsRemaining = seats;
                 var updateFields = {student_seats_remaining: seatsRemaining};
                 return this.myds.updateLicenseById(licenseId, updateFields);
             }.bind(this))

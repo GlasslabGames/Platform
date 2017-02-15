@@ -481,6 +481,56 @@ Lic_MySQL.prototype.getCourseTeacherMapByLicense = function(licenseId){
     }.bind(this));
 };
 
+Lic_MySQL.prototype.getCourse = function(courseId) {
+// add promise wrapper
+	return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+		var Q =
+			"SELECT         \
+				c.id,       \
+				c.title,    \
+				c.grade,    \
+				c.locked > 0 as locked,      \
+				c.archived > 0 as archived,  \
+				c.premium_games_assigned > 0 as premiumGamesAssigned,\
+				(SELECT code FROM GL_CODE WHERE course_id=c.id) as code,    \
+				IFNULL((SELECT COUNT(course_id) FROM GL_MEMBERSHIP WHERE role='student' AND course_id=c.id GROUP BY course_id), 0) as studentCount,    \
+				c.archived_Date as archivedDate,    \
+				c.institution_id as institution,     \
+				c.lmsType \
+			FROM GL_COURSE c JOIN GL_MEMBERSHIP m ON c.id=m.course_id \
+			WHERE c.id="+ this.ds.escape(courseId);
+
+		this.ds.query(Q)
+			.then(function(results) {
+					if(results.length > 0) {
+						results = results[0];
+						results.archived = results.archived ? true : false;
+						results.locked   = results.locked   ? true : false;
+						results.premiumGamesAssigned = results.premiumGamesAssigned ? true : false;
+
+						// convert string to array
+						results.grade = this._splitGrade(results.grade);
+
+						// normalize archive dates
+						results.archivedDate = Util.GetTimeStamp(results.archivedDate);
+
+						resolve(results);
+					} else {
+						resolve();
+					}
+				}.bind(this),
+				function(err) {
+					reject({"error": "failure", "exception": err}, 500);
+				}.bind(this)
+			);
+
+// ------------------------------------------------
+	}.bind(this));
+// end promise wrapper
+};
+
 Lic_MySQL.prototype.getUsersByEmail = function(emails){
     return when.promise(function(resolve, reject){
         var Q = "SELECT * FROM GL_USER WHERE email in (" + this.ds.escape(emails) + ");";

@@ -1033,24 +1033,14 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 							return;
 						}
 						var hasLicense = !!license;
-						var studentSeatsRemaining = license["student_seats_remaining"];
-						if(studentSeatsRemaining && studentSeatsRemaining < req.body.students.length){
-							this.stats.increment("error", "Route.Register.User.licStudentsFull");
-							this.requestUtil.errorResponse( res, {"notEnoughSpace":true} );
-							return;
-						}
 
 						if (hasLicense) {
-							var packageType = license["package_type"];
 							var packageSize = license["package_size_tier"];
-							var packageDetails = {};
-							var plans = licConst.plan[packageType];
 							var seats = {};
-							licService._getPOSeats(packageSize, seats);
-							_(packageDetails).merge(plans, seats);
+							licService._getPOSeats( packageSize, seats );
 
 							var studentTotal = course.studentCount + req.body.students.length;
-							if (studentTotal > packageDetails.studentSeats) {
+							if (studentTotal > seats.studentSeats) {
 								this.requestUtil.errorResponse(res, {"notEnoughSpace": true});
 								return;
 							}
