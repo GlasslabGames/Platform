@@ -4,7 +4,6 @@ var _         = require('lodash');
 var when      = require('when');
 var request   = require('request');
 var lConst    = require('../../lms/lms.const.js');
-var licConst    = require('../../lic/lic.const.js');
 var aConst    = require('../../auth/auth.const.js');
 var Util      = require('../../core/util.js');
 
@@ -988,23 +987,25 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 				}.bind(this);
 
 				var register = function(regData, hasLicense) {
-					return this.registerUser(regData)
-						.then(function(userId){
-							this.stats.increment("info", "AddUserToCourse");
-							_enrollPremiumIfPremium.call(this, userId, courseId, hasLicense)
-								.then(function(status){
-									if(status === "lic.students.full"){
-										this.stats.increment("error", "Route.Register.User.LicStudentsFull");
-										this.requestUtil.errorResponse( res, {"notEnoughSpace":true} );
-										return;
-									}
-									return this.lmsStore.addUserToCourse(userId, courseId, lConst.role.student);
-								}.bind(this))
-								// catch all errors
-								.then(null, function(err){
-									console.errorExt("AuthService", "Register Error -",err);
-									registerErr(err, 404);
-								});
+					return this.registerStudents(regData)
+						.then(function(userIds){
+						    when.all(userIds.map(function(userId){
+							    this.stats.increment("info", "AddUserToCourse");
+							    _enrollPremiumIfPremium.call(this, userId, courseId, hasLicense)
+								    .then(function(status){
+									    if(status === "lic.students.full"){
+										    this.stats.increment("error", "Route.Register.User.LicStudentsFull");
+										    this.requestUtil.errorResponse( res, {"notEnoughSpace":true} );
+										    return;
+									    }
+									    return this.lmsStore.addUserToCourse(userId, courseId, lConst.role.student);
+								    }.bind(this))
+								    // catch all errors
+								    .then(null, function(err){
+									    console.errorExt("AuthService", "Register Error -",err);
+									    registerErr(err, 404);
+								    });
+						    }.bind(this)));
 						}.bind(this))
 						// catch all errors
 						.then(null, registerErr);
@@ -1041,16 +1042,12 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 						}
 
 						if (hasLicense) {
-							var packageType = license["package_type"];
 							var packageSize = license["package_size_tier"];
-							var packageDetails = {};
-							var plans = licConst.plan[packageType];
 							var seats = {};
-							licService._getPOSeats(packageSize, seats);
-							_(packageDetails).merge(plans, seats);
+							licService._getPOSeats( packageSize, seats );
 
 							var studentTotal = course.studentCount + req.body.students.length;
-							if (studentTotal > packageDetails.studentSeats) {
+							if (studentTotal > seats.studentSeats) {
 								this.requestUtil.errorResponse(res, {"notEnoughSpace": true});
 								return;
 							}
@@ -1101,8 +1098,10 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 												trial:         false,
 												subscribe:     false
 											};
-											return register(regData, hasLicense);
-										}.bind(this))).then(function(){
+											return regData;
+										}.bind(this))).then(function(allRegData){
+                                            return register(allRegData, hasLicense);
+										}.bind(this)).then(function(){
 											this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(lConst.role.student));
 											this.requestUtil.jsonResponse( res, {} );
 										}.bind(this));
