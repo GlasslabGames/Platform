@@ -1,0 +1,182 @@
+{
+  "basic": {
+    "gameId": "GEMAUDIO",
+    "enabled": true,
+    "visible": true,
+    "maintenance": null,
+    "shortName": "Deep Sea Crisis Audio Version",
+    "longName": "Deep Sea Crisis Audio Version: Collaborative Problem Solving",
+    "grades": "5th - 8th graders",
+    "subject": "Collaboration",
+    "type": "Browser",
+    "platform": {
+      "type": "Browser",
+      "icon": {
+        "small": "/assets/platform-browser.png",
+        "large": "/assets/platform-browser@2x.png"
+      }
+    },
+    "price": "Free",
+    "packages": "PC/Mac, Chromebook/Web Games",
+    "release": "dev",
+    "releaseDate": "TBD",
+    "shortDescription": "Deep Sea Crisis Audio Version is a collaborative problem solving game designed for students in grades 6 and beyond. Aligned to 21st century skills and developed in partnership with NOAA and the Hewlett Foundation, this learning tool addresses the need for an engaging learning experience that helps teach students how to use effective communication and collaboration to solve complex problems.",
+    "description": "Deep Sea Crisis Audio Version is a collaborative problem solving game designed for students in grades 6 and beyond. Aligned to 21st century skills and developed in partnership with NOAA and the Hewlett Foundation, this learning tool addresses the need for an engaging learning experience that helps teach students how to use effective communication and collaboration to solve complex problems. All hands on deck! Two players are put in charge of their very own submarine - and it’s seen quite a few adventures! Players need to keep it from sinking into the depths of the dark, mysterious ocean. One player needs to study their control manual and give instructions quickly, while the other player is in charge of the controls! Disarm all of the emergency alarms before the countdown timer expires to save your ship and keep exploring!",
+    "developer": {
+      "id": "GL",
+      "name": "GlassLab, Inc.",
+      "logo": {
+        "small": "/assets/glasslab-logo.png",
+        "large": "/assets/glasslab-logo-2x.png"
+      }
+    },
+    "settings": {
+      "canCreateMatches": true
+    },
+    "license": {
+      "type": "loginType",
+      "loginType": "glasslabv2",
+      "valid": false,
+      "message": {
+        "invalid": "In Development"
+      }
+    },
+    "thumbnail": {
+      "small": "/assets/thumb-game-GEM.png",
+      "large": "/assets/thumb-game-GEM.png"
+    },
+    "card": {
+      "small": "/assets/game-card-GEM.png",
+      "large": "/assets/game-card-GEM.png"
+    },
+    "banners": {
+      "product": "/assets/game-banner-GEM.png",
+      "reports": "/assets/report-banner-GEM.png"
+    },
+    "play": {
+      "type": "page",
+      "page": {
+        "embed": "https://s3.amazonaws.com/gl-gemini/testing/DeepSeaCrisisAudio/index.html",
+        "embedSecure": "https://s3.amazonaws.com/gl-gemini/testing/DeepSeaCrisisAudio/index.html",
+        "format": "html",
+        "size": {
+          "width": 940,
+          "height": 640
+        }
+      }
+    }
+  },
+  "assessment": [],
+  "reports": {
+    "list": []
+  },
+  "details": {
+    "buttons": [
+      {
+        "name": "Play Game",
+        "type": "play",
+        "authRequired": true,
+        "links": [
+          {
+            "name": "Play Game",
+            "type": "play"
+          }
+        ]
+      }
+    ],
+    "pages": {
+      "product": {
+        "order": 1,
+        "enabled": true,
+        "id": "product",
+        "title": "Product Description",
+        "header": "About the Game",
+        "about": "Deep Sea Crisis Audio Version is a collaborative problem solving game designed for students in grades 6 and beyond. Aligned to 21st century skills and developed in partnership with NOAA and the Hewlett Foundation, this learning tool addresses the need for an engaging learning experience that helps teach students how to use effective communication and collaboration to solve complex problems. All hands on deck! Two players are put in charge of their very own submarine - and it’s seen quite a few adventures! Players need to keep it from sinking into the depths of the dark, mysterious ocean. One player needs to study their control manual and give instructions quickly, while the other player is in charge of the controls! Disarm all of the emergency alarms before the countdown timer expires to save your ship and keep exploring!",
+        "video": "",
+        "brochure": "",
+        "curriculum": [
+          "Helps build a conceptual and intuitive understanding of collaborative problem solving in any learning environment",
+          "Brings highly engaging, commercial quality gameplay into any learning environment with effective reporting and instructional resources that help educators assess and improve students’ collaborative problem solving skills"
+        ],
+        "slideshow": [
+          {
+            "url": "/assets/GEM-carousel_1.png"
+          },
+          {
+            "url": "/assets/GEM-carousel_2.png"
+          },
+          {
+            "url": "/assets/GEM-carousel_3.png"
+          },
+          {
+            "url": "/assets/GEM-carousel_4.png"
+          },
+          {
+            "url": "/assets/GEM-carousel_5.png"
+          },
+          {
+            "url": "/assets/GEM-carousel_6.png"
+          },
+          {
+            "url": "/assets/GEM-carousel_7.png"
+          },
+          {
+            "url": "/assets/GEM-carousel_8.png"
+          }
+        ]
+      },
+      "standards": {
+        "order": 2,
+        "enabled": false,
+        "authRequired": false,
+        "id": "standards",
+        "title": "Standards",
+        "CCSS": [],
+        "TEKS": []
+      },
+      "lessonPlans": {
+        "order": 3,
+        "enabled": false,
+        "authRequired": true,
+        "id": "lessonPlans",
+        "title": "Lesson Plans",
+        "list": []
+      },
+      "research": {
+        "order": 4,
+        "enabled": false,
+        "authRequired": true,
+        "id": "research",
+        "title": "Research",
+        "list": [
+          {
+            "category": "",
+            "list": [
+              {
+                "name": "",
+                "link": ""
+              }
+            ]
+          }
+        ]
+      },
+      "reviews": {
+        "order": 5,
+        "enabled": false,
+        "id": "reviews",
+        "title": "Reviews",
+        "list": [
+          {
+            "reviewer": "",
+            "review": ""
+          }
+        ]
+      }
+    },
+    "social": {
+      "facebook": "http://facebook.com/glasslabgames",
+      "twitter": "http://twitter.com/glasslabgames",
+      "google": "https://plus.google.com/117864084582459836584/posts"
+    }
+  }
+}
