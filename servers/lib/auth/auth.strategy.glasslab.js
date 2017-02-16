@@ -260,6 +260,76 @@ return when.promise(function(resolve, reject) {
 // end promise wrapper
 };
 
+Glasslab_Strategy.prototype.registerStudents = function(studentsData){
+// add promise wrapper
+	return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+		var usernames = [];
+		for (var i=0; i<studentsData.length; i++) {
+			usernames.push(studentsData.username);
+		}
+
+		this._service.getAuthStore().checkUserNamesUnique(usernames)
+			.then(function(){
+				when.all(studentsData.map(function(userData) {
+					return this.registerStudent(userData);
+				}.bind(this)))
+				// added user
+					.then(function(userIds){
+						resolve(userIds);
+					}.bind(this))
+					// catch all errors
+					.then(null, function(err, code){
+						return reject(err, code);
+					}.bind(this));
+			}.bind(this))
+			// catch all errors
+			.then(null, function(err, code){
+				return reject(err, code);
+			}.bind(this));
+// ------------------------------------------------
+	}.bind(this));
+// end promise wrapper
+};
+
+Glasslab_Strategy.prototype.registerStudent = function(userData){
+// add promise wrapper
+	return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+		this.validatePassword(userData.password)
+		// encrypt password
+			.then(function(){
+				return this.encryptPassword(userData.password);
+			}.bind(this))
+			// add user
+			.then(function(password){
+				userData.password  = password;
+				userData.loginType = aConst.login.type.glassLabV2;
+				userData.role = lConst.role.student;
+				userData.email = "";
+
+				console.log(' ');
+				console.log(Util.DateGMTString(), 'adding new user ... ', userData.role, userData.username);
+				console.log(' ');
+				this.stats.increment("info", "new.user.created");
+				this.stats.increment("info", "new."+userData.role+'created');
+				return this._service.getAuthStore().addUser(userData);
+			}.bind(this))
+			// added user
+			.then(function(userId){
+				resolve(userId);
+			}.bind(this))
+			// catch all errors
+			.then(null, function(err, code){
+				return reject(err, code);
+			}.bind(this));
+// ------------------------------------------------
+	}.bind(this));
+// end promise wrapper
+};
+
 // Current password rule enforced by both client and server:
 // At least 6 characters
 // Must have at least one uppercase letter
