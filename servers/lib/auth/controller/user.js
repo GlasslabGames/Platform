@@ -1121,7 +1121,18 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
                                 }
                             }.bind(this));
                         } else {
-                            this.requestUtil.errorResponse( res, {"studentErrors":studentErrors} );
+                            this.getAuthStore().checkUserNamesUnique(usernames)
+                                .then(function(nonuniqueUsernames){
+	                                _(nonuniqueUsernames).forEach(function (nonuniqueUsername) {
+		                                var lowercaseUsername = nonuniqueUsername['LOWER(username)'];
+		                                for (var i=0; i<usernames.length; i++) {
+			                                if (usernames[i].toLowerCase() === lowercaseUsername) {
+				                                addStudentError(usernames[i], "username");
+                                            }
+                                        }
+                                    });
+	                                this.requestUtil.errorResponse( res, {"studentErrors":studentErrors} );
+                                }.bind(this));
                         }
 					}.bind(this))
 					// catch all errors
