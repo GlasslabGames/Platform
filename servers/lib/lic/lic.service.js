@@ -501,6 +501,70 @@ LicService.prototype.enrollStudentInPremiumCourse = function(userId, courseId){
     }.bind(this));
 };
 
+LicService.prototype.enrollStudentsInPremiumCourse = function(userIds, courseId){
+	return when.promise(function(resolve, reject){
+		var license;
+		var licenseId;
+		var seats;
+		this.myds.getLicenseFromPremiumCourse(courseId)
+			.then(function (results) {
+				if(!results){
+					return "lms.course.not.premium";
+				}
+				license = results;
+				licenseId = license.id;
+				seats = license["package_size_tier"];
+				// get active student list
+				return this.cbds.getStudentsByLicense(licenseId);
+			}.bind(this))
+			.then(function (studentMap) {
+				if(typeof studentMap === "string"){
+					return studentMap;
+				}
+				var studentSeatsRemaining = license["student_seats_remaining"];
+
+				for (var i=0; i<userIds.length; i++) {
+				    var userId = userIds[i];
+
+				    if (studentSeatsRemaining === 0 && !studentMap[userId]) {
+						return "lic.students.full";
+					}
+
+					if (studentMap[userId] === undefined) {
+						studentMap[userId] = {};
+					}
+					var student = studentMap[userId];
+					student[courseId] = true;
+                }
+
+				var data = {};
+				data.students = studentMap;
+				return this.cbds.updateStudentsByLicense(licenseId, data);
+			}.bind(this))
+			.then(function (status) {
+				if (typeof status === "string") {
+					return status;
+				}
+
+				var iseats = {};
+				this._getPOSeats( seats, iseats );
+				var studentSeats = iseats.studentSeats;
+				return this.updateStudentSeatsRemaining(licenseId, studentSeats);
+			}.bind(this))
+			.then(function (status) {
+				if (typeof status === "string") {
+					resolve(status);
+					return;
+				}
+				resolve();
+			}.bind(this))
+			.then(null, function (err) {
+				console.errorExt("LicService", "Enroll Student In Premium Course Error -", err);
+				reject(err);
+			});
+	}.bind(this));
+};
+
 LicService.prototype.updateEducatorSeatsRemaining = function(licenseId, seats){
     return when.promise(function(resolve, reject){
         this.myds.countEducatorSeatsByLicense(licenseId)

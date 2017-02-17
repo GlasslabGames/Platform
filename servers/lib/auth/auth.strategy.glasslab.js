@@ -267,22 +267,26 @@ Glasslab_Strategy.prototype.registerStudents = function(studentsData){
 
 		var usernames = [];
 		for (var i=0; i<studentsData.length; i++) {
-			usernames.push(studentsData.username);
+			usernames.push(studentsData[i].username);
 		}
 
 		this._service.getAuthStore().checkUserNamesUnique(usernames)
-			.then(function(){
-				when.all(studentsData.map(function(userData) {
-					return this.registerStudent(userData);
-				}.bind(this)))
-				// added user
-					.then(function(userIds){
-						resolve(userIds);
-					}.bind(this))
-					// catch all errors
-					.then(null, function(err, code){
-						return reject(err, code);
-					}.bind(this));
+			.then(function(nonuniqueUsernames){
+				if (nonuniqueUsernames && nonuniqueUsernames.length > 0) {
+					resolve({nonuniqueUsernames: nonuniqueUsernames})
+				} else {
+					when.all(studentsData.map(function (userData) {
+						return this.registerStudent(userData);
+					}.bind(this)))
+					// added user
+						.then(function (userIds) {
+							resolve({userIds: userIds});
+						}.bind(this))
+						// catch all errors
+						.then(null, function (err, code) {
+							return reject(err, code);
+						}.bind(this));
+				}
 			}.bind(this))
 			// catch all errors
 			.then(null, function(err, code){
@@ -732,7 +736,7 @@ Glasslab_Strategy.prototype.unregisterUser = function(username){
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 	this._service.getAuthStore().deleteShadowUser(username)
-	.then(function() { 
+	.then(function() {
 		resolve(username);
 	}.bind(this),
 		function(err, code){

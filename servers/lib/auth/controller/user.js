@@ -986,31 +986,6 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 					studentErrors[username].push(errorCode);
 				}.bind(this);
 
-				var register = function(regData, hasLicense) {
-					return this.registerStudents(regData)
-						.then(function(userIds){
-						    when.all(userIds.map(function(userId){
-							    this.stats.increment("info", "AddUserToCourse");
-							    _enrollPremiumIfPremium.call(this, userId, courseId, hasLicense)
-								    .then(function(status){
-									    if(status === "lic.students.full"){
-										    this.stats.increment("error", "Route.Register.User.LicStudentsFull");
-										    this.requestUtil.errorResponse( res, {"notEnoughSpace":true} );
-										    return;
-									    }
-									    return this.lmsStore.addUserToCourse(userId, courseId, lConst.role.student);
-								    }.bind(this))
-								    // catch all errors
-								    .then(null, function(err){
-									    console.errorExt("AuthService", "Register Error -",err);
-									    registerErr(err, 404);
-								    });
-						    }.bind(this)));
-						}.bind(this))
-						// catch all errors
-						.then(null, registerErr);
-				}.bind(this);
-
 				var licService = this.serviceManager.get("lic").service;
 				var license;
 				this.lmsStore.isCoursePremium(courseId)
@@ -1080,46 +1055,74 @@ function bulkRegisterStudents(req, res, next, serviceManager) {
 							usernames.push(username);
 						}.bind(this));
 
-						this.getAuthStore().checkUserNamesUnique(usernames)
-							.then(function(nonuniqueUsernames){
-								if (nonuniqueUsernames.length === 0) {
-									if (Object.keys(studentErrors).length === 0 && studentErrors.constructor === Object) {
-										when.all(req.body.students.map(function(student){
-											var regData = {
-												username:      Util.ConvertToString(student.username),
-												firstName:     Util.ConvertToString(student.firstName),
-												lastName:      Util.ConvertToString(student.lastName),
-												password:      Util.ConvertToString(student.password),
-												role:          lConst.role.student,
-												email:         "",
-												state:         "",
-												school:        "",
-												loginType:     aConst.login.type.glassLabV2,
-												trial:         false,
-												subscribe:     false
-											};
-											return regData;
-										}.bind(this))).then(function(allRegData){
-                                            return register(allRegData, hasLicense);
-										}.bind(this)).then(function(){
-											this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(lConst.role.student));
-											this.requestUtil.jsonResponse( res, {} );
-										}.bind(this));
-									} else {
-										this.requestUtil.errorResponse( res, {"studentErrors":studentErrors} );
-									}
-								} else {
-									_(nonuniqueUsernames).forEach(function (nonuniqueUsername) {
-										var lowercaseUsername = nonuniqueUsername['LOWER(username)'];
-										for (var i=0; i<usernames.length; i++) {
-											if (usernames[i].toLowerCase() === lowercaseUsername) {
-												addStudentError(usernames[i], "username");
-											}
-										}
-									});
-									this.requestUtil.errorResponse( res, {"studentErrors":studentErrors} );
-								}
-							}.bind(this));
+                        if (Object.keys(studentErrors).length === 0 && studentErrors.constructor === Object) {
+                            when.all(req.body.students.map(function(student){
+                                var regData = {
+                                    username:      Util.ConvertToString(student.username),
+                                    firstName:     Util.ConvertToString(student.firstName),
+                                    lastName:      Util.ConvertToString(student.lastName),
+                                    password:      Util.ConvertToString(student.password),
+                                    role:          lConst.role.student,
+                                    email:         "",
+                                    state:         "",
+                                    school:        "",
+                                    loginType:     aConst.login.type.glassLabV2,
+                                    trial:         false,
+                                    subscribe:     false
+                                };
+                                return regData;
+                            }.bind(this))).then(function(allRegData){
+                                return this.registerStudents(allRegData)
+                                    .then(function(data){
+                                        var userIds = data.userIds;
+                                        var nonuniqueUsernames = data.nonuniqueUsernames;
+
+                                        if (nonuniqueUsernames && nonuniqueUsernames.length > 0) {
+                                            _(nonuniqueUsernames).forEach(function (nonuniqueUsername) {
+                                                var lowercaseUsername = nonuniqueUsername['LOWER(username)'];
+                                                for (var i = 0; i < usernames.length; i++) {
+                                                    if (usernames[i].toLowerCase() === lowercaseUsername) {
+                                                        addStudentError(usernames[i], "username");
+                                                    }
+                                                }
+                                            });
+                                            return "errors";
+                                        } else {
+	                                        return _bulkEnrollPremiumIfPremium.call(this, userIds, courseId, hasLicense)
+		                                        .then(function (status) {
+			                                        if (status === "lic.students.full") {
+				                                        this.stats.increment("error", "Route.Register.User.LicStudentsFull");
+				                                        this.requestUtil.errorResponse(res, {"notEnoughSpace": true});
+				                                        return;
+			                                        }
+			                                        if(typeof status === "string"){
+				                                        registerErr(null, null);
+				                                        return;
+			                                        }
+			                                        return when.all(userIds.map(function (userId) {
+				                                        return this.lmsStore.addUserToCourse(userId, courseId, lConst.role.student);
+			                                        }.bind(this)));
+		                                        }.bind(this))
+		                                        // catch all errors
+		                                        .then(null, function (err) {
+			                                        console.errorExt("AuthService", "Register Error -", err);
+			                                        registerErr(err, 404);
+		                                        });
+                                        }
+                                    }.bind(this))
+                                    // catch all errors
+                                    .then(null, registerErr);
+                            }.bind(this)).then(function(result){
+                                if (result === "errors") {
+	                                this.requestUtil.errorResponse(res, {"studentErrors": studentErrors});
+                                } else {
+	                                this.stats.increment("info", "Route.Register.User."+Util.String.capitalize(lConst.role.student));
+	                                this.requestUtil.jsonResponse( res, {} );
+                                }
+                            }.bind(this));
+                        } else {
+                            this.requestUtil.errorResponse( res, {"studentErrors":studentErrors} );
+                        }
 					}.bind(this))
 					// catch all errors
 					.then(null, function(err){
@@ -1156,6 +1159,27 @@ function _enrollPremiumIfPremium(userId, courseId, hasLicense){
             resolve();
         }
     }.bind(this));
+}
+
+// if a course is a premium course, enroll students in license. else, do nothing
+function _bulkEnrollPremiumIfPremium(userIds, courseId, hasLicense){
+	return when.promise(function(resolve, reject){
+		if(hasLicense){
+			var licService = this.serviceManager.get("lic").service;
+			licService.enrollStudentsInPremiumCourse(userIds, courseId)
+				.then(function(status){
+					if(typeof status === "string"){
+						resolve(status);
+					}
+					resolve();
+				})
+				.then(null, function(err){
+					reject(err);
+				});
+		} else {
+			resolve();
+		}
+	}.bind(this));
 }
 
 function sendBetaConfirmEmail(regData, protocol, host) {
