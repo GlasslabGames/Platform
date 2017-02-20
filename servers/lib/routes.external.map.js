@@ -725,7 +725,16 @@ module.exports = {
                 get: "getStudentsInLicense"
             }
         },
-
+	    {
+		    requireAuth: true,
+		    requireHttps: true,
+		    api: "/api/v2/license/seatsremaining",
+		    service: "lic",
+		    controller: "license",
+		    method: {
+			    get: "getRemainingStudentSeatsInLicense"
+		    }
+	    },
         {
             requireAuth: true,
             requireHttps: true,

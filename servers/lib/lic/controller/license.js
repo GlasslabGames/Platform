@@ -10,6 +10,7 @@ module.exports = {
     getCurrentPlan: 					getCurrentPlan,
     getPlanForUser: 					getPlanForUser,
     getStudentsInLicense: 				getStudentsInLicense,
+	getRemainingStudentSeatsInLicense: 	getRemainingStudentSeatsInLicense,
     getBillingInfo: 					getBillingInfo,
     updateBillingInfo: 					updateBillingInfo,
     subscribeToLicense: 				subscribeToLicense,
@@ -335,6 +336,35 @@ function getStudentsInLicense(req, res){
             console.errorExt("LicService", "Get Students in License Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
         }.bind(this));
+}
+
+function getRemainingStudentSeatsInLicense(req, res){
+	if(!(req && req.user && req.user.id && req.user.licenseId)){
+		this.requestUtil.errorResponse(res, {key: "lic.access.invalid"});
+		return;
+	}
+	var userId = req.user.id;
+	var licenseId = req.user.licenseId;
+	_validateLicenseInstructorAccess.call(this, userId, licenseId)
+		.then(function(status) {
+			if (typeof status === "string") {
+				return status;
+			}
+			return this.myds.getLicenseById(licenseId);
+		}.bind(this))
+        .then(function(license){
+            if (license) {
+                var seatsRemaining = license[0]["student_seats_remaining"];
+	            this.requestUtil.jsonResponse(res, {seatsRemaining: seatsRemaining});
+            } else {
+	            console.errorExt("LicService", "Get Remaining Student Seats in License Error - License not found");
+	            this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+            }
+        }.bind(this))
+		.then(null, function(err){
+			console.errorExt("LicService", "Get Remaining Student Seats in License Error -",err);
+			this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
+		}.bind(this));
 }
 
 // grabs credit card information for the license owner
