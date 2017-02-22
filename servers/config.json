@@ -41,8 +41,8 @@
         		"https://s3-us-west-1.amazonaws.com",
                 "http://www.teachableagentsgame.com",
                 "https://www.teachableagentsgame.com",
-                "http://awesome.stanford.edu/",
-                "https://awesome.stanford.edu/",
+                "http://awesome.stanford.edu",
+                "https://awesome.stanford.edu",
                 "http://s3.amazonaws.com",
                 "https://s3.amazonaws.com"
         	]
