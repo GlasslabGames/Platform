@@ -43,6 +43,7 @@ module.exports = {
     cancelLicenseInternal: 				cancelLicenseInternal,
     subscribeToLicenseInternal: 		subscribeToLicenseInternal,
     inspectLicenses: 					inspectLicenses,
+	startTrialsForAllUnlicensed:		startTrialsForAllUnlicensed,
     trialMoveToTeacher: 				trialMoveToTeacher
     // vestigial apis
     //verifyLicense:   					verifyLicense,
@@ -3350,6 +3351,33 @@ function _doSubscribeToLicenseInternal(userEmail, purchaseOrderInfo, planInfo, s
             this.requestUtil.errorResponse(res, { key: "lic.general"}, 500);
             console.errorExt("LicService", "Subscribe to License Purchase Order Internal Error -",err);
         }.bind(this));
+}
+
+function startTrialsForAllUnlicensed(req, res) {
+	if ( ! ( ( req.user.role === "admin" ) || ( req.user.role === "reseller" ) ) ) {
+		this.requestUtil.errorResponse(res, { key: "lic.access.invalid"});
+		return;
+	}
+
+	var stripeInfo = {};
+	var planInfo = {
+		seats: "trial",
+		type: "trial"
+	};
+	this.myds.getInstructorsWithoutLicenses()
+		.then(function(instructors){
+            return when.all(instructors.map(function(instructor){
+	            var userId = instructor.id;
+	            var userReq = {
+		            user: {
+			            email: instructor.EMAIL,
+			            firstName: instructor.FIRST_NAME,
+			            lastName: instructor.LAST_NAME
+		            }
+	            };
+	            return _createSubscription.call(this, userReq, userId, "NULL", stripeInfo, planInfo);
+            }.bind(this)));
+		}.bind(this));
 }
 
 function inspectLicenses(req, res){

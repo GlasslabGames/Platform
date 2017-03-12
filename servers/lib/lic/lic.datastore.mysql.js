@@ -408,7 +408,7 @@ Lic_MySQL.prototype.getInstructorsByLicense = function(licenseId){
             .then(null, function(err){
                 console.errorExt("DataStore MySQL", "Get Instructors By License Error -",err);
                 reject(err);
-            })
+            });
     }.bind(this));
 };
 
@@ -891,6 +891,22 @@ Lic_MySQL.prototype.insertToInstitutionTable = function(values){
                 reject(err);
             })
     }.bind(this));
+};
+
+Lic_MySQL.prototype.getInstructorsWithoutLicenses = function(){
+	return when.promise(function(resolve, reject){
+		var Q = "SELECT id, EMAIL, FIRST_NAME, LAST_NAME FROM GL_USER WHERE SYSTEM_ROLE='instructor'\n"+
+			"AND id not in (SELECT DISTINCT user_id from GL_LICENSE)\n"+
+			"AND id not in (SELECT DISTINCT user_id from GL_LICENSE_MAP)";
+		this.ds.query(Q)
+			.then(function(results){
+				resolve(results);
+			})
+			.then(null, function(err){
+				console.errorExt("DataStore MySQL", "Get Instructors Without Licenses Error -",err);
+				reject(err);
+			});
+	}.bind(this));
 };
 
 Lic_MySQL.prototype.getLicensesForInspection = function(){
