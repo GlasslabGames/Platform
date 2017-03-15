@@ -3375,7 +3375,6 @@ function inspectLicenses(req, res){
             });
             var license;
             var renewLicense;
-            var corruptData;
             _(inspecter).forEach(function(user, userId){
                 if(user.length === 1 && user[0].active === 1){
                     license = user[0];
@@ -3408,15 +3407,14 @@ function inspectLicenses(req, res){
                         //need to do more work on renew flow
                         //promiseList.push(_renewLicense.call(this, license, protocol, host));
                     } else{
-                        corruptData = true;
+	                    hasErrors = true;
+	                    errors[license.id] = "data corrupted";
                     }
                 } else{
-                    corruptData = true;
+	                hasErrors = true;
+	                errors[license.id] = "data corrupted";
                 }
             }.bind(this));
-            if(corruptData){
-                return "data corrupted";
-            }
             return when.reduce(promiseList, function(results, status, index){
                 if(status){
                     hasErrors = true;
@@ -3427,10 +3425,6 @@ function inspectLicenses(req, res){
             }, []);
         }.bind(this))
         .then(function(status){
-            if(status === "data corrupted"){
-                this.requestUtil.errorResponse(res, { key: "lic.records.inconsistent"});
-                return;
-            }
             if(hasErrors){
                 this.requestUtil.jsonResponse(res, {status: "not all handled", errors: errors});
                 return;
@@ -3516,8 +3510,9 @@ function _expireLicense(license, protocol, host){
                 resolve();
             }.bind(this))
             .then(null, function(err){
-                console.errorExt("LicService", "Expire License Error -",err);
-                reject(err);
+	            resolve(err.message);
+                // console.errorExt("LicService", "Expire License Error -",err);
+                // reject(err);
             }.bind(this));
     }.bind(this));
 }
