@@ -44,6 +44,7 @@ var exampleOut = {};
 
 function getUserProfileData(req, res, next) {
 
+	console.log("AuthService getUserProfileData start");
     if( req.session &&
         req.session.passport &&
         req.session.passport.user) {
@@ -53,12 +54,14 @@ function getUserProfileData(req, res, next) {
             // ok, send mdata
             .then(function(data){
                 userData = data;
+	            console.logExt("AuthService", "getUserProfileData updating user session with userData: ", userData);
                 return _updateUserSession(userData, req);
             }.bind(this))
             .then(function(){
                 if ('app-archiver' === this.options.services.name) {
                     userData.archiver = true;
                 }
+	            console.log("AuthService getUserProfileData successful");
                 this.requestUtil.jsonResponse(res, userData);
             }.bind(this))
             // error
