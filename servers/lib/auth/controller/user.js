@@ -63,11 +63,9 @@ function getUserProfileData(req, res, next) {
             }.bind(this))
             // error
             .then(null, function(err){
-	            console.errorExt("AuthService", "getUserProfileData error (can't find user) - ", err);
                 this.requestUtil.errorResponse(res, err);
             }.bind(this))
     } else {
-	    console.errorExt("AuthService", "getUserProfileData error (bad session data) - ", req.session);
         this.requestUtil.errorResponse(res, { status: "error", error: {key:'user.login.notLoggedIn'}}, 200);
     }
 }
