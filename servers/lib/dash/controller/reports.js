@@ -800,7 +800,7 @@ function _determineLevel(skillId, score, questInfo) {
     if (questInfo && !_.contains(questInfo.skills, skillId)) {
         return "NotAvailable";
     }
-    if (grade >= 0.50) {
+    if (grade >= 0.70) {
         return "Advancing";
     }
     else if (score.attempts > 0) {
