@@ -263,7 +263,10 @@ DashService.prototype.getListOfVisibleGameIds = function() {
             if( this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
-                this._games[g].info.basic.visible) {
+                this._games[g].info.basic.visible &&
+	            (this._games[g].info.basic.release === "live" ||
+	                (this._games[g].info.basic.release === "dev" && this.options.env !== "prod") )
+            ) {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
@@ -286,7 +289,10 @@ DashService.prototype.getListOfAllGameIds = function() {
             if( this._games.hasOwnProperty(g) &&
                 this._games[g].info &&
                 this._games[g].info.basic &&
-                this._games[g].info.basic.gameId) {
+                this._games[g].info.basic.gameId &&
+	            (this._games[g].info.basic.release === "live" ||
+	                (this._games[g].info.basic.release === "dev" && this.options.env !== "prod") )
+            ) {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
@@ -306,7 +312,10 @@ DashService.prototype.getListOfAllFreeGameIds = function(){
                 this._games[g].info &&
                 this._games[g].info.basic &&
                 this._games[g].info.basic.gameId &&
-                ( this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD" ) ) {
+                ( this._games[g].info.basic.price === "Free" || this._games[g].info.basic.price === "TBD" ) &&
+                (this._games[g].info.basic.release === "live" ||
+                    (this._games[g].info.basic.release === "dev" && this.options.env !== "prod") )
+            ) {
                 gameIds.push( this._games[g].info.basic.gameId.toUpperCase() );
             }
         }
