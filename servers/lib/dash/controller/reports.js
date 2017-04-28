@@ -879,8 +879,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                     latestMission = questInfo.mission;
                                 }
 
-                                // Special hack to fix report discrepancy detailed in DRK-211. A skill can only be
-                                // considered 'Advancing' if all of its subskills are 'Advancing'.
+                                // Special hack to fix report discrepancy detailed in DRK-211.
 	                            var magicData = {
 		                            "connectingEvidence": [
 			                            "AUTHORITRON",
