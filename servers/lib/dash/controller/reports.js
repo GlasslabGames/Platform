@@ -868,22 +868,6 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                     var skillScore = skillInfo.score;
 
                                     var skillLevel = _determineLevel(skillId, skillScore, questInfo);
-                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
-                                        if (!(skillId in latestSkillScores)) {
-                                            latestSkillScores[skillId] = {
-                                                mission: questInfo.mission,
-                                                level: skillLevel,
-                                                score: skillScore,
-                                                detail: skillInfo.detail,
-                                            }
-                                        }
-                                        else if (questInfo.mission > latestSkillScores[skillId].mission) {
-                                            latestSkillScores[skillId].mission = questInfo.mission;
-                                            latestSkillScores[skillId].level = skillLevel;
-                                            latestSkillScores[skillId].score = skillScore;
-                                            latestSkillScores[skillId].detail = skillInfo.detail;
-                                        }
-                                    }
 
                                     return {
                                         "level": skillLevel,
@@ -894,6 +878,72 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                 if (questInfo.mission > latestMission) {
                                     latestMission = questInfo.mission;
                                 }
+
+                                // Special hack to fix report discrepancy detailed in DRK-211. A skill can only be
+                                // considered 'Advancing' if all of its subskills are 'Advancing'.
+	                            var magicData = {
+		                            "connectingEvidence": [
+			                            "AUTHORITRON",
+			                            "OBSERVATRON",
+			                            "CONSEBOT",
+			                            "COMPARIDROID"
+		                            ],
+		                            "supportingClaims": [
+			                            "FUSE_CORE",
+			                            "CORE_ATTACK"
+		                            ],
+		                            "criticalQuestions": [
+			                            "CRITICAL_QUESTION_ATTACK"
+		                            ],
+		                            "usingBacking": [
+			                            "CREATED",
+			                            "DEFENDED"
+		                            ]
+	                            };
+
+                                var FUSE_CORE = skills["connectingEvidence"].detail["FUSE_CORE"];
+
+	                            skills = _.mapValues(skills, function(skill, skillId) {
+	                                if (magicData[skillId]) {
+	                                    for (var i=0; i<magicData[skillId].length; i++) {
+	                                        var subSkillId = magicData[skillId][i];
+		                                    var subSkillScore = skill.detail[subSkillId];
+
+		                                    // Special hack to fix FUSE_CORE, which is included in the first skill
+                                            // but must be displayed in the second. (Perpetuated from drilldown
+                                            // controller.)
+	                                        if (subSkillId === "FUSE_CORE") {
+		                                        subSkillScore = FUSE_CORE;
+                                            }
+
+                                            if (subSkillScore) {
+	                                            var grade = subSkillScore.correct / subSkillScore.attempts;
+	                                            if (grade < 0.70 && subSkillScore.attempts > 0) {
+		                                            skill.level = "NeedSupport";
+	                                            }
+                                            }
+                                        }
+                                    }
+
+		                            if (skill.level != "NotAvailable" && skill.level != "NotAttempted") {
+			                            if (!(skillId in latestSkillScores)) {
+				                            latestSkillScores[skillId] = {
+					                            mission: questInfo.mission,
+					                            level: skill.level,
+					                            score: skill.score,
+					                            detail: skill.detail,
+				                            }
+			                            }
+			                            else if (questInfo.mission > latestSkillScores[skillId].mission) {
+				                            latestSkillScores[skillId].mission = questInfo.mission;
+				                            latestSkillScores[skillId].level = skill.level;
+				                            latestSkillScores[skillId].score = skill.score;
+				                            latestSkillScores[skillId].detail = skill.detail;
+			                            }
+		                            }
+
+                                    return skill;
+	                            });
                             } else {
                                 var score = {"correct":0, "attempts":0};
                                 skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
