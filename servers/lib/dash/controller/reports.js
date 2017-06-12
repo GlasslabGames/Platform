@@ -915,7 +915,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 		                                        subSkillScore = FUSE_CORE;
                                             }
 
-                                            if (skill.level != "NotAvailable" && subSkillScore) {
+                                            if (subSkillScore) {
 	                                            var grade = subSkillScore.correct / subSkillScore.attempts;
 	                                            if (grade < 0.70 && subSkillScore.attempts > 0) {
 		                                            skill.level = "NeedSupport";
