@@ -849,7 +849,8 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                     }
                                     studentQuests[questSkillInfo.questId].skills[skillId] = {
                                         score: questSkillInfo.score,
-                                        detail: questSkillInfo.detail
+                                        detail: questSkillInfo.detail,
+	                                    attemptList: questSkillInfo.attemptList
                                     }
 
                                 });
@@ -875,6 +876,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                                 level: skillLevel,
                                                 score: skillScore,
                                                 detail: skillInfo.detail,
+	                                            attemptList: skillInfo.attemptList
                                             }
                                         }
                                         else if (questInfo.mission > latestSkillScores[skillId].mission) {
@@ -882,6 +884,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                             latestSkillScores[skillId].level = skillLevel;
                                             latestSkillScores[skillId].score = skillScore;
                                             latestSkillScores[skillId].detail = skillInfo.detail;
+	                                        latestSkillScores[skillId].attemptList = skillInfo.attemptList;
                                         }
                                     }
 
@@ -889,6 +892,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         "level": skillLevel,
                                         "score": skillScore,
                                         "detail": skillInfo.detail,
+	                                    "attemptList": skillInfo.attemptList
                                     }
                                 });
                                 if (questInfo.mission > latestMission) {
