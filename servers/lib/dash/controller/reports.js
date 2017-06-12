@@ -904,8 +904,6 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
 	                            skills = _.mapValues(skills, function(skill, skillId) {
 	                                if (magicData[skillId]) {
-	                                    var totalCorrect = 0;
-	                                    var totalAttempts = 0;
 	                                    for (var i=0; i<magicData[skillId].length; i++) {
 	                                        var subSkillId = magicData[skillId][i];
 		                                    var subSkillScore = skill.detail[subSkillId];
@@ -918,22 +916,11 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                             }
 
                                             if (skill.level != "NotAvailable" && subSkillScore) {
-	                                            totalCorrect += subSkillScore.correct;
-	                                            totalAttempts += subSkillScore.attempts;
+	                                            var grade = subSkillScore.correct / subSkillScore.attempts;
+	                                            if (grade < 0.70 && subSkillScore.attempts > 0) {
+		                                            skill.level = "NeedSupport";
+	                                            }
                                             }
-                                        }
-
-                                        if (skill.level != "NotAvailable") {
-	                                        var grade = totalCorrect / totalAttempts;
-	                                        if (grade >= 0.70) {
-		                                        skill.level = "Advancing";
-	                                        }
-	                                        else if (totalAttempts > 0) {
-		                                        skill.level = "NeedSupport";
-	                                        }
-	                                        else {
-		                                        skill.level = "NotAttempted";
-	                                        }
                                         }
                                     }
 
