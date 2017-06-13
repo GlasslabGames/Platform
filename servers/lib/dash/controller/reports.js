@@ -833,7 +833,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                 return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData) {
 
-                        var latestMission = 0;
+                        var latestMission = drkInfo.missionList[0];
                         var latestSkillScores = {};
                         var studentQuests = {};
 
@@ -895,7 +895,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 	                                    "attemptList": skillInfo.attemptList
                                     }
                                 });
-                                if (questInfo.mission > latestMission) {
+                                if (drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestMission)) {
                                     latestMission = questInfo.mission;
                                 }
                             } else {
