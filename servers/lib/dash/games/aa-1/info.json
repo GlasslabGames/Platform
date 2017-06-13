@@ -252,25 +252,25 @@
                         "name": "Connecting Evidence to Argument Schemes",
                         "label": "Argument Schemes",
                         "description": "Track individual students' progress on Connecting Evidence to Argumentation Schemes",
-                        "missions": [3, 5, 6, 7, 8, 9, 10, 14, 17, 19, 21]
+                        "missions": ["ST", 1, 2, 3, 4, 5, 6, 7, 10, 11, 13]
                     },
                     "supportingClaims": {
                         "name": "Supporting Claims with Evidence",
                         "label": "Claims and Evidence",
                         "description": "Track individual students' progress on Supporting Claims with Relevant and Non-Contradictory Evidence",
-                        "missions": [5, 6, 10, 12, 14, 15, 17, 19, 21]
+                        "missions": [1, 2, 3, 6, "BT", 7, 10, 11, 13]
                     },
                     "criticalQuestions": {
                         "name": "Using Critical Questions",
                         "label": "Critical Questions",
                         "description": "Track individual students' progress on Using Critical Questions",
-                        "missions": [12, 15, 17, 19, 21]
+                        "missions": ["BT", 8, 10, 11, 13]
                     },
                     "usingBacking": {
                         "name": "Using Backing",
                         "label": "Backing",
                         "description": "Track individual students' progress on Using Backing to Strengthen an Argument",
-                        "missions": [12, 16, 17, 19, 20, 21]
+                        "missions": ["BT", 9, 10, 11, 12, 13]
                     }
                 }
             },
