@@ -156,6 +156,10 @@
                 }
             },
             "quests": {
+                "Quest0-3": {
+                    "mission": "Scheme Trainer",
+                    "skills": ["connectingEvidence"]
+                },
                 "Quest0-5": {
                     "mission": 1,
                     "skills": ["connectingEvidence", "supportingClaims"]
@@ -179,6 +183,10 @@
                 "Quest14": {
                     "mission": 6,
                     "skills": ["connectingEvidence", "supportingClaims"]
+                },
+                "Quest18": {
+                    "mission": "Bot Trainer 5000",
+                    "skills": ["supportingClaims", "criticalQuestions", "usingBacking"]
                 },
                 "Quest21": {
                     "mission": 7,
