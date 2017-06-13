@@ -246,7 +246,7 @@
                     "skinny": "/assets/skinny-banner-AA-1.jpg",
                     "large": "/assets/skinny-banner-AA-1@2x.jpg"
                 },
-                "description": "Click the <strong>Whole Class</strong> tab to see the average progress of your entire class for each skill. Click the <strong>Student Roster</strong> tab to review students' progress for each skill and across missions.",
+                "description": "Use this report to review your students’ progress on each of the four skills in the argumentation learning trajectory. Click the “Class View” tab to see average progress for the entire class on each skill, and click the “Student View” tab to review progress by individuals.",
                 "skills": {
                     "connectingEvidence": {
                         "name": "Connecting Evidence to Argument Schemes",
