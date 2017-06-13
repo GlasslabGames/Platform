@@ -156,93 +156,57 @@
                 }
             },
             "quests": {
-                "Quest0-1": {
-                    "mission": 1,
-                    "skills": []
-                },
-                "Quest0-2": {
-                    "mission": 2,
-                    "skills": []
-                },
-                "Quest0-3": {
-                    "mission": 3,
-                    "skills": ["connectingEvidence"]
-                },
-                "Quest0-4": {
-                    "mission": 4,
-                    "skills": []
-                },
                 "Quest0-5": {
-                    "mission": 5,
+                    "mission": 1,
                     "skills": ["connectingEvidence", "supportingClaims"]
                 },
                 "Quest1-1": {
-                    "mission": 6,
+                    "mission": 2,
                     "skills": ["connectingEvidence", "supportingClaims"]
                 },
                 "Quest0-6": {
-                    "mission": 7,
-                    "skills": ["connectingEvidence"]
+                    "mission": 3,
+                    "skills": ["connectingEvidence", "supportingClaims"]
                 },
                 "Quest11": {
-                    "mission": 8,
+                    "mission": 4,
                     "skills": ["connectingEvidence"]
                 },
                 "Quest13": {
-                    "mission": 9,
+                    "mission": 5,
                     "skills": ["connectingEvidence"]
                 },
                 "Quest14": {
-                    "mission": 10,
+                    "mission": 6,
                     "skills": ["connectingEvidence", "supportingClaims"]
                 },
-                "Quest16": {
-                    "mission": 11,
-                    "skills": []
-                },
-                "Quest18": {
-                    "mission": 12,
-                    "skills": ["supportingClaims", "criticalQuestions", "usingBacking"]
-                },
-                "Quest19": {
-                    "mission": 13,
-                    "skills": []
-                },
                 "Quest21": {
-                    "mission": 14,
+                    "mission": 7,
                     "skills": ["connectingEvidence", "supportingClaims"]
                 },
                 "Quest23": {
-                    "mission": 15,
-                    "skills": ["supportingClaims", "criticalQuestions"]
+                    "mission": 8,
+                    "skills": ["criticalQuestions"]
                 },
                 "Quest23a": {
-                    "mission": 16,
+                    "mission": 9,
                     "skills": ["usingBacking"]
                 },
                 "Quest24": {
-                    "mission": 17,
+                    "mission": 10,
                     "skills": ["connectingEvidence", "supportingClaims", "criticalQuestions", "usingBacking"]
                 },
-                "Quest26": {
-                    "mission": 18,
-                    "skills": []
-                },
                 "Quest28": {
-                    "mission": 19,
+                    "mission": 11,
                     "skills": ["connectingEvidence", "supportingClaims", "criticalQuestions", "usingBacking"]
                 },
                 "Quest30": {
-                    "mission": 20,
+                    "mission": 12,
                     "skills": ["usingBacking"]
                 },
                 "Quest33": {
-                    "mission": 21,
+                    "mission": 13,
                     "skills": ["connectingEvidence", "supportingClaims", "criticalQuestions", "usingBacking"]
-                },
-                "Quest34": {
-                    "mission": 22,
-                    "skills": []
                 }
             }
         }
