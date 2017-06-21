@@ -826,7 +826,6 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
         lmsService.getStudentsOfCourse(courseId).then(function(users) {
             if (!users) return;
-
             var studentPromises = _.map(users, function(user) {
                 var userId = user.id;
 
@@ -840,20 +839,22 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                         if (assessmentData && assessmentData.results) {
                             //build a questId -> skills map for this student
                             _.forOwn(assessmentData.results.skill, function (skillInfo, skillId) {
-                                _.forEach(skillInfo.quests, function(questSkillInfo) {
-                                    if (!(questSkillInfo.questId in studentQuests)) {
-                                        studentQuests[questSkillInfo.questId] = {
-                                            "questId": questSkillInfo.questId,
-                                            "skills": {}
-                                        }
-                                    }
-                                    studentQuests[questSkillInfo.questId].skills[skillId] = {
-                                        score: questSkillInfo.score,
-                                        detail: questSkillInfo.detail,
-	                                    attemptList: questSkillInfo.attemptList
-                                    }
+                                if (skillInfo.quests) {
+	                                _.forEach(skillInfo.quests, function (questSkillInfo) {
+		                                if (!(questSkillInfo.questId in studentQuests)) {
+			                                studentQuests[questSkillInfo.questId] = {
+				                                "questId": questSkillInfo.questId,
+				                                "skills": {}
+			                                }
+		                                }
+		                                studentQuests[questSkillInfo.questId].skills[skillId] = {
+			                                score: questSkillInfo.score,
+			                                detail: questSkillInfo.detail,
+			                                attemptList: questSkillInfo.attemptList
+		                                }
 
-                                });
+	                                });
+                                }
                             });
                         }
 
@@ -920,11 +921,24 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             skillLevel: latestSkillScores
                         };
 
+                        var argubotsUnlocked = {};
+	                    if (assessmentData &&
+                            assessmentData.results &&
+		                    assessmentData.results.skill &&
+                            assessmentData.results.skill.argubotsUnlocked) {
+		                    _.forOwn(assessmentData.results.skill.argubotsUnlocked.bots, function (questId, botId) {
+		                        if (drkInfo.quests[questId]) {
+			                        argubotsUnlocked[botId] = drkInfo.quests[questId].mission;
+		                        }
+		                    });
+                        }
+
                         // student row
                         return {
                             'userId': userId,
                             'currentProgress': progress,
-                            'missions': missionProgress
+                            'missions': missionProgress,
+                            'argubotsUnlocked': argubotsUnlocked
                         }
                     }.bind(this));
             }.bind(this));
