@@ -175,6 +175,10 @@
                 }
             },
             "missionList": ["ST", 1, 2, 3, 4, 5, 6, "BT", 7, 8, 9, 10, 11, 12, 13],
+            "duplicateQuestMapping": {
+                "MCreateBot": "Quest0-3",
+                "MLevelUpBot": "Quest0-3"
+            },
             "quests": {
                 "Quest0-3": {
                     "mission": "ST",
