@@ -795,22 +795,6 @@ function _getStandards(req, res, reportId, gameId, courseId) {
         }.bind(this));
 }
 
-function _determineLevel(skillId, score, questInfo) {
-    var grade = score.correct / score.attempts;
-    if (questInfo && !_.contains(questInfo.skills, skillId)) {
-        return "NotAvailable";
-    }
-    if (grade >= 0.70) {
-        return "Advancing";
-    }
-    else if (score.attempts > 0) {
-        return "NeedSupport";
-    }
-    else {
-        return "NotAttempted";
-    }
-}
-
 function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
     var lmsService = this.serviceManager.get("lms").service;
@@ -869,7 +853,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                                     var skillScore = skillInfo.score;
 
-                                    var skillLevel = _determineLevel(skillId, skillScore, questInfo);
+                                    var skillLevel = this.determineSkillLevel(skillId, skillScore, questInfo);
                                     if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
                                         if (!(skillId in latestSkillScores)) {
                                             latestSkillScores[skillId] = {
@@ -880,7 +864,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 	                                            attemptList: skillInfo.attemptList
                                             }
                                         }
-                                        else if (questInfo.mission > latestSkillScores[skillId].mission) {
+                                        else if (drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestSkillScores[skillId].mission)) {
                                             latestSkillScores[skillId].mission = questInfo.mission;
                                             latestSkillScores[skillId].level = skillLevel;
                                             latestSkillScores[skillId].score = skillScore;
@@ -895,7 +879,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         "detail": skillInfo.detail,
 	                                    "attemptList": skillInfo.attemptList
                                     }
-                                });
+                                }.bind(this));
                                 if (drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestMission)) {
                                     latestMission = questInfo.mission;
                                 }
@@ -903,10 +887,10 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                 var score = {"correct":0, "attempts":0};
                                 skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
                                     return {
-                                        "level": _determineLevel(skillId, score, questInfo),
+                                        "level": this.determineSkillLevel(skillId, score, questInfo),
                                         "score": score
                                     }
-                                });
+                                }.bind(this));
                             }
 
                             return {
@@ -914,7 +898,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                 "skillLevel": skills
                             }
 
-                        });
+                        }.bind(this));
 
                         var progress = {
                             mission: latestMission,

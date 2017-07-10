@@ -17,6 +17,8 @@ module.exports = {
     verifyGameInCourse:     verifyGameInCourse,
     verifyAccessToGameInCourse: verifyAccessToGameInCourse,
     _updateCourseInfo:      _updateCourseInfo,
+	getReportHelperNotes:   getReportHelperNotes,
+    saveReportHelperNotes:  saveReportHelperNotes,
     getGamesCourseMap:      getGamesCourseMap
 };
 
@@ -1223,6 +1225,172 @@ function verifyAccessToGameInCourse(req, res, next) {
             console.errorExt("LMSService", "Verify Access to Game In Course Error -",err);
             this.requestUtil.errorResponse(res, { key: "lic.general"});
         }.bind(this));
+}
+
+function saveReportHelperNotes(req, res){
+	var userData = req.session.passport.user;
+
+	if( !req.params ||
+		!req.params.hasOwnProperty("courseId") ||
+		!req.params.hasOwnProperty("skillId") ||
+		!req.params.hasOwnProperty("gameId") ||
+        !userData) {
+		this.requestUtil.errorResponse(res, {key:"course.general"});
+		return;
+	}
+
+	// gameId is not case sensitive
+	var gameId = req.params.gameId.toUpperCase();
+	var courseId = parseInt(req.params.courseId);
+	var skillId = req.params.skillId;
+	var userId = userData.id;
+
+    if(gameId === "AA-1") {
+
+        if( req.body ) {
+            var notes = _.isArray(req.body) ? req.body : [req.body];
+
+            var promiseList = [];
+            notes.forEach(function(note){
+                promiseList.push(this.myds.saveNote(
+                    note.id,
+                    userId,
+                    courseId,
+                    skillId,
+                    note.date,
+                    note.studentGroup,
+                    note.students,
+                    note.info
+                ));
+            }.bind(this));
+            when.all(promiseList)
+                .then(function(status){
+                    this.requestUtil.jsonResponse(res, status);
+                    return;
+                }.bind(this))
+                // catch all errors
+                .then(null, function(err){
+                    this.requestUtil.errorResponse(res, err);
+                }.bind(this));
+        } else {
+            this.requestUtil.errorResponse(res, {key:"course.general"});
+        }
+    } else {
+        this.requestUtil.errorResponse(res, {key:"course.general"});
+    }
+}
+
+function getReportHelperNotes(req, res){
+	var userData = req.session.passport.user;
+
+	if( !req.params ||
+		!req.params.hasOwnProperty("courseId") ||
+        !req.params.hasOwnProperty("gameId") ||
+		!req.params.hasOwnProperty("skillId") ||
+        !userData) {
+		this.requestUtil.errorResponse(res, {key:"course.general"});
+		return;
+	}
+
+	var gameId = req.params.gameId.toUpperCase();
+	var courseId = req.params.courseId;
+	var skillId = req.params.skillId;
+	var userId = userData.id;
+
+	var dashService = this.serviceManager.get("dash").service;
+
+	if (gameId === 'AA-1') {
+		dashService.getGameAssessmentInfo(gameId).then(function(aInfo) {
+
+			var drkInfo = _.find(aInfo, function (a) { return a.id == "drk12_b" });
+			if (!drkInfo) {
+				this.requestUtil.errorResponse(res, "could not retrieve game metadata");
+				return;
+			}
+
+			this.getStudentsOfCourse(courseId).then(function(users) {
+				if (!users) return;
+				var studentPromises = _.map(users, function(user) {
+					var userId = user.id;
+
+					return this.telmStore.getAssessmentResults(userId, gameId, "drk12_b")
+						.then(function(assessmentData) {
+
+							var latestSkillLevel = {};
+							var studentQuests = {};
+
+							if (assessmentData && assessmentData.results) {
+								var skillInfo = assessmentData.results.skill[skillId];
+                                if (skillInfo && skillInfo.quests) {
+                                    _.forEach(skillInfo.quests, function (questSkillInfo) {
+                                        if (!(questSkillInfo.questId in studentQuests)) {
+                                            studentQuests[questSkillInfo.questId] = {};
+                                        }
+                                        studentQuests[questSkillInfo.questId] = questSkillInfo.score;
+                                    }.bind(this));
+                                }
+							}
+
+							//iterate over all possible missions and determine levels
+							_.map(_.keys(drkInfo.quests), function(questId) {
+								var questInfo = drkInfo.quests[questId];
+
+								var studentSkillScore = studentQuests[questId];
+								if (studentSkillScore) {
+                                    var skillLevel = dashService.determineSkillLevel(skillId, studentSkillScore, questInfo);
+                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
+                                        if (!latestSkillLevel.mission ||
+	                                        drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestSkillLevel.mission)) {
+                                            latestSkillLevel = {
+                                                mission: questInfo.mission,
+                                                level: skillLevel
+                                            };
+                                        }
+                                    }
+								}
+							}.bind(this));
+
+							return {
+								'userId': userId,
+								'currentProgress': latestSkillLevel.level
+							}
+						}.bind(this));
+				}.bind(this));
+
+				when.all(studentPromises).then(function(studentProgressLevels) {
+
+				    var studentGroups = {};
+				    _.forEach(studentProgressLevels, function(studentProgressLevel){
+				        if (studentProgressLevel.currentProgress) {
+				            if (!studentGroups[studentProgressLevel.currentProgress]) {
+					            studentGroups[studentProgressLevel.currentProgress] = [];
+                            }
+				            studentGroups[studentProgressLevel.currentProgress].push(studentProgressLevel.userId);
+                        }
+                    }.bind(this));
+
+					this.myds.getNotes(userId, courseId, skillId)
+						.then(function(notes){
+
+						    _.forEach(notes, function(note){
+                                if (note.student_group === 'Advancing' || note.student_group === 'NeedSupport') {
+								    note.students = studentGroups[note.student_group];
+							    }
+                            }.bind(this));
+
+							this.requestUtil.jsonResponse(res, notes);
+						}.bind(this))
+						// catch all errors
+						.then(null, function(err){
+							this.requestUtil.errorResponse(res, err);
+						}.bind(this));
+				}.bind(this));
+			}.bind(this));
+		}.bind(this));
+    } else {
+		this.requestUtil.errorResponse(res, "unsupported game id");
+		return;
+    }
 }
 
 function getGamesCourseMap(req, res){

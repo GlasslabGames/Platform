@@ -415,6 +415,21 @@ DashService.prototype.getGameAssessmentInfo = function(gameId) {
     }.bind(this) );
 };
 
+DashService.prototype.determineSkillLevel = function(skillId, score, questInfo) {
+	var grade = score.correct / score.attempts;
+	if (questInfo && !_.contains(questInfo.skills, skillId)) {
+		return "NotAvailable";
+	}
+	if (grade >= 0.70) {
+		return "Advancing";
+	}
+	else if (score.attempts > 0) {
+		return "NeedSupport";
+	}
+	else {
+		return "NotAttempted";
+	}
+};
 
 // TODO: replace this with DB lookup, return promise
 // promise transition complete
