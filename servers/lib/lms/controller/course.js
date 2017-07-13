@@ -2,6 +2,7 @@ var _      = require('lodash');
 var when   = require('when');
 var Util   = require('../../core/util.js');
 var lConst = require('../lms.const.js');
+var dConst = require('../../dash/dash.const.js');
 
 module.exports = {
     getEnrolledCourses:     getEnrolledCourses,
@@ -1235,7 +1236,7 @@ function saveReportHelperNotes(req, res){
 		!req.params.hasOwnProperty("skillId") ||
 		!req.params.hasOwnProperty("gameId") ||
         !userData) {
-		this.requestUtil.errorResponse(res, {key:"course.general"});
+		this.requestUtil.errorResponse(res, {key:"course.notes.save.missingParameters"});
 		return;
 	}
 
@@ -1273,10 +1274,10 @@ function saveReportHelperNotes(req, res){
                     this.requestUtil.errorResponse(res, err);
                 }.bind(this));
         } else {
-            this.requestUtil.errorResponse(res, {key:"course.general"});
+            this.requestUtil.errorResponse(res, {key:"course.notes.save.missingContent"});
         }
     } else {
-        this.requestUtil.errorResponse(res, {key:"course.general"});
+        this.requestUtil.errorResponse(res, {key:"course.notes.invalidGame"});
     }
 }
 
@@ -1288,7 +1289,7 @@ function getReportHelperNotes(req, res){
         !req.params.hasOwnProperty("gameId") ||
 		!req.params.hasOwnProperty("skillId") ||
         !userData) {
-		this.requestUtil.errorResponse(res, {key:"course.general"});
+		this.requestUtil.errorResponse(res, {key:"course.notes.save.missingParameters"});
 		return;
 	}
 
@@ -1297,12 +1298,14 @@ function getReportHelperNotes(req, res){
 	var skillId = req.params.skillId;
 	var userId = userData.id;
 
+	var assessmentId = "drk12_b";
+
 	var dashService = this.serviceManager.get("dash").service;
 
 	if (gameId === 'AA-1') {
 		dashService.getGameAssessmentInfo(gameId).then(function(aInfo) {
 
-			var drkInfo = _.find(aInfo, function (a) { return a.id == "drk12_b" });
+			var drkInfo = _.find(aInfo, function (a) { return a.id == assessmentId });
 			if (!drkInfo) {
 				this.requestUtil.errorResponse(res, "could not retrieve game metadata");
 				return;
@@ -1313,7 +1316,7 @@ function getReportHelperNotes(req, res){
 				var studentPromises = _.map(users, function(user) {
 					var userId = user.id;
 
-					return this.telmStore.getAssessmentResults(userId, gameId, "drk12_b")
+					return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
 						.then(function(assessmentData) {
 
 							var latestSkillLevel = {};
@@ -1338,7 +1341,7 @@ function getReportHelperNotes(req, res){
 								var studentSkillScore = studentQuests[questId];
 								if (studentSkillScore) {
                                     var skillLevel = dashService.determineSkillLevel(skillId, studentSkillScore, questInfo);
-                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
+                                    if (skillLevel != dConst.skillStatus.NotAvailable && skillLevel != dConst.skillStatus.NotAttempted) {
                                         if (!latestSkillLevel.mission ||
 	                                        drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestSkillLevel.mission)) {
                                             latestSkillLevel = {
@@ -1360,6 +1363,7 @@ function getReportHelperNotes(req, res){
 				when.all(studentPromises).then(function(studentProgressLevels) {
 
 				    var studentGroups = {};
+				    var studentIdList = [];
 				    _.forEach(studentProgressLevels, function(studentProgressLevel){
 				        if (studentProgressLevel.currentProgress) {
 				            if (!studentGroups[studentProgressLevel.currentProgress]) {
@@ -1367,15 +1371,24 @@ function getReportHelperNotes(req, res){
                             }
 				            studentGroups[studentProgressLevel.currentProgress].push(studentProgressLevel.userId);
                         }
+                        studentIdList.push(studentProgressLevel.userId);
                     }.bind(this));
 
 					this.myds.getNotes(userId, courseId, skillId)
 						.then(function(notes){
 
 						    _.forEach(notes, function(note){
-                                if (note.student_group === 'Advancing' || note.student_group === 'NeedSupport') {
+                                if (note.student_group === dConst.skillStatus.Advancing || note.student_group === dConst.skillStatus.NeedSupport) {
 								    note.students = studentGroups[note.student_group];
-							    }
+							    } else if (note.students.length > 0) {
+                                    var studentsStillInCourse = [];
+                                    _.forEach(note.students.split(","), function(studentId){
+                                        if (studentIdList.indexOf(parseInt(studentId)) >= 0) {
+	                                        studentsStillInCourse.push(parseInt(studentId));
+                                        }
+                                    });
+                                    note.students = studentsStillInCourse;
+                                }
                             }.bind(this));
 
 							this.requestUtil.jsonResponse(res, notes);
@@ -1388,7 +1401,7 @@ function getReportHelperNotes(req, res){
 			}.bind(this));
 		}.bind(this));
     } else {
-		this.requestUtil.errorResponse(res, "unsupported game id");
+		this.requestUtil.errorResponse(res, {key:"course.notes.invalidGame"});
 		return;
     }
 }

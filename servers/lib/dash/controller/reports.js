@@ -2,6 +2,7 @@
 var _         = require('lodash');
 var when      = require('when');
 var lConst    = require('../../lms/lms.const.js');
+var dConst    = require('../../dash/dash.const.js');
 var Util      = require('../../core/util');
 //
 
@@ -854,7 +855,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                     var skillScore = skillInfo.score;
 
                                     var skillLevel = this.determineSkillLevel(skillId, skillScore, questInfo);
-                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
+                                    if (skillLevel != dConst.skillStatus.NotAvailable && skillLevel != dConst.skillStatus.NotAttempted) {
                                         if (!(skillId in latestSkillScores)) {
                                             latestSkillScores[skillId] = {
                                                 mission: questInfo.mission,
@@ -984,7 +985,7 @@ function _calculate_course_skill_average(studentAssessments, drkInfo) {
                 var level = studentReport.currentProgress.skillLevel[skillId].level;
                 result[skillId][level] += 1;
             } else {
-                result[skillId]['NotAttempted'] += 1;
+                result[skillId][dConst.skillStatus.NotAttempted] += 1;
             }
 
         });
@@ -994,10 +995,10 @@ function _calculate_course_skill_average(studentAssessments, drkInfo) {
 
     //fold NotAvailable into NotAttempted
     _.forOwn(courseSkillTotals, function(skillTotals, skillId) {
-        if ('NotAvailable' in courseSkillTotals[skillId]) {
-            var c = courseSkillTotals[skillId]['NotAvailable'];
-            delete courseSkillTotals[skillId]['NotAvailable'];
-            courseSkillTotals[skillId]['NotAttempted'] += c;
+        if (dConst.skillStatus.NotAvailable in courseSkillTotals[skillId]) {
+            var c = courseSkillTotals[skillId][dConst.skillStatus.NotAvailable];
+            delete courseSkillTotals[skillId][dConst.skillStatus.NotAvailable];
+            courseSkillTotals[skillId][dConst.skillStatus.NotAttempted] += c;
         }
     });
 

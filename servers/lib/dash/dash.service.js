@@ -15,6 +15,7 @@ var imjv    = require('is-my-json-valid');
 
 // load at runtime
 var Util;
+var dConst  = require('../dash/dash.const.js');
 
 module.exports = DashService;
 
@@ -418,16 +419,14 @@ DashService.prototype.getGameAssessmentInfo = function(gameId) {
 DashService.prototype.determineSkillLevel = function(skillId, score, questInfo) {
 	var grade = score.correct / score.attempts;
 	if (questInfo && !_.contains(questInfo.skills, skillId)) {
-		return "NotAvailable";
+		return dConst.skillStatus.NotAvailable;
 	}
 	if (grade >= 0.70) {
-		return "Advancing";
-	}
-	else if (score.attempts > 0) {
-		return "NeedSupport";
-	}
-	else {
-		return "NotAttempted";
+		return dConst.skillStatus.Advancing;
+	} else if (score.attempts > 0) {
+		return dConst.skillStatus.NeedSupport;
+	} else {
+		return dConst.skillStatus.NotAttempted;
 	}
 };
 
