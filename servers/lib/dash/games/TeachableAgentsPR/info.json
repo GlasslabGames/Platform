@@ -19,7 +19,7 @@
         "price": "Free",
         "packages": "PC/Mac, Chromebook/Web Games",
         "release": "live",
-        "releaseDate": "TBD",
+        "releaseDate": "Aug 9, 2017",
         "shortDescription": "Teachable Agents (TA) is a learning technology that draws on the social metaphor of teaching a computer agent to help students learn.",
         "description": "Teachable Agents (TA) is a learning technology that draws on the social metaphor of teaching a computer agent to help students learn. Students teach their agent by creating a concept map that serves as the agent’s “brain.” An artificial intelligence engine enables the agent to interactively answer questions posed to it by traversing the links & nodes in its map.  As the agent reasons, it also animates the path it is following, thereby providing feedback, as well as a visible model of thinking for the students. Students can then use the feedback to revise their agent’s knowledge (and consequently, their own).",
         "developer": {
