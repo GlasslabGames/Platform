@@ -814,9 +814,13 @@ function _determineLevel(skillId, score, questInfo) {
 function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
     var lmsService = this.serviceManager.get("lms").service;
+    var aInfo = null;
 
-    this.getGameAssessmentInfo(gameId).then(function(aInfo) {
-
+    this.getGameAssessmentInfo(gameId).then(function(assessmentInfo) {
+        aInfo = assessmentInfo;
+        return this.getGameReportInfo(gameId, "drk12_b");
+    }.bind(this))
+    .then(function(gInfo){
         var drkInfo = _.find(aInfo, function(a) { return a.id == "drk12_b" });
         if (!drkInfo) {
             var emptyReport = {}
@@ -892,26 +896,30 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                                     // Accumulate running totals of correct answers and attempts for each skill and subskill,
                                     // so we can compute averages at the end
-                                    if (!(skillId in studentSkillAndSubskillAverages)) {
-                                        studentSkillAndSubskillAverages[skillId] = {
-                                            correct: 0,
-                                            attempts: 0,
-                                            details: {}
-                                        }
-                                    }
-                                    studentSkillAndSubskillAverages[skillId].correct += skillScore.correct;
-                                    studentSkillAndSubskillAverages[skillId].attempts += skillScore.attempts;
-                                    if (skillInfo.detail) {
-                                        _.forEach(skillInfo.detail, function (detailInfo, detailId) {
-                                            if (!(detailId in studentSkillAndSubskillAverages[skillId].details)) {
-                                                studentSkillAndSubskillAverages[skillId].details[detailId] = {
-                                                    correct: 0,
-                                                    attempts: 0
-                                                }
+                                    if (gInfo.skills && gInfo.skills[skillId] &&
+                                        gInfo.skills[skillId].missions &&
+                                        gInfo.skills[skillId].missions.indexOf(questInfo.mission) >= 0) {
+                                        if (!(skillId in studentSkillAndSubskillAverages)) {
+                                            studentSkillAndSubskillAverages[skillId] = {
+                                                correct: 0,
+                                                attempts: 0,
+                                                details: {}
                                             }
-                                            studentSkillAndSubskillAverages[skillId].details[detailId].correct += detailInfo.correct;
-                                            studentSkillAndSubskillAverages[skillId].details[detailId].attempts += detailInfo.attempts;
-                                        });
+                                        }
+                                        studentSkillAndSubskillAverages[skillId].correct += skillScore.correct;
+                                        studentSkillAndSubskillAverages[skillId].attempts += skillScore.attempts;
+                                        if (skillInfo.detail) {
+                                            _.forEach(skillInfo.detail, function (detailInfo, detailId) {
+                                                if (!(detailId in studentSkillAndSubskillAverages[skillId].details)) {
+                                                    studentSkillAndSubskillAverages[skillId].details[detailId] = {
+                                                        correct: 0,
+                                                        attempts: 0
+                                                    }
+                                                }
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].correct += detailInfo.correct;
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].attempts += detailInfo.attempts;
+                                            });
+                                        }
                                     }
 
                                     return {
