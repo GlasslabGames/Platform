@@ -834,6 +834,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                         var latestMission = drkInfo.missionList[0];
                         var latestSkillScores = {};
+                        var studentSkillAndSubskillAverages = {};
                         var studentQuests = {};
 
                         if (assessmentData && assessmentData.results) {
@@ -889,6 +890,30 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         }
                                     }
 
+                                    // Accumulate running totals of correct answers and attempts for each skill and subskill,
+                                    // so we can compute averages at the end
+                                    if (!(skillId in studentSkillAndSubskillAverages)) {
+                                        studentSkillAndSubskillAverages[skillId] = {
+                                            correct: 0,
+                                            attempts: 0,
+                                            details: {}
+                                        }
+                                    }
+                                    studentSkillAndSubskillAverages[skillId].correct += skillScore.correct;
+                                    studentSkillAndSubskillAverages[skillId].attempts += skillScore.attempts;
+                                    if (skillInfo.detail) {
+                                        _.forEach(skillInfo.detail, function (detailInfo, detailId) {
+                                            if (!(detailId in studentSkillAndSubskillAverages[skillId].details)) {
+                                                studentSkillAndSubskillAverages[skillId].details[detailId] = {
+                                                    correct: 0,
+                                                    attempts: 0
+                                                }
+                                            }
+                                            studentSkillAndSubskillAverages[skillId].details[detailId].correct += detailInfo.correct;
+                                            studentSkillAndSubskillAverages[skillId].details[detailId].attempts += detailInfo.attempts;
+                                        });
+                                    }
+
                                     return {
                                         "level": skillLevel,
                                         "score": skillScore,
@@ -914,6 +939,18 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                 "skillLevel": skills
                             }
 
+                        });
+
+                        // Compute the averages and add them to the current progress info
+                        _.forEach(studentSkillAndSubskillAverages, function (skillAverageInfo, skillId) {
+                            if (latestSkillScores[skillId]) {
+                                latestSkillScores[skillId].average = (skillAverageInfo.correct / skillAverageInfo.attempts) * 100;
+                                _.forEach(skillAverageInfo.details, function (detailAverageInfo, detailId) {
+                                    if (latestSkillScores[skillId].detail && latestSkillScores[skillId].detail[detailId]) {
+                                        latestSkillScores[skillId].detail[detailId].average = (detailAverageInfo.correct / detailAverageInfo.attempts) * 100;
+                                    }
+                                });
+                            }
                         });
 
                         var progress = {
