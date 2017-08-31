@@ -951,14 +951,26 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                         // Compute the averages and add them to the current progress info
                         _.forEach(studentSkillAndSubskillAverages, function (skillAverageInfo, skillId) {
-                            if (latestSkillScores[skillId]) {
-                                latestSkillScores[skillId].average = (skillAverageInfo.correct / skillAverageInfo.attempts) * 100;
-                                _.forEach(skillAverageInfo.details, function (detailAverageInfo, detailId) {
-                                    if (latestSkillScores[skillId].detail && latestSkillScores[skillId].detail[detailId]) {
-                                        latestSkillScores[skillId].detail[detailId].average = (detailAverageInfo.correct / detailAverageInfo.attempts) * 100;
-                                    }
-                                });
+                            if (!latestSkillScores[skillId]) {
+                                latestSkillScores[skillId] = {
+                                    correct: 0,
+                                    attempts: 0,
+                                    detail: {}
+                                };
                             }
+                            latestSkillScores[skillId].average = (skillAverageInfo.correct / skillAverageInfo.attempts) * 100;
+                            _.forEach(skillAverageInfo.details, function (detailAverageInfo, detailId) {
+                                if (!latestSkillScores[skillId].detail) {
+                                    latestSkillScores[skillId].detail = {};
+                                }
+                                if (!latestSkillScores[skillId].detail[detailId]) {
+                                    latestSkillScores[skillId].detail[detailId] = {
+                                        correct: 0,
+                                        attempts: 0
+                                    };
+                                }
+                                latestSkillScores[skillId].detail[detailId].average = (detailAverageInfo.correct / detailAverageInfo.attempts) * 100;
+                            });
                         });
 
                         var progress = {
