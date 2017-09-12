@@ -901,23 +901,23 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         gInfo.skills[skillId].missions.indexOf(questInfo.mission) >= 0) {
                                         if (!(skillId in studentSkillAndSubskillAverages)) {
                                             studentSkillAndSubskillAverages[skillId] = {
-                                                correct: 0,
-                                                attempts: 0,
+                                                scoreSum: 0.0,
+                                                missionTotal: 0,
                                                 details: {}
                                             }
                                         }
-                                        studentSkillAndSubskillAverages[skillId].correct += skillScore.correct;
-                                        studentSkillAndSubskillAverages[skillId].attempts += skillScore.attempts;
+                                        studentSkillAndSubskillAverages[skillId].scoreSum += (skillScore.attempts == 0 ? 0 : (skillScore.correct/skillScore.attempts));
+                                        studentSkillAndSubskillAverages[skillId].missionTotal += (skillScore.attempts == 0 ? 0 : 1);
                                         if (skillInfo.detail) {
                                             _.forEach(skillInfo.detail, function (detailInfo, detailId) {
                                                 if (!(detailId in studentSkillAndSubskillAverages[skillId].details)) {
                                                     studentSkillAndSubskillAverages[skillId].details[detailId] = {
-                                                        correct: 0,
-                                                        attempts: 0
+                                                        scoreSum: 0.0,
+                                                        missionTotal: 0
                                                     }
                                                 }
-                                                studentSkillAndSubskillAverages[skillId].details[detailId].correct += detailInfo.correct;
-                                                studentSkillAndSubskillAverages[skillId].details[detailId].attempts += detailInfo.attempts;
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].scoreSum += (detailInfo.attempts == 0 ? 0 : (detailInfo.correct/detailInfo.attempts));
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].missionTotal += (detailInfo.attempts == 0 ? 0 : 1);
                                             });
                                         }
                                     }
@@ -958,7 +958,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                     detail: {}
                                 };
                             }
-                            latestSkillScores[skillId].average = (skillAverageInfo.correct / skillAverageInfo.attempts) * 100;
+                            latestSkillScores[skillId].average = (skillAverageInfo.missionTotal == 0 ? 0: (skillAverageInfo.scoreSum / skillAverageInfo.missionTotal) * 100);
                             _.forEach(skillAverageInfo.details, function (detailAverageInfo, detailId) {
                                 if (!latestSkillScores[skillId].detail) {
                                     latestSkillScores[skillId].detail = {};
@@ -969,7 +969,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         attempts: 0
                                     };
                                 }
-                                latestSkillScores[skillId].detail[detailId].average = (detailAverageInfo.correct / detailAverageInfo.attempts) * 100;
+                                latestSkillScores[skillId].detail[detailId].average = (detailAverageInfo.missionTotal == 0 ? 0 : (detailAverageInfo.scoreSum / detailAverageInfo.missionTotal) * 100);
                             });
                         });
 
