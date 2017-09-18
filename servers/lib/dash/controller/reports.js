@@ -814,9 +814,13 @@ function _determineLevel(skillId, score, questInfo) {
 function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
     var lmsService = this.serviceManager.get("lms").service;
+    var aInfo = null;
 
-    this.getGameAssessmentInfo(gameId).then(function(aInfo) {
-
+    this.getGameAssessmentInfo(gameId).then(function(assessmentInfo) {
+        aInfo = assessmentInfo;
+        return this.getGameReportInfo(gameId, "drk12_b");
+    }.bind(this))
+    .then(function(gInfo){
         var drkInfo = _.find(aInfo, function(a) { return a.id == "drk12_b" });
         if (!drkInfo) {
             var emptyReport = {}
@@ -826,33 +830,36 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
         lmsService.getStudentsOfCourse(courseId).then(function(users) {
             if (!users) return;
-
             var studentPromises = _.map(users, function(user) {
                 var userId = user.id;
 
                 return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
                     .then(function(assessmentData) {
 
-                        var latestMission = 0;
+                        var latestMission = drkInfo.missionList[0];
                         var latestSkillScores = {};
+                        var studentSkillAndSubskillAverages = {};
                         var studentQuests = {};
 
                         if (assessmentData && assessmentData.results) {
                             //build a questId -> skills map for this student
                             _.forOwn(assessmentData.results.skill, function (skillInfo, skillId) {
-                                _.forEach(skillInfo.quests, function(questSkillInfo) {
-                                    if (!(questSkillInfo.questId in studentQuests)) {
-                                        studentQuests[questSkillInfo.questId] = {
-                                            "questId": questSkillInfo.questId,
-                                            "skills": {}
-                                        }
-                                    }
-                                    studentQuests[questSkillInfo.questId].skills[skillId] = {
-                                        score: questSkillInfo.score,
-                                        detail: questSkillInfo.detail
-                                    }
+                                if (skillInfo.quests) {
+	                                _.forEach(skillInfo.quests, function (questSkillInfo) {
+		                                if (!(questSkillInfo.questId in studentQuests)) {
+			                                studentQuests[questSkillInfo.questId] = {
+				                                "questId": questSkillInfo.questId,
+				                                "skills": {}
+			                                }
+		                                }
+		                                studentQuests[questSkillInfo.questId].skills[skillId] = {
+			                                score: questSkillInfo.score,
+			                                detail: questSkillInfo.detail,
+			                                attemptList: questSkillInfo.attemptList
+		                                }
 
-                                });
+	                                });
+                                }
                             });
                         }
 
@@ -868,94 +875,63 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                     var skillScore = skillInfo.score;
 
                                     var skillLevel = _determineLevel(skillId, skillScore, questInfo);
+                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
+                                        if (!(skillId in latestSkillScores)) {
+                                            latestSkillScores[skillId] = {
+                                                mission: questInfo.mission,
+                                                level: skillLevel,
+                                                score: skillScore,
+                                                detail: skillInfo.detail,
+	                                            attemptList: skillInfo.attemptList
+                                            }
+                                        }
+                                        else if (questInfo.mission > latestSkillScores[skillId].mission) {
+                                            latestSkillScores[skillId].mission = questInfo.mission;
+                                            latestSkillScores[skillId].level = skillLevel;
+                                            latestSkillScores[skillId].score = skillScore;
+                                            latestSkillScores[skillId].detail = skillInfo.detail;
+	                                        latestSkillScores[skillId].attemptList = skillInfo.attemptList;
+                                        }
+                                    }
+
+                                    // Accumulate running totals of correct answers and attempts for each skill and subskill,
+                                    // so we can compute averages at the end
+                                    if (gInfo.skills && gInfo.skills[skillId] &&
+                                        gInfo.skills[skillId].missions &&
+                                        gInfo.skills[skillId].missions.indexOf(questInfo.mission) >= 0) {
+                                        if (!(skillId in studentSkillAndSubskillAverages)) {
+                                            studentSkillAndSubskillAverages[skillId] = {
+                                                scoreSum: 0.0,
+                                                missionTotal: 0,
+                                                details: {}
+                                            }
+                                        }
+                                        studentSkillAndSubskillAverages[skillId].scoreSum += (skillScore.attempts == 0 ? 0 : (skillScore.correct/skillScore.attempts));
+                                        studentSkillAndSubskillAverages[skillId].missionTotal += (skillScore.attempts == 0 ? 0 : 1);
+                                        if (skillInfo.detail) {
+                                            _.forEach(skillInfo.detail, function (detailInfo, detailId) {
+                                                if (!(detailId in studentSkillAndSubskillAverages[skillId].details)) {
+                                                    studentSkillAndSubskillAverages[skillId].details[detailId] = {
+                                                        scoreSum: 0.0,
+                                                        missionTotal: 0
+                                                    }
+                                                }
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].scoreSum += (detailInfo.attempts == 0 ? 0 : (detailInfo.correct/detailInfo.attempts));
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].missionTotal += (detailInfo.attempts == 0 ? 0 : 1);
+                                            });
+                                        }
+                                    }
 
                                     return {
                                         "level": skillLevel,
                                         "score": skillScore,
                                         "detail": skillInfo.detail,
+	                                    "attemptList": skillInfo.attemptList
                                     }
                                 });
-                                if (questInfo.mission > latestMission) {
+                                if (drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestMission)) {
                                     latestMission = questInfo.mission;
                                 }
-
-                                // Special hack to fix report discrepancy detailed in DRK-211.
-	                            var magicData = {
-		                            "connectingEvidence": [
-			                            "AUTHORITRON",
-			                            "OBSERVATRON",
-			                            "CONSEBOT",
-			                            "COMPARIDROID"
-		                            ],
-		                            "supportingClaims": [
-			                            "FUSE_CORE",
-			                            "CORE_ATTACK"
-		                            ],
-		                            "criticalQuestions": [
-			                            "CRITICAL_QUESTION_ATTACK"
-		                            ],
-		                            "usingBacking": [
-			                            "CREATED",
-			                            "DEFENDED"
-		                            ]
-	                            };
-
-                                var FUSE_CORE = skills["connectingEvidence"].detail["FUSE_CORE"];
-
-	                            skills = _.mapValues(skills, function(skill, skillId) {
-	                                if (magicData[skillId]) {
-	                                    var totalCorrect = 0;
-	                                    var totalAttempts = 0;
-	                                    for (var i=0; i<magicData[skillId].length; i++) {
-	                                        var subSkillId = magicData[skillId][i];
-		                                    var subSkillScore = skill.detail[subSkillId];
-
-		                                    // Special hack to fix FUSE_CORE, which is included in the first skill
-                                            // but must be displayed in the second. (Perpetuated from drilldown
-                                            // controller.)
-	                                        if (subSkillId === "FUSE_CORE") {
-		                                        subSkillScore = FUSE_CORE;
-                                            }
-
-                                            if (skill.level != "NotAvailable" && subSkillScore) {
-	                                            totalCorrect += subSkillScore.correct;
-	                                            totalAttempts += subSkillScore.attempts;
-                                            }
-                                        }
-
-                                        if (skill.level != "NotAvailable") {
-	                                        var grade = totalCorrect / totalAttempts;
-	                                        if (grade >= 0.70) {
-		                                        skill.level = "Advancing";
-	                                        }
-	                                        else if (totalAttempts > 0) {
-		                                        skill.level = "NeedSupport";
-	                                        }
-	                                        else {
-		                                        skill.level = "NotAttempted";
-	                                        }
-                                        }
-                                    }
-
-		                            if (skill.level != "NotAvailable" && skill.level != "NotAttempted") {
-			                            if (!(skillId in latestSkillScores)) {
-				                            latestSkillScores[skillId] = {
-					                            mission: questInfo.mission,
-					                            level: skill.level,
-					                            score: skill.score,
-					                            detail: skill.detail,
-				                            }
-			                            }
-			                            else if (questInfo.mission > latestSkillScores[skillId].mission) {
-				                            latestSkillScores[skillId].mission = questInfo.mission;
-				                            latestSkillScores[skillId].level = skill.level;
-				                            latestSkillScores[skillId].score = skill.score;
-				                            latestSkillScores[skillId].detail = skill.detail;
-			                            }
-		                            }
-
-                                    return skill;
-	                            });
                             } else {
                                 var score = {"correct":0, "attempts":0};
                                 skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
@@ -973,16 +949,53 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                         });
 
+                        // Compute the averages and add them to the current progress info
+                        _.forEach(studentSkillAndSubskillAverages, function (skillAverageInfo, skillId) {
+                            if (!latestSkillScores[skillId]) {
+                                latestSkillScores[skillId] = {
+                                    correct: 0,
+                                    attempts: 0,
+                                    detail: {}
+                                };
+                            }
+                            latestSkillScores[skillId].average = (skillAverageInfo.missionTotal == 0 ? 0: (skillAverageInfo.scoreSum / skillAverageInfo.missionTotal) * 100);
+                            _.forEach(skillAverageInfo.details, function (detailAverageInfo, detailId) {
+                                if (!latestSkillScores[skillId].detail) {
+                                    latestSkillScores[skillId].detail = {};
+                                }
+                                if (!latestSkillScores[skillId].detail[detailId]) {
+                                    latestSkillScores[skillId].detail[detailId] = {
+                                        correct: 0,
+                                        attempts: 0
+                                    };
+                                }
+                                latestSkillScores[skillId].detail[detailId].average = (detailAverageInfo.missionTotal == 0 ? 0 : (detailAverageInfo.scoreSum / detailAverageInfo.missionTotal) * 100);
+                            });
+                        });
+
                         var progress = {
                             mission: latestMission,
                             skillLevel: latestSkillScores
                         };
 
+                        var argubotsUnlocked = {};
+	                    if (assessmentData &&
+                            assessmentData.results &&
+		                    assessmentData.results.skill &&
+                            assessmentData.results.skill.argubotsUnlocked) {
+		                    _.forOwn(assessmentData.results.skill.argubotsUnlocked.bots, function (questId, botId) {
+		                        if (drkInfo.quests[questId]) {
+			                        argubotsUnlocked[botId] = drkInfo.quests[questId].mission;
+		                        }
+		                    });
+                        }
+
                         // student row
                         return {
                             'userId': userId,
                             'currentProgress': progress,
-                            'missions': missionProgress
+                            'missions': missionProgress,
+                            'argubotsUnlocked': argubotsUnlocked
                         }
                     }.bind(this));
             }.bind(this));
