@@ -98,7 +98,8 @@
             "id": "standards",
             "dataProcessScope": "gameSession",
             "engine": "standards",
-            "trigger": "activity"
+            "trigger": "activity",
+            "distiller": "shared"
         },
         {
             "enabled": true,
