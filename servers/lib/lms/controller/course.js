@@ -1378,6 +1378,7 @@ function getReportHelperNotes(req, res){
 						.then(function(notes){
 
 						    _.forEach(notes, function(note){
+						        // NOTE: DRK-291 NotAttempted and NotAvailable student groups are not currently supported
                                 if (note.student_group === dConst.skillStatus.Advancing || note.student_group === dConst.skillStatus.NeedSupport) {
 								    note.students = studentGroups[note.student_group];
 							    } else if (note.students.length > 0) {
