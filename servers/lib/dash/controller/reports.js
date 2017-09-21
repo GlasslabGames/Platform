@@ -799,9 +799,13 @@ function _getStandards(req, res, reportId, gameId, courseId) {
 function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
     var lmsService = this.serviceManager.get("lms").service;
+    var aInfo = null;
 
-    this.getGameAssessmentInfo(gameId).then(function(aInfo) {
-
+    this.getGameAssessmentInfo(gameId).then(function(assessmentInfo) {
+        aInfo = assessmentInfo;
+        return this.getGameReportInfo(gameId, "drk12_b");
+    }.bind(this))
+    .then(function(gInfo){
         var drkInfo = _.find(aInfo, function(a) { return a.id == "drk12_b" });
         if (!drkInfo) {
             var emptyReport = {}
@@ -819,6 +823,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
                         var latestMission = drkInfo.missionList[0];
                         var latestSkillScores = {};
+                        var studentSkillAndSubskillAverages = {};
                         var studentQuests = {};
 
                         if (assessmentData && assessmentData.results) {
@@ -874,6 +879,34 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         }
                                     }
 
+                                    // Accumulate running totals of correct answers and attempts for each skill and subskill,
+                                    // so we can compute averages at the end
+                                    if (gInfo.skills && gInfo.skills[skillId] &&
+                                        gInfo.skills[skillId].missions &&
+                                        gInfo.skills[skillId].missions.indexOf(questInfo.mission) >= 0) {
+                                        if (!(skillId in studentSkillAndSubskillAverages)) {
+                                            studentSkillAndSubskillAverages[skillId] = {
+                                                scoreSum: 0.0,
+                                                missionTotal: 0,
+                                                details: {}
+                                            }
+                                        }
+                                        studentSkillAndSubskillAverages[skillId].scoreSum += (skillScore.attempts == 0 ? 0 : (skillScore.correct/skillScore.attempts));
+                                        studentSkillAndSubskillAverages[skillId].missionTotal += (skillScore.attempts == 0 ? 0 : 1);
+                                        if (skillInfo.detail) {
+                                            _.forEach(skillInfo.detail, function (detailInfo, detailId) {
+                                                if (!(detailId in studentSkillAndSubskillAverages[skillId].details)) {
+                                                    studentSkillAndSubskillAverages[skillId].details[detailId] = {
+                                                        scoreSum: 0.0,
+                                                        missionTotal: 0
+                                                    }
+                                                }
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].scoreSum += (detailInfo.attempts == 0 ? 0 : (detailInfo.correct/detailInfo.attempts));
+                                                studentSkillAndSubskillAverages[skillId].details[detailId].missionTotal += (detailInfo.attempts == 0 ? 0 : 1);
+                                            });
+                                        }
+                                    }
+
                                     return {
                                         "level": skillLevel,
                                         "score": skillScore,
@@ -900,6 +933,30 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             }
 
                         }.bind(this));
+
+                        // Compute the averages and add them to the current progress info
+                        _.forEach(studentSkillAndSubskillAverages, function (skillAverageInfo, skillId) {
+                            if (!latestSkillScores[skillId]) {
+                                latestSkillScores[skillId] = {
+                                    correct: 0,
+                                    attempts: 0,
+                                    detail: {}
+                                };
+                            }
+                            latestSkillScores[skillId].average = (skillAverageInfo.missionTotal == 0 ? 0: (skillAverageInfo.scoreSum / skillAverageInfo.missionTotal) * 100);
+                            _.forEach(skillAverageInfo.details, function (detailAverageInfo, detailId) {
+                                if (!latestSkillScores[skillId].detail) {
+                                    latestSkillScores[skillId].detail = {};
+                                }
+                                if (!latestSkillScores[skillId].detail[detailId]) {
+                                    latestSkillScores[skillId].detail[detailId] = {
+                                        correct: 0,
+                                        attempts: 0
+                                    };
+                                }
+                                latestSkillScores[skillId].detail[detailId].average = (detailAverageInfo.missionTotal == 0 ? 0 : (detailAverageInfo.scoreSum / detailAverageInfo.missionTotal) * 100);
+                            });
+                        });
 
                         var progress = {
                             mission: latestMission,

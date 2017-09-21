@@ -1,0 +1,1208 @@
+{
+  "basic": {
+    "gameId": "MGOWEB",
+    "enabled": true,
+    "visible": true,
+    "maintenance": null,
+    "shortName": "Argubot Academy EDU Web",
+    "longName": "Mars Generation One: Argubot Academy EDU Web",
+    "grades": "6-8",
+    "subject": "ELA",
+    "type": "Browser",
+    "platform": {
+      "type": "Browser",
+      "icon": {
+        "small": "/assets/platform-browser.png",
+        "large": "/assets/platform-browser@2x.png"
+      }
+    },
+    "price": "Free",
+    "packages": "Chromebook/Web Games",
+    "release": "dev",
+    "releaseDate": "",
+    "shortDescription": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for web browsers.",
+    "description": "Put your powers of persuasion to the ultimate test, on a whole new planet! Argubot Academy is an adventure game for web browsers.",
+    "developer": {
+      "id": "TEMP",
+      "name": "GlassLab, Inc.",
+      "logo": {
+        "small": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/644fc59f34a69c53deb04c79c6259942.png",
+        "large": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/644fc59f34a69c53deb04c79c6259942.png"
+      },
+      "description": "GlassLab brings together leaders in commercial games and experts in learning and assessment to develop next generation digital games and interactive experiences that make learning visible. Our products and services are designed to deliver proven learning impact and reach youth in schools, informal learning environments, and at home.<br /><br />The Lab represents a groundbreaking collaboration between Educational Testing Service, Electronic Arts, the Entertainment Software Association, Institute of Play, Pearson's Center for Digital Data, Analytics & Adaptive Learning, Zynga, and others.<br /><br />GlassLab is made possible through the generous support of The Bill and Melinda Gates Foundation and The John D. and Catherine T. MacArthur Foundation."
+    },
+    "settings": {
+      "canCreateMatches": false
+    },
+    "license": {
+      "type": "loginType",
+      "loginType": "glasslabv2,icivics,edmodo",
+      "valid": false,
+      "message": {
+        "invalid": "Coming Soon!"
+      }
+    },
+    "thumbnail": {
+      "small": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/403ab7e3dcfed91f12377911a97623b2.png",
+      "large": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/403ab7e3dcfed91f12377911a97623b2.png"
+    },
+    "card": {
+      "small": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/3ca4e7936a65666186fe899f98667d6c.jpg",
+      "large": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/3ca4e7936a65666186fe899f98667d6c.jpg"
+    },
+    "banners": {
+      "product": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/3f4293c46eef0dbbcebd3010198a15ff.png",
+      "reports": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/3f4293c46eef0dbbcebd3010198a15ff.png"
+    },
+    "skills": {
+      "academicSkills": [
+        "English Language Arts"
+      ],
+      "_21stCenturySkills": [
+        "System Thinking",
+        "Communication"
+      ],
+      "_21stCenturyReadiness": [],
+      "primary": "English Language Arts",
+      "secondary": "Communication"
+    },
+    "play": {
+      "type": "page",
+      "page": {
+        "embed": "https://s3-us-west-1.amazonaws.com/gl-mgoport/staging/index.html",
+        "embedSecure": "https://s3-us-west-1.amazonaws.com/gl-mgoport/staging/index.html",
+        "format": "html",
+        "size": {
+          "width": 960,
+          "height": 720
+        }
+      }
+    }
+  },
+  "assessment": [
+    {
+      "enabled": true,
+      "id": "sowo",
+      "dataProcessScope": "all",
+      "engine": "javascript",
+      "trigger": "activity",
+      "rules": {
+        "so1": {
+          "name": "Nailed It!",
+          "description": "Outstanding performance at identifying weaknesses of claim-data pairs."
+        },
+        "wo1": {
+          "name": "Contradictory Mechanic",
+          "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more contradictory pairs."
+        },
+        "wo2": {
+          "name": "Irrelevant Mechanic",
+          "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more pairs with irrelevant evidence."
+        },
+        "wo3": {
+          "name": "Straggler",
+          "description": "Student is having difficulty distinguishing between evidence that is 'not supporting' and 'not relevant' in opponent arguments."
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "id": "standards",
+      "dataProcessScope": "gameSession",
+      "engine": "standards",
+      "trigger": "activity",
+      "distiller": "shared"
+    },
+    {
+      "enabled": true,
+      "id": "drk12_b",
+      "dataProcessScope": "all",
+      "engine": "drk12",
+      "trigger": "activity",
+      "skills": {
+        "connectingEvidence": "Connecting evidence to argumentation schemes",
+        "supportingClaims": "Supporting claims w/ evidence",
+        "criticalQuestions": "Using critical questions",
+        "usingBacking": "Using backing"
+      },
+      "levels": {
+        "Advancing": "More than the threshold of attempts have been successful",
+        "NeedSupport": "Attempts have been made but success rate is below threshold",
+        "NotAttempted": "No attempts have been made",
+        "NotAvailable": "No opportunities to practice the skill are available"
+      },
+      "fuseCoreMapping": {
+        "quests": {
+          "Quest11": {
+            "4970": {
+              "correct": false,
+              "detail": "AUTHORITRON"
+            },
+            "4971": {
+              "correct": true,
+              "detail": "OBSERVATRON"
+            },
+            "4972": {
+              "correct": false,
+              "detail": "CONSEBOT"
+            },
+            "4973": {
+              "correct": false,
+              "detail": "CONSEBOT"
+            },
+            "4974": {
+              "correct": false,
+              "detail": "OBSERVATRON"
+            },
+            "4975": {
+              "correct": false,
+              "detail": "AUTHORITRON"
+            },
+            "4976": {
+              "correct": true,
+              "detail": "CONSEBOT"
+            },
+            "4977": {
+              "correct": true,
+              "detail": "AUTHORITRON"
+            }
+          }
+        },
+        "claimIds": {
+          "3353": {
+            "4486": {
+              "correct": false,
+              "detail": "OBSERVATRON"
+            },
+            "4487": {
+              "correct": true,
+              "detail": "CONSEBOT"
+            },
+            "4489": {
+              "correct": false,
+              "detail": "OBSERVATRON"
+            },
+            "4490": {
+              "correct": true,
+              "detail": "AUTHORITRON"
+            },
+            "4491": {
+              "correct": false,
+              "detail": "OBSERVATRON"
+            }
+          },
+          "3354": {
+            "4492": {
+              "correct": false,
+              "detail": "OBSERVATRON"
+            },
+            "4493": {
+              "correct": true,
+              "detail": "AUTHORITRON"
+            },
+            "4494": {
+              "correct": false,
+              "detail": "OBSERVATRON"
+            },
+            "4495": {
+              "correct": false,
+              "detail": "AUTHORITRON"
+            },
+            "4496": {
+              "correct": false,
+              "detail": "CONSEBOT"
+            }
+          },
+          "3357": {
+            "4485": {
+              "correct": true,
+              "detail": "CONSEBOT"
+            },
+            "4507": {
+              "correct": false,
+              "detail": "CONSEBOT"
+            },
+            "4508": {
+              "correct": false,
+              "detail": "CONSEBOT"
+            },
+            "4509": {
+              "correct": false,
+              "detail": "OBSERVATRON"
+            },
+            "4510": {
+              "correct": true,
+              "detail": "AUTHORITRON"
+            }
+          }
+        }
+      },
+      "useBackingDataIds": {
+        "quests": {
+          "Quest23a": [
+            4986, 4988, 4987
+          ],
+          "Quest24": [
+            4861, 4862, 4864, 4865, 4867, 4870, 4871, 4872, 4874, 4875, 4876, 4877, 4878, 4879, 4880
+          ],
+          "Quest28": [
+            4845, 4846, 4851, 4855, 4856, 4860, 4847, 4852, 4857, 4858, 4859, 4854
+          ],
+          "Quest30": [
+            4982, 4978, 4985
+          ],
+          "Quest21": [
+            4519, 4520, 4402, 4405, 4409, 4411, 4516, 4415
+          ]
+        }
+      },
+      "dataClaimAttackMap": {
+        "4811": { "3390": 2, "3388": 0, "3389": 2 },
+        "4812": { "3390": 2, "3388": 2, "3389": 0 },
+        "4813": { "3390": 0, "3388": 2, "3389": 2 },
+        "4814": { "3390": 2, "3388": 2, "3389": 2 },
+        "4815": { "3390": 2, "3388": 2, "3389": 2 },
+        "4816": { "3390": 1, "3388": 0, "3389": 1 },
+        "4817": { "3390": 1, "3388": 1, "3389": 0 },
+        "4818": { "3390": 0, "3388": 1, "3389": 1 },
+        "4819": { "3390": 2, "3388": 2, "3389": 2 },
+        "4820": { "3390": 2, "3388": 1, "3389": 2 },
+        "4821": { "3390": 1, "3388": 0, "3389": 1 },
+
+        "4202": { "3202": 1, "3203": 1, "3204": 0 },
+        "4203": { "3202": 2, "3203": 2, "3204": 2 },
+        "4205": { "3202": 0, "3203": 1, "3204": 1 },
+        "4207": { "3202": 1, "3203": 0, "3204": 1 },
+        "4209": { "3202": 2, "3203": 2, "3204": 2 },
+        "4212": { "3202": 1, "3203": 1, "3204": 0 },
+        "4360": { "3202": 1, "3203": 0, "3204": 1 },
+        "4363": { "3202": 0, "3203": 1, "3204": 1 },
+        "4364": { "3202": 0, "3203": 1, "3204": 1 },
+        "4359": { "3202": 2, "3203": 0, "3204": 2 },
+        "4361": { "3202": 2, "3203": 2, "3204": 0 },
+        "4362": { "3202": 0, "3203": 2, "3204": 2 },
+        "4979": { "3202": 1, "3203": 2, "3204": 2 },
+        "4358": { "3202": 2, "3203": 2, "3204": 2 },
+        "4532": { "3202": 2, "3203": 2, "3204": 2 },
+
+        "4485": { "3353": 2, "3354": 2, "3357": 0 },
+        "4486": { "3353": 1, "3354": 2, "3357": 2 },
+        "4487": { "3353": 0, "3354": 2, "3357": 2 },
+        "4489": { "3353": 2, "3354": 2, "3357": 2 },
+        "4490": { "3353": 1, "3354": 2, "3357": 2 },
+        "4491": { "3353": 2, "3354": 2, "3357": 2 },
+        "4492": { "3353": 2, "3354": 2, "3357": 2 },
+        "4493": { "3353": 2, "3354": 0, "3357": 2 },
+        "4494": { "3353": 2, "3354": 2, "3357": 2 },
+        "4495": { "3353": 0, "3354": 1, "3357": 2 },
+        "4496": { "3353": 0, "3354": 1, "3357": 2 },
+        "4507": { "3353": 2, "3354": 2, "3357": 1 },
+        "4508": { "3353": 2, "3354": 2, "3357": 1 },
+        "4509": { "3353": 2, "3354": 2, "3357": 2 },
+        "4510": { "3353": 2, "3354": 2, "3357": 0 },
+
+        "4365": { "3317": 2, "3315": 0, "3316": 1 },
+        "4366": { "3317": 2, "3315": 0, "3316": 1 },
+        "4367": { "3317": 2, "3315": 0, "3316": 1 },
+        "4368": { "3317": 2, "3315": 0, "3316": 1 },
+        "4369": { "3317": 2, "3315": 1, "3316": 0 },
+        "4370": { "3317": 2, "3315": 1, "3316": 0 },
+        "4371": { "3317": 2, "3315": 1, "3316": 0 },
+        "4372": { "3317": 2, "3315": 1, "3316": 0 },
+        "4373": { "3317": 0, "3315": 2, "3316": 2 },
+        "4374": { "3317": 0, "3315": 2, "3316": 2 },
+        "4375": { "3317": 0, "3315": 2, "3316": 2 },
+        "4376": { "3317": 0, "3315": 2, "3316": 2 },
+        "4377": { "3317": 2, "3315": 2, "3316": 2 },
+        "4378": { "3317": 2, "3315": 2, "3316": 2 },
+        "4379": { "3317": 2, "3315": 2, "3316": 2 },
+        "4380": { "3317": 2, "3315": 2, "3316": 2 },
+        "4381": { "3317": 0, "3315": 2, "3316": 2 },
+        "4382": { "3317": 2, "3315": 0, "3316": 1 },
+        "4383": { "3317": 2, "3315": 1, "3316": 0 },
+        "4384": { "3317": 2, "3315": 0, "3316": 1 },
+        "4385": { "3317": 2, "3315": 1, "3316": 0 },
+        "4526": { "3317": 2, "3315": 0, "3316": 1 },
+        "4527": { "3317": 2, "3315": 1, "3316": 0 },
+        "4528": { "3317": 0, "3315": 2, "3316": 2 },
+
+        "4827": { "3395": 0, "3396": 1, "3397": 1 },
+        "4828": { "3395": 0, "3396": 1, "3397": 1 },
+        "4829": { "3395": 0, "3396": 1, "3397": 1 },
+        "4831": { "3395": 0, "3396": 1, "3397": 2 },
+        "4832": { "3395": 0, "3396": 1, "3397": 1 },
+        "4833": { "3395": 0, "3396": 1, "3397": 1 },
+        "4834": { "3395": 2, "3396": 2, "3397": 2 },
+        "4835": { "3395": 1, "3396": 0, "3397": 1 },
+        "4836": { "3395": 1, "3396": 0, "3397": 1 },
+        "4837": { "3395": 1, "3396": 0, "3397": 1 },
+        "4838": { "3395": 2, "3396": 0, "3397": 2 },
+        "4839": { "3395": 2, "3396": 0, "3397": 2 },
+        "4840": { "3395": 2, "3396": 2, "3397": 0 },
+        "4841": { "3395": 1, "3396": 2, "3397": 0 },
+        "4842": { "3395": 2, "3396": 1, "3397": 0 },
+        "4843": { "3395": 2, "3396": 2, "3397": 0 },
+
+        "4861": { "3401": 0, "3402": 1, "3403": 1 },
+        "4862": { "3401": 0, "3402": 1, "3403": 1 },
+        "4863": { "3401": 0, "3402": 1, "3403": 1 },
+        "4864": { "3401": 0, "3402": 1, "3403": 1 },
+        "4865": { "3401": 0, "3402": 1, "3403": 1 },
+        "4866": { "3401": 0, "3402": 1, "3403": 1 },
+        "4867": { "3401": 0, "3402": 1, "3403": 1 },
+        "4868": { "3401": 2, "3402": 2, "3403": 2 },
+        "4869": { "3401": 1, "3402": 0, "3403": 1 },
+        "4870": { "3401": 1, "3402": 0, "3403": 1 },
+        "4871": { "3401": 1, "3402": 0, "3403": 1 },
+        "4872": { "3401": 1, "3402": 0, "3403": 1 },
+        "4873": { "3401": 1, "3402": 0, "3403": 1 },
+        "4874": { "3401": 1, "3402": 1, "3403": 0 },
+        "4875": { "3401": 1, "3402": 1, "3403": 0 },
+        "4876": { "3401": 1, "3402": 1, "3403": 0 },
+        "4877": { "3401": 1, "3402": 1, "3403": 0 },
+        "4878": { "3401": 1, "3402": 1, "3403": 0 },
+        "4879": { "3401": 1, "3402": 1, "3403": 0 },
+        "4880": { "3401": 1, "3402": 0, "3403": 1 },
+
+        "4844": { "3398": 2, "3399": 2, "3400": 2 },
+        "4845": { "3398": 0, "3399": 1, "3400": 1 },
+        "4846": { "3398": 0, "3399": 1, "3400": 1 },
+        "4847": { "3398": 0, "3399": 1, "3400": 1 },
+        "4848": { "3398": 0, "3399": 1, "3400": 1 },
+        "4849": { "3398": 2, "3399": 2, "3400": 2 },
+        "4850": { "3398": 2, "3399": 2, "3400": 2 },
+        "4851": { "3398": 1, "3399": 0, "3400": 1 },
+        "4852": { "3398": 1, "3399": 0, "3400": 1 },
+        "4853": { "3398": 1, "3399": 0, "3400": 1 },
+        "4854": { "3398": 2, "3399": 2, "3400": 2 },
+        "4855": { "3398": 1, "3399": 1, "3400": 0 },
+        "4856": { "3398": 1, "3399": 1, "3400": 0 },
+        "4857": { "3398": 1, "3399": 1, "3400": 0 },
+        "4858": { "3398": 1, "3399": 1, "3400": 0 },
+        "4859": { "3398": 2, "3399": 2, "3400": 2 },
+        "4860": { "3398": 1, "3399": 1, "3400": 0 },
+
+        "4401": { "3318": 0, "3319": 1, "3320": 1 },
+        "4402": { "3318": 0, "3319": 2, "3320": 2 },
+        "4403": { "3318": 0, "3319": 2, "3320": 2 },
+        "4404": { "3318": 1, "3319": 0, "3320": 1 },
+        "4405": { "3318": 2, "3319": 0, "3320": 2 },
+        "4406": { "3318": 2, "3319": 2, "3320": 0 },
+        "4407": { "3318": 1, "3319": 1, "3320": 0 },
+        "4408": { "3318": 2, "3319": 2, "3320": 2 },
+        "4409": { "3318": 0, "3319": 1, "3320": 1 },
+        "4410": { "3318": 2, "3319": 2, "3320": 2 },
+        "4411": { "3318": 0, "3319": 1, "3320": 1 },
+        "4412": { "3318": 2, "3319": 2, "3320": 2 },
+        "4413": { "3318": 2, "3319": 2, "3320": 2 },
+        "4414": { "3318": 2, "3319": 2, "3320": 2 },
+        "4415": { "3318": 2, "3319": 0, "3320": 2 },
+        "4416": { "3318": 2, "3319": 2, "3320": 2 },
+        "4419": { "3318": 1, "3319": 1, "3320": 0 },
+        "4511": { "3318": 0, "3319": 1, "3320": 1 },
+        "4512": { "3318": 0, "3319": 1, "3320": 1 },
+        "4513": { "3318": 0, "3319": 1, "3320": 1 },
+        "4514": { "3318": 1, "3319": 0, "3320": 1 },
+        "4515": { "3318": 2, "3319": 0, "3320": 2 },
+        "4516": { "3318": 2, "3319": 0, "3320": 2 },
+        "4517": { "3318": 2, "3319": 0, "3320": 2 },
+        "4518": { "3318": 2, "3319": 2, "3320": 0 },
+        "4519": { "3318": 1, "3319": 1, "3320": 0 },
+        "4520": { "3318": 1, "3319": 1, "3320": 0 },
+        "4521": { "3318": 2, "3319": 2, "3320": 0 },
+        "4980": { "3318": 0, "3319": 2, "3320": 2 },
+        "4981": { "3318": 2, "3319": 2, "3320": 0 },
+        "4991": { "3318": 2, "3319": 2, "3320": 2 }
+      },
+      "useBackingDataIdsToBackingIdAttackIdMap": {
+        "0": { "563": 102 },
+        "4209": { "503": 101, "504": 101 },
+        "4363": { "501": 101, "502": 102 },
+        "4401": { "666": 101, "667": 102 },
+        "4402": { "670": 105, "671": 106 },
+        "4403": { "672": 105, "673": 106 },
+        "4404": { "678": 101, "679": 102 },
+        "4405": { "680": 105, "681": 106 },
+        "4406": { "696": 105, "697": 106 },
+        "4407": { "698": 101, "699": 102 },
+        "4408": { "702": 101, "703": 102 },
+        "4409": { "704": 105, "705": 106 },
+        "4410": { "706": 103, "707": 104 },
+        "4411": { "708": 105, "709": 106 },
+        "4412": { "710": 103, "711": 104 },
+        "4413": { "712": 101, "713": 102 },
+        "4414": { "714": 105, "715": 106 },
+        "4415": { "716": 103, "717": 104 },
+        "4416": { "718": 105, "719": 106 },
+        "4417": { "720": 101, "721": 102 },
+        "4419": { "722": 101, "723": 102 },
+        "4511": { "668": 101, "669": 102 },
+        "4512": { "674": 101, "675": 102 },
+        "4513": { "676": 105, "677": 106 },
+        "4514": { "682": 101, "683": 102 },
+        "4515": { "684": 105, "685": 106 },
+        "4516": { "686": 105, "687": 106 },
+        "4517": { "688": 105, "689": 106 },
+        "4518": { "690": 105, "691": 106 },
+        "4519": { "692": 101, "693": 102 },
+        "4520": { "694": 101, "695": 102 },
+        "4521": { "700": 105, "701": 106 },
+        "4790": { "506": 103, "507": 104 },
+        "4791": { "508": 103, "509": 104 },
+        "4792": { "510": 101, "511": 102 },
+        "4793": { "512": 101, "513": 102 },
+        "4794": { "514": 105, "515": 106 },
+        "4795": { "516": 105, "517": 106 },
+        "4796": { "518": 107, "519": 108 },
+        "4797": { "520": 103, "521": 104 },
+        "4798": { "522": 103, "523": 104 },
+        "4799": { "524": 101, "525": 102 },
+        "4800": { "526": 101, "527": 102 },
+        "4801": { "528": 105, "529": 106 },
+        "4802": { "530": 107, "531": 108 },
+        "4803": { "532": 103, "533": 104 },
+        "4804": { "534": 101, "535": 102 },
+        "4805": { "536": 105, "537": 106 },
+        "4806": { "538": 107, "539": 108 },
+        "4807": { "540": 103, "541": 104 },
+        "4808": { "542": 101, "543": 102 },
+        "4809": { "544": 105, "545": 106 },
+        "4810": { "546": 107, "547": 108 },
+        "4823": { "548": 101, "549": 102 },
+        "4824": { "550": 103, "551": 104 },
+        "4825": { "552": 105, "553": 106 },
+        "4826": { "555": 104 },
+        "4827": { "556": 103, "557": 104 },
+        "4828": { "558": 103, "559": 104 },
+        "4829": { "560": 101, "561": 102 },
+        "4831": { "564": 105, "565": 106 },
+        "4832": { "566": 105, "567": 106 },
+        "4833": { "568": 107, "569": 108 },
+        "4834": { "570": 103, "571": 104 },
+        "4835": { "572": 101, "573": 102 },
+        "4836": { "562": 101, "574": 101, "575": 102 },
+        "4837": { "576": 105, "577": 106 },
+        "4838": { "578": 105, "579": 106 },
+        "4839": { "580": 107, "581": 108 },
+        "4840": { "582": 103, "583": 104 },
+        "4841": { "584": 101, "585": 102 },
+        "4842": { "586": 105, "587": 106, "588": 106 },
+        "4843": { "589": 107, "590": 108 },
+        "4844": { "591": 103, "592": 104 },
+        "4845": { "593": 101, "594": 102 },
+        "4846": { "595": 101, "596": 102 },
+        "4847": { "597": 105, "598": 106 },
+        "4848": { "599": 105, "600": 106 },
+        "4849": { "601": 107, "602": 108 },
+        "4850": { "603": 103, "604": 104 },
+        "4851": { "605": 101, "606": 102 },
+        "4852": { "607": 105, "608": 106 },
+        "4853": { "609": 105, "610": 106 },
+        "4854": { "611": 103, "612": 104 },
+        "4855": { "613": 101, "614": 102 },
+        "4856": { "615": 101, "616": 102 },
+        "4857": { "617": 105, "618": 106 },
+        "4858": { "619": 105, "620": 106 },
+        "4859": { "621": 105, "622": 106 },
+        "4860": { "623": 107, "624": 108 },
+        "4861": { "625": 103, "626": 104 },
+        "4862": { "627": 103, "628": 104 },
+        "4863": { "629": 101, "630": 102 },
+        "4864": { "631": 101, "632": 102 },
+        "4865": { "633": 105, "634": 106 },
+        "4866": { "635": 105, "636": 106 },
+        "4867": { "637": 107, "638": 108 },
+        "4868": { "639": 103, "640": 105 },
+        "4869": { "641": 101, "642": 102 },
+        "4870": { "643": 101, "644": 102 },
+        "4871": { "645": 105, "646": 106 },
+        "4872": { "647": 105, "648": 106 },
+        "4873": { "649": 107, "650": 108 },
+        "4874": { "651": 103, "652": 104 },
+        "4875": { "653": 101, "654": 102 },
+        "4876": { "655": 101, "656": 102 },
+        "4877": { "657": 105, "658": 106 },
+        "4878": { "659": 105, "660": 106 },
+        "4879": { "662": 107, "663": 108 },
+        "4880": { "664": 105, "665": 106 },
+        "4978": { "724": 101, "725": 102 },
+        "4982": { "726": 103 },
+        "4983": { "727": 106 },
+        "4985": { "728": 102 },
+        "4986": { "729": 102 },
+        "4987": { "730": 104 },
+        "4988": { "732": 105, "731": 106, "735": 106 },
+        "4989": { "733": 108 },
+        "4990": { "734": 103 }
+      },
+      "missionList": ["ST", 1, 2, 3, 4, 5, 6, "BT", 7, 8, 9, 10, 11, 12, 13],
+      "duplicateQuestMapping": {
+        "MCreateBot": "Quest0-3",
+        "MLevelUpBot": "Quest0-3"
+      },
+      "quests": {
+        "Quest0-1": {
+          "mission": 1,
+          "skills": []
+        },
+        "Quest0-2": {
+          "mission": 2,
+          "skills": []
+        },
+        "Quest0-3": {
+          "mission": 3,
+          "skills": [
+            "connectingEvidence"
+          ]
+        },
+        "Quest0-4": {
+          "mission": 4,
+          "skills": []
+        },
+        "Quest0-5": {
+          "mission": 5,
+          "skills": [
+            "connectingEvidence",
+            "supportingClaims"
+          ]
+        },
+        "Quest1-1": {
+          "mission": 6,
+          "skills": [
+            "connectingEvidence",
+            "supportingClaims"
+          ]
+        },
+        "Quest0-6": {
+          "mission": 7,
+          "skills": [
+            "connectingEvidence"
+          ]
+        },
+        "Quest11": {
+          "mission": 8,
+          "skills": [
+            "connectingEvidence"
+          ]
+        },
+        "Quest13": {
+          "mission": 9,
+          "skills": [
+            "connectingEvidence"
+          ]
+        },
+        "Quest14": {
+          "mission": 10,
+          "skills": [
+            "connectingEvidence",
+            "supportingClaims"
+          ]
+        },
+        "Quest16": {
+          "mission": 11,
+          "skills": []
+        },
+        "Quest18": {
+          "mission": 12,
+          "skills": [
+            "supportingClaims",
+            "criticalQuestions",
+            "usingBacking"
+          ]
+        },
+        "Quest19": {
+          "mission": 13,
+          "skills": []
+        },
+        "Quest21": {
+          "mission": 14,
+          "skills": [
+            "connectingEvidence",
+            "supportingClaims"
+          ]
+        },
+        "Quest23": {
+          "mission": 15,
+          "skills": [
+            "supportingClaims",
+            "criticalQuestions"
+          ]
+        },
+        "Quest23a": {
+          "mission": 16,
+          "skills": [
+            "usingBacking"
+          ]
+        },
+        "Quest24": {
+          "mission": 17,
+          "skills": [
+            "connectingEvidence",
+            "supportingClaims",
+            "criticalQuestions",
+            "usingBacking"
+          ]
+        },
+        "Quest26": {
+          "mission": 18,
+          "skills": []
+        },
+        "Quest28": {
+          "mission": 19,
+          "skills": [
+            "connectingEvidence",
+            "supportingClaims",
+            "criticalQuestions",
+            "usingBacking"
+          ]
+        },
+        "Quest30": {
+          "mission": 20,
+          "skills": [
+            "usingBacking"
+          ]
+        },
+        "Quest33": {
+          "mission": 21,
+          "skills": [
+            "connectingEvidence",
+            "supportingClaims",
+            "criticalQuestions",
+            "usingBacking"
+          ]
+        },
+        "Quest34": {
+          "mission": 22,
+          "skills": []
+        }
+      }
+    }
+  ],
+  "reports": {
+    "list": [
+      {
+        "id": "achievements",
+        "assessmentId": "none",
+        "enabled": true,
+        "name": "Learning Events & Time Played",
+        "header": {
+          "text": "Learning Events & Time Played",
+          "image": "/assets/game-banner-AA-1.png",
+          "skinny": "/assets/skinny-banner-AA-1.jpg",
+          "large": "/assets/skinny-banner-AA-1@2x.jpg"
+        },
+        "description": "In addition to showing total time played, this report reveals critical accomplishments in the game and how these accomplishments align to curriculum standards.",
+        "achievements": "PLACEHOLDER will be AUTO REPLACED with contents of achievements.json"
+      },
+      {
+        "id": "drk12_b",
+        "assessmentId": "drk12_b",
+        "enabled": true,
+        "name": "Progress Report",
+        "header": {
+          "text": "Progress Report",
+          "image": "/assets/game-banner-AA-1.png",
+          "skinny": "/assets/skinny-banner-AA-1.jpg",
+          "large": "/assets/skinny-banner-AA-1@2x.jpg"
+        },
+        "description": "Click the <strong>Whole Class</strong> tab to see the average progress of your entire class for each skill. Click the <strong>Student Roster</strong> tab to review students' progress for each skill and across missions.",
+        "skills": {
+          "connectingEvidence": {
+            "name": "Connecting Evidence to Argument Schemes",
+            "label": "Argument Schemes",
+            "description": "Track individual students' progress on Connecting Evidence to Argumentation Schemes",
+            "missions": [
+              3,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              14,
+              17,
+              19,
+              21
+            ]
+          },
+          "supportingClaims": {
+            "name": "Supporting Claims with Evidence",
+            "label": "Claims and Evidence",
+            "description": "Track individual students' progress on Supporting Claims with Relevant and Non-Contradictory Evidence",
+            "missions": [
+              5,
+              6,
+              10,
+              12,
+              14,
+              15,
+              17,
+              19,
+              21
+            ]
+          },
+          "criticalQuestions": {
+            "name": "Using Critical Questions",
+            "label": "Critical Questions",
+            "description": "Track individual students' progress on Using Critical Questions",
+            "missions": [
+              12,
+              15,
+              17,
+              19,
+              21
+            ]
+          },
+          "usingBacking": {
+            "name": "Using Backing",
+            "label": "Backing",
+            "description": "Track individual students' progress on Using Backing to Strengthen an Argument",
+            "missions": [
+              12,
+              16,
+              17,
+              19,
+              20,
+              21
+            ]
+          }
+        }
+      },
+      {
+        "id": "sowo",
+        "assessmentId": "sowo",
+        "enabled": true,
+        "name": "Shout Out and Watch Out Report",
+        "header": {
+          "text": "Shout Out and Watch Out Report",
+          "image": "/assets/skinny-banner-AA-1.jpg",
+          "skinny": "/assets/skinny-banner-AA-1.jpg",
+          "large": "/assets/skinny-banner-AA-1.jpg"
+        },
+        "description": "This report provides a snapshot of how students are doing right now. Celebrate your students' success (Shout Out!) and intervene with those students in need of help (Watch Out!).",
+        "table": {
+          "labels": [],
+          "groups": [
+            {
+              "id": "so",
+              "title": "Shout Out!",
+              "headers": [
+                {
+                  "id": "so1",
+                  "title": "Nailed It!",
+                  "description": "Outstanding performance at identifying weaknesses of claim-data pairs."
+                }
+              ]
+            },
+            {
+              "id": "wo",
+              "title": "Watch Out!",
+              "headers": [
+                {
+                  "id": "wo1",
+                  "title": "Contradictory Mechanic",
+                  "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more contradictory pairs.",
+                  "whatNow": {
+                    "intro": "In continued play by the student, support her/him in thinking aloud about choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                    "summary": "Use the gameplay context to tease out and change misconceptions about contradictory vs valid evidence.",
+                    "actionPoints": [
+                      "talk through what contradictory evidence means",
+                      "identify pieces of contradictory evidence in the current game level, or",
+                      "use the contradictory evidence to equip a robot or fight a battle."
+                    ]
+                  }
+                },
+                {
+                  "id": "wo2",
+                  "title": "Irrelevant Mechanic",
+                  "description": "In their most recent six attempts to build claim-evidence pairs, the player has created three or more pairs with irrelevant evidence.",
+                  "whatNow": {
+                    "intro": "Join the student during play, talking through his or her choices as the game progresses. In the next evidence gathering, claim core construction, or argubot battle, use the game context to help the student: ",
+                    "summary": "Use the gameplay context to tease out and change misconceptions about irrelevant vs valid evidence.",
+                    "actionPoints": [
+                      "talk through what irrelevant evidence means",
+                      "identify pieces of irrelevant evidence in the current game level, or",
+                      "use the irrelevant evidence to equip a robot or fight a battle"
+                    ]
+                  }
+                },
+                {
+                  "id": "wo3",
+                  "title": "Straggler",
+                  "description": "Student is having difficulty distinguishing between evidence that is 'not supporting' and 'not relevant' in opponent arguments.",
+                  "whatNow": {
+                    "intro": "As the student continues play, engage her/him in chat about game progression. To help understand what the student knows, encourage discussion about kinds of evidence she/he is seeing anywhere in the current game level. Help the student:",
+                    "summary": "Use gameplay context to tease out and change misconceptions about 'not supporting' and 'not relevant' argument critique.",
+                    "actionPoints": [
+                      "Identify evidence that comes up, and support a think-aloud about what evidence is and what it means in the game scene.",
+                      "Next, specifically talk through supporting and relevant evidence that comes up (e.g. during next gathering of evidence or claim core construction). ",
+                      "If a game battle happens, discuss with the student what active arguments she/he is making (if possible, making reference to the idea of supporting and relevant evidence).",
+                      "During the battle, as the student defends their bot, and can choose a way to critique an opponent's argument, take a moment to talk about the 'not supporting' and 'not relevant' options with the student. ",
+                      "Continue to support the student throughout the battle, particularly during 'not supporting' and 'not relevant' choices during the 'critique opponent's argument' phase. "
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "standards",
+        "assessmentId": "standards",
+        "enabled": false,
+        "name": "Standards Report",
+        "header": {
+          "text": "Standards Report",
+          "image": "/assets/game-banner-AA-1.png",
+          "skinny": "/assets/skinny-banner-AA-1.jpg",
+          "large": "/assets/skinny-banner-AA-1@2x.jpg"
+        },
+        "description": "This report shows studentsâ€™ advancement through the standards as they play. The content shown here is based on key in-game learning events that provide strong evidence of standards progression.",
+        "table": {
+          "groups": [
+            {
+              "name": "Common Core",
+              "subjects": [
+                {
+                  "name": "English Language Art",
+                  "standards": [
+                    {
+                      "id": "RI 6.8",
+                      "title": "RI 6.8",
+                      "description": "Trace and evaluate argument and claims in text; distinguish those supported (and not supported) by reasons and evidence.",
+                      "alignment": "For baseline argumentation skill-building, students complete training in argument scheme (finding evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                      "progress": {
+                        "Not-Started": "Standard progress not yet started.",
+                        "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                        "WatchoutA": "Student is having trouble identifying evidence relevant to argument schemes.",
+                        "Partial": "Student has successfully completed initial training in argument schemes and evidence selection.",
+                        "WatchoutB": "In the training level, student is having trouble successfully critiquing opponents in battle.",
+                        "Full": "Student has successfully completed training in selection of scheme-relevant evidence, evidence-claim pairing, and evaluation of argument (via critique) in battle.",
+                        "Watchout": "At a beginning level, the student is having trouble identifying evidence and successfully critiquing opponents in battle."
+                      }
+                    },
+                    {
+                      "id": "RI 7.8",
+                      "title": "RI 7.8",
+                      "description": "Trace and evaluate argument and claims in text; distinguish those supported (and not supported) by reasons and evidence.",
+                      "alignment": "For intermediate argumentation skill-building, students perform more difficult argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                      "progress": {
+                        "Not-Started": "Standard progress not yet started.",
+                        "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                        "WatchoutA": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle.",
+                        "Partial": "Student has successfully matched strong claim-evidence pairs, and evaluated opponentsâ€™ argument through critique in intermediate battle.",
+                        "WatchoutB": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle.",
+                        "Full": "Student has successfully matched strong claim-evidence pairs, and evaluated opponentsâ€™ argument through critique in multiple intermediate battles.",
+                        "Watchout": "Student is having trouble successfully evaluating arguments and critiquing opponents in intermediate battle."
+                      }
+                    },
+                    {
+                      "id": "RI 8.8",
+                      "title": "RI 8.8",
+                      "description": "Trace and evaluate argument and claims in text; assess sound reasoning and relevant/sufficient evidence; recognize when irrelevant evidence is introduced.",
+                      "alignment": "For advanced argumentation skill-building, students perform multiple boss-level argument scheme tasks (selecting evidence), sound reasoning (core fusion of claims and evidence), and evaluation of opponent argument (in-battle critique).",
+                      "progress": {
+                        "Not-Started": "Standard progress not yet started.",
+                        "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                        "WatchoutA": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle.",
+                        "Partial": "Student has successfully matched strong claim-evidence pairs, and evaluated opponentsâ€™ argument through critique in advanced battle.",
+                        "WatchoutB": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle.",
+                        "Full": "Student has successfully matched strong claim-evidence pairs, and evaluated opponentsâ€™ argument through critique in multiple advanced battles.",
+                        "Watchout": "Student is having trouble successfully evaluating arguments and critiquing opponents in advanced battle."
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "College and Career Readiness",
+                  "standards": [
+                    {
+                      "id": "CCRA.R.1",
+                      "title": "CCRA.R.1",
+                      "description": "Make logical inferences from close reading of text; support conclusions drawn with specific evidence.",
+                      "alignment": "For logical inference around sound claims and evidence, studentsâ€™ success in building strong evidence-claim pairs (through fusion of argubot evidence-claim cores) is measured throughout play.",
+                      "progress": {
+                        "Not-Started": "Standard progress not yet started.",
+                        "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
+                        "WatchoutA": "Student is having trouble successfully matching evidence and claims to create a strong core argument.",
+                        "Partial": "Throughout beginning and intermediate levels of play, student has consistently fused strong claim-evidence pairs.",
+                        "WatchoutB": "Student is having trouble successfully matching evidence and claims to create a strong core argument.",
+                        "Full": "Throughout beginning, intermediate, and advanced levels of play, student has consistently fused strong claim-evidence pairs.",
+                        "Watchout": "Student is having trouble successfully matching evidence and claims to create a strong core argument."
+                      }
+                    },
+                    {
+                      "id": "CCRA.R.8",
+                      "title": "CCRA.R.8",
+                      "description": "Delineate and evaluate the argument and claims in text; assess the validity of the reasoning, and existence of relevant and sufficient evidence.",
+                      "alignment": "For advanced evidence-based evaluation of claims, students train in special argument critique and rebuttal tactics for use in battle.",
+                      "progress": {
+                        "Not-Started": "Standard progress not yet started.",
+                        "In-Progress": "Standard is in progress, but there is not enough data for evaluation",
+                        "WatchoutA": "Student is having trouble with advanced critique training, based in the use of critical questions to attack opponent argument in battle.",
+                        "Partial": "Student has completed advanced critique training, based on the evaluation and attack of opponentsâ€™ arguments via critical questions.",
+                        "WatchoutB": "Student is having trouble with defensive argumentation tactics (evidence-based rebuttal of opponent attacks).",
+                        "Full": "Student has completed advanced training in defensive argumentation tactics, around evidence-based rebuttal of opponentsâ€™ attacks in battle.",
+                        "Watchout": "Student is having trouble with critiquing and defensive argumentation tactics in advanced battle."
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "21st Century Skills",
+              "subjects": [
+                {
+                  "name": "Critical Thinking and Problem Solving",
+                  "standards": [
+                    {
+                      "id": "21st.RE",
+                      "title": "Reason Effectively",
+                      "description": "Use various types of reasoning as appropriate to the situation.",
+                      "alignment": "For dynamic application of reasoning, studentsâ€™ ongoing response (via successful critique and rebuttal) during varied and changing battle scenarios is measured.",
+                      "progress": {
+                        "Not-Started": "Standard progress not yet started.",
+                        "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
+                        "WatchoutA": "Student is having trouble consistently evaluating the logic of opponentsâ€™ arguments, and successfully launching claim critique in battle.",
+                        "Partial": "Throughout beginning and intermediate levels of play, student has consistently launched successful evaluation and critique of opponent arguments.",
+                        "WatchoutB": "Student is having trouble consistently evaluating the logic of opponentsâ€™ arguments, and successfully launching claim critique in battle.",
+                        "Full": "From beginning through advanced levels of play, student has consistently launched successful evaluation and critique of opponent arguments.",
+                        "Watchout": "Student is having trouble consistently evaluating the logic of opponentsâ€™ arguments, and successfully launching claim critique in battle."
+                      }
+                    },
+                    {
+                      "id": "21st.MJD",
+                      "title": "Making Judgments and Decisions",
+                      "description": "Effectively analyze evidence, arguments, and claims; evaluate alternative points of view; synthesize information and arguments and draw evidence-based conclusions.",
+                      "alignment": "For full synthesis of argument evaluation skills, students perform advanced fusion of evidence identification, argument scheme, strong evidence-claim matching, and critique and rebuttal tactics in boss-level battle scenarios.",
+                      "progress": {
+                        "Not-Started": "Standard progress not yet started.",
+                        "In-Progress": "Standard is in Progress, but there is not enough data for evaluation",
+                        "WatchoutA": "Student is having trouble identifying advanced evidence relevant to argument schemes.",
+                        "Partial": "Student has successfully completed advanced levels of argument schemes and evidence selection.",
+                        "WatchoutB": "At an advanced level, student is having trouble successfully critiquing opponents in battle.",
+                        "Full": "Student has successfully completed advanced levels of evidence-claim pairing, and evaluation of argument (via advanced critique & rebuttal tactics) in battle.",
+                        "Watchout": "Student is having trouble identifying advanced evidence and critiquing in battle."
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "details": {
+    "buttons": [
+      {
+        "name": "Play Game",
+        "type": "play",
+        "authRequired": true,
+        "links": [
+          {
+            "name": "Play Game",
+            "type": "play"
+          }
+        ]
+      }
+    ],
+    "pages": {
+      "product": {
+        "order": 1,
+        "enabled": true,
+        "id": "product",
+        "title": "Product Description",
+        "header": "About the Game",
+        "about": "Mars Generation One: Argubot Academy EDU is an engaging futuristic adventure game for web browsers. Aligned to the Common Core State Standards, the game brings STEM content into the English Language Arts classroom, and helps middle schoolers develop persuasion and reasoning skills. In Argubot Academy EDU, players take on the persona of a new student at Argubot Academy, the cityâ€™s middle school. There, each player will have to make very adult decisions about the building and governance of the city, for example: What type of food should the citizens cultivate? Players have to build sound arguments for every choice they make â€“ but in this city on Mars, people settle their differences by equipping their robot assistants, called argubots, with claims and evidence, culminating in a robot battle of wits!",
+        "video": "https://vimeo.com/105931525",
+        "brochure": "https://s3-us-west-1.amazonaws.com/playfully-games/AA-1/brochures/AAEDU+brochure.pdf",
+        "curriculum": [
+          "Addresses critical Common Core standards in persuasion and reasoned thinking â€“ a cornerstone of the standards for English Language Arts",
+          "Promotes interest in STEM content while developing the literacy and leadership skills that are essential for any 21st century career",
+          "With input from experts in literacy at the National Writing Project, works well to introduce norms for classroom discussions, persuasive writing, and expository writing",
+          "Brings games into the ELA classroom to support Common Core Reading and Writing so that educators can make the most of their tablet hardware"
+        ],
+        "slideshow": [
+          {
+            "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/8fca2eb113ba9773739c19860ca2222d.png"
+          },
+          {
+            "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/8f75a72737f80688405ece42046c01cc.png"
+          },
+          {
+            "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/fb4648cffe784b43effe6f760e16ecf5.png"
+          },
+          {
+            "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/0b7b23b7220ac9a84e9ce441fe737657.png"
+          },
+          {
+            "url": "https://s3-us-west-2.amazonaws.com/playfully-cms/MGOWEB/images/e1d6d6c3bb6e2dc7ff7d28ae97aabee9.png"
+          }
+        ]
+      },
+      "standards": {
+        "order": 2,
+        "enabled": true,
+        "authRequired": false,
+        "id": "standards",
+        "title": "Standards",
+        "CCSS": [
+          {
+            "category": "ELA Common Core",
+            "groups": [
+              {
+                "name": "Reading Informational Text",
+                "list": [
+                  {
+                    "name": "RI.6.8, RI.7.8",
+                    "link": "http://www.corestandards.org/ELA-Literacy/RI/6/#CCSS.ELA-Literacy.RI.6.8",
+                    "description": "Trace and evaluate the argument and specific claims in a text, distinguishing claims that are supported by reasons and evidence from claims that are not."
+                  },
+                  {
+                    "name": "RI.8.8",
+                    "link": "http://www.corestandards.org/ELA-Literacy/RI/8/8/",
+                    "description": "Delineate and evaluate the argument and specific claims in a text, assessing whether the reasoning is sound and the evidence is relevant and sufficient; recognize when irrelevant evidence is introduced."
+                  }
+                ]
+              },
+              {
+                "name": "College and Career Readiness",
+                "list": [
+                  {
+                    "name": "CCRA.R.1",
+                    "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/#CCSS.ELA-Literacy.CCRA.R.1",
+                    "description": "Read closely to determine what the text says explicitly and to make logical inferences from it; cite specific textual evidence when writing or speaking to support conclusions drawn from the text."
+                  },
+                  {
+                    "name": "CCRA.R.8",
+                    "link": "http://www.corestandards.org/ELA-Literacy/CCRA/R/8/",
+                    "description": "Delineate and evaluate the argument and specific claims in a text, including the validity of the reasoning as well as the relevance and sufficiency of the evidence."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "category": "21st Century Skills",
+            "groups": [
+              {
+                "name": "Critical Thinking and Problem Solving",
+                "list": [
+                  {
+                    "name": "Reason Effectively",
+                    "description": "- Use various types of reasoning (inductive, deductive, etc.) as appropriate to the situation"
+                  },
+                  {
+                    "name": "Making Judgments and Decisions",
+                    "description": "- Effectively analyze and evaluate evidence, arguments, claims and beliefs\n- Analyze and evaluate major alternative points of view\n- Synthesize and make connections between information and arguments\n- Interpret information and draw conclusions based on the best analysis"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "TEKS": []
+      },
+      "lessonPlans": {
+        "order": 3,
+        "enabled": true,
+        "authRequired": true,
+        "id": "lessonPlans",
+        "title": "Lesson Plans & Videos",
+        "list": [
+          {
+            "category": "Lesson Plans",
+            "list": [
+              {
+                "name": "Argubot Academy: Lesson 1"
+              },
+              {
+                "name": "Argubot Academy: Lesson 2"
+              },
+              {
+                "name": "Argubot Academy: Routine 1"
+              },
+              {
+                "name": "Argubot Academy: More Routines Coming Soon!"
+              }
+            ]
+          },
+          {
+            "category": "Videos",
+            "list": [
+              {
+                "name": "Walkthrough",
+                "link": "https://vimeo.com/105931525"
+              }
+            ]
+          }
+        ]
+      },
+      "research": {
+        "order": 4,
+        "enabled": true,
+        "authRequired": true,
+        "id": "research",
+        "title": "Research",
+        "list": [
+          {
+            "category": "",
+            "list": [
+              {
+                "name": "Case Studies and Findings"
+              },
+              {
+                "name": "Resources from the National Writing Project"
+              },
+              {
+                "name": "Katie Salenâ€™s The Ecology of Games"
+              }
+            ]
+          }
+        ]
+      },
+      "reviews": {
+        "order": 5,
+        "enabled": true,
+        "id": "reviews",
+        "title": "Reviews",
+        "list": [
+          {
+            "reviewer": "Common Sense Media",
+            "review": "Engrossing missions feature imaginative STEM-themed issues. Meanwhile, it's exciting to discover that the game rewards users for making strong arguments -- not for picking a particular \"correct\" position. By teaching ELA standards through a STEM-themed storyline, the game is fundamentally interdisciplinary in all the right ways. Showing students how these skills bridge disciplines is a critical lesson, and that point is deftly delivered."
+          },
+          {
+            "reviewer": "Forbes",
+            "review": "Argubot Academy is significant because it addresses a part of school curriculum that few games have tried to tackle: argumentation, logic, and reasoned thinking. â€¦  one of the impressive things about Argubot Academy is that it takes a multidisciplinary approach. It grounds ELA proficiencies in a STEM based narrative setting. ... So often we forget that the purpose of education is not only to make workers who contribute to the economy, but also, to make citizens that contribute to making a better civilization."
+          },
+          {
+            "reviewer": "Elyse Eidman-Aadahl, Executive Director, National Writing Project ",
+            "review": "[Argubot Academy] teaches moves in argumentation like moves in Karate. ... [We] love that this also introduces a social practice and structure in a positive frame around â€˜argumentationâ€™ which provides a significant social learning impact."
+          },
+          {
+            "reviewer": "Jordan Shapiro, Forbes",
+            "review": "One of the impressive things about Argubot Academy is that it takes a multidisciplinary approach. It grounds ELA proficiencies in a STEM based narrative setting...I like that it blends disciplines. I like the focus on ethical decision making. ANd I love that the emphasis in the game is on using skills to help people live together in better ways."
+          },
+          {
+            "reviewer": "Graphite",
+            "review": "The argubots at the heart of the game are a powerful metaphor, and they offer a powerful illustration of the purpose and substance of making a solid argument."
+          },
+          {
+            "reviewer": "Tech with Kids",
+            "review": "Another positive aspect is that kids make a lot of choices on their own, giving them ownership over the game. This encourages tweens to apply the reasoning and problem-solving skills they're learning in the game to situations outside of the Argubot battles."
+          }
+        ]
+      }
+    },
+    "social": {
+      "facebook": "http://facebook.com/glasslabgames",
+      "twitter": "http://twitter.com/glasslabgames",
+      "google": "https://plus.google.com/117864084582459836584/posts"
+    },
+    "applink": ""
+  }
+}
