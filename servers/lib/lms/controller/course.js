@@ -1259,9 +1259,9 @@ function saveReportHelperNotes(req, res){
                     courseId,
                     skillId,
                     note.date,
-                    note.studentGroup,
+                    note.student_group,
                     note.students,
-                    note.info
+                    note.note
                 ));
             }.bind(this));
             when.all(promiseList)
