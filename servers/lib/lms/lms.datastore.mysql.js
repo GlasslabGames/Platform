@@ -931,7 +931,7 @@ return when.promise(function(resolve, reject) {
 									    if(existingNote.length) {
 										    this.ds.query(
 											    "UPDATE GL_NOTE SET last_updated=NOW(), user_id=?, course_id=?, date=?, skill_id=?, student_group=?, students=?, note=? WHERE id=?",
-                                                [userId, courseId, date, skillId, studentGroup, (students.length ? students.join(',') : ""), JSON.stringify(note), existingId])
+                                                [userId, courseId, date, skillId, studentGroup, ((students && students.length) ? students.join(',') : ""), JSON.stringify(note), existingId])
 											    .then(
 												    resolve,
 												    function (err) {
@@ -952,7 +952,7 @@ return when.promise(function(resolve, reject) {
                         } else {
 						    this.ds.query(
 							    "INSERT INTO GL_NOTE (last_updated, user_id, course_id, date, skill_id, student_group, students, note) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?);",
-                                [userId, courseId, date, skillId, studentGroup, (students.length ? students.join(',') : ""), JSON.stringify(note)])
+                                [userId, courseId, date, skillId, studentGroup, ((students && students.length) ? students.join(',') : ""), JSON.stringify(note)])
 							    .then(
 								    resolve,
                                     function (err) {
