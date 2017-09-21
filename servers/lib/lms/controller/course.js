@@ -1356,7 +1356,7 @@ function getReportHelperNotes(req, res){
 							return {
 								'userId': userId,
 								'currentProgress': latestSkillLevel.level
-							}
+							};
 						}.bind(this));
 				}.bind(this));
 
@@ -1390,6 +1390,7 @@ function getReportHelperNotes(req, res){
                                     });
                                     note.students = studentsStillInCourse;
                                 }
+                                note.note = JSON.parse(note.note);
                             }.bind(this));
 
 							this.requestUtil.jsonResponse(res, notes);
