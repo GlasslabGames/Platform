@@ -855,11 +855,22 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             var studentQuestScore = studentQuests[questId];
                             var skills;
                             if (studentQuestScore) {
-                                skills = _.mapValues(studentQuestScore.skills, function(skillInfo, skillId) {
+                                skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
+                                    var skillInfo = studentQuestScore.skills[skillId];
 
-                                    var skillScore = skillInfo.score;
+                                    var skillScore = (skillInfo && skillInfo.score) ? skillInfo.score : {"correct":0, "attempts":0};
 
                                     var skillLevel = this.determineSkillLevel(skillId, skillScore, questInfo);
+
+                                    if (!skillInfo) {
+                                        skillInfo = {
+                                            "level": skillLevel,
+                                            "score": skillScore,
+                                            "detail": {},
+                                            "attemptList": []
+                                        };
+                                    }
+
                                     if (skillLevel != dConst.skillStatus.NotAvailable && skillLevel != dConst.skillStatus.NotAttempted) {
                                         if (!(skillId in latestSkillScores)) {
                                             latestSkillScores[skillId] = {
