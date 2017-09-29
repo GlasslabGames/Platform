@@ -808,7 +808,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
     .then(function(gInfo){
         var drkInfo = _.find(aInfo, function(a) { return a.id == "drk12_b" });
         if (!drkInfo) {
-            var emptyReport = {}
+            var emptyReport = {};
             this.requestUtil.jsonResponse(res, emptyReport);
             return;
         }
@@ -1015,6 +1015,11 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
             }.bind(this));
         }.bind(this));
 
+    }.bind(this))
+    .then(null, function(err){
+        console.errorExt("DashService", "Get DRK12_b Report Error -", err);
+        var emptyReport = {};
+        this.requestUtil.jsonResponse(res, emptyReport);
     }.bind(this));
 }
 
