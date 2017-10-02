@@ -900,6 +900,127 @@ return when.promise(function(resolve, reject) {
 };
 
 
+LMS_MySQL.prototype.saveNote = function(existingId,
+                                        userId,
+                                        courseId,
+                                        skillId,
+                                        date,
+                                        studentGroup,
+                                        students,
+                                        note) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        userId = parseInt(userId);
+        courseId = parseInt(courseId);
+
+		// verify userId is instructor of course
+        this.ds.query(
+            "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND c.id=? AND m.user_id=?",
+            [courseId, userId])
+            .then(function(data){
+				if(data.length) {
+					if (!date || !skillId || !studentGroup || !note) {
+						reject({key:"course.notes.save.invalidParameters"}, 400);
+                    } else {
+					    if (typeof(existingId) !== "undefined") {
+						    this.ds.query("SELECT id FROM GL_NOTE WHERE id=?", [parseInt(existingId)])
+							    .then(
+								    function (existingNote) {
+									    if(existingNote.length) {
+										    this.ds.query(
+											    "UPDATE GL_NOTE SET last_updated=NOW(), user_id=?, course_id=?, date=?, skill_id=?, student_group=?, students=?, note=? WHERE id=?",
+                                                [userId, courseId, date, skillId, studentGroup, ((students && students.length) ? students.join(',') : ""), JSON.stringify(note), existingId])
+											    .then(
+												    resolve,
+												    function (err) {
+													    console.errorExt("LMSStore MySQL", "saveNote UPDATE err:", err);
+													    reject({key: "course.notes.updateQueryError"}, 400);
+												    }.bind(this)
+											    );
+									    } else {
+										    console.errorExt("LMSStore MySQL", "saveNote SELECT err:", err);
+										    reject({key:"course.notes.notFound"}, 400);
+                                        }
+								    }.bind(this),
+								    function (err) {
+									    console.errorExt("LMSStore MySQL", "saveNote SELECT err:", err);
+									    reject({key:"course.notes.notFound"}, 400);
+								    }.bind(this)
+							    );
+                        } else {
+						    this.ds.query(
+							    "INSERT INTO GL_NOTE (last_updated, user_id, course_id, date, skill_id, student_group, students, note) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?);",
+                                [userId, courseId, date, skillId, studentGroup, ((students && students.length) ? students.join(',') : ""), JSON.stringify(note)])
+							    .then(
+								    resolve,
+                                    function (err) {
+                                        console.errorExt("LMSStore MySQL", "saveNote INSERT err:", err);
+                                        reject({key:"course.notes.insertQueryError"}, 400);
+                                    }.bind(this)
+							    );
+                        }
+					}
+				} else {
+					reject({key:"course.notUnique.name"}, 400);
+				}
+			}.bind(this),
+			function(err){
+				console.errorExt("LMSStore MySQL", "saveNote SELECT err:", err);
+				reject({key:"course.notes.updateQueryError"}, 400);
+			}.bind(this)
+		);
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+LMS_MySQL.prototype.getNotes = function(userId, courseId, skillId) {
+// add promise wrapper
+return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+		userId = parseInt(userId);
+		courseId = parseInt(courseId);
+
+		// verify userId is instructor of course
+		this.ds.query(
+		    "SELECT c.id FROM GL_COURSE c JOIN GL_MEMBERSHIP m on c.id = m.course_id WHERE m.role='instructor' AND c.id=? AND m.user_id=?",
+            [courseId, userId])
+            .then(function(data){
+				if(data.length) {
+					if (!skillId) {
+						reject({key:"course.notes.save.missingParameters"}, 400);
+					} else {
+						this.ds.query(
+						    "SELECT * FROM GL_NOTE WHERE user_id=? AND course_id=? AND skill_id=?",
+                            [userId,courseId,skillId])
+							.then(
+							    resolve,
+								function (err) {
+									console.errorExt("LMSStore MySQL", "getNotes SELECT err:", err);
+									reject({key:"course.notes.notFound"}, 400);
+								}.bind(this)
+							);
+					}
+				} else {
+					reject({key:"course.notUnique.name"}, 400);
+				}
+			}.bind(this),
+			function(err){
+				console.errorExt("LMSStore MySQL", "saveNote SELECT err:", err);
+				reject({key:"course.notes.notFound"}, 400);
+			}.bind(this)
+		);
+
+// ------------------------------------------------
+}.bind(this));
+// end promise wrapper
+};
+
+
 LMS_MySQL.prototype.isEnrolledInCourse = function(userId, courseId) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {

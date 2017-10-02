@@ -25,6 +25,12 @@ module.exports = {
     "course.locked":                        "Course Registration is Locked at the moment. Please try again later.",
     "course.notUnique.name":                "Class names must be unique. Please choose a different class name.",
     "course.cannot.enable":                 "This action would not enable any premium games",
+	"course.notes.save.missingParameters":  "Incomplete parameters; Report Helper notes must a date, skill, course id, and must be recorded for student id(s) or student group.",
+	"course.notes.save.missingContent":     "Incomplete parameters; content is missing.",
+    "course.notes.invalidGame":             "Invalid or unsupported game id specified.",
+    "course.notes.notFound":                "Specified Report Helper note was not found.",
+    "course.notes.updateQueryError":        "Query error; could not update Report Helper note.",
+	"course.notes.insertQueryError":        "Query error; could not insert new Report Helper note.",
     //user
     "user.permit.invalid":                  "Your role does not have permission to access this feature",
     "user.enroll.general":                  "There was an error with the information you entered.",

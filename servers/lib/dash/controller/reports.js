@@ -2,6 +2,7 @@
 var _         = require('lodash');
 var when      = require('when');
 var lConst    = require('../../lms/lms.const.js');
+var dConst    = require('../../dash/dash.const.js');
 var Util      = require('../../core/util');
 //
 
@@ -795,22 +796,6 @@ function _getStandards(req, res, reportId, gameId, courseId) {
         }.bind(this));
 }
 
-function _determineLevel(skillId, score, questInfo) {
-    var grade = score.correct / score.attempts;
-    if (questInfo && !_.contains(questInfo.skills, skillId)) {
-        return "NotAvailable";
-    }
-    if (grade >= 0.70) {
-        return "Advancing";
-    }
-    else if (score.attempts > 0) {
-        return "NeedSupport";
-    }
-    else {
-        return "NotAttempted";
-    }
-}
-
 function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 
     var lmsService = this.serviceManager.get("lms").service;
@@ -823,7 +808,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
     .then(function(gInfo){
         var drkInfo = _.find(aInfo, function(a) { return a.id == "drk12_b" });
         if (!drkInfo) {
-            var emptyReport = {}
+            var emptyReport = {};
             this.requestUtil.jsonResponse(res, emptyReport);
             return;
         }
@@ -870,12 +855,23 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                             var studentQuestScore = studentQuests[questId];
                             var skills;
                             if (studentQuestScore) {
-                                skills = _.mapValues(studentQuestScore.skills, function(skillInfo, skillId) {
+                                skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
+                                    var skillInfo = studentQuestScore.skills[skillId];
 
-                                    var skillScore = skillInfo.score;
+                                    var skillScore = (skillInfo && skillInfo.score) ? skillInfo.score : {"correct":0, "attempts":0};
 
-                                    var skillLevel = _determineLevel(skillId, skillScore, questInfo);
-                                    if (skillLevel != "NotAvailable" && skillLevel != "NotAttempted") {
+                                    var skillLevel = this.determineSkillLevel(skillId, skillScore, questInfo);
+
+                                    if (!skillInfo) {
+                                        skillInfo = {
+                                            "level": skillLevel,
+                                            "score": skillScore,
+                                            "detail": {},
+                                            "attemptList": []
+                                        };
+                                    }
+
+                                    if (skillLevel != dConst.skillStatus.NotAvailable && skillLevel != dConst.skillStatus.NotAttempted) {
                                         if (!(skillId in latestSkillScores)) {
                                             latestSkillScores[skillId] = {
                                                 mission: questInfo.mission,
@@ -885,7 +881,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
 	                                            attemptList: skillInfo.attemptList
                                             }
                                         }
-                                        else if (questInfo.mission > latestSkillScores[skillId].mission) {
+                                        else if (drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestSkillScores[skillId].mission)) {
                                             latestSkillScores[skillId].mission = questInfo.mission;
                                             latestSkillScores[skillId].level = skillLevel;
                                             latestSkillScores[skillId].score = skillScore;
@@ -928,7 +924,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                         "detail": skillInfo.detail,
 	                                    "attemptList": skillInfo.attemptList
                                     }
-                                });
+                                }.bind(this));
                                 if (drkInfo.missionList.indexOf(questInfo.mission) > drkInfo.missionList.indexOf(latestMission)) {
                                     latestMission = questInfo.mission;
                                 }
@@ -936,10 +932,10 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                 var score = {"correct":0, "attempts":0};
                                 skills = _.mapValues(drkInfo.skills, function(skillName, skillId) {
                                     return {
-                                        "level": _determineLevel(skillId, score, questInfo),
+                                        "level": this.determineSkillLevel(skillId, score, questInfo),
                                         "score": score
                                     }
-                                });
+                                }.bind(this));
                             }
 
                             return {
@@ -947,7 +943,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                                 "skillLevel": skills
                             }
 
-                        });
+                        }.bind(this));
 
                         // Compute the averages and add them to the current progress info
                         _.forEach(studentSkillAndSubskillAverages, function (skillAverageInfo, skillId) {
@@ -1019,6 +1015,11 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
             }.bind(this));
         }.bind(this));
 
+    }.bind(this))
+    .then(null, function(err){
+        console.errorExt("DashService", "Get DRK12_b Report Error -", err);
+        var emptyReport = {};
+        this.requestUtil.jsonResponse(res, emptyReport);
     }.bind(this));
 }
 
@@ -1057,7 +1058,7 @@ function _calculate_course_skill_average(studentAssessments, drkInfo) {
                 var level = studentReport.currentProgress.skillLevel[skillId].level;
                 result[skillId][level] += 1;
             } else {
-                result[skillId]['NotAttempted'] += 1;
+                result[skillId][dConst.skillStatus.NotAttempted] += 1;
             }
 
         });
@@ -1067,10 +1068,10 @@ function _calculate_course_skill_average(studentAssessments, drkInfo) {
 
     //fold NotAvailable into NotAttempted
     _.forOwn(courseSkillTotals, function(skillTotals, skillId) {
-        if ('NotAvailable' in courseSkillTotals[skillId]) {
-            var c = courseSkillTotals[skillId]['NotAvailable'];
-            delete courseSkillTotals[skillId]['NotAvailable'];
-            courseSkillTotals[skillId]['NotAttempted'] += c;
+        if (dConst.skillStatus.NotAvailable in courseSkillTotals[skillId]) {
+            var c = courseSkillTotals[skillId][dConst.skillStatus.NotAvailable];
+            delete courseSkillTotals[skillId][dConst.skillStatus.NotAvailable];
+            courseSkillTotals[skillId][dConst.skillStatus.NotAttempted] += c;
         }
     });
 

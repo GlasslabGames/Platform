@@ -685,6 +685,16 @@ module.exports = {
                 post: "getGamesCourseMap"
             }
         },
+	    {
+		    //requireAuth: true,
+		    api: "/api/v2/lms/course/:courseId/game/:gameId/skill/:skillId/notes",
+		    service: "lms",
+		    controller: "course",
+		    method: {
+			    get: "getReportHelperNotes",
+			    post: "saveReportHelperNotes"
+		    }
+	    },
 
         // ---------------------------------------------------
         {

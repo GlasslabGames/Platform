@@ -98,7 +98,8 @@
             "id": "standards",
             "dataProcessScope": "gameSession",
             "engine": "standards",
-            "trigger": "activity"
+            "trigger": "activity",
+            "distiller": "shared"
         },
         {
             "enabled": true,
@@ -454,9 +455,54 @@
                 "4990": { "734": 103 }
             },
             "missionList": ["ST", 1, 2, 3, 4, 5, 6, "BT", 7, 8, 9, 10, 11, 12, 13],
-            "duplicateQuestMapping": {
+            "questIdDisambiguationMap": {
                 "MCreateBot": "Quest0-3",
-                "MLevelUpBot": "Quest0-3"
+                "MLevelUpBot": "Quest0-3",
+                "Choose Your Argubot": "Quest0-3",
+                "Bot Workshop": "Quest0-3",
+                "Quest0-3": "Quest0-3",
+
+                "Build a Bot": "Quest0-5",
+                "Quest0-5": "Quest0-5",
+
+                "Which Protein?": "Quest1-1",
+                "Quest1-1": "Quest1-1",
+
+                "More Training!": "Quest0-6",
+                "Quest0-6": "Quest0-6",
+
+                "Missing Evidence": "Quest11",
+                "Quest11": "Quest11",
+
+                "Level Up!": "Quest13",
+                "Quest13": "Quest13",
+
+                "Helpbots": "Quest14",
+                "Quest14": "Quest14",
+
+                "Bot Trainer 5000": "Quest18",
+                "Quest18": "Quest18",
+
+                "Hero or Zero?": "Quest21",
+                "Quest21": "Quest21",
+
+                "Let's Evo-2": "Quest23",
+                "Quest23": "Quest23",
+
+                "All About Backing": "Quest23a",
+                "Quest23a": "Quest23a",
+
+                "Brackett City Objectives": "Quest24",
+                "Quest24": "Quest24",
+
+                "What to do about Lucas": "Quest28",
+                "Quest28": "Quest28",
+
+                "Adrian's Project": "Quest30",
+                "Quest30": "Quest30",
+
+                "Pet Decision": "Quest33",
+                "Quest33": "Quest33"
             },
             "quests": {
                 "Quest0-3": {

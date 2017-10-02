@@ -59,7 +59,7 @@ MySQL.prototype.escapeArray = function(value) {
     throw new Error("escapeArray called on non-Array");
 }
 
-MySQL.prototype.query = function(query) {
+MySQL.prototype.query = function(query, values) {
 // add promise wrapper
 return when.promise(function(resolve, reject) {
 // ------------------------------------------------
@@ -71,7 +71,7 @@ return when.promise(function(resolve, reject) {
             return;
         }
 
-        connection.query(query, function(err, data) {
+        connection.query(query, values, function(err, data) {
             connection.release();
 
             if(err) {
