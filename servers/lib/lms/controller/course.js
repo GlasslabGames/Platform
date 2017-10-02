@@ -1246,7 +1246,7 @@ function saveReportHelperNotes(req, res){
 	var skillId = req.params.skillId;
 	var userId = userData.id;
 
-    if(gameId === "AA-1") {
+    if (gameId === "AA-1" || gameId === "MGOWEB") {
 
         if( req.body ) {
             var notes = _.isArray(req.body) ? req.body : [req.body];
@@ -1302,7 +1302,7 @@ function getReportHelperNotes(req, res){
 
 	var dashService = this.serviceManager.get("dash").service;
 
-	if (gameId === 'AA-1') {
+	if (gameId === "AA-1" || gameId === "MGOWEB") {
 		dashService.getGameAssessmentInfo(gameId).then(function(aInfo) {
 
 			var drkInfo = _.find(aInfo, function (a) { return a.id == assessmentId });
