@@ -452,6 +452,14 @@ module.exports = {
             }
         },
         {
+            api: "/api/v2/dash/delete-assessments/:gameId/:assessmentId/:code",
+            service: "dash",
+            controller: "games",
+            method: {
+                get: "deleteAssessments"
+            }
+        },
+        {
             api: "/api/v2/dash/queueStatus/:code",
             service: "dash",
             controller: "games",

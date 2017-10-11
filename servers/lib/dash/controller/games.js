@@ -24,6 +24,7 @@ module.exports = {
     badgeCodeAwarded:                badgeCodeAwarded,
     reprocessSince:                  reprocessSince,
     reprocessGame:                   reprocessGame,
+    deleteAssessments:               deleteAssessments,
     queueStatus:                     queueStatus,
     migrateInfoFiles:                migrateInfoFiles,
     migrateSingleGameInfoFiles:      migrateSingleGameInfoFiles,
@@ -618,6 +619,42 @@ function reprocessGame(req, res){
             res.end('{"reprocess": "started"}');
         }
     );
+}
+
+function deleteAssessments(req, res){
+    if( !(req.params.code &&
+            _.isString(req.params.code) &&
+            req.params.code.length) ) {
+        // if has no code
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    // code saved as a constant
+    if( req.params.code !== dConst.code ) {
+        // If the code is not valid
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+        return;
+    }
+
+    if (!(req.params.gameId && _.isString(req.params.gameId) && req.params.gameId.length)) {
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+    }
+    var gameId = req.params.gameId.toUpperCase();
+
+    if (!(req.params.assessmentId && _.isString(req.params.assessmentId) && req.params.assessmentId.length)) {
+        this.requestUtil.errorResponse(res, {key:"dash.access.invalid"}, 401);
+    }
+    var assessmentId = req.params.assessmentId;
+
+    this.telmStore.deleteAllAssessmentResults(gameId, assessmentId)
+        .then(function(results) {
+            this.requestUtil.jsonResponse(res, "success");
+        }.bind(this))
+        .catch(function(err) {
+            console.errorExt("DashService", "getAllAssessmentResults Error", err);
+            this.requestUtil.errorResponse(res, {key: "dash.general"}, 500);
+        }.bind(this));
 }
 
 function reprocessSince(req, res) {

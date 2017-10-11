@@ -508,6 +508,7 @@ var gdv_getGameSessionsByTimeStamp = function(doc, meta) {
         }
     };
 
+
     // convert function to string
     for(var i in this.telemDDoc.views) {
         if( this.telemDDoc.views[i].hasOwnProperty('map') ) {
@@ -547,6 +548,78 @@ var gdv_getGameSessionsByTimeStamp = function(doc, meta) {
 
 }.bind(this));
 
+
+    var gdv_getAllAssessmentResults_drk12b_AA1 = function(doc, meta) {
+        var values = meta.id.split(':');
+        if( (values[0] == 'ae') &&
+            (values[1] == 'r') &&
+            (values[2] == 'AA-1') &&
+            (values[3] == 'drk12_b')
+        )
+        {
+            emit( meta.id );
+        }
+    };
+
+    var gdv_getAllAssessmentResults_drk12b_MGOWEB = function(doc, meta) {
+        var values = meta.id.split(':');
+        if( (values[0] == 'ae') &&
+            (values[1] == 'r') &&
+            (values[2] == 'MGOWEB') &&
+            (values[3] == 'drk12_b')
+        )
+        {
+            emit( meta.id );
+        }
+    };
+
+    this.assessmentsDDoc = {
+        views: {
+            gdv_getAllAssessmentResults_drk12b_AA1: {
+                map: gdv_getAllAssessmentResults_drk12b_AA1
+            },
+            gdv_getAllAssessmentResults_drk12b_MGOWEB: {
+                map: gdv_getAllAssessmentResults_drk12b_MGOWEB
+            }
+        }
+    };
+
+    // convert function to string
+    for(var i in this.assessmentsDDoc.views) {
+        if( this.assessmentsDDoc.views[i].hasOwnProperty('map') ) {
+            this.assessmentsDDoc.views[i].map = this.assessmentsDDoc.views[i].map.toString();
+        }
+        if( this.assessmentsDDoc.views[i].hasOwnProperty('reduce') ) {
+            this.assessmentsDDoc.views[i].reduce = this.assessmentsDDoc.views[i].reduce.toString();
+        }
+    }
+
+    this.client.getDesignDoc("assessments", function(err, data){
+        if(err) {
+            // missing need to create the doc and views
+            if( err.reason == "missing" ||
+                err.reason == "deleted") {
+
+                this._setAssessmentsDocsAndViews()
+                    .then( resolve, reject );
+                return;
+            } else {
+                console.errorExt("DataStore Couchbase TelemetryStore", err);
+                reject(err);
+                return;
+            }
+        }
+
+        if(JSON.stringify(data) != JSON.stringify(this.assessmentsDDoc)) {
+            this._setAssessmentsDocsAndViews()
+                .then( resolve, reject );
+            return;
+        } else {
+            resolve();
+        }
+
+    }.bind(this));
+
 // ------------------------------------------------
 }.bind(this));
 // end promise wrapper
@@ -554,23 +627,86 @@ var gdv_getGameSessionsByTimeStamp = function(doc, meta) {
 
 TelemDS_Couchbase.prototype._setDocsAndViews = function() {
 // add promise wrapper
-return when.promise(function(resolve, reject) {
+    return when.promise(function(resolve, reject) {
 // ------------------------------------------------
 
-    console.log("Updating telemetry Design Document...");
-    this.client.setDesignDoc("telemetry", this.telemDDoc, function(err){
-        if(err) {
-            console.errorExt("DataStore Couchbase TelemetryStore", err);
-            reject(err);
-            return;
+        console.log("Updating telemetry Design Document...");
+        this.client.setDesignDoc("telemetry", this.telemDDoc, function(err){
+            if(err) {
+                console.errorExt("DataStore Couchbase TelemetryStore", err);
+                reject(err);
+                return;
+            }
+
+            resolve();
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype._setAssessmentsDocsAndViews = function() {
+// add promise wrapper
+    return when.promise(function(resolve, reject) {
+// ------------------------------------------------
+
+        console.log("Updating assessments Design Document...");
+        this.client.setDesignDoc("assessments", this.assessmentsDDoc, function(err){
+            if(err) {
+                console.errorExt("DataStore Couchbase TelemetryStore", err);
+                reject(err);
+                return;
+            }
+
+            resolve();
+        }.bind(this));
+
+// ------------------------------------------------
+    }.bind(this));
+// end promise wrapper
+};
+
+TelemDS_Couchbase.prototype.deleteAllAssessmentResults = function(gameId, assessmentId){
+    return when.promise(function(resolve, reject){
+        var viewName = undefined;
+        if (assessmentId == "drk_12b") {
+            if (gameId == "AA-1") {
+                viewName = "gdv_getAllAssessmentResults_drk12b_AA1";
+            }
+            if (gameId == "MGOWEB") {
+                viewName = "gdv_getAllAssessmentResults_drk12b_MGOWEB";
+            }
         }
 
-        resolve();
+        if (viewName) {
+            this.client.view("assessments", viewName).query({
+                    gameId: gameId,
+                    assessmentId: assessmentId
+                },
+                function (err, results) {
+                    if (err) {
+                        console.errorExt("DataStore Couchbase TelemetryStore", "Delete All Assessment Results Error -", err);
+                        reject(err);
+                        return;
+                    }
+                    var keys = _.pluck(results, "id");
+                    this._removeKeys(keys)
+                        .then(function(){
+                            resolve()
+                        })
+                        .then(null, function(err){
+                            console.errorExt("DataStore Couchbase TelemetryStore", "Delete All Assessment Results Error -", gameId, " Error -", err);
+                            reject(err);
+                        });
+                    resolve(keys);
+                }.bind(this));
+        } else {
+            console.error("DataStore Couchbase TelemetryStore", "Delete All Assessment Results Error - a view does not exist for the specified game and assessment id.");
+            reject("A view does not exist for the specified game and assessment id.");
+            return;
+        }
     }.bind(this));
-
-// ------------------------------------------------
-}.bind(this));
-// end promise wrapper
 };
 
 TelemDS_Couchbase.prototype.migrateDataAuto = function(myds) {
@@ -2632,7 +2768,6 @@ TelemDS_Couchbase.prototype.getAssessmentResults = function(userId, gameId, asse
     }.bind(this));
 // end promise wrapper
 };
-
 
 TelemDS_Couchbase.prototype.getConfigs = function(gameId){
 // add promise wrapper
