@@ -949,6 +949,7 @@ function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
                         _.forEach(studentSkillAndSubskillAverages, function (skillAverageInfo, skillId) {
                             if (!latestSkillScores[skillId]) {
                                 latestSkillScores[skillId] = {
+                                    level: dConst.skillStatus.NotAttempted,
                                     correct: 0,
                                     attempts: 0,
                                     detail: {}
