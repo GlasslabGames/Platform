@@ -316,7 +316,7 @@ module.exports = {
             }
         },
         {
-            //requireAuth: true,
+            requireAuth: true,
             api: "/api/v2/dash/game/:gameId/configJson",
             service: "dash",
             controller: "game",
