@@ -618,7 +618,7 @@ function saveGameConfigJson(req, res) {
                         this.requestUtil.errorResponse(res, err);
                     }.bind(this));
             } else {
-                this.requestUtil.errorResponse(res, err);
+                this.requestUtil.errorResponse(res, { error: "user does not have developer access", statusCode: 401});
             }
         }.bind(this))
         .then(null, function(err){
