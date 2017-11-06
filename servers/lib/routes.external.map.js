@@ -316,6 +316,16 @@ module.exports = {
             }
         },
         {
+            //requireAuth: true,
+            api: "/api/v2/dash/game/:gameId/configJson",
+            service: "dash",
+            controller: "game",
+            method: {
+                get: "getGameConfigJson",
+                post: "saveGameConfigJson"
+            }
+        },
+        {
             requireAuth: true,
             api: "/api/v2/dash/games/awaiting-approval",
             service: "dash",
