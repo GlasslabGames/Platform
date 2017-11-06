@@ -52,7 +52,8 @@ module.exports = {
         keys: {
             user: "u",
             developer: "di",
-            developerGameApprovalActivity: "dgaa"
+            developerGameApprovalActivity: "dgaa",
+            gameConfigJson: "gcj"
         }
     },
     webapp: {

@@ -17,7 +17,9 @@ module.exports = {
     getGameInfoFromSubmissionTarget: getGameInfoFromSubmissionTarget,
     approveDeveloperGame:       approveDeveloperGame,
     rejectDeveloperGame:        rejectDeveloperGame,
-    requestInfoDeveloperGame:   requestInfoDeveloperGame
+    requestInfoDeveloperGame:   requestInfoDeveloperGame,
+    saveGameConfigJson:         saveGameConfigJson,
+    getGameConfigJson:          getGameConfigJson
 };
 
 var exampleIn = {};
@@ -575,5 +577,77 @@ function sendDeveloperGameRequestInfoEmail(gameId, reason, protocol, host) {
     .then(null, function(err){
         console.errorExt("DashService", 'failed to send email -',  err);
     }.bind(this))
+}
+
+function saveGameConfigJson(req, res) {
+    // route requireAuth ensures "session.passport.user" exists
+    var userId = req.session.passport.user.id;
+
+    if( !req.body ||
+        ( _.isObject(req.body) &&
+            !Object.keys(req.body).length ) ) {
+        this.requestUtil.errorResponse(res, {key: "missing.data", statusCode: 401});
+        return;
+    }
+
+    if( !( req.params &&
+            req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId", statusCode: 401});
+        return;
+    }
+    var gameId = req.params.gameId;
+    var data = req.body;
+
+    // TODO: check if gameId in DB
+
+    this.telmStore.getDeveloperProfile(userId)
+        .then(function(values){
+            var hasAccess = false;
+            _(values).forEach(function(value, key){
+                if(value.verifyCodeStatus === "verified" && key === gameId) {
+                    hasAccess = true;
+                }
+            });
+
+            if (hasAccess) {
+                this.telmStore.saveGameConfigJson(gameId, data)
+                    .then(function(){
+                        this.requestUtil.jsonResponse(res, { status: "ok" });
+                    }.bind(this))
+                    .then(null, function(err){
+                        this.requestUtil.errorResponse(res, err);
+                    }.bind(this));
+            } else {
+                this.requestUtil.errorResponse(res, err);
+            }
+        }.bind(this))
+        .then(null, function(err){
+            this.requestUtil.errorResponse(res, err);
+        }.bind(this));
+}
+
+function getGameConfigJson(req, res) {
+    if( !( req.params &&
+            req.params.hasOwnProperty("gameId") ) ) {
+        this.requestUtil.errorResponse(res, { error: "missing game Id", key: "missing.gameId"});
+        return;
+    }
+    var gameId = req.params.gameId;
+
+    // TODO: check if gameId in DB
+
+    this.telmStore.getGameConfigJson(gameId)
+        .then(function(data){
+            this.requestUtil.noCache(res);
+            this.requestUtil.jsonResponse(res, data);
+        }.bind(this))
+        .then(null, function(err) {
+            // missing
+            if(err.code == 13) {
+                this.requestUtil.errorResponse(res, { error: "no game data", key: "no.data", statusCode: 404});
+            } else {
+                this.requestUtil.errorResponse(res, err);
+            }
+        }.bind(this));
 }
 

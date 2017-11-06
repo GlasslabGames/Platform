@@ -3776,6 +3776,54 @@ TelemDS_Couchbase.prototype.getDeveloperGameStatus = function(gameId, allowMissi
             }
         }.bind(this));
     }.bind(this));
-}
+};
+
+TelemDS_Couchbase.prototype.saveGameConfigJson = function(gameId, json){
+    return when.promise(function(resolve, reject){
+        var key = tConst.datastore.keys.gameConfigJson + ":" + gameId;
+        this.client.get(key, function(err, results) {
+            var now = Date.now();
+            if(err) {
+                if(err.code != 13) {
+                    console.errorExt("DataStore Couchbase TelemetryStore", "saveGameConfigJson Error -", err);
+                    reject(err);
+                    return;
+                }
+
+                // new entry
+                data = {
+                    gameId: gameId,
+                    ts: now,
+                    json: json
+                };
+            } else {
+                data = results.value;
+                data.ts = now;
+                data.json = json;
+            }
+
+            this.client.set(key, data, function(err, results){
+                if(err){
+                    console.errorExt("DataStore Couchbase TelemetryStore", "saveGameConfigJson Error -", err);
+                    reject(err);
+                    return;
+                }
+                resolve(data);
+            }.bind(this));
+        }.bind(this));
+    }.bind(this));
+};
+
+TelemDS_Couchbase.prototype.getGameConfigJson = function(gameId){
+    return when.promise(function(resolve, reject){
+        var key = tConst.datastore.keys.gameConfigJson + ":" + gameId;
+        this.client.get(key, function(err, results) {
+            if (err){
+                resolve("no profile");
+            }
+            resolve(results.value);
+        }.bind(this));
+    }.bind(this));
+};
 
 
