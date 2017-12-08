@@ -80,6 +80,9 @@ function getReport(req, res, next) {
                 else if(reportId === "drk12_b") {
                     _getDRK12_b.call(this, req, res, reportId, gameId, courseId);
                 }
+                else if(reportId === "stanford") {
+                    _getStanford.call(this, req, res, reportId, gameId, courseId);
+                }
                 else {
                     this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
                 }
@@ -794,6 +797,50 @@ function _getStandards(req, res, reportId, gameId, courseId) {
             console.errorExt("DashService", "Get Standards Error 3 -", err);
             this.requestUtil.errorResponse(res, { key: "dash.general"});
         }.bind(this));
+}
+
+function _getStanford(req, res, assessmentId, gameId, courseId) {
+
+    var lmsService = this.serviceManager.get("lms").service;
+    var courseTitle = null;
+
+    this.lmsStore.getCourseInfoFromKey("id", courseId).then(function(courseInfo) {
+        courseTitle = courseInfo.title;
+        return lmsService.getStudentsOfCourse(courseId);
+    }.bind(this)).then(function(users) {
+        if (!users) return;
+        var studentPromises = _.map(users, function(user) {
+            var userId = user.id;
+
+            return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                .then(function(assessmentData) {
+                    // student row
+                    return {
+                        "userId": userId,
+                        "firstName": user.firstName,
+                        "lastInitial": user.lastName ? user.lastName.charAt(0) : "",
+                        "telemetry": assessmentData && assessmentData.results ? assessmentData.results["0"] : []
+                    };
+                }.bind(this));
+        }.bind(this));
+
+        when.all(studentPromises).then(function(studentAssessments) {
+            var report = {
+                "gameId": gameId,
+                "assessmentId": assessmentId,
+                "courseId": courseId,
+                "courseTitle": courseTitle,
+                "timestamp": Util.GetTimeStamp(),
+                "students": studentAssessments
+            };
+            this.requestUtil.jsonResponse(res, report);
+        }.bind(this));
+    }.bind(this))
+    .then(null, function(err){
+        console.errorExt("DashService", "Get Stanford Report Error -", err);
+        var emptyReport = {};
+        this.requestUtil.jsonResponse(res, emptyReport);
+    }.bind(this));
 }
 
 function _getDRK12_b(req, res, assessmentId, gameId, courseId) {
