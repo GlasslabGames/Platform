@@ -81,7 +81,8 @@ function getReport(req, res, next) {
                     _getDRK12_b.call(this, req, res, reportId, gameId, courseId);
                 }
                 else if(reportId === "stanford") {
-                    _getStanford.call(this, req, res, reportId, gameId, courseId);
+                    // NB: Stanford reports do not require a courseId, and will always return an array of reports for all courses
+                    _getStanford.call(this, req, res, reportId, gameId);
                 }
                 else {
                     this.requestUtil.errorResponse(res, {key:"report.reportId.invalid"});
@@ -799,41 +800,74 @@ function _getStandards(req, res, reportId, gameId, courseId) {
         }.bind(this));
 }
 
-function _getStanford(req, res, assessmentId, gameId, courseId) {
+function _getStanford(req, res, assessmentId, gameId) {
 
     var lmsService = this.serviceManager.get("lms").service;
-    var courseTitle = null;
 
-    this.lmsStore.getCourseInfoFromKey("id", courseId).then(function(courseInfo) {
-        courseTitle = courseInfo.title;
-        return lmsService.getStudentsOfCourse(courseId);
-    }.bind(this)).then(function(users) {
-        if (!users) return;
-        var studentPromises = _.map(users, function(user) {
-            var userId = user.id;
+    this.telmStore.getAllCourseGameProfiles().then(function(courseGameProfiles){
+        // map courseId -> courseGameProfile
+        var courses = _.map(_.keys(courseGameProfiles), function (key) {
+            var r = courseGameProfiles[key];
+            var k = key.split(':');
+            var courseId = k[2];
+            return {
+                'courseId': courseId,
+                'games': _.keys(r),
+            };
+        });
 
-            return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
-                .then(function(assessmentData) {
-                    // student row
-                    return {
-                        "userId": userId,
-                        "firstName": user.firstName,
-                        "lastInitial": user.lastName ? user.lastName.charAt(0) : "",
-                        "telemetry": assessmentData && assessmentData.results ? assessmentData.results["0"] : []
-                    };
+        var promiseList = [];
+
+        // find courses with at least one of the games in gameIds
+        var coursesWithGames = _.filter(courses, function (c) {
+            var matchingGames = _.intersection(["TEACHABLEAGENTSPR"], c.games);
+            return matchingGames.length > 0;
+        });
+
+        var reportPromises = _.map(coursesWithGames, function(courseWithGame){
+            var courseId = courseWithGame.courseId;
+
+            return this.lmsStore.getCourseInfoFromKey("id", courseId).then(function(courseInfo) {
+                courseTitle = courseInfo.title;
+                return lmsService.getStudentsOfCourse(courseId);
+            }.bind(this)).then(function(users) {
+                if (!users) return;
+                var studentPromises = _.map(users, function(user) {
+                    var userId = user.id;
+
+                    return this.telmStore.getAssessmentResults(userId, gameId, assessmentId)
+                        .then(function(assessmentData) {
+                            // student row
+                            return {
+                                "userId": userId,
+                                "firstName": user.firstName,
+                                "lastInitial": user.lastName ? user.lastName.charAt(0) : "",
+                                "telemetry": assessmentData && assessmentData.results ? assessmentData.results["0"] : []
+                            };
+                        }.bind(this));
                 }.bind(this));
+
+                return when.all(studentPromises).then(function(studentAssessments) {
+                    var report = {
+                        "gameId": gameId,
+                        "assessmentId": assessmentId,
+                        "courseId": courseId,
+                        "courseTitle": courseTitle,
+                        "timestamp": Util.GetTimeStamp(),
+                        "students": studentAssessments
+                    };
+                    return report;
+                }.bind(this));
+            }.bind(this))
+            .then(null, function(err){
+                console.errorExt("DashService", "Get Stanford Report Error -", err);
+                var emptyReport = {};
+                this.requestUtil.jsonResponse(res, emptyReport);
+            }.bind(this));
         }.bind(this));
 
-        when.all(studentPromises).then(function(studentAssessments) {
-            var report = {
-                "gameId": gameId,
-                "assessmentId": assessmentId,
-                "courseId": courseId,
-                "courseTitle": courseTitle,
-                "timestamp": Util.GetTimeStamp(),
-                "students": studentAssessments
-            };
-            this.requestUtil.jsonResponse(res, report);
+        when.all(reportPromises).then(function(courseReports) {
+            this.requestUtil.jsonResponse(res, courseReports);
         }.bind(this));
     }.bind(this))
     .then(null, function(err){
