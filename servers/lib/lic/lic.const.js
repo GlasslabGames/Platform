@@ -19,28 +19,28 @@ module.exports = {
             "stripe_planId": "GLG_CHROMEBOOK_P03_0",
             "name": "Chromebook/Web",
             "description": "Games in this package are optimized to work on Chromebooks.",
-            "pricePerSeat": 2.5,
+            "pricePerSeat": 0,
             "planId": "chromebook"
         },
         "ipad": {
             "stripe_planId": "GLG_IPAD_P04_0",
             "name": "iPad",
             "description": "Games in this package are optimized to work on iPads.",
-            "pricePerSeat": 3,
+            "pricePerSeat": 0,
             "planId": "ipad"
         },
         "pcMac": {
             "stripe_planId": "GLG_PCMAC_P05_0",
             "name": "PC/MAC",
             "description": "Games in this package run on PC or Mac computers.",
-            "pricePerSeat": 3.5,
+            "pricePerSeat": 0,
             "planId": "pcMac"
         },
         "allGames": {
             "stripe_planId": "GLG_ALLGAMES_P06_0",
             "name": "All Games",
             "description": "This package includes all games available on this site.",
-            "pricePerSeat": 5,
+            "pricePerSeat": 0,
             "planId": "allGames"
         },
         "trial": {
