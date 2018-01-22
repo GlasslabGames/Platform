@@ -795,39 +795,19 @@ ServiceManager.prototype.start = function(port) {
 
                             var reqPort = req.get('port') || host.split(":")[1];
 
-                            // GLAS-88: use HTTP Strict Transport Security
-                            res.set('Strict-Transport-Security', 'max-age=31536000');
-
-                            if(req.secure){
-                                // console.log("Connection status at SSL-Redirection-Gate - The http request is encrypted. " + req.originalUrl);
-                                // if(forwProto){
-                                // console.log(Util.DateGMTString()+' Secure Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
-                                // }else{
-                                //     console.log(Util.DateGMTString()+' Secure Request -- port = '+reqPort+'  -- host = '+host);
-                                // }
+                            if (this.options.env !== "dev") {
+                                if (forwProto === "https") {
+                                    // GLAS-88: use HTTP Strict Transport Security
+                                    res.setHeader("Strict-Transport-Security", "max-age=31536000");
+                                    res.end();
+                                } else {
+                                    res.writeHead(301, {"Location": "https://" + req.headers.host + req.url});
+                                    console.log("redirecting http request to https://" + req.headers.host + req.url);
+                                    res.end();
+                                }
+                            } else {
                                 next();
-                            }else{
-
-                                // if(forwProto){
-                                // console.log(Util.DateGMTString()+' INSECURE Request -- '+forwProto+' port = '+reqPort+', fport = '+forwPort+'  -- host = '+host);
-                                // }else{
-                                //     console.log(Util.DateGMTString()+' INSECURE Request -- port = '+reqPort+'  -- host = '+host);
-                                // }
-
-                                // console.log("Connection status at SSL-Redirection-Gate - The http request is not encrypted. " + req.originalUrl);
-
-                             //    var newUrl = "https://" + host.split(":")[0] + ":" + serverPort;
-                             // // var newUrl = "https://" + host.split(":")[0] + ":" + sslServerPort + req.originalUrl;
-
-                                next();
-
-                                //  console.log("  ****** req.connection is not encrypted,  ******  ");
-                                //  console.log("  ******   rediriecting to " + newUrl + "  ******  ");
-                                //
-                            //  res.redirect(303, newUrl);
-                                //res.redirect(302, newUrl);     // for pre-http/1/1 user agents
                             }
-
                         }.bind(this));
                     }
 
