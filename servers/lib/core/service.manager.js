@@ -795,6 +795,7 @@ ServiceManager.prototype.start = function(port) {
 
                             var reqPort = req.get('port') || host.split(":")[1];
 
+                            // DRK-519 Always redirect to use SSL
                             if (this.options.env !== "dev") {
                                 if (forwProto === "https") {
                                     // GLAS-88: use HTTP Strict Transport Security
