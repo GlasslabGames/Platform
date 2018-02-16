@@ -1168,7 +1168,7 @@ function getEventsByDate(req, res, next){
             timeFormat = req.query.timeFormat;
         }
 
-        var limit = 10000;
+        var limit = 50000;
         if(req.query.limit) {
             limit = req.query.limit;
         }
