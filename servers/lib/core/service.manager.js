@@ -800,7 +800,7 @@ ServiceManager.prototype.start = function(port) {
                                 if (forwProto === "https") {
                                     // GLAS-88: use HTTP Strict Transport Security
                                     res.setHeader("Strict-Transport-Security", "max-age=31536000");
-                                    res.end();
+                                    next();
                                 } else {
                                     res.writeHead(301, {"Location": "https://" + req.headers.host + req.url});
                                     console.log("redirecting http request to https://" + req.headers.host + req.url);
