@@ -842,7 +842,7 @@ function _getStanford(req, res, assessmentId, gameId) {
                                 "userId": userId,
                                 "firstName": user.firstName,
                                 "lastInitial": user.lastName ? user.lastName.charAt(0) : "",
-                                "telemetry": assessmentData && assessmentData.results ? assessmentData.results["0"] : []
+                                "telemetry": assessmentData && assessmentData.results ? assessmentData.results["0"] : {}
                             };
                         }.bind(this));
                 }.bind(this));
