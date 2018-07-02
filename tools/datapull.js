@@ -194,8 +194,9 @@ function getInstructorsLastLoggedIn(year, month) {
 }
 
 function main() {
-	var year = 2017;
-	var currentMonth = 8;
+	var year = 2018;
+	var startMonth = 4;
+	var endMonth = 6;
 	
     var gameIdsToFind = ["AA-1", "AW-1", "B538", "GOG", "PRIMA", "SLFR", "WPLUS", "WT", "SC", "PVZ"];
 
@@ -213,7 +214,7 @@ function main() {
 		
 		var promiseList = [];
 		
-		for (var m=1; m<=currentMonth; m++) {
+		for (var m=startMonth; m<=endMonth; m++) {
 			promiseList.push(getRegistrations('instructor', year, m));
 			promiseList.push(getRegistrations('student', year, m));
 			promiseList.push(getInstructorsLastLoggedIn(year, m));
@@ -227,7 +228,7 @@ function main() {
 			var gameId = gameIdsToFind[g];
 			var courseIds = gameIdx[gameId];
 			if (courseIds) {
-				for (var m=1; m<=currentMonth; m++) {
+				for (var m=startMonth; m<=endMonth; m++) {
 					promiseList.push(getCoursesCreated(courseIds, gameId, year, m));
 					promiseList.push(getStudentsEnrolled(courseIds, gameId, year, m));
 				}
