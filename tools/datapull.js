@@ -9,7 +9,7 @@ var cluster = new couchbase.Connection({
 	operationTimeout: 100000
 });
 
-var json2csv = require('json2csv');
+var json2csv = require('json2csv').parse;
 
 var MySQL = require('../Platform/servers/lib/core/datastore.mysql.js');
 var ds = new MySQL({
@@ -253,8 +253,8 @@ function main() {
 
 				var csv_rows = _.values(metric_map);
 
-                console.log(json2csv({
-                    data: csv_rows,
+                console.log(json2csv(
+                    csv_rows,{
                     fields: [
                         'Metric',
 						'All time',
